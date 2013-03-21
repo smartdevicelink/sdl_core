@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -170,6 +171,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	private ArrayAdapter<SyncSubMenu> _submenuAdapter = null;
 	private ArrayAdapter<Integer> _commandAdapter = null;
+	private Map<Integer, Integer> _commandIdToParentSubmenuMap = null;
 	private ArrayAdapter<Integer> _choiceSetAdapter = null;
 	private ArrayAdapter<String> _putFileAdapter = null;
 	
@@ -593,6 +595,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				android.R.layout.select_dialog_item);
 		_commandAdapter
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		
+		_commandIdToParentSubmenuMap = new Hashtable<Integer, Integer>();
 
 		_choiceSetAdapter = new ArrayAdapter<Integer>(this,
 				android.R.layout.select_dialog_item);
@@ -1346,7 +1350,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
-									_commandAdapter.add(cmdID);
+									addCommandToList(cmdID, menuParams.getParentID());
 								}
 							});
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1373,7 +1377,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
-									_commandAdapter.remove(cmdID);
+									removeCommandFromList(cmdID);
 								}
 							});
 							AlertDialog dlg = builder.create();
@@ -2803,6 +2807,30 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		});
 	}
 	
+	/**
+	 * Adds command ID to the adapter, and maps it to its parent submenu.
+	 * 
+	 * @param cmdID
+	 *            ID of the new command
+	 * @param submenuID
+	 *            ID of the command's parent submenu
+	 */
+	private void addCommandToList(int cmdID, int submenuID) {
+		_commandAdapter.add(cmdID);
+		_commandIdToParentSubmenuMap.put(cmdID, submenuID);
+	}
+
+	/**
+	 * Removes command ID from the adapter.
+	 * 
+	 * @param cmdID
+	 *            ID of the command
+	 */
+	private void removeCommandFromList(int cmdID) {
+		_commandAdapter.remove(cmdID);
+		_commandIdToParentSubmenuMap.remove(cmdID);
+	}
+
 /*	public void startSyncProxyService() {
     	// Get the local Bluetooth adapter
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -2926,12 +2954,22 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	/**
 	 * Called when a DeleteSubMenuResponse comes. If successful, remove it from
-	 * the adapter.
+	 * the adapter. We also need to delete all the commands that were added to
+	 * this submenu.
 	 */
 	public void onDeleteSubMenuResponse(boolean success) {
 		if (_latestDeleteSubmenu != null) {
 			if (success) {
 				_submenuAdapter.remove(_latestDeleteSubmenu);
+
+				for (Iterator<Entry<Integer, Integer>> it = _commandIdToParentSubmenuMap
+						.entrySet().iterator(); it.hasNext();) {
+					Entry<Integer, Integer> entry = it.next();
+					if (entry.getValue() == _latestDeleteSubmenu.getSubMenuId()) {
+						_commandAdapter.remove(entry.getKey());
+						it.remove();
+					}
+				}
 			}
 			_latestDeleteSubmenu = null;
 		} else {
