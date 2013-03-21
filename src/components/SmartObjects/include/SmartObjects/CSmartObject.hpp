@@ -143,7 +143,6 @@ namespace NsAppLink
 
             SmartData m_data;
             CSmartSchema m_schema;
-            bool m_schemaAvailable;
 
             // Support of type: int
             inline void set_value_integer(int);

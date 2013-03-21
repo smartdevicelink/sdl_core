@@ -8,7 +8,6 @@
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(void)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
 }
@@ -16,7 +15,6 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(void)
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const NsAppLink::NsSmartObjects::CSmartObject& object)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
     duplicate(object);
@@ -66,7 +64,6 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(const NsAppLink::NsSmar
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(int i)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
     set_value_integer(i);
@@ -139,7 +136,6 @@ int NsAppLink::NsSmartObjects::CSmartObject::convert_int(void) const
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(long l)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
     set_value_long(l);
@@ -202,7 +198,6 @@ long NsAppLink::NsSmartObjects::CSmartObject::convert_long(void) const
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(double d)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
     set_value_double(d);
@@ -263,7 +258,6 @@ double NsAppLink::NsSmartObjects::CSmartObject::convert_double(void) const
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(bool b)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
     set_value_bool(b);
@@ -327,7 +321,6 @@ bool NsAppLink::NsSmartObjects::CSmartObject::convert_bool(void) const
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(char c)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
     set_value_char(c);
@@ -386,7 +379,6 @@ char NsAppLink::NsSmartObjects::CSmartObject::convert_char(void) const
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const std::string s)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
     set_value_string(s);
@@ -449,7 +441,6 @@ std::string NsAppLink::NsSmartObjects::CSmartObject::convert_string(void) const
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(char* s)
 : m_type(SmartType_Null)
 , m_schema()
-, m_schemaAvailable(false)
 {
     m_data.str_value = NULL;
     set_value_cstr(s);
@@ -702,20 +693,12 @@ bool NsAppLink::NsSmartObjects::CSmartObject::keyExists(const char * key)
 
 bool NsAppLink::NsSmartObjects::CSmartObject::isValid()
 {
-    if(m_schemaAvailable)
-    {
-        return m_schema.validate(*this);
-    }
-    else
-    {
-        return true;
-    }
+    return m_schema.validate(*this);
 }
 
 void NsAppLink::NsSmartObjects::CSmartObject::setSchema(NsAppLink::NsSmartObjects::CSmartSchema schema)
 {
     m_schema = schema;
-    m_schemaAvailable = true;
 }
 
 NsAppLink::NsSmartObjects::CSmartSchema NsAppLink::NsSmartObjects::CSmartObject::getSchema()
