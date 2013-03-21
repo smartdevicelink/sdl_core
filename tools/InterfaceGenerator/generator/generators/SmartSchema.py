@@ -751,7 +751,7 @@ class SmartSchema(object):
         '''\n'''
         '''#include "JSONHandler/CSmartFactory.hpp"\n'''
         '''#include "SmartObjects/CSmartSchema.hpp"\n'''
-        '''#include "SmartObjects/CObjectSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/ISchemaItem.hpp"\n'''
         '''#include "SmartObjects/TSharedPtr.hpp"\n'''
         '''\n'''
         '''$namespace_open'''
@@ -774,6 +774,7 @@ class SmartSchema(object):
         '''#include "SmartObjects/CAlwaysFalseSchemaItem.hpp"\n'''
         '''#include "SmartObjects/CArraySchemaItem.hpp"\n'''
         '''#include "SmartObjects/CBoolSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/CObjectSchemaItem.hpp"\n'''
         '''#include "SmartObjects/CStringSchemaItem.hpp"\n'''
         '''#include "SmartObjects/TEnumSchemaItem.hpp"\n'''
         '''#include "SmartObjects/TNumberSchemaItem.hpp"\n'''
@@ -789,10 +790,10 @@ class SmartSchema(object):
         '''    initSchemas(structsSchemaItems);\n'''
         '''}\n'''
         '''\n'''
-        '''TSharedPtr<CObjectSchemaItem> $namespace::$class_name::'''
+        '''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
         '''provideObjectSchemaItemForStruct('''
         '''TStructsSchemaItems & StructsSchemaItems, '''
-        '''const std::string & StructName) const\n'''
+        '''const std::string & StructName)\n'''
         '''{\n'''
         '''    const TStructsSchemaItems::const_iterator it = '''
         '''StructsSchemaItems.find(StructName);\n'''
@@ -827,7 +828,7 @@ class SmartSchema(object):
         '''\n''')
 
     _struct_schema_item_template = string.Template(
-        '''mStructSchemaItems.insert(std::make_pair("${name}", '''
+        '''StructsSchemaItems.insert(std::make_pair("${name}", '''
         '''initStructSchemaItem_${name}('''
         '''StructsSchemaItems)));''')
 
@@ -839,7 +840,7 @@ class SmartSchema(object):
         '''StructsSchemaItems)));''')
 
     _struct_impl_template = string.Template(
-        '''TSharedPtr<CObjectSchemaItem> $namespace::$class_name::'''
+        '''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
         '''initStructSchemaItem_${struct_name}('''
         '''TStructsSchemaItems & StructsSchemaItems)\n'''
         '''{\n'''
@@ -915,7 +916,7 @@ class SmartSchema(object):
         '''     */\n'''
         '''    typedef std::map<std::string, NsAppLink::NsSmartObjects::'''
         '''TSharedPtr<NsAppLink::NsSmartObjects::'''
-        '''CObjectSchemaItem> > TStructsSchemaItems;\n'''
+        '''ISchemaItem> > TStructsSchemaItems;\n'''
         '''\n'''
         '''   /**\n'''
         '''    * @brief Helper that allows to make reference to struct\n'''
@@ -925,7 +926,7 @@ class SmartSchema(object):
         '''    * @return TSharedPtr of strucute\n'''
         '''    */\n'''
         '''    static NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::'''
-        '''NsSmartObjects::CObjectSchemaItem> '''
+        '''NsSmartObjects::ISchemaItem> '''
         '''provideObjectSchemaItemForStruct(TStructsSchemaItems & '''
         '''StructsSchemaItems, const std::string & StructName);\n'''
         '''\n'''
@@ -951,12 +952,13 @@ class SmartSchema(object):
     _function_decl_template = string.Template(
         '''$comment\n'''
         '''static NsAppLink::NsSmartObjects::CSmartSchema '''
-        '''initFunction_${function_id}_${message_type}();''')
+        '''initFunction_${function_id}_${message_type}('''
+        '''TStructsSchemaItems & StructsSchemaItems);''')
 
     _struct_decl_template = string.Template(
         '''$comment\n'''
         '''static NsAppLink::NsSmartObjects::'''
-        '''TSharedPtr<NsAppLink::NsSmartObjects::CObjectSchemaItem> '''
+        '''TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> '''
         '''initStructSchemaItem_${struct_name}('''
         '''TStructsSchemaItems & StructsSchemaItems);''')
 
