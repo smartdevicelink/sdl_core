@@ -568,6 +568,7 @@ const NsAppLink::NsSmartObjects::CSmartObject & NsAppLink::NsSmartObjects::CSmar
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::handle_map_access(const std::string s)
 {
+    //TODO: implement handling of non-existing keys similar to array
     if(m_type != SmartType_Map)
     {
         cleanup_data();
@@ -668,23 +669,53 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data_if_type_changed_and_s
 
 double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const std::string* s)
 {
+    if(0 == s->size())
+    {
+        return invalid_double_value;
+    }
+
+    char firstSymbol = s->at(0);
+
+    if( (firstSymbol != '.') && (firstSymbol != '+') && (firstSymbol != '-') && ((firstSymbol < '0') || (firstSymbol > '9')) )
+    {
+        return invalid_double_value;
+    }
+
     char* ptr;
     errno = 0;
 
     double result = strtod(s->c_str(),&ptr);
-    if (errno ||
-        (result == 0.0 && ptr != (s->c_str() + s->length())))
+    if (errno || (ptr != (s->c_str() + s->length())))
+    {
         return invalid_double_value;
+    }
 
     return result;
 }
 
 long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::string* s)
 {
+    if(0 == s->size())
+    {
+        return invalid_int_value;
+    }
+
+    char firstSymbol = s->at(0);
+
+    if( (firstSymbol != '+') && (firstSymbol != '-') && ((firstSymbol < '0') || (firstSymbol > '9')) )
+    {
+        return invalid_int_value;
+    }
+
+    char* ptr;
     errno = 0;
-    long l = strtol(s->c_str(),NULL,10);
-    if (errno) return invalid_int_value;
-    return l;
+    long result = strtol(s->c_str(),&ptr,10);
+    if (errno || (ptr != (s->c_str() + s->length())))
+    {
+        return invalid_int_value;
+    }
+
+    return result;
 }
 
 NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::get_type() const
