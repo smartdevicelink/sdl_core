@@ -99,15 +99,37 @@ namespace NsAppManager
         virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & deviceList);
 
         /**
-         * \brief callback which is called upon session starting
-         * \param deviceHandle
-         * \param sessionKey
+         * \brief Updates device list.
+         *
+         * Called when device list has been updated and new devices were added.
+         *
+         * \param DeviceList New list of available devices.
+         **/
+        virtual void UpdateDeviceList(const NsConnectionHandler::tDeviceList & DeviceList);
+
+        /**
+         * \brief Removes device.
+         *
+         * Called when device has been removed from a list.
+         *
+         * \param DeviceHandle Handle of removed device.
+         **/
+        virtual void RemoveDevice(const NsConnectionHandler::tDeviceHandle DeviceHandle);
+
+        /**
+         * \brief Callback function used by ConnectionHandler
+         * when Mobile Application initiates start of new session.
+         * \param deviceHandle Device identifier within which session has to be started.
+         * \param sessionKey Key of started session.
+         * \param firstSessionKey Session key of first session in this connection.
          */
         virtual void onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
 
         /**
-         * \brief callback which is called upon session ending
-         * \param sessionKey
+         * \brief Callback function used by ConnectionHandler
+         * when Mobile Application initiates session ending.
+         * \param sessionKey Key of session which should be ended
+         * \param firstSessionKey Session key of first session in this connection
          */
         virtual void onSessionEndedCallback(int sessionKey, int firstSessionKey);
 

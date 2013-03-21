@@ -53,128 +53,162 @@
  * \namespace NsConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler
-{
-    /**
-    * \class CConnectionHandler
-    * \brief SmartDeviceLink ConnectionHandler main class
-    */
-    class CConnectionHandler: public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener,
-                              public NsProtocolHandler::ISessionObserver,
-                              public IDevicesDiscoveryStarter,
-                              public IConnectionHandler
-    {
-    public:
-        /**
-        * \brief Singletone instantiator.
-        * \return pointer to CConnectionHandler instance.
-        */
-        static CConnectionHandler* getInstance();
+namespace NsConnectionHandler {
+/**
+ * \class CConnectionHandler
+ * \brief SmartDeviceLink ConnectionHandler main class
+ */
+class CConnectionHandler :
+    public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener,
+    public NsProtocolHandler::ISessionObserver, public IDevicesDiscoveryStarter,
+    public IConnectionHandler {
+ public:
+  /**
+   * \brief Singletone instantiator.
+   * \return pointer to CConnectionHandler instance.
+   */
+  static CConnectionHandler* getInstance();
 
-        /**
-         * \brief Destructor
-         */
-        ~CConnectionHandler();
+  /**
+   * \brief Destructor
+   */
+  ~CConnectionHandler();
 
-        /**
-         * \brief Sets observer pointer for ConnectionHandler.
-         * \param observer Pointer to observer object.
-         **/
-        void setConnectionHandlerObserver(IConnectionHandlerObserver * observer);
+  /**
+   * \brief Sets observer pointer for ConnectionHandler.
+   * \param observer Pointer to observer object.
+   **/
+  void setConnectionHandlerObserver(IConnectionHandlerObserver * observer);
 
-        /**
-         * \brief Available devices list updated.
-         *
-         * Called when device scanning initiated with scanForNewDevices
-         * is completed.
-         *
-         * \param DeviceList New list of available devices.
-         **/
-        virtual void onDeviceListUpdated(const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList);
+  /**
+   * \brief Available devices list updated.
+   *
+   * Called when device scanning initiated with scanForNewDevices
+   * is completed.
+   *
+   * \param DeviceList New list of available devices.
+   **/
+  virtual void onDeviceListUpdated(
+      const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList);
 
-        /**
-         * \brief Application connected.
-         *
-         * \param ConnectedDevice DeviceInfo of connected device.
-         * \param Connection Connection handle.
-         **/
-        virtual void onApplicationConnected(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
+  /**
+   * \brief Application connected.
+   *
+   * \param ConnectedDevice DeviceInfo of connected device.
+   * \param Connection Connection handle.
+   **/
+  virtual void onApplicationConnected(
+      const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & ConnectedDevice,
+      const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
 
-        /**
-         * \brief Application disconnected.
-         *
-         * \param DisconnectedDevice DeviceInfo of disconnected device.
-         * \param Connection Connection handle.
-         **/
-        virtual void onApplicationDisconnected(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
+  /**
+   * \brief Application disconnected.
+   *
+   * \param DisconnectedDevice DeviceInfo of disconnected device.
+   * \param Connection Connection handle.
+   **/
+  virtual void onApplicationDisconnected(
+      const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice,
+      const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
 
-        virtual int onSessionStartedCallback(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle);
+  virtual int onSessionStartedCallback(
+      NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle);
 
-        virtual int onSessionEndedCallback(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-                                               unsigned char sessionId,
-                                               unsigned int hashCode);
+  virtual int onSessionEndedCallback(
+      NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+      unsigned char sessionId, unsigned int hashCode);
 
-        virtual int keyFromPair(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-                                               unsigned char sessionId);
+  virtual int keyFromPair(
+      NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+      unsigned char sessionId);
 
-        virtual void pairFromKey(int key, NsSmartDeviceLink::NsTransportManager::tConnectionHandle & connectionHandle,
-                                               unsigned char & sessionId);
+  virtual void pairFromKey(
+      int key,
+      NsSmartDeviceLink::NsTransportManager::tConnectionHandle & connectionHandle,
+      unsigned char & sessionId);
 
-        /**
-         * \brief Sets pointer to TransportManager.
-         * \param transportManager Pointer to TransportManager object.
-         **/
-        void setTransportManager( NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager );
+  /**
+   * \brief Sets pointer to TransportManager.
+   * \param transportManager Pointer to TransportManager object.
+   **/
+  void setTransportManager(
+      NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager);
 
-        /**
-         * \brief Method which should start devices discoveryng
-         */
-        virtual void startDevicesDiscovery();
+  /**
+   * \brief Method which should start devices discoveryng
+   */
+  virtual void startDevicesDiscovery();
 
-        /**
-         * \brief Connects to all services of device
-         * \param deviceHandle Handle of device to connect to
-         */
-        virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
+  /**
+   * \brief Connects to all services of device
+   * \param deviceHandle Handle of device to connect to
+   */
+  virtual void connectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle);
 
-        void startTransportManager();
+  void startTransportManager();
 
-    private:
-        /**
-         * \brief Default class constructor
-         */
-        CConnectionHandler();
+ private:
+  /**
+   * \brief Default class constructor
+   */
+  CConnectionHandler();
 
-        /**
-         * \brief Copy constructor
-         */
-        CConnectionHandler(const CConnectionHandler&);
+  /**
+   * \brief Copy constructor
+   */
+  CConnectionHandler(const CConnectionHandler&);
 
-        /**
-         * \brief Pointer to observer
-         */
-        IConnectionHandlerObserver* mpConnectionHandlerObserver;
+  /**
+   * \brief Checks does device exist in list from TransportManager
+   * \param DeviceHandle Handle of device for checking.
+   * \param DeviceHandle Handle of device for checking.
+  * \return True if device exists.
+   */
+  bool DoesDeviceExistInTMList(
+      const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList,
+      const NsConnectionHandler::tDeviceHandle DeviceHandle);
 
-        /**
-         * \brief Pointer to TransportManager
-         */
-        NsSmartDeviceLink::NsTransportManager::ITransportManager * mpTransportManager;
+  /**
+   * \brief Checks does device exist in list and adds if not
+   * \param DeviceHandle Handle of device for checking.
+   */
+  void AddDeviceInDeviceListIfNotExist(
+      const NsSmartDeviceLink::NsTransportManager::SDeviceInfo DeviceInfo);
 
-        /**
-         * \brief List of devices
-         */
-        tDeviceList mDeviceList;
+  /**
+   * \brief Disconnect application.
+   *
+   * \param device_handle DeviceHandle of disconnected device.
+   * \param connection_handle Connection handle.
+   **/
+  void RemoveConnection(
+      const tConnectionHandle connection_handle);
 
-        /**
-         * \brief List of connections
-         */
-        tConnectionList mConnectionList;
+  /**
+   * \brief Pointer to observer
+   */
+  IConnectionHandlerObserver* mpConnectionHandlerObserver;
 
-        /**
-          *\brief For logging.
-        */
-        static log4cplus::Logger mLogger;
-    };
+  /**
+   * \brief Pointer to TransportManager
+   */
+  NsSmartDeviceLink::NsTransportManager::ITransportManager * mpTransportManager;
+
+  /**
+   * \brief List of devices
+   */
+  tDeviceList mDeviceList;
+
+  /**
+   * \brief List of connections
+   */
+  tConnectionList mConnectionList;
+
+  /**
+   *\brief For logging.
+   */
+  static log4cplus::Logger mLogger;
+};
 }/* namespace NsConnectionHandler */
 
 #endif /* CONNECTIONHANDLER_H */

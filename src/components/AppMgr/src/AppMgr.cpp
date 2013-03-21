@@ -157,6 +157,14 @@ namespace NsAppManager
         AppMgrCore::getInstance().setDeviceList(deviceList);
     }
 
+    void AppMgr::UpdateDeviceList(const NsConnectionHandler::tDeviceList & DeviceList)
+    {
+    }
+
+    void AppMgr::RemoveDevice(const NsConnectionHandler::tDeviceHandle DeviceHandle)
+    {
+    }
+
     /**
      * \brief callback which is called upon session starting
      * \param deviceHandle
