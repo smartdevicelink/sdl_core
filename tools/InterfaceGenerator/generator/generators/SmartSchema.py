@@ -498,7 +498,7 @@ class SmartSchema(object):
         return self._impl_code_item_fill_template.substitute(
             name=member.name,
             var_name=self._gen_schema_item_var_name(member),
-            is_mandatory=member.is_mandatory)
+            is_mandatory="true" if member.is_mandatory is True else "false")
 
     @staticmethod
     def _gen_schema_item_var_name(member):
@@ -751,6 +751,8 @@ class SmartSchema(object):
         '''\n'''
         '''#include "JSONHandler/CSmartFactory.hpp"\n'''
         '''#include "SmartObjects/CSmartSchema.hpp"\n'''
+        '''#include "SmartObjects/CObjectSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/TSharedPtr.hpp"\n'''
         '''\n'''
         '''$namespace_open'''
         '''$enums_content'''
@@ -765,7 +767,13 @@ class SmartSchema(object):
 
     _cpp_file_template = string.Template(
         '''#include "$header_file_name"\n'''
-        '''#include "SmartObjects/validation/CAlwaysTrueValidator.hpp"\n'''
+        '''#include "SmartObjects/CAlwaysTrueSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/CAlwaysFalseSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/CBoolSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/CStringSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/TEnumSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/TNumberSchemaItem.hpp"\n'''
+        '''#include "SmartObjects/TSchemaItemParameter.hpp"\n'''
         '''\n'''
         '''using namespace NsAppLink::NsSmartObjects;\n'''
         '''\n'''
@@ -788,7 +796,8 @@ class SmartSchema(object):
         '''        return it->second;\n'''
         '''    }\n'''
         '''\n'''
-        '''    return NsAppLink::NsSmartObjects::CAlwaysFalse();\n'''
+        '''    return NsAppLink::NsSmartObjects::'''
+        '''CAlwaysFalseSchemaItem::create();\n'''
         '''}\n'''
         '''\n'''
         '''void $namespace::$class_name::initStructSchemaItems()\n'''
@@ -812,7 +821,7 @@ class SmartSchema(object):
 
     _struct_schema_item_template = string.Template(
         '''mStructSchemaItems.insert(std::make_pair("${name}", '''
-        '''initStructSchemaItem_${name}());''')
+        '''initStructSchemaItem_${name}()));''')
 
     _function_schema_template = string.Template(
         '''mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::'''
@@ -821,7 +830,7 @@ class SmartSchema(object):
         '''initFunction_${function_id}_${message_type}()));''')
 
     _struct_impl_template = string.Template(
-        '''CObjectValidator $namespace::$class_name::'''
+        '''TSharedPtr<CObjectSchemaItem> $namespace::$class_name::'''
         '''initStructSchemaItem_${struct_name}()\n'''
         '''{\n'''
         '''$code'''
@@ -873,7 +882,7 @@ class SmartSchema(object):
         '''CSmartSchema $namespace::$class_name::'''
         '''initFunction_${function_id}_${message_type}()\n'''
         '''{\n'''
-        '''    return CSmartSchema(Validation::CAlwaysTrueValidator());\n'''
+        '''    return CSmartSchema(CAlwaysTrueSchemaItem::create());\n'''
         '''}\n''')
 
     _class_hpp_template = string.Template(
@@ -920,7 +929,8 @@ class SmartSchema(object):
         '''     * @brief Type that maps of struct names to schema items.\n'''
         '''     */\n'''
         '''    typedef std::map<std::string, NsAppLink::NsSmartObjects::'''
-        '''TSharedPtr<CObjectSchemaItem> > TStructsSchemaItems;\n'''
+        '''TSharedPtr<NsAppLink::NsSmartObjects::'''
+        '''CObjectSchemaItem> > TStructsSchemaItems;\n'''
         '''\n'''
         '''    /**\n'''
         '''     * @brief Map of struct names to their schema items.\n'''
@@ -938,7 +948,8 @@ class SmartSchema(object):
 
     _struct_decl_template = string.Template(
         '''$comment\n'''
-        '''static NsAppLink::NsSmartObjects::CObjectValidator '''
+        '''static NsAppLink::NsSmartObjects::'''
+        '''TSharedPtr<NsAppLink::NsSmartObjects::CObjectSchemaItem> '''
         '''initStructSchemaItem_${struct_name}();''')
 
     _class_comment_template = string.Template(
