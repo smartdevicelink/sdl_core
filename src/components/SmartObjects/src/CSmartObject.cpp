@@ -538,6 +538,34 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return handle_map_access(str);
 }
 
+const NsAppLink::NsSmartObjects::CSmartObject & NsAppLink::NsSmartObjects::CSmartObject::getElement(size_t Index) const
+{
+    if (NsAppLink::NsSmartObjects::SmartType_Array == m_type)
+    {
+        if (Index < m_data.array_value->size())
+        {
+            return m_data.array_value->at(Index);
+        }
+    }
+
+    return invalid_object_value;
+}
+
+const NsAppLink::NsSmartObjects::CSmartObject & NsAppLink::NsSmartObjects::CSmartObject::getElement(const std::string & Key) const
+{
+    if (NsAppLink::NsSmartObjects::SmartType_Map == m_type)
+    {
+        SmartMap::const_iterator i = m_data.map_value->find(Key);
+
+        if (i != m_data.map_value->end())
+        {
+            return i->second;
+        }
+    }
+
+    return invalid_object_value;
+}
+
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::handle_map_access(const std::string s)
 {
     if(m_type != SmartType_Map)

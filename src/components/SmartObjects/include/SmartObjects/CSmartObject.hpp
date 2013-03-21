@@ -89,6 +89,32 @@ namespace NsAppLink
             CSmartObject& operator[](char* s);
             CSmartObject& operator[](const char*);
 
+            /**
+             * @brief Get array element.
+             *
+             * This method does not automatically convert the object to an array or
+             * add elements. If this object is not an array or index is out of
+             * range then null object is returned.
+             *
+             * @param Index Index of an element.
+             *
+             * @return Element of array or null object if element can't be provided.
+             **/
+            const CSmartObject & getElement(size_t Index) const;
+
+            /**
+             * @brief Get map element.
+             *
+             * This method does not automatically convert the object to a map or
+             * add elements. If this object is not a map or it does not contain
+             * key then null object is returned.
+             *
+             * @param Key Key of an element.
+             *
+             * @return Element of map or null object if element can't be provided.
+             **/
+            const CSmartObject & getElement(const std::string & Key) const;
+
             SmartType get_type() const;
 
 
