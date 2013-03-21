@@ -63,15 +63,15 @@ void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue(
     }
     else if (NsAppLink::NsSmartObjects::SmartType_Map == obj.get_type())
     {
-        std::vector<std::string> keys = obj.enumerate();
+        std::set<std::string> keys = obj.enumerate();
 
-        for (int i = 0; i < keys.size(); i++)
+        for (std::set<std::string>::const_iterator key = keys.begin(); key != keys.end(); key++)
         {
             Json::Value value(Json::nullValue);
 
-            objToJsonValue(obj[keys[i]], value);
+            objToJsonValue(obj[*key], value);
 
-            item[keys[i]] = value;
+            item[*key] = value;
         }
     }
     else if (NsAppLink::NsSmartObjects::SmartType_Boolean == obj.get_type())
