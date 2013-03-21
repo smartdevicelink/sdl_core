@@ -124,9 +124,9 @@ namespace NsAppLink
 }
 
 template <typename NumberType>
-NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType> > create(const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MinValue,
-                                                                                                        const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MaxValue,
-                                                                                                        const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & DefaultValue)
+NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType> > NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>::create(const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MinValue,
+                                                                                                                                                                  const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MaxValue,
+                                                                                                                                                                  const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & DefaultValue)
 {
     return new NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue);
 }
