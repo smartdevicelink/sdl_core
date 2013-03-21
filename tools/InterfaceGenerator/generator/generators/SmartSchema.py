@@ -85,16 +85,16 @@ class SmartSchema(object):
             f_h.write(self._hpp_file_tempalte.substitute(
                 guard=guard,
                 namespace_open=namespace_open,
-                enums_content=self._indent_code(self._generate_enums(
+                enums_content=self._indent_code(self._gen_enums(
                     interface.enums.values()), indent_level),
-                class_content=self._indent_code(self._generate_hpp_class(
+                class_content=self._indent_code(self._gen_hpp_class(
                     class_name,
                     interface.params,
                     interface.functions.values(),
                     interface.structs.values()), indent_level),
                 namespace_close=namespace_close))
 
-        self._generate_struct_schema_items(interface.structs.values())
+        self._gen_struct_schema_items(interface.structs.values())
 
         with open(os.path.join(destination_dir,
                                "".join("{0}.cpp".format(class_name))),
@@ -104,18 +104,18 @@ class SmartSchema(object):
                 namespace=namespace,
                 class_name=class_name,
                 struct_schema_items=self._structs_add_code,
-                function_schemas=self._generate_function_schemas(
+                function_schemas=self._gen_function_schemas(
                     interface.functions.values()),
-                init_function_impls=self._generate_function_impls(
+                init_function_impls=self._gen_function_impls(
                     interface.functions.values(),
                     namespace,
                     class_name),
-                init_structs_impls=self._generate_sturct_impls(
+                init_structs_impls=self._gen_sturct_impls(
                     interface.structs.values(),
                     namespace,
                     class_name)))
 
-    def _generate_hpp_class(self, class_name, params, functions, structs):
+    def _gen_hpp_class(self, class_name, params, functions, structs):
         """Generate source code of class for header file.
 
         Generates source code of class that should be used in the
@@ -133,12 +133,12 @@ class SmartSchema(object):
         """
 
         return self._class_hpp_template.substitute(
-            comment=self._generate_class_comment(class_name, params),
+            comment=self._gen_class_comment(class_name, params),
             class_name=class_name,
-            init_function_decls=self._generate_function_decls(functions),
-            init_struct_decls=self._generate_structs_decls(structs))
+            init_function_decls=self._gen_function_decls(functions),
+            init_struct_decls=self._gen_structs_decls(structs))
 
-    def _generate_structs_decls(self, structs):
+    def _gen_structs_decls(self, structs):
         """Generate method prototypes for structs for header file.
 
         Generates method prototypes for structs that should be used in the
@@ -156,9 +156,9 @@ class SmartSchema(object):
             raise GenerateError("Structs is None")
 
         return "\n".join([self._indent_code(
-            self._generate_struct_decl(x), 1) for x in structs])
+            self._gen_struct_decl(x), 1) for x in structs])
 
-    def _generate_struct_decl(self, struct):
+    def _gen_struct_decl(self, struct):
         """Generate method prototype for struct for header file.
 
         Generates method prototype for struct that should be used in the
@@ -173,10 +173,10 @@ class SmartSchema(object):
         """
 
         return self._struct_decl_template.substitute(
-            comment=self._generate_comment(struct),
+            comment=self._gen_comment(struct),
             struct_name=struct.name)
 
-    def _generate_function_decls(self, functions):
+    def _gen_function_decls(self, functions):
         """Generate method prototypes for functions for header file.
 
         Generates method prototypes for functions that should be used in the
@@ -194,9 +194,9 @@ class SmartSchema(object):
             raise GenerateError("Functions is None")
 
         return "\n".join([self._indent_code(
-            self._generate_function_decl(x), 1) for x in functions])
+            self._gen_function_decl(x), 1) for x in functions])
 
-    def _generate_function_decl(self, function):
+    def _gen_function_decl(self, function):
         """Generate method prototype for function for header file.
 
         Generates method prototype for function that should be used in the
@@ -211,11 +211,11 @@ class SmartSchema(object):
         """
 
         return self._function_decl_template.substitute(
-            comment=self._generate_comment(function),
+            comment=self._gen_comment(function),
             function_id=function.function_id.primary_name,
             message_type=function.message_type.primary_name)
 
-    def _generate_struct_schema_items(self, structs):
+    def _gen_struct_schema_items(self, structs):
         """Generate struct schema items initialization code for source file.
 
         Generates struct schema items initialization code that should be used
@@ -244,7 +244,7 @@ class SmartSchema(object):
 
         self._structs_add_code = "".join(
             [self._structs_add_code, self._indent_code(
-                self._generate_struct_schema_item(struct), 1)])
+                self._gen_struct_schema_item(struct), 1)])
         self._generated_structs.append(struct.name)
 
     def _process_struct_member(self, member):
@@ -257,7 +257,7 @@ class SmartSchema(object):
 
         self._process_struct(struct)
 
-    def _generate_struct_schema_item(self, struct):
+    def _gen_struct_schema_item(self, struct):
         """Generate struct schema item initialization code for source file.
 
         Generates struct schema item initialization code that should be used
@@ -273,7 +273,7 @@ class SmartSchema(object):
 
         return self._struct_schema_item_template.substitute(name=struct.name)
 
-    def _generate_function_schemas(self, functions):
+    def _gen_function_schemas(self, functions):
         """Generate functions initialization code for source file.
 
         Generates functions schema initialization code that should be used
@@ -291,10 +291,10 @@ class SmartSchema(object):
             raise GenerateError("Functions is None")
 
         return "".join([self._indent_code(
-            self._generate_function_schema(x), 1)
+            self._gen_function_schema(x), 1)
             for x in functions])
 
-    def _generate_function_schema(self, function):
+    def _gen_function_schema(self, function):
         """Generate function initialization code for source file.
 
         Generates function schema initialization code that should be used
@@ -312,7 +312,7 @@ class SmartSchema(object):
             function_id=function.function_id.primary_name,
             message_type=function.message_type.primary_name)
 
-    def _generate_sturct_impls(self, structs, namespace, class_name):
+    def _gen_sturct_impls(self, structs, namespace, class_name):
         """Generate structs implementation for source file.
 
         Generates implementation code of methods that provide schema items for
@@ -331,10 +331,10 @@ class SmartSchema(object):
         if structs is None:
             raise GenerateError("Structs is None")
 
-        return "\n".join([self._generate_struct_impl(
+        return "\n".join([self._gen_struct_impl(
             x, namespace, class_name) for x in structs])
 
-    def _generate_struct_impl(self, struct, namespace, class_name):
+    def _gen_struct_impl(self, struct, namespace, class_name):
         """Generate struct implementation for source file.
 
         Generates implementation code of method that provide schema item for
@@ -356,21 +356,21 @@ class SmartSchema(object):
             struct_name=struct.name,
             code=self._indent_code(
                 self._struct_impl_code_tempate.substitute(
-                    schema_local_decl=self._generate_schema_local_decls(
+                    schema_local_decl=self._gen_schema_local_decls(
                         struct.members.values()),
-                    schema_items_decl=self._generate_schema_items_decls(
+                    schema_items_decl=self._gen_schema_items_decls(
                         struct.members.values()),
-                    schema_item_fill=self._generate_struct_items_fill(
+                    schema_item_fill=self._gen_struct_items_fill(
                         struct.members.values())),
                 1))
 
-    def _generate_schema_local_decls(self, members):
+    def _gen_schema_local_decls(self, members):
         result = ""
         processed_enums = []
         for member in members:
             if type(member.param_type) is Model.Enum and \
                member.param_type.name not in processed_enums:
-                local_var = self._generate_schema_local_emum_var_name(member)
+                local_var = self._gen_schema_local_emum_var_name(member)
                 result = "\n".join(
                     ["".join(
                         [result, self._impl_code_local_decl_enum_template.
@@ -388,13 +388,13 @@ class SmartSchema(object):
 
         return "".join([result, "\n\n"]) if result else ""
 
-    def _generate_schema_items_decls(self, members):
+    def _gen_schema_items_decls(self, members):
         result = "\n".join(
-            [self._generate_schema_item_decl(x) for x in members])
+            [self._gen_schema_item_decl(x) for x in members])
 
         return "".join([result, "\n\n"]) if result else ""
 
-    def _generate_schema_item_decl(self, member):
+    def _gen_schema_item_decl(self, member):
         code = ""
 
         if type(member.param_type) is Model.Boolean:
@@ -402,18 +402,18 @@ class SmartSchema(object):
         elif type(member.param_type) is Model.Integer:
             code = self._impl_code_integer_item_template.substitute(
                 type="int",
-                params=self._generate_schema_item_param_values(
+                params=self._gen_schema_item_param_values(
                     [["int", member.param_type.min_value],
                      ["int", member.param_type.max_value]]))
         elif type(member.param_type) is Model.Double:
             code = self._impl_code_integer_item_template.substitute(
                 type="double",
-                params=self._generate_schema_item_param_values(
+                params=self._gen_schema_item_param_values(
                     [["double", member.param_type.min_value],
                      ["double", member.param_type.max_value]]))
         elif type(member.param_type) is Model.String:
             code = self._impl_code_string_item_template.safe_substitute(
-                param=self._generate_schema_item_param_values(
+                param=self._gen_schema_item_param_values(
                     [["size_t", member.param_type.max_length]]))
         elif type(member.param_type) is Model.Array:
             code = "ARRAY"
@@ -423,7 +423,7 @@ class SmartSchema(object):
         elif type(member.param_type) is Model.Enum:
             code = self._impl_code_enum_item_template.substitute(
                 type=member.param_type.name,
-                params=self._generate_schema_local_emum_var_name(member))
+                params=self._gen_schema_local_emum_var_name(member))
         elif type(member.param_type) is Model.EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=member.param_type.name,
@@ -433,10 +433,10 @@ class SmartSchema(object):
                                 str(type(member.param_type)))
 
         return self._impl_code_item_decl_temlate.substitute(
-            var_name=self._generate_schema_item_var_name(member),
+            var_name=self._gen_schema_item_var_name(member),
             item_decl=code)
 
-    def _generate_schema_item_param_values(self, params):
+    def _gen_schema_item_param_values(self, params):
         result = ""
         for param in params:
             value = self._impl_code_item_param_value_template.substitute(
@@ -448,25 +448,27 @@ class SmartSchema(object):
 
         return result
 
-    def _generate_struct_items_fill(self, members):
+    def _gen_struct_items_fill(self, members):
         result = "\n".join(
-            [self._generate_schema_item_fill(x) for x in members])
+            [self._gen_schema_item_fill(x) for x in members])
 
         return "".join([result, "\n\n"]) if result else ""
 
-    def _generate_schema_item_fill(self, member):
+    def _gen_schema_item_fill(self, member):
         return self._impl_code_item_fill_template.substitute(
             name=member.name,
-            var_name=self._generate_schema_item_var_name(member),
+            var_name=self._gen_schema_item_var_name(member),
             is_mandatory=member.is_mandatory)
 
-    def _generate_schema_item_var_name(self, member):
+    @staticmethod
+    def _gen_schema_item_var_name(member):
         return "".join([member.name, "_SchemaItem"])
 
-    def _generate_schema_local_emum_var_name(self, member):
+    @staticmethod
+    def _gen_schema_local_emum_var_name(member):
         return "".join([member.param_type.name, "_allowedEnumValues"])
 
-    def _generate_function_impls(self, functions, namespace, class_name):
+    def _gen_function_impls(self, functions, namespace, class_name):
         """Generate functions implementation for source file.
 
         Generates implementation code of methods that provide schema for
@@ -485,10 +487,10 @@ class SmartSchema(object):
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "\n".join([self._generate_function_impl(
+        return "\n".join([self._gen_function_impl(
             x, namespace, class_name) for x in functions])
 
-    def _generate_function_impl(self, function, namespace, class_name):
+    def _gen_function_impl(self, function, namespace, class_name):
         """Generate function implementation for source file.
 
         Generates implementation code of method that provides schema for
@@ -510,7 +512,7 @@ class SmartSchema(object):
             function_id=function.function_id.primary_name,
             message_type=function.message_type.primary_name)
 
-    def _generate_enums(self, enums):
+    def _gen_enums(self, enums):
         """Generate enums for header file.
 
         Generates declaration of enumerations for the header file.
@@ -526,9 +528,9 @@ class SmartSchema(object):
         if enums is None:
             raise GenerateError("Enums is None")
 
-        return "\n".join([self._generate_enum(x) for x in enums])
+        return "\n".join([self._gen_enum(x) for x in enums])
 
-    def _generate_enum(self, enum):
+    def _gen_enum(self, enum):
         """Generate enum for header file.
 
         Generates declaration of enumeration for the header file.
@@ -545,12 +547,12 @@ class SmartSchema(object):
         enum_elements.insert(0, Model.EnumElement(
             "INVALID_ENUM", None, None, None, None, None, "-1"))
         return self._enum_template.substitute(
-            comment=self._indent_code(self._generate_comment(enum), 1),
+            comment=self._indent_code(self._gen_comment(enum), 1),
             name=enum.name,
-            enum_items=self._indent_code(self._generate_enum_elements(
+            enum_items=self._indent_code(self._gen_enum_elements(
                 enum_elements), 2))
 
-    def _generate_enum_elements(self, enum_elements):
+    def _gen_enum_elements(self, enum_elements):
         """Generate enum elements for header file.
 
         Generates declaration of enumeration elements for the header file.
@@ -563,10 +565,10 @@ class SmartSchema(object):
 
         """
 
-        return ",\n\n".join([self._generate_enum_element(x)
+        return ",\n\n".join([self._gen_enum_element(x)
                              for x in enum_elements])
 
-    def _generate_enum_element(self, enum_element):
+    def _gen_enum_element(self, enum_element):
         """Generate enum element for header file.
 
         Generates declaration of enumeration element for the header file.
@@ -581,15 +583,15 @@ class SmartSchema(object):
 
         if enum_element.value is not None:
             return self._enum_element_with_value_template.substitute(
-                comment=self._generate_comment(enum_element),
+                comment=self._gen_comment(enum_element),
                 name=enum_element.primary_name,
                 value=enum_element.value)
         else:
             return self._enum_element_with_no_value_template.substitute(
-                comment=self._generate_comment(enum_element),
+                comment=self._gen_comment(enum_element),
                 name=enum_element.primary_name)
 
-    def _generate_class_comment(self, class_name, params):
+    def _gen_class_comment(self, class_name, params):
         """Generate doxygen comment to the class for header file.
 
         Generates doxygen comment for the class that should be used in
@@ -611,7 +613,7 @@ class SmartSchema(object):
                                              x[1]) for x in params.items()])
             if params else " *    none\n")
 
-    def _generate_comment(self, interface_item_base):
+    def _gen_comment(self, interface_item_base):
         """Generate doxygen comment for iterface_item_base for header file.
 
         Generates doxygen comment for any iterface_item_base for the header
