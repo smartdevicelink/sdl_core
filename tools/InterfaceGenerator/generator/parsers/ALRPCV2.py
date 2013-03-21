@@ -166,7 +166,6 @@ class Parser(object):
 
         function_id = None
         message_type = None
-        platform = None
 
         for attrubute in attributes:
             if attrubute == "functionID":
@@ -177,15 +176,12 @@ class Parser(object):
                 message_type = \
                     self._get_enum_element_for_function("messageType",
                                                         attributes[attrubute])
-            elif attrubute == "platform":
-                platform = attributes[attrubute]
             else:
                 raise ParseError("Unexpected attribute '" + attrubute +
                                  "' in function '" + params["name"] + "'")
 
         params["function_id"] = function_id
         params["message_type"] = message_type
-        params["platform"] = platform
 
         function_params = collections.OrderedDict()
         for subelement in subelements:
@@ -225,6 +221,8 @@ class Parser(object):
         params["name"] = element.attrib["name"]
         attrib = dict(element.attrib.items())
         del attrib["name"]
+
+        params["platform"] = self._extract_attrib(attrib, "platform")
 
         for subelement in element:
             if subelement.tag == "description":
@@ -342,8 +340,6 @@ class Parser(object):
 
         """
         params, subelements, attrib = self._parse_param_base_item(element)
-
-        params["platform"] = self._extract_attrib(attrib, "platform")
 
         default_value = None
         default_value_string = self._extract_attrib(attrib, "defvalue")

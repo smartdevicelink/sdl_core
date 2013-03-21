@@ -109,7 +109,8 @@ class TestALRPCV2Parser(unittest.TestCase):
 
         self.assertIn("enum1", interface.enums)
         enum = interface.enums["enum1"]
-        self.verify_base_item(item=enum, name="enum1")
+        self.verify_base_item(item=enum, name="enum1",
+                              platform="enum1 platform")
         self.assertEqual("scope", enum.internal_scope)
 
         self.assertEqual(3, len(enum.elements))
@@ -131,7 +132,8 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(
             item=element,
             name="element3",
-            design_description=["Element design description"])
+            design_description=["Element design description"],
+            platform="element3 platform")
         self.assertIsNone(element.internal_name)
         self.assertIsNone(element.value)
 
@@ -167,7 +169,8 @@ class TestALRPCV2Parser(unittest.TestCase):
 
         self.assertIn("member2", struct.members)
         member = struct.members["member2"]
-        self.verify_base_item(item=member, name="member2")
+        self.verify_base_item(item=member, name="member2",
+                              platform="member2 platform")
         self.assertTrue(member.is_mandatory)
         self.assertIsInstance(member.param_type, generator.Model.Boolean)
 
@@ -197,7 +200,8 @@ class TestALRPCV2Parser(unittest.TestCase):
         struct = interface.structs["struct2"]
         self.verify_base_item(item=struct,
                               name="struct2",
-                              description=["Description of struct2"])
+                              description=["Description of struct2"],
+                              platform="struct2 platform")
 
         self.assertEqual(4, len(struct.members))
 
@@ -257,7 +261,6 @@ class TestALRPCV2Parser(unittest.TestCase):
                       interface.enums["FunctionID"].elements["Function1_id"])
         self.assertIs(function.message_type,
                       interface.enums["messageType"].elements["request"])
-        self.assertIsNone(function.platform)
 
         self.assertEqual(3, len(function.params))
 
@@ -270,7 +273,6 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.assertEqual(False, param.is_mandatory)
         self.assertIsInstance(param.param_type, generator.Model.String)
         self.assertIsNone(param.param_type.max_length)
-        self.assertIsNone(param.platform)
         self.assertEqual("String default value", param.default_value)
 
         self.assertIn("param2", function.params)
@@ -279,12 +281,12 @@ class TestALRPCV2Parser(unittest.TestCase):
             item=param,
             name="param2",
             description=["Param2 description", ""],
-            todos=["Param2 todo"])
+            todos=["Param2 todo"],
+            platform="param2 platform")
         self.assertTrue(param.is_mandatory)
         self.assertIsInstance(param.param_type, generator.Model.Integer)
         self.assertIsNone(param.param_type.min_value)
         self.assertIsNone(param.param_type.max_value)
-        self.assertEqual("param2 platform", param.platform)
         self.assertIsNone(param.default_value)
 
         self.assertIn("param3", function.params)
@@ -292,7 +294,6 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(item=param, name="param3")
         self.assertEqual(False, param.is_mandatory)
         self.assertIs(param.param_type, interface.structs["struct1"])
-        self.assertIsNone(param.platform)
         self.assertIsNone(param.default_value)
 
         # Function response "Function1"
@@ -308,12 +309,12 @@ class TestALRPCV2Parser(unittest.TestCase):
             item=function,
             name="Function1",
             issues=[TestALRPCV2Parser._Issue(creator="c1", value=""),
-                    TestALRPCV2Parser._Issue(creator="c2", value="")])
+                    TestALRPCV2Parser._Issue(creator="c2", value="")],
+            platform="")
         self.assertIs(function.function_id,
                       interface.enums["FunctionID"].elements["Function1_id"])
         self.assertIs(function.message_type,
                       interface.enums["messageType"].elements["response"])
-        self.assertEqual("", function.platform)
 
         self.assertEqual(3, len(function.params))
 
@@ -322,7 +323,6 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(item=param, name="p1")
         self.assertTrue(param.is_mandatory)
         self.assertIs(param.param_type, interface.enums["enum1"])
-        self.assertIsNone(param.platform)
         self.assertIsNone(param.default_value)
 
         self.assertIn("p2", function.params)
@@ -330,7 +330,6 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(item=param, name="p2")
         self.assertTrue(param.is_mandatory)
         self.assertIs(param.param_type, interface.enums["enum1"])
-        self.assertIsNone(param.platform)
         self.assertIs(param.default_value,
                       interface.enums["enum1"].elements["element2"])
 
@@ -339,7 +338,6 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(item=param, name="p3", design_description=[""])
         self.assertTrue(param.is_mandatory)
         self.assertIsInstance(param.param_type, generator.Model.Boolean)
-        self.assertIsNone(param.platform)
         self.assertEqual(False, param.default_value)
 
         # Function notification "Function2"
@@ -353,12 +351,12 @@ class TestALRPCV2Parser(unittest.TestCase):
              interface.enums["messageType"].elements["notification"])]
         self.verify_base_item(item=function,
                               name="Function2",
-                              description=["Function2 description"])
+                              description=["Function2 description"],
+                              platform="function2 platform")
         self.assertIs(function.function_id,
                       interface.enums["FunctionID"].elements["Function2_id"])
         self.assertIs(function.message_type,
                       interface.enums["messageType"].elements["notification"])
-        self.assertEqual("function2 platform", function.platform)
 
         self.assertEqual(3, len(function.params))
 
@@ -372,7 +370,6 @@ class TestALRPCV2Parser(unittest.TestCase):
             {"element2": interface.enums["enum1"].elements["element2"],
              "element3": interface.enums["enum1"].elements["element3"]},
             param.param_type.allowed_elements)
-        self.assertIsNone(param.platform)
         self.assertIsNone(param.default_value)
 
         self.assertIn("n2", function.params)
@@ -390,7 +387,6 @@ class TestALRPCV2Parser(unittest.TestCase):
             {"element1": interface.enums["enum1"].elements["element1"],
              "element3": interface.enums["enum1"].elements["element3"]},
             param.param_type.element_type.allowed_elements)
-        self.assertIsNone(param.platform)
         self.assertIsNone(param.default_value)
 
         self.assertIn("n3", function.params)
@@ -398,11 +394,11 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(item=param, name="n3")
         self.assertEqual(False, param.is_mandatory)
         self.assertIs(param.param_type, interface.structs["struct2"])
-        self.assertIsNone(param.platform)
         self.assertIsNone(param.default_value)
 
     def verify_base_item(self, item, name, description=None,
-                         design_description=None, issues=None, todos=None):
+                         design_description=None, issues=None, todos=None,
+                         platform=None):
         """Verify base interface item variables."""
         self.assertEqual(name, item.name)
         self.assertSequenceEqual(self.get_list(description), item.description)
@@ -410,6 +406,7 @@ class TestALRPCV2Parser(unittest.TestCase):
                                  item.design_description)
         self.assertSequenceEqual(self.get_list(issues), item.issues)
         self.assertSequenceEqual(self.get_list(todos), item.todos)
+        self.assertEqual(platform, item.platform)
 
     @staticmethod
     def get_list(list=None):

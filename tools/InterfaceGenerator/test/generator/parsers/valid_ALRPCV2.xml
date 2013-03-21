@@ -26,7 +26,7 @@
             <description>Param1 description</description>
         </param>
         <issue creator="creator1">Issue1</issue>
-        <param name="member2" type="Boolean" mandatory="true"/>
+        <param name="member2" type="Boolean" mandatory="true" platform="member2 platform"/>
         <param name="member3" type="Float" maxvalue="20.5" mandatory="false"/>
         <description>Struct description</description>
         <issue creator="creator2">Issue2</issue>
@@ -45,10 +45,10 @@
         <todo>Function1 request todo</todo>
         <param name="param3" type="struct1" mandatory="false"/>
     </function>
-    <enum name="enum1" internal_scope="scope">
+    <enum name="enum1" internal_scope="scope" platform="enum1 platform">
         <element name="element1" value="10"/>
         <element name="element2" internal_name="element2_internal" value="11"/>
-        <element name="element3">
+        <element name="element3" platform="element3 platform">
             <designdescription>Element design description</designdescription>
         </element>
     </enum>
@@ -61,7 +61,7 @@
             <designdescription/>
         </param>
     </function>
-    <struct name="struct2">
+    <struct name="struct2" platform="struct2 platform">
         <description>Description of struct2</description>
         <param name="m1" type="String"/>
         <param name="m2" type="String" maxlength="100" array="true" minsize="1" maxsize="50"/>

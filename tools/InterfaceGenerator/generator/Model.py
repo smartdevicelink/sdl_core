@@ -105,17 +105,19 @@ class InterfaceItemBase(object):
     design_description -- list of string design description elements
     issues -- list of issues
     todos -- list of string todo elements
+    platform -- optional platform (string or None)
 
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None):
+                 issues=None, todos=None, platform=None):
         self.name = name
         self.description = description if description is not None else []
         self.design_description = \
             design_description if design_description is not None else []
         self.issues = issues if issues is not None else []
         self.todos = todos if todos is not None else []
+        self.platform = platform
 
 
 class EnumElement(InterfaceItemBase):
@@ -130,10 +132,12 @@ class EnumElement(InterfaceItemBase):
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None, internal_name=None, value=None):
+                 issues=None, todos=None, platform=None, internal_name=None,
+                 value=None):
         super(EnumElement, self).__init__(
             name, description=description,
-            design_description=design_description, issues=issues, todos=todos)
+            design_description=design_description, issues=issues, todos=todos,
+            platform=platform)
         self.internal_name = internal_name
         self.value = value
 
@@ -159,10 +163,12 @@ class Enum(InterfaceItemBase):
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None, internal_scope=None, elements=None):
+                 issues=None, todos=None, platform=None, internal_scope=None,
+                 elements=None):
         super(Enum, self).__init__(
             name, description=description,
-            design_description=design_description, issues=issues, todos=todos)
+            design_description=design_description, issues=issues, todos=todos,
+            platform=platform)
 
         self.internal_scope = internal_scope
         self.elements = \
@@ -181,10 +187,12 @@ class EnumSubset(InterfaceItemBase):
     """
 
     def __init__(self, name, enum, description=None, design_description=None,
-                 issues=None, todos=None, allowed_elements=None):
+                 issues=None, todos=None, platform=None,
+                 allowed_elements=None):
         super(EnumSubset, self).__init__(
             name, description=description,
-            design_description=design_description, issues=issues, todos=todos)
+            design_description=design_description, issues=issues, todos=todos,
+            platform=platform)
 
         self.enum = enum
         self.allowed_elements = \
@@ -204,10 +212,11 @@ class Param(InterfaceItemBase):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 is_mandatory=True):
+                 platform=None, is_mandatory=True):
         super(Param, self).__init__(
             name, description=description,
-            design_description=design_description, issues=issues, todos=todos)
+            design_description=design_description, issues=issues, todos=todos,
+            platform=platform)
 
         self.is_mandatory = is_mandatory
         self.param_type = param_type
@@ -218,20 +227,18 @@ class FunctionParam(Param):
     """Function parameter.
 
     Instance variables:
-    platform -- optional platform (string or None)
     default_value -- optional default value of this parameter
 
     """
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 is_mandatory=True, platform=None, default_value=None):
+                 platform=None, is_mandatory=True, default_value=None):
         super(FunctionParam, self).__init__(
             name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            is_mandatory=is_mandatory)
+            platform=platform, is_mandatory=is_mandatory)
 
-        self.platform = platform
         self.default_value = default_value
 
 
@@ -245,10 +252,11 @@ class Struct(InterfaceItemBase):
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None, members=None):
+                 issues=None, todos=None, platform=None, members=None):
         super(Struct, self).__init__(
             name, description=description,
-            design_description=design_description, issues=issues, todos=todos)
+            design_description=design_description, issues=issues, todos=todos,
+            platform=platform)
 
         self.members = \
             members if members is not None else collections.OrderedDict()
@@ -261,7 +269,6 @@ class Function(InterfaceItemBase):
     Instance variables:
     function_id -- function identifier (EnumElement from Enum "FunctionID")
     message_type -- message type (EnumElement from Enum "messageType")
-    platform -- optional platform (string or None)
     params -- function parameters
 
     """
@@ -271,11 +278,11 @@ class Function(InterfaceItemBase):
                  platform=None, params=None):
         super(Function, self).__init__(
             name, description=description,
-            design_description=design_description, issues=issues, todos=todos)
+            design_description=design_description, issues=issues, todos=todos,
+            platform=platform)
 
         self.function_id = function_id
         self.message_type = message_type
-        self.platform = platform
         self.params = \
             params if params is not None else collections.OrderedDict()
 
