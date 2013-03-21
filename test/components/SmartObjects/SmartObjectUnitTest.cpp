@@ -468,16 +468,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
        obj = obj[0];
 
        ASSERT_EQ("test string", static_cast<std::string>(obj));
+
+       obj["abc"] = "new test string";
+       obj = obj["abc"];
+
+       ASSERT_EQ("new test string", static_cast<std::string>(obj));
    }
-   
+
     TEST(CopyConstructorTest, SmartObjectTest)
     {
         CSmartObject srcObj;
-        
+
         srcObj[0] = "test string";
-        
+
         CSmartObject dstObj = srcObj[0];
-        
+
         ASSERT_EQ("test string", static_cast<std::string>(dstObj));
     }
 
