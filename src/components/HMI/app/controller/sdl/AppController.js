@@ -70,7 +70,7 @@ MFT.SDLAppController = Em.Object.create({
 
 		FFW.UI.interactionResponse( 'SUCCESS', element.performInteractionRequestId, element.choiceId );
 
-		MFT.InteractionChoicesView.deactivate();
+		MFT.InteractionChoicesView.deactivate( false );
 	},
 	
 	/**

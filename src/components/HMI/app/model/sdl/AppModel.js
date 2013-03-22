@@ -231,7 +231,8 @@ MFT.SDLAppModel = Em.Object.extend({
             var choiceSetId = message.interactionChoiceSetIDList[i];
 			MFT.InteractionChoicesView.preformChoices(
 				this.interactionChoices[ choiceSetId ],
-                performInteractionRequestId
+                performInteractionRequestId,
+                message.timeout
 			);
 
             MFT.VRPopUp.CreateInteractionChoise( this.interactionChoices[ choiceSetId ]);
@@ -241,13 +242,6 @@ MFT.SDLAppModel = Em.Object.extend({
 
 		// Show Initial prompt
 		MFT.SDLModel.onPrompt(message.initialPrompt);
-
-		// Show Timeout prompt
-        setTimeout(function(){
-        	if ( MFT.InteractionChoicesView.active ) {
-        		MFT.SDLModel.onPrompt( message.timeoutPrompt );
-        	}
-        }, message.timeout);
 	},
 	
 	/**

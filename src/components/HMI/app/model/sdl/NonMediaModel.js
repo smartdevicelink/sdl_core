@@ -19,7 +19,7 @@ MFT.SDLNonMediaModel = MFT.SDLAppModel.extend( {
             field2: '<field2>',
             field3: '<field3>',
             field4: '<field4>',
-            trackIcon: 'images/sdl/audio_icon.jpg',
+            mainImage: 'images/sdl/audio_icon.jpg',
             image: '',
             customPresets: []
         } ) );
@@ -66,7 +66,7 @@ MFT.SDLNonMediaModel = MFT.SDLAppModel.extend( {
         this.appInfo.set( 'field3', '' );
         this.appInfo.set( 'field4', '' );
         this.appInfo.set( 'alignment', '' );
-        this.appInfo.set( 'trackIcon', 'images/sdl/audio_icon.jpg' );
+        this.appInfo.set( 'mainImage', 'images/sdl/audio_icon.jpg' );
         this.updateSoftButtons();
         for( i = 0; i < 6; i++ ){
             this.appInfo.set( 'customPresets.' + i, '' );
@@ -85,9 +85,9 @@ MFT.SDLNonMediaModel = MFT.SDLAppModel.extend( {
         this.appInfo.set( 'field3', params.mainField3 );
         this.appInfo.set( 'field4', params.mainField4 );
         if( params.graphic ){
-            this.appInfo.set( 'trackIcon', params.graphic );
+            this.appInfo.set( 'mainImage', params.graphic );
         }else{
-            this.appInfo.set( 'trackIcon', 'images/sdl/audio_icon.jpg' );
+            this.appInfo.set( 'mainImage', 'images/sdl/audio_icon.jpg' );
         }
 
         if( params.customPresets ){

@@ -50,7 +50,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			classNames: ['app_image'],
 			
 			template: Ember.Handlebars.compile(
-				'<img width="150px" {{bindAttr src="MFT.SDLAppController.model.appInfo.trackIcon"}}>'
+				'<img width="150px" {{bindAttr src="MFT.SDLAppController.model.appInfo.mainImage"}}>'
 			)
 		}),
 		
