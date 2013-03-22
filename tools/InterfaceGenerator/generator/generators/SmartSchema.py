@@ -236,6 +236,17 @@ class SmartSchema(object):
             self._process_struct(struct)
 
     def _process_struct(self, struct):
+        """Process struct recursively to provide correct initialization.
+
+        This method create source code for cpp file that guarantees that
+        structures are initialized in right order (to resolve all
+        dependencies).
+
+        Keyword arguments:
+        struct -- struct to process.
+
+        """
+
         if struct.name in self._generated_structs:
             return
 
@@ -248,10 +259,28 @@ class SmartSchema(object):
         self._generated_structs.append(struct.name)
 
     def _process_struct_member(self, member):
+        """Process struct member recursively to provide correct initialization.
+
+        This method ensures that nested structs (if any) are generated.
+
+        Keyword arguments:
+        member -- struct member to process.
+
+        """
+
         if type(member.param_type) is Model.Struct:
             self._ensure_struct_generated(member.param_type)
 
     def _ensure_struct_generated(self, struct):
+        """Ensure that struct is already generated.
+
+        If struct is already created this method returns otherwise it
+        runs generation of struct to resolve dependency.
+
+        Keyword arguments:
+        struct -- struct to ensure existence.
+
+        """
         if struct.name in self._generated_structs:
             return
 
@@ -366,6 +395,20 @@ class SmartSchema(object):
                 1))
 
     def _gen_schema_local_decls(self, members, processed_enums):
+        """Generate local declarations of variables for schema.
+
+        This method generates full set of required variables for
+        enums and enum subsets.
+
+        Keyword arguments:
+        members -- struct/function members/params.
+        processed_enums -- list of already processed enums.
+
+        Returns:
+        String with local declarations source code.
+
+        """
+
         result = ""
         for member in members:
             if type(member.param_type) is Model.Enum and \
@@ -416,12 +459,38 @@ class SmartSchema(object):
         return result
 
     def _gen_schema_items_decls(self, members):
+        """Generate schema items declarations.
+
+        Generates declaration and initialization of schema items
+        which is uses as struct members/function parameters.
+
+        Keyword arguments:
+        members -- list of struct members/function parameters.
+
+        Returns:
+        String with schema items declaration source code.
+
+        """
+
         result = "\n".join(
             [self._gen_schema_item_decl(x) for x in members])
 
         return "".join([result, "\n\n"]) if result else ""
 
     def _gen_schema_item_decl(self, member):
+        """Generate schema item declaration.
+
+        Generates declaration and initialization of schema item
+        which is uses as struct member/function parameter.
+
+        Keyword arguments:
+        member -- struct member/function parameter.
+
+        Returns:
+        String with schema item declaration source code.
+
+        """
+
         return self._impl_code_item_decl_temlate.substitute(
             var_name=self._gen_schema_item_var_name(member),
             item_decl=self._gen_schema_item_decl_code(
@@ -431,11 +500,26 @@ class SmartSchema(object):
                 is Model.FunctionParam else None))
 
     def _gen_schema_item_decl_code(self, param, member_name, default_value):
+        """Generate schema item initialization code.
+
+        Generates type-specific code that initializes schema item
+
+        Keyword arguments:
+        param -- value of parameter type.
+        mamber_name -- name of struct member/function parameter.
+        default_value -- default value (used only for function parameters).
+
+        Returns:
+        String with schema item initialization source code.
+
+        """
+
         code = ""
         if type(param) is Model.Boolean:
             code = self._impl_code_bool_item_template.substitute(
                 params=self._gen_schema_item_param_values(
-                    [["bool", None if default_value is None else "true" if default_value is True else "false"]]))
+                    [["bool", None if default_value is None
+                      else "true" if default_value is True else "false"]]))
         elif type(param) is Model.Integer:
             code = self._impl_code_integer_item_template.substitute(
                 type="int",
@@ -462,9 +546,9 @@ class SmartSchema(object):
                         [self._gen_schema_item_decl_code(
                             param.element_type,
                             param.element_type.name if type(param.element_type)
-                                is Model.EnumSubset else "",
+                            is Model.EnumSubset else "",
                             None),
-                        ", "]),
+                            ", "]),
                         self._gen_schema_item_param_values(
                             [["size_t", param.min_size],
                              ["size_t", param.max_size]])]))
@@ -476,27 +560,40 @@ class SmartSchema(object):
                 type=param.name,
                 params="".join(
                     [self._gen_schema_local_emum_var_name(param),
-                    ", ",
-                    self._gen_schema_item_param_values(
-                        [["".join([param.name, "::eType"]),
-                         default_value.primary_name if default_value
-                         is not None else None]])]))
+                     ", ",
+                     self._gen_schema_item_param_values(
+                         [["".join([param.name, "::eType"]),
+                          default_value.primary_name if default_value
+                          is not None else None]])]))
         elif type(param) is Model.EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
                 params="".join(
                     [self._gen_schema_local_emum_s_var_name(member_name),
-                    ", ",
-                    self._gen_schema_item_param_values(
-                        [["".join([param.name, "::eType"]),
-                         default_value.primary_name if default_value
-                         is not None else None]])]))
+                     ", ",
+                     self._gen_schema_item_param_values(
+                         [["".join([param.name, "::eType"]),
+                          default_value.primary_name if default_value
+                          is not None else None]])]))
         else:
             raise GenerateError("Unexpected type of parameter: " +
                                 str(type(param)))
         return code
 
     def _gen_schema_item_param_values(self, params):
+        """Generate values of schema item initialization parameters.
+
+        Generates part of code which is used as schema item initialization
+        parameters.
+
+        Keyword arguments:
+        params -- list of tuples which maps parameter type to parameter value.
+
+        Returns:
+        String with schema item initialization parameters source code.
+
+        """
+
         result = ""
         for param in params:
             value = self._impl_code_item_param_value_template.substitute(
@@ -509,12 +606,36 @@ class SmartSchema(object):
         return result
 
     def _gen_schema_items_fill(self, members):
+        """Generate schema items fill code.
+
+        Generates source code that fills new schema with items.
+
+        Keyword arguments:
+        members -- list of struct members/function parameters to process.
+
+        Returns:
+        String with schema items fill code.
+
+        """
+
         result = "\n".join(
             [self._gen_schema_item_fill(x) for x in members])
 
         return "".join([result, "\n\n"]) if result else ""
 
     def _gen_schema_item_fill(self, member):
+        """Generate schema item fill code.
+
+        Generates source code that fills new schema with item.
+
+        Keyword arguments:
+        member -- struct member/function parameter to process.
+
+        Returns:
+        String with schema item fill code.
+
+        """
+
         return self._impl_code_item_fill_template.substitute(
             name=member.name,
             var_name=self._gen_schema_item_var_name(member),
@@ -522,14 +643,51 @@ class SmartSchema(object):
 
     @staticmethod
     def _gen_schema_item_var_name(member):
+        """Generate schema item variable name.
+
+        Generates variable name for local declarations.
+
+        Keyword arguments:
+        member -- struct member/function parameter to process.
+
+        Returns:
+        String with schema item variable name.
+
+        """
+
         return "".join([member.name, "_SchemaItem"])
 
     @staticmethod
     def _gen_schema_local_emum_var_name(param_type):
+        """Generate name of enum local variable.
+
+        Generates name of local variable that defines allowed enum elements.
+
+        Keyword arguments:
+        param_type -- parameter type object.
+
+        Returns:
+        String with name of enum local variable.
+
+        """
+
         return "".join([param_type.name, "_allEnumValues"])
 
     @staticmethod
     def _gen_schema_local_emum_s_var_name(member_name):
+        """Generate name of enum subset local variable.
+
+        Generates name of local variable that defines allowed enum
+        subset elements.
+
+        Keyword arguments:
+        param_type -- parameter type object.
+
+        Returns:
+        String with name of enum subset local variable.
+
+        """
+
         return "".join([member_name, "_allowedEnumSubsetValues"])
 
     def _gen_function_impls(self, functions, namespace, class_name):
