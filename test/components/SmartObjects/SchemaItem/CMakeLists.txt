@@ -16,6 +16,14 @@ set (SOURCES_NUMBER_SCHEMA_ITEM_TEST
     ./test_NumberSchemaItemTest.cpp
 )
 
+set (SOURCES_STRING_SCHEMA_ITEM_TEST
+    ./test_StringSchemaItemTest.cpp
+)
+
+set (SOURCES_ARRAY_SCHEMA_ITEM_TEST
+    ./test_ArraySchemaItemTest.cpp
+)
+
 # Libraries are the same for all SchemaItem tests
 set (LIBRARIES
     gtest
@@ -33,3 +41,11 @@ add_test(test_BoolSchemaItemTest test_BoolSchemaItemTest)
 add_executable("test_NumberSchemaItemTest" ${SOURCES_NUMBER_SCHEMA_ITEM_TEST})
 target_link_libraries("test_NumberSchemaItemTest" ${LIBRARIES})
 add_test(test_NumberSchemaItemTest test_NumberSchemaItemTest)
+
+add_executable("test_StringSchemaItemTest" ${SOURCES_STRING_SCHEMA_ITEM_TEST})
+target_link_libraries("test_StringSchemaItemTest" ${LIBRARIES})
+add_test(test_StringSchemaItemTest test_StringSchemaItemTest)
+
+add_executable("test_ArraySchemaItemTest" ${SOURCES_ARRAY_SCHEMA_ITEM_TEST})
+target_link_libraries("test_ArraySchemaItemTest" ${LIBRARIES})
+add_test(test_ArraySchemaItemTest test_ArraySchemaItemTest)
