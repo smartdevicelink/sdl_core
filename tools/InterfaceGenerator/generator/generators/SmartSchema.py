@@ -426,28 +426,35 @@ class SmartSchema(object):
             var_name=self._gen_schema_item_var_name(member),
             item_decl=self._gen_schema_item_decl_code(
                 member.param_type,
-                member.name))
+                member.name,
+                member.default_value if type(member)
+                is Model.FunctionParam else None))
 
-    def _gen_schema_item_decl_code(self, param, member_name):
+    def _gen_schema_item_decl_code(self, param, member_name, default_value):
         code = ""
         if type(param) is Model.Boolean:
-            code = self._impl_code_bool_item_template.substitute(params="")
+            code = self._impl_code_bool_item_template.substitute(
+                params=self._gen_schema_item_param_values(
+                    [["bool", None if default_value is None else "true" if default_value is True else "false"]]))
         elif type(param) is Model.Integer:
             code = self._impl_code_integer_item_template.substitute(
                 type="int",
                 params=self._gen_schema_item_param_values(
                     [["int", param.min_value],
-                     ["int", param.max_value]]))
+                     ["int", param.max_value],
+                     ["int", default_value]]))
         elif type(param) is Model.Double:
             code = self._impl_code_integer_item_template.substitute(
                 type="double",
                 params=self._gen_schema_item_param_values(
                     [["double", param.min_value],
-                     ["double", param.max_value]]))
+                     ["double", param.max_value],
+                     ["double", default_value]]))
         elif type(param) is Model.String:
             code = self._impl_code_string_item_template.substitute(
                 params=self._gen_schema_item_param_values(
-                    [["size_t", param.max_length]]))
+                    [["size_t", param.max_length],
+                     ["std::string", default_value]]))
         elif type(param) is Model.Array:
             code = self._impl_code_array_item_template.substitute(
                 params="".join(
@@ -455,8 +462,9 @@ class SmartSchema(object):
                         [self._gen_schema_item_decl_code(
                             param.element_type,
                             param.element_type.name if type(param.element_type)
-                                is Model.EnumSubset else ""),
-                            ", "]),
+                                is Model.EnumSubset else "",
+                            None),
+                        ", "]),
                         self._gen_schema_item_param_values(
                             [["size_t", param.min_size],
                              ["size_t", param.max_size]])]))
@@ -466,11 +474,23 @@ class SmartSchema(object):
         elif type(param) is Model.Enum:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.name,
-                params=self._gen_schema_local_emum_var_name(param))
+                params="".join(
+                    [self._gen_schema_local_emum_var_name(param),
+                    ", ",
+                    self._gen_schema_item_param_values(
+                        [["".join([param.name, "::eType"]),
+                         default_value.primary_name if default_value
+                         is not None else None]])]))
         elif type(param) is Model.EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
-                params=self._gen_schema_local_emum_s_var_name(member_name))
+                params="".join(
+                    [self._gen_schema_local_emum_s_var_name(member_name),
+                    ", ",
+                    self._gen_schema_item_param_values(
+                        [["".join([param.name, "::eType"]),
+                         default_value.primary_name if default_value
+                         is not None else None]])]))
         else:
             raise GenerateError("Unexpected type of parameter: " +
                                 str(type(param)))
