@@ -154,10 +154,8 @@ MFT.ControlButtons = Em.ContainerView.create( {
         elementId: 'sendDataCheckBox',
 
         classNames: 'sendDataCheckBox',
-
-        onCheckBoxSelected: function() {
-            MFT.SDLController.selectSendData(this.checked);
-        }.observes('this.checked')
+        
+        checkedBinding: 'MFT.SDLModel.sendDataExtend'
 
     }),
 
@@ -301,10 +299,8 @@ MFT.ControlButtons = Em.ContainerView.create( {
             elementId: 'driverDistractionControlCheckBox',
 
             classNames: 'driverDistractionControlCheckBox',
-
-            onCheckBoxSelected: function() {
-                MFT.SDLController.selectDriverDistraction(this.checked);
-            }.observes('this.checked')
+            
+            checkedBinding: 'MFT.SDLModel.driverDistractionState'
 
         })
     }),
@@ -333,10 +329,8 @@ MFT.ControlButtons = Em.ContainerView.create( {
             elementId: 'protocolVersionCheckBox',
 
             classNames: 'protocolVersionCheckBox',
-
-            onCheckBoxSelected: function() {
-                MFT.SDLController.selectProtocolVersion(this.checked);
-            }.observes('this.checked')
+            
+            checkedBinding: 'MFT.SDLModel.protocolVersion2State'
 
         })
     }),

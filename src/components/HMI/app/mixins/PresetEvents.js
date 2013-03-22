@@ -1,10 +1,10 @@
 MFT.PresetEvents = Ember.Mixin.create({
     actionDown:     function(){
         this._super();
-        MFT.SDLController.onSoftButtonActionDown( this.presetName, this);
+        MFT.SDLController.onSoftButtonActionDown( this);
     },
     actionUp:       function(){
         this._super();
-        MFT.SDLController.onSoftButtonActionUp( this.presetName, this);
+        MFT.SDLController.onSoftButtonActionUp( this);
     }
 });

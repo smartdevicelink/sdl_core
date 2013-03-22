@@ -10,20 +10,6 @@
 MFT.SDLController = Em.Object.create( {
 
     /**
-     * Driver Distraction State
-     * 
-     * @type bool
-     */
-    driverDistractionState: false,
-
-    /**
-     * Protocol Version 2 State
-     * 
-     * @type bool
-     */
-    protocolVersion2State: false,
-
-    /**
      * Current system context
      * 
      * @type {String}
@@ -66,7 +52,8 @@ MFT.SDLController = Em.Object.create( {
     },
 
     /**
-     * Handler for SoftButtons default action
+     * Default action for SoftButtons: closes window, popUp or clears
+     * applications screen
      * 
      * @param {Object}
      */
@@ -85,11 +72,11 @@ MFT.SDLController = Em.Object.create( {
                 MFT.TurnByTurnView.deactivate();
                 break;
             }
-            case "info_nonMedia": {
+            case "NonMediaView": {
                 MFT.SDLController.getApplicationModel( element.appId ).clearAppOverLay();
                 break;
             }
-            case "sdl_view_container": {
+            case "MediaView": {
                 MFT.SDLController.getApplicationModel( element.appId ).clearAppOverLay();
                 break;
             }
@@ -98,7 +85,8 @@ MFT.SDLController = Em.Object.create( {
     },
 
     /**
-     * Handler for SoftButtons stealFocus action
+     * Action for SoftButtons that closes popUp or window and opens applications
+     * screen
      * 
      * @param {Object}
      */
@@ -120,7 +108,8 @@ MFT.SDLController = Em.Object.create( {
     },
 
     /**
-     * Handler for SoftButtons keepContext action
+     * Action for SoftButtons that clears popUps timer and it become visible all
+     * the time until user user closes it
      * 
      * @param {Object}
      */
@@ -260,49 +249,34 @@ MFT.SDLController = Em.Object.create( {
      * @param {Number} appId
      */
     unregisterApplication: function( appId ) {
-        
+
         this.getApplicationModel( appId ).onDeleteApplication( appId );
-        
+
         MFT.SDLModel.get( 'registeredApps' ).shiftObject( MFT.SDLModel.registeredApps.filterProperty( 'appId', appId )[0] );
-        
+
     },
 
     /**
      * SDL Driver Distraction ON/OFF switcher
-     * 
-     * @param {Boolean}
      */
-    selectDriverDistraction: function( checked ) {
-        if( checked ){
+    selectDriverDistraction: function() {
+        if( MFT.SDLModel.driverDistractionState ){
             FFW.UI.onDriverDistraction( "DD_ON" );
-            this.set( 'driverDistractionState', true );
         }else{
             FFW.UI.onDriverDistraction( "DD_OFF" );
-            this.set( 'driverDistractionState', false );
         }
-    },
-
-    /**
-     * SDL Send Data ON/OFF extended param switcher
-     * 
-     * @param {Boolean}
-     */
-    selectSendData: function( checked ) {
-        MFT.SDLModel.set( 'sendDataExtend', checked );
-    },
+    }.observes( 'MFT.SDLModel.driverDistractionState' ),
 
     /**
      * SDL Protocol Version 2 ON/OFF switcher
-     * 
-     * @param {Boolean}
      */
-    selectProtocolVersion: function( checked ) {
-        if( checked ){
+    selectProtocolVersion: function() {
+        if( MFT.SDLModel.protocolVersion2State ){
             FFW.BasicCommunication.OnVersionChanged( 2 );
         }else{
             FFW.BasicCommunication.OnVersionChanged( 1 );
         }
-    },
+    }.observes( 'MFT.SDLModel.protocolVersion2State' ),
 
     /**
      * Get application model
@@ -400,12 +374,12 @@ MFT.SDLController = Em.Object.create( {
      * @param {String}
      * @param {Object}
      */
-    onSoftButtonActionUp: function( name, element ) {
+    onSoftButtonActionUp: function( element ) {
         if( element.time > 0 ){
-            FFW.Buttons.buttonEvent( name, "BUTTONUP" );
+            FFW.Buttons.buttonEvent( element.presetName, "BUTTONUP" );
         }else{
-            FFW.Buttons.buttonEvent( name, "BUTTONUP" );
-            FFW.Buttons.buttonPressed( name, "SHORT" );
+            FFW.Buttons.buttonEvent( element.presetName, "BUTTONUP" );
+            FFW.Buttons.buttonPressed( element.presetName, "SHORT" );
         }
         clearTimeout( element.timer );
         element.time = 0;
@@ -437,11 +411,11 @@ MFT.SDLController = Em.Object.create( {
      * @param {String}
      * @param {Object}
      */
-    onSoftButtonActionDown: function( name, element ) {
-        FFW.Buttons.buttonEvent( name, "BUTTONDOWN" );
+    onSoftButtonActionDown: function( element ) {
+        FFW.Buttons.buttonEvent( element.presetName, "BUTTONDOWN" );
         element.time = 0;
         element.timer = setTimeout( function() {
-            FFW.Buttons.buttonPressed( name, "LONG" );
+            FFW.Buttons.buttonPressed( element.presetName, "LONG" );
             element.time++;
         }, 2000 );
     },

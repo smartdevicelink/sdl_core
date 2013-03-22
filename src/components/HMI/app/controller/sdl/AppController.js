@@ -30,7 +30,7 @@ MFT.SDLAppController = Em.Object.create({
         if ( element.menuId ) {
 
             // activate driver destruction if necessary
-            if ( MFT.SDLController.driverDistractionState ) {
+            if ( MFT.SDLModel.driverDistractionState ) {
                 MFT.DriverDistraction.activate();
             } else {
                 this.onSubMenu( element.menuId );

@@ -197,7 +197,7 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
         for( i = 0; i < 6; i++ ){
             this.appInfo.set( 'customPresets.' + i, '' );
         }
-        MFT.SDLController.set( 'protocolVersion2State', false );
+        MFT.SDLModel.set( 'protocolVersion2State', false );
 
     },
 
@@ -233,9 +233,9 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
                     this.appInfo.set( 'customPresets.' + i, '' );
                 }
             }
-            MFT.SDLController.set( 'protocolVersion2State', true );
+            MFT.SDLModel.set( 'protocolVersion2State', true );
         }else{
-            MFT.SDLController.set( 'protocolVersion2State', false );
+            MFT.SDLModel.set( 'protocolVersion2State', false );
         }
     }
 } );

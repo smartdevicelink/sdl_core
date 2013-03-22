@@ -15,6 +15,13 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Boolean}
      */
     AudioPassThruState: false,
+    
+    /**
+     * Driver Distraction State
+     * 
+     * @type bool
+     */
+    driverDistractionState: false,
 
     /**
      * Flag to sent Send Data extended params
@@ -22,6 +29,13 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Boolean}
      */
     sendDataExtend: false,
+
+    /**
+     * Protocol Version 2 State
+     * 
+     * @type bool
+     */
+    protocolVersion2State: false,
 
     /**
      * Flag to be set true when phone call is initialised
@@ -286,7 +300,7 @@ MFT.SDLModel = Em.Object.create( {
     onSDLScrolableMessage: function( params, messageRequestId ) {
 
         if( !MFT.ScrollableMessage.active ){
-            if( MFT.SDLController.driverDistractionState ){
+            if( MFT.SDLModel.driverDistractionState ){
                 MFT.DriverDistraction.activate();
             }else{
                 MFT.ScrollableMessage.activate( MFT.SDLController.getApplicationModel( params.appId ).appName, params, messageRequestId );
@@ -372,7 +386,7 @@ MFT.SDLModel = Em.Object.create( {
             MFT.SDLController.getApplicationModel( message.appId ).set( 'appIcon', message.syncFileName );
             FFW.UI.sendUIResult( "SUCCESS", id, method );
         };
-        img.onerror = function( ev ) {
+        img.onerror = function( e ) {
             // doesn't exist or error loading
             FFW.UI.sendUIResult( "INVALID_DATA", id, method );
             return false;

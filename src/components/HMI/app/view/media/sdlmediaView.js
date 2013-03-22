@@ -33,24 +33,6 @@ MFT.sdlView = Em.ContainerView.create(MFT.LoadableView,{
         MFT.States.goToState('info.apps');
     },
 
-	/**
-	 * Function to choose appropriate view
-	 * to current version of protocol
-	 */
-	changeControlls: function(){
-		if(MFT.SDLController.protocolVersion2State){
-			this.get('childViews').removeObjects(
-                this.get('childViews').filterProperty( 'sdlMediaControlls' , 'V1' )
-            );
-			MFT.sdlView.get('childViews').pushObject(MFT.SDLMediaControlls);
-		}else{
-			this.get('childViews').removeObjects(
-                this.get('childViews').filterProperty( 'sdlMediaControlls' , 'V2' )
-            );
-			MFT.sdlView.get('childViews').pushObject(MFT.SDLMediaControllsV1);
-		}
-	},//.observes('MFT.SDLController.protocolVersion2State'),
-
 	innerMenu: MFT.MenuList.extend({
 			
 		refreshItems: function() {
@@ -59,7 +41,7 @@ MFT.sdlView = Em.ContainerView.create(MFT.LoadableView,{
             }                    
         }.observes('MFT.SDLAppController.model.softButtons.@each'),
 
-        groupName:      "sdl_view_container",
+        groupName:      "MediaView",
 		
 		content: Em.ContainerView.extend({
 			

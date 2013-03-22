@@ -91,7 +91,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
                 }                    
             }.observes('MFT.SDLAppController.model.softButtons.@each'),
 
-        	groupName:      "info_nonMedia",
+        	groupName:      "NonMediaView",
 			
 			content: Em.ContainerView.extend({
 				
