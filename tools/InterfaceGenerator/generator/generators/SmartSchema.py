@@ -4,6 +4,7 @@ Generator for SmartObjects schema source code.
 
 """
 # pylint: disable=W0402
+# pylint: disable=C0302
 import os
 import string
 import uuid
@@ -386,7 +387,7 @@ class SmartSchema(object):
             struct_name=struct.name,
             code=self._indent_code(
                 self._struct_impl_code_tempate.substitute(
-                    schema_local_decl=self._gen_schema_local_decls(
+                    schema_loc_decl=self._gen_schema_loc_decls(
                         struct.members.values(), processed_enums),
                     schema_items_decl=self._gen_schema_items_decls(
                         struct.members.values()),
@@ -394,7 +395,7 @@ class SmartSchema(object):
                         struct.members.values())),
                 1))
 
-    def _gen_schema_local_decls(self, members, processed_enums):
+    def _gen_schema_loc_decls(self, members, processed_enums):
         """Generate local declarations of variables for schema.
 
         This method generates full set of required variables for
@@ -413,16 +414,16 @@ class SmartSchema(object):
         for member in members:
             if type(member.param_type) is Model.Enum and \
                member.param_type.name not in processed_enums:
-                local_var = self._gen_schema_local_emum_var_name(
+                local_var = self._gen_schema_loc_emum_var_name(
                     member.param_type)
                 result = "\n".join(
                     ["".join(
-                        [result, self._impl_code_local_decl_enum_template.
+                        [result, self._impl_code_loc_decl_enum_template.
                             substitute(
                                 type=member.param_type.name,
                                 var_name=local_var)]),
                         "\n".join(
-                            [self._impl_code_local_decl_enum_insert_template.
+                            [self._impl_code_loc_decl_enum_insert_template.
                                 substitute(
                                     var_name=local_var,
                                     enum=member.param_type.name,
@@ -431,15 +432,15 @@ class SmartSchema(object):
                 processed_enums.append(member.param_type.name)
                 result = "".join([result, "\n\n"]) if result else ""
             elif type(member.param_type) is Model.EnumSubset:
-                local_var = self._gen_schema_local_emum_s_var_name(member.name)
+                local_var = self._gen_schema_loc_emum_s_var_name(member.name)
                 result = "\n".join(
                     ["".join(
-                        [result, self._impl_code_local_decl_enum_template.
+                        [result, self._impl_code_loc_decl_enum_template.
                             substitute(
                                 type=member.param_type.enum.name,
                                 var_name=local_var)]),
                         "\n".join(
-                            [self._impl_code_local_decl_enum_insert_template.
+                            [self._impl_code_loc_decl_enum_insert_template.
                                 substitute(
                                     var_name=local_var,
                                     enum=member.param_type.enum.name,
@@ -449,7 +450,7 @@ class SmartSchema(object):
                 result = "".join([result, "\n\n"]) if result else ""
             elif type(member.param_type) is Model.Array:
                 result = "".join(
-                    [result, self._gen_schema_local_decls(
+                    [result, self._gen_schema_loc_decls(
                         [Model.Param(name=member.param_type.element_type.name
                          if type(member.param_type.element_type) is
                          Model.EnumSubset else "",
@@ -559,7 +560,7 @@ class SmartSchema(object):
             code = self._impl_code_enum_item_template.substitute(
                 type=param.name,
                 params="".join(
-                    [self._gen_schema_local_emum_var_name(param),
+                    [self._gen_schema_loc_emum_var_name(param),
                      ", ",
                      self._gen_schema_item_param_values(
                          [["".join([param.name, "::eType"]),
@@ -569,10 +570,10 @@ class SmartSchema(object):
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
                 params="".join(
-                    [self._gen_schema_local_emum_s_var_name(member_name),
+                    [self._gen_schema_loc_emum_s_var_name(member_name),
                      ", ",
                      self._gen_schema_item_param_values(
-                         [["".join([param.name, "::eType"]),
+                         [["".join([param.enum.name, "::eType"]),
                           default_value.primary_name if default_value
                           is not None else None]])]))
         else:
@@ -658,7 +659,7 @@ class SmartSchema(object):
         return "".join([member.name, "_SchemaItem"])
 
     @staticmethod
-    def _gen_schema_local_emum_var_name(param_type):
+    def _gen_schema_loc_emum_var_name(param_type):
         """Generate name of enum local variable.
 
         Generates name of local variable that defines allowed enum elements.
@@ -674,7 +675,7 @@ class SmartSchema(object):
         return "".join([param_type.name, "_allEnumValues"])
 
     @staticmethod
-    def _gen_schema_local_emum_s_var_name(member_name):
+    def _gen_schema_loc_emum_s_var_name(member_name):
         """Generate name of enum subset local variable.
 
         Generates name of local variable that defines allowed enum
@@ -736,7 +737,7 @@ class SmartSchema(object):
             message_type=function.message_type.primary_name,
             code=self._indent_code(
                 self._function_impl_code_tempate.substitute(
-                    schema_local_decl=self._gen_schema_local_decls(
+                    schema_loc_decl=self._gen_schema_loc_decls(
                         function.params.values(), processed_enums),
                     schema_items_decl=self._gen_schema_items_decls(
                         function.params.values()),
@@ -1043,17 +1044,17 @@ class SmartSchema(object):
         '''}\n''')
 
     _struct_impl_code_tempate = string.Template(
-        '''${schema_local_decl}'''
+        '''${schema_loc_decl}'''
         '''${schema_items_decl}'''
         '''std::map<std::string, CObjectSchemaItem::SMember> '''
         '''schemaMembersMap;\n\n'''
         '''${schema_item_fill}'''
         '''return CObjectSchemaItem::create(schemaMembersMap);''')
 
-    _impl_code_local_decl_enum_template = string.Template(
+    _impl_code_loc_decl_enum_template = string.Template(
         '''std::set<${type}::eType> ${var_name};''')
 
-    _impl_code_local_decl_enum_insert_template = string.Template(
+    _impl_code_loc_decl_enum_insert_template = string.Template(
         '''${var_name}.insert(${enum}::${value});''')
 
     _impl_code_item_decl_temlate = string.Template(
@@ -1093,7 +1094,7 @@ class SmartSchema(object):
         '''}\n''')
 
     _function_impl_code_tempate = string.Template(
-        '''${schema_local_decl}'''
+        '''${schema_loc_decl}'''
         '''${schema_items_decl}'''
         '''std::map<std::string, CObjectSchemaItem::SMember> '''
         '''schemaMembersMap;\n\n'''
