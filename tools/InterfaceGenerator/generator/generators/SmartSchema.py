@@ -525,7 +525,7 @@ class SmartSchema(object):
 
         """
 
-        result = "\n".join(
+        result = "\n\n".join(
             [self._gen_schema_item_decl(x) for x in members])
 
         return "".join([result, "\n\n"]) if result else ""
@@ -545,6 +545,7 @@ class SmartSchema(object):
         """
 
         return self._impl_code_item_decl_temlate.substitute(
+            comment=self._gen_comment(member, False),
             var_name=self._gen_schema_item_var_name(member),
             item_decl=self._gen_schema_item_decl_code(
                 member.param_type,
@@ -905,7 +906,7 @@ class SmartSchema(object):
                                              x[1]) for x in params.items()])
             if params else " *    none\n")
 
-    def _gen_comment(self, interface_item_base):
+    def _gen_comment(self, interface_item_base, use_doxygen=True):
         """Generate doxygen comment for iterface_item_base for header file.
 
         Generates doxygen comment for any iterface_item_base for the header
@@ -913,6 +914,7 @@ class SmartSchema(object):
 
         Keyword arguments:
         interface_item_base -- object to generate doxygen comment for.
+        use_doxygen -- Flag that indicates does function uses doxygen or not.
 
         Returns:
         String with generated doxygen comment.
@@ -931,35 +933,44 @@ class SmartSchema(object):
         name = interface_item_base.primary_name if \
             type(interface_item_base) is Model.EnumElement else \
             interface_item_base.name
-        brief_description = " * @brief {0}{1}.\n".format(
-            brief_type_title, name)
+        brief_description = (" * @brief {0}{1}.\n" if use_doxygen is True else "// {0}{1}.\n").format(brief_type_title, name)
 
-        description = "".join([" * {0}\n".format(x)
+        description = "".join([(" * {0}\n" if use_doxygen
+                                is True else "// {0}\n").format(x)
                               for x in interface_item_base.description])
         if description is not "":
-            description = "".join([" *\n", description])
+            description = "".join([" *\n" if use_doxygen
+                                    is True else "//\n", description])
 
-        design_description = "".join([" * {0}\n".format(x)
+        design_description = "".join([(" * {0}\n" if use_doxygen is
+                                       True else "// {0}\n").format(x)
                                      for x in
                                      interface_item_base.design_description])
         if design_description is not "":
-            design_description = "".join([" *\n", design_description])
+            design_description = "".join([" *\n" if use_doxygen is
+                                          True else "//\n", design_description])
 
-        issues = "".join([" * @note {0}\n".format(x.value)
+        issues = "".join([(" * @note {0}\n" if use_doxygen is
+                           True else "// Note: {0}\n").format(x.value)
                          for x in interface_item_base.issues])
         if issues is not "":
-            issues = "".join([" *\n", issues])
+            issues = "".join([" *\n" if use_doxygen is
+                              True else "//\n", issues])
 
-        todos = "".join([" * @todo {0}\n".format(x)
+        todos = "".join([(" * @todo {0}\n" if use_doxygen is
+                          True else "// TODO: {0}\n").format(x)
                         for x in interface_item_base.todos])
         if todos is not "":
-            todos = "".join([" *\n", todos])
+            todos = "".join([" *\n" if use_doxygen is True else "//\n", todos])
 
         returns = ""
         if type(interface_item_base) is Model.Function:
             returns = "".join([" *\n", self._function_return_comment])
 
-        return self._comment_template.substitute(
+        template = self._comment_doxygen_template if use_doxygen is \
+            True else self._comment_cpp_template
+
+        return template.substitute(
             brief_description=brief_description,
             description=description,
             design_description=design_description,
@@ -991,7 +1002,9 @@ class SmartSchema(object):
         {"EnumElement": "",
          "Enum": "Enumeration ",
          "Function": "Method that generates schema for function ",
-         "Struct": "Method that generates schema item for structure "})
+         "Struct": "Method that generates schema item for structure ",
+         "Param": "Struct member ",
+         "FunctionParam" : "Function parameter "})
 
     _hpp_file_tempalte = string.Template(
         '''#ifndef $guard\n'''
@@ -1144,6 +1157,7 @@ class SmartSchema(object):
         '''${var_name}.insert(${enum}::${value});''')
 
     _impl_code_item_decl_temlate = string.Template(
+        '''${comment}'''
         '''TSharedPtr<ISchemaItem> ${var_name} = ${item_decl};''')
 
     _impl_code_integer_item_template = string.Template(
@@ -1261,7 +1275,7 @@ class SmartSchema(object):
         '''$class_params'''
         ''' */''')
 
-    _comment_template = string.Template(
+    _comment_doxygen_template = string.Template(
         '''/**\n'''
         '''$brief_description'''
         '''$description'''
@@ -1269,6 +1283,14 @@ class SmartSchema(object):
         '''$issues'''
         '''$todos'''
         '''$returns */''')
+
+    _comment_cpp_template = string.Template(
+        '''$brief_description'''
+        '''$description'''
+        '''$design_description'''
+        '''$issues'''
+        '''$todos'''
+        '''$returns''')
 
     _enum_template = string.Template(
         '''namespace $name\n'''
