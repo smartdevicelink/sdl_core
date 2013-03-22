@@ -361,7 +361,7 @@ class SmartSchema(object):
                         struct.members.values(), processed_enums),
                     schema_items_decl=self._gen_schema_items_decls(
                         struct.members.values()),
-                    schema_item_fill=self._gen_struct_items_fill(
+                    schema_item_fill=self._gen_schema_items_fill(
                         struct.members.values())),
                 1))
 
@@ -488,7 +488,7 @@ class SmartSchema(object):
 
         return result
 
-    def _gen_struct_items_fill(self, members):
+    def _gen_schema_items_fill(self, members):
         result = "\n".join(
             [self._gen_schema_item_fill(x) for x in members])
 
@@ -550,11 +550,21 @@ class SmartSchema(object):
 
         """
 
+        processed_enums = []
         return self._function_impl_template.substitute(
             namespace=namespace,
             class_name=class_name,
             function_id=function.function_id.primary_name,
-            message_type=function.message_type.primary_name)
+            message_type=function.message_type.primary_name,
+            code=self._indent_code(
+                self._function_impl_code_tempate.substitute(
+                    schema_local_decl=self._gen_schema_local_decls(
+                        function.params.values(), processed_enums),
+                    schema_items_decl=self._gen_schema_items_decls(
+                        function.params.values()),
+                    schema_item_fill=self._gen_schema_items_fill(
+                        function.params.values())),
+                1))
 
     def _gen_enums(self, enums):
         """Generate enums for header file.
@@ -901,8 +911,17 @@ class SmartSchema(object):
         '''initFunction_${function_id}_${message_type}('''
         '''TStructsSchemaItems & StructsSchemaItems)\n'''
         '''{\n'''
-        '''    return CSmartSchema(CAlwaysTrueSchemaItem::create());\n'''
+        '''$code'''
         '''}\n''')
+
+    _function_impl_code_tempate = string.Template(
+        '''${schema_local_decl}'''
+        '''${schema_items_decl}'''
+        '''std::map<std::string, CObjectSchemaItem::SMember> '''
+        '''schemaMembersMap;\n\n'''
+        '''${schema_item_fill}'''
+        '''return CSmartSchema(CObjectSchemaItem::'''
+        '''create(schemaMembersMap));''')
 
     _class_hpp_template = string.Template(
         '''$comment\n'''
