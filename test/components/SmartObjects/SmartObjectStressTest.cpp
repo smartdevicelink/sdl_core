@@ -5,8 +5,8 @@
 #include "SmartObjects/CSmartObject.hpp"
 
 
-#define NO_INCLUSIVE_MAPS
-#define COPY_SUB_OBJECTS_WORKAROUND
+//#define NO_INCLUSIVE_MAPS
+//#define COPY_SUB_OBJECTS_WORKAROUND
 
 
 namespace test { namespace components { namespace SmartObjects { namespace SmartObjectStressTest {
@@ -23,17 +23,20 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         std::string to_string(const int value) const
         {
-            char buff[32];
-            sprintf(buff, "%d", value);
-            return std::string(buff);
+            return std::to_string(value);
         }
 
         std::string to_string(const double value) const
         {
-//            char buff[32];
-//            sprintf(buff, "%g", value);
-//            return std::string(buff);
-            return std::to_string(value);   // TODO: decide which format to use, because the result is different
+            // Content is the same as in CSmartObject::convert_double_to_string
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(10) << value;         //convert double to string w fixed notation, hi precision
+            std::string s = ss.str();                                   //output to std::string
+            s.erase(s.find_last_not_of('0') + 1, std::string::npos);    //remove trailing 000s    (123.1200 => 123.12,  123.000 => 123.)
+            if(s[s.size()-1] == '.') {
+                s.erase(s.end()-1);                                     //remove dangling decimal (123. => 123)
+            }
+            return s;
         }
 
         std::string to_string(const char ch) const
@@ -69,7 +72,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         std::string generate_key(const char *pPrefix, const int index) const
         {
             char buff[32];
-            sprintf(buff, "%s%d ", pPrefix, index);
+            sprintf(buff, "%s%d", pPrefix, index);
             return std::string(buff);
         }
 
@@ -84,7 +87,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     int iVal = rand();
                     obj = iVal;
                     mVerifyMap[key_path] = to_string(iVal);
-                    std::cout << "Created int, value: " << iVal << std::endl;
+                    //std::cout << "Created int, value: " << iVal << std::endl;
                     break;
                 }
             case 1:     // bool
@@ -92,7 +95,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     bool bVal = static_cast<bool>(rand()%2);
                     obj = bVal;
                     mVerifyMap[key_path] = to_string(bVal);
-                    std::cout << "Created bool, value: " << to_string(bVal) << std::endl;
+                    //std::cout << "Created bool, value: " << to_string(bVal) << std::endl;
                     break;
                 }
             case 2:     // double
@@ -100,7 +103,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     double dVal = 100.0 / (rand()%200);
                     obj = dVal;
                     mVerifyMap[key_path] = to_string(dVal);
-                    std::cout << "Created double, value: " << dVal << std::endl;
+                    //std::cout << "Created double, value: " << dVal << std::endl;
                     break;
                 }
             case 3:     // char
@@ -108,7 +111,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     char cVal = get_random_char();
                     obj = cVal;
                     mVerifyMap[key_path] = to_string(cVal);
-                    std::cout << "Created char, value: " << cVal << std::endl;
+                    //std::cout << "Created char, value: " << cVal << std::endl;
                     break;
                 }
             case 4:     // string
@@ -116,14 +119,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     std::string strVal(rand()%200, get_random_char());
                     obj = strVal;   // string with random char filled random size
                     mVerifyMap[key_path] = strVal;
-                    std::cout << "Created string, value: " << strVal << std::endl;
+                    //std::cout << "Created string, value: " << strVal << std::endl;
                     break;
                 }
             case 5:     // map
                 if (size <= 0)
                     break;
 
-                std::cout << "Creating a map with size: " << size << std::endl;
+                //std::cout << "Creating a map with size: " << size << std::endl;
                 mVerifyMap[key_path] = "map";
                 for (int i = 0; i < size; i++)
                 {
@@ -132,7 +135,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     obj[key] = key;
 #else
                     obj[key] = CSmartObject();
-                    makeRandomObject(obj[key], size - 1, key_path + key);     // recursion
+                    makeRandomObject(obj[key], size - 1, key_path + key + ' ');     // recursion
 #endif // MAP_WORKAROUND
                 }
                 break;
@@ -140,12 +143,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 if (size <= 0)
                     break;
 
-                std::cout << "Creating an array with size: " << size << std::endl;
+                //std::cout << "Creating an array with size: " << size << std::endl;
                 mVerifyMap[key_path] = "array";
                 for (int i = 0; i < size; i++)
                 {
                     obj[i] = CSmartObject();      // just init it as an array
-                    makeRandomObject(obj[i], size - 1, key_path + generate_key("A", i));     // recursion
+                    makeRandomObject(obj[i], size - 1, key_path + generate_key("A", i) + ' ');     // recursion
                 }
                 break;
             }
@@ -198,13 +201,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         CSmartObject objects;
 
-        const int size = 10;
+        const int size = 11;
 
         for (int i = 0; i < size; i++)
         {
             CSmartObject obj;
 
-            makeRandomObject(obj, size - 1, generate_key("A", i));
+            makeRandomObject(obj, size - 1, generate_key("A", i) + ' ');
 
             objects[i] = obj;
         }
@@ -226,8 +229,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 #endif
             if (value.compare("map") && value.compare("array"))
             {
-                std::cout << "Verification key: " << it->first << " Value: " << value << std::endl;
-                std::cout << "Object Value: " << static_cast<std::string>(obj) << std::endl;
+                //std::cout << "Verification key: " << it->first << " Value: " << value << std::endl;
+                //std::cout << "Object Value: " << static_cast<std::string>(obj) << std::endl;
 
                 if (!value.compare("true"))
                 {
@@ -266,7 +269,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         refObj["M1"]["M0"]["M0"][0] = true;
 
         // FIXME: Figure out why there's a trailing zero while converting from double to string
-        ASSERT_EQ("0.594320", static_cast<std::string>(get_object(obj, "A6 A4 M0")));
+        ASSERT_EQ("0.59432", static_cast<std::string>(get_object(obj, "A6 A4 M0")));
         ASSERT_TRUE(static_cast<bool>(get_object(obj, "A6 A4 M1 M0 M0 A0")));
     }
 
