@@ -1,4 +1,5 @@
 [CW12]
+* UpdateTurnList dialog: change the way how Turn items are parsed from the GUI.
 + Add an option to disable screen locking while doing XML tests. It can be toggled in the options menu, "Lock screen while testing" item. The change will NOT affect currently running tests, if any.
 * Fix: remove all the commands that were added to the submenu when it's deleted.
 + ModuleTest: the user can now specify the source data for a PutFile request as a filename (with path starting at "/sdcard/") or a Base64-encoded string (starting with "base64:").

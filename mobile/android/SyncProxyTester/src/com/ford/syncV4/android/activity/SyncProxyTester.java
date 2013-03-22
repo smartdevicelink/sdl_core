@@ -2382,49 +2382,52 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder = new AlertDialog.Builder(mContext);
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								UpdateTurnList msg = new UpdateTurnList();
-								msg.setCorrelationID(autoIncCorrId++);
-								
+								/*
+								 * the number of items to send is determined as max of turn items
+								 * and icon items. only when the both fields are empty, we
+								 * don't send anything.
+								 */
 								String turnListString = txtTurnList.getText().toString();
 								String iconListString = txtIconList.getText().toString();
-								// string to split turnList/iconList strings
-								final String joinString = ",";
-								
-								/*
-								 * the main string is the turn list, so we iterate over it.
-								 * if the icon list is shorter, we set the default icon for
-								 * the last turns. if longer, skip the icons w/o turns.
-								 */
-								Vector<Turn> tarray = new Vector<Turn>();
-								String[] iconNames = iconListString.split(joinString);
-								int iconNumber = 0;
-								for (String turn : turnListString.split(joinString)) {
-									Turn t = new Turn();
-									t.setNavigationText(turn);
-									Image ti1 = new Image();
-									ti1.setValue((iconNumber < iconNames.length) ?
-											iconNames[iconNumber] :
-											"Turn");
-									ti1.setImageType(ImageType.STATIC);
-									t.setTurnIcon(ti1);
-									tarray.add(t);
+								if ((turnListString.length() > 0) || (iconListString.length() > 0)) {
+									// string to split turnList/iconList strings
+									final String joinString = ",";
 									
-									++iconNumber;
-								}
-								msg.setTurnList(tarray);
-								if (currentSoftButtons != null) {
-									msg.setSoftButtons(currentSoftButtons);
+									Vector<Turn> tarray = new Vector<Turn>();
+									
+									String[] iconNames = iconListString.split(joinString);
+									String[] turnNames = turnListString.split(joinString);
+									int turnCount = Math.max(iconNames.length, turnNames.length);
+									
+									for (int i = 0; i < turnCount; ++i) {
+										Turn t = new Turn();
+										t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
+										Image ti = new Image();
+										ti.setValue((i < iconNames.length) ? iconNames[i] : "");
+										ti.setImageType(ImageType.STATIC);
+										t.setTurnIcon(ti);
+										tarray.add(t);
+									}
+									UpdateTurnList msg = new UpdateTurnList();
+									msg.setCorrelationID(autoIncCorrId++);
+									msg.setTurnList(tarray);
+									if (currentSoftButtons != null) {
+										msg.setSoftButtons(currentSoftButtons);
+									} else {
+										msg.setSoftButtons(new Vector<SoftButton>());
+									}
+									currentSoftButtons = null;
+									
+									_msgAdapter.logMessage(msg, true);
+									
+									try {
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
 								} else {
-									msg.setSoftButtons(new Vector<SoftButton>());
-								}
-								currentSoftButtons = null;
-								
-								_msgAdapter.logMessage(msg, true);
-								
-								try {
-									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-								} catch (SyncException e) {
-									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									Toast.makeText(mContext, "Both fields are empty, nothing to send",
+											Toast.LENGTH_LONG).show();
 								}
 							}
 						});
