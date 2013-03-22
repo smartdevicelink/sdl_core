@@ -407,10 +407,10 @@ class SmartSchema(object):
             elif type(member.param_type) is Model.Array:
                 result = "".join(
                     [result, self._gen_schema_local_decls(
-                        [Model.Param(member.param_type.element_type.name if type(
-                            member.param_type.element_type) is
-                                Model.EnumSubset else "",
-                            member.param_type.element_type)],
+                        [Model.Param(name=member.param_type.element_type.name
+                         if type(member.param_type.element_type) is
+                         Model.EnumSubset else "",
+                            param_type=member.param_type.element_type)],
                         processed_enums)])
 
         return result
@@ -589,7 +589,14 @@ class SmartSchema(object):
 
         enum_elements = enum.elements.values()
         enum_elements.insert(0, Model.EnumElement(
-            "INVALID_ENUM", None, None, None, None, None, "-1"))
+            name="INVALID_ENUM",
+            description=None,
+            design_description=None,
+            issues=None,
+            todos=None,
+            platform=None,
+            internal_name=None,
+            value="-1"))
         return self._enum_template.substitute(
             comment=self._indent_code(self._gen_comment(enum), 1),
             name=enum.name,
