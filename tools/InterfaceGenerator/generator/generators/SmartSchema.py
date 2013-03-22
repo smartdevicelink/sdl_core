@@ -114,7 +114,59 @@ class SmartSchema(object):
                 init_structs_impls=self._gen_sturct_impls(
                     interface.structs.values(),
                     namespace,
-                    class_name)))
+                    class_name),
+                enum_string_coversions=self._gen_enum_to_str_converters(
+                    interface.enums.values(), namespace)))
+
+    def _gen_enum_to_str_converters(self, enums, namespace):
+        """Generate enum to string converters.
+
+        Generates part of source code with specific enum to string value
+        converting functions.
+
+        Keyword arguments:
+        enums -- list of enums to generate string converting functions.
+        namespace -- namespace to address enums.
+
+        Returns:
+        String value with enum to string converting functions.
+
+        """
+
+        if enums is None:
+            raise GenerateError("Enums is None")
+
+        return "\n".join([self._indent_code(
+            self._enum_to_str_converter_template.substitute(
+                namespace=namespace,
+                enum=x.name,
+                mapping=self._indent_code(
+                    self._gen_enum_to_str_mapping(
+                        x,
+                        namespace),
+                    2)),
+            2) for x in enums])
+
+    def _gen_enum_to_str_mapping(self, enum, namespace):
+        """Generate enum to string mapping code.
+
+        Generates part of source code with specific enum to string value
+        mapping.
+
+        Keyword arguments:
+        enums -- enum to generate string mapping.
+        namespace -- namespace to address enum.
+
+        Returns:
+        String value with enum to string mapping source code.
+
+        """
+
+        return "\n".join([self._enum_to_str_mapping_template.substitute(
+            namespace=namespace,
+            enum_name=enum.name,
+            enum_value=x.primary_name,
+            string=x.name) for x in enum.elements.values()])
 
     def _gen_hpp_class(self, class_name, params, functions, structs):
         """Generate source code of class for header file.
@@ -1021,7 +1073,41 @@ class SmartSchema(object):
         '''//---------- Structs schema items initialization --------------\n'''
         '''\n'''
         '''$init_structs_impls'''
+        '''\n'''
+        '''//---------- Structs schema items initialization --------------\n'''
+        '''\n'''
+        '''namespace NsAppLink\n'''
+        '''{\n'''
+        '''    namespace NsSmartObjects\n'''
+        '''    {\n'''
+        '''$enum_string_coversions'''
+        '''    }\n'''
+        '''}\n'''
         '''\n''')
+
+    _enum_to_str_converter_template = string.Template(
+        '''template <>\n'''
+        '''const std::map<${namespace}::${enum}::eType, '''
+        '''std::string> & TEnumSchemaItem<${namespace}::${enum}::eType>::'''
+        '''getEnumElementsStringRepresentation(void)\n'''
+        '''{\n'''
+        '''    static bool isInitialized = false;\n'''
+        '''    static std::map<${namespace}::${enum}::eType, '''
+        '''std::string> enumStringRepresentationMap;\n'''
+        '''\n'''
+        '''    if (false == isInitialized)\n'''
+        '''    {\n'''
+        '''${mapping}'''
+        '''\n'''
+        '''        isInitialized = true;\n'''
+        '''    }\n'''
+        '''\n'''
+        '''    return enumStringRepresentationMap;\n'''
+        '''}''')
+
+    _enum_to_str_mapping_template = string.Template(
+        '''enumStringRepresentationMap.insert(std::make_pair(${namespace}::'''
+        '''${enum_name}::${enum_value}, "${string}"));''')
 
     _struct_schema_item_template = string.Template(
         '''StructsSchemaItems.insert(std::make_pair("${name}", '''
@@ -1112,7 +1198,7 @@ class SmartSchema(object):
         '''    /**\n'''
         '''     * @brief Constructor.\n'''
         '''     */\n'''
-        '''    $class_name();\n'''
+        '''    $class_name(void);\n'''
         '''\n'''
         '''protected:\n'''
         '''\n'''
