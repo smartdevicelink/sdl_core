@@ -36,6 +36,8 @@
 #ifndef ISESSIONOBSERVER_CLASS
 #define ISESSIONOBSERVER_CLASS
 
+#include <list>
+
 /**
   *\namespace NsProtocolHandler
   *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
@@ -90,6 +92,29 @@ namespace NsProtocolHandler
          */
         virtual void pairFromKey(int key, NsSmartDeviceLink::NsTransportManager::tConnectionHandle & connectionHandle,
                                                unsigned char & sessionId) = 0;
+
+        /**
+         * \brief information about given Connection Key.
+         * \param key Unique key used by other components as session identifier
+         * \param app_id Returned: ApplicationID
+         * \param sessions_list Returned: List of session keys
+         * \param device_id Returned: DeviceID
+         * \return int -1 in case of error or 0 in case of success
+         */
+        virtual int GetDataOnSessionKey(int key, int & app_id,
+                                           std::list<int> & sessions_list,
+                                           int & device_id) = 0;
+
+        /**
+         * \brief information about given Connection Key.
+         * \param key Unique key used by other components as session identifier
+         * \param app_id Returned: ApplicationID
+         * \param sessions_list Returned: List of session keys
+         * \param device_id Returned: DeviceID
+         * \return int -1 in case of error or 0 in case of success
+         */
+        virtual int GetDataOnDeviceID(int device_id, std::string & device_name,
+                                           std::list<int> & applications_list) = 0;
     protected:
 
         /**

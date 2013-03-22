@@ -39,6 +39,7 @@
 #define CONNECTIONHANDLER_H
 
 #include <map>
+#include <list>
 
 #include "Logger.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
@@ -111,21 +112,73 @@ class CConnectionHandler :
       const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice,
       const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
 
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates start of new session.
+   * \param connectionHandle Connection identifier whithin which session has to be started.
+   * \return int Id (number) of new session if successful otherwise -1.
+   */
   virtual int onSessionStartedCallback(
       NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle);
 
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates session ending.
+   * \param connectionHandle Connection identifier whithin which session exists
+   * \param sessionId Identifier of the session to be ended
+   * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
+   * If not equal to hash assigned to session on start then operation fails.
+   * \return int -1 if operation fails session key otherwise
+   */
   virtual int onSessionEndedCallback(
       NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
       unsigned char sessionId, unsigned int hashCode);
 
+  /**
+   * \brief Creates unique identifier of session (can be used as hash)
+   * from given connection identifier
+   * whithin which session exists and session number.
+   * \param  connectionHandle Connection identifier whithin which session exists
+   * \param sessionId Identifier of the session
+   * \return int Unique key for session
+   */
   virtual int keyFromPair(
       NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
       unsigned char sessionId);
 
+  /**
+   * \brief Returns connection identifier and session number from given session key
+   * \param key Unique key used by other components as session identifier
+   * \param connectionHandle Returned: Connection identifier whithin which session exists
+   * \param sessionId Returned: Number of session
+   */
   virtual void pairFromKey(
       int key,
       NsSmartDeviceLink::NsTransportManager::tConnectionHandle & connectionHandle,
       unsigned char & sessionId);
+
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int -1 in case of error or 0 in case of success
+   */
+  virtual int GetDataOnSessionKey(int key, int & app_id,
+                                     std::list<int> & sessions_list,
+                                     int & device_id);
+
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int -1 in case of error or 0 in case of success
+   */
+  virtual int GetDataOnDeviceID(int device_id, std::string & device_name,
+                                     std::list<int> & applications_list);
 
   /**
    * \brief Sets pointer to TransportManager.
@@ -187,7 +240,7 @@ class CConnectionHandler :
   /**
    * \brief Pointer to observer
    */
-  IConnectionHandlerObserver* mpConnectionHandlerObserver;
+  IConnectionHandlerObserver* mp_ConnectionHandlerObserver;
 
   /**
    * \brief Pointer to TransportManager
