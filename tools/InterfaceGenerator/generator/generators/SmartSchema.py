@@ -704,7 +704,7 @@ class SmartSchema(object):
         if design_description is not "":
             design_description = "".join([" *\n", design_description])
 
-        issues = "".join([" * @note {0}\n".format(x)
+        issues = "".join([" * @note {0}\n".format(x.value)
                          for x in interface_item_base.issues])
         if issues is not "":
             issues = "".join([" *\n", issues])

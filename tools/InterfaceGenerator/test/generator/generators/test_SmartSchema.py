@@ -134,8 +134,13 @@ expected_result_enum2 = """namespace E2
 """
 
 description = ["Description Line1", "Description Line2"]
+
 design_description = ["Design Line1"]
-issues = ["Issue1", "Issue2", "Issue3"]
+
+issues = [Model.Issue(value="Issue1"),
+          Model.Issue(value="Issue2"),
+          Model.Issue(value="Issue3")]
+
 todos = ["Do1", "Do2"]
 
 class TestSmartSchema(unittest.TestCase):
