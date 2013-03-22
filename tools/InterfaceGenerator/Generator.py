@@ -19,11 +19,13 @@ optional arguments:
 import os.path
 import argparse
 
+import generator.parsers.ALRPCV1
 import generator.parsers.ALRPCV2
 import generator.Model
 import generator.generators.SmartSchema
 
 SUPPORTED_PARSERS = {
+    "alrpcv1": generator.parsers.ALRPCV1.Parser,
     "alrpcv2": generator.parsers.ALRPCV2.Parser
 }
 
