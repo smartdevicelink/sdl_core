@@ -1182,7 +1182,7 @@
     </function>
     <function name="ExitApplication" messagetype="response">
       <description>Success of operation.</description>
-    </function>l
+    </function>
     <function name="ExitAllApplications" messagetype="request">
       <description>Sent by HMI to SDL to close all registered applications.</description>
       <param name="reason" type="Common.ApplicationsCloseReason" mandatory="true">
