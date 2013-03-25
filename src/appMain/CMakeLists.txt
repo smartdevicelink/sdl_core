@@ -1,5 +1,6 @@
 set(LIBRARIES
   ApplicationManager
+  HMI_API
   SmartObjects
   JSONHandler
   ProtocolHandler

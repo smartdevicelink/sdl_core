@@ -43,6 +43,7 @@
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "request_watchdog/watchdog_subscriber.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "interfaces/HMI_API.h"
@@ -332,6 +333,9 @@ class ApplicationManagerImpl : public ApplicationManager
        * \return bool Indicates whether message is allowed for application
        */
     bool CheckHMIMatrix(smart_objects::CSmartObject* message);
+
+    bool ConvertMessageToSO(const Message& message,
+                            smart_objects::CSmartObject& output);
 
     /**
      * @brief Map of connection keys and associated applications
