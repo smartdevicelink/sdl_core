@@ -17,6 +17,7 @@ namespace NsAppLink
             extern const std::string S_FUNCTION_ID;
             extern const std::string S_MESSAGE_TYPE;
             extern const std::string S_PROTOCOL_VERSION;
+            extern const std::string S_PROTOCOL_TYPE;
             extern const std::string S_CORRELATION_ID;
         }
 
