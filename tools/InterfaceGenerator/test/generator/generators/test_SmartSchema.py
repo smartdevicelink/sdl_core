@@ -10,7 +10,7 @@ import unittest
 from generator.generators.SmartSchema import SmartSchema
 from generator import Model
 
-expected_result_full_comment = """/**
+expected_result_full_comment = u"""/**
  * @brief Enumeration Test Name.
  *
  * Description Line1
@@ -26,12 +26,12 @@ expected_result_full_comment = """/**
  * @todo Do2
  */"""
 
-expected_result_enum_element1 = """/**
+expected_result_enum_element1 = u"""/**
  * @brief InternalName.
  */
 InternalName = 10"""
 
-expected_result_enum_element2 = """/**
+expected_result_enum_element2 = u"""/**
  * @brief NO_VALUE_ELEMENT.
  *
  * Description Line1
@@ -41,7 +41,7 @@ expected_result_enum_element2 = """/**
  */
 NO_VALUE_ELEMENT"""
 
-expected_result_enum_elements1 = """/**
+expected_result_enum_elements1 = u"""/**
  * @brief name1.
  *
  * Design Line1
@@ -63,7 +63,7 @@ name1 = 1,
  */
 internal_name2"""
 
-expected_result_enum1 = """namespace Enum1
+expected_result_enum1 = u"""namespace Enum1
 {
     /**
      * @brief Enumeration Enum1.
@@ -103,7 +103,7 @@ expected_result_enum1 = """namespace Enum1
 }
 """
 
-expected_result_enum2 = """namespace E2
+expected_result_enum2 = u"""namespace E2
 {
     /**
      * @brief Enumeration E2.
@@ -133,22 +133,22 @@ expected_result_enum2 = """namespace E2
 }
 """
 
-description = ["Description Line1", "Description Line2"]
+description = [u"Description Line1", u"Description Line2"]
 
-design_description = ["Design Line1"]
+design_description = [u"Design Line1"]
 
-issues = [Model.Issue(value="Issue1"),
-          Model.Issue(value="Issue2"),
-          Model.Issue(value="Issue3")]
+issues = [Model.Issue(value=u"Issue1"),
+          Model.Issue(value=u"Issue2"),
+          Model.Issue(value=u"Issue3")]
 
-todos = ["Do1", "Do2"]
+todos = [u"Do1", u"Do2"]
 
 class TestSmartSchema(unittest.TestCase):
 
     def test_gen_comment(self):
         generator = SmartSchema()
 
-        enum = Model.Enum(name="Test Name",
+        enum = Model.Enum(name=u"Test Name",
                           description=description,
                           design_description=design_description,
                           issues=issues,
@@ -160,14 +160,16 @@ class TestSmartSchema(unittest.TestCase):
     def test_gen_enum_element(self):
         generator = SmartSchema()
 
-        enum_element1 = Model.EnumElement(name="Element1",
-                                          internal_name="InternalName",
-                                          value="10")
+        enum_element1 = Model.EnumElement(name=u"Element1",
+                                          internal_name=u"InternalName",
+                                          value=u"10")
+        print expected_result_enum_element1
+        print generator._gen_enum_element(enum_element1)
         self.assertEqual(generator._gen_enum_element(enum_element1),
                          expected_result_enum_element1,
                          "Short commented enum element with internal name is invalid")
 
-        enum_element2 = Model.EnumElement(name="NO_VALUE_ELEMENT",
+        enum_element2 = Model.EnumElement(name=u"NO_VALUE_ELEMENT",
                                           description=description,
                                           design_description=design_description)
         self.assertEqual(generator._gen_enum_element(enum_element2),
@@ -177,14 +179,14 @@ class TestSmartSchema(unittest.TestCase):
     def test_gen_enum_elements(self):
         generator = SmartSchema()
 
-        elements = [Model.EnumElement(name="name1",
+        elements = [Model.EnumElement(name=u"name1",
                                       design_description=design_description,
                                       todos=todos,
-                                      value="1"),
-                    Model.EnumElement(name="name2",
+                                      value=u"1"),
+                    Model.EnumElement(name=u"name2",
                                       description=description,
                                       issues=issues,
-                                      internal_name="internal_name2")]
+                                      internal_name=u"internal_name2")]
         self.assertEqual(generator._gen_enum_elements(elements),
                          expected_result_enum_elements1,
                          "Simple enum elements are invalid")
@@ -193,16 +195,16 @@ class TestSmartSchema(unittest.TestCase):
         generator = SmartSchema()
 
         elements1 = collections.OrderedDict()
-        elements1["name1"] = Model.EnumElement(name="name1",
+        elements1[u"name1"] = Model.EnumElement(name=u"name1",
                                                design_description=design_description,
                                                todos=todos,
-                                               value="1")
-        elements1["name2"] = Model.EnumElement(name="name2",
+                                               value=u"1")
+        elements1[u"name2"] = Model.EnumElement(name=u"name2",
                                                description=description,
                                                issues=issues,
-                                               internal_name="internal_name2")
+                                               internal_name=u"internal_name2")
 
-        enum1 = Model.Enum(name="Enum1",
+        enum1 = Model.Enum(name=u"Enum1",
                            todos=todos,
                            elements=elements1)
         self.assertEqual(generator._gen_enum(enum1),
@@ -210,49 +212,49 @@ class TestSmartSchema(unittest.TestCase):
                          "Simple enum is invalid")
 
         elements2 = collections.OrderedDict()
-        elements2["xxx"] = Model.EnumElement(name="xxx",
-                                             internal_name="val_1")
-        elements2["yyy"] = Model.EnumElement(name="yyy",
-                                             internal_name="val_2",
-                                             value="100")
-        elements2["zzz"] = Model.EnumElement(name="val_3")
+        elements2[u"xxx"] = Model.EnumElement(name=u"xxx",
+                                             internal_name=u"val_1")
+        elements2[u"yyy"] = Model.EnumElement(name=u"yyy",
+                                             internal_name=u"val_2",
+                                             value=u"100")
+        elements2[u"zzz"] = Model.EnumElement(name=u"val_3")
 
-        enum2 = Model.Enum(name="E2",
+        enum2 = Model.Enum(name=u"E2",
                            elements=elements2)
         self.assertEqual(generator._gen_enum(enum2),
                          expected_result_enum2,
                          "Long enum is invalid")
 
         self.assertEqual(generator._gen_enums([enum1, enum2]),
-                         "{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
+                         u"{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
                          , "Generated enums are invalid")
 
     def test_full_generation(self):
         generator = SmartSchema()
 
         elements1 = collections.OrderedDict()
-        elements1["name1"] = Model.EnumElement(name="name1",
+        elements1[u"name1"] = Model.EnumElement(name=u"name1",
                                                design_description=design_description,
                                                todos=todos,
-                                               value="1")
-        elements1["name2"] = Model.EnumElement(name="name2",
+                                               value=u"1")
+        elements1[u"name2"] = Model.EnumElement(name="name2",
                                                 description=description,
                                                 issues=issues,
-                                                internal_name="internal_name2")
+                                                internal_name=u"internal_name2")
 
-        enum1 = Model.Enum(name="Enum1",
+        enum1 = Model.Enum(name=u"Enum1",
                            todos=todos,
                            elements=elements1)
 
         elements2 = collections.OrderedDict()
-        elements2["xxx"] = Model.EnumElement(name="xxx",
-                                             internal_name="val_1")
-        elements2["yyy"] = Model.EnumElement(name="yyy",
-                                             internal_name="val_2",
-                                             value="100")
-        elements2["zzz"] = Model.EnumElement(name="val_3")
+        elements2[u"xxx"] = Model.EnumElement(name=u"xxx",
+                                             internal_name=u"val_1")
+        elements2[u"yyy"] = Model.EnumElement(name=u"yyy",
+                                             internal_name=u"val_2",
+                                             value=u"100")
+        elements2[u"zzz"] = Model.EnumElement(name=u"val_3")
 
-        enum2 = Model.Enum(name="E2",
+        enum2 = Model.Enum(name=u"E2",
                            elements=elements2)
 
         elements3 = collections.OrderedDict()
@@ -266,7 +268,7 @@ class TestSmartSchema(unittest.TestCase):
                            elements=elements3)
 
         elements4 = collections.OrderedDict()
-        elements4["1"] = Model.EnumElement(name="xxx",
+        elements4["name1"] = Model.EnumElement(name="xxx",
                                            internal_name="_11")
         elements4["name2"] = Model.EnumElement(name="xxx",
                                                internal_name="_22")
@@ -279,10 +281,25 @@ class TestSmartSchema(unittest.TestCase):
         enums["Enum3"] = enum3
         enums["Enum4"] = enum4
 
+        params1 = collections.OrderedDict()
+        params1["1"] = Model.FunctionParam(name="param1",
+                                           design_description=design_description,
+                                           description=description,
+                                           issues=issues,
+                                           todos=todos,
+                                           param_type=enum4,
+                                           default_value=elements4["name1"])
+        params1["2"] = Model.FunctionParam(name="param2",
+                                           param_type=Model.EnumSubset(name="sub1",
+                                                                       enum=enum1,
+                                                                       allowed_elements={"e1" : elements1["name1"]}),
+                                           default_value=elements1["name1"])
+
         functions = collections.OrderedDict()
         functions["Function1"] = Model.Function(name="Function1",
                                                 function_id=elements1["name1"],
-                                                message_type=elements1["name2"])
+                                                message_type=elements1["name2"],
+                                                params=params1)
         functions["Function2"] = Model.Function(name="Function2",
                                                 function_id=elements2["xxx"],
                                                 message_type=elements2["yyy"])
@@ -355,9 +372,9 @@ class TestSmartSchema(unittest.TestCase):
                                             "param2" : "value2"})
 
         # generator.generate(interface=interface,
-        #                   filename="Test.xml",
-        #                   namespace="XXX::YYY::ZZZ",
-        #                   destination_dir="/home/eftin/gen_test")
+        #                    filename="Test.xml",
+        #                    namespace="XXX::YYY::ZZZ",
+        #                    destination_dir="/home/eftin/gen_test")
 
 if __name__ == '__main__':
     unittest.main()

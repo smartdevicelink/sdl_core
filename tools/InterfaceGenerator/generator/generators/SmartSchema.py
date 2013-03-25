@@ -978,7 +978,7 @@ class SmartSchema(object):
                                        True else u"// {0}\n").format(x)
                                        for x in
                                        interface_item_base.design_description])
-        if design_description is not "":
+        if design_description is not u"":
             design_description = u"".join([u" *\n" if use_doxygen is
                                            True else "//\n",
                                            design_description])
