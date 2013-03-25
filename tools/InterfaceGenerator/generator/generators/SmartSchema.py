@@ -8,6 +8,7 @@ Generator for SmartObjects schema source code.
 import os
 import string
 import uuid
+import codecs
 
 from generator import Model
 
@@ -37,7 +38,7 @@ class SmartSchema(object):
         """Construct new object."""
 
         self._generated_structs = []
-        self._structs_add_code = ""
+        self._structs_add_code = u""
 
     def generate(self, interface, filename, namespace, destination_dir):
         """Generate SmartObject source files.
@@ -53,6 +54,8 @@ class SmartSchema(object):
 
         """
 
+        namespace = unicode(namespace)
+
         if interface is None:
             raise GenerateError("Given interface is None.")
 
@@ -63,26 +66,28 @@ class SmartSchema(object):
             os.makedirs(destination_dir)
 
         indent_level = 0
-        namespace_open = ""
-        namespace_close = ""
+        namespace_open = u""
+        namespace_close = u""
 
         if namespace:
-            parts = namespace.split("::")
+            parts = namespace.split(u"::")
             for part in parts:
-                namespace_open = "".join([namespace_open, self._indent_code(
+                namespace_open = u"".join([namespace_open, self._indent_code(
                     self._namespace_open_template.substitute(name=part),
                     indent_level)])
                 namespace_close = "".join([namespace_close, self._indent_code(
                     "}", len(parts) - indent_level - 1)])
                 indent_level = indent_level + 1
 
-        class_name = os.path.splitext(filename)[0]
-        guard = "__CSMARTFACTORY_{0}_{1}_HPP__".format(
+        class_name = unicode(os.path.splitext(filename)[0])
+        guard = u"__CSMARTFACTORY_{0}_{1}_HPP__".format(
             class_name.upper(),
-            uuid.uuid1().hex.capitalize())
+            unicode(uuid.uuid1().hex.capitalize()))
         header_file_name = "".join("{0}.hpp".format(class_name))
 
-        with open(os.path.join(destination_dir, header_file_name), "w") as f_h:
+        with codecs.open(os.path.join(destination_dir, header_file_name),
+                         encoding="utf-8",
+                         mode="w") as f_h:
             f_h.write(self._hpp_file_tempalte.substitute(
                 guard=guard,
                 namespace_open=namespace_open,
@@ -97,11 +102,11 @@ class SmartSchema(object):
 
         self._gen_struct_schema_items(interface.structs.values())
 
-        with open(os.path.join(destination_dir,
-                               "".join("{0}.cpp".format(class_name))),
-                  "w") as f_s:
+        with codecs.open(os.path.join(destination_dir,
+                                      "".join("{0}.cpp".format(class_name))),
+                         encoding="utf-8", mode="w") as f_s:
             f_s.write(self._cpp_file_template.substitute(
-                header_file_name=header_file_name,
+                header_file_name=unicode(header_file_name),
                 namespace=namespace,
                 class_name=class_name,
                 struct_schema_items=self._structs_add_code,
@@ -116,7 +121,8 @@ class SmartSchema(object):
                     namespace,
                     class_name),
                 enum_string_coversions=self._gen_enum_to_str_converters(
-                    interface.enums.values(), namespace)))
+                    interface.enums.values(),
+                    namespace)))
 
     def _gen_enum_to_str_converters(self, enums, namespace):
         """Generate enum to string converters.
@@ -136,7 +142,7 @@ class SmartSchema(object):
         if enums is None:
             raise GenerateError("Enums is None")
 
-        return "\n".join([self._indent_code(
+        return u"\n".join([self._indent_code(
             self._enum_to_str_converter_template.substitute(
                 namespace=namespace,
                 enum=x.name,
@@ -162,7 +168,7 @@ class SmartSchema(object):
 
         """
 
-        return "\n".join([self._enum_to_str_mapping_template.substitute(
+        return u"\n".join([self._enum_to_str_mapping_template.substitute(
             namespace=namespace,
             enum_name=enum.name,
             enum_value=x.primary_name,
@@ -208,7 +214,7 @@ class SmartSchema(object):
         if structs is None:
             raise GenerateError("Structs is None")
 
-        return "\n".join([self._indent_code(
+        return u"\n".join([self._indent_code(
             self._gen_struct_decl(x), 1) for x in structs])
 
     def _gen_struct_decl(self, struct):
@@ -246,7 +252,7 @@ class SmartSchema(object):
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "\n".join([self._indent_code(
+        return u"\n".join([self._indent_code(
             self._gen_function_decl(x), 1) for x in functions])
 
     def _gen_function_decl(self, function):
@@ -306,7 +312,7 @@ class SmartSchema(object):
         for member in struct.members.values():
             self._process_struct_member(member)
 
-        self._structs_add_code = "".join(
+        self._structs_add_code = u"".join(
             [self._structs_add_code, self._indent_code(
                 self._gen_struct_schema_item(struct), 1)])
         self._generated_structs.append(struct.name)
@@ -334,6 +340,7 @@ class SmartSchema(object):
         struct -- struct to ensure existence.
 
         """
+
         if struct.name in self._generated_structs:
             return
 
@@ -372,7 +379,7 @@ class SmartSchema(object):
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "".join([self._indent_code(
+        return u"".join([self._indent_code(
             self._gen_function_schema(x), 1)
             for x in functions])
 
@@ -413,7 +420,7 @@ class SmartSchema(object):
         if structs is None:
             raise GenerateError("Structs is None")
 
-        return "\n".join([self._gen_struct_impl(
+        return u"\n".join([self._gen_struct_impl(
             x, namespace, class_name) for x in structs])
 
     def _gen_struct_impl(self, struct, namespace, class_name):
@@ -462,19 +469,19 @@ class SmartSchema(object):
 
         """
 
-        result = ""
+        result = u""
         for member in members:
             if type(member.param_type) is Model.Enum and \
                member.param_type.name not in processed_enums:
                 local_var = self._gen_schema_loc_emum_var_name(
                     member.param_type)
-                result = "\n".join(
-                    ["".join(
+                result = u"\n".join(
+                    [u"".join(
                         [result, self._impl_code_loc_decl_enum_template.
                             substitute(
                                 type=member.param_type.name,
                                 var_name=local_var)]),
-                        "\n".join(
+                        u"\n".join(
                             [self._impl_code_loc_decl_enum_insert_template.
                                 substitute(
                                     var_name=local_var,
@@ -482,16 +489,16 @@ class SmartSchema(object):
                                     value=x.primary_name)
                              for x in member.param_type.elements.values()])])
                 processed_enums.append(member.param_type.name)
-                result = "".join([result, "\n\n"]) if result else ""
+                result = u"".join([result, u"\n\n"]) if result else u""
             elif type(member.param_type) is Model.EnumSubset:
                 local_var = self._gen_schema_loc_emum_s_var_name(member.name)
-                result = "\n".join(
-                    ["".join(
+                result = u"\n".join(
+                    [u"".join(
                         [result, self._impl_code_loc_decl_enum_template.
                             substitute(
                                 type=member.param_type.enum.name,
                                 var_name=local_var)]),
-                        "\n".join(
+                        u"\n".join(
                             [self._impl_code_loc_decl_enum_insert_template.
                                 substitute(
                                     var_name=local_var,
@@ -499,7 +506,7 @@ class SmartSchema(object):
                                     value=x.primary_name)
                              for x in member.param_type.
                              allowed_elements.values()])])
-                result = "".join([result, "\n\n"]) if result else ""
+                result = "".join([result, u"\n\n"]) if result else u""
             elif type(member.param_type) is Model.Array:
                 result = "".join(
                     [result, self._gen_schema_loc_decls(
@@ -525,10 +532,10 @@ class SmartSchema(object):
 
         """
 
-        result = "\n\n".join(
+        result = u"\n\n".join(
             [self._gen_schema_item_decl(x) for x in members])
 
-        return "".join([result, "\n\n"]) if result else ""
+        return u"".join([result, u"\n\n"]) if result else u""
 
     def _gen_schema_item_decl(self, member):
         """Generate schema item declaration.
@@ -568,44 +575,44 @@ class SmartSchema(object):
 
         """
 
-        code = ""
+        code = u""
         if type(param) is Model.Boolean:
             code = self._impl_code_bool_item_template.substitute(
                 params=self._gen_schema_item_param_values(
-                    [["bool", None if default_value is None
-                      else "true" if default_value is True else "false"]]))
+                    [[u"bool", None if default_value is None
+                      else u"true" if default_value is True else u"false"]]))
         elif type(param) is Model.Integer:
             code = self._impl_code_integer_item_template.substitute(
-                type="int",
+                type=u"int",
                 params=self._gen_schema_item_param_values(
-                    [["int", param.min_value],
-                     ["int", param.max_value],
-                     ["int", default_value]]))
+                    [[u"int", param.min_value],
+                     [u"int", param.max_value],
+                     [u"int", default_value]]))
         elif type(param) is Model.Double:
             code = self._impl_code_integer_item_template.substitute(
-                type="double",
+                type=u"double",
                 params=self._gen_schema_item_param_values(
-                    [["double", param.min_value],
-                     ["double", param.max_value],
-                     ["double", default_value]]))
+                    [[u"double", param.min_value],
+                     [u"double", param.max_value],
+                     [u"double", default_value]]))
         elif type(param) is Model.String:
             code = self._impl_code_string_item_template.substitute(
                 params=self._gen_schema_item_param_values(
-                    [["size_t", param.max_length],
-                     ["std::string", default_value]]))
+                    [[u"size_t", param.max_length],
+                     [u"std::string", default_value]]))
         elif type(param) is Model.Array:
             code = self._impl_code_array_item_template.substitute(
-                params="".join(
-                    ["".join(
+                params=u"".join(
+                    [u"".join(
                         [self._gen_schema_item_decl_code(
                             param.element_type,
                             param.element_type.name if type(param.element_type)
-                            is Model.EnumSubset else "",
+                            is Model.EnumSubset else u"",
                             None),
-                            ", "]),
+                            u", "]),
                         self._gen_schema_item_param_values(
-                            [["size_t", param.min_size],
-                             ["size_t", param.max_size]])]))
+                            [[u"size_t", param.min_size],
+                             [u"size_t", param.max_size]])]))
         elif type(param) is Model.Struct:
             code = self._impl_code_struct_item_template.substitute(
                 name=param.name)
@@ -614,19 +621,19 @@ class SmartSchema(object):
                 type=param.name,
                 params="".join(
                     [self._gen_schema_loc_emum_var_name(param),
-                     ", ",
+                     u", ",
                      self._gen_schema_item_param_values(
-                         [["".join([param.name, "::eType"]),
+                         [[u"".join([param.name, u"::eType"]),
                           default_value.primary_name if default_value
                           is not None else None]])]))
         elif type(param) is Model.EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
-                params="".join(
+                params=u"".join(
                     [self._gen_schema_loc_emum_s_var_name(member_name),
-                     ", ",
+                     u", ",
                      self._gen_schema_item_param_values(
-                         [["".join([param.enum.name, "::eType"]),
+                         [["".join([param.enum.name, u"::eType"]),
                           default_value.primary_name if default_value
                           is not None else None]])]))
         else:
@@ -648,13 +655,13 @@ class SmartSchema(object):
 
         """
 
-        result = ""
+        result = u""
         for param in params:
             value = self._impl_code_item_param_value_template.substitute(
                 type=param[0],
                 value=str(param[1] if param[1] is not None else ""))
-            result = "".join([result, "".join(
-                [", ", value])
+            result = u"".join([result, u"".join(
+                [u", ", value])
                 if result else value])
 
         return result
@@ -672,10 +679,10 @@ class SmartSchema(object):
 
         """
 
-        result = "\n".join(
+        result = u"\n".join(
             [self._gen_schema_item_fill(x) for x in members])
 
-        return "".join([result, "\n\n"]) if result else ""
+        return u"".join([result, u"\n\n"]) if result else u""
 
     def _gen_schema_item_fill(self, member):
         """Generate schema item fill code.
@@ -693,7 +700,7 @@ class SmartSchema(object):
         return self._impl_code_item_fill_template.substitute(
             name=member.name,
             var_name=self._gen_schema_item_var_name(member),
-            is_mandatory="true" if member.is_mandatory is True else "false")
+            is_mandatory=u"true" if member.is_mandatory is True else u"false")
 
     @staticmethod
     def _gen_schema_item_var_name(member):
@@ -709,7 +716,7 @@ class SmartSchema(object):
 
         """
 
-        return "".join([member.name, "_SchemaItem"])
+        return u"".join([member.name, u"_SchemaItem"])
 
     @staticmethod
     def _gen_schema_loc_emum_var_name(param_type):
@@ -725,7 +732,7 @@ class SmartSchema(object):
 
         """
 
-        return "".join([param_type.name, "_allEnumValues"])
+        return u"".join([param_type.name, u"_allEnumValues"])
 
     @staticmethod
     def _gen_schema_loc_emum_s_var_name(member_name):
@@ -742,7 +749,7 @@ class SmartSchema(object):
 
         """
 
-        return "".join([member_name, "_allowedEnumSubsetValues"])
+        return u"".join([member_name, "_allowedEnumSubsetValues"])
 
     def _gen_function_impls(self, functions, namespace, class_name):
         """Generate functions implementation for source file.
@@ -763,7 +770,7 @@ class SmartSchema(object):
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "\n".join([self._gen_function_impl(
+        return u"\n".join([self._gen_function_impl(
             x, namespace, class_name) for x in functions])
 
     def _gen_function_impl(self, function, namespace, class_name):
@@ -814,7 +821,7 @@ class SmartSchema(object):
         if enums is None:
             raise GenerateError("Enums is None")
 
-        return "\n".join([self._gen_enum(x) for x in enums])
+        return u"\n".join([self._gen_enum(x) for x in enums])
 
     def _gen_enum(self, enum):
         """Generate enum for header file.
@@ -831,14 +838,14 @@ class SmartSchema(object):
 
         enum_elements = enum.elements.values()
         enum_elements.insert(0, Model.EnumElement(
-            name="INVALID_ENUM",
+            name=u"INVALID_ENUM",
             description=None,
             design_description=None,
             issues=None,
             todos=None,
             platform=None,
             internal_name=None,
-            value="-1"))
+            value=u"-1"))
         return self._enum_template.substitute(
             comment=self._indent_code(self._gen_comment(enum), 1),
             name=enum.name,
@@ -858,8 +865,8 @@ class SmartSchema(object):
 
         """
 
-        return ",\n\n".join([self._gen_enum_element(x)
-                             for x in enum_elements])
+        return u",\n\n".join([self._gen_enum_element(x)
+                              for x in enum_elements])
 
     def _gen_enum_element(self, enum_element):
         """Generate enum element for header file.
@@ -902,9 +909,9 @@ class SmartSchema(object):
         return self._class_comment_template.substitute(
             class_name=class_name,
             class_params="".join(
-                [" *     {0} - {1}\n".format(x[0],
-                                             x[1]) for x in params.items()])
-            if params else " *    none\n")
+                [u" *     {0} - {1}\n".format(x[0],
+                 x[1]) for x in params.items()])
+            if params else u" *    none\n")
 
     def _gen_comment(self, interface_item_base, use_doxygen=True):
         """Generate doxygen comment for iterface_item_base for header file.
@@ -933,39 +940,44 @@ class SmartSchema(object):
         name = interface_item_base.primary_name if \
             type(interface_item_base) is Model.EnumElement else \
             interface_item_base.name
-        brief_description = (" * @brief {0}{1}.\n" if use_doxygen is True else "// {0}{1}.\n").format(brief_type_title, name)
+        brief_description = (u" * @brief {0}{1}.\n" if use_doxygen is
+                             True else u"// {0}{1}.\n").format(
+                                 brief_type_title,
+                                 name)
 
-        description = "".join([(" * {0}\n" if use_doxygen
-                                is True else "// {0}\n").format(x)
-                              for x in interface_item_base.description])
-        if description is not "":
-            description = "".join([" *\n" if use_doxygen
-                                    is True else "//\n", description])
+        description = u"".join([(u" * {0}\n" if use_doxygen
+                                is True else u"// {0}\n").format(x)
+                                for x in interface_item_base.description])
+        if description is not u"":
+            description = u"".join([u" *\n" if use_doxygen
+                                    is True else u"//\n", description])
 
-        design_description = "".join([(" * {0}\n" if use_doxygen is
-                                       True else "// {0}\n").format(x)
-                                     for x in
-                                     interface_item_base.design_description])
+        design_description = u"".join([(u" * {0}\n" if use_doxygen is
+                                       True else u"// {0}\n").format(x)
+                                       for x in
+                                       interface_item_base.design_description])
         if design_description is not "":
-            design_description = "".join([" *\n" if use_doxygen is
-                                          True else "//\n", design_description])
+            design_description = u"".join([u" *\n" if use_doxygen is
+                                           True else "//\n",
+                                           design_description])
 
-        issues = "".join([(" * @note {0}\n" if use_doxygen is
-                           True else "// Note: {0}\n").format(x.value)
-                         for x in interface_item_base.issues])
-        if issues is not "":
-            issues = "".join([" *\n" if use_doxygen is
-                              True else "//\n", issues])
+        issues = u"".join([(u" * @note {0}\n" if use_doxygen is
+                           True else u"// Note: {0}\n").format(x.value)
+                           for x in interface_item_base.issues])
+        if issues is not u"":
+            issues = u"".join([u" *\n" if use_doxygen is
+                              True else u"//\n", issues])
 
-        todos = "".join([(" * @todo {0}\n" if use_doxygen is
-                          True else "// TODO: {0}\n").format(x)
-                        for x in interface_item_base.todos])
-        if todos is not "":
-            todos = "".join([" *\n" if use_doxygen is True else "//\n", todos])
+        todos = u"".join([(u" * @todo {0}\n" if use_doxygen is
+                          True else u"// ToDo: {0}\n").format(x)
+                          for x in interface_item_base.todos])
+        if todos is not u"":
+            todos = u"".join([u" *\n" if use_doxygen is
+                              True else u"//\n", todos])
 
-        returns = ""
+        returns = u""
         if type(interface_item_base) is Model.Function:
-            returns = "".join([" *\n", self._function_return_comment])
+            returns = "".join([u" *\n", self._function_return_comment])
 
         template = self._comment_doxygen_template if use_doxygen is \
             True else self._comment_cpp_template
@@ -993,320 +1005,321 @@ class SmartSchema(object):
         """
 
         code_lines = code.split("\n")
-        return "".join(
-            ["{0}{1}\n".format(
+        return u"".join(
+            [u"{0}{1}\n".format(
                 self._indent_template * indent_level,
-                x) if x is not "" else "\n" for x in code_lines])
+                x) if x is not u"" else u"\n" for x in code_lines])
 
     _model_types_briefs = dict(
-        {"EnumElement": "",
-         "Enum": "Enumeration ",
-         "Function": "Method that generates schema for function ",
-         "Struct": "Method that generates schema item for structure ",
-         "Param": "Struct member ",
-         "FunctionParam" : "Function parameter "})
+        {u"EnumElement": u"",
+         u"Enum": u"Enumeration ",
+         u"Function": u"Method that generates schema for function ",
+         u"Struct": u"Method that generates schema item for structure ",
+         u"Param": u"Struct member ",
+         u"FunctionParam": u"Function parameter "})
 
     _hpp_file_tempalte = string.Template(
-        '''#ifndef $guard\n'''
-        '''#define $guard\n'''
-        '''\n'''
-        '''#include "JSONHandler/CSmartFactory.hpp"\n'''
-        '''#include "SmartObjects/CSmartSchema.hpp"\n'''
-        '''#include "SmartObjects/ISchemaItem.hpp"\n'''
-        '''#include "SmartObjects/TSharedPtr.hpp"\n'''
-        '''\n'''
-        '''$namespace_open'''
-        '''$enums_content'''
-        '''$class_content'''
-        '''$namespace_close'''
-        '''#endif //$guard\n'''
-        '''\n''')
+        u'''#ifndef $guard\n'''
+        u'''#define $guard\n'''
+        u'''\n'''
+        u'''#include "JSONHandler/CSmartFactory.hpp"\n'''
+        u'''#include "SmartObjects/CSmartSchema.hpp"\n'''
+        u'''#include "SmartObjects/ISchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/TSharedPtr.hpp"\n'''
+        u'''\n'''
+        u'''$namespace_open'''
+        u'''$enums_content'''
+        u'''$class_content'''
+        u'''$namespace_close'''
+        u'''#endif //$guard\n'''
+        u'''\n''')
 
     _namespace_open_template = string.Template(
-        '''namespace $name\n'''
-        '''{''')
+        u'''namespace $name\n'''
+        u'''{''')
 
     _cpp_file_template = string.Template(
-        '''#include <map>\n'''
-        '''#include <set>\n'''
-        '''\n'''
-        '''#include "$header_file_name"\n'''
-        '''#include "SmartObjects/CAlwaysTrueSchemaItem.hpp"\n'''
-        '''#include "SmartObjects/CAlwaysFalseSchemaItem.hpp"\n'''
-        '''#include "SmartObjects/CArraySchemaItem.hpp"\n'''
-        '''#include "SmartObjects/CBoolSchemaItem.hpp"\n'''
-        '''#include "SmartObjects/CObjectSchemaItem.hpp"\n'''
-        '''#include "SmartObjects/CStringSchemaItem.hpp"\n'''
-        '''#include "SmartObjects/TEnumSchemaItem.hpp"\n'''
-        '''#include "SmartObjects/TNumberSchemaItem.hpp"\n'''
-        '''#include "SmartObjects/TSchemaItemParameter.hpp"\n'''
-        '''\n'''
-        '''using namespace NsAppLink::NsSmartObjects;\n'''
-        '''\n'''
-        '''$namespace::$class_name::$class_name()\n'''
-        ''' : CSmartFactory<FunctionID::eType, messageType::eType>()\n'''
-        '''{\n'''
-        '''    TStructsSchemaItems structsSchemaItems;\n'''
-        '''    initStructSchemaItems(structsSchemaItems);\n'''
-        '''    initSchemas(structsSchemaItems);\n'''
-        '''}\n'''
-        '''\n'''
-        '''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
-        '''provideObjectSchemaItemForStruct('''
-        '''TStructsSchemaItems & StructsSchemaItems, '''
-        '''const std::string & StructName)\n'''
-        '''{\n'''
-        '''    const TStructsSchemaItems::const_iterator it = '''
-        '''StructsSchemaItems.find(StructName);\n'''
-        '''    if (it != StructsSchemaItems.end())\n'''
-        '''    {\n'''
-        '''        return it->second;\n'''
-        '''    }\n'''
-        '''\n'''
-        '''    return NsAppLink::NsSmartObjects::'''
-        '''CAlwaysFalseSchemaItem::create();\n'''
-        '''}\n'''
-        '''\n'''
-        '''void $namespace::$class_name::initStructSchemaItems('''
-        '''TStructsSchemaItems & StructsSchemaItems)\n'''
-        '''{\n'''
-        '''$struct_schema_items'''
-        '''}\n'''
-        '''\n'''
-        '''void $namespace::$class_name::initSchemas(TStructsSchemaItems & '''
-        '''StructsSchemaItems)\n'''
-        '''{\n'''
-        '''$function_schemas'''
-        '''}\n'''
-        '''\n'''
-        '''//------------- Functions schema initialization ---------------\n'''
-        '''\n'''
-        '''$init_function_impls'''
-        '''\n'''
-        '''//---------- Structs schema items initialization --------------\n'''
-        '''\n'''
-        '''$init_structs_impls'''
-        '''\n'''
-        '''//---------- Structs schema items initialization --------------\n'''
-        '''\n'''
-        '''namespace NsAppLink\n'''
-        '''{\n'''
-        '''    namespace NsSmartObjects\n'''
-        '''    {\n'''
-        '''$enum_string_coversions'''
-        '''    }\n'''
-        '''}\n'''
-        '''\n''')
+        u'''#include <map>\n'''
+        u'''#include <set>\n'''
+        u'''\n'''
+        u'''#include "$header_file_name"\n'''
+        u'''#include "SmartObjects/CAlwaysTrueSchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/CAlwaysFalseSchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/CArraySchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/CBoolSchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/CObjectSchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/CStringSchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/TEnumSchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/TNumberSchemaItem.hpp"\n'''
+        u'''#include "SmartObjects/TSchemaItemParameter.hpp"\n'''
+        u'''\n'''
+        u'''using namespace NsAppLink::NsSmartObjects;\n'''
+        u'''\n'''
+        u'''$namespace::$class_name::$class_name()\n'''
+        u''' : CSmartFactory<FunctionID::eType, messageType::eType>()\n'''
+        u'''{\n'''
+        u'''    TStructsSchemaItems structsSchemaItems;\n'''
+        u'''    initStructSchemaItems(structsSchemaItems);\n'''
+        u'''    initSchemas(structsSchemaItems);\n'''
+        u'''}\n'''
+        u'''\n'''
+        u'''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
+        u'''provideObjectSchemaItemForStruct('''
+        u'''TStructsSchemaItems & StructsSchemaItems, '''
+        u'''const std::string & StructName)\n'''
+        u'''{\n'''
+        u'''    const TStructsSchemaItems::const_iterator it = '''
+        u'''StructsSchemaItems.find(StructName);\n'''
+        u'''    if (it != StructsSchemaItems.end())\n'''
+        u'''    {\n'''
+        u'''        return it->second;\n'''
+        u'''    }\n'''
+        u'''\n'''
+        u'''    return NsAppLink::NsSmartObjects::'''
+        u'''CAlwaysFalseSchemaItem::create();\n'''
+        u'''}\n'''
+        u'''\n'''
+        u'''void $namespace::$class_name::initStructSchemaItems('''
+        u'''TStructsSchemaItems & StructsSchemaItems)\n'''
+        u'''{\n'''
+        u'''$struct_schema_items'''
+        u'''}\n'''
+        u'''\n'''
+        u'''void $namespace::$class_name::initSchemas(TStructsSchemaItems & '''
+        u'''StructsSchemaItems)\n'''
+        u'''{\n'''
+        u'''$function_schemas'''
+        u'''}\n'''
+        u'''\n'''
+        u'''//------------- Functions schema initialization --------------\n'''
+        u'''\n'''
+        u'''$init_function_impls'''
+        u'''\n'''
+        u'''//---------- Structs schema items initialization -------------\n'''
+        u'''\n'''
+        u'''$init_structs_impls'''
+        u'''\n'''
+        u'''//---------- Structs schema items initialization -------------\n'''
+        u'''\n'''
+        u'''namespace NsAppLink\n'''
+        u'''{\n'''
+        u'''    namespace NsSmartObjects\n'''
+        u'''    {\n'''
+        u'''$enum_string_coversions'''
+        u'''    }\n'''
+        u'''}\n'''
+        u'''\n''')
 
     _enum_to_str_converter_template = string.Template(
-        '''template <>\n'''
-        '''const std::map<${namespace}::${enum}::eType, '''
-        '''std::string> & TEnumSchemaItem<${namespace}::${enum}::eType>::'''
-        '''getEnumElementsStringRepresentation(void)\n'''
-        '''{\n'''
-        '''    static bool isInitialized = false;\n'''
-        '''    static std::map<${namespace}::${enum}::eType, '''
-        '''std::string> enumStringRepresentationMap;\n'''
-        '''\n'''
-        '''    if (false == isInitialized)\n'''
-        '''    {\n'''
-        '''${mapping}'''
-        '''\n'''
-        '''        isInitialized = true;\n'''
-        '''    }\n'''
-        '''\n'''
-        '''    return enumStringRepresentationMap;\n'''
-        '''}''')
+        u'''template <>\n'''
+        u'''const std::map<${namespace}::${enum}::eType, '''
+        u'''std::string> & TEnumSchemaItem<${namespace}::${enum}::eType>::'''
+        u'''getEnumElementsStringRepresentation(void)\n'''
+        u'''{\n'''
+        u'''    static bool isInitialized = false;\n'''
+        u'''    static std::map<${namespace}::${enum}::eType, '''
+        u'''std::string> enumStringRepresentationMap;\n'''
+        u'''\n'''
+        u'''    if (false == isInitialized)\n'''
+        u'''    {\n'''
+        u'''${mapping}'''
+        u'''\n'''
+        u'''        isInitialized = true;\n'''
+        u'''    }\n'''
+        u'''\n'''
+        u'''    return enumStringRepresentationMap;\n'''
+        u'''}''')
 
     _enum_to_str_mapping_template = string.Template(
-        '''enumStringRepresentationMap.insert(std::make_pair(${namespace}::'''
-        '''${enum_name}::${enum_value}, "${string}"));''')
+        u'''enumStringRepresentationMap.insert(std::make_pair(${namespace}::'''
+        u'''${enum_name}::${enum_value}, "${string}"));''')
 
     _struct_schema_item_template = string.Template(
-        '''StructsSchemaItems.insert(std::make_pair("${name}", '''
-        '''initStructSchemaItem_${name}('''
-        '''StructsSchemaItems)));''')
+        u'''StructsSchemaItems.insert(std::make_pair("${name}", '''
+        u'''initStructSchemaItem_${name}('''
+        u'''StructsSchemaItems)));''')
 
     _function_schema_template = string.Template(
-        '''mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::'''
-        '''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
-        '''(FunctionID::$function_id, messageType::$message_type), '''
-        '''initFunction_${function_id}_${message_type}('''
-        '''StructsSchemaItems)));''')
+        u'''mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::'''
+        u'''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
+        u'''(FunctionID::$function_id, messageType::$message_type), '''
+        u'''initFunction_${function_id}_${message_type}('''
+        u'''StructsSchemaItems)));''')
 
     _struct_impl_template = string.Template(
-        '''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
-        '''initStructSchemaItem_${struct_name}('''
-        '''TStructsSchemaItems & StructsSchemaItems)\n'''
-        '''{\n'''
-        '''$code'''
-        '''}\n''')
+        u'''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
+        u'''initStructSchemaItem_${struct_name}('''
+        u'''TStructsSchemaItems & StructsSchemaItems)\n'''
+        u'''{\n'''
+        u'''$code'''
+        u'''}\n''')
 
     _struct_impl_code_tempate = string.Template(
-        '''${schema_loc_decl}'''
-        '''${schema_items_decl}'''
-        '''std::map<std::string, CObjectSchemaItem::SMember> '''
-        '''schemaMembersMap;\n\n'''
-        '''${schema_item_fill}'''
-        '''return CObjectSchemaItem::create(schemaMembersMap);''')
+        u'''${schema_loc_decl}'''
+        u'''${schema_items_decl}'''
+        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''schemaMembersMap;\n\n'''
+        u'''${schema_item_fill}'''
+        u'''return CObjectSchemaItem::create(schemaMembersMap);''')
 
     _impl_code_loc_decl_enum_template = string.Template(
-        '''std::set<${type}::eType> ${var_name};''')
+        u'''std::set<${type}::eType> ${var_name};''')
 
     _impl_code_loc_decl_enum_insert_template = string.Template(
-        '''${var_name}.insert(${enum}::${value});''')
+        u'''${var_name}.insert(${enum}::${value});''')
 
     _impl_code_item_decl_temlate = string.Template(
-        '''${comment}'''
-        '''TSharedPtr<ISchemaItem> ${var_name} = ${item_decl};''')
+        u'''${comment}'''
+        u'''TSharedPtr<ISchemaItem> ${var_name} = ${item_decl};''')
 
     _impl_code_integer_item_template = string.Template(
-        '''TNumberSchemaItem<${type}>::create(${params})''')
+        u'''TNumberSchemaItem<${type}>::create(${params})''')
 
     _impl_code_bool_item_template = string.Template(
-        '''CBoolSchemaItem::create(${params})''')
+        u'''CBoolSchemaItem::create(${params})''')
 
     _impl_code_string_item_template = string.Template(
-        '''CStringSchemaItem::create(${params})''')
+        u'''CStringSchemaItem::create(${params})''')
 
     _impl_code_array_item_template = string.Template(
-        '''CArraySchemaItem::create(${params})''')
+        u'''CArraySchemaItem::create(${params})''')
 
     _impl_code_struct_item_template = string.Template(
-        '''provideObjectSchemaItemForStruct(StructsSchemaItems, "${name}")''')
+        u'''provideObjectSchemaItemForStruct(StructsSchemaItems, "${name}")''')
 
     _impl_code_enum_item_template = string.Template(
-        '''TEnumSchemaItem<${type}::eType>::create(${params})''')
+        u'''TEnumSchemaItem<${type}::eType>::create(${params})''')
 
     _impl_code_item_param_value_template = string.Template(
-        '''TSchemaItemParameter<$type>($value)''')
+        u'''TSchemaItemParameter<$type>($value)''')
 
     _impl_code_item_fill_template = string.Template(
-        '''schemaMembersMap["${name}"] = CObjectSchemaItem::'''
-        '''SMember(${var_name}, ${is_mandatory});''')
+        u'''schemaMembersMap["${name}"] = CObjectSchemaItem::'''
+        u'''SMember(${var_name}, ${is_mandatory});''')
 
     _function_impl_template = string.Template(
-        '''CSmartSchema $namespace::$class_name::'''
-        '''initFunction_${function_id}_${message_type}('''
-        '''TStructsSchemaItems & StructsSchemaItems)\n'''
-        '''{\n'''
-        '''$code'''
-        '''}\n''')
+        u'''CSmartSchema $namespace::$class_name::'''
+        u'''initFunction_${function_id}_${message_type}('''
+        u'''TStructsSchemaItems & StructsSchemaItems)\n'''
+        u'''{\n'''
+        u'''$code'''
+        u'''}\n''')
 
     _function_impl_code_tempate = string.Template(
-        '''${schema_loc_decl}'''
-        '''${schema_items_decl}'''
-        '''std::map<std::string, CObjectSchemaItem::SMember> '''
-        '''schemaMembersMap;\n\n'''
-        '''${schema_item_fill}'''
-        '''return CSmartSchema(CObjectSchemaItem::'''
-        '''create(schemaMembersMap));''')
+        u'''${schema_loc_decl}'''
+        u'''${schema_items_decl}'''
+        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''schemaMembersMap;\n\n'''
+        u'''${schema_item_fill}'''
+        u'''return CSmartSchema(CObjectSchemaItem::'''
+        u'''create(schemaMembersMap));''')
 
     _class_hpp_template = string.Template(
-        '''$comment\n'''
-        '''class $class_name : public NsAppLink::NsJSONHandler::'''
-        '''CSmartFactory<FunctionID::eType, messageType::eType>\n'''
-        '''{\n'''
-        '''public:\n'''
-        '''\n'''
-        '''    /**\n'''
-        '''     * @brief Constructor.\n'''
-        '''     */\n'''
-        '''    $class_name(void);\n'''
-        '''\n'''
-        '''protected:\n'''
-        '''\n'''
-        '''    /**\n'''
-        '''     * @brief Type that maps of struct names to schema items.\n'''
-        '''     */\n'''
-        '''    typedef std::map<std::string, NsAppLink::NsSmartObjects::'''
-        '''TSharedPtr<NsAppLink::NsSmartObjects::'''
-        '''ISchemaItem> > TStructsSchemaItems;\n'''
-        '''\n'''
-        '''   /**\n'''
-        '''    * @brief Helper that allows to make reference to struct\n'''
-        '''    *\n'''
-        '''    * @param StructName Name of structure to provide.\n'''
-        '''    *\n'''
-        '''    * @return TSharedPtr of strucute\n'''
-        '''    */\n'''
-        '''    static NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::'''
-        '''NsSmartObjects::ISchemaItem> '''
-        '''provideObjectSchemaItemForStruct(TStructsSchemaItems & '''
-        '''StructsSchemaItems, const std::string & StructName);\n'''
-        '''\n'''
-        '''    /**\n'''
-        '''     * @brief Initializes all struct schema items.\n'''
-        '''     */\n'''
-        '''    void initStructSchemaItems(TStructsSchemaItems & '''
-        '''StructsSchemaItems);\n'''
-        '''\n'''
-        '''    /**\n'''
-        '''     * @brief Initializes all schemas.\n'''
-        '''     */\n'''
-        '''    void initSchemas(TStructsSchemaItems & StructsSchemaItems);\n'''
-        '''\n'''
-        '''$init_function_decls'''
-        '''\n'''
-        '''$init_struct_decls'''
-        '''};''')
+        u'''$comment\n'''
+        u'''class $class_name : public NsAppLink::NsJSONHandler::'''
+        u'''CSmartFactory<FunctionID::eType, messageType::eType>\n'''
+        u'''{\n'''
+        u'''public:\n'''
+        u'''\n'''
+        u'''    /**\n'''
+        u'''     * @brief Constructor.\n'''
+        u'''     */\n'''
+        u'''    $class_name(void);\n'''
+        u'''\n'''
+        u'''protected:\n'''
+        u'''\n'''
+        u'''    /**\n'''
+        u'''     * @brief Type that maps of struct names to schema items.\n'''
+        u'''     */\n'''
+        u'''    typedef std::map<std::string, NsAppLink::NsSmartObjects::'''
+        u'''TSharedPtr<NsAppLink::NsSmartObjects::'''
+        u'''ISchemaItem> > TStructsSchemaItems;\n'''
+        u'''\n'''
+        u'''   /**\n'''
+        u'''    * @brief Helper that allows to make reference to struct\n'''
+        u'''    *\n'''
+        u'''    * @param StructName Name of structure to provide.\n'''
+        u'''    *\n'''
+        u'''    * @return TSharedPtr of strucute\n'''
+        u'''    */\n'''
+        u'''    static NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::'''
+        u'''NsSmartObjects::ISchemaItem> '''
+        u'''provideObjectSchemaItemForStruct(TStructsSchemaItems & '''
+        u'''StructsSchemaItems, const std::string & StructName);\n'''
+        u'''\n'''
+        u'''    /**\n'''
+        u'''     * @brief Initializes all struct schema items.\n'''
+        u'''     */\n'''
+        u'''    void initStructSchemaItems(TStructsSchemaItems & '''
+        u'''StructsSchemaItems);\n'''
+        u'''\n'''
+        u'''    /**\n'''
+        u'''     * @brief Initializes all schemas.\n'''
+        u'''     */\n'''
+        u'''    void initSchemas(TStructsSchemaItems & '''
+        u'''StructsSchemaItems);\n'''
+        u'''\n'''
+        u'''$init_function_decls'''
+        u'''\n'''
+        u'''$init_struct_decls'''
+        u'''};''')
 
-    _function_return_comment = ''' * @return NsAppLink::NsSmartObjects::''' \
-                               '''CSmartSchema\n'''
+    _function_return_comment = u''' * @return NsAppLink::NsSmartObjects::''' \
+                               u'''CSmartSchema\n'''
 
     _function_decl_template = string.Template(
-        '''$comment\n'''
-        '''static NsAppLink::NsSmartObjects::CSmartSchema '''
-        '''initFunction_${function_id}_${message_type}('''
-        '''TStructsSchemaItems & StructsSchemaItems);''')
+        u'''$comment\n'''
+        u'''static NsAppLink::NsSmartObjects::CSmartSchema '''
+        u'''initFunction_${function_id}_${message_type}('''
+        u'''TStructsSchemaItems & StructsSchemaItems);''')
 
     _struct_decl_template = string.Template(
-        '''$comment\n'''
-        '''static NsAppLink::NsSmartObjects::'''
-        '''TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> '''
-        '''initStructSchemaItem_${struct_name}('''
-        '''TStructsSchemaItems & StructsSchemaItems);''')
+        u'''$comment\n'''
+        u'''static NsAppLink::NsSmartObjects::'''
+        u'''TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> '''
+        u'''initStructSchemaItem_${struct_name}('''
+        u'''TStructsSchemaItems & StructsSchemaItems);''')
 
     _class_comment_template = string.Template(
-        '''/**\n'''
-        ''' * @brief Class $class_name.\n'''
-        ''' *\n'''
-        ''' * Params:\n'''
-        '''$class_params'''
-        ''' */''')
+        u'''/**\n'''
+        u''' * @brief Class $class_name.\n'''
+        u''' *\n'''
+        u''' * Params:\n'''
+        u'''$class_params'''
+        u''' */''')
 
     _comment_doxygen_template = string.Template(
-        '''/**\n'''
-        '''$brief_description'''
-        '''$description'''
-        '''$design_description'''
-        '''$issues'''
-        '''$todos'''
-        '''$returns */''')
+        u'''/**\n'''
+        u'''$brief_description'''
+        u'''$description'''
+        u'''$design_description'''
+        u'''$issues'''
+        u'''$todos'''
+        u'''$returns */''')
 
     _comment_cpp_template = string.Template(
-        '''$brief_description'''
-        '''$description'''
-        '''$design_description'''
-        '''$issues'''
-        '''$todos'''
-        '''$returns''')
+        u'''$brief_description'''
+        u'''$description'''
+        u'''$design_description'''
+        u'''$issues'''
+        u'''$todos'''
+        u'''$returns''')
 
     _enum_template = string.Template(
-        '''namespace $name\n'''
-        '''{\n'''
-        '''$comment'''
-        '''    enum eType\n'''
-        '''    {\n'''
-        '''$enum_items    };\n'''
-        '''}\n''')
+        u'''namespace $name\n'''
+        u'''{\n'''
+        u'''$comment'''
+        u'''    enum eType\n'''
+        u'''    {\n'''
+        u'''$enum_items    };\n'''
+        u'''}\n''')
 
     _enum_element_with_value_template = string.Template(
-        '''$comment\n'''
-        '''$name = $value''')
+        u'''$comment\n'''
+        u'''$name = $value''')
 
     _enum_element_with_no_value_template = string.Template(
-        '''$comment\n'''
-        '''$name''')
+        u'''$comment\n'''
+        u'''$name''')
 
-    _indent_template = "    "
+    _indent_template = u"    "
