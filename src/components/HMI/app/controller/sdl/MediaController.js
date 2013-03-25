@@ -110,7 +110,7 @@ MFT.SDLMediaController = Em.Object.create( {
     onDeleteApplication: function( appId ) {
         if( this.currentAppId == appId ){
 
-            if( MFT.sdlView.stateObj.active || MFT.SDLAppController.model.active ){
+            if( MFT.States.media.sdlmedia.active || MFT.SDLAppController.model.active ){
 
                 MFT.SDLAppController.model.set( 'active', false );
                 
