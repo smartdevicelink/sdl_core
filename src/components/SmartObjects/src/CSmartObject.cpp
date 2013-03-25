@@ -27,14 +27,19 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(SmartType type)
     switch(type) {
         case SmartType_Integer :
             set_value_long(0);
+            break;
         case SmartType_Double :
             set_value_double(0);
+            break;
         case SmartType_Boolean :
             set_value_bool(false);
+            break;
         case SmartType_Character :
             set_value_char(' ');
+            break;
         case SmartType_String :
             set_value_string("");
+            break;
         case SmartType_Invalid:
             m_type = SmartType_Invalid;
             break;
