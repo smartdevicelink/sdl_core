@@ -10,6 +10,16 @@ namespace NsAppLink
 {
     namespace NsJSONHandler
     {
+        namespace strings
+        {
+            extern const std::string S_MSG_PARAMS;
+            extern const std::string S_PARAMS;
+            extern const std::string S_FUNCTION_ID;
+            extern const std::string S_MESSAGE_TYPE;
+            extern const std::string S_PROTOCOL_VERSION;
+            extern const std::string S_CORRELATION_ID;
+        }
+
         template <class FunctionIdEnum, class MessageTypeEnum>
         struct SmartSchemaKey
         {
@@ -42,12 +52,12 @@ namespace NsAppLink
         template <class FunctionIdEnum, class MessageTypeEnum>
         bool CSmartFactory<FunctionIdEnum, MessageTypeEnum>::attachSchema(NsAppLink::NsSmartObjects::CSmartObject& object)
         {
-            if(false == object.keyExists("params")) return false;
-            if(false == object["params"].keyExists("msg_type")) return false;
-            if(false == object["params"].keyExists("function_id")) return false;
+            if(false == object.keyExists(strings::S_PARAMS)) return false;
+            if(false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE)) return false;
+            if(false == object[strings::S_PARAMS].keyExists(strings::S_FUNCTION_ID)) return false;
 
-            MessageTypeEnum msgtype((MessageTypeEnum)(int)object["params"]["msg_type"]);
-            FunctionIdEnum fid((FunctionIdEnum)(int)object["params"]["function_id"]);
+            MessageTypeEnum msgtype((MessageTypeEnum)(int)object[strings::S_PARAMS][strings::S_MESSAGE_TYPE]);
+            FunctionIdEnum fid((FunctionIdEnum)(int)object[strings::S_PARAMS][strings::S_FUNCTION_ID]);
 
             SmartSchemaKey<FunctionIdEnum, MessageTypeEnum> key(fid, msgtype);
 
@@ -85,18 +95,6 @@ namespace NsAppLink
 
             return false;
         }
-
-        namespace strings
-        {
-            extern const std::string S_MSG_PARAMS;
-            extern const std::string S_PARAMS;
-            extern const std::string S_FUNCTION_ID;
-            extern const std::string S_MESSAGE_TYPE;
-            extern const std::string S_PROTOCOL_VERSION;
-            extern const std::string S_CORRELATION_ID;
-        }
     }
-
-
 }
 #endif //__CSMARTFACTORY_HPP__
