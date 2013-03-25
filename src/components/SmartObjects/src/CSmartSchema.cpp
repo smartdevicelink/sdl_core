@@ -12,7 +12,7 @@ NsAppLink::NsSmartObjects::CSmartSchema::CSmartSchema(NsAppLink::NsSmartObjects:
 
 }
 
-bool NsAppLink::NsSmartObjects::CSmartSchema::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
+NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CSmartSchema::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
 {
     return mSchemaItem->validate(object);
 }
@@ -20,4 +20,9 @@ bool NsAppLink::NsSmartObjects::CSmartSchema::validate(const NsAppLink::NsSmartO
 void NsAppLink::NsSmartObjects::CSmartSchema::setSchemaItem(NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem)
 {
     mSchemaItem = SchemaItem;
+}
+
+void NsAppLink::NsSmartObjects::CSmartSchema::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+{
+    mSchemaItem->applySchema(Object);
 }

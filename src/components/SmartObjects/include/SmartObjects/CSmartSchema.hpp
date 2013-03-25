@@ -17,8 +17,15 @@ namespace NsAppLink
             CSmartSchema();
             CSmartSchema(TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem);
 
-            bool validate(const NsAppLink::NsSmartObjects::CSmartObject& object);
+            Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject& object);
             void setSchemaItem(TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem);
+
+            /**
+             * @brief Apply schema.
+             *
+             * @param Object Object to apply schema.
+             **/
+            virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
 
         protected:
             TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> mSchemaItem;
