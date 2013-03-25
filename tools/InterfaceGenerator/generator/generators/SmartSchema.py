@@ -102,7 +102,7 @@ class SmartSchema(object):
 
         self._gen_struct_schema_items(interface.structs.values())
 
-        function_id_items = u"";
+        function_id_items = u""
         if "FunctionID" in interface.enums:
             function_id = interface.enums["FunctionID"]
             function_id_items = u"\n".join(
@@ -1247,22 +1247,28 @@ class SmartSchema(object):
         u'''${schema_item_fill}'''
         u'''std::map<std::string, CObjectSchemaItem::SMember> '''
         u'''paramsMembersMap;\n'''
-        u'''paramsMembersMap["function_id"] = CObjectSchemaItem::'''
+        u'''paramsMembersMap[NsAppLink::NsJSONHandler::'''
+        u'''strings::S_FUNCTION_ID] = CObjectSchemaItem::'''
         u'''SMember(TEnumSchemaItem<FunctionID::eType>::'''
         u'''create(FunctionIDItems), true);\n'''
-        u'''paramsMembersMap["message_type"] = CObjectSchemaItem::'''
+        u'''paramsMembersMap[NsAppLink::NsJSONHandler::'''
+        u'''strings::S_MESSAGE_TYPE] = CObjectSchemaItem::'''
         u'''SMember(TEnumSchemaItem<messageType::eType>::'''
         u'''create(MessageTypeItems), true);\n'''
-        u'''paramsMembersMap["koral_ID"] = CObjectSchemaItem::'''
+        u'''paramsMembersMap[NsAppLink::NsJSONHandler::'''
+        u'''strings::S_CORRELATION_ID] = CObjectSchemaItem::'''
         u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
-        u'''paramsMembersMap["version"] = CObjectSchemaItem::'''
+        u'''paramsMembersMap[NsAppLink::NsJSONHandler::'''
+        u'''strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::'''
         u'''SMember(TNumberSchemaItem<int>::create(1, 2), true);\n\n'''
         u'''std::map<std::string, CObjectSchemaItem::SMember> '''
         u'''rootMembersMap;\n'''
-        u'''rootMembersMap["MSG_PARMS"] = '''
+        u'''rootMembersMap[NsAppLink::NsJSONHandler::'''
+        u'''strings::S_MSG_PARAMS] = '''
         u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
         u'''create(schemaMembersMap), true);\n'''
-        u'''rootMembersMap["PARAMS"] = '''
+        u'''rootMembersMap[NsAppLink::NsJSONHandler::'''
+        u'''strings::S_PARAMS] = '''
         u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
         u'''create(paramsMembersMap), true);\n\n'''
         u'''return CSmartSchema(CObjectSchemaItem::'''
