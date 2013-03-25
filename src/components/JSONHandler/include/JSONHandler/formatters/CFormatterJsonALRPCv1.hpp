@@ -15,6 +15,25 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
         CFormatterJsonALRPCv1();
         CFormatterJsonALRPCv1(const CFormatterJsonALRPCv1&);
 
+        /**
+         * @brief Extracts a message type from the SmartObject
+         */
+        static const std::string getMessageType(NsAppLink::NsSmartObjects::CSmartObject& obj);
+
+        /**
+         * @brief Extracts a message type from the root JSON object.
+         *
+         * @return Type or empty string if there's no type in the JSON object.
+         */
+        static const std::string getMessageType(const Json::Value& root);
+
+        // ALRPCv1 string consts
+        static const std::string S_REQUEST;
+        static const std::string S_RESPONSE;
+        static const std::string S_PARAMETERS;
+        static const std::string S_NAME;
+        static const std::string S_CORRELATION_ID;
+
     public:
 
         // TODO: Make const input params

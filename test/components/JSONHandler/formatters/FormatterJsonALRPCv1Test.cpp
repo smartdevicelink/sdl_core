@@ -20,8 +20,9 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         NsAppLink::NsSmartObjects::CSmartObject srcObj;
         NsAppLink::NsSmartObjects::CSmartObject dstObj;
 
-        srcObj["params"]["MessageType"] = 0;
-        srcObj["params"]["FunctionId"] = 0;
+        srcObj["params"]["message_type"] = "request";
+        srcObj["params"]["function_id"] = "some function";
+        srcObj["params"]["correlation_id"] = 12;
         srcObj["msg_params"]["appId"] = "APP ID";
         srcObj["msg_params"]["appName"] = "APP NAME";
         srcObj["msg_params"]["appType"][0] = "SYSTEM";
