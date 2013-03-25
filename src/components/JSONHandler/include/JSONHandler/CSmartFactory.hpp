@@ -59,6 +59,7 @@ namespace NsAppLink
             }
 
             object.setSchema(schemaIterator->second);
+            schemaIterator->second.applySchema(object);
 
             return true;
         }
