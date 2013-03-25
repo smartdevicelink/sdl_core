@@ -24,7 +24,7 @@ namespace NsAppLink
             SmartType_Double    = 5,
             SmartType_Map       = 6,
             SmartType_Array     = 7,
-            SmartType_Unknown   = -1
+            SmartType_Invalid   = -1
         };
 
         typedef std::vector<CSmartObject> SmartArray;
@@ -35,6 +35,7 @@ namespace NsAppLink
         public:
             CSmartObject();
             CSmartObject(const CSmartObject&);
+            CSmartObject(SmartType type);
             ~CSmartObject();
 
             CSmartObject& operator=(const CSmartObject&);
@@ -138,7 +139,7 @@ namespace NsAppLink
              *
              * @return bool
              **/
-            bool isValid();
+            Errors::eType isValid();
 
             /**
              * @brief Sets new schema

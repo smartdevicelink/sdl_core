@@ -20,6 +20,27 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const NsAppLink::NsSmartOb
     duplicate(object);
 }
 
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(SmartType type)
+: m_type(SmartType_Null)
+, m_schema()
+{
+    switch(type) {
+        case SmartType_Integer :
+            set_value_long(0);
+        case SmartType_Double :
+            set_value_double(0);
+        case SmartType_Boolean :
+            set_value_bool(false);
+        case SmartType_Character :
+            set_value_char(' ');
+        case SmartType_String :
+            set_value_string("");
+        case SmartType_Invalid:
+            m_type = SmartType_Invalid;
+            break;
+    }
+}
+
 NsAppLink::NsSmartObjects::CSmartObject::~CSmartObject()
 {
     cleanup_data();
@@ -54,6 +75,8 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(const NsAppLink::NsSmar
             return std::equal(m_data.array_value->begin(), m_data.array_value->end(), object.m_data.array_value->begin());
         case SmartType_Null :
             return true;
+        case SmartType_Invalid:
+            return true;
     }
     return false;
 }
@@ -76,7 +99,10 @@ NsAppLink::NsSmartObjects::CSmartObject::operator int(void) const
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(int i)
 {
-    set_value_integer(i);
+    if(m_type != SmartType_Invalid)
+    {
+        set_value_integer(i);
+    }
     return *this;
 }
 
@@ -148,7 +174,10 @@ NsAppLink::NsSmartObjects::CSmartObject::operator long(void) const
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(long l)
 {
-    set_value_integer(l);
+    if(m_type != SmartType_Invalid)
+    {
+        set_value_integer(l);
+    }
     return *this;
 }
 
@@ -210,7 +239,10 @@ NsAppLink::NsSmartObjects::CSmartObject::operator double(void) const
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(double d)
 {
-    set_value_double(d);
+    if(m_type != SmartType_Invalid)
+    {
+        set_value_double(d);
+    }
     return *this;
 }
 
@@ -270,7 +302,10 @@ NsAppLink::NsSmartObjects::CSmartObject::operator bool(void) const
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(bool b)
 {
-    set_value_bool(b);
+    if(m_type != SmartType_Invalid)
+    {
+        set_value_bool(b);
+    }
     return *this;
 }
 
@@ -333,7 +368,10 @@ NsAppLink::NsSmartObjects::CSmartObject::operator char(void) const
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(char c)
 {
-    set_value_char(c);
+    if(m_type != SmartType_Invalid)
+    {
+        set_value_char(c);
+    }
     return *this;
 }
 
@@ -391,7 +429,10 @@ NsAppLink::NsSmartObjects::CSmartObject::operator std::string(void) const
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const std::string& s)
 {
-    set_value_string(s);
+    if(m_type != SmartType_Invalid)
+    {
+        set_value_string(s);
+    }
     return *this;
 }
 
@@ -454,7 +495,10 @@ NsAppLink::NsSmartObjects::CSmartObject::operator char*(void) const
 */
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const char* s)
 {
-    set_value_cstr(s);
+    if(m_type != SmartType_Invalid)
+    {
+        set_value_cstr(s);
+    }
     return *this;
 }
 
@@ -493,6 +537,11 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
 
 inline NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::handle_array_access(int index)
 {
+    if(m_type == SmartType_Invalid)
+    {
+        return *this;
+    }
+
     if(m_type != SmartType_Array)
     {
         cleanup_data();
@@ -568,6 +617,11 @@ const NsAppLink::NsSmartObjects::CSmartObject & NsAppLink::NsSmartObjects::CSmar
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::handle_map_access(const std::string s)
 {
+    if(m_type == SmartType_Invalid)
+    {
+        return *this;
+    }
+
     //TODO: implement handling of non-existing keys similar to array
     if(m_type != SmartType_Map)
     {
@@ -763,7 +817,7 @@ bool NsAppLink::NsSmartObjects::CSmartObject::keyExists(const std::string & Key)
     return m_data.map_value->count(Key);
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::isValid()
+NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CSmartObject::isValid()
 {
     return m_schema.validate(*this);
 }
