@@ -33,17 +33,13 @@
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 OnVRCommandNotification::OnVRCommandNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
 OnVRCommandNotification::~OnVRCommandNotification() {
@@ -56,7 +52,7 @@ void OnVRCommandNotification::Run() {
     NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
 
   (*message_)[strings::params][strings::trigger_source] =
-      NsSmartDeviceLinkRPC::V2::TriggerSource::TS_VR;
+    NsSmartDeviceLinkRPC::V2::TriggerSource::TS_VR;
   SendNotificationToMobile(message_);
 }
 

@@ -31,17 +31,13 @@
  */
 #include "application_manager/commands/hmi/vr_get_supported_languages_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 VRGetSupportedLanguagesResponse::VRGetSupportedLanguagesResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {
@@ -50,7 +46,7 @@ VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {
 void VRGetSupportedLanguagesResponse::Run() {
   LOG4CXX_INFO(logger_, "VRGetSupportedLanguagesResponse::Run");
   ApplicationManagerImpl::instance()->set_vr_supported_languages(
-      (*message_)[strings::msg_params][hmi_response::languages]);
+    (*message_)[strings::msg_params][hmi_response::languages]);
 }
 
 }  // namespace commands

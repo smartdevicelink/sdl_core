@@ -36,16 +36,12 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/Result.h"
-//#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
 namespace str = strings;
-
-/*log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));*/
 
 UnsubscribeButtonRequest::UnsubscribeButtonRequest(
   const MessageSharedPtr& message): CommandRequestImpl(message) {

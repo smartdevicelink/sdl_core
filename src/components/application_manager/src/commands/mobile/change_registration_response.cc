@@ -35,17 +35,13 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 ChangeRegistrationResponse::ChangeRegistrationResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 ChangeRegistrationResponse::~ChangeRegistrationResponse() {
@@ -59,10 +55,10 @@ void ChangeRegistrationResponse::Run() {
   }
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+    (*message_)[strings::params][strings::correlation_id].asInt();
 
   MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -78,29 +74,29 @@ void ChangeRegistrationResponse::Run() {
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id)) {
+        correlation_id)) {
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application(data[strings::params][strings::connection_key]));
+                                     ApplicationManagerImpl::instance()->
+                                     application(data[strings::params][strings::connection_key]));
 
     if (mobile_api::Result::SUCCESS == result_ui) {
       application->set_language(
-          static_cast<mobile_api::Language::eType>(
-              data[strings::msg_params][strings::language].asInt()));
+        static_cast<mobile_api::Language::eType>(
+          data[strings::msg_params][strings::language].asInt()));
     }
 
     if (mobile_api::Result::SUCCESS == result_vr) {
       application->set_ui_language(
-          static_cast<mobile_api::Language::eType>(
-            data[strings::msg_params][strings::hmi_display_language].asInt()));
+        static_cast<mobile_api::Language::eType>(
+          data[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
     if ((mobile_api::Result::SUCCESS == result_ui) &&
         (mobile_api::Result::SUCCESS == result_vr)) {
-          (*message_)[strings::msg_params][strings::success] = true;
-          (*message_)[strings::msg_params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-          SendResponse();
+      (*message_)[strings::msg_params][strings::success] = true;
+      (*message_)[strings::msg_params][strings::result_code] =
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+      SendResponse();
     } else {
       // TODO(VS): check ui and vr response code
     }

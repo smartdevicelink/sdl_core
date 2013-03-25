@@ -36,13 +36,12 @@
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 PutFileRequest::PutFileRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 PutFileRequest::~PutFileRequest() {
@@ -50,8 +49,8 @@ PutFileRequest::~PutFileRequest() {
 
 void PutFileRequest::Run() {
   ApplicationImpl* application =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+    static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
+                                  application((*message_)[strings::params][strings::connection_key]));
 
   if (!application) {
     SendResponse(false,
@@ -62,20 +61,20 @@ void PutFileRequest::Run() {
   uint64_t free_space = file_system::AvailableSpace();
 
   const std::string& sync_file_name =
-      (*message_)[strings::msg_params][strings::sync_file_name];
+    (*message_)[strings::msg_params][strings::sync_file_name];
 
   bool is_persistent_file = false;
 
   if ((*message_)[strings::msg_params].keyExists(strings::persistent_file)) {
     is_persistent_file =
-        (*message_)[strings::msg_params][strings::persistent_file];
+      (*message_)[strings::msg_params][strings::persistent_file];
   }
 
   const std::vector<unsigned char> file_data = message_->asBinary();
 
   if (free_space > file_data.size()) {
     std::string relative_file_path =
-        file_system::CreateDirectory(application->name());
+      file_system::CreateDirectory(application->name());
     relative_file_path += "/";
     relative_file_path += sync_file_name;
 

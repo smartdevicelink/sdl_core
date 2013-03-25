@@ -31,17 +31,17 @@
  */
 
 #include "application_manager/commands/hmi/close_popup_request.h"
-#include "utils/logger.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+
+
 
 ClosePopupRequest::ClosePopupRequest(
-    const MessageSharedPtr& message): RequestToHMI(message) {
+  const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
 ClosePopupRequest::~ClosePopupRequest() {

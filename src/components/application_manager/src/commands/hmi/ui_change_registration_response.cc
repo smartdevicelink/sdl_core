@@ -33,17 +33,13 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 UIChangeRegistratioResponse::UIChangeRegistratioResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UIChangeRegistratioResponse::~UIChangeRegistratioResponse() {
@@ -53,10 +49,10 @@ void UIChangeRegistratioResponse::Run() {
   LOG4CXX_INFO(logger_, "UIChangeRegistratioResponse::Run");
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+    (*message_)[strings::params][strings::correlation_id].asInt();
 
   MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -67,14 +63,14 @@ void UIChangeRegistratioResponse::Run() {
    * in corresponding Mobile response
    */
   const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+    static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
       (*message_)[strings::msg_params][hmi_response::code].asInt());
 
   msg_chain->set_ui_response_result(code);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::ChangeRegistrationID;
+    NsSmartDeviceLinkRPC::V2::FunctionID::eType::ChangeRegistrationID;
 
   SendResponseToMobile(message_);
 }

@@ -32,17 +32,17 @@
 
 #include "application_manager/commands/hmi/on_ui_language_change_notification.h"
 #include "application_manager/application_manager_impl.h"
-#include "utils/logger.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+
+
 
 OnUILanguageChangeNotification::OnUILanguageChangeNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
 OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {
@@ -53,19 +53,19 @@ void OnUILanguageChangeNotification::Run() {
   // TODO(VS): Set UI language in application manager
 
   (*message_)[strings::msg_params][strings::hmi_display_language] =
-      (*message_)[strings::msg_params][strings::language];
+    (*message_)[strings::msg_params][strings::language];
 
   // TODO(VS): Get language from  application manager
   // (*message_)[strings::msg_params][strings::language]
 
   (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID;
+    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID;
 
   std::set<Application*> applications = ApplicationManagerImpl::instance()
-      ->applications();
+                                        ->applications();
 
   for (std::set<Application*>::iterator it = applications.begin();
-      applications.end() != it; ++it) {
+       applications.end() != it; ++it) {
     if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE
         != static_cast<ApplicationImpl*>(*it)->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
