@@ -45,7 +45,7 @@
 #include "request_watchdog/watchdog_subscriber.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/hmi_capabilities.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -75,7 +75,8 @@ typedef std::map<unsigned int, MessageChainPtr> MessageChains;
 class ApplicationManagerImpl : public ApplicationManager
   , public hmi_message_handler::HMIMessageObserver
   , public connection_handler::ConnectionHandlerObserver
-    , public request_watchdog::WatchdogSubscriber {
+  , public request_watchdog::WatchdogSubscriber
+    , public HMICapabilities {
   public:
     ~ApplicationManagerImpl();
     static ApplicationManagerImpl* instance();
@@ -94,21 +95,6 @@ class ApplicationManagerImpl : public ApplicationManager
     /////////////////////////////////////////////////////
 
     bool RegisterApplication(Application* application);
-    bool UnregisterApplication(Application* application);
-    void UnregisterAllApplications();
-    bool RemoveAppDataFromHMI(Application* application);
-    bool LoadAppDataToHMI(Application* application);
-    bool ActivateApplication(Application* application);
-    void ConnectToDevice(unsigned int id);
-
-    /*
-     * @brief Closes all registered applications
-     *
-     * @param reason Describes reason for exiting application
-     */
-    void ExitAllApplications(
-        const hmi_apis::Common_ApplicationsCloseReason::eType& reason);
-
     /*
      * @brief Closes application by id
      *
@@ -116,7 +102,20 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return operation result
      */
-     hmi_apis::Common_Result::eType& ExitApplication(int app_id);
+    bool UnregisterApplication(int app_id);
+
+    /*
+     * @brief Closes all registered applications
+     *
+     * @param hmi_off Describes if the reason for exiting
+     *  applications was HU switching off
+     */
+    void UnregisterAllApplications(bool hmi_off = false);
+    bool RemoveAppDataFromHMI(Application* application);
+    bool LoadAppDataToHMI(Application* application);
+    bool ActivateApplication(Application* application);
+    void ConnectToDevice(unsigned int id);
+    void OnHMIStartedCooperation();
 
     /*
      * @brief Add to the chain amount of requests sent to hmi
@@ -134,11 +133,11 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return pointer to MessageChaining
      */
     MessageChaining* AddMessageChain(
-        MessageChaining* chain,
-        unsigned int connection_key,
-        unsigned int correlation_id,
-        unsigned int function_id,
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
+      MessageChaining* chain,
+      unsigned int connection_key,
+      unsigned int correlation_id,
+      unsigned int function_id,
+      const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
      * @brief Decrease chain for correlation ID
@@ -174,27 +173,11 @@ class ApplicationManagerImpl : public ApplicationManager
     void set_audio_pass_thru_flag(bool flag);
 
     /*
-     * @brief Retrieves if mixing audio is supported by HMI
-     * (ie recording TTS command and playing audio)
-     *
-     * @return Current state of the mixing audio flag
-     */
-    bool attenuated_supported() const;
-
-    /*
-     * @brief Sets state for mixing audio
-     *
-     * @param state New state to be set
-     */
-    void set_attenuated_supported(bool state);
-
-    /*
      * @brief Retrieves driver distraction state
      *
      * @return Current state of the distraction state
      */
-    inline const hmi_apis::Common_DriverDistractionState::eType&
-        driver_distraction() const;
+    inline bool driver_distraction() const;
 
     /*
      * @brief Sets state for driver distraction
@@ -202,55 +185,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @param state New state to be set
      */
     void set_driver_distraction(
-        const hmi_apis::Common_DriverDistractionState::eType& state);
-
-    /*
-     * @brief Retrieves UI supported languages
-     *
-     * @return Currently supported UI languages
-     */
-    inline const smart_objects::CSmartObject*
-        ui_supported_languages() const;
-
-    /*
-     * @brief Sets supported UI languages
-     *
-     * @param supported_languages Supported UI languages
-     */
-    void set_ui_supported_languages(
-        const smart_objects::CSmartObject& supported_languages);
-
-    /*
-     * @brief Retrieves TTS  supported languages
-     *
-     * @return Currently supported TTS languages
-     */
-    inline const smart_objects::CSmartObject*
-        tts_supported_languages() const;
-
-    /*
-     * @brief Sets supported TTS languages
-     *
-     * @param supported_languages Supported TTS languages
-     */
-    void set_tts_supported_languages(
-        const smart_objects::CSmartObject& supported_languages);
-
-    /*
-     * @brief Retrieves VR supported languages
-     *
-     * @return Currently supported VR languages
-     */
-    inline const smart_objects::CSmartObject*
-        vr_supported_languages() const;
-
-    /*
-     * @brief Sets supported VR languages
-     *
-     * @param supported_languages Supported VR languages
-     */
-    void set_vr_supported_languages(
-        const smart_objects::CSmartObject& supported_languages);
+      bool is_distracting);
 
     /*
      * @brief Retrieves if VR session has started
@@ -265,54 +200,6 @@ class ApplicationManagerImpl : public ApplicationManager
      * @param state Current HMI VR session state
      */
     void set_vr_session_started(const bool& state);
-
-    /*
-     * @brief Retrieves information about the display capabilities
-     *
-     * @return Currently supported display capabilities
-     */
-    inline const smart_objects::CSmartObject*
-        display_capabilities() const;
-
-    /*
-     * @brief Sets supported display capabilities
-     *
-     * @param display_capabilities supported display capabilities
-     */
-    void set_display_capabilities(
-        const smart_objects::CSmartObject& display_capabilities);
-
-    /*
-     * @brief Retrieves information about the HMI zone capabilities
-     *
-     * @return Currently supported HMI zone capabilities
-     */
-    inline const smart_objects::CSmartObject*
-        hmi_zone_capabilities() const;
-
-    /*
-     * @brief Sets supported HMI zone capabilities
-     *
-     * @param hmi_zone_capabilities supported HMI zone capabilities
-     */
-    void set_hmi_zone_capabilities(
-        const smart_objects::CSmartObject& hmi_zone_capabilities);
-
-    /*
-     * @brief Retrieves information about the SoftButton's capabilities
-     *
-     * @return Currently supported SoftButton's capabilities
-     */
-    inline const smart_objects::CSmartObject*
-        soft_button_capabilities() const;
-
-    /*
-     * @brief Sets supported SoftButton's capabilities
-     *
-     * @param soft_button_capabilities supported SoftButton's capabilities
-     */
-    void set_soft_button_capabilities(
-        const smart_objects::CSmartObject& soft_button_capabilities);
 
     /*
      * @brief Starts audio pass thru thread
@@ -352,8 +239,10 @@ class ApplicationManagerImpl : public ApplicationManager
 
     /////////////////////////////////////////////////////////
 
-    void onMessageReceived(application_manager::Message* message);
-    void onErrorSending(application_manager::Message* message);
+    void onMessageReceived(
+      utils::SharedPtr<application_manager::Message> message);
+    void onErrorSending(
+      utils::SharedPtr<application_manager::Message> message);
 
     void OnDeviceListUpdated(
       const connection_handler::DeviceList& device_list);
@@ -398,69 +287,34 @@ class ApplicationManagerImpl : public ApplicationManager
     /**
      * @brief Map of connection keys and associated applications
      */
-    std::map<int, Application*>                     applications_;
+    std::map<int, Application*> applications_;
     /**
      * @brief List of applications
      */
-    std::set<Application*>                          application_list_;
-    MessageChains                                   message_chaining_;
-    bool                                            hmi_deletes_commands_;
-    bool                                            audio_pass_thru_flag_;
-    threads::Thread*                                perform_audio_thread_;
-    bool                                            attenuated_supported_;
-    hmi_apis::Common_DriverDistractionState::eType  driver_distraction_;
-    smart_objects::CSmartObject*                    ui_supported_languages_;
-    smart_objects::CSmartObject*                    tts_supported_languages_;
-    smart_objects::CSmartObject*                    vr_supported_languages_;
-    bool                                            is_vr_session_strated_;
-    smart_objects::CSmartObject*                    display_capabilities_;
-    smart_objects::CSmartObject*                    hmi_zone_capabilities_;
-    smart_objects::CSmartObject*                    soft_buttons_capabilities_;
+    std::set<Application*> application_list_;
+    MessageChains message_chaining_;
+    bool audio_pass_thru_flag_;
+    threads::Thread* perform_audio_thread_;
+    bool is_distracting_driver_;
+    bool is_vr_session_strated_;
+    bool hmi_cooperating_;
+
+    hmi_message_handler::HMIMessageHandler* hmi_handler_;
+    mobile_message_handler::MobileMessageHandler* mobile_handler_;
+    connection_handler::ConnectionHandler* connection_handler_;
+    request_watchdog::Watchdog* watchdog_;
+
+    static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
 
 const std::set<Application*>& ApplicationManagerImpl::applications() const {
-    return application_list_;
+  return application_list_;
 }
 
-const hmi_apis::Common_DriverDistractionState::eType&
-    ApplicationManagerImpl::driver_distraction() const {
-  return driver_distraction_;
-}
-
-const smart_objects::CSmartObject*
-    ApplicationManagerImpl::ui_supported_languages() const {
-  return ui_supported_languages_;
-}
-
-const smart_objects::CSmartObject*
-    ApplicationManagerImpl::tts_supported_languages() const {
-  return tts_supported_languages_;
-}
-
-const smart_objects::CSmartObject*
-    ApplicationManagerImpl::vr_supported_languages() const {
-  return vr_supported_languages_;
-}
-
-inline bool ApplicationManagerImpl::vr_session_started() const {
-  return is_vr_session_strated_;
-}
-
-inline const smart_objects::CSmartObject*
-    ApplicationManagerImpl::display_capabilities() const {
-  return display_capabilities_;
-}
-
-inline const smart_objects::CSmartObject*
-    ApplicationManagerImpl::hmi_zone_capabilities() const {
-  return hmi_zone_capabilities_;
-}
-
-inline const smart_objects::CSmartObject*
-    ApplicationManagerImpl::soft_button_capabilities() const {
-  return soft_buttons_capabilities_;
+bool ApplicationManagerImpl::driver_distraction() const {
+  return is_distracting_driver_;
 }
 
 }  // namespace application_manager

@@ -33,14 +33,14 @@
 
 #include "application_manager/commands/mobile/reset_global_properties_response.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+//#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+/*log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));*/
 
 ResetGlobalPropertiesResponse::ResetGlobalPropertiesResponse(
   const MessageSharedPtr& message): CommandResponseImpl(message) {

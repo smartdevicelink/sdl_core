@@ -33,6 +33,7 @@
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
+#include "application_manager/hmi_command_factory.h"
 #include "application_manager/message_conversion.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/audio_pass_thru_thread_impl.h"
@@ -41,30 +42,20 @@
 
 namespace application_manager {
 
+log4cxx::LoggerPtr ApplicationManagerImpl::logger_   =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
+
 ApplicationManagerImpl::ApplicationManagerImpl()
-: hmi_deletes_commands_(false),
-  audio_pass_thru_flag_(false),
-  perform_audio_thread_(NULL),
-  attenuated_supported_(false),
-  driver_distraction_(hmi_apis::Common_DriverDistractionState::INVALID_ENUM ),
-  ui_supported_languages_(NULL),
-  tts_supported_languages_(NULL),
-  vr_supported_languages_(NULL),
-  is_vr_session_strated_(false),
-  display_capabilities_(NULL),
-  hmi_zone_capabilities_(NULL),
-  soft_buttons_capabilities_(NULL) {
+  : audio_pass_thru_flag_(false),
+    perform_audio_thread_(NULL),
+    is_distracting_driver_(false),
+    is_vr_session_strated_(false),
+    hmi_cooperating_(false) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
   delete perform_audio_thread_;
-  delete ui_supported_languages_;
-  delete tts_supported_languages_;
-  delete vr_supported_languages_;
-  delete display_capabilities_;
-  delete hmi_zone_capabilities_;
-  delete soft_buttons_capabilities_;
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -111,7 +102,7 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
   unsigned int vehicle_info) {
   std::vector<Application*> result;
   for (std::set<Application*>::iterator it = application_list_.begin();
-      application_list_.end() != it; ++it) {
+       application_list_.end() != it; ++it) {
     if ((*it)->IsSubscribedToIVI(vehicle_info)) {
       result.push_back(*it);
     }
@@ -122,8 +113,8 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
 std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
   std::vector<Application*> result;
   for (std::set<Application*>::iterator it = application_list_.begin();
-      application_list_.end() != it;
-      ++it) {
+       application_list_.end() != it;
+       ++it) {
     if ((*it)->SupportsNavigation()) {
       result.push_back(*it);
     }
@@ -152,22 +143,18 @@ bool ApplicationManagerImpl::RegisterApplication(Application* application) {
   return true;
 }
 
-bool ApplicationManagerImpl::UnregisterApplication(Application* application) {
-  DCHECK(application);
-  if (NULL == application) {
-    return false;
-  }
-  std::map<int, Application*>::iterator it = applications_.find(
-        application->app_id());
+bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
+  std::map<int, Application*>::iterator it = applications_.find(app_id);
   if (applications_.end() == it) {
     return false;
   }
+  Application* app_to_remove = it->second;
   applications_.erase(it);
-  application_list_.erase(application);
+  application_list_.erase(app_to_remove);
   return true;
 }
 
-void ApplicationManagerImpl::UnregisterAllApplications() {
+void ApplicationManagerImpl::UnregisterAllApplications(bool hmi_off) {
   applications_.clear();
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
@@ -175,10 +162,31 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     delete(*it);
   }
   application_list_.clear();
+
+  if (hmi_off) {
+    hmi_cooperating_ = false;
+  }
+}
+
+bool ApplicationManagerImpl::RemoveAppDataFromHMI(Application* application) {
+  return true;
+}
+
+bool ApplicationManagerImpl::LoadAppDataToHMI(Application* application) {
+  return true;
+}
+
+bool ApplicationManagerImpl::ActivateApplication(Application* application) {
+  return true;
 }
 
 void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
   // TODO(VS): Call function from ConnectionHandler
+}
+
+void ApplicationManagerImpl::OnHMIStartedCooperation() {
+  hmi_cooperating_ = true;
+  //HMICommandFactory::CreateCommand
 }
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
@@ -211,10 +219,10 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
-    unsigned int correlation_id) {
+  unsigned int correlation_id) {
   bool result = false;
   MessageChains::iterator it =
-      message_chaining_.find(correlation_id);
+    message_chaining_.find(correlation_id);
 
   if (message_chaining_.end() != it) {
     (*it->second).DecrementCounter();
@@ -229,7 +237,7 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 MessageChaining* ApplicationManagerImpl::GetMessageChain(
   unsigned int correlation_id) const {
   MessageChains::const_iterator it =
-      message_chaining_.find(correlation_id);
+    message_chaining_.find(correlation_id);
   if (message_chaining_.end() != it) {
     return &(*it->second);
   }
@@ -245,87 +253,25 @@ void ApplicationManagerImpl::set_audio_pass_thru_flag(bool flag) {
   audio_pass_thru_flag_ = flag;
 }
 
-bool ApplicationManagerImpl::attenuated_supported() const {
-  return attenuated_supported_;
-}
-
-void ApplicationManagerImpl::set_attenuated_supported(bool state) {
-  attenuated_supported_ = state;
-}
-
 void ApplicationManagerImpl::set_driver_distraction(
-    const hmi_apis::Common_DriverDistractionState::eType& state) {
-  driver_distraction_ = state;
-}
-
-void ApplicationManagerImpl::set_ui_supported_languages(
-    const smart_objects::CSmartObject& supported_languages) {
-  if (ui_supported_languages_) {
-    delete ui_supported_languages_;
-  }
-  ui_supported_languages_ =
-    new smart_objects::CSmartObject(supported_languages);
-}
-
-void ApplicationManagerImpl::set_tts_supported_languages(
-    const smart_objects::CSmartObject& supported_languages) {
-  if (tts_supported_languages_) {
-    delete tts_supported_languages_;
-  }
-  tts_supported_languages_ =
-    new smart_objects::CSmartObject(supported_languages);
-}
-
-void ApplicationManagerImpl::set_vr_supported_languages(
-    const smart_objects::CSmartObject& supported_languages) {
-  if (vr_supported_languages_) {
-    delete vr_supported_languages_;
-  }
-  vr_supported_languages_ =
-    new smart_objects::CSmartObject(supported_languages);
+  bool is_distracting) {
+  is_distracting_driver_ = is_distracting;
 }
 
 void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
   is_vr_session_strated_ = state;
 }
 
-void ApplicationManagerImpl::set_display_capabilities(
-    const smart_objects::CSmartObject& display_capabilities) {
-  if (display_capabilities_) {
-     delete display_capabilities_;
-   }
-  display_capabilities_ =
-     new smart_objects::CSmartObject(display_capabilities);
-}
-
-void ApplicationManagerImpl::set_hmi_zone_capabilities(
-    const smart_objects::CSmartObject& hmi_zone_capabilities) {
-  if (hmi_zone_capabilities_) {
-     delete hmi_zone_capabilities_;
-   }
-  hmi_zone_capabilities_ =
-     new smart_objects::CSmartObject(hmi_zone_capabilities);
-}
-
-void ApplicationManagerImpl::set_soft_button_capabilities(
-    const smart_objects::CSmartObject& soft_button_capabilities) {
-  if (soft_buttons_capabilities_) {
-     delete soft_buttons_capabilities_;
-   }
-  soft_buttons_capabilities_ =
-     new smart_objects::CSmartObject(soft_button_capabilities);
-}
-
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int correlation_id, int max_duration, int sampling_rate,
     int bits_per_sample, int audio_type) {
   AudioPassThruThreadImpl* thread_impl = new AudioPassThruThreadImpl(
-      static_cast<unsigned int>(session_key),
-      static_cast<unsigned int>(correlation_id),
-      static_cast<unsigned int>(max_duration),
-      static_cast<SamplingRate>(sampling_rate),
-      static_cast<AudioCaptureQuality>(bits_per_sample),
-      static_cast<AudioType>(audio_type));
+    static_cast<unsigned int>(session_key),
+    static_cast<unsigned int>(correlation_id),
+    static_cast<unsigned int>(max_duration),
+    static_cast<SamplingRate>(sampling_rate),
+    static_cast<AudioCaptureQuality>(bits_per_sample),
+    static_cast<AudioType>(audio_type));
 
   thread_impl->Init();
   perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
@@ -342,13 +288,89 @@ void ApplicationManagerImpl::StopAudioPassThruThread() {
 }
 
 void ApplicationManagerImpl::onMessageReceived(
-  application_manager::Message* message) {
+  utils::SharedPtr<application_manager::Message> message) {
+  DCHECK(message);
+  if (!message) {
+    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    return;
+  }
+
   NsSmartDeviceLink::NsSmartObjects::CSmartObject smart_object =
     MessageToSmartObject(*message);
-  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&smart_object);
+  CommandSharedPtr command = HMICommandFactory::CreateCommand(&smart_object);
   command->Init();
   command->Run();
   command->CleanUp();
+}
+
+void ApplicationManagerImpl::onErrorSending(
+  utils::SharedPtr<application_manager::Message> message) {
+  return;
+}
+
+void ApplicationManagerImpl::OnDeviceListUpdated(
+  const connection_handler::DeviceList& device_list) {
+}
+void ApplicationManagerImpl::RemoveDevice(
+  const connection_handler::DeviceHandle device_handle) {
+}
+
+void ApplicationManagerImpl::OnSessionStartedCallback(
+  connection_handler::DeviceHandle device_handle, int session_key,
+  int first_session_key) {
+}
+
+void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
+    int first_session_key) {
+}
+
+void ApplicationManagerImpl::onTimeoutExpired(request_watchdog::RequestInfo) {
+}
+
+void ApplicationManagerImpl::set_hmi_message_handler(
+  hmi_message_handler::HMIMessageHandler* handler) {
+  hmi_handler_ = handler;
+}
+
+void ApplicationManagerImpl::set_mobile_message_handler(
+  mobile_message_handler::MobileMessageHandler* handler) {
+  mobile_handler_ = handler;
+}
+
+void ApplicationManagerImpl::set_connection_handler(
+  connection_handler::ConnectionHandler* handler) {
+  connection_handler_ = handler;
+}
+
+void ApplicationManagerImpl::set_watchdog(
+  request_watchdog::Watchdog* watchdog) {
+  watchdog_ = watchdog;
+}
+
+void ApplicationManagerImpl::SendMessageToMobile(
+  const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  return;
+}
+
+void ApplicationManagerImpl::SendMessageToHMI(
+  const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  return;
+}
+
+void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
+}
+
+void ApplicationManagerImpl::CreatePoliciesManager(PoliciesManager* managaer) {
+}
+
+bool ApplicationManagerImpl::CheckPolicies(smart_objects::CSmartObject* message,
+    Application* application) {
+  return true;
+}
+
+bool ApplicationManagerImpl::CheckHMIMatrix(
+  smart_objects::CSmartObject* message) {
+  return true;
 }
 
 }  // namespace application_manager

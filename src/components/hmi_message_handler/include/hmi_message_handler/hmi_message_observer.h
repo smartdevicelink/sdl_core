@@ -37,9 +37,11 @@ namespace hmi_message_handler {
 
 class HMIMessageObserver {
   public:
-    virtual void onMessageReceived(application_manager::Message* message) = 0;
-    virtual void onErrorSending(application_manager::Message* message) = 0;
+    virtual void onMessageReceived(
+      utils::SharedPtr<application_manager::Message> message) = 0;
+    virtual void onErrorSending(
+      utils::SharedPtr<application_manager::Message> message) = 0;
 };
 }
 
-#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER
+#endif  //  SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER

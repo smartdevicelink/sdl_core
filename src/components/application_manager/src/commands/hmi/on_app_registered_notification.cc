@@ -39,7 +39,10 @@ namespace application_manager {
 namespace commands {
 
 OnAppRegisteredNotification::OnAppRegisteredNotification(
-    const MessageSharedPtr& message): NotificationToHMI(message) {
+  const MessageSharedPtr& message): NotificationToHMI(message) {
+}
+
+OnAppRegisteredNotification::~OnAppRegisteredNotification() {
 }
 
 void OnAppRegisteredNotification::Run() {

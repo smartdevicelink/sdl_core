@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_READY_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -43,26 +44,26 @@ namespace commands {
  * @brief OnReadyNotification command class
  **/
 class OnReadyNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnReadyNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnReadyNotification(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief OnReadyNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnReadyNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnReadyNotification class destructor
-   **/
-  virtual ~OnReadyNotification();
+    /**
+     * @brief OnReadyNotification class destructor
+     **/
+    virtual ~OnReadyNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnReadyNotification);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnReadyNotification);
 };
 
 }  // namespace commands

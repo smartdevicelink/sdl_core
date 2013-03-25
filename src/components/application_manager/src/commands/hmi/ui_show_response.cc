@@ -31,17 +31,13 @@
  */
 #include "application_manager/commands/hmi/ui_show_response.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 UIShowResponse::UIShowResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UIShowResponse::~UIShowResponse() {
@@ -50,7 +46,8 @@ UIShowResponse::~UIShowResponse() {
 void UIShowResponse::Run() {
   LOG4CXX_INFO(logger_, "UIShowResponse::Run ");
 
-  (*message_)[strings::params][strings::function_id] = NsSmartDeviceLinkRPC::V2::FunctionID::eType::ShowID;
+  (*message_)[strings::params][strings::function_id] =
+    NsSmartDeviceLinkRPC::V2::FunctionID::eType::ShowID;
 
   SendResponseToMobile(message_);
 }

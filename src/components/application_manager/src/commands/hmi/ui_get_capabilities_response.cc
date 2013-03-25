@@ -31,17 +31,17 @@
  */
 #include "application_manager/commands/hmi/ui_get_capabilities_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "utils/logger.h"
+//#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+/*log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));*/
 
 UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {

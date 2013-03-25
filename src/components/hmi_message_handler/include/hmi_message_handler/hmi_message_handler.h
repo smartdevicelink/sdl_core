@@ -47,11 +47,11 @@ class HMIMessageAdapter;
 class HMIMessageHandler : public HMIMessageObserver,
   public HMIMessageSender {
   public:
-    virtual ~HMIMessageHandler() = 0;
+    virtual ~HMIMessageHandler() {}
     virtual void addHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
     virtual void removeHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
 };
 
 }  // namespace hmi_message_handler
 
-#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER
+#endif  //  SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER

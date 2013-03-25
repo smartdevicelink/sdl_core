@@ -36,17 +36,13 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 DeleteInteractionChoiceSetRequest::DeleteInteractionChoiceSetRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {
@@ -56,8 +52,8 @@ void DeleteInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run ");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
@@ -67,7 +63,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
   }
 
   const int choise_set_id =
-  (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
+    (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
 
   if (!app->FindChoiceSet(choise_set_id)) {
     SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
@@ -75,33 +71,33 @@ void DeleteInteractionChoiceSetRequest::Run() {
   }
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
-  MessageChaining * chain = NULL;
+  MessageChaining* chain = NULL;
 
   // create HMI request
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
   // TODO(DK): HMI Request Id
   const int ui_cmd_id = 21;
   (*p_smrt_ui)[strings::params][strings::function_id] =
-      ui_cmd_id;
+    ui_cmd_id;
 
   (*p_smrt_ui)[strings::params][strings::message_type] =
-      MessageType::kRequest;
+    MessageType::kRequest;
 
   (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
+    (*message_)[strings::msg_params][strings::cmd_id];
 
   (*p_smrt_ui)[strings::msg_params][strings::interaction_choice_set_id] =
-      choise_set_id;
+    choise_set_id;
 
   (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-      app->app_id();
+    app->app_id();
 
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
+          connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
 }

@@ -36,17 +36,13 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
@@ -55,9 +51,10 @@ ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
 void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run ");
 
+  int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application(app_id));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
@@ -67,12 +64,12 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
   size_t obj_length =
-      (*message_)[strings::msg_params][strings::properties].length();
+    (*message_)[strings::msg_params][strings::properties].length();
   for (size_t i = 0; i < obj_length; ++i) {
     switch ((*message_)[strings::msg_params][strings::properties][i].asInt()) {
       case GlobalProperty::HELPPROMT: {
@@ -93,7 +90,7 @@ void ResetGlobalPropertiesRequest::Run() {
       }
       default: {
         LOG4CXX_ERROR(logger_, "Unknown global property 0x%02X value" <<
-        (*message_)[strings::msg_params][strings::properties][i].asInt());
+                      (*message_)[strings::msg_params][strings::properties][i].asInt());
         break;
       }
     }
@@ -113,7 +110,7 @@ void ResetGlobalPropertiesRequest::Run() {
 }
 
 void ResetGlobalPropertiesRequest::ResetHelpPromt(ApplicationImpl* const app,
-                                                  bool is_timeout_promp) {
+    bool is_timeout_promp) {
   if (NULL == app) {
     return;
   }
@@ -140,12 +137,12 @@ void ResetGlobalPropertiesRequest::ResetHelpPromt(ApplicationImpl* const app,
 }
 
 void ResetGlobalPropertiesRequest::ResetTimeoutPromt(
-    ApplicationImpl* const app) {
+  ApplicationImpl* const app) {
   ResetHelpPromt(app, true);
 }
 
 void ResetGlobalPropertiesRequest::ResetVrHelpTitle(
-    ApplicationImpl* const app) {
+  ApplicationImpl* const app) {
   if (NULL == app) {
     return;
   }
@@ -155,7 +152,7 @@ void ResetGlobalPropertiesRequest::ResetVrHelpTitle(
 }
 
 void ResetGlobalPropertiesRequest::ResetVrHelpItems(
-    ApplicationImpl* const app) {
+  ApplicationImpl* const app) {
 }
 
 }  // namespace commands

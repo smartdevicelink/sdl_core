@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 ExitAllApplicationsRequest::ExitAllApplicationsRequest(
-    const MessageSharedPtr& message): RequestFromHMI(message) {
+  const MessageSharedPtr& message): RequestFromHMI(message) {
 }
 
 ExitAllApplicationsRequest::~ExitAllApplicationsRequest() {
@@ -48,10 +48,10 @@ ExitAllApplicationsRequest::~ExitAllApplicationsRequest() {
 
 void ExitAllApplicationsRequest::Run() {
   const hmi_apis::Common_ApplicationsCloseReason::eType reason =
-      static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
+    static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
       (*message_)[strings::msg_params][hmi_request::reason].asInt());
 
-  ApplicationManagerImpl::instance()->ExitAllApplications(reason);
+  ApplicationManagerImpl::instance()->UnregisterAllApplications(reason);
   SendResponseToHMI();
 }
 

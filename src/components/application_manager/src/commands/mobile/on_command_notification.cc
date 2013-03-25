@@ -35,14 +35,14 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+////#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+/*log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));*/
 
 OnCommandNotification::OnCommandNotification(
   const MessageSharedPtr& message): CommandNotificationImpl(message) {
@@ -56,7 +56,7 @@ void OnCommandNotification::Run() {
 
   ApplicationImpl* app =
     static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-       application((*message_)[strings::msg_params][strings::app_id].asInt()));
+                                  application((*message_)[strings::msg_params][strings::app_id].asInt()));
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -64,7 +64,7 @@ void OnCommandNotification::Run() {
   }
 
   const unsigned int cmd_id = static_cast<unsigned int>(
-      (*message_)[strings::msg_params][strings::cmd_id].asInt());
+                                (*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!app->FindCommand(cmd_id)) {
     LOG4CXX_ERROR_EXT(logger_,

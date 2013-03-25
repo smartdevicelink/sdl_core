@@ -31,17 +31,13 @@
  */
 
 #include "application_manager/commands/hmi/on_play_tone_notification.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 OnPlayToneNotification::OnPlayToneNotification(
-    const MessageSharedPtr& message): NotificationToHMI(message) {
+  const MessageSharedPtr& message): NotificationToHMI(message) {
 }
 
 OnPlayToneNotification::~OnPlayToneNotification() {

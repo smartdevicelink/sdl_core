@@ -39,7 +39,10 @@ namespace application_manager {
 namespace commands {
 
 OnAppUnregisteredNotification::OnAppUnregisteredNotification(
-    const MessageSharedPtr& message): NotificationToHMI(message) {
+  const MessageSharedPtr& message): NotificationToHMI(message) {
+}
+
+OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {
 }
 
 void OnAppUnregisteredNotification::Run() {

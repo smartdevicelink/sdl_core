@@ -30,17 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/exit_application_response.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 ExitApplicationResponse::ExitApplicationResponse(
-    const MessageSharedPtr& message): ResponseToHMI(message) {
+  const MessageSharedPtr& message): ResponseToHMI(message) {
 }
 
 ExitApplicationResponse::~ExitApplicationResponse() {

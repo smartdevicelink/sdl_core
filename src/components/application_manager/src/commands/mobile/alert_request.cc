@@ -36,7 +36,6 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -44,11 +43,8 @@ namespace commands {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 AlertRequest::AlertRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 AlertRequest::~AlertRequest() {
@@ -57,9 +53,10 @@ AlertRequest::~AlertRequest() {
 void AlertRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertRequest::Run ");
 
+  int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application(app_id));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
@@ -75,59 +72,59 @@ void AlertRequest::Run() {
 
 void AlertRequest::SendAlertRequest() const {
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
   // create HMI alert request
   smart_objects::CSmartObject* ui_alert  = new smart_objects::CSmartObject();
   // TODO(DK): HMI Request Id
   const int ui_cmd_id = 31;
   (*ui_alert)[strings::params][strings::function_id] =
-      ui_cmd_id;
+    ui_cmd_id;
 
   (*ui_alert)[strings::params][strings::message_type] =
-      MessageType::kRequest;
+    MessageType::kRequest;
 
   // create Common.TextFieldStruct type
   // alert1
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][0] =
-      smart_objects::CSmartObject();
+    smart_objects::CSmartObject();
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][0]
-      [hmi_request::field_name] = TextFieldName::ALERT_TEXT1;
+  [hmi_request::field_name] = TextFieldName::ALERT_TEXT1;
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][0]
-      [hmi_request::field_text] =
-          (*message_)[strings::msg_params][strings::alert_text1];
+  [hmi_request::field_text] =
+    (*message_)[strings::msg_params][strings::alert_text1];
 
   // alert2
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][1] =
-      smart_objects::CSmartObject();
+    smart_objects::CSmartObject();
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][1]
-      [hmi_request::field_name] = TextFieldName::ALERT_TEXT2;
+  [hmi_request::field_name] = TextFieldName::ALERT_TEXT2;
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][1]
-      [hmi_request::field_text] =
-          (*message_)[strings::msg_params][strings::alert_text2];
+  [hmi_request::field_text] =
+    (*message_)[strings::msg_params][strings::alert_text2];
   // alert3
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][2] =
-      smart_objects::CSmartObject();
+    smart_objects::CSmartObject();
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][2]
-      [hmi_request::field_name] = TextFieldName::ALERT_TEXT3;
+  [hmi_request::field_name] = TextFieldName::ALERT_TEXT3;
   (*ui_alert)[strings::msg_params][hmi_request::alert_strings][2]
-      [hmi_request::field_text] =
-          (*message_)[strings::msg_params][strings::alert_text3];
+  [hmi_request::field_text] =
+    (*message_)[strings::msg_params][strings::alert_text3];
   // duration
   (*ui_alert)[strings::msg_params][hmi_request::duration] =
-      (*message_)[strings::msg_params][strings::duration];
+    (*message_)[strings::msg_params][strings::duration];
   // softButtons
   (*ui_alert)[strings::msg_params][hmi_request::soft_buttons] =
-      (*message_)[strings::msg_params][strings::soft_buttons];
+    (*message_)[strings::msg_params][strings::soft_buttons];
   // app_id
   (*ui_alert)[strings::msg_params][strings::app_id] =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
-  MessageChaining * chain = NULL;
+  MessageChaining* chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, correlation_id, ui_cmd_id);
+          connection_key, correlation_id, ui_cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_alert);
 }
@@ -138,16 +135,16 @@ void AlertRequest::SendSpeekRequest() const {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       // crate HMI basic communication playtone request
       smart_objects::CSmartObject* tts_speak =
-          new smart_objects::CSmartObject();
+        new smart_objects::CSmartObject();
       // TODO(DK): HMI tts request Id
       const int tts_cmd_id = 51;
       (*tts_speak)[strings::params][strings::function_id] =
-          tts_cmd_id;
+        tts_cmd_id;
 
       (*tts_speak)[strings::params][strings::message_type] =
-          MessageType::kRequest;
+        MessageType::kRequest;
       (*tts_speak)[strings::msg_params][hmi_request::tts_chunks] =
-         (*message_)[strings::msg_params][strings::tts_chunks];
+        (*message_)[strings::msg_params][strings::tts_chunks];
       ApplicationManagerImpl::instance()->SendMessageToHMI(tts_speak);
     }
   }
@@ -159,14 +156,14 @@ void AlertRequest::SendPlayToneRequest() const {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
       smart_objects::CSmartObject* bc_play =
-          new smart_objects::CSmartObject();
+        new smart_objects::CSmartObject();
       // TODO(DK): HMI Basic communication request Id
       const int bc_cmd_id = 41;
       (*bc_play)[strings::params][strings::function_id] =
-          bc_cmd_id;
+        bc_cmd_id;
 
       (*bc_play)[strings::params][strings::message_type] =
-          MessageType::kNotification;
+        MessageType::kNotification;
       ApplicationManagerImpl::instance()->SendMessageToHMI(bc_play);
     }
   }

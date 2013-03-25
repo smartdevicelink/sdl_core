@@ -33,21 +33,23 @@
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_TO_HMI_THREAD_IMPL
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_TO_HMI_THREAD_IMPL
 
+#include "utils/threads/thread_delegate.h"
+#include "hmi_message_handler/hmi_message_handler_impl.h"
+
 namespace hmi_message_handler {
 
 class ToHMIThreadImpl : public threads::ThreadDelegate {
-public:
-	explicit ToHMIThreadImpl(HMIMessageHandler * handler);
-	~ToHMIThreadImpl();
+  public:
+    explicit ToHMIThreadImpl(HMIMessageHandlerImpl* handler);
+    ~ToHMIThreadImpl();
 
-	void threadMain();
+    void threadMain();
 
-private:
-	HMIMessageHandler * handler_;
-	DISALLOW_COPY_AND_ASSIGN(ToHMIThreadImpl);
-
+  private:
+    HMIMessageHandlerImpl* handler_;
+    DISALLOW_COPY_AND_ASSIGN(ToHMIThreadImpl);
 };
 
-} // namespace hmi_message_handler
+}  //  namespace hmi_message_handler
 
-#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_TO_HMI_THREAD_IMPL
+#endif  //  SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_TO_HMI_THREAD_IMPL

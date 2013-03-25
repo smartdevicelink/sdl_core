@@ -14,8 +14,6 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
-
-
 set (SOURCES
 ./src/application_manager_impl.cc
 ./src/message.cc
@@ -27,6 +25,7 @@ set (SOURCES
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
 ./src/message_conversion.cc
+./src/hmi_capabilities.cc
 )
 
 set (MOBILE_COMMANDS_SOURCES
@@ -177,6 +176,12 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_ui_language_change_notification.cc
 ./src/commands/hmi/close_popup_request.cc
 ./src/commands/hmi/close_popup_response.cc
+./src/commands/hmi/exit_application_request.cc
+./src/commands/hmi/exit_application_response.cc
+./src/commands/hmi/ui_show_request.cc
+./src/commands/hmi/ui_show_response.cc
+./src/commands/hmi/activate_app_request.cc
+./src/commands/hmi/activate_app_response.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})

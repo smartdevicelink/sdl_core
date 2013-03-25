@@ -36,7 +36,6 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -44,11 +43,8 @@ namespace commands {
 
 namespace str = strings;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
@@ -64,9 +60,10 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
+  int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[str::params][str::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application(app_id));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -87,38 +84,38 @@ void PerformAudioPassThruRequest::Run() {
   int i = 0;
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
     (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i] =
-        smart_objects::CSmartObject();
+      smart_objects::CSmartObject();
     (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i]
-        [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT1;
+    [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT1;
     (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i]
-        [hmi_request::field_text] =
-            (*message_)[str::msg_params][str::audio_pass_display_text1];
+    [hmi_request::field_text] =
+      (*message_)[str::msg_params][str::audio_pass_display_text1];
     // increment index
     ++i;
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
     (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i] =
-        smart_objects::CSmartObject();
+      smart_objects::CSmartObject();
     (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i]
-        [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT2;
+    [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT2;
     (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i]
-        [hmi_request::field_text] =
-            (*message_)[str::msg_params][str::audio_pass_display_text2];
+    [hmi_request::field_text] =
+      (*message_)[str::msg_params][str::audio_pass_display_text2];
   }
 
   // duration
   (*ui_audio)[strings::msg_params][hmi_request::max_duration] =
-      (*message_)[str::msg_params][str::max_duration];
+    (*message_)[str::msg_params][str::max_duration];
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
-  MessageChaining * chain = NULL;
+  MessageChaining* chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, correlation_id, audio_cmd_id);
+          connection_key, correlation_id, audio_cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(connection_key,
@@ -139,21 +136,21 @@ void PerformAudioPassThruRequest::SendSpeakRequest() const {
   int i = 0;
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
     (*tts_speak)[str::msg_params][hmi_request::tts_chunks][i++] =
-        (*message_)[str::msg_params][str::audio_pass_display_text1];
+      (*message_)[str::msg_params][str::audio_pass_display_text1];
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
     (*tts_speak)[str::msg_params][hmi_request::tts_chunks][i] =
-        (*message_)[str::msg_params][str::audio_pass_display_text2];
+      (*message_)[str::msg_params][str::audio_pass_display_text2];
   }
 
   // app_id
   (*tts_speak)[strings::msg_params][strings::app_id] =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
-    if (0 < tts_speak->length()) {
-      ApplicationManagerImpl::instance()->SendMessageToHMI(tts_speak);
-    }
+  if (0 < tts_speak->length()) {
+    ApplicationManagerImpl::instance()->SendMessageToHMI(tts_speak);
+  }
 }
 
 }  // namespace commands

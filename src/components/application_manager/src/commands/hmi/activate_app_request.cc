@@ -31,15 +31,15 @@
  */
 
 #include "application_manager/commands/hmi/activate_app_request.h"
-
 #include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
 ActivateAppRequest::ActivateAppRequest(
-    const MessageSharedPtr& message): RequestFromHMI(message) {
+  const MessageSharedPtr& message): RequestFromHMI(message) {
 }
 
 ActivateAppRequest::~ActivateAppRequest() {
@@ -47,23 +47,22 @@ ActivateAppRequest::~ActivateAppRequest() {
 
 void ActivateAppRequest::Run() {
   Application* application =
-      ApplicationManagerImpl::instance()->application(
-          (*message_)[strings::msg_params][strings::app_id]);
+    ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::msg_params][strings::app_id]);
 
   (*message_)[strings::msg_params].erase(strings::app_id);
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
 
   if (!application) {
     (*message_)[strings::msg_params][strings::result_code] =
-          hmi_apis::Common_Result::eType::INVALID_DATA;
+      hmi_apis::Common_Result::eType::INVALID_DATA;
   } else {
-    if (ApplicationManagerImpl::instance()->ActivateApplication(application))
-    {
+    if (ApplicationManagerImpl::instance()->ActivateApplication(application)) {
       (*message_)[strings::msg_params][strings::result_code] =
-                hmi_apis::Common_Result::eType::SUCCESS;
+        hmi_apis::Common_Result::eType::SUCCESS;
     } else {
       (*message_)[strings::msg_params][strings::result_code] =
-                      hmi_apis::Common_Result::eType::GENERIC_ERROR;
+        hmi_apis::Common_Result::eType::GENERIC_ERROR;
     }
   }
 

@@ -1150,7 +1150,7 @@
         <param name="appList" type="Common.HMIApplication" mandatory="false" array="true" minsize="1"/>
     </function>
     <function name="ActivateApp" messagetype="request">
-      <description>Invoked by UI component when user clicks on app in the list of registered apps. Application is shown on recieving successful response.</description>
+      <description>Invoked by UI component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action. Application is shown on recieving successful response.</description>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of selected application.</description>
       </param>

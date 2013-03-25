@@ -38,14 +38,14 @@ namespace application_manager {
 namespace commands {
 
 OnReadyNotification::OnReadyNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
 OnReadyNotification::~OnReadyNotification() {
 }
 
 void OnReadyNotification::Run() {
-  // TODO(VS): Call function from application manager that sends all necessary requests to HMI
+  ApplicationManagerImpl::instance()->OnHMIStartedCooperation();
 }
 
 }  // namespace commands

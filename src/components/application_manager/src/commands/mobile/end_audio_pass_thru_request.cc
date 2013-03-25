@@ -36,7 +36,6 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -44,11 +43,8 @@ namespace commands {
 
 namespace str = strings;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 EndAudioPassThruRequest::EndAudioPassThruRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 EndAudioPassThruRequest::~EndAudioPassThruRequest() {
@@ -65,19 +61,19 @@ void EndAudioPassThruRequest::Run() {
   (*ui_audio)[str::params][str::message_type] = MessageType::kRequest;
   // app_id
   (*ui_audio)[strings::msg_params][strings::app_id] =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
   (*ui_audio)[str::params][str::correlation_id] = correlation_id;
   (*ui_audio)[str::params][str::connection_key] = connection_key;
 
-  MessageChaining * chain = NULL;
+  MessageChaining* chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, correlation_id, audio_cmd_id);
+          connection_key, correlation_id, audio_cmd_id);
 
   ApplicationManagerImpl::instance()->StopAudioPassThruThread();
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);

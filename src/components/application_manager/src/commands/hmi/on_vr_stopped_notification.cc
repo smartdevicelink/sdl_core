@@ -32,18 +32,13 @@
 
 #include "application_manager/commands/hmi/on_vr_stopped_notification.h"
 #include "application_manager/application_manager_impl.h"
-#include "utils/logger.h"
-
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 OnVRStoppedNotification::OnVRStoppedNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
 OnVRStoppedNotification::~OnVRStoppedNotification() {

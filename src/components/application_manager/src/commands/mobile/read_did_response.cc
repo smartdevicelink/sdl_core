@@ -34,14 +34,10 @@
 #include "application_manager/commands/mobile/read_did_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 ReadDIDResponse::ReadDIDResponse(
   const MessageSharedPtr& message): CommandResponseImpl(message) {
@@ -64,14 +60,14 @@ void ReadDIDResponse::Run() {
   const int hmi_correlation_id = 205;
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      hmi_correlation_id)) {
+        hmi_correlation_id)) {
     // TODO(DK): HMI code Id
     const int code =
-        (*message_)[strings::msg_params][hmi_response::code].asInt();
+      (*message_)[strings::msg_params][hmi_response::code].asInt();
     if (true == code) {
       (*message_)[strings::params][strings::success] = true;
       (*message_)[strings::params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
     } else {
       // TODO(DK): Some logic
     }

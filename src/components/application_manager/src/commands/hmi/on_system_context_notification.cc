@@ -34,17 +34,13 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 OnSystemContextNotification::OnSystemContextNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
 OnSystemContextNotification::~OnSystemContextNotification() {
@@ -52,7 +48,7 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 
 void OnSystemContextNotification::Run() {
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->active_application());
+                           ApplicationManagerImpl::instance()->active_application());
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_,
@@ -61,32 +57,32 @@ void OnSystemContextNotification::Run() {
   }
 
   const int system_context_ = (*message_)[strings::msg_params]
-                                  [hmi_notification::system_context].asInt();
+                              [hmi_notification::system_context].asInt();
   // TODO(DK): paste correct enum ID
   if (mobile_api::SystemContext::INVALID_ENUM == system_context_) {
     if (mobile_api::AudioStreamingState::AUDIBLE ==
         app->audio_streaming_state()) {
       app->set_audio_streaming_state(
-          mobile_api::AudioStreamingState::NOT_AUDIBLE);
+        mobile_api::AudioStreamingState::NOT_AUDIBLE);
       NotifyMobileApp(app);
     }
     return;
   } else {
-      app->set_system_context(
-          static_cast<mobile_api::SystemContext::eType>(system_context_));
-      app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
-      NotifyMobileApp(app);
-      return;
+    app->set_system_context(
+      static_cast<mobile_api::SystemContext::eType>(system_context_));
+    app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
+    NotifyMobileApp(app);
+    return;
   }
 
   if (system_context_ != app->system_context()) {
     app->set_system_context(
-        static_cast<mobile_api::SystemContext::eType>(system_context_));
+      static_cast<mobile_api::SystemContext::eType>(system_context_));
 
-      if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context_
-          && mobile_api::HMILevel::HMI_FULL != app->hmi_level()) {
-        ApplicationManagerImpl::instance()->ActivateApplication(app);
-      }
+    if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context_
+        && mobile_api::HMILevel::HMI_FULL != app->hmi_level()) {
+      ApplicationManagerImpl::instance()->ActivateApplication(app);
+    }
   } else {
     NotifyMobileApp(app);
   }

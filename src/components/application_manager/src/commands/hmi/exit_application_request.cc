@@ -32,18 +32,13 @@
 
 #include "application_manager/commands/hmi/exit_application_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "utils/logger.h"
-//#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 ExitApplicationRequest::ExitApplicationRequest(const MessageSharedPtr& message)
-    : RequestFromHMI(message) {
+  : RequestFromHMI(message) {
 }
 
 ExitApplicationRequest::~ExitApplicationRequest() {
@@ -55,8 +50,8 @@ void ExitApplicationRequest::Run() {
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
 
   (*message_)[strings::msg_params][strings::result_code] =
-      ApplicationManagerImpl::instance()->ExitApplication(
-          (*message_)[strings::msg_params][strings::app_id]);
+    ApplicationManagerImpl::instance()->UnregisterApplication(
+      (*message_)[strings::msg_params][strings::app_id]);
 
   SendResponseToHMI();
 }

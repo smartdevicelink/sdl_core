@@ -37,7 +37,6 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -45,11 +44,8 @@ namespace commands {
 
 namespace str = strings;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 GetVehicleDataRequest::GetVehicleDataRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {
@@ -58,9 +54,10 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run ");
 
+  int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[str::params][str::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application(app_id));
 
   if (!app) {
     SendResponse(false,
@@ -70,16 +67,16 @@ void GetVehicleDataRequest::Run() {
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
     SendResponse(false,
-                     NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+                 NsSmartDeviceLinkRPC::V2::Result::REJECTED);
     return;
   }
 
   smart_objects::CSmartObject* p_smrt_vr  =
-      new smart_objects::CSmartObject();
+    new smart_objects::CSmartObject();
 
   if (!p_smrt_vr) {
     SendResponse(false,
-                     NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+                 NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
     return;
   }
 
@@ -87,21 +84,21 @@ void GetVehicleDataRequest::Run() {
   (*p_smrt_vr) = (*message_);
 
   const int correlation_id =
-        (*p_smrt_vr)[strings::params][strings::correlation_id];
+    (*p_smrt_vr)[strings::params][strings::correlation_id];
   const int connection_key =
-        (*p_smrt_vr)[strings::params][strings::connection_key];
+    (*p_smrt_vr)[strings::params][strings::connection_key];
 
   // TODO(DK) HMI Request Id
   const int vr_cmd_id = 92;
   (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
 
   (*p_smrt_vr)[strings::params][strings::message_type] =
-      MessageType::kRequest;
+    MessageType::kRequest;
 
 
-  MessageChaining * chain = NULL;
+  MessageChaining* chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, correlation_id, vr_cmd_id, p_smrt_vr);
+          connection_key, correlation_id, vr_cmd_id, p_smrt_vr);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
 }
