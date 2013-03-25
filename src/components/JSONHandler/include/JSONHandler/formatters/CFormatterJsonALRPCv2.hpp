@@ -5,6 +5,7 @@
 #include "json/json.h"
 
 #include "CFormatterJsonBase.hpp"
+#include "JSONHandler/CSmartFactory.hpp"
 
 namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
 
@@ -53,14 +54,14 @@ inline bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromStr
     Json::Reader reader;
 
     // TODO: Check correct keys and values
-    out["params"]["MessageType"] = messageType;
-    out["params"]["FunctionId"] = functionId;
+    out[NsAppLink::NsJSONHandler::strings::S_PARAMS][NsAppLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = messageType;
+    out[NsAppLink::NsJSONHandler::strings::S_PARAMS][NsAppLink::NsJSONHandler::strings::S_FUNCTION_ID] = functionId;
 
     bool parsingSuccessful = reader.parse(str, root);
 
     if (true == parsingSuccessful)
     {
-        jsonValueToObj(root, out["msg_params"]);
+        jsonValueToObj(root, out[NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS]);
     }
 
     return parsingSuccessful;

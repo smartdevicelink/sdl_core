@@ -8,7 +8,7 @@ bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(
 {
     Json::Value root(Json::objectValue);
 
-    objToJsonValue(obj["msg_params"], root);
+    objToJsonValue(obj[NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS], root);
 
     outStr = root.toStyledString();
 
