@@ -11,7 +11,7 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CStringSchem
 {
     NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
 
-    if (NsAppLink::NsSmartObjects::SmartType_String == Object.get_type())
+    if (NsAppLink::NsSmartObjects::SmartType_String == Object.getType())
     {
         result = NsAppLink::NsSmartObjects::Errors::OK;
 

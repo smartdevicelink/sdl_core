@@ -117,7 +117,7 @@ namespace NsAppLink
              **/
             const CSmartObject & getElement(const std::string & Key) const;
 
-            SmartType get_type() const;
+            SmartType getType() const;
 
 
             size_t length() const;

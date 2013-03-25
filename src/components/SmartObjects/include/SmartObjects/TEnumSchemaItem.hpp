@@ -125,7 +125,7 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::TEnumSchemaI
 {
     NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
 
-    if (NsAppLink::NsSmartObjects::SmartType_Integer == Object.get_type())
+    if (NsAppLink::NsSmartObjects::SmartType_Integer == Object.getType())
     {
         if (mAllowedElements.end() != mAllowedElements.find(static_cast<EnumType>((int)Object)))
         {
@@ -162,7 +162,7 @@ bool NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::setDefaultValue(NsApp
 template <typename EnumType>
 void NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_String == Object.get_type())
+    if (NsAppLink::NsSmartObjects::SmartType_String == Object.getType())
     {
         std::string stringValue = Object;
         const std::map<EnumType, std::string> elementsStringRepresentation = getEnumElementsStringRepresentation();

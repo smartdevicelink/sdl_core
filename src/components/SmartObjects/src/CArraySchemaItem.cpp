@@ -12,7 +12,7 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CArraySchema
 {
     NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
 
-    if (NsAppLink::NsSmartObjects::SmartType_Array == Object.get_type())
+    if (NsAppLink::NsSmartObjects::SmartType_Array == Object.getType())
     {
         result = NsAppLink::NsSmartObjects::Errors::OK;
         size_t sizeLimit;
@@ -57,7 +57,7 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CArraySchema
 
 void NsAppLink::NsSmartObjects::CArraySchemaItem::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Array == Object.get_type())
+    if (NsAppLink::NsSmartObjects::SmartType_Array == Object.getType())
     {
         for (size_t i = 0U; i < Object.length(); ++i)
         {

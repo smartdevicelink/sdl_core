@@ -8,7 +8,7 @@ NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::CBoolSchemaItem
 
 NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CBoolSchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject & Object)
 {
-    return (true == NsAppLink::NsSmartObjects::SmartType_Boolean == Object.get_type()) ? NsAppLink::NsSmartObjects::Errors::OK : NsAppLink::NsSmartObjects::Errors::INVALID_VALUE;
+    return (true == NsAppLink::NsSmartObjects::SmartType_Boolean == Object.getType()) ? NsAppLink::NsSmartObjects::Errors::OK : NsAppLink::NsSmartObjects::Errors::INVALID_VALUE;
 }
 
 bool NsAppLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsAppLink::NsSmartObjects::CSmartObject & Object)

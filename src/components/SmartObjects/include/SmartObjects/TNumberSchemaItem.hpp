@@ -136,7 +136,7 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::TNumberSchem
 {
     NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
 
-    if (getSmartType() == Object.get_type())
+    if (getSmartType() == Object.getType())
     {
         result = NsAppLink::NsSmartObjects::Errors::OK;
         NumberType value = Object;

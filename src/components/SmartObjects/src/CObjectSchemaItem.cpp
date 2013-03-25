@@ -24,7 +24,7 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CObjectSchem
 {
     NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
 
-    if (NsAppLink::NsSmartObjects::SmartType_Map == Object.get_type())
+    if (NsAppLink::NsSmartObjects::SmartType_Map == Object.getType())
     {
         result = NsAppLink::NsSmartObjects::Errors::OK;
         const std::set<std::string> objectKeys = Object.enumerate();
@@ -71,7 +71,7 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CObjectSchem
 
 void NsAppLink::NsSmartObjects::CObjectSchemaItem::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Map == Object.get_type())
+    if (NsAppLink::NsSmartObjects::SmartType_Map == Object.getType())
     {
         for (std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember>::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i)
         {

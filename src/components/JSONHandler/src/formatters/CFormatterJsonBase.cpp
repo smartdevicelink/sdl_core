@@ -50,7 +50,7 @@ void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue(
         NsAppLink::NsSmartObjects::CSmartObject &obj,
         Json::Value &item)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Array == obj.get_type())
+    if (NsAppLink::NsSmartObjects::SmartType_Array == obj.getType())
     {
         for (int i = 0; i < obj.length(); i++)
         {
@@ -61,7 +61,7 @@ void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue(
             item.append(value);
         }
     }
-    else if (NsAppLink::NsSmartObjects::SmartType_Map == obj.get_type())
+    else if (NsAppLink::NsSmartObjects::SmartType_Map == obj.getType())
     {
         std::set<std::string> keys = obj.enumerate();
 
@@ -74,19 +74,19 @@ void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue(
             item[*key] = value;
         }
     }
-    else if (NsAppLink::NsSmartObjects::SmartType_Boolean == obj.get_type())
+    else if (NsAppLink::NsSmartObjects::SmartType_Boolean == obj.getType())
     {
         item = static_cast<bool>(obj);
     }
-    else if (NsAppLink::NsSmartObjects::SmartType_Integer == obj.get_type())
+    else if (NsAppLink::NsSmartObjects::SmartType_Integer == obj.getType())
     {
         item = static_cast<int>(obj);
     }
-    else if (NsAppLink::NsSmartObjects::SmartType_Double == obj.get_type())
+    else if (NsAppLink::NsSmartObjects::SmartType_Double == obj.getType())
     {
         item = static_cast<double>(obj);
     }
-    else if (NsAppLink::NsSmartObjects::SmartType_Null == obj.get_type())
+    else if (NsAppLink::NsSmartObjects::SmartType_Null == obj.getType())
     {
         item = Json::nullValue;
     }
