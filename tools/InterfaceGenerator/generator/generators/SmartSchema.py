@@ -102,6 +102,26 @@ class SmartSchema(object):
 
         self._gen_struct_schema_items(interface.structs.values())
 
+        function_id_items = u"";
+        if "FunctionID" in interface.enums:
+            function_id = interface.enums["FunctionID"]
+            function_id_items = u"\n".join(
+                [self._impl_code_loc_decl_enum_insert_template.substitute(
+                    var_name="FunctionIDItems",
+                    enum=function_id.name,
+                    value=x.primary_name)
+                 for x in function_id.elements.values()])
+
+        message_type_items = u""
+        if "messageType" in interface.enums:
+            message_type = interface.enums["messageType"]
+            message_type_items = u"\n".join(
+                [self._impl_code_loc_decl_enum_insert_template.substitute(
+                    var_name="MessageTypeItems",
+                    enum=message_type.name,
+                    value=x.primary_name)
+                 for x in message_type.elements.values()])
+
         with codecs.open(os.path.join(destination_dir,
                                       "".join("{0}.cpp".format(class_name))),
                          encoding="utf-8", mode="w") as f_s:
@@ -109,6 +129,8 @@ class SmartSchema(object):
                 header_file_name=unicode(header_file_name),
                 namespace=namespace,
                 class_name=class_name,
+                function_id_items=self._indent_code(function_id_items, 1),
+                message_type_items=self._indent_code(message_type_items, 1),
                 struct_schema_items=self._structs_add_code,
                 function_schemas=self._gen_function_schemas(
                     interface.functions.values()),
@@ -1060,7 +1082,15 @@ class SmartSchema(object):
         u'''{\n'''
         u'''    TStructsSchemaItems structsSchemaItems;\n'''
         u'''    initStructSchemaItems(structsSchemaItems);\n'''
-        u'''    initSchemas(structsSchemaItems);\n'''
+        u'''\n'''
+        u'''    std::set<FunctionID::eType> FunctionIDItems;\n'''
+        u'''${function_id_items}'''
+        u'''\n'''
+        u'''    std::set<messageType::eType> MessageTypeItems;\n'''
+        u'''${message_type_items}'''
+        u'''\n'''
+        u'''    initSchemas(structsSchemaItems, '''
+        u'''FunctionIDItems, MessageTypeItems);\n'''
         u'''}\n'''
         u'''\n'''
         u'''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
@@ -1086,7 +1116,9 @@ class SmartSchema(object):
         u'''}\n'''
         u'''\n'''
         u'''void $namespace::$class_name::initSchemas(TStructsSchemaItems & '''
-        u'''StructsSchemaItems)\n'''
+        u'''StructsSchemaItems, '''
+        u'''const std::set<FunctionID::eType> & FunctionIDItems, '''
+        u'''const std::set<messageType::eType> & MessageTypeItems)\n'''
         u'''{\n'''
         u'''$function_schemas'''
         u'''}\n'''
@@ -1144,7 +1176,7 @@ class SmartSchema(object):
         u'''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
         u'''(FunctionID::$function_id, messageType::$message_type), '''
         u'''initFunction_${function_id}_${message_type}('''
-        u'''StructsSchemaItems)));''')
+        u'''StructsSchemaItems, FunctionIDItems, MessageTypeItems)));''')
 
     _struct_impl_template = string.Template(
         u'''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
@@ -1200,7 +1232,9 @@ class SmartSchema(object):
     _function_impl_template = string.Template(
         u'''CSmartSchema $namespace::$class_name::'''
         u'''initFunction_${function_id}_${message_type}('''
-        u'''TStructsSchemaItems & StructsSchemaItems)\n'''
+        u'''TStructsSchemaItems & StructsSchemaItems, '''
+        u'''const std::set<FunctionID::eType> & FunctionIDItems, '''
+        u'''const std::set<messageType::eType> & MessageTypeItems)\n'''
         u'''{\n'''
         u'''$code'''
         u'''}\n''')
@@ -1211,8 +1245,28 @@ class SmartSchema(object):
         u'''std::map<std::string, CObjectSchemaItem::SMember> '''
         u'''schemaMembersMap;\n\n'''
         u'''${schema_item_fill}'''
+        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''paramsMembersMap;\n'''
+        u'''paramsMembersMap["function_id"] = CObjectSchemaItem::'''
+        u'''SMember(TEnumSchemaItem<FunctionID::eType>::'''
+        u'''create(FunctionIDItems), true);\n'''
+        u'''paramsMembersMap["message_type"] = CObjectSchemaItem::'''
+        u'''SMember(TEnumSchemaItem<messageType::eType>::'''
+        u'''create(MessageTypeItems), true);\n'''
+        u'''paramsMembersMap["koral_ID"] = CObjectSchemaItem::'''
+        u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
+        u'''paramsMembersMap["version"] = CObjectSchemaItem::'''
+        u'''SMember(TNumberSchemaItem<int>::create(1, 2), true);\n\n'''
+        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''rootMembersMap;\n'''
+        u'''rootMembersMap["MSG_PARMS"] = '''
+        u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
+        u'''create(schemaMembersMap), true);\n'''
+        u'''rootMembersMap["PARAMS"] = '''
+        u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
+        u'''create(paramsMembersMap), true);\n\n'''
         u'''return CSmartSchema(CObjectSchemaItem::'''
-        u'''create(schemaMembersMap));''')
+        u'''create(rootMembersMap));''')
 
     _class_hpp_template = string.Template(
         u'''$comment\n'''
@@ -1256,8 +1310,9 @@ class SmartSchema(object):
         u'''    /**\n'''
         u'''     * @brief Initializes all schemas.\n'''
         u'''     */\n'''
-        u'''    void initSchemas(TStructsSchemaItems & '''
-        u'''StructsSchemaItems);\n'''
+        u'''    void initSchemas(TStructsSchemaItems & StructsSchemaItems, '''
+        u'''const std::set<FunctionID::eType> & FunctionIDItems, '''
+        u'''const std::set<messageType::eType> & MessageTypeItems);\n'''
         u'''\n'''
         u'''$init_function_decls'''
         u'''\n'''
@@ -1271,7 +1326,9 @@ class SmartSchema(object):
         u'''$comment\n'''
         u'''static NsAppLink::NsSmartObjects::CSmartSchema '''
         u'''initFunction_${function_id}_${message_type}('''
-        u'''TStructsSchemaItems & StructsSchemaItems);''')
+        u'''TStructsSchemaItems & StructsSchemaItems, '''
+        u'''const std::set<FunctionID::eType> & FunctionIDItems, '''
+        u'''const std::set<messageType::eType> & MessageTypeItems);''')
 
     _struct_decl_template = string.Template(
         u'''$comment\n'''
