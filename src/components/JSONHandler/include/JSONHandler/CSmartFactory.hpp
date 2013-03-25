@@ -4,6 +4,7 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CSmartSchema.hpp"
 #include <map>
+#include <string>
 
 namespace NsAppLink
 {
@@ -84,6 +85,18 @@ namespace NsAppLink
 
             return false;
         }
+
+        namespace strings
+        {
+            extern const std::string S_MSG_PARAMS;
+            extern const std::string S_PARAMS;
+            extern const std::string S_FUNCTION_ID;
+            extern const std::string S_MESSAGE_TYPE;
+            extern const std::string S_PROTOCOL_VERSION;
+            extern const std::string S_CORRELATION_ID;
+        }
     }
+
+
 }
 #endif //__CSMARTFACTORY_HPP__
