@@ -83,7 +83,7 @@ MFT.TBTClientStateView = Em.ContainerView.create({
      * Trigger function that activates and deactivates tbtClientStateView
      */
     toggleActivity: function(){
-        this.set('active', !this.active);
+        this.toggleProperty('active')
         MFT.SDLController.onSystemContextChange();
     }
 });

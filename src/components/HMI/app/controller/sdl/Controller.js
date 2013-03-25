@@ -85,6 +85,13 @@ MFT.SDLController = Em.Object.create( {
     },
 
     /**
+     * Action to show Voice Recognition PopUp
+     */
+    activateVRPopUp: function() {
+        MFT.VRPopUp.activateVRPopUp();
+    },
+
+    /**
      * Action for SoftButtons that closes popUp or window and opens applications
      * screen
      * 

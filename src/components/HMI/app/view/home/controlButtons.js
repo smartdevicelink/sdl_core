@@ -204,10 +204,8 @@ MFT.ControlButtons = Em.ContainerView.create( {
     VRButton: MFT.Button.create( {
         elementId: 'VRButton',
         classNames: 'VRButton',
-        action: function() {
-            // this._super();
-            MFT.VRPopUp.activateVRPopUp();
-        }
+        action: 'activateVRPopUp',
+        target: 'MFT.SDLController'
     }),
 
     infoTable: Em.ContainerView.extend( {
