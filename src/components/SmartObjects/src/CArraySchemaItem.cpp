@@ -66,6 +66,17 @@ void NsAppLink::NsSmartObjects::CArraySchemaItem::applySchema(NsAppLink::NsSmart
     }
 }
 
+void NsAppLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+{
+    if (NsAppLink::NsSmartObjects::SmartType_Array == Object.getType())
+    {
+        for (size_t i = 0U; i < Object.length(); ++i)
+        {
+            mElementSchemaItem->unapplySchema(Object[i]);
+        }
+    }
+}
+
 NsAppLink::NsSmartObjects::CArraySchemaItem::CArraySchemaItem(const TSharedPtr<ISchemaItem> & ElementSchemaItem,
                                                               const TSchemaItemParameter<size_t> & MinSize,
                                                               const TSchemaItemParameter<size_t> & MaxSize):

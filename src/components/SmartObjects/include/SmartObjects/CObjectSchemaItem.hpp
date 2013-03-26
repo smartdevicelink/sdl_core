@@ -75,6 +75,13 @@ namespace NsAppLink
              **/
             virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
 
+            /**
+             * @brief Unapply schema.
+             *
+             * @param Object Object to unapply schema.
+             **/
+            virtual void unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
+
         private:
             /**
              * @brief Constructor.

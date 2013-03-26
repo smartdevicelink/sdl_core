@@ -63,6 +63,13 @@ namespace NsAppLink
              **/
             virtual void applySchema(CSmartObject & Object);
 
+            /**
+             * @brief Unapply schema.
+             *
+             * @param Object Object to unapply schema.
+             **/
+            virtual void unapplySchema(CSmartObject & Object);
+
         private:
             /**
              * @brief Constructor.
@@ -174,6 +181,22 @@ void NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(NsAppLink
                 Object = static_cast<int>(i->first);
                 break;
             }
+        }
+    }
+}
+
+template <typename EnumType>
+void NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+{
+    if (NsAppLink::NsSmartObjects::SmartType_Integer == Object.getType())
+    {
+        int integerValue = Object;
+        const std::map<EnumType, std::string> elementsStringRepresentation = getEnumElementsStringRepresentation();
+        typename std::map<EnumType, std::string>::const_iterator i = elementsStringRepresentation.find(static_cast<EnumType>(integerValue));
+
+        if (i != elementsStringRepresentation.end())
+        {
+            Object = i->second;
         }
     }
 }

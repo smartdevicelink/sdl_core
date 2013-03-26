@@ -83,6 +83,20 @@ void NsAppLink::NsSmartObjects::CObjectSchemaItem::applySchema(NsAppLink::NsSmar
     }
 }
 
+void NsAppLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+{
+    if (NsAppLink::NsSmartObjects::SmartType_Map == Object.getType())
+    {
+        for (std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember>::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i)
+        {
+            if (true == Object.keyExists(i->first))
+            {
+                i->second.mSchemaItem->unapplySchema(Object[i->first]);
+            }
+        }
+    }
+}
+
 NsAppLink::NsSmartObjects::CObjectSchemaItem::CObjectSchemaItem(const std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members):
 mMembers(Members)
 {

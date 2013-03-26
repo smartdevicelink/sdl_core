@@ -13,3 +13,7 @@ bool NsAppLink::NsSmartObjects::ISchemaItem::setDefaultValue(CSmartObject & Obje
 void NsAppLink::NsSmartObjects::ISchemaItem::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
 {
 }
+
+void NsAppLink::NsSmartObjects::ISchemaItem::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+{
+}
