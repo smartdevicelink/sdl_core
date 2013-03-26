@@ -1,5 +1,6 @@
 # Generating interface
-GenerateInterface("test_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler" "alrpcv2")
+GenerateInterface("test_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler2" "alrpcv2")
+GenerateInterface("test_v4_protocol_v1_2_no_extra.xml" "Gen::test::components::JSONHandler1" "alrpcv1")
 
 
 include_directories (
