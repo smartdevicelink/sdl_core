@@ -1,0 +1,11 @@
+/*! \page tools_interfacegenerator_output Use of InterfaceGenerator output
+
+As a result InterfaceGenerator produces one cpp and one hpp file in the output directory. That file contains one C++ class which is named in accordance with input XML file name. Class is declared and implemented in specified namespace. Also in that namespace automatically generated declarations of all enums form source XML file.
+
+Generated class is inherited form predefined base template class CSmartFactory. Actually this inherited class defines specific set of Smart Object schema's initialization methods which is set to the base class member and can be used by the clients.
+
+Also generated code contains string mapping for enums that is used to convert string representation or enums to integer values and vise versa.
+
+Result source code should be compilable but this is not guaranteed in case if source XML file contains identifier names that is not correct C++ identifiers.
+
+*/
