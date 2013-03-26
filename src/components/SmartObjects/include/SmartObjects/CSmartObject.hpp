@@ -220,7 +220,7 @@ namespace NsAppLink
         static const std::string invalid_string_value = "";
         static const double      invalid_double_value   = -1;
         static const char*       invalid_cstr_value   = "";
-        static CSmartObject      invalid_object_value;
+        static CSmartObject      invalid_object_value(SmartType_Invalid);
 
     }
 }
