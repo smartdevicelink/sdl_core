@@ -47,7 +47,7 @@ void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValueToObj(
 // ----------------------------------------------------------------------------
 
 void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue(
-        NsAppLink::NsSmartObjects::CSmartObject &obj,
+        const NsAppLink::NsSmartObjects::CSmartObject &obj,
         Json::Value &item)
 {
     if (NsAppLink::NsSmartObjects::SmartType_Array == obj.getType())
@@ -56,7 +56,7 @@ void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue(
         {
             Json::Value value(Json::nullValue);
 
-            objToJsonValue(obj[i], value);
+            objToJsonValue(obj.getElement(i), value);
 
             item.append(value);
         }
@@ -69,7 +69,7 @@ void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue(
         {
             Json::Value value(Json::nullValue);
 
-            objToJsonValue(obj[*key], value);
+            objToJsonValue(obj.getElement(*key), value);
 
             item[*key] = value;
         }

@@ -18,9 +18,9 @@ const std::string Formatters::CFormatterJsonALRPCv1::S_CORRELATION_ID("correlati
 // ----------------------------------------------------------------------------
 
 const std::string Formatters::CFormatterJsonALRPCv1::getMessageType(
-        SmartObjects::CSmartObject& obj)
+        const SmartObjects::CSmartObject& obj)
 {
-    return obj[Strings::S_PARAMS][Strings::S_MESSAGE_TYPE];
+    return obj.getElement(Strings::S_PARAMS).getElement(Strings::S_MESSAGE_TYPE);
 }
 
 // ----------------------------------------------------------------------------
@@ -47,20 +47,23 @@ const std::string Formatters::CFormatterJsonALRPCv1::getMessageType(
 // ----------------------------------------------------------------------------
 
 bool Formatters::CFormatterJsonALRPCv1::toString(
-        SmartObjects::CSmartObject& obj,
+        const SmartObjects::CSmartObject& obj,
         std::string& outStr)
 {
     Json::Value root(Json::objectValue);
     Json::Value params(Json::objectValue);
 
-    objToJsonValue(obj[Strings::S_MSG_PARAMS], params);
+    objToJsonValue(obj.getElement(Strings::S_MSG_PARAMS), params);
 
     std::string type = getMessageType(obj);
     root[type] = Json::Value(Json::objectValue);
     root[type][S_PARAMETERS] = params;
 
-    root[type][S_CORRELATION_ID] = static_cast<int>(obj[Strings::S_PARAMS][Strings::S_CORRELATION_ID]);
-    root[type][S_NAME] = static_cast<std::string>(obj[Strings::S_PARAMS][Strings::S_FUNCTION_ID]);
+    root[type][S_CORRELATION_ID] = static_cast<int>(
+            obj.getElement(Strings::S_PARAMS).getElement(Strings::S_CORRELATION_ID));
+
+    root[type][S_NAME] = static_cast<std::string>(
+            obj.getElement(Strings::S_PARAMS).getElement(Strings::S_FUNCTION_ID));
 
     outStr = root.toStyledString();
 

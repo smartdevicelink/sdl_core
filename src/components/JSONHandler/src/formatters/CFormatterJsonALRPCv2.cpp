@@ -3,12 +3,12 @@
 
 
 bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(
-        NsAppLink::NsSmartObjects::CSmartObject& obj,
+        const NsAppLink::NsSmartObjects::CSmartObject& obj,
         std::string& outStr)
 {
     Json::Value root(Json::objectValue);
 
-    objToJsonValue(obj[NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS], root);
+    objToJsonValue(obj.getElement(NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS), root);
 
     outStr = root.toStyledString();
 

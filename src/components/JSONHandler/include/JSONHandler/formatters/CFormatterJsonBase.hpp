@@ -23,7 +23,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param obj Input SmartObject. Can contain a complex structure of objects.
          * @param value The resulting JSON object. It has the same structure as the input SmartObject.
          */
-        static void objToJsonValue(NsAppLink::NsSmartObjects::CSmartObject &obj,
+        static void objToJsonValue(const NsAppLink::NsSmartObjects::CSmartObject &obj,
                 Json::Value &value);
 
         /**

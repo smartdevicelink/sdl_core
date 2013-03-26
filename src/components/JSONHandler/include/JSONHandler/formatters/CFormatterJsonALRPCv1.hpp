@@ -34,7 +34,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
         /**
          * @brief Extracts a message type from the SmartObject
          */
-        static const std::string getMessageType(NsAppLink::NsSmartObjects::CSmartObject& obj);
+        static const std::string getMessageType(const NsAppLink::NsSmartObjects::CSmartObject& obj);
 
         /**
          * @brief Extracts a message type from the root JSON object.
@@ -60,7 +60,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param outStr resulting JSON string
          * @return true if success, false otherwise
          */
-        static bool toString(NsAppLink::NsSmartObjects::CSmartObject &obj,
+        static bool toString(const NsAppLink::NsSmartObjects::CSmartObject &obj,
                 std::string& outStr);
 
         /**

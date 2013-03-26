@@ -35,7 +35,6 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
 
     public:
 
-        // TODO: Make const input params
         /**
          * @brief Creates a JSON string from a SmartObject.
          *
@@ -43,7 +42,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param outStr resulting JSON string
          * @return true if success, false otherwise
          */
-        static bool toString(NsAppLink::NsSmartObjects::CSmartObject &obj,
+        static bool toString(const NsAppLink::NsSmartObjects::CSmartObject &obj,
                 std::string& outStr);
 
 
