@@ -27,6 +27,10 @@ set (SOURCES_TSHAREDPTR_TEST
     ./TSharedPtrTest.cpp
 )
 
+set (SOURCES_INVALID_TEST
+    ./SmartObjectInvalidTest.cpp
+)
+
 # Libraries are the same for all SmartObject test
 set (LIBRARIES
     gtest
@@ -52,3 +56,7 @@ add_test(test_SmartObjectStressTest test_SmartObjectStressTest)
 add_executable("test_TSharedPtrTest" ${SOURCES_TSHAREDPTR_TEST})
 target_link_libraries("test_TSharedPtrTest" ${LIBRARIES})
 add_test(test_TSharedPtrTest test_TSharedPtrTest)
+
+add_executable("test_SmartObjectInvalidTest" ${SOURCES_INVALID_TEST})
+target_link_libraries("test_SmartObjectInvalidTest" ${LIBRARIES})
+add_test(test_SmartObjectInvalidTest test_SmartObjectInvalidTest)
