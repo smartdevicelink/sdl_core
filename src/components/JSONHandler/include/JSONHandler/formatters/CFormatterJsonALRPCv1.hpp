@@ -9,10 +9,26 @@
 namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
 
 
+    /**
+     * @brief Class is used to convert SmartObjects to JSON string and vice versa.
+     *
+     * JSON strings is in ALPCv1 format.
+     */
     class CFormatterJsonALRPCv1 : public CFormatterJsonBase
     {
     private:
+        /**
+         * @brief Hidden constructor.
+         *
+         * The class contains only static methods. Should not be instantiated.
+         */
         CFormatterJsonALRPCv1();
+
+        /**
+         * @brief Hidden copy constructor.
+         *
+         * The class contains only static methods. Should not be instantiated.
+         */
         CFormatterJsonALRPCv1(const CFormatterJsonALRPCv1&);
 
         /**
@@ -52,6 +68,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          *
          * @param str input JSON string
          * @param out The resulting SmartObject
+         * @return true if success, otherwise - false
          */
         static bool fromString(const std::string &str,
                 NsAppLink::NsSmartObjects::CSmartObject &out);
