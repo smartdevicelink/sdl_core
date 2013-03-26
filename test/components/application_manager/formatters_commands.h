@@ -250,7 +250,8 @@ TEST(json2_command, response_error_params) {
 
   smart_objects::CSmartObject incoming_message;
 
-  formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
+  formatters::FormatterJsonRpc::
+  FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
     incoming_string,
     incoming_message);
 
@@ -276,6 +277,23 @@ TEST(json2_command, response_error_params) {
 
   std::string str;
   formatters::FormatterJsonRpc::ToString(incoming_message, str);
+  std::cout << str << std::endl;
+}
+
+TEST(json2_command, create_object) {
+  hmi_apis::HMI_API factory;
+  smart_objects::CSmartObject object = factory.CreateSmartObject(
+                                         hmi_apis::FunctionID::VR_IsReady,
+                                         hmi_apis::messageType::request);
+
+  smart_objects::CSmartObject is_vr_ready =
+    factory.CreateSmartObject(hmi_apis::FunctionID::VR_IsReady,
+                              hmi_apis::messageType::request);
+
+  ASSERT_EQ(smart_objects::SmartType_Map, is_vr_ready.getType());
+
+  std::string str;
+  formatters::FormatterJsonRpc::ToString(is_vr_ready, str);
   std::cout << str << std::endl;
 }
 

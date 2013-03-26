@@ -41,7 +41,9 @@ log4cxx::LoggerPtr MessageBrokerAdapter::logger_   =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler)
-  : MessageBrokerController(std::string("127.0.0.1"), 8087, "SDL")
+  : MessageBrokerController(std::string("127.0.0.1"),
+                            8087,
+                            "BasicCommunication")
   , HMIMessageAdapter(handler) {
   LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
 }
@@ -51,7 +53,6 @@ MessageBrokerAdapter::~MessageBrokerAdapter() {
 
 void MessageBrokerAdapter::sendMessageToHMI(
   utils::SharedPtr<application_manager::Message> message) {
-
   LOG4CXX_INFO(logger_, "MessageBrokerAdapter::sendMessageToHMI");
   /*if (!message) {
     // TODO(PV): LOG
@@ -101,6 +102,7 @@ void MessageBrokerAdapter::subscribeTo() {
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
   MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
   MessageBrokerController::subscribeTo("UI.OnTBTClientState");
+  LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
 void MessageBrokerAdapter::processRecievedfromMB(Json::Value& root) {

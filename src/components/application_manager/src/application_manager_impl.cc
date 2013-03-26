@@ -203,7 +203,19 @@ void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
 
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
-  // HMICommandFactory::CreateCommand
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
+
+  /*hmi_apis::HMI_API factory;
+  smart_objects::CSmartObject is_vr_ready =
+    factory.CreateSmartObject(hmi_apis::FunctionID::VR_IsReady,
+                              hmi_apis::messageType::request);
+  */
+  LOG4CXX_INFO(logger_, "Sending vr is ready");
+
+  /*CommandSharedPtr command = HMICommandFactory::CreateCommand(is_vr_ready);
+  command->Init();
+  command->Run();
+  command->CleanUp();*/
 }
 
 // TODO(VS) : Remove function_id from function parameters(it isn't used)
@@ -281,17 +293,17 @@ void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
 }
 
 void ApplicationManagerImpl::set_active_ui_language(
-    const hmi_apis::Common_Language::eType& language) {
+  const hmi_apis::Common_Language::eType& language) {
   ui_language_ = language;
 }
 
 void ApplicationManagerImpl::set_active_vr_language(
-    const hmi_apis::Common_Language::eType& language) {
+  const hmi_apis::Common_Language::eType& language) {
   vr_language_ = language;
 }
 
 void ApplicationManagerImpl::set_active_tts_language(
-    const hmi_apis::Common_Language::eType& language) {
+  const hmi_apis::Common_Language::eType& language) {
   tts_language_ = language;
 }
 
@@ -341,9 +353,9 @@ void ApplicationManagerImpl::onMessageReceived(
 
   LOG4CXX_INFO(logger_, "Converted message, trying to create command");
   CommandSharedPtr command = HMICommandFactory::CreateCommand(smart_object);
-  /*command->Init();
+  command->Init();
   command->Run();
-  command->CleanUp();*/
+  command->CleanUp();
 }
 
 void ApplicationManagerImpl::onErrorSending(
@@ -353,7 +365,7 @@ void ApplicationManagerImpl::onErrorSending(
 
 void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
-  // TODO (DK): HMI StartDeviceDiscovery response
+  // TODO(DK): HMI StartDeviceDiscovery response
 }
 void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
@@ -393,7 +405,7 @@ void ApplicationManagerImpl::set_watchdog(
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
   connection_handler::ConnectionHandlerImpl::instance()->
-      StartDevicesDiscovery();
+  StartDevicesDiscovery();
 }
 
 void ApplicationManagerImpl::SendMessageToMobile(
@@ -401,9 +413,19 @@ void ApplicationManagerImpl::SendMessageToMobile(
   return;
 }
 
+bool ApplicationManagerImpl::ManageCommandToMobile(
+  const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  return true;
+}
+
 void ApplicationManagerImpl::SendMessageToHMI(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
   return;
+}
+
+bool ApplicationManagerImpl::ManageCommandToHMI(
+  const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  return true;
 }
 
 void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
