@@ -240,27 +240,27 @@ class CConnectionHandler :
   /**
    * \brief Pointer to observer
    */
-  IConnectionHandlerObserver* mp_ConnectionHandlerObserver;
+  IConnectionHandlerObserver* mp_connection_handler_observer;
 
   /**
    * \brief Pointer to TransportManager
    */
-  NsSmartDeviceLink::NsTransportManager::ITransportManager * mpTransportManager;
+  NsSmartDeviceLink::NsTransportManager::ITransportManager * mp_transport_manager;
 
   /**
    * \brief List of devices
    */
-  tDeviceList mDeviceList;
+  tDeviceList m_deviceList;
 
   /**
    * \brief List of connections
    */
-  tConnectionList mConnectionList;
+  tConnectionList m_connection_list;
 
   /**
    *\brief For logging.
    */
-  static log4cplus::Logger mLogger;
+  static log4cplus::Logger m_logger;
 };
 }/* namespace NsConnectionHandler */
 
