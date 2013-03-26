@@ -83,20 +83,20 @@ const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
  */
 bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
+                                log4cxx::Logger::getLogger("appMain"));
 
   NsMessageBroker::CMessageBroker* message_broker =
-      NsMessageBroker::CMessageBroker::getInstance();
+    NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker) {
     LOG4CXX_INFO(logger, " Wrong pMessageBroker pointer!");
     return false;
   }
 
   NsMessageBroker::TcpServer* message_broker_server =
-      new NsMessageBroker::TcpServer(
-          profile::Profile::instance()->server_address(),
-          profile::Profile::instance()->server_port(),
-          message_broker);
+    new NsMessageBroker::TcpServer(
+    profile::Profile::instance()->server_address(),
+    profile::Profile::instance()->server_port(),
+    message_broker);
   if (!message_broker_server) {
     LOG4CXX_INFO(logger, " Wrong pJSONRPC20Server pointer!");
     return false;
@@ -122,37 +122,37 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
   }
 
   hmi_message_handler::MessageBrokerAdapter* mb_adapter =
-      new hmi_message_handler::MessageBrokerAdapter(
-          hmi_message_handler::HMIMessageHandlerImpl::instance());
+    new hmi_message_handler::MessageBrokerAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
 
   hmi_message_handler::HMIMessageHandlerImpl::instance()->addHMIMessageAdapter(
-      mb_adapter);
+    mb_adapter);
   if (!mb_adapter->Connect()) {
     LOG4CXX_INFO(logger, "Cannot connect to remote peer!");
     return false;
   }
 
   LOG4CXX_INFO(logger, "Start CMessageBroker thread!");
-  System::Thread th1(
-      new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
-          *message_broker, &NsMessageBroker::CMessageBroker::MethodForThread,
-          NULL));
-  th1.Start(false);
+  System::Thread* th1 = new System::Thread(
+    new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
+      *message_broker, &NsMessageBroker::CMessageBroker::MethodForThread,
+      NULL));
+  th1->Start(false);
 
   LOG4CXX_INFO(logger, "Start MessageBroker TCP server thread!");
-  System::Thread th2(
-      new System::ThreadArgImpl<NsMessageBroker::TcpServer>(
-          *message_broker_server, &NsMessageBroker::TcpServer::MethodForThread,
-          NULL));
-  th2.Start(false);
+  System::Thread* th2 = new System::Thread(
+    new System::ThreadArgImpl<NsMessageBroker::TcpServer>(
+      *message_broker_server, &NsMessageBroker::TcpServer::MethodForThread,
+      NULL));
+  th2->Start(false);
 
   LOG4CXX_INFO(logger, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
-  System::Thread th3(
-      new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
-          *mb_adapter,
-          &hmi_message_handler::MessageBrokerAdapter::MethodForReceiverThread,
-          NULL));
-  th3.Start(false);
+  System::Thread* th3 = new System::Thread(
+    new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
+      *mb_adapter,
+      &hmi_message_handler::MessageBrokerAdapter::MethodForReceiverThread,
+      NULL));
+  th3->Start(false);
 
   mb_adapter->registerController();
   mb_adapter->subscribeTo();
@@ -166,7 +166,7 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
  */
 bool InitHmi() {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
+                                log4cxx::Logger::getLogger("appMain"));
 
   pid_t pid_hmi = 0;
   struct stat sb;
@@ -206,7 +206,6 @@ bool InitHmi() {
     LOG4CXX_INFO(logger, "HMI index.html doesn't exist!");
     return false;
   }
-
   // Create a child process.
   pid_hmi = fork();
 
@@ -257,7 +256,7 @@ int main(int argc, char** argv) {
   // Logger initialization
 
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
+                                log4cxx::Logger::getLogger("appMain"));
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
   LOG4CXX_INFO(logger, " Application started!");
 
@@ -265,27 +264,27 @@ int main(int argc, char** argv) {
   // Components initialization
 
   NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager =
-      NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
+    NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
   DCHECK(transport_manager);
 
   protocol_handler::ProtocolHandlerImpl* protocol_handler =
-      new protocol_handler::ProtocolHandlerImpl(transport_manager);
+    new protocol_handler::ProtocolHandlerImpl(transport_manager);
   DCHECK(protocol_handler);
 
   mobile_message_handler::MobileMessageHandlerImpl* mmh =
-      mobile_message_handler::MobileMessageHandlerImpl::instance();
+    mobile_message_handler::MobileMessageHandlerImpl::instance();
   DCHECK(mmh);
 
   connection_handler::ConnectionHandlerImpl* connection_handler =
-      connection_handler::ConnectionHandlerImpl::instance();
+    connection_handler::ConnectionHandlerImpl::instance();
   DCHECK(connection_handler);
 
   application_manager::ApplicationManagerImpl* app_manager =
-      application_manager::ApplicationManagerImpl::instance();
+    application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager);
 
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler =
-      hmi_message_handler::HMIMessageHandlerImpl::instance();
+    hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler)
 
   transport_manager->addDataListener(protocol_handler);
