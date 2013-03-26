@@ -93,6 +93,7 @@ bool Formatters::CFormatterJsonALRPCv1::fromString(
         out[Strings::S_PARAMS][Strings::S_MESSAGE_TYPE] = type;
         out[Strings::S_PARAMS][Strings::S_FUNCTION_ID] = root[type][S_NAME].asString();
         out[Strings::S_PARAMS][Strings::S_CORRELATION_ID] = root[type][S_CORRELATION_ID].asInt();
+        out[Strings::S_PARAMS][Strings::S_PROTOCOL_TYPE] = 0;
         out[Strings::S_PARAMS][Strings::S_PROTOCOL_VERSION] = 1;
     }
 

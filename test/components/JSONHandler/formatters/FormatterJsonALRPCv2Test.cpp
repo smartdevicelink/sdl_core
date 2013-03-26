@@ -11,6 +11,8 @@
 
 namespace test { namespace components { namespace JSONHandler { namespace formatters {
 
+    using namespace NsAppLink::NsJSONHandler::strings;
+
     TEST(test_SimpleTwoWaysTest, test_JsonALRPCv2)
     {
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
@@ -19,36 +21,48 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         NsAppLink::NsSmartObjects::CSmartObject srcObj;
         NsAppLink::NsSmartObjects::CSmartObject dstObj;
 
-        srcObj["params"]["MessageType"] = 0;
-        srcObj["params"]["FunctionId"] = 0;
-        srcObj["msg_params"]["appId"] = "APP ID";
-        srcObj["msg_params"]["appName"] = "APP NAME";
-        srcObj["msg_params"]["appType"][0] = "SYSTEM";
-        srcObj["msg_params"]["appType"][1] = "COMMUNICATION";
-        srcObj["msg_params"]["hmiDisplayLanguageDesired"] = "RU-RU";
-        srcObj["msg_params"]["isMediaApplication"] = true;
-        srcObj["msg_params"]["languageDesired"] = "EN-US";
-        srcObj["msg_params"]["ngnMediaScreenAppName"] = "SCREEN NAME";
-        srcObj["msg_params"]["syncMsgVersion"]["majorVersion"] = 2;
-        srcObj["msg_params"]["syncMsgVersion"]["minorVersion"] = 10;
-        srcObj["msg_params"]["ttsName"][0]["text"] = "ABC";
-        srcObj["msg_params"]["ttsName"][0]["type"] = "TEXT";
-        srcObj["msg_params"]["vrSynonyms"][0] = "Synonym1";
-        srcObj["msg_params"]["vrSynonyms"][1] = "Synonym2";
-        srcObj["msg_params"]["null"] = NsAppLink::NsSmartObjects::CSmartObject();
-        srcObj["msg_params"]["double"] = -0.1234;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
+        srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
+        srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+        srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+        srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+        srcObj[S_MSG_PARAMS]["appId"] = "APP ID";
+        srcObj[S_MSG_PARAMS]["appName"] = "APP NAME";
+        srcObj[S_MSG_PARAMS]["appType"][0] = "SYSTEM";
+        srcObj[S_MSG_PARAMS]["appType"][1] = "COMMUNICATION";
+        srcObj[S_MSG_PARAMS]["hmiDisplayLanguageDesired"] = "RU-RU";
+        srcObj[S_MSG_PARAMS]["isMediaApplication"] = true;
+        srcObj[S_MSG_PARAMS]["languageDesired"] = "EN-US";
+        srcObj[S_MSG_PARAMS]["ngnMediaScreenAppName"] = "SCREEN NAME";
+        srcObj[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 2;
+        srcObj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 10;
+        srcObj[S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
+        srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
+        srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
+        srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
+        srcObj[S_MSG_PARAMS]["null"] = NsAppLink::NsSmartObjects::CSmartObject();
+        srcObj[S_MSG_PARAMS]["double"] = -0.1234;
 
         // SmartObjects --> JSON
         NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(srcObj, str);
 
+        //std::cout << str << std::endl;
+
         // JSON --> SmartObjects
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromString<int, int>(str, dstObj, 0, 0);
+        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
+            fromString<std::string, std::string>(str, dstObj, "some function", "request", 13);
 
         // Compare SmartObjects
-        ASSERT_EQ("APP NAME",  static_cast<std::string>(dstObj["msg_params"]["appName"]));
-        ASSERT_EQ(10, static_cast<int>(dstObj["msg_params"]["syncMsgVersion"]["minorVersion"]));
-        ASSERT_EQ("TEXT", static_cast<std::string>(dstObj["msg_params"]["ttsName"][0]["type"]));
-        ASSERT_TRUE(static_cast<bool>(dstObj["msg_params"]["isMediaApplication"]));
+        ASSERT_EQ("APP NAME",  static_cast<std::string>(dstObj[S_MSG_PARAMS]["appName"]));
+        ASSERT_EQ(10, static_cast<int>(dstObj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"]));
+        ASSERT_EQ("TEXT", static_cast<std::string>(dstObj[S_MSG_PARAMS]["ttsName"][0]["type"]));
+        ASSERT_TRUE(static_cast<bool>(dstObj[S_MSG_PARAMS]["isMediaApplication"]));
+
+        ASSERT_EQ("request", static_cast<std::string>(dstObj[S_PARAMS][S_MESSAGE_TYPE]));
+        ASSERT_EQ("some function", static_cast<std::string>(dstObj[S_PARAMS][S_FUNCTION_ID]));
+        ASSERT_EQ(13, static_cast<int>(dstObj[S_PARAMS][S_CORRELATION_ID]));
+        ASSERT_EQ(0, static_cast<int>(dstObj[S_PARAMS][S_PROTOCOL_TYPE]));
+        ASSERT_EQ(2, static_cast<int>(dstObj[S_PARAMS][S_PROTOCOL_VERSION]));
 
         ASSERT_TRUE(srcObj == dstObj);      // High level comparison
     }
