@@ -8,7 +8,10 @@ bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(
 {
     Json::Value root(Json::objectValue);
 
-    objToJsonValue(obj.getElement(NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS), root);
+    NsAppLink::NsSmartObjects::CSmartObject formattedObj(obj);
+    formattedObj.getSchema().unapplySchema(formattedObj);       // converts enums(as int) to strings
+
+    objToJsonValue(formattedObj.getElement(NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS), root);
 
     outStr = root.toStyledString();
 

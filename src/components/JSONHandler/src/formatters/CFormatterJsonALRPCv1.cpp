@@ -53,17 +53,20 @@ bool Formatters::CFormatterJsonALRPCv1::toString(
     Json::Value root(Json::objectValue);
     Json::Value params(Json::objectValue);
 
-    objToJsonValue(obj.getElement(Strings::S_MSG_PARAMS), params);
+    SmartObjects::CSmartObject formattedObj(obj);
+    formattedObj.getSchema().unapplySchema(formattedObj);       // converts enums(as int) to strings
 
-    std::string type = getMessageType(obj);
+    objToJsonValue(formattedObj.getElement(Strings::S_MSG_PARAMS), params);
+
+    std::string type = getMessageType(formattedObj);
     root[type] = Json::Value(Json::objectValue);
     root[type][S_PARAMETERS] = params;
 
     root[type][S_CORRELATION_ID] = static_cast<int>(
-            obj.getElement(Strings::S_PARAMS).getElement(Strings::S_CORRELATION_ID));
+            formattedObj.getElement(Strings::S_PARAMS).getElement(Strings::S_CORRELATION_ID));
 
     root[type][S_NAME] = static_cast<std::string>(
-            obj.getElement(Strings::S_PARAMS).getElement(Strings::S_FUNCTION_ID));
+            formattedObj.getElement(Strings::S_PARAMS).getElement(Strings::S_FUNCTION_ID));
 
     outStr = root.toStyledString();
 

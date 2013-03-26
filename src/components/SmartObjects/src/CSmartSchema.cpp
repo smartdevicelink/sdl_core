@@ -26,3 +26,8 @@ void NsAppLink::NsSmartObjects::CSmartSchema::applySchema(NsAppLink::NsSmartObje
 {
     mSchemaItem->applySchema(Object);
 }
+
+void NsAppLink::NsSmartObjects::CSmartSchema::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+{
+    mSchemaItem->unapplySchema(Object);
+}

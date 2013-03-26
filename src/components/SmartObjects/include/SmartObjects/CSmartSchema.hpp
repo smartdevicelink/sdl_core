@@ -27,6 +27,13 @@ namespace NsAppLink
              **/
             virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
 
+            /**
+             * @brief The reverse SmartObject conversion using schema.
+             *
+             * @param object Object to convert.
+             */
+            virtual void unapplySchema(NsAppLink::NsSmartObjects::CSmartObject& object);
+
         protected:
             TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> mSchemaItem;
         };
