@@ -646,6 +646,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmart
 {
     SmartData newData;
     SmartType newType = object.m_type;
+    CSmartSchema newSchema = object.m_schema;
 
     switch(newType) {
         case SmartType_Map :
@@ -676,6 +677,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmart
 
     m_type = newType;
     m_data = newData;
+    m_schema = newSchema;
 }
 
 void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
