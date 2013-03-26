@@ -29,4 +29,9 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "formatters_commands.h"
+#include "./formatters_commands.h"
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleMock(&argc, argv);
+  return RUN_ALL_TESTS();
+}
