@@ -1,0 +1,9 @@
+/*! \page components_smartobjects Smart Objects
+
+Smart Object is building block for a custom dynamic data structures with virtually unlimited complexity.
+Client code can use Smart Objects to create containers for simple basic types such as bools, ints, doubles, chars, strings end enums as well as arrays and maps.
+
+More detailed information is described in following chapters:
+    - \subpage components_smartobjects_types "Smart Objects Types"
+    - \subpage components_smartobjects_usage "Use of Smart Objects"
+*/

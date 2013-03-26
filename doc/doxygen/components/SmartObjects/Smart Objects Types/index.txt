@@ -1,0 +1,7 @@
+/*! \page components_smartobjects_types Smart Objects Types
+
+Current implementation of Smart Objects contains definitions that allow working with every Smart Object 
+as variable of one of the basic types: bool, int, long, double, char, string (both as char* and std::string), array and map.
+
+In the client code Smart Object will be automatically casted to the desired type.
+*/
