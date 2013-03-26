@@ -495,8 +495,233 @@ namespace NsAppLink
             size_t length() const;
 
         protected:
+            /**
+             * @name Support of type: int (internal)
+             * @{
+             */
+            /**
+             * @brief Sets new integer value to the object.
+             *
+             * This method changes also internal object type
+             *
+             * @param  NewValue New object value
+             * @return void
+             **/
+            inline void set_value_integer(int NewValue);
+
+            /**
+             * @brief Sets new integer value to the object.
+             *
+             * This method changes also internal object type
+             *
+             * @param  NewValue New object value
+             * @return void
+             **/
+            inline void set_value_long(long NewValue);
+
+            /**
+             * @brief Converts object to int type
+             *
+             * @return int Converted value or invalid_int_value if conversion not possible
+             **/
+            inline int convert_int(void) const;
+
+            /**
+             * @brief Converts object to int type
+             *
+             * @return int Converted value or invalid_int_value if conversion not possible
+             **/
+            inline long convert_long(void) const;
+            /** @} */
+
+            /**
+             * @name Support of type: char (internal)
+             * @{
+             */
+            /**
+             * @brief Sets new char value to the object.
+             *
+             * This method changes also internal object type
+             *
+             * @param  NewValue New object value
+             * @return void
+             **/
+            inline void set_value_char(char NewValue);
+
+            /**
+             * @brief Converts object to char type
+             *
+             * @return int Converted value or invalid_char_value if conversion not possible
+             **/
+            inline char convert_char(void) const;
+            /** @} */
+
+            /**
+             * @name Support of type: double (internal)
+             * @{
+             */
+            /**
+             * @brief Sets new double value to the object.
+             *
+             * This method changes also internal object type
+             *
+             * @param  NewValue New object value
+             * @return void
+             **/
+            inline void set_value_double(double NewValue);
+
+            /**
+             * @brief Converts object to double type
+             *
+             * @return int Converted value or invalid_double_value if conversion not possible
+             **/
+            inline double convert_double(void) const;
+            /** @} */
+
+            /**
+             * @name Support of type: bool (internal)
+             * @{
+             */
+            /**
+             * @brief Sets new bool value to the object.
+             *
+             * This method changes also internal object type
+             *
+             * @param  NewValue New object value
+             * @return void
+             **/
+            inline void set_value_bool(bool NewValue);
+
+            /**
+             * @brief Converts object to bool type
+             *
+             * @return int Converted value or invalid_bool_value if conversion not possible
+             **/
+            inline bool convert_bool(void) const;
+            /** @} */
+
+            /**
+             * @name Support of type: string (internal)
+             * @{
+             */
+            /**
+             * @brief Sets new string value to the object.
+             *
+             * This method changes also internal object type
+             *
+             * @param  NewValue New object value
+             * @return void
+             **/
+            inline void set_value_string(const std::string& NewValue);
+
+            /**
+             * @brief Sets new string value to the object.
+             *
+             * This method changes also internal object type
+             *
+             * @param  NewValue New object value
+             * @return void
+             **/
+            inline void set_value_cstr(const char* NewValue);
+
+            /**
+             * @brief Converts object to string type
+             *
+             * @return int Converted value or invalid_string_value if conversion not possible
+             **/
+            inline std::string convert_string(void) const;
+            /** @} */
+
+
+            /**
+             * @name Array-like interface support (internal)
+             * @{
+             */
+            /**
+             * @brief Returns SmartObject from internal array data by it's index
+             *
+             * @param Index Index of element to retrieve
+             * @return CSmartObject&
+             **/
+            CSmartObject& handle_array_access(int Index);
+            /** @} */
+
+            /**
+             * @name Map-like interface support (internal)
+             * @{
+             */
+            /**
+             * @brief Returns SmartObject from internal map data by it's key
+             *
+             * @param Key Key of element to retrieve
+             * @return CSmartObject&
+             **/
+            inline CSmartObject& handle_map_access(std::string Key);
+            /** @} */
+
+            /**
+             * @name Helper conversion methods
+             * @{
+             */
+            /**
+             * @brief Converts string to double
+             *
+             * @param Value Pointer to string to convert
+             * @return double
+             **/
+            static double convert_string_to_double(const std::string* Value);
+
+            /**
+             * @brief Converts string to long
+             *
+             * @param Value Pointer to string to convert
+             * @return long int
+             **/
+            static long convert_string_to_long(const std::string* Value);
+
+            /**
+             * @brief Converts double value to string
+             *
+             * @param Value Value to be converted
+             * @return std::string
+             **/
+            static std::string convert_double_to_string(const double& Value);
+            /** @} */
+
+            /**
+             * @brief Duplicates another SmartObject
+             *
+             * After calling that function current SmartObject will have the same
+             * type, schema and data, as passed.
+             *
+             * @param  OtherObject Object to be duplicated
+             * @return void
+             **/
+            void duplicate(const CSmartObject& OtherObject);
+
+            /**
+             * @brief Cleans up internal data for some types (like string, array or map)
+             *
+             * @return void
+             **/
+            void cleanup_data();
+
+            /**
+             * @brief Sets new internal type and cleans up if it changes
+             *
+             * @param NewType New object type
+             * @return void
+             **/
+            void set_new_type(SmartType NewType);
+
+            /**
+             * @brief Current type of the object
+             **/
             SmartType m_type;
 
+            /**
+             * @brief Union for holding actual internal object data
+             **/
             typedef union {
                 double double_value;
                 bool bool_value;
@@ -507,59 +732,51 @@ namespace NsAppLink
                 SmartMap* map_value;
             } SmartData;
 
+            /**
+             * @brief Current internal object data
+             **/
             SmartData m_data;
+
+            /**
+             * @brief Validation schema, attached to the object
+             **/
             CSmartSchema m_schema;
-
-            // Support of type: int
-            inline void set_value_integer(int);
-            inline int convert_int(void) const;
-
-            // Support of type: char
-            inline void set_value_char(char);
-            inline char convert_char(void) const;
-
-            // Support of type: double
-            inline void set_value_double(double);
-            inline double convert_double(void) const;
-
-            // Support of type: bool
-            inline void set_value_bool(bool);
-            inline bool convert_bool(void) const;
-
-            // Support of type: string
-            inline void set_value_string(const std::string&);
-            inline void set_value_cstr(const char*);
-            inline std::string convert_string(void) const;
-
-            // Support of type: long
-            inline void set_value_long(long);
-            inline long convert_long(void) const;
-
-            // Array interface support
-            inline CSmartObject& handle_map_access(std::string);
-
-            // Map interface support
-            CSmartObject& handle_array_access(int index);
-
-            // Helper methods
-            static double convert_string_to_double(const std::string* s);
-            static long convert_string_to_long(const std::string* s);
-            static std::string convert_double_to_string(const double& value);
-
-            void duplicate(const CSmartObject&);
-            void cleanup_data();
-            // TODO: Is it really necessary to be that long? Why not just "set_new_type"
-            void cleanup_data_if_type_changed_and_set_new_type(SmartType newType);
         };
 
+        /**
+         * @brief Value that is used as invalid value for bool type
+         **/
         static const bool        invalid_bool_value   = false;
-        static const int         invalid_int_value    = -1;
-        static const char        invalid_char_value   = 0;
-        static const std::string invalid_string_value = "";
-        static const double      invalid_double_value   = -1;
-        static const char*       invalid_cstr_value   = "";
-        static CSmartObject      invalid_object_value(SmartType_Invalid);
 
+        /**
+         * @brief Value that is used as invalid value for int type
+         **/
+        static const int         invalid_int_value    = -1;
+
+        /**
+         * @brief Value that is used as invalid value for char type
+         **/
+        static const char        invalid_char_value   = 0;
+
+        /**
+         * @brief Value that is used as invalid value for string type
+         **/
+        static const std::string invalid_string_value = "";
+
+        /**
+         * @brief Value that is used as invalid value for double type
+         **/
+        static const double      invalid_double_value   = -1;
+
+        /**
+         * @brief Value that is used as invalid value for string type
+         **/
+        static const char*       invalid_cstr_value   = "";
+
+        /**
+         * @brief Value that is used as invalid value for object type
+         **/
+        static CSmartObject      invalid_object_value(SmartType_Invalid);
     }
 }
 #endif // __CSMARTOBJECT_HPP__
