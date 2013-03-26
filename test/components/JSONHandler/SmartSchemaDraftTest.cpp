@@ -41,7 +41,7 @@ namespace test { namespace components { namespace JSONHandler { namespace SmartS
         ";
 
         CSmartObject obj;
-        bResult = CFormatterJsonALRPCv2::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj, FunctionID::RegisterAppInterfaceID, messageType::request);
+        bResult = CFormatterJsonALRPCv2::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj, FunctionID::RegisterAppInterfaceID, messageType::request, 1);
         ASSERT_TRUE(bResult);
 
         ASSERT_EQ(FunctionID::RegisterAppInterfaceID, (int)obj[S_PARAMS][S_FUNCTION_ID]);
@@ -92,7 +92,7 @@ namespace test { namespace components { namespace JSONHandler { namespace SmartS
         std::string expectedOutputJsonString = "{\
             \"appID\" : \"APP ID\",\
             \"appName\" : \"NEW APP NAME\",\
-            \"appType\" : [ \9, 1 ],\
+            \"appType\" : [ 9, 1 ],\
             \"isMediaApplication\" : true,\
             \"languageDesired\" : \"DE-EU\",\
             \"hmiDisplayLanguageDesired\" : \"RU-RU\",\
