@@ -14,82 +14,368 @@ namespace NsAppLink
     {
         class CSmartObject;
 
+        /**
+         * @brief Enumeration with all types, supported by SmartObject
+         **/
         enum SmartType
         {
+            /**
+             * @brief Null value. Act as initial value.
+             **/
             SmartType_Null      = 0,
+
+            /**
+             * @brief Boolean value.
+             **/
             SmartType_Boolean   = 1,
+
+            /**
+             * @brief Integer value.
+             **/
             SmartType_Integer   = 2,
+
+            /**
+             * @brief Character value.
+             **/
             SmartType_Character = 3,
+
+            /**
+             * @brief String value.
+             **/
             SmartType_String    = 4,
+
+            /**
+             * @brief Double value.
+             **/
             SmartType_Double    = 5,
+
+            /**
+             * @brief Map value. Gives possibility for object to act like hashtable.
+             **/
             SmartType_Map       = 6,
+
+            /**
+             * @brief Array value. Gives possibility for object to act like array.
+             **/
             SmartType_Array     = 7,
+
+            /**
+             * @brief Invalid value. Represents invalid object that cannot change his type.
+             **/
             SmartType_Invalid   = -1
         };
 
+        /**
+         * @brief SmartArray type
+         **/
         typedef std::vector<CSmartObject> SmartArray;
+
+        /**
+         * @brief SmartMap type
+         **/
         typedef std::map<std::string, CSmartObject> SmartMap;
 
+        /**
+         * @brief Main SmartObject class
+         *
+         * This class act as Variant type from other languages and can be used as primitive type
+         * like bool, int, char, double, string and as complex type like array and map.
+         **/
         class CSmartObject
         {
         public:
+            /**
+             * @brief Constructor.
+             *
+             * Creates object with Null type.
+             **/
             CSmartObject();
-            CSmartObject(const CSmartObject&);
-            CSmartObject(SmartType type);
+
+            /**
+             * @brief Copy constructor.
+             *
+             * @param Other Object to be copied from.
+             **/
+            CSmartObject(const CSmartObject& Other);
+
+            /**
+             * @brief Constructor for creating object of given primitive type.
+             *
+             * Only primitive types (bool, int, char, double, string) are supported.
+             *
+             * @param type Type of the created object.
+             **/
+            CSmartObject(SmartType Type);
+
+            /**
+             * @brief Destructor
+             *
+             **/
             ~CSmartObject();
 
-            CSmartObject& operator=(const CSmartObject&);
-            bool operator==(const CSmartObject&) const;
+            /**
+             * @brief Assignment operator.
+             *
+             * @param  Other Other SmartObject
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator=(const CSmartObject& Other);
 
-            // Support of type: int
-            CSmartObject(int);
+            /**
+             * @brief Comparison operator
+             *
+             * @param  Other Other SmartObject to be compared with
+             * @return bool Result of comparison
+             **/
+            bool operator==(const CSmartObject& Other) const;
+
+            /**
+             * @name Support of type: int
+             * @{
+             */
+            /**
+             * @brief Constructor for creating object of type: int
+             *
+             * @param InitialValue Initial object value
+             **/
+            CSmartObject(int InitialValue);
+
+            /**
+             * @brief Conversion operator to type: int
+             *
+             * @return int Value of the object converted to int type or invalid_int_value if
+             *         conversion is not possible
+             **/
             operator int(void) const;
-            CSmartObject& operator=(int);
-            bool operator==(int) const;
+
+            /**
+             * @brief Assignment operator for type: int
+             *
+             * @param  NewValue New object value
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator=(int NewValue);
+
+            /**
+             * @brief Comparison operator for comparing object with integer value
+             *
+             * @param  Value Value to compare object with
+             * @return bool
+             **/
+            bool operator==(int Value) const;
 
             // Support of type: long
-            CSmartObject(long);
+            /**
+             * @brief Constructor for creating object of type: int
+             *
+             * @param InitialValue Initial object value
+             **/
+            CSmartObject(long InitialValue);
+
+            /**
+             * @brief Conversion operator to type: int
+             *
+             * @return long Value of the object converted to int type or invalid_int_value if
+             *         conversion is not possible
+             **/
             operator long(void) const;
-            CSmartObject& operator=(long);
-            bool operator==(long) const;
 
-            // Support of type: double
-            CSmartObject(double);
+            /**
+             * @brief Assignment operator for type: int
+             *
+             * @param  NewValue New object value
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator=(long NewValue);
+
+            /**
+             * @brief Comparison operator for comparing object with long value
+             *
+             * @param  Value Value to compare object with
+             * @return bool
+             **/
+            bool operator==(long Value) const;
+
+            /** @} */
+
+            /**
+             * @name Support of type: double
+             * @{
+             */
+            /**
+             * @brief Constructor for creating object of type: double
+             *
+             * @param InitialValue Initial object value
+             **/
+            CSmartObject(double InitialValue);
+
+            /**
+             * @brief Conversion operator to type: double
+             *
+             * @return double Value of the object converted to double type or invalid_double_value if
+             *         conversion is not possible
+             **/
             operator double(void) const;
+
+            /**
+             * @brief Assignment operator for type: double
+             *
+             * @param  NewValue New object value
+             * @return CSmartObject&
+             **/
             CSmartObject& operator=(double);
+
+            /**
+             * @brief Comparison operator for comparing object with double value
+             *
+             * @param  Value Value to compare object with
+             * @return bool
+             **/
             bool operator==(double) const;
+            /** @} */
 
-            // Support of type: bool
-            CSmartObject(bool);
+            /**
+             * @name Support of type: bool
+             * @{
+             */
+            /**
+             * @brief Constructor for creating object of type: bool
+             *
+             * @param InitialValue Initial object value
+             **/
+            CSmartObject(bool InitialValue);
+
+            /**
+             * @brief Conversion operator to type: bool
+             *
+             * @return bool Value of the object converted to bool type or invalid_bool_value if
+             *         conversion is not possible
+             **/
             operator bool(void) const;
-            CSmartObject& operator=(bool);
-            bool operator==(bool) const;
 
-            // Support of type: char
-            CSmartObject(char);
+            /**
+             * @brief Assignment operator for type: bool
+             *
+             * @param  NewValue New object value
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator=(bool NewValue);
+
+            /**
+             * @brief Comparison operator for comparing object with bool value
+             *
+             * @param  Value Value to compare object with
+             * @return bool
+             **/
+            bool operator==(bool Value) const;
+            /** @} */
+
+            /**
+             * @name Support of type: char
+             * @{
+             */
+            /**
+             * @brief Constructor for creating object of type: char
+             *
+             * @param InitialValue Initial object value
+             **/
+            CSmartObject(char InitialValue);
+
+            /**
+             * @brief Conversion operator to type: char
+             *
+             * @return char Value of the object converted to bool type or invalid_char_value if
+             *         conversion is not possible
+             **/
             operator char(void) const;
-            CSmartObject& operator=(char);
-            bool operator==(char) const;
 
-            // Support of type: std::string
-            CSmartObject(const std::string);
+            /**
+             * @brief Assignment operator for type: char
+             *
+             * @param  NewValue New object value
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator=(char NewValue);
+
+            /**
+             * @brief Comparison operator for comparing object with char value
+             *
+             * @param  Value Value to compare object with
+             * @return bool
+             **/
+            bool operator==(char Value) const;
+            /** @} */
+
+            /**
+             * @name Support of type: string
+             * @{
+             */
+            /**
+             * @brief Constructor for creating object of type: string
+             *
+             * @param InitialValue Initial object value
+             **/
+            CSmartObject(const std::string InitialValue);
+
+            /**
+             * @brief Constructor for creating object of type: string
+             *
+             * @param InitialValue Initial object value
+             **/
+            CSmartObject(char* InitialValue);
+
+            /**
+             * @brief Conversion operator to type: string
+             *
+             * @return std::string Value of the object converted to bool type or invalid_string_value if
+             *         conversion is not possible
+             **/
             operator std::string(void) const;
-            CSmartObject& operator=(const std::string&);
-            bool operator==(std::string) const;
 
-            // Support of type: char*
-            CSmartObject(char*);
-            //operator char*(void) const;
-            CSmartObject& operator=(const char*);
-            bool operator==(const char*) const;
+            /**
+             * @brief Assignment operator for type: string
+             *
+             * @param  NewValue New object value
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator=(const std::string& NewValue);
 
-            // Array interface support
-            CSmartObject& operator[](int);
+            /**
+             * @brief Assignment operator for type: string
+             *
+             * @param  NewValue New object value
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator=(const char* NewValue);
 
-            // Map interface support
-            CSmartObject& operator[](const std::string s);
-            CSmartObject& operator[](char* s);
-            CSmartObject& operator[](const char*);
+            /**
+             * @brief Comparison operator for comparing object with string value
+             *
+             * @param  Value Value to compare object with
+             * @return bool
+             **/
+            bool operator==(std::string Value) const;
+
+            /**
+             * @brief Comparison operator for comparing object with string value
+             *
+             * @param  Value Value to compare object with
+             * @return bool
+             **/
+            bool operator==(const char* Value) const;
+            /** @} */
+
+            /**
+             * @name Array interface support
+             * @{
+             */
+            /**
+             * @brief Support of array-like access
+             *
+             * @param  Index index of element to return
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator[](int Index);
 
             /**
              * @brief Get array element.
@@ -104,6 +390,36 @@ namespace NsAppLink
              **/
             const CSmartObject & getElement(size_t Index) const;
 
+            /** @} */
+
+            /**
+             * @name Map/Hashtable interface support
+             * @{
+             */
+            /**
+             * @brief Support of map-like access
+             *
+             * @param  Key Key of element to return
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator[](const std::string Key);
+
+            /**
+             * @brief Support of map-like access
+             *
+             * @param  Key Key of element to return
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator[](char* Key);
+
+            /**
+             * @brief Support of map-like access
+             *
+             * @param  Key Key of element to return
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator[](const char* Key);
+
             /**
              * @brief Get map element.
              *
@@ -117,23 +433,26 @@ namespace NsAppLink
              **/
             const CSmartObject & getElement(const std::string & Key) const;
 
-            SmartType getType() const;
-
-
-            size_t length() const;
-
-
             /**
              * @brief Enumerates content of the object when it behaves like a map.
              *
-             * Returns set of map keys
+             * @return Set of map keys or empty set if object has type other than map
              **/
             std::set<std::string> enumerate() const;
 
+            /**
+             * @brief Checks for key presense when object is behaves like a map
+             *
+             * @param Key Key to check presense for
+             * @return bool
+             **/
             bool keyExists(const std::string & Key) const;
+            /** @} */
 
-            //TODO: Implement method keyExist(const char*) for checking key in map availability
-
+            /**
+             * @name Validation and schema support
+             * @{
+             */
             /**
              * @brief Validates object according to attached schema
              *
@@ -152,9 +471,28 @@ namespace NsAppLink
             /**
              * @brief Returns attached schema
              *
-             * @return :NsSmartObjects::CSmartSchema
+             * @return CSmartSchema
              **/
             CSmartSchema getSchema();
+            /** @} */
+
+            /**
+             * @brief Returns current object type
+             *
+             * @return NsSmartObjects::SmartType
+             **/
+            SmartType getType() const;
+
+
+            /**
+             * @brief Returns length of object
+             *
+             * If object has type string, array or map then method returns corresponded
+             * size. Otherwise returns zero
+             *
+             * @return size_t Length of the object
+             **/
+            size_t length() const;
 
         protected:
             SmartType m_type;
