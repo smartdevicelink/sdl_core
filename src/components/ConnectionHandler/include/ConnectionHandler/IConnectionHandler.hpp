@@ -59,17 +59,17 @@ class IConnectionHandler {
    * \brief Sets observer pointer for ConnectionHandler.
    * \param observer Pointer to observer object.
    **/
-  virtual void setConnectionHandlerObserver(
+  virtual void set_connection_handler_observer(
       IConnectionHandlerObserver * observer)=0;
 
   /**
    * \brief Sets pointer to TransportManager.
    * \param transportManager Pointer to TransportManager object.
    **/
-  virtual void setTransportManager(
+  virtual void set_transport_manager(
       NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager)=0;
 
-  virtual void startTransportManager() = 0;
+  virtual void StartTransportManager() = 0;
 
  protected:
   /**

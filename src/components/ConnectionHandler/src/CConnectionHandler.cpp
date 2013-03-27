@@ -63,7 +63,7 @@ CConnectionHandler::CConnectionHandler()
 CConnectionHandler::~CConnectionHandler() {
 }
 
-void CConnectionHandler::setConnectionHandlerObserver(
+void CConnectionHandler::set_connection_handler_observer(
     IConnectionHandlerObserver * observer) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::setConnectionHandlerObserver()");
   if (!observer) {
@@ -355,7 +355,7 @@ int CConnectionHandler::GetDataOnDeviceID(int device_id,
   return result;
 }
 
-void CConnectionHandler::setTransportManager(
+void CConnectionHandler::set_transport_manager(
     NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::setTransportManager()");
   if (!transportManager) {
@@ -391,7 +391,7 @@ void CConnectionHandler::connectToDevice(
   }
 }
 
-void CConnectionHandler::startTransportManager() {
+void CConnectionHandler::StartTransportManager() {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::startTransportManager()");
   if (NULL == transport_manager_) {
     LOG4CPLUS_ERROR(logger_, "Null pointer to TransportManager.");

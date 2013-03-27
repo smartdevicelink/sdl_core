@@ -62,7 +62,7 @@ namespace NsConnectionHandler
          */
         virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle ) = 0;
 
-        virtual void startTransportManager() = 0;
+        virtual void StartTransportManager() = 0;
 
     protected:
         /**

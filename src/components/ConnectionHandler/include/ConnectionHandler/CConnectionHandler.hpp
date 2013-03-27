@@ -79,7 +79,7 @@ class CConnectionHandler :
    * \brief Sets observer pointer for ConnectionHandler.
    * \param observer Pointer to observer object.
    **/
-  void setConnectionHandlerObserver(IConnectionHandlerObserver * observer);
+  virtual void set_connection_handler_observer(IConnectionHandlerObserver * observer);
 
   /**
    * \brief Available devices list updated.
@@ -184,7 +184,7 @@ class CConnectionHandler :
    * \brief Sets pointer to TransportManager.
    * \param transportManager Pointer to TransportManager object.
    **/
-  void setTransportManager(
+ virtual void set_transport_manager(
       NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager);
 
   /**
@@ -198,7 +198,7 @@ class CConnectionHandler :
    */
   virtual void connectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle);
 
-  void startTransportManager();
+  virtual void StartTransportManager();
 
  private:
   /**

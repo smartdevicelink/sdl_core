@@ -82,7 +82,7 @@ namespace NsAppManager
          */
         void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
 
-        void startTransportManager();
+        void StartTransportManager();
 
     private:
 

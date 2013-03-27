@@ -153,7 +153,7 @@ int main(int argc, char** argv)
 
     pProtocolHandler -> setSessionObserver( connectionHandler );
 
-    connectionHandler -> setTransportManager( transportManager );
+    connectionHandler -> set_transport_manager( transportManager );
 
     transportManager->addDeviceListener(connectionHandler);
 
@@ -161,7 +161,7 @@ int main(int argc, char** argv)
 
     jsonHandler.setRPCMessagesObserver(&appMgr);
 
-    connectionHandler -> setConnectionHandlerObserver(&appMgr);
+    connectionHandler -> set_connection_handler_observer(&appMgr);
 
     appMgr.setJsonHandler(&jsonHandler);
 

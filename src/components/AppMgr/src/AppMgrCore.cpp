@@ -4189,7 +4189,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -4371,7 +4371,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
 
                 return;
@@ -4388,7 +4388,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -5388,7 +5388,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -5620,7 +5620,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -5634,7 +5634,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -5650,7 +5650,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -5901,7 +5901,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -5914,7 +5914,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -5927,7 +5927,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
@@ -6376,7 +6376,7 @@ namespace NsAppManager
                 --core->mHMIStartupFlag;
                 if (!core->mHMIStartupFlag)
                 {
-                    ConnectionHandler::getInstance().startTransportManager();
+                    ConnectionHandler::getInstance().StartTransportManager();
                 }
                 return;
             }
