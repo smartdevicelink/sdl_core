@@ -1,0 +1,5 @@
+/*! \page components_smartobjects_validation_use Using Schema for validation
+
+
+
+*/

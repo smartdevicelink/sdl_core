@@ -4,4 +4,7 @@ The mechanism of Smart Objects validation includes special Schema. This Schema i
 
 Every Schema is constructed from objects called SchemaItems. Every SchemaItem defines type and restriction of specific data structure.
 
+For more details please review:
+    - \subpage components_smartobjects_validation_items "Schema structure: Schema Items"
+    - \subpage components_smartobjects_validation_use "Using Schema for validation"
 */
