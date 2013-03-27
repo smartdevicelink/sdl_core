@@ -159,6 +159,13 @@ namespace NsAppLink
             operator int(void) const;
 
             /**
+             * @brief Returns current object converted to int
+             *
+             * @return int
+             **/
+            int asInt();
+
+            /**
              * @brief Assignment operator for type: int
              *
              * @param  NewValue New object value
@@ -189,6 +196,13 @@ namespace NsAppLink
              *         conversion is not possible
              **/
             operator long(void) const;
+
+            /**
+             * @brief Returns current object converted to long int
+             *
+             * @return double
+             **/
+            long asLong();
 
             /**
              * @brief Assignment operator for type: int
@@ -228,6 +242,13 @@ namespace NsAppLink
             operator double(void) const;
 
             /**
+             * @brief Returns current object converted to double
+             *
+             * @return double
+             **/
+            double asDouble();
+
+            /**
              * @brief Assignment operator for type: double
              *
              * @param  NewValue New object value
@@ -264,6 +285,13 @@ namespace NsAppLink
             operator bool(void) const;
 
             /**
+             * @brief Returns current object converted to bool
+             *
+             * @return bool
+             **/
+            bool asBool();
+
+            /**
              * @brief Assignment operator for type: bool
              *
              * @param  NewValue New object value
@@ -298,6 +326,13 @@ namespace NsAppLink
              *         conversion is not possible
              **/
             operator char(void) const;
+
+            /**
+             * @brief Returns current object converted to char
+             *
+             * @return char
+             **/
+            char asChar();
 
             /**
              * @brief Assignment operator for type: char
@@ -341,6 +376,13 @@ namespace NsAppLink
              *         conversion is not possible
              **/
             operator std::string(void) const;
+
+            /**
+             * @brief Returns current object converted to string
+             *
+             * @return std::string
+             **/
+            std::string asString();
 
             /**
              * @brief Assignment operator for type: string

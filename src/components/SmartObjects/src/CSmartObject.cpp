@@ -102,6 +102,11 @@ NsAppLink::NsSmartObjects::CSmartObject::operator int(void) const
     return convert_int();
 }
 
+int NsAppLink::NsSmartObjects::CSmartObject::asInt()
+{
+    return (int)(*this);
+}
+
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(int NewValue)
 {
     if(m_type != SmartType_Invalid)
@@ -177,6 +182,11 @@ NsAppLink::NsSmartObjects::CSmartObject::operator long(void) const
     return convert_long();
 }
 
+long NsAppLink::NsSmartObjects::CSmartObject::asLong()
+{
+    return (long)(*this);
+}
+
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(long NewValue)
 {
     if(m_type != SmartType_Invalid)
@@ -242,6 +252,11 @@ NsAppLink::NsSmartObjects::CSmartObject::operator double(void) const
     return convert_double();
 }
 
+double NsAppLink::NsSmartObjects::CSmartObject::asDouble()
+{
+    return (double)(*this);
+}
+
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(double NewValue)
 {
     if(m_type != SmartType_Invalid)
@@ -303,6 +318,11 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(bool InitialValue)
 NsAppLink::NsSmartObjects::CSmartObject::operator bool(void) const
 {
     return convert_bool();
+}
+
+bool NsAppLink::NsSmartObjects::CSmartObject::asBool()
+{
+    return (bool)(*this);
 }
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(bool NewValue)
@@ -371,6 +391,11 @@ NsAppLink::NsSmartObjects::CSmartObject::operator char(void) const
     return convert_char();
 }
 
+char NsAppLink::NsSmartObjects::CSmartObject::asChar()
+{
+    return (char)(*this);
+}
+
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(char NewValue)
 {
     if(m_type != SmartType_Invalid)
@@ -430,6 +455,11 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const std::string InitialV
 NsAppLink::NsSmartObjects::CSmartObject::operator std::string(void) const
 {
     return convert_string();
+}
+
+std::string NsAppLink::NsSmartObjects::CSmartObject::asString()
+{
+    return (std::string)(*this);
 }
 
 NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const std::string& NewValue)

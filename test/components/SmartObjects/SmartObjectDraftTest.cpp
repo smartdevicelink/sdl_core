@@ -117,6 +117,35 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(456, (int)obj["response"]["id"]);
         ASSERT_TRUE((bool)obj["we"]["need"]["to"]["go"]["deeper"]);
     }
+
+    TEST(test_helper_methods, test_SmartObjectsDraftTest)
+    {
+        NsAppLink::NsSmartObjects::CSmartObject obj;
+
+        // ---- INTEGER ---- //
+        obj = 1;
+        ASSERT_EQ(1, obj.asInt());
+
+        // ---- LONG ---- //
+        obj = 100l;
+        ASSERT_EQ(100l, obj.asLong());
+
+        // ---- DOUBLE ---- //
+        obj = 3.14;
+        ASSERT_EQ(3.14, obj.asDouble());
+
+        // ---- CHAR ---- //
+        obj = 'a';
+        ASSERT_EQ('a', obj.asChar());
+
+        // ---- BOOL ---- //
+        obj = true;
+        ASSERT_TRUE(obj.asBool());
+
+        // ---- STD::STRING ---- //
+        obj = std::string("Hello, world");
+        ASSERT_EQ(std::string("Hello, world"), obj.asString());
+    }
 }}}}
 
 int main(int argc, char **argv) {
