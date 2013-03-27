@@ -33,35 +33,54 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <pthread.h>
-#include <signal.h>
 #include <memory.h>
+
 #include "TransportManager/ITransportManager.hpp"
 #include "ProtocolHandler/ISessionObserver.h"
 #include "ProtocolHandler/IProtocolObserver.h"
 #include "ProtocolHandler/ProtocolHandler.h"
+#include "ProtocolHandler/message_from_mobile_app_handler.h"
+#include "ProtocolHandler/messages_to_mobile_app_handler.h"
+
+#include "Utils/macro.h"
 
 using namespace NsProtocolHandler;
 
-log4cplus::Logger ProtocolHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ProtocolHandler"));
+log4cplus::Logger ProtocolHandler::mLogger = log4cplus::Logger::getInstance(
+    LOG4CPLUS_TEXT("ProtocolHandler"));
 
-ProtocolHandler::ProtocolHandler( NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager ) :
- mProtocolObserver( 0 )
-,mSessionObserver( 0 )
-,mTransportManager( transportManager )
-{
-    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    pthread_create( &mHandleMessagesFromMobileApp, NULL, &ProtocolHandler::handleMessagesFromMobileApp, (void *)this );
-    pthread_create( &mHandleMessagesToMobileApp, NULL, &ProtocolHandler::handleMessagesToMobileApp, (void *)this );
+ProtocolHandler::ProtocolHandler(
+    NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager)
+    : mProtocolObserver(0),
+      mSessionObserver(0),
+      mTransportManager(transportManager),
+      handle_messages_from_mobile_app_(NULL),
+      handle_messages_to_mobile_app_(NULL) {
+  LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+
+  handle_messages_from_mobile_app_ = new threads::Thread(
+      "MessagesFromMobileAppHandler", new MessagesFromMobileAppHandler(this));
+  handle_messages_from_mobile_app_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
+
+  handle_messages_to_mobile_app_ = new threads::Thread(
+      "MessagesToMobileAppHandler", new MessagesToMobileAppHandler(this));
+  handle_messages_to_mobile_app_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
-ProtocolHandler::~ProtocolHandler()
-{
-    pthread_kill( mHandleMessagesFromMobileApp, 1 );
-    pthread_kill( mHandleMessagesToMobileApp, 1 );
-    mProtocolObserver = 0;
-    mSessionObserver = 0;
-    mTransportManager = 0;
+ProtocolHandler::~ProtocolHandler() {
+  handle_messages_from_mobile_app_->stop();
+  delete handle_messages_from_mobile_app_;
+  handle_messages_from_mobile_app_ = NULL;
+
+  handle_messages_to_mobile_app_->stop();
+  delete handle_messages_to_mobile_app_;
+  handle_messages_to_mobile_app_ = NULL;
+
+  mProtocolObserver = 0;
+  mSessionObserver = 0;
+  mTransportManager = 0;
 }
 
 void ProtocolHandler::setProtocolObserver( IProtocolObserver * observer )
@@ -569,117 +588,4 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsSmartDeviceLink::NsTranspor
     }
 
     return RESULT_OK;
-}
-
-void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
-{
-    ProtocolHandler * handler = static_cast<ProtocolHandler*> (params);
-    if ( !handler )
-    {
-        pthread_exit( 0 );
-    }
-
-    while( 1 )
-    {
-        while( ! handler -> mMessagesFromMobileApp.empty() )
-        {
-            IncomingMessage * message = handler -> mMessagesFromMobileApp.pop();
-            LOG4CPLUS_INFO_EXT(mLogger, "Message " << message -> mData << " from mobile app received of size " << message -> mDataSize );
-
-            //@TODO check for ConnectionHandle.
-            //@TODO check for data size - crash is possible.
-            if ((0 != message -> mData) && (0 != message -> mDataSize) && (MAXIMUM_FRAME_DATA_SIZE + PROTOCOL_HEADER_V2_SIZE >= message -> mDataSize))
-            {
-                ProtocolPacket * packet = new ProtocolPacket;
-                LOG4CPLUS_INFO_EXT(mLogger ,"Data: " << packet -> getData());
-                if ( packet -> deserializePacket( message -> mData, message -> mDataSize ) == RESULT_FAIL )
-                {
-                    LOG4CPLUS_ERROR(mLogger, "Failed to parse received message.");
-                    delete packet;
-                }
-                else
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Packet: dataSize " << packet -> getDataSize());
-                    handler -> handleMessage( message -> mConnectionHandle, packet );
-                }
-            }
-            else
-            {
-                LOG4CPLUS_WARN(mLogger, "handleMessagesFromMobileApp() - incorrect or NULL data");
-            }
-
-            delete message;
-        }
-        handler -> mMessagesFromMobileApp.wait();
-    }
-
-    pthread_exit( 0 );
-}
-
-void * ProtocolHandler::handleMessagesToMobileApp( void * params )
-{
-    ProtocolHandler * handler = static_cast<ProtocolHandler*> (params);
-    if ( !handler )
-    {
-        pthread_exit( 0 );
-    }
-
-    //TODO: check if continue running condition.
-    while( 1 )
-    {
-        while ( ! handler -> mMessagesToMobileApp.empty() )
-        {
-            const SmartDeviceLinkRawMessage * message = handler -> mMessagesToMobileApp.pop();
-            LOG4CPLUS_INFO_EXT(mLogger, "Message to mobile app: connection " << message->getConnectionKey()
-                    << "; dataSize: " << message->getDataSize() << " ; protocolVersion " << message -> getProtocolVersion());
-
-            unsigned int maxDataSize = 0;
-            if ( PROTOCOL_VERSION_1 == message -> getProtocolVersion() )
-                maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
-            else if ( PROTOCOL_VERSION_2 == message -> getProtocolVersion() )
-                maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
-
-            NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle = 0;
-            unsigned char sessionID = 0;
-
-            if ( !handler -> mSessionObserver )
-            {
-                LOG4CPLUS_ERROR(mLogger, "Cannot handle message to mobile app: ISessionObserver doesn't exist.");
-                pthread_exit(0);
-            }
-            handler -> mSessionObserver -> pairFromKey( message->getConnectionKey(), connectionHandle, sessionID );
-
-            if ( message -> getDataSize() <= maxDataSize )
-            {
-                if (handler -> sendSingleFrameMessage(connectionHandle,
-                                            sessionID,
-                                            message -> getProtocolVersion(),
-                                            SERVICE_TYPE_RPC,
-                                            message -> getDataSize(),
-                                            message -> getData(),
-                                            false) != RESULT_OK)
-                {
-                    LOG4CPLUS_ERROR(mLogger, "ProtocolHandler failed to send single frame message.");
-                }
-            }
-            else
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, "Message will be sent in multiple frames; max size is " << maxDataSize);
-                if (handler -> sendMultiFrameMessage(connectionHandle,
-                                            sessionID,
-                                            message -> getProtocolVersion(),
-                                            SERVICE_TYPE_RPC, // TODO : check if this is correct assumption; and remove this hot fix because it is not supposed to be so.
-                                            message -> getDataSize(),
-                                            message -> getData(),
-                                            false,
-                                            maxDataSize) != RESULT_OK)
-                {
-                    LOG4CPLUS_ERROR(mLogger, "ProtocolHandler failed to send multi frame messages.");
-                }
-            }
-        }
-        handler -> mMessagesToMobileApp.wait();
-    }
-
-    pthread_exit( 0 );
 }

@@ -39,9 +39,13 @@
 #include <map>
 #include "Logger.hpp"
 #include "Utils/MessageQueue.h"
+
 #include "ProtocolHandler/SmartDeviceLinkRawMessage.h"
 #include "ProtocolHandler/ProtocolPacket.h"
+
 #include "TransportManager/ITransportManagerDataListener.hpp"
+
+#include "Utils/threads/thread.h"
 
 /**
   *\namespace NsProtocolHandler
@@ -50,7 +54,10 @@
 namespace NsProtocolHandler
 {
     class IProtocolObserver;
-    class ISessionObserver;  
+    class ISessionObserver;
+
+    class MessagesFromMobileAppHandler;
+    class MessagesToMobileAppHandler;
 
     /**
      * \class ProtocolHandler
@@ -92,19 +99,6 @@ namespace NsProtocolHandler
         void sendData(const SmartDeviceLinkRawMessage * message);
     
     protected:
-
-        /**
-         * \brief Static method for handling message from Transport Layer.
-         * \param params Pointer to instance of ProtocolHandler class.
-         */
-        static void * handleMessagesFromMobileApp( void * params );
-
-        /**
-         * \brief Static method for handling message to Transport Layer.
-         * \param params Pointer to instance of ProtocolHandler class.
-         */
-        static void * handleMessagesToMobileApp( void * params );
-
         /**
          * \brief Sends fail of ending session to mobile application.
          * \param connectionHandle Identifier of connection whithin which session exists
@@ -283,19 +277,9 @@ namespace NsProtocolHandler
         MessageQueue<IncomingMessage *> mMessagesFromMobileApp;
 
         /**
-          *\brief Thread for handling messages from Mobile side.
-        */
-        pthread_t mHandleMessagesFromMobileApp;
-
-        /**
           *\brief Queue for message to Mobile side.
         */
         MessageQueue<const SmartDeviceLinkRawMessage *> mMessagesToMobileApp;
-
-        /**
-          *\brief Thread for handling message to Mobile side.
-        */
-        pthread_t mHandleMessagesToMobileApp;
 
         /**
           *\brief Map of frames for messages received in multiple frames.
@@ -306,6 +290,14 @@ namespace NsProtocolHandler
           *\brief Counter of messages sent in each session.
         */
         std::map<unsigned char, unsigned int> mMessageCounters;
+
+        // Thread for handling messages from Mobile side.
+        threads::Thread* handle_messages_from_mobile_app_;
+        friend class MessagesFromMobileAppHandler;
+
+        // Thread for handling message to Mobile side.
+        threads::Thread* handle_messages_to_mobile_app_;
+        friend class MessagesToMobileAppHandler;
     };
 }
 

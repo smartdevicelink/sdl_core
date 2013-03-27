@@ -50,6 +50,13 @@ const unsigned char RPC_RESPONSE = 0x1;
 const unsigned char RPC_NOTIFICATION = 0x2;
 const unsigned char RPC_UNKNOWN = 0xF;
 
+#include "Utils/threads/thread.h"
+
+namespace json_handler {
+class IncomingThreadImpl;
+class OutgoingThreadImpl;
+}
+
 /**
  * \class JSONHandler
  * \brief Class for handling message exchange between protocol layer and Application Manager.
@@ -103,18 +110,6 @@ public:
        
 protected:
     /**
-     * \brief Static method for handling messages from Mobile application.
-     * \param params Pointer to JSONHandler instance.
-     */
-    static void * waitForIncomingMessages( void * params );
-
-    /**
-     * \brief Static method for handling messages to Mobile application.
-     * \param params Pointer to JSONHandler instance.
-     */
-    static void * waitForOutgoingMessages( void * params );
-
-    /**
      * \brief Helper method for clearing Json message from empty spaces
      * in order for it to be parsed correctly by Json library.
      * \param input Json string.
@@ -160,21 +155,18 @@ private:
     MessageQueue<const NsProtocolHandler::SmartDeviceLinkRawMessage*>          mIncomingMessages;
 
     /**
-      *\brief Thread for handling messages from Mobile Application.
-    */
-    pthread_t             mWaitForIncomingMessagesThread;
-
-    /**
       *\brief Queue of messages to Mobile Application.
       *\sa MessageQueue
     */
     MessageQueue<std::pair<int,const NsSmartDeviceLinkRPC::SDLRPCMessage*>>    mOutgoingMessages;
 
-    /**
-      *\brief Thread for handling messages to Mobile Application.
-    */
-    pthread_t             mWaitForOutgoingMessagesThread;
+    // Thread for handling messages from Mobile Application.
+    threads::Thread* incoming_thread_;
+    friend class json_handler::IncomingThreadImpl;
 
+    // Thread for handling messages to Mobile Application.
+    threads::Thread* outgoing_thread_;
+    friend class json_handler::OutgoingThreadImpl;
 };
 
 #endif  //  JSONHANDLER_CLASS

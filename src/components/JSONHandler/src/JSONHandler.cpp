@@ -35,13 +35,14 @@
 #include <stdio.h>
 #include <algorithm>
 #include <string.h>
-#include <pthread.h>
-#include <signal.h>
 #include <json/reader.h>
 #include <json/writer.h>
+
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/SDLRPCObjects/V1/Marshaller.h"
 #include "JSONHandler/SDLRPCObjects/V2/Marshaller.h"
+#include "JSONHandler/incoming_thread_impl.h"
+#include "JSONHandler/outgoing_thread_impl.h"
 
 namespace
 {
@@ -192,17 +193,32 @@ namespace
 
 log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONHandler"));
 
-JSONHandler::JSONHandler(NsProtocolHandler::ProtocolHandler* protocolHandler) :
-    mProtocolHandler(protocolHandler)
-{
-    pthread_create(&mWaitForIncomingMessagesThread, NULL, &JSONHandler::waitForIncomingMessages, (void*)this);
-    pthread_create(&mWaitForOutgoingMessagesThread, NULL, &JSONHandler::waitForOutgoingMessages, (void*)this);
+JSONHandler::JSONHandler(NsProtocolHandler::ProtocolHandler* protocolHandler)
+    : mProtocolHandler(protocolHandler) {
+
+  incoming_thread_ = new threads::Thread(
+      "json_handler::IncomingThreadImpl",
+      new json_handler::IncomingThreadImpl(this));
+  incoming_thread_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
+
+  outgoing_thread_ = new threads::Thread(
+      "json_handler::OutgoingThreadImpl",
+      new json_handler::OutgoingThreadImpl(this));
+  outgoing_thread_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 JSONHandler::~JSONHandler()
 {
-    pthread_kill(mWaitForIncomingMessagesThread, 1);
-    pthread_kill(mWaitForOutgoingMessagesThread, 1);
+    incoming_thread_->stop();
+    delete incoming_thread_;
+    incoming_thread_ = NULL;
+
+    outgoing_thread_->stop();
+    delete outgoing_thread_;
+    outgoing_thread_ = NULL;
+
     mProtocolHandler = 0;
     mMessagesObserver = 0;
 }
@@ -256,61 +272,6 @@ std::string JSONHandler::clearEmptySpaces(const std::string& input)
     std::string str = input;
     str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
     return str;
-}
-
-void* JSONHandler::waitForIncomingMessages(void* params)
-{
-    JSONHandler* handler = static_cast<JSONHandler*>(params);
-    if (!handler)
-    {
-        pthread_exit(0);
-    }
-
-    while (1)
-    {
-        while (! handler -> mIncomingMessages.empty())
-        {
-            LOG4CPLUS_INFO(mLogger, "Incoming mobile message received.");
-            const NsProtocolHandler::SmartDeviceLinkRawMessage* message = handler -> mIncomingMessages.pop();
-
-            NsSmartDeviceLinkRPC::SDLRPCMessage* currentMessage = 0;
-
-            LOG4CPLUS_INFO_EXT(mLogger, "Message of protocol version " << message -> getProtocolVersion());
-
-            if (message -> getProtocolVersion() == 1)
-            {
-                currentMessage = handler -> handleIncomingMessageProtocolV1(message);
-            }
-            else if (message -> getProtocolVersion() == 2)
-            {
-                currentMessage = handler -> handleIncomingMessageProtocolV2(message);
-            }
-            else
-            {
-                LOG4CPLUS_WARN(mLogger, "Message of wrong protocol version received.");
-                continue;
-            }
-
-            if (!currentMessage)
-            {
-                LOG4CPLUS_ERROR(mLogger, "Invalid mobile message received.");
-                continue;
-            }
-
-            currentMessage -> setProtocolVersion(message -> getProtocolVersion());
-
-            if (!handler -> mMessagesObserver)
-            {
-                LOG4CPLUS_ERROR(mLogger, "Cannot handle mobile message: MessageObserver doesn't exist.");
-                pthread_exit(0);
-            }
-
-            handler -> mMessagesObserver -> onMessageReceivedCallback(currentMessage, message -> getConnectionKey());
-
-            LOG4CPLUS_INFO(mLogger, "Incoming mobile message handled.");
-        }
-        handler -> mIncomingMessages.wait();
-    }
 }
 
 NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV1(
@@ -474,59 +435,6 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
     }
 
     return messageObject;
-}
-
-void* JSONHandler::waitForOutgoingMessages(void* params)
-{
-    JSONHandler* handler = static_cast<JSONHandler*>(params);
-    if (!handler)
-    {
-        pthread_exit(0);
-    }
-    while (1)
-    {
-        while (! handler -> mOutgoingMessages.empty())
-        {
-            std::pair<int, const NsSmartDeviceLinkRPC::SDLRPCMessage*> messagePair = handler -> mOutgoingMessages.pop();
-            const NsSmartDeviceLinkRPC::SDLRPCMessage*   message = messagePair.second;
-            LOG4CPLUS_INFO(mLogger, "Outgoing mobile message " << message->getMethodId() << " received.");
-
-            NsProtocolHandler::SmartDeviceLinkRawMessage* msgToProtocolHandler = 0;
-            if (message -> getProtocolVersion() == 1)
-            {
-                msgToProtocolHandler = handler -> handleOutgoingMessageProtocolV1(messagePair.first, message);
-            }
-            else if (message -> getProtocolVersion() == 2)
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, "method id "
-                   << static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId())
-                   << "; message type "
-                   << static_cast<NsSmartDeviceLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()));
-
-                msgToProtocolHandler = handler -> handleOutgoingMessageProtocolV2(messagePair.first, message);
-            }
-
-            if (!msgToProtocolHandler)
-            {
-                LOG4CPLUS_ERROR(mLogger, "Faile to create message string.");
-                continue;
-            }
-
-            if (!handler -> mProtocolHandler)
-            {
-                LOG4CPLUS_ERROR(mLogger, "Cannot handle mobile message: ProtocolHandler doesn't exist.");
-                pthread_exit(0);
-            }
-
-            LOG4CPLUS_INFO_EXT(mLogger, "Sending to ProtocolHandler: " << msgToProtocolHandler->getData()
-                               << " of size " << msgToProtocolHandler->getDataSize());
-            handler -> mProtocolHandler -> sendData(msgToProtocolHandler);
-
-            delete message;
-            LOG4CPLUS_INFO(mLogger, "Outgoing mobile message handled.");
-        }
-        handler -> mOutgoingMessages.wait();
-    }
 }
 
 NsProtocolHandler::SmartDeviceLinkRawMessage* JSONHandler::handleOutgoingMessageProtocolV1(int connectionKey,

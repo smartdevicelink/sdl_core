@@ -64,112 +64,21 @@
 
 #include "ConnectionHandler/CConnectionHandler.hpp"
 
+#include "AppMgr/rpc_helper.h"
+#include "AppMgr/audio_pass_thru_thread_impl.h"
+
+using namespace rpc_commands::helpers;
+
 namespace {
-    // We wait for some request form HMI:
-    // UI::GetCapabilities, VR::GetCapabilities, TTS::GetCapabilities, Buttons::GetCapabilities
-    // VehicleInfo::GetVehicleType, UI::GetSupportedLanguages, TTS::GetSupportedLanguages
-    // VR::GetSupportedLanguages, UI::GetLanguage, VR::GetLanguage, TTS::GetLanguage
-    // Look for METHOD_NSRPC2COMMUNICATION_UI__ONREADY for details
-    const int HMI_STARTUP_REQUEST_COUNT = 11;
-
-    template<typename To, typename From, typename InternalType>
-    void convert(const std::vector<From> & from, std::vector<To> & result)
-    {
-        typename std::vector<From>::const_iterator i = from.begin();
-        for(i; i != from.end(); ++i)
-        {
-            const From& caps = *i;
-            To item;
-            item.set(static_cast<InternalType>(caps.get()));
-            result.push_back(item);
-        }
-    }
-
-    template<typename Response>
-    void sendResponse(int responseId, NsSmartDeviceLinkRPCV2::Result::ResultInternal result)
-    {
-        Response* response = new Response;
-        if (!response)
-            return;
-
-        response->setId(responseId);
-        response->setResult(result);
-        NsAppManager::HMIHandler::getInstance().sendResponse(response);
-    }
-
-    template<typename Response, typename Result>
-    void sendResponse(NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal functionId
-        , Result result
-        , unsigned int correlationID
-        , bool succes
-        , unsigned int sessionKey)
-    {
-        Response* response = new Response;
-        if (!response)
-            return;
-
-        response->setMethodId(functionId);
-        response->setMessageType(NsSmartDeviceLinkRPC::SDLRPCMessage::RESPONSE);
-        response->set_success(succes);
-        response->set_resultCode(result);
-        response->setCorrelationID(correlationID);
-        NsAppManager::MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
-    }
-
-    template<typename Response, typename Result>
-    void sendResponse(NsSmartDeviceLinkRPC::SDLRPCMessage * request
-        , Result result
-        , bool succes
-        , unsigned int sessionKey)
-    {
-        Response* response = new Response;
-        if (!response)
-            return;
-
-        response->setMethodId(request->getMethodId());
-        response->setMessageType(NsSmartDeviceLinkRPC::SDLRPCMessage::RESPONSE);
-        response->setCorrelationID(request->getCorrelationID());
-        response->set_success(succes);
-        response->set_resultCode(result);
-        NsAppManager::MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
-    }
-
-    template<typename Response>
-    NsAppManager::Application_v2* getApplicationV2AndCheckHMIStatus(unsigned int sessionKey
-        , NsSmartDeviceLinkRPC::SDLRPCMessage * request)
-    {
-        NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(
-            NsAppManager::AppMgrCore::getInstance().getItem(sessionKey));
-        if(!app)
-        {
-            /*LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
-                << " hasn't been associated with any application!");*/
-
-            sendResponse<Response, NsSmartDeviceLinkRPCV2::Result::ResultInternal>(
-                request
-                , NsSmartDeviceLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
-                , false
-                , sessionKey);
-
-            return NULL;
-        }
-
-        if(NsSmartDeviceLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
-        {
-            /*LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key "
-                << sessionKey << " has not been activated yet!" );*/
-
-            sendResponse<Response, NsSmartDeviceLinkRPCV2::Result::ResultInternal>(
-                request
-                , NsSmartDeviceLinkRPCV2::Result::REJECTED
-                , false
-                , sessionKey);
-
-            return NULL;
-        }
-
-        return app;
-    }
+// We wait for some request form HMI:
+// UI::GetCapabilities, VR::GetCapabilities, TTS::GetCapabilities,
+// Buttons::GetCapabilities, VehicleInfo::GetVehicleType,
+// UI::GetSupportedLanguages, TTS::GetSupportedLanguages,
+// VR::GetSupportedLanguages, UI::GetLanguage, VR::GetLanguage,
+// TTS::GetLanguage
+//
+// Look for METHOD_NSRPC2COMMUNICATION_UI__ONREADY for details
+const int HMI_STARTUP_REQUEST_COUNT = 11;
 
     pthread_t sendingThread;
     struct thread_data
@@ -205,225 +114,6 @@ namespace {
         LOG4CPLUS_INFO_EXT(logger, " All data sent to host " << host << " port " << port);
         pthread_exit(NULL);
     }
-
-    // !----------------------------------------------------------------------------------------------------------------
-
-    const unsigned int AUDIO_PASS_THRU_TIMEOUT = 1;
-
-    pthread_cond_t cv;
-    pthread_mutex_t audioPassThruMutex = PTHREAD_MUTEX_INITIALIZER;
-    pthread_t audioPassThruThread;
-
-    // Don't send PerformAudioPassThru_response to mobile if false.
-    bool sendEndAudioPassThruToHMI(unsigned int sessionKey, unsigned int correlationID)
-    {
-        // Send respons to HMI.
-        NsRPC2Communication::UI::EndAudioPassThru* endAudioPassThru
-            = new NsRPC2Communication::UI::EndAudioPassThru;
-        if (!endAudioPassThru)
-        {
-            std::cout << "OUT_OF_MEMORY: new NsRPC2Communication::UI::EndAudioPassThru." << std::endl;
-            sendResponse<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response
-                , NsSmartDeviceLinkRPCV2::Result::ResultInternal>(NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID
-                    , NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY
-                    , correlationID
-                    , false
-                    , sessionKey);
-            return false;
-        }
-
-        NsAppManager::Application* app = NsAppManager::AppMgrCore::getInstance().getItem(sessionKey);
-        if(!app)
-        {
-            std::cout << "No application associated with this registry item!" << std::endl;
-            return false;
-        }
-
-        endAudioPassThru->setId(NsAppManager::HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-        endAudioPassThru->set_appId(app->getAppID());
-        NsAppManager::HMIHandler::getInstance().sendRequest(endAudioPassThru);
-        return true;
-    }
-
-    void AudioPassThruTimerProc(int i)
-    {
-        pthread_cond_signal(&cv);
-    }
-
-    struct AudioPassThruData
-    {
-        unsigned int sessionKey;  // For error reports
-        unsigned int id;  // For error reports
-
-        unsigned int maxDuration;
-        NsSmartDeviceLinkRPCV2::SamplingRate samplingRate;
-        NsSmartDeviceLinkRPCV2::AudioCaptureQuality bitsPerSample;
-        NsSmartDeviceLinkRPCV2::AudioType audioType;
-    };
-
-    void* AudioPassThru(void* data)
-    {
-        AudioPassThruData* data_ = static_cast<AudioPassThruData*>(data);
-        if (!data_)
-        {
-            NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-            std::cout << "AudioPassThruData empty." << std::endl;
-            pthread_exit(NULL);
-        }
-
-        unsigned int audioLength = 0;
-        std::string filename;
-        if (data_->bitsPerSample.get() == NsSmartDeviceLinkRPCV2::AudioCaptureQuality::FIX_8_BIT)
-        {
-            filename = "audio.8bit.wav";
-            audioLength = 5000;
-        }
-        else if (data_->bitsPerSample.get() == NsSmartDeviceLinkRPCV2::AudioCaptureQuality::FIX_16_BIT)
-        {
-            filename = "";  // TODO(AK): Add file name here.
-            audioLength = static_cast<unsigned int>(1000 * 60 * 2.7); // 3 minute audio.
-        }
-        else
-        {
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
-            {
-                sendResponse<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response
-                    , NsSmartDeviceLinkRPCV2::Result::ResultInternal>(NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID
-                    , NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR
-                    , data_->id
-                    , false
-                    , data_->sessionKey);
-            }
-
-            NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-            pthread_exit(NULL);
-        }
-
-        std::vector<unsigned char> binaryData;
-        if (!WorkWithOS::readFileAsBinary(filename, binaryData))
-        {
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            std::cout << "Can't read from file." << std::endl;
-            if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
-            {
-                sendResponse<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response
-                    , NsSmartDeviceLinkRPCV2::Result::ResultInternal>(NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID
-                    , NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR
-                    , data_->id
-                    , false
-                    , data_->sessionKey);
-            }
-
-            NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-            pthread_exit(NULL);
-        }
-
-        if (binaryData.empty())
-        {
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            std::cout << "Binary data empty." << std::endl;
-            if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
-            {
-                sendResponse<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response
-                    , NsSmartDeviceLinkRPCV2::Result::ResultInternal>(NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID
-                    , NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR
-                    , data_->id
-                    , false
-                    , data_->sessionKey);
-            }
-
-            NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-            pthread_exit(NULL);
-        }
-
-        unsigned int percentOfAudioLength = 0;  // % of audio file.
-        unsigned int dataLength = 0;  // part of file data.
-
-        // Send only part of file
-        if (data_->maxDuration != 0 && data_->maxDuration < audioLength)
-        {
-            percentOfAudioLength = (data_->maxDuration * 100) / audioLength;
-            dataLength = (binaryData.size() * percentOfAudioLength) / 100;
-        }
-        else
-        {
-            percentOfAudioLength = 100;
-            dataLength = binaryData.size();
-        }
-
-        // Part of file in seconds = audio length in seconds * (%) of audio length / 100%
-        unsigned int seconds = ((audioLength / 1000) * percentOfAudioLength) / 100;
-        // Step is data length * AUDIO_PASS_THRU_TIMEOUT / seconds
-        unsigned int step = dataLength * AUDIO_PASS_THRU_TIMEOUT / seconds;
-
-        std::vector<unsigned char>::iterator from = binaryData.begin();
-        std::vector<unsigned char>::iterator to = from + step;
-
-        for (int i = 0; i != seconds; i += AUDIO_PASS_THRU_TIMEOUT)  // minimal timeout is 1 sec now.
-        {
-            struct itimerval tout_val;
-            tout_val.it_interval.tv_sec = 0;
-            tout_val.it_interval.tv_usec = 0;
-            tout_val.it_value.tv_sec = AUDIO_PASS_THRU_TIMEOUT;
-            tout_val.it_value.tv_usec = 0;
-            setitimer(ITIMER_REAL, &tout_val, 0);
-            signal(SIGALRM, AudioPassThruTimerProc);
-
-            pthread_cond_wait(&cv, &audioPassThruMutex);
-
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            NsSmartDeviceLinkRPCV2::OnAudioPassThru* onAudioPassThru = new NsSmartDeviceLinkRPCV2::OnAudioPassThru;
-            if (!onAudioPassThru)
-            {
-                std::cout << "OUT_OF_MEMORY: new NsSmartDeviceLinkRPCV2::OnAudioPassThru." << std::endl;
-                if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
-                {
-                    sendResponse<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response
-                        , NsSmartDeviceLinkRPCV2::Result::ResultInternal>(NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID
-                        , NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY
-                        , data_->id
-                        , false
-                        , data_->sessionKey);
-                }
-
-                delete onAudioPassThru;
-                NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-                pthread_exit(NULL);
-            }
-
-            onAudioPassThru->setBinaryData(std::vector<unsigned char>(from, to));
-            onAudioPassThru->setMethodId(NsSmartDeviceLinkRPCV2::FunctionID::OnAudioPassThruID);
-            onAudioPassThru->setMessageType(NsSmartDeviceLinkRPC::SDLRPCMessage::NOTIFICATION);
-
-            NsAppManager::MobileHandler::getInstance().sendRPCMessage(onAudioPassThru, data_->sessionKey);
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-
-            from = to;
-            to = to + step;
-        }
-
-        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-
-        //sendEndAudioPassThruToHMI(data_->sessionKey);
-        /*if (sendEndAudioPassThruToHMI(data_->sessionKey))
-        {
-            // Send response to mobile.
-            sendResponse<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response
-                , NsSmartDeviceLinkRPCV2::Result::ResultInternal>(NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID
-                , NsSmartDeviceLinkRPCV2::Result::SUCCESS
-                , NsSmartDeviceLinkRPC::SDLRPCMessage::RESPONSE
-                , true
-                , data_->sessionKey);
-        }*/
-
-        NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-        pthread_exit(NULL);
-    }
 }
 
 namespace NsAppManager
@@ -451,11 +141,9 @@ namespace NsAppManager
         , mAudioPassThruFlag(false)
         , mPerformInteractionFlag(-1)
         , mHMIStartupFlag(HMI_STARTUP_REQUEST_COUNT)
+        , perform_audio_thread_(NULL)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
-
-        pthread_mutex_init(&audioPassThruMutex, NULL);
-        memset(static_cast<void*>(&cv), 0, sizeof(cv));
     }
 
     /**
@@ -3308,28 +2996,16 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(performAudioPassThru);
                     LOG4CPLUS_INFO_EXT(mLogger, "Request PerformAudioPassThru sent to HMI ...");
 
-                    AudioPassThruData* data = new AudioPassThruData;
-                    if (!data)
-                    {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "PerformAudioPassThru::OUT_OF_MEMORY");
-                        sendResponse<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response
-                            , NsSmartDeviceLinkRPCV2::Result::ResultInternal>(NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID
-                                , NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY
-                                , request->getCorrelationID()
-                                , false
-                                , sessionKey);
-                        core->setAudioPassThruFlag(false);
-                        break;
-                    }
-
-                    //  Thread for audio record operation
-                    data->samplingRate = samplingRate;
-                    data->maxDuration = maxDuration;
-                    data->bitsPerSample = bitsPerSample;
-                    data->audioType = audioType;
-                    data->sessionKey = sessionKey;
-                    data->id = request->getCorrelationID();
-                    pthread_create(&audioPassThruThread, 0, AudioPassThru, static_cast<void*>(data));
+                    core->perform_audio_thread_ = new threads::Thread(
+                        "AudioPassThru thread",
+                        new rpc_commands::AudioPassThruThreadImpl(sessionKey,
+                                                        request->getCorrelationID(),
+                                                        maxDuration,
+                                                        samplingRate,
+                                                        bitsPerSample,
+                                                        audioType));
+                    core->perform_audio_thread_->startWithOptions(
+                        threads::ThreadOptions(threads::Thread::kMinStackSize));
 
                     LOG4CPLUS_INFO_EXT(mLogger, "AudioPassThru thread created...");
 
@@ -3341,8 +3017,11 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A EndAudioPassThru request has been invoked");
 
-                    pthread_cond_signal(&cv);
-                    pthread_cancel(audioPassThruThread);
+                    // TODO(AK): compile error
+                    // pthread_cond_signal(&cv);
+                    core->perform_audio_thread_->stop();
+                    delete core->perform_audio_thread_;
+                    core->perform_audio_thread_ = NULL;
 
                     Application_v2* app
                         = getApplicationV2AndCheckHMIStatus<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response>(sessionKey,
@@ -4250,8 +3929,9 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A PerformAudioPassThru response has been invoked");
 
-                pthread_cond_signal(&cv);
-                pthread_cancel(audioPassThruThread);
+                // TODO(AK): compile error
+                // pthread_cond_signal(&cv);
+                core->perform_audio_thread_->stop();
 
                 NsRPC2Communication::UI::PerformAudioPassThruResponse* response
                     = static_cast<NsRPC2Communication::UI::PerformAudioPassThruResponse*>(msg);

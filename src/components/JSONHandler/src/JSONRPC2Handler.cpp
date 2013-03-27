@@ -41,6 +41,7 @@ log4cplus::Logger JSONRPC2Handler::mLogger = log4cplus::Logger::getInstance(LOG4
 JSONRPC2Handler::JSONRPC2Handler( const std::string& address, uint16_t port ) :
 NsMessageBroker::CMessageBrokerController( address, port, "BasicCommunication" )
 {
+  // TODO(AK): Are we need this threads?
     pthread_create( &mWaitForCommandsFromHMI, NULL, &JSONRPC2Handler::waitForCommandsFromHMI, (void *)this );
     pthread_create( &mWaitForRequestsToHMI, NULL, &JSONRPC2Handler::waitForRequestsToHMI, (void *)this );
     pthread_create( &mWaitForResponsesToHMI, NULL, &JSONRPC2Handler::waitForResponsesToHMI, (void *)this );
