@@ -74,13 +74,13 @@ namespace NsAppManager
         /**
          * \brief Start device discovery
          */
-        void startDevicesDiscovery();
+        void StartDevicesDiscovery();
 
         /**
          * \brief Connect to device specified in params
          * \param deviceHandle device handle
          */
-        void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
+        void ConnectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
 
         void StartTransportManager();
 

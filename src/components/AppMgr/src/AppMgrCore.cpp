@@ -5364,14 +5364,14 @@ namespace NsAppManager
                 {
                     if ( !it->second.getUserFriendlyName().compare(deviceName) )
                     {
-                        ConnectionHandler::getInstance().connectToDevice(it->first);
+                        ConnectionHandler::getInstance().ConnectToDevice(it->first);
                         return;
                     }
                 }/*
                 if (device)
                 {
                     const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
-                    ConnectionHandler::getInstance().connectToDevice(handle);
+                    ConnectionHandler::getInstance().ConnectToDevice(handle);
                 }*/
                 return;
             }
@@ -6291,7 +6291,7 @@ namespace NsAppManager
                 NsRPC2Communication::BasicCommunication::GetDeviceListResponse* response = new NsRPC2Communication::BasicCommunication::GetDeviceListResponse;
                 response->setId(getDevList->getId());
                 response->setResult(NsSmartDeviceLinkRPCV2::Result::SUCCESS);
-                ConnectionHandler::getInstance().startDevicesDiscovery();
+                ConnectionHandler::getInstance().StartDevicesDiscovery();
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }

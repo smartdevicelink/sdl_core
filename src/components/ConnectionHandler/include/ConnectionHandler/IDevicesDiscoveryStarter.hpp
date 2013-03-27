@@ -42,34 +42,35 @@
  * \namespace NsConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler
-{
-    /**
-    * \class IDevicesDiscoveryStarter
-    * \brief Starter of devices discovering process class
-    */
-    class IDevicesDiscoveryStarter
-    {
-    public:
-        /**
-         * \brief Method which should start devices discoveryng
-         */
-        virtual void startDevicesDiscovery()=0;
+namespace NsConnectionHandler {
+/**
+ * \class IDevicesDiscoveryStarter
+ * \brief Starter of devices discovering process class
+ */
+class IDevicesDiscoveryStarter {
+ public:
+  /**
+   * \brief Method which should start devices discoveryng
+   */
+  virtual void StartDevicesDiscovery()=0;
 
-        /**
-         * \brief Connects to all services of device
-         * \param deviceHandle Handle of device to connect to
-         */
-        virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle ) = 0;
+  /**
+   * \brief Connects to all services of device
+   * \param deviceHandle Handle of device to connect to
+   */
+  virtual void ConnectToDevice(
+      NsConnectionHandler::tDeviceHandle deviceHandle) = 0;
 
-        virtual void StartTransportManager() = 0;
+  virtual void StartTransportManager() = 0;
 
-    protected:
-        /**
-         * \brief Destructor
-         */
-        virtual ~IDevicesDiscoveryStarter() {};
-    };
+ protected:
+  /**
+   * \brief Destructor
+   */
+  virtual ~IDevicesDiscoveryStarter() {
+  }
+  ;
+};
 }/* namespace NsConnectionHandler */
 
 #endif /* IDEVICESDISCOVERYSTARTER_H */

@@ -190,13 +190,13 @@ class CConnectionHandler :
   /**
    * \brief Method which should start devices discoveryng
    */
-  virtual void startDevicesDiscovery();
+  virtual void StartDevicesDiscovery();
 
   /**
    * \brief Connects to all services of device
    * \param deviceHandle Handle of device to connect to
    */
-  virtual void connectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle);
+  virtual void ConnectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle);
 
   virtual void StartTransportManager();
 

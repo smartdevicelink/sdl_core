@@ -78,28 +78,28 @@ namespace NsAppManager
     /**
      * \brief Start device discovery
      */
-    void ConnectionHandler::startDevicesDiscovery()
+    void ConnectionHandler::StartDevicesDiscovery()
     {
         if(!mConnectionHandler)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
             return;
         }
-        mConnectionHandler->startDevicesDiscovery();
+        mConnectionHandler->StartDevicesDiscovery();
     }
 
     /**
      * \brief Connect to device specified in params
      * \param deviceHandle device handle
      */
-    void ConnectionHandler::connectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle)
+    void ConnectionHandler::ConnectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle)
     {
         if(!mConnectionHandler)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
             return;
         }
-        mConnectionHandler->connectToDevice(deviceHandle);
+        mConnectionHandler->ConnectToDevice(deviceHandle);
     }
 
     void ConnectionHandler::StartTransportManager()

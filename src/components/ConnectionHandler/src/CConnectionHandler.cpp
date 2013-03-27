@@ -364,7 +364,7 @@ void CConnectionHandler::set_transport_manager(
   }
   transport_manager_ = transportManager;
 }
-void CConnectionHandler::startDevicesDiscovery() {
+void CConnectionHandler::StartDevicesDiscovery() {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::startDevicesDiscovery()");
   if (NULL == transport_manager_) {
     LOG4CPLUS_ERROR(logger_, "Null pointer to TransportManager.");
@@ -373,7 +373,7 @@ void CConnectionHandler::startDevicesDiscovery() {
   transport_manager_->scanForNewDevices();
 }
 
-void CConnectionHandler::connectToDevice(
+void CConnectionHandler::ConnectToDevice(
     NsConnectionHandler::tDeviceHandle deviceHandle) {
   NsConnectionHandler::tDeviceList::const_iterator it_in;
   it_in = device_list_.find(deviceHandle);
