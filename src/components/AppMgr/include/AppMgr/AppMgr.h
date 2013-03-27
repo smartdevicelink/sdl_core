@@ -96,7 +96,7 @@ namespace NsAppManager
          *
          * \param deviceList New list of available devices.
          **/
-        virtual void OnDeviceListUpdated(const NsConnectionHandler::tDeviceList & deviceList);
+        virtual void OnDeviceListUpdated(const NsConnectionHandler::DeviceList & deviceList);
 
         /**
          * \brief Updates device list.
@@ -105,7 +105,7 @@ namespace NsAppManager
          *
          * \param DeviceList New list of available devices.
          **/
-        virtual void UpdateDeviceList(const NsConnectionHandler::tDeviceList & DeviceList);
+        virtual void UpdateDeviceList(const NsConnectionHandler::DeviceList & DeviceList);
 
         /**
          * \brief Removes device.
@@ -114,7 +114,7 @@ namespace NsAppManager
          *
          * \param DeviceHandle Handle of removed device.
          **/
-        virtual void RemoveDevice(const NsConnectionHandler::tDeviceHandle DeviceHandle);
+        virtual void RemoveDevice(const NsConnectionHandler::DeviceHandle DeviceHandle);
 
         /**
          * \brief Callback function used by ConnectionHandler
@@ -123,7 +123,7 @@ namespace NsAppManager
          * \param sessionKey Key of started session.
          * \param firstSessionKey Session key of first session in this connection.
          */
-        virtual void OnSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
+        virtual void OnSessionStartedCallback(NsConnectionHandler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
 
         /**
          * \brief Callback function used by ConnectionHandler

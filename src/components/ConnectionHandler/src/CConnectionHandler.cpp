@@ -76,14 +76,14 @@ void CConnectionHandler::set_connection_handler_observer(
 void CConnectionHandler::onDeviceListUpdated(
     const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::onDeviceListUpdated()");
-  for (tDeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
+  for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
       ++itr) {
     if (!DoesDeviceExistInTMList(DeviceList, (*itr).first)) {
       // Device has been removed. Perform all needed actions.
       // 1. Delete all the connections and sessions of this device
       // 2. Delete device from a list
       // 3. Let observer know that device has been deleted.
-      tDeviceHandle device_for_remove_handle = (*itr).first;
+      DeviceHandle device_for_remove_handle = (*itr).first;
       for (tConnectionListIterator it = connection_list_.begin();
           it != connection_list_.end(); ++it) {
         if (device_for_remove_handle
@@ -109,7 +109,7 @@ void CConnectionHandler::onDeviceListUpdated(
 
 bool CConnectionHandler::DoesDeviceExistInTMList(
     const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList,
-    const NsConnectionHandler::tDeviceHandle DeviceHandle) {
+    const NsConnectionHandler::DeviceHandle DeviceHandle) {
   bool result = false;
   for (NsSmartDeviceLink::NsTransportManager::tDeviceList::const_iterator it_in =
       DeviceList.begin(); it_in != DeviceList.end(); ++it_in) {
@@ -123,11 +123,11 @@ bool CConnectionHandler::DoesDeviceExistInTMList(
 
 void CConnectionHandler::AddDeviceInDeviceListIfNotExist(
     const NsSmartDeviceLink::NsTransportManager::SDeviceInfo DeviceInfo) {
-  tDeviceListIterator it = device_list_.find(DeviceInfo.mDeviceHandle);
+  DeviceListIterator it = device_list_.find(DeviceInfo.mDeviceHandle);
   if (device_list_.end() == it) {
     LOG4CPLUS_INFO(logger_, "Adding new device!");
     device_list_.insert(
-        tDeviceList::value_type(
+        DeviceList::value_type(
             DeviceInfo.mDeviceHandle,
             CDevice(DeviceInfo.mDeviceHandle, DeviceInfo.mUserFriendlyName)));
   }
@@ -137,7 +137,7 @@ void CConnectionHandler::onApplicationConnected(
     const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & ConnectedDevice,
     const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::onApplicationConnected()");
-  tDeviceListIterator it = device_list_.find(ConnectedDevice.mDeviceHandle);
+  DeviceListIterator it = device_list_.find(ConnectedDevice.mDeviceHandle);
   if (device_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Unknown device!");
     return;
@@ -152,7 +152,7 @@ void CConnectionHandler::onApplicationDisconnected(
     const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice,
     const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::onApplicationDisconnected()");
-  tDeviceListIterator it = device_list_.find(DisconnectedDevice.mDeviceHandle);
+  DeviceListIterator it = device_list_.find(DisconnectedDevice.mDeviceHandle);
   if (device_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Unknown device!");
     return;
@@ -338,11 +338,11 @@ int CConnectionHandler::GetDataOnDeviceID(int device_id,
                                           std::list<int> & applications_list) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::GetDataOnDeviceID()");
   int result = -1;
-  tDeviceListIterator it = device_list_.find(device_id);
+  DeviceListIterator it = device_list_.find(device_id);
   if (device_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Device not found!");
   } else {
-    device_name = (*it).second.getUserFriendlyName();
+    device_name = (*it).second.user_friendly_name();
     applications_list.clear();
     for (tConnectionListIterator itr = connection_list_.begin();
         itr != connection_list_.end(); ++itr) {
@@ -374,8 +374,8 @@ void CConnectionHandler::StartDevicesDiscovery() {
 }
 
 void CConnectionHandler::ConnectToDevice(
-    NsConnectionHandler::tDeviceHandle deviceHandle) {
-  NsConnectionHandler::tDeviceList::const_iterator it_in;
+    NsConnectionHandler::DeviceHandle deviceHandle) {
+  NsConnectionHandler::DeviceList::const_iterator it_in;
   it_in = device_list_.find(deviceHandle);
   if (device_list_.end() != it_in) {
     LOG4CPLUS_INFO_EXT(

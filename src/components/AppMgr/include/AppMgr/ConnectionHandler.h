@@ -37,7 +37,7 @@
 namespace NsConnectionHandler
 {
     class IDevicesDiscoveryStarter;
-    typedef int tDeviceHandle;
+    typedef int DeviceHandle;
 }
 
 namespace log4cplus
@@ -80,7 +80,7 @@ namespace NsAppManager
          * \brief Connect to device specified in params
          * \param deviceHandle device handle
          */
-        void ConnectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
+        void ConnectToDevice( NsConnectionHandler::DeviceHandle deviceHandle );
 
         void StartTransportManager();
 

@@ -40,31 +40,27 @@
 /**
  * \namespace NsConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler namespace.
- */ 
-namespace NsConnectionHandler
-{
+ */
+namespace NsConnectionHandler {
 
-    log4cplus::Logger CDevice::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ConnectionHandler"));
+log4cplus::Logger CDevice::logger_ = log4cplus::Logger::getInstance(
+    LOG4CPLUS_TEXT("ConnectionHandler"));
 
-    CDevice::CDevice(tDeviceHandle aDeviceHandle, std::string aUserFriendlyName):
-    mDeviceHandle(aDeviceHandle),
-    mUserFriendlyName(aUserFriendlyName)
-    {
+CDevice::CDevice(DeviceHandle device_handle, std::string user_friendly_name)
+    : device_handle_(device_handle),
+      user_friendly_name_(user_friendly_name) {
 
-    }
+}
 
-    CDevice::~CDevice()
-    {
-        
-    }
+CDevice::~CDevice() {
 
-    tDeviceHandle CDevice::getDeviceHandle() const
-    {
-        return mDeviceHandle;
-    }
+}
 
-    std::string CDevice::getUserFriendlyName() const
-    {
-        return mUserFriendlyName;
-    }
+DeviceHandle CDevice::device_handle() const {
+  return device_handle_;
+}
+
+std::string CDevice::user_friendly_name() const {
+  return user_friendly_name_;
+}
 }/* namespace NsConnectionHandler */

@@ -196,7 +196,7 @@ class CConnectionHandler :
    * \brief Connects to all services of device
    * \param deviceHandle Handle of device to connect to
    */
-  virtual void ConnectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle);
+  virtual void ConnectToDevice(NsConnectionHandler::DeviceHandle deviceHandle);
 
   virtual void StartTransportManager();
 
@@ -219,7 +219,7 @@ class CConnectionHandler :
    */
   bool DoesDeviceExistInTMList(
       const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList,
-      const NsConnectionHandler::tDeviceHandle DeviceHandle);
+      const NsConnectionHandler::DeviceHandle DeviceHandle);
 
   /**
    * \brief Checks does device exist in list and adds if not
@@ -250,7 +250,7 @@ class CConnectionHandler :
   /**
    * \brief List of devices
    */
-  tDeviceList device_list_;
+  DeviceList device_list_;
 
   /**
    * \brief List of connections

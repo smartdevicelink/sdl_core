@@ -47,12 +47,12 @@ namespace NsAppManager
     /**
      * \brief session-to-device map
      */
-    typedef std::map<int, NsConnectionHandler::tDeviceHandle> DeviceMap;
+    typedef std::map<int, NsConnectionHandler::DeviceHandle> DeviceMap;
 
     /**
      * \brief session-to-device map
      */
-    typedef std::pair<int, NsConnectionHandler::tDeviceHandle> DeviceMapItem;
+    typedef std::pair<int, NsConnectionHandler::DeviceHandle> DeviceMapItem;
 
     class DeviceHandler
     {
@@ -73,7 +73,7 @@ namespace NsAppManager
          * \param sessionKey session/connection key
          * \param device device handler
          */
-        void addDevice( const int& sessionKey, const NsConnectionHandler::tDeviceHandle& device );
+        void addDevice( const int& sessionKey, const NsConnectionHandler::DeviceHandle& device );
 
         /**
          * \brief remove a device from a mapping
@@ -85,14 +85,14 @@ namespace NsAppManager
          * \brief remove an application from a mapping
          * \param device device to remove all associated sessions from mapping
          */
-        void removeSession( const NsConnectionHandler::tDeviceHandle& device );
+        void removeSession( const NsConnectionHandler::DeviceHandle& device );
 
         /**
          * \brief find a device subscribed to sesssion
          * \param sessionKey session/connection key
          * \return device handler
          */
-        NsConnectionHandler::tDeviceHandle findDeviceAssignedToSession(const int& sessionKey) const;
+        NsConnectionHandler::DeviceHandle findDeviceAssignedToSession(const int& sessionKey) const;
 
         /**
          * \brief cleans session mapping

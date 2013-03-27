@@ -71,7 +71,7 @@ class CConnection {
    * \brief Class constructor
    */
   CConnection(tConnectionHandle aConnectionHandle,
-              tDeviceHandle aConnectionDeviceHandle);
+              DeviceHandle aConnectionDeviceHandle);
 
   /**
    * \brief Destructor
@@ -88,7 +88,7 @@ class CConnection {
    * \brief Returns connection device handle
    * \return ConnectionDeviceHandle
    */
-  tDeviceHandle getConnectionDeviceHandle();
+  DeviceHandle getConnectionDeviceHandle();
 
   /**
    * \brief Adds session to connection
@@ -125,7 +125,7 @@ class CConnection {
   /**
    * \brief DeviceHandle of this connection.
    */
-  tDeviceHandle mConnectionDeviceHandle;
+  DeviceHandle mConnectionDeviceHandle;
 
   /**
    * \brief Counter to generate session id's.

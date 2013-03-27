@@ -560,7 +560,7 @@ namespace NsAppManager
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
         const unsigned int& protocolVersion = mobileMsg->getProtocolVersion();
-        /*const NsConnectionHandler::tDeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
+        /*const NsConnectionHandler::DeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
         const NsConnectionHandler::CDevice* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
         if(!currentDevice)
         {
@@ -5370,7 +5370,7 @@ namespace NsAppManager
                 }/*
                 if (device)
                 {
-                    const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
+                    const NsConnectionHandler::DeviceHandle& handle = device->getDeviceHandle();
                     ConnectionHandler::getInstance().ConnectToDevice(handle);
                 }*/
                 return;
@@ -6227,7 +6227,7 @@ namespace NsAppManager
                         << " application id " << app->getAppID()
                         << " is media? " << app->getIsMediaApplication() );
 
-                    /*const NsConnectionHandler::tDeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
+                    /*const NsConnectionHandler::DeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
                     const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByHandle(deviceHandle);
                     if(!device)
                     {
@@ -7248,7 +7248,7 @@ namespace NsAppManager
      * \brief set device list
      * \param deviceList device list
      */
-    void AppMgrCore::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
+    void AppMgrCore::setDeviceList(const NsConnectionHandler::DeviceList &deviceList)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Updating device list: " << deviceList.size() << " devices");
         //mDeviceList.setDeviceList(deviceList);
@@ -7268,10 +7268,10 @@ namespace NsAppManager
         HMIHandler::getInstance().sendNotification(deviceListUpdated);
     }
 
-    void AppMgrCore::differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList )
+    void AppMgrCore::differenceBetweenLists( const NsConnectionHandler::DeviceList &deviceList )
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Start finding diff.");
-        typedef NsConnectionHandler::tDeviceList::const_iterator NewIterator;
+        typedef NsConnectionHandler::DeviceList::const_iterator NewIterator;
         typedef std::map<int, DeviceStorage>::const_iterator ExistingIterator;
         typedef std::map<int, Application*>::const_iterator ApplicationIterator;
 
@@ -7299,7 +7299,7 @@ namespace NsAppManager
                 for( NewIterator newItRest = newIt; newItRest != deviceList.end(); ++ newItRest)
                 {
                     updatedMap.insert( std::pair<int, DeviceStorage>(newItRest->first,
-                        DeviceStorage(newItRest->second.getDeviceHandle(), newItRest->second.getUserFriendlyName())) );
+                        DeviceStorage(newItRest->second.device_handle(), newItRest->second.user_friendly_name())) );
                 }
                 LOG4CPLUS_INFO_EXT(mLogger, "Size of updated map " << updatedMap.size());
                 break;
@@ -7331,14 +7331,14 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tAdding new device " << newIt->first);
                 updatedMap.insert( std::pair<int, DeviceStorage>(newIt->first,
-                            DeviceStorage(newIt->second.getDeviceHandle(), newIt->second.getUserFriendlyName())) );
+                            DeviceStorage(newIt->second.device_handle(), newIt->second.user_friendly_name())) );
                 ++newIt;
             }
             if ( oldIt != mDevices.end() && newIt != deviceList.end() && newIt->first == oldIt->first )
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tCopying existing device " << oldIt->first);
                 updatedMap.insert( std::pair<int, DeviceStorage>(newIt->first,
-                            DeviceStorage(newIt->second.getDeviceHandle(), newIt->second.getUserFriendlyName())) );
+                            DeviceStorage(newIt->second.device_handle(), newIt->second.user_friendly_name())) );
                 ++oldIt; ++newIt;
             }
         }
@@ -7374,7 +7374,7 @@ namespace NsAppManager
      * \brief get device list
      * \return device list
      */
-    /*const NsConnectionHandler::tDeviceList &AppMgrCore::getDeviceList() const
+    /*const NsConnectionHandler::DeviceList &AppMgrCore::getDeviceList() const
     {
         return mDeviceList.getDeviceList();
     }*/
@@ -7384,7 +7384,7 @@ namespace NsAppManager
      * \param connectionKey session/connection key
      * \param device device handler
      */
-    void AppMgrCore::addDevice(const NsConnectionHandler::tDeviceHandle &device,
+    void AppMgrCore::addDevice(const NsConnectionHandler::DeviceHandle &device,
             const int &sessionKey, int firstSessionKey)
     {
         //mDeviceHandler.addDevice(sessionKey, device);

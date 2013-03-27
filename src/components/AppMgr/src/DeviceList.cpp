@@ -54,7 +54,7 @@ namespace NsAppManager
      * \brief set device list
      * \param deviceList device list
      */
-    void DeviceList::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
+    void DeviceList::setDeviceList(const NsConnectionHandler::DeviceList &deviceList)
     {
         mDeviceList = deviceList;
     }
@@ -63,7 +63,7 @@ namespace NsAppManager
      * \brief get device list
      * \return device list
      */
-    const NsConnectionHandler::tDeviceList &DeviceList::getDeviceList() const
+    const NsConnectionHandler::DeviceList &DeviceList::getDeviceList() const
     {
         return mDeviceList;
     }
@@ -82,9 +82,9 @@ namespace NsAppManager
      * \param handle device handle
      * \return device associated with the given handle
      */
-    const NsConnectionHandler::CDevice* DeviceList::findDeviceByHandle(const NsConnectionHandler::tDeviceHandle &handle) const
+    const NsConnectionHandler::CDevice* DeviceList::findDeviceByHandle(const NsConnectionHandler::DeviceHandle &handle) const
     {
-        NsConnectionHandler::tDeviceList::const_iterator it = mDeviceList.find(handle);
+        NsConnectionHandler::DeviceList::const_iterator it = mDeviceList.find(handle);
         if(it != mDeviceList.end())
         {
             return &it->second;
@@ -100,10 +100,10 @@ namespace NsAppManager
      */
     const NsConnectionHandler::CDevice *DeviceList::findDeviceByName(const std::string &name) const
     {
-        for(NsConnectionHandler::tDeviceList::const_iterator it = mDeviceList.begin(); it != mDeviceList.end(); it++)
+        for(NsConnectionHandler::DeviceList::const_iterator it = mDeviceList.begin(); it != mDeviceList.end(); it++)
         {
             const NsConnectionHandler::CDevice& device = it->second;
-            if(device.getUserFriendlyName() == name)
+            if(device.user_friendly_name() == name)
             {
                 return &device;
             }

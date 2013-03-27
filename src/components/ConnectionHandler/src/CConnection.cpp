@@ -49,7 +49,7 @@ log4cplus::Logger CConnection::mLogger = log4cplus::Logger::getInstance(
     LOG4CPLUS_TEXT("ConnectionHandler"));
 
 CConnection::CConnection(tConnectionHandle aConnectionHandle,
-                         tDeviceHandle aConnectionDeviceHandle)
+                         DeviceHandle aConnectionDeviceHandle)
     : mConnectionHandle(aConnectionHandle),
       mConnectionDeviceHandle(aConnectionDeviceHandle),
       mSessionIDCounter(1) {
@@ -93,7 +93,7 @@ tConnectionHandle CConnection::getConnectionHandle() {
   return mConnectionHandle;
 }
 
-tDeviceHandle CConnection::getConnectionDeviceHandle() {
+DeviceHandle CConnection::getConnectionDeviceHandle() {
   return mConnectionDeviceHandle;
 }
 

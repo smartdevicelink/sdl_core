@@ -59,7 +59,7 @@ class IDevicesDiscoveryStarter {
    * \param deviceHandle Handle of device to connect to
    */
   virtual void ConnectToDevice(
-      NsConnectionHandler::tDeviceHandle deviceHandle) = 0;
+      NsConnectionHandler::DeviceHandle deviceHandle) = 0;
 
   virtual void StartTransportManager() = 0;
 

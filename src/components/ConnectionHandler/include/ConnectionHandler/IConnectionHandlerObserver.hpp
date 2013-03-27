@@ -62,7 +62,7 @@ class IConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void OnDeviceListUpdated(
-      const NsConnectionHandler::tDeviceList & DeviceList) = 0;
+      const NsConnectionHandler::DeviceList & DeviceList) = 0;
 
   /**
    * \brief Updates device list.
@@ -72,7 +72,7 @@ class IConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void UpdateDeviceList(
-      const NsConnectionHandler::tDeviceList & DeviceList) = 0;
+      const NsConnectionHandler::DeviceList & DeviceList) = 0;
 
   /**
    * \brief Removes device.
@@ -82,7 +82,7 @@ class IConnectionHandlerObserver {
    * \param DeviceHandle Handle of removed device.
    **/
   virtual void RemoveDevice(
-      const NsConnectionHandler::tDeviceHandle DeviceHandle) = 0;
+      const NsConnectionHandler::DeviceHandle DeviceHandle) = 0;
 
   /**
    * \brief Callback function used by ConnectionHandler
@@ -92,7 +92,7 @@ class IConnectionHandlerObserver {
    * \param firstSessionKey Session key of first session in this connection.
    */
   virtual void OnSessionStartedCallback(
-      NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey,
+      NsConnectionHandler::DeviceHandle deviceHandle, int sessionKey,
       int firstSessionKey) = 0;
 
   /**

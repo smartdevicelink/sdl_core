@@ -92,7 +92,7 @@ namespace NsAppManager
      * \brief Connect to device specified in params
      * \param deviceHandle device handle
      */
-    void ConnectionHandler::ConnectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle)
+    void ConnectionHandler::ConnectToDevice(NsConnectionHandler::DeviceHandle deviceHandle)
     {
         if(!mConnectionHandler)
         {

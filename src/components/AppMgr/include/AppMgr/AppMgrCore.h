@@ -177,20 +177,20 @@ namespace NsAppManager
          * \brief set device list
          * \param deviceList device list
          */
-        void setDeviceList( const NsConnectionHandler::tDeviceList& deviceList );
+        void setDeviceList( const NsConnectionHandler::DeviceList& deviceList );
 
         /**
          * \brief get device list
          * \return device list
          */
-        const NsConnectionHandler::tDeviceList& getDeviceList() const;
+        const NsConnectionHandler::DeviceList& getDeviceList() const;
 
         /**
          * \brief add a device to a mapping
          * \param sessionKey session/connection key
          * \param device device handler
          */
-        void addDevice( const NsConnectionHandler::tDeviceHandle &device,
+        void addDevice( const NsConnectionHandler::DeviceHandle &device,
             const int &sessionKey, int firstSessionKey );
 
         /**
@@ -316,7 +316,7 @@ namespace NsAppManager
          */
         MessageChaining * addChain(MessageChaining * chain, int connectionKey, unsigned int correlationID);
 
-        void differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList );
+        void differenceBetweenLists( const NsConnectionHandler::DeviceList &deviceList );
 
         Application * getActiveItem();
 
@@ -374,7 +374,7 @@ namespace NsAppManager
 
         std::map<int, Application*> mApplications;
         std::map<int, DeviceStorage> mDevices;
-        //NsConnectionHandler::tDeviceList mDevices;
+        //NsConnectionHandler::DeviceList mDevices;
     };
 
 } // namespace NsAppManager

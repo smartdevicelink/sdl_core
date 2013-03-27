@@ -44,71 +44,69 @@
 /**
  * \namespace NsConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler namespace.
- */ 
-namespace NsConnectionHandler
-{
+ */
+namespace NsConnectionHandler {
 
-    /**
-     * \brief Type for DeviceHandle
-     */
-    typedef int tDeviceHandle;
+/**
+ * \brief Type for DeviceHandle
+ */
+typedef int DeviceHandle;
 
-    /**
-    * \class CDevice
-    * \brief Connection class
-    */
-    class CDevice
-    {
-    public:
-        /**
-         * \brief Class constructor
-         */
-        CDevice(tDeviceHandle aDeviceHandle, std::string aUserFriendlyName);
+/**
+ * \class CDevice
+ * \brief Connection class
+ */
+class CDevice {
+ public:
+  /**
+   * \brief Class constructor
+   */
+  CDevice(DeviceHandle device_handle, std::string user_friendly_name);
 
-        /**
-         * \brief Destructor
-         */
-        ~CDevice();
+  /**
+   * \brief Destructor
+   */
+  ~CDevice();
 
-        /**
-         * \brief Returns device handle
-         * \return DeviceHandle
-         */
-        tDeviceHandle getDeviceHandle() const;
+  /**
+   * \brief Returns device handle
+   * \return DeviceHandle
+   */
+  DeviceHandle device_handle() const;
 
-        /**
-         * \brief Returns user frendly device name
-         * \return UserFriendlyName
-         */
-        std::string getUserFriendlyName() const;
+  /**
+   * \brief Returns user frendly device name
+   * \return UserFriendlyName
+   */
+  std::string user_friendly_name() const;
 
-    private:
-        /**
-         * \brief Uniq device handle.
-         */
-        tDeviceHandle mDeviceHandle;
+ private:
+  /**
+   * \brief Uniq device handle.
+   */
+  DeviceHandle device_handle_;
 
-        /**
-         * \brief User-friendly device name.
-         */
-        std::string mUserFriendlyName;
+  /**
+   * \brief User-friendly device name.
+   */
+  std::string user_friendly_name_;
 
-        /**
-         * \brief For logging.
-         */
-        static log4cplus::Logger mLogger;
-    };
+  /**
+   * \brief For logging.
+   */
+  static log4cplus::Logger logger_;
+};
 
-    /**
-     * \brief Type for Devices map
-     */
-    typedef std::map<int, CDevice> tDeviceList;
+/**
+ * \brief Type for Devices map
+ */
+typedef std::map<int, CDevice> DeviceList;
 
-    /**
-     * \brief Type for Devices map iterator
-     * Key is DeviceHandle which is uniq
-     */
-    typedef std::map<int, CDevice>::iterator tDeviceListIterator;
+/**
+ * \brief Type for Devices map iterator
+ * Key is DeviceHandle which is uniq
+ */
+typedef std::map<int, CDevice>::iterator DeviceListIterator;
 
 }/* namespace NsConnectionHandler */
 

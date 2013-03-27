@@ -63,13 +63,13 @@ namespace NsAppManager
          * \brief set device list
          * \param deviceList device list
          */
-        void setDeviceList( const NsConnectionHandler::tDeviceList& deviceList );
+        void setDeviceList( const NsConnectionHandler::DeviceList& deviceList );
 
         /**
          * \brief get device list
          * \return device list
          */
-        const NsConnectionHandler::tDeviceList& getDeviceList() const;
+        const NsConnectionHandler::DeviceList& getDeviceList() const;
 
         /**
          * \brief get count of items
@@ -82,7 +82,7 @@ namespace NsAppManager
          * \param handle device handle
          * \return device associated with the given handle
          */
-        const NsConnectionHandler::CDevice *findDeviceByHandle(const NsConnectionHandler::tDeviceHandle& handle) const;
+        const NsConnectionHandler::CDevice *findDeviceByHandle(const NsConnectionHandler::DeviceHandle& handle) const;
 
         /**
          * \brief find device associated with the given name
@@ -98,7 +98,7 @@ namespace NsAppManager
          */
         DeviceList(const DeviceList&);
 
-        NsConnectionHandler::tDeviceList mDeviceList;
+        NsConnectionHandler::DeviceList mDeviceList;
         static log4cplus::Logger mLogger;
     };
 }
