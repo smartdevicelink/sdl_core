@@ -418,6 +418,49 @@ namespace NsAppLink
             /** @} */
 
             /**
+             * @name Support of type: binary
+             * @{
+             */
+            /**
+             * @brief Constructor for creating object of type: binary
+             *
+             * @param InitialValue Initial binary value
+             **/
+            CSmartObject(SmartBinary InitialValue);
+
+            /**
+             * @brief Conversion operator to type: binary
+             *
+             * @return SmartBinary Value of the object converted to binary type or invalid_binary_value if
+             *         conversion is not possible
+             **/
+            operator SmartBinary(void) const;
+
+            /**
+             * @brief Returns current object converted to binary
+             *
+             * @return SmartBinary
+             **/
+            SmartBinary asBinary();
+
+            /**
+             * @brief Assignment operator for type: binary
+             *
+             * @param  NewValue New object value
+             * @return CSmartObject&
+             **/
+            CSmartObject& operator=(SmartBinary);
+
+            /**
+             * @brief Comparison operator for comparing object with binary value
+             *
+             * @param  Value Value to compare object with
+             * @return bool
+             **/
+            bool operator==(SmartBinary) const;
+            /** @} */
+
+            /**
              * @name Array interface support
              * @{
              */
@@ -540,7 +583,9 @@ namespace NsAppLink
              * @brief Returns length of object
              *
              * If object has type string, array or map then method returns corresponded
-             * size. Otherwise returns zero
+             * size. Otherwise returns zero.
+             *
+             * @note This method does not return size of binary data.
              *
              * @return size_t Length of the object
              **/
@@ -684,6 +729,27 @@ namespace NsAppLink
             inline std::string convert_string(void) const;
             /** @} */
 
+            /**
+             * @name Support of type: binary (internal)
+             * @{
+             */
+            /**
+             * @brief Sets new binary value to the object.
+             *
+             * This method changes also internal object type
+             *
+             * @param  NewValue New object value
+             * @return void
+             **/
+            inline void set_value_binary(SmartBinary NewValue);
+
+            /**
+             * @brief Converts object to binary type
+             *
+             * @return int Converted value or invalid_binary_value if conversion not possible
+             **/
+            inline SmartBinary convert_binary(void) const;
+            /** @} */
 
             /**
              * @name Array-like interface support (internal)
@@ -782,6 +848,7 @@ namespace NsAppLink
                 std::string* str_value;
                 SmartArray* array_value;
                 SmartMap* map_value;
+                SmartBinary* binary_value;
             } SmartData;
 
             /**
@@ -829,6 +896,11 @@ namespace NsAppLink
          * @brief Value that is used as invalid value for object type
          **/
         static CSmartObject      invalid_object_value(SmartType_Invalid);
+
+        /**
+         * @brief Value that is used as invalid value for object type
+         **/
+        static const SmartBinary invalid_binary_value;
     }
 }
 #endif // __CSMARTOBJECT_HPP__

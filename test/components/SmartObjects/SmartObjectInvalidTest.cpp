@@ -26,6 +26,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         CSmartObject objString(SmartType_String);
         ASSERT_EQ(SmartType_String, objString.getType());
 
+        CSmartObject objBinary(SmartType_Binary);
+        ASSERT_EQ(SmartType_Binary, objBinary.getType());
+
         CSmartObject objInvalid(SmartType_Invalid);
         ASSERT_EQ(SmartType_Invalid, objInvalid.getType());
 
@@ -83,6 +86,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj = std::string("Hello, world");
         ASSERT_EQ(SmartType_Invalid, obj.getType());
         ASSERT_EQ(invalid_string_value, (std::string)obj);
+
+        // ---- BINARY ---- //
+        NsAppLink::NsSmartObjects::SmartBinary binaryData;
+        binaryData.push_back('\0');
+        binaryData.push_back('a');
+        obj = binaryData;
+        ASSERT_EQ(SmartType_Invalid, obj.getType());
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         // ---- ARRAY ---- //
         obj[0] = 1;

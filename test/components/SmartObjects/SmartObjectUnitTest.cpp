@@ -260,6 +260,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             obj = "this is not an array";
             ASSERT_EQ(invalid_double_value, static_cast<double>(obj[0]));
         }
+        {   // String to Binary
+            CSmartObject obj;
+            ASSERT_EQ(invalid_binary_value, obj.asBinary());
+            obj = "this is not an array";
+            ASSERT_EQ(invalid_binary_value, obj.asBinary());
+        }
     }
 
     TEST(FromBool, TypeConversion)
@@ -275,6 +281,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(1.0, static_cast<double>(obj));
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
         ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         obj = false;
 
@@ -285,6 +292,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(0, static_cast<double>(obj));
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
         ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
     TEST(FromInt, TypeConversion)
@@ -297,6 +305,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_TRUE(static_cast<bool>(obj));
         ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
         ASSERT_EQ(123.0, static_cast<double>(obj));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         obj = 5;
         ASSERT_EQ("5", static_cast<std::string>(obj));
@@ -315,6 +324,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(-1234.0, static_cast<double>(obj));
         ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
         ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
     TEST(FromChar, TypeConversion)
@@ -329,6 +339,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
         ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         obj = '0';
 
@@ -338,6 +349,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
         ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
     TEST(FromDouble, TypeConversion)
@@ -350,6 +362,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
         ASSERT_EQ(0.1, static_cast<double>(obj));
         ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         obj = 0.9;
         ASSERT_EQ("0.9", static_cast<std::string>(obj));
@@ -365,6 +378,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ("0", static_cast<std::string>(obj));
         ASSERT_EQ(0, static_cast<int>(obj));
         ASSERT_FALSE(static_cast<bool>(obj));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
     TEST(FromMap, TypeConversion)
@@ -379,6 +393,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
         ASSERT_EQ(123, static_cast<int>(obj["key1"]));
         ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
     TEST(FromArray, TypeConversion)
@@ -394,6 +409,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
         ASSERT_EQ('A', static_cast<char>(obj[0]));
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key1"]));
+        ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
     TEST_F(TestHelper, AssignmentTest)

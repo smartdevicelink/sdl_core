@@ -78,7 +78,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         void makeRandomObject(CSmartObject &obj, const int size, std::string key_path)
         {
-            int type_id = rand() % 7;
+            int type_id = rand() % 8;
 
             switch (type_id)
             {
@@ -151,6 +151,19 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     makeRandomObject(obj[i], size - 1, key_path + generate_key("A", i) + ' ');     // recursion
                 }
                 break;
+            case 7:     // binary
+                int dataSize = rand()%200;
+                char randomChar = get_random_char();
+                std::string strDataVal(dataSize, randomChar);
+                std::string strVal("c:");
+                strVal += strDataVal;
+
+                NsAppLink::NsSmartObjects::SmartBinary binaryVal(dataSize, randomChar);
+
+                obj = binaryVal;   // string with binary data filled with random chars
+                mVerifyMap[key_path] = strVal;
+                //std::cout << "Created string, value: " << strVal << std::endl;
+                break;
             }
         }
 
@@ -212,11 +225,41 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             objects[i] = obj;
         }
 
-
         for (VerificationMap::const_iterator it = mVerifyMap.begin(); it != mVerifyMap.end(); it++)
         {
             std::string value(it->second);
             CSmartObject obj = get_object(objects, it->first);
+
+            // Binary data check
+            if(!value.compare(0, 2, "c:"))
+            {
+                std::string etalonData = value.substr(2);
+
+                ASSERT_EQ(NsAppLink::NsSmartObjects::SmartType_Binary, obj.getType());
+
+                NsAppLink::NsSmartObjects::SmartBinary binaryData = obj.asBinary();
+                ASSERT_EQ(etalonData.size(), binaryData.size());
+
+                for (size_t i = 0; i < etalonData.size() ; ++i)
+                {       {
+                    std::string etalonData = value.substr(2);
+
+                    ASSERT_EQ(NsAppLink::NsSmartObjects::SmartType_Binary, obj.getType());
+
+                    NsAppLink::NsSmartObjects::SmartBinary binaryData = obj.asBinary();
+                    ASSERT_EQ(etalonData.size(), binaryData.size());
+
+                    for (size_t i = 0; i < etalonData.size() ; ++i)
+                    {
+                        ASSERT_EQ(etalonData.at(i), binaryData.at(i));
+                    }
+                    continue;
+                }
+
+                    ASSERT_EQ(etalonData.at(i), binaryData.at(i));
+                }
+                continue;
+            }
 
 #ifdef NO_INCLUSIVE_MAPS
             if (!value.compare("map"))
@@ -225,6 +268,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
                 std::string map_value = path[path.size()-1];
                 ASSERT_EQ(map_value, static_cast<std::string>(obj));
+                continue;
             }
 #endif
             if (value.compare("map") && value.compare("array"))

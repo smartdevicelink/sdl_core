@@ -40,6 +40,9 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(SmartType Type)
         case SmartType_String :
             set_value_string("");
             break;
+        case SmartType_Binary :
+            set_value_binary(SmartBinary());
+            break;
         case SmartType_Invalid:
             m_type = SmartType_Invalid;
             break;
@@ -78,6 +81,9 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(const NsAppLink::NsSmar
         case SmartType_Array :
             if (m_data.array_value == Other.m_data.array_value) return true;
             return std::equal(m_data.array_value->begin(), m_data.array_value->end(), Other.m_data.array_value->begin());
+        case SmartType_Binary :
+            if (m_data.binary_value == Other.m_data.binary_value) return true;
+            return std::equal(m_data.binary_value->begin(), m_data.binary_value->end(), Other.m_data.binary_value->begin());
         case SmartType_Null :
             return true;
         case SmartType_Invalid:
@@ -562,6 +568,68 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_cstr(const char* NewValu
 }
 
 // =============================================================
+// BINARY TYPE SUPPORT
+// =============================================================
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(SmartBinary InitialValue)
+: m_type(SmartType_Null)
+, m_schema()
+{
+    m_data.str_value = NULL;
+    set_value_binary(InitialValue);
+}
+
+NsAppLink::NsSmartObjects::CSmartObject::operator SmartBinary(void) const
+{
+    return convert_binary();
+}
+
+NsAppLink::NsSmartObjects::SmartBinary NsAppLink::NsSmartObjects::CSmartObject::asBinary()
+{
+    //return static_cast<NsAppLink::NsSmartObjects::SmartBinary>(*this);
+    return convert_binary();
+}
+
+NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(SmartBinary NewValue)
+{
+    if(m_type != SmartType_Invalid)
+    {
+        set_value_binary(NewValue);
+    }
+    return *this;
+}
+
+bool NsAppLink::NsSmartObjects::CSmartObject::operator==(SmartBinary Value) const
+{
+    SmartBinary comp = convert_binary();
+    if(comp == NsAppLink::NsSmartObjects::invalid_binary_value)
+    {
+        return false;
+    }
+    else
+    {
+        return std::equal(comp.begin(), comp.end(), Value.begin());
+    }
+}
+
+void NsAppLink::NsSmartObjects::CSmartObject::set_value_binary(SmartBinary NewValue)
+{
+    set_new_type(SmartType_Binary);
+    m_data.binary_value = new SmartBinary(NewValue);
+}
+
+NsAppLink::NsSmartObjects::SmartBinary NsAppLink::NsSmartObjects::CSmartObject::convert_binary(void) const
+{
+    switch (m_type) {
+        case SmartType_Binary:
+            return *(m_data.binary_value);
+        default:
+            return invalid_binary_value;
+    }
+
+    return invalid_binary_value;
+}
+
+// =============================================================
 // ARRAY INTERFACE SUPPORT
 // =============================================================
 
@@ -700,7 +768,11 @@ void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmart
         case SmartType_String :
             newData.str_value = new std::string(*OtherObject.m_data.str_value);
             break;
-            //    default : ;
+        case SmartType_Binary :
+            newData.binary_value = new SmartBinary(*OtherObject.m_data.binary_value);
+            break;
+        default:
+            break;
     }
 
     cleanup_data();
@@ -722,7 +794,11 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
     case SmartType_Array :
         delete m_data.array_value;
         break;
-//    default : ;
+    case SmartType_Binary :
+        delete m_data.binary_value;
+        break;
+    default :
+        break;
     }
 }
 

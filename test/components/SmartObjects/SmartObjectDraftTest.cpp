@@ -4,6 +4,8 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include <string>
 
+using ::testing::ElementsAre;
+using ::testing::ContainerEq;
 
 namespace test { namespace components { namespace SmartObjects { namespace SmartObjectDraftTest {
 
@@ -75,6 +77,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj = std::string("Hello, world");
         ASSERT_EQ(std::string("Hello, world"), (std::string)obj);
 
+        // ---- Binary ---- //
+        NsAppLink::NsSmartObjects::SmartBinary binaryData;
+        binaryData.push_back('\0');
+        binaryData.push_back('a');
+        obj = binaryData;
+        ASSERT_THAT(obj.asBinary(), ElementsAre('\0', 'a'));
+
         // ---- ARRAY ---- //
         obj[0] = 1;
         obj[1] = true;
@@ -145,6 +154,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         // ---- STD::STRING ---- //
         obj = std::string("Hello, world");
         ASSERT_EQ(std::string("Hello, world"), obj.asString());
+
+        // ---- Binary ---- //
+        NsAppLink::NsSmartObjects::SmartBinary binaryData;
+        binaryData.push_back('\0');
+        binaryData.push_back('a');
+        obj = binaryData;
+        ASSERT_THAT(obj.asBinary(), ElementsAre('\0', 'a'));
     }
 }}}}
 
