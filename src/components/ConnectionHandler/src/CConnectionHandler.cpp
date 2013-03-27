@@ -102,7 +102,7 @@ void CConnectionHandler::onDeviceListUpdated(
     AddDeviceInDeviceListIfNotExist((*it_in));
   }
   if (connection_handler_observer_) {
-    connection_handler_observer_->onDeviceListUpdated(device_list_);
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
     connection_handler_observer_->UpdateDeviceList(device_list_);
   }
 }
@@ -169,10 +169,10 @@ void CConnectionHandler::onApplicationDisconnected(
       int firstSessionID = (itr->second).getFirstSessionID();
       if (0 < firstSessionID) {
         firstSessionID = keyFromPair(Connection, firstSessionID);
-        // In case bot parameters of onSessionEndedCallback are the same
+        // In case bot parameters of OnSessionEndedCallback are the same
         // AppMgr knows that Application with id=firstSessionID
         // should be closed.
-        connection_handler_observer_->onSessionEndedCallback(firstSessionID,
+        connection_handler_observer_->OnSessionEndedCallback(firstSessionID,
                                                              firstSessionID);
       }
     }
@@ -201,10 +201,10 @@ void CConnectionHandler::RemoveConnection(
       int firstSessionID = (itr->second).getFirstSessionID();
       if (0 < firstSessionID) {
         firstSessionID = keyFromPair(connection_handle, firstSessionID);
-        // In case both parameters of onSessionEndedCallback are the same
+        // In case both parameters of OnSessionEndedCallback are the same
         // AppMgr knows that Application with id=firstSessionID
         // should be closed.
-        connection_handler_observer_->onSessionEndedCallback(firstSessionID,
+        connection_handler_observer_->OnSessionEndedCallback(firstSessionID,
                                                              firstSessionID);
       }
     }
@@ -232,7 +232,7 @@ int CConnectionHandler::onSessionStartedCallback(
           firstSessionID = keyFromPair(connectionHandle, firstSessionID);
         }
         int sessionKey = keyFromPair(connectionHandle, newSessionID);
-        connection_handler_observer_->onSessionStartedCallback(
+        connection_handler_observer_->OnSessionStartedCallback(
             (it->second).getConnectionDeviceHandle(), sessionKey,
             firstSessionID);
       }
@@ -261,7 +261,7 @@ int CConnectionHandler::onSessionEndedCallback(
           firstSessionID = keyFromPair(connectionHandle, firstSessionID);
         }
         int sessionKey = keyFromPair(connectionHandle, sessionId);
-        connection_handler_observer_->onSessionEndedCallback(sessionKey,
+        connection_handler_observer_->OnSessionEndedCallback(sessionKey,
                                                              firstSessionID);
         result = sessionKey;
       }

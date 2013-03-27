@@ -96,7 +96,7 @@ namespace NsAppManager
          *
          * \param deviceList New list of available devices.
          **/
-        virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & deviceList);
+        virtual void OnDeviceListUpdated(const NsConnectionHandler::tDeviceList & deviceList);
 
         /**
          * \brief Updates device list.
@@ -123,7 +123,7 @@ namespace NsAppManager
          * \param sessionKey Key of started session.
          * \param firstSessionKey Session key of first session in this connection.
          */
-        virtual void onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
+        virtual void OnSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
 
         /**
          * \brief Callback function used by ConnectionHandler
@@ -131,7 +131,7 @@ namespace NsAppManager
          * \param sessionKey Key of session which should be ended
          * \param firstSessionKey Session key of first session in this connection
          */
-        virtual void onSessionEndedCallback(int sessionKey, int firstSessionKey);
+        virtual void OnSessionEndedCallback(int sessionKey, int firstSessionKey);
 
         /**
          * \brief Sets Json mobile handler instance
