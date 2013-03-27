@@ -60,6 +60,11 @@ namespace NsAppLink
             SmartType_Array     = 7,
 
             /**
+             * @brief Binary data value. Gives possibility for object to store binary data.
+             **/
+            SmartType_Binary    = 8,
+
+            /**
              * @brief Invalid value. Represents invalid object that cannot change his type.
              **/
             SmartType_Invalid   = -1
@@ -74,6 +79,11 @@ namespace NsAppLink
          * @brief SmartMap type
          **/
         typedef std::map<std::string, CSmartObject> SmartMap;
+
+        /**
+         * @brief SmartBinary type
+         **/
+        typedef std::vector<unsigned char> SmartBinary;
 
         /**
          * @brief Main SmartObject class
