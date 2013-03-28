@@ -40,13 +40,14 @@
 #include <json/value.h>
 #include "mb_controller.hpp"
 #include "Logger.hpp"
+#include "Utils/macro.h"
+#include "Utils/MessageQueue.h"
 #include "JSONHandler/IJSONRPC2Handler.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Request.h"
-#include "JSONHandler/MessageQueue.h"
 
 /**
  * \class JSONRPC2Handler

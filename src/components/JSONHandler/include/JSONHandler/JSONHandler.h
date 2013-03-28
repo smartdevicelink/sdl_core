@@ -37,7 +37,6 @@
 #define JSONHANDLER_CLASS 
 
 #include "Logger.hpp"
-#include "JSONHandler/MessageQueue.h"
 #include "JSONHandler/SDLRPCMessage.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IJsonHandler.h"
@@ -50,6 +49,8 @@ const unsigned char RPC_RESPONSE = 0x1;
 const unsigned char RPC_NOTIFICATION = 0x2;
 const unsigned char RPC_UNKNOWN = 0xF;
 
+#include "Utils/macro.h"
+#include "Utils/MessageQueue.h"
 #include "Utils/threads/thread.h"
 
 namespace json_handler {
