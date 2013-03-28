@@ -134,7 +134,7 @@ var StateManager = Em.StateManager.extend({
             exit: function() {
                 this._super();
                 
-		     	MFT.ApplinkAppController.model.deactivateApp();
+		     	MFT.SDLAppController.model.deactivateApp();
             }
 		})
 	}),
@@ -333,18 +333,18 @@ var StateManager = Em.StateManager.extend({
 		avin: Em.State.create({
 		}),
 		
-		applink: Em.State.create({
+		sdlmedia: Em.State.create({
 
 			enter: function() {
                 this._super();
                 
-                MFT.ApplinkMediaController.restoreCurrentApp();
+                MFT.SDLMediaController.restoreCurrentApp();
             },
 
             exit: function() {
                 this._super();
                 
-		     	MFT.ApplinkAppController.model.deactivateApp();
+		     	MFT.SDLAppController.model.deactivateApp();
             }
 
 		}),

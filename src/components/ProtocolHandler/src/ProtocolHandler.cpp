@@ -1,38 +1,86 @@
 /**
 * \file ProtocolHandler.cpp
 * \brief ProtocolHandler class source file.
-* \author PVyshnevska
+* 
+* Copyright (c) 2013, Ford Motor Company
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+* Redistributions of source code must retain the above copyright notice, this
+* list of conditions and the following disclaimer.
+*
+* Redistributions in binary form must reproduce the above copyright notice,
+* this list of conditions and the following
+* disclaimer in the documentation and/or other materials provided with the
+* distribution.
+*
+* Neither the name of the Ford Motor Company nor the names of its contributors
+* may be used to endorse or promote products derived from this software
+* without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <pthread.h>
-#include <signal.h>
 #include <memory.h>
+
 #include "TransportManager/ITransportManager.hpp"
 #include "ProtocolHandler/ISessionObserver.h"
 #include "ProtocolHandler/IProtocolObserver.h"
 #include "ProtocolHandler/ProtocolHandler.h"
+#include "ProtocolHandler/message_from_mobile_app_handler.h"
+#include "ProtocolHandler/messages_to_mobile_app_handler.h"
+
+#include "Utils/macro.h"
 
 using namespace NsProtocolHandler;
 
-log4cplus::Logger ProtocolHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ProtocolHandler"));
+log4cplus::Logger ProtocolHandler::mLogger = log4cplus::Logger::getInstance(
+    LOG4CPLUS_TEXT("ProtocolHandler"));
 
-ProtocolHandler::ProtocolHandler( NsAppLink::NsTransportManager::ITransportManager * transportManager ) :
- mProtocolObserver( 0 )
-,mSessionObserver( 0 )
-,mTransportManager( transportManager )
-{
-    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    pthread_create( &mHandleMessagesFromMobileApp, NULL, &ProtocolHandler::handleMessagesFromMobileApp, (void *)this );
-    pthread_create( &mHandleMessagesToMobileApp, NULL, &ProtocolHandler::handleMessagesToMobileApp, (void *)this );
+ProtocolHandler::ProtocolHandler(
+    NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager)
+    : mProtocolObserver(0),
+      mSessionObserver(0),
+      mTransportManager(transportManager),
+      handle_messages_from_mobile_app_(NULL),
+      handle_messages_to_mobile_app_(NULL) {
+  LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+
+  handle_messages_from_mobile_app_ = new threads::Thread(
+      "MessagesFromMobileAppHandler", new MessagesFromMobileAppHandler(this));
+  handle_messages_from_mobile_app_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
+
+  handle_messages_to_mobile_app_ = new threads::Thread(
+      "MessagesToMobileAppHandler", new MessagesToMobileAppHandler(this));
+  handle_messages_to_mobile_app_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
-ProtocolHandler::~ProtocolHandler()
-{
-    pthread_kill( mHandleMessagesFromMobileApp, 1 );
-    pthread_kill( mHandleMessagesToMobileApp, 1 );
-    mProtocolObserver = 0;
-    mSessionObserver = 0;
-    mTransportManager = 0;
+ProtocolHandler::~ProtocolHandler() {
+  handle_messages_from_mobile_app_->stop();
+  delete handle_messages_from_mobile_app_;
+  handle_messages_from_mobile_app_ = NULL;
+
+  handle_messages_to_mobile_app_->stop();
+  delete handle_messages_to_mobile_app_;
+  handle_messages_to_mobile_app_ = NULL;
+
+  mProtocolObserver = 0;
+  mSessionObserver = 0;
+  mTransportManager = 0;
 }
 
 void ProtocolHandler::setProtocolObserver( IProtocolObserver * observer )
@@ -58,7 +106,7 @@ void ProtocolHandler::setSessionObserver( ISessionObserver * observer )
     mSessionObserver = observer;
 }
 
-void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::sendEndSessionNAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned int sessionID,
               unsigned char serviceType )
 {
@@ -83,7 +131,7 @@ void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnec
     }
 }
 
-void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::sendStartSessionAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char sessionID,
               unsigned char protocolVersion,
               unsigned int hashCode,
@@ -111,7 +159,7 @@ void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConne
     }
 }
 
-void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::sendStartSessionNAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char serviceType )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -138,7 +186,7 @@ void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConn
 
 }
 
-void ProtocolHandler::sendData(const AppLinkRawMessage * message)
+void ProtocolHandler::sendData(const SmartDeviceLinkRawMessage * message)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     if ( !message )
@@ -149,7 +197,7 @@ void ProtocolHandler::sendData(const AppLinkRawMessage * message)
     mMessagesToMobileApp.push(message);
 }
 
-void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::onFrameReceived(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
     const uint8_t * data, size_t dataSize)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -169,16 +217,16 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
     }
 }
 
-void ProtocolHandler::onFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-            int userData, NsAppLink::NsTransportManager::ESendStatus sendStatus)
+void ProtocolHandler::onFrameSendCompleted(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+            int userData, NsSmartDeviceLink::NsTransportManager::ESendStatus sendStatus)
 {
-    if ( NsAppLink::NsTransportManager::SendStatusOK != sendStatus )
+    if ( NsSmartDeviceLink::NsTransportManager::SendStatusOK != sendStatus )
     {
         LOG4CPLUS_ERROR(mLogger, "Failed to send frame with number " << userData);
     }
 }
 
-RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::sendFrame( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
         const ProtocolPacket & packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -203,7 +251,7 @@ RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnecti
     return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandler::sendSingleFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::sendSingleFrameMessage(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                       const unsigned char sessionID,
                                       unsigned int protocolVersion,
                                       const unsigned char servType,
@@ -232,7 +280,7 @@ RESULT_CODE ProtocolHandler::sendSingleFrameMessage(NsAppLink::NsTransportManage
     return sendFrame( connectionHandle, packet );
 }
 
-RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                          const unsigned char sessionID,
                                          unsigned int protocolVersion,
                                          const unsigned char servType,
@@ -342,7 +390,7 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
     return retVal;
 }
 
-RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::handleMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                     ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -368,7 +416,7 @@ RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConn
             int connectionKey = mSessionObserver -> keyFromPair( connectionHandle,
                                         packet -> getSessionId() );
 
-            AppLinkRawMessage * rawMessage = new AppLinkRawMessage( connectionKey,
+            SmartDeviceLinkRawMessage * rawMessage = new SmartDeviceLinkRawMessage( connectionKey,
                                         packet -> getVersion(),
                                         packet -> getData(),
                                         packet -> getDataSize() );
@@ -394,7 +442,7 @@ RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConn
     return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -452,7 +500,7 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportMana
             }
 
             ProtocolPacket * completePacket = it->second;
-            AppLinkRawMessage * rawMessage = new AppLinkRawMessage( key,
+            SmartDeviceLinkRawMessage * rawMessage = new SmartDeviceLinkRawMessage( key,
                                         completePacket -> getVersion(),
                                         completePacket -> getData(),
                                         completePacket -> getTotalDataBytes() );
@@ -467,7 +515,7 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportMana
     return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::handleControlMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               const ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -540,117 +588,4 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
     }
 
     return RESULT_OK;
-}
-
-void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
-{
-    ProtocolHandler * handler = static_cast<ProtocolHandler*> (params);
-    if ( !handler )
-    {
-        pthread_exit( 0 );
-    }
-
-    while( 1 )
-    {
-        while( ! handler -> mMessagesFromMobileApp.empty() )
-        {
-            IncomingMessage * message = handler -> mMessagesFromMobileApp.pop();
-            LOG4CPLUS_INFO_EXT(mLogger, "Message " << message -> mData << " from mobile app received of size " << message -> mDataSize );
-
-            //@TODO check for ConnectionHandle.
-            //@TODO check for data size - crash is possible.
-            if ((0 != message -> mData) && (0 != message -> mDataSize) && (MAXIMUM_FRAME_DATA_SIZE + PROTOCOL_HEADER_V2_SIZE >= message -> mDataSize))
-            {
-                ProtocolPacket * packet = new ProtocolPacket;
-                LOG4CPLUS_INFO_EXT(mLogger ,"Data: " << packet -> getData());
-                if ( packet -> deserializePacket( message -> mData, message -> mDataSize ) == RESULT_FAIL )
-                {
-                    LOG4CPLUS_ERROR(mLogger, "Failed to parse received message.");
-                    delete packet;
-                }
-                else
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Packet: dataSize " << packet -> getDataSize());
-                    handler -> handleMessage( message -> mConnectionHandle, packet );
-                }
-            }
-            else
-            {
-                LOG4CPLUS_WARN(mLogger, "handleMessagesFromMobileApp() - incorrect or NULL data");
-            }
-
-            delete message;
-        }
-        handler -> mMessagesFromMobileApp.wait();
-    }
-
-    pthread_exit( 0 );
-}
-
-void * ProtocolHandler::handleMessagesToMobileApp( void * params )
-{
-    ProtocolHandler * handler = static_cast<ProtocolHandler*> (params);
-    if ( !handler )
-    {
-        pthread_exit( 0 );
-    }
-
-    //TODO: check if continue running condition.
-    while( 1 )
-    {
-        while ( ! handler -> mMessagesToMobileApp.empty() )
-        {
-            const AppLinkRawMessage * message = handler -> mMessagesToMobileApp.pop();
-            LOG4CPLUS_INFO_EXT(mLogger, "Message to mobile app: connection " << message->getConnectionKey()
-                    << "; dataSize: " << message->getDataSize() << " ; protocolVersion " << message -> getProtocolVersion());
-
-            unsigned int maxDataSize = 0;
-            if ( PROTOCOL_VERSION_1 == message -> getProtocolVersion() )
-                maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
-            else if ( PROTOCOL_VERSION_2 == message -> getProtocolVersion() )
-                maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
-
-            NsAppLink::NsTransportManager::tConnectionHandle connectionHandle = 0;
-            unsigned char sessionID = 0;
-
-            if ( !handler -> mSessionObserver )
-            {
-                LOG4CPLUS_ERROR(mLogger, "Cannot handle message to mobile app: ISessionObserver doesn't exist.");
-                pthread_exit(0);
-            }
-            handler -> mSessionObserver -> pairFromKey( message->getConnectionKey(), connectionHandle, sessionID );
-
-            if ( message -> getDataSize() <= maxDataSize )
-            {
-                if (handler -> sendSingleFrameMessage(connectionHandle,
-                                            sessionID,
-                                            message -> getProtocolVersion(),
-                                            SERVICE_TYPE_RPC,
-                                            message -> getDataSize(),
-                                            message -> getData(),
-                                            false) != RESULT_OK)
-                {
-                    LOG4CPLUS_ERROR(mLogger, "ProtocolHandler failed to send single frame message.");
-                }
-            }
-            else
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, "Message will be sent in multiple frames; max size is " << maxDataSize);
-                if (handler -> sendMultiFrameMessage(connectionHandle,
-                                            sessionID,
-                                            message -> getProtocolVersion(),
-                                            SERVICE_TYPE_RPC, // TODO : check if this is correct assumption; and remove this hot fix because it is not supposed to be so.
-                                            message -> getDataSize(),
-                                            message -> getData(),
-                                            false,
-                                            maxDataSize) != RESULT_OK)
-                {
-                    LOG4CPLUS_ERROR(mLogger, "ProtocolHandler failed to send multi frame messages.");
-                }
-            }
-        }
-        handler -> mMessagesToMobileApp.wait();
-    }
-
-    pthread_exit( 0 );
 }

@@ -1,8 +1,40 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/OnVehicleData.h"
-#include "../src/ALRPCObjectsImpl/V2/GPSDataMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/PRNDLMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/TireStatusMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/GPSDataMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/PRNDLMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TireStatusMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/OnVehicleDataMarshaller.h"
 
 /*
@@ -10,7 +42,7 @@
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication::VehicleInfo;
@@ -47,7 +79,7 @@ const std::string OnVehicleDataMarshaller::toString(const OnVehicleData& e)
 
 bool OnVehicleDataMarshaller::checkIntegrityConst(const OnVehicleData& s)
 {
-  if(s.gps && (!NsAppLinkRPCV2::GPSDataMarshaller::checkIntegrityConst(s.gps[0])))  return false;
+  if(s.gps && (!NsSmartDeviceLinkRPCV2::GPSDataMarshaller::checkIntegrityConst(s.gps[0])))  return false;
 
   if(s.speed && (s.speed[0]<-100 || s.speed[0]>500))  return false;
 
@@ -63,9 +95,9 @@ bool OnVehicleDataMarshaller::checkIntegrityConst(const OnVehicleData& s)
 
   if(s.vin && (s.vin[0].length()>17))  return false;
 
-  if(s.prndl && (!NsAppLinkRPCV2::PRNDLMarshaller::checkIntegrityConst(s.prndl[0])))  return false;
+  if(s.prndl && (!NsSmartDeviceLinkRPCV2::PRNDLMarshaller::checkIntegrityConst(s.prndl[0])))  return false;
 
-  if(s.tirePressure && (!NsAppLinkRPCV2::TireStatusMarshaller::checkIntegrityConst(s.tirePressure[0])))  return false;
+  if(s.tirePressure && (!NsSmartDeviceLinkRPCV2::TireStatusMarshaller::checkIntegrityConst(s.tirePressure[0])))  return false;
 
   if(s.batteryPackVoltage && (s.batteryPackVoltage[0]<-1000 || s.batteryPackVoltage[0]>1000))  return false;
 
@@ -96,7 +128,7 @@ Json::Value OnVehicleDataMarshaller::toJSON(const OnVehicleData& e)
   json["params"]=Json::Value(Json::objectValue);
 
   if(e.gps)
-    json["params"]["gps"]=NsAppLinkRPCV2::GPSDataMarshaller::toJSON(e.gps[0]);;
+    json["params"]["gps"]=NsSmartDeviceLinkRPCV2::GPSDataMarshaller::toJSON(e.gps[0]);;
   if(e.speed)
     json["params"]["speed"]=Json::Value(e.speed[0]);;
   if(e.rpm)
@@ -112,9 +144,9 @@ Json::Value OnVehicleDataMarshaller::toJSON(const OnVehicleData& e)
   if(e.vin)
     json["params"]["vin"]=Json::Value(e.vin[0]);;
   if(e.prndl)
-    json["params"]["prndl"]=NsAppLinkRPCV2::PRNDLMarshaller::toJSON(e.prndl[0]);;
+    json["params"]["prndl"]=NsSmartDeviceLinkRPCV2::PRNDLMarshaller::toJSON(e.prndl[0]);;
   if(e.tirePressure)
-    json["params"]["tirePressure"]=NsAppLinkRPCV2::TireStatusMarshaller::toJSON(e.tirePressure[0]);;
+    json["params"]["tirePressure"]=NsSmartDeviceLinkRPCV2::TireStatusMarshaller::toJSON(e.tirePressure[0]);;
   if(e.batteryPackVoltage)
     json["params"]["batteryPackVoltage"]=Json::Value(e.batteryPackVoltage[0]);;
   if(e.batteryPackCurrent)
@@ -149,8 +181,8 @@ bool OnVehicleDataMarshaller::fromJSON(const Json::Value& json,OnVehicleData& c)
     c.gps=0;
     if(js.isMember("gps"))
     {
-      c.gps=new NsAppLinkRPCV2::GPSData();
-      if(!NsAppLinkRPCV2::GPSDataMarshaller::fromJSON(js["gps"],c.gps[0]))  return false;
+      c.gps=new NsSmartDeviceLinkRPCV2::GPSData();
+      if(!NsSmartDeviceLinkRPCV2::GPSDataMarshaller::fromJSON(js["gps"],c.gps[0]))  return false;
     }
 
     if(c.speed)  delete c.speed;
@@ -234,16 +266,16 @@ bool OnVehicleDataMarshaller::fromJSON(const Json::Value& json,OnVehicleData& c)
     c.prndl=0;
     if(js.isMember("prndl"))
     {
-      c.prndl=new NsAppLinkRPCV2::PRNDL();
-      if(!NsAppLinkRPCV2::PRNDLMarshaller::fromJSON(js["prndl"],c.prndl[0]))  return false;
+      c.prndl=new NsSmartDeviceLinkRPCV2::PRNDL();
+      if(!NsSmartDeviceLinkRPCV2::PRNDLMarshaller::fromJSON(js["prndl"],c.prndl[0]))  return false;
     }
 
     if(c.tirePressure)  delete c.tirePressure;
     c.tirePressure=0;
     if(js.isMember("tirePressure"))
     {
-      c.tirePressure=new NsAppLinkRPCV2::TireStatus();
-      if(!NsAppLinkRPCV2::TireStatusMarshaller::fromJSON(js["tirePressure"],c.tirePressure[0]))  return false;
+      c.tirePressure=new NsSmartDeviceLinkRPCV2::TireStatus();
+      if(!NsSmartDeviceLinkRPCV2::TireStatusMarshaller::fromJSON(js["tirePressure"],c.tirePressure[0]))  return false;
     }
 
     if(c.batteryPackVoltage)  delete c.batteryPackVoltage;

@@ -1,7 +1,39 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/AddCommand.h"
-#include "../src/ALRPCObjectsImpl/V2/MenuParamsMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ImageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/MenuParamsMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ImageMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddCommandMarshaller.h"
 
 /*
@@ -9,7 +41,7 @@
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication::UI;
@@ -48,9 +80,9 @@ bool AddCommandMarshaller::checkIntegrityConst(const AddCommand& s)
 {
   if(s.cmdId>2000000000)  return false;
 
-  if(!NsAppLinkRPCV2::MenuParamsMarshaller::checkIntegrityConst(s.menuParams))  return false;
+  if(!NsSmartDeviceLinkRPCV2::MenuParamsMarshaller::checkIntegrityConst(s.menuParams))  return false;
 
-  if(s.cmdIcon && (!NsAppLinkRPCV2::ImageMarshaller::checkIntegrityConst(s.cmdIcon[0])))  return false;
+  if(s.cmdIcon && (!NsSmartDeviceLinkRPCV2::ImageMarshaller::checkIntegrityConst(s.cmdIcon[0])))  return false;
 
   return true;
 }
@@ -68,9 +100,9 @@ Json::Value AddCommandMarshaller::toJSON(const AddCommand& e)
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
   json["params"]["cmdId"]=Json::Value(e.cmdId);;
-  json["params"]["menuParams"]=NsAppLinkRPCV2::MenuParamsMarshaller::toJSON(e.menuParams);;
+  json["params"]["menuParams"]=NsSmartDeviceLinkRPCV2::MenuParamsMarshaller::toJSON(e.menuParams);;
   if(e.cmdIcon)
-    json["params"]["cmdIcon"]=NsAppLinkRPCV2::ImageMarshaller::toJSON(e.cmdIcon[0]);;
+    json["params"]["cmdIcon"]=NsSmartDeviceLinkRPCV2::ImageMarshaller::toJSON(e.cmdIcon[0]);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -94,14 +126,14 @@ bool AddCommandMarshaller::fromJSON(const Json::Value& json,AddCommand& c)
     c.cmdId=js["cmdId"].asInt();
     if(c.cmdId>2000000000)  return false;
 
-    if(!js.isMember("menuParams") || !NsAppLinkRPCV2::MenuParamsMarshaller::fromJSON(js["menuParams"],c.menuParams))  return false;
+    if(!js.isMember("menuParams") || !NsSmartDeviceLinkRPCV2::MenuParamsMarshaller::fromJSON(js["menuParams"],c.menuParams))  return false;
 
     if(c.cmdIcon)  delete c.cmdIcon;
     c.cmdIcon=0;
     if(js.isMember("cmdIcon"))
     {
-      c.cmdIcon=new NsAppLinkRPCV2::Image();
-      if(!NsAppLinkRPCV2::ImageMarshaller::fromJSON(js["cmdIcon"],c.cmdIcon[0]))  return false;
+      c.cmdIcon=new NsSmartDeviceLinkRPCV2::Image();
+      if(!NsSmartDeviceLinkRPCV2::ImageMarshaller::fromJSON(js["cmdIcon"],c.cmdIcon[0]))  return false;
     }
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;

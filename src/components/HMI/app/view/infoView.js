@@ -54,7 +54,7 @@ MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
 				'alertsButton',
 				'calendarButton',
 				'appsButton',
-				'appLinkButton'
+				'sdlButton'
 			],
 		
 			servicesButton: MFT.Button.extend({
@@ -112,8 +112,8 @@ MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
 				target:				'MFT.InfoController',
 			}),
 			
-			appLinkButton: MFT.Button.extend({
-				elementId:			'info_leftMenu_appLink',
+			sdlButton: MFT.Button.extend({
+				elementId:			'info_leftMenu_sdl',
 				goToState:   		'nonMedia',	
 				classNames:			'menu-item lsp1_p',
 				classNameBindings:	 [

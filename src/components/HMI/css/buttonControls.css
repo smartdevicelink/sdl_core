@@ -45,14 +45,14 @@
 	border: 1px solid gray;
 	overflow: hidden;
 }
-#infoTable .applinkGPLabel{
+#infoTable .sdlGPLabel{
 	width: 157px;
 	border-right: 1px solid #14100F;
 	height: 96px;
 	position: relative;
 	float: left;
 }
-#infoTable .applinkGPData{
+#infoTable .sdlGPData{
 	position: relative;
 	display: block;
 	overflow: hidden;

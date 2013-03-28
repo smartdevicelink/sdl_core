@@ -1,7 +1,36 @@
 /**
 * \file ProtocolHandler.h
 * \brief ProtocolHandler class header file.
-* \author PVyshnevska
+*
+* Copyright (c) 2013, Ford Motor Company
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+* Redistributions of source code must retain the above copyright notice, this
+* list of conditions and the following disclaimer.
+*
+* Redistributions in binary form must reproduce the above copyright notice,
+* this list of conditions and the following
+* disclaimer in the documentation and/or other materials provided with the
+* distribution.
+*
+* Neither the name of the Ford Motor Company nor the names of its contributors
+* may be used to endorse or promote products derived from this software
+* without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
 */
 
 #ifndef PROTOCOLHANDLER_CLASS
@@ -10,18 +39,25 @@
 #include <map>
 #include "Logger.hpp"
 #include "Utils/MessageQueue.h"
-#include "ProtocolHandler/AppLinkRawMessage.h"
+
+#include "ProtocolHandler/SmartDeviceLinkRawMessage.h"
 #include "ProtocolHandler/ProtocolPacket.h"
+
 #include "TransportManager/ITransportManagerDataListener.hpp"
+
+#include "Utils/threads/thread.h"
 
 /**
   *\namespace NsProtocolHandler
-  *\brief Namespace for AppLink ProtocolHandler related functionality.
+  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
 */
 namespace NsProtocolHandler
 {
     class IProtocolObserver;
-    class ISessionObserver;  
+    class ISessionObserver;
+
+    class MessagesFromMobileAppHandler;
+    class MessagesToMobileAppHandler;
 
     /**
      * \class ProtocolHandler
@@ -30,14 +66,14 @@ namespace NsProtocolHandler
      * parsing results (version number, start/end session etc) and if needed passes message 
      * to JSON Handler or notifies Connection Handler about activities around sessions.
     */
-    class ProtocolHandler : public NsAppLink::NsTransportManager::ITransportManagerDataListener
+    class ProtocolHandler : public NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener
     {
     public:
         /**
          * \brief Constructor
          * \param transportManager Pointer to Transport layer handler for message exchange.
         */
-        ProtocolHandler( NsAppLink::NsTransportManager::ITransportManager * transportManager );
+        ProtocolHandler( NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager );
 
         /**
          * \brief Destructor
@@ -60,29 +96,16 @@ namespace NsProtocolHandler
          * \brief Method for sending message to Mobile Application.
          * \param message Message with params to be sent to Mobile App.
          */
-        void sendData(const AppLinkRawMessage * message);
+        void sendData(const SmartDeviceLinkRawMessage * message);
     
     protected:
-
-        /**
-         * \brief Static method for handling message from Transport Layer.
-         * \param params Pointer to instance of ProtocolHandler class.
-         */
-        static void * handleMessagesFromMobileApp( void * params );
-
-        /**
-         * \brief Static method for handling message to Transport Layer.
-         * \param params Pointer to instance of ProtocolHandler class.
-         */
-        static void * handleMessagesToMobileApp( void * params );
-
         /**
          * \brief Sends fail of ending session to mobile application.
          * \param connectionHandle Identifier of connection whithin which session exists
          * \param sessionID ID of session ment to be ended
          * \param serviceType Type of session: RPC or BULK Data. RPC by default.
          */
-        void sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        void sendEndSessionNAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned int sessionID,
               unsigned char serviceType = SERVICE_TYPE_RPC );
 
@@ -96,7 +119,7 @@ namespace NsProtocolHandler
          * mobile app for using when ending session.
          * \param serviceType Type of session: RPC or BULK Data. RPC by default.
          */
-        void sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        void sendStartSessionAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char sessionID,
               unsigned char protocolVersion,
               unsigned int hashCode = 0,
@@ -107,7 +130,7 @@ namespace NsProtocolHandler
          * \param connectionHandle Identifier of connection whithin which session ment to be started
          * \param serviceType Type of session: RPC or BULK Data. RPC by default.
          */
-        void sendStartSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        void sendStartSessionNAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char serviceType = SERVICE_TYPE_RPC );
 
     private:
@@ -121,7 +144,7 @@ namespace NsProtocolHandler
           /**
            * \brief Identifier of connection through which message is transported.
            */
-          NsAppLink::NsTransportManager::tConnectionHandle mConnectionHandle;
+          NsSmartDeviceLink::NsTransportManager::tConnectionHandle mConnectionHandle;
           /**
            * \brief Message string.
            */
@@ -139,7 +162,7 @@ namespace NsProtocolHandler
          * @param Data Received frame payload data.
          * @param DataSize Size of data in bytes.
         **/
-        virtual void onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+        virtual void onFrameReceived(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
             const uint8_t * data, size_t dataSize);
 
         /**
@@ -149,8 +172,8 @@ namespace NsProtocolHandler
          * @param UserData User data that was previously passed to ITransportManager::sendFrame.
          * @param SendStatus Result status.
          **/
-        virtual void onFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-            int userData, NsAppLink::NsTransportManager::ESendStatus sendStatus);
+        virtual void onFrameSendCompleted(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+            int userData, NsSmartDeviceLink::NsTransportManager::ESendStatus sendStatus);
     
         /**
          * \brief Sends message which size permits to send it in one frame.
@@ -163,7 +186,7 @@ namespace NsProtocolHandler
          * \param compress Compression flag
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE sendSingleFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE sendSingleFrameMessage(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                       const unsigned char sessionID,
                                       unsigned int protocolVersion,
                                       const unsigned char servType,
@@ -183,7 +206,7 @@ namespace NsProtocolHandler
          * \param maxDataSize Maximum allowed size of single frame.
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE sendMultiFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE sendMultiFrameMessage(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                          const unsigned char sessionID,
                                          unsigned int protocolVersion,
                                          const unsigned char servType,
@@ -198,7 +221,7 @@ namespace NsProtocolHandler
          * \param packet Message with protocol header.
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE sendFrame( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               const ProtocolPacket & packet );
 
         /**
@@ -207,7 +230,7 @@ namespace NsProtocolHandler
          * \param packet Received message with protocol header.
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE handleMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE handleMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               ProtocolPacket * packet );
 
         /**
@@ -216,7 +239,7 @@ namespace NsProtocolHandler
          * \param packet Current frame of message with protocol header. 
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE handleMultiFrameMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               ProtocolPacket * packet );
 
         /**
@@ -225,7 +248,7 @@ namespace NsProtocolHandler
          * \param packet Received message with protocol header. 
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE handleControlMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               const ProtocolPacket * packet );
         
         /**
@@ -246,7 +269,7 @@ namespace NsProtocolHandler
         /**
           *\brief Pointer on instance of Transport layer handler for message exchange.
         */
-        NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
+        NsSmartDeviceLink::NsTransportManager::ITransportManager * mTransportManager;
 
         /**
           *\brief Queue for message from Mobile side.
@@ -254,19 +277,9 @@ namespace NsProtocolHandler
         MessageQueue<IncomingMessage *> mMessagesFromMobileApp;
 
         /**
-          *\brief Thread for handling messages from Mobile side.
-        */
-        pthread_t mHandleMessagesFromMobileApp;
-
-        /**
           *\brief Queue for message to Mobile side.
         */
-        MessageQueue<const AppLinkRawMessage *> mMessagesToMobileApp;
-
-        /**
-          *\brief Thread for handling message to Mobile side.
-        */
-        pthread_t mHandleMessagesToMobileApp;
+        MessageQueue<const SmartDeviceLinkRawMessage *> mMessagesToMobileApp;
 
         /**
           *\brief Map of frames for messages received in multiple frames.
@@ -277,6 +290,14 @@ namespace NsProtocolHandler
           *\brief Counter of messages sent in each session.
         */
         std::map<unsigned char, unsigned int> mMessageCounters;
+
+        // Thread for handling messages from Mobile side.
+        threads::Thread* handle_messages_from_mobile_app_;
+        friend class MessagesFromMobileAppHandler;
+
+        // Thread for handling message to Mobile side.
+        threads::Thread* handle_messages_to_mobile_app_;
+        friend class MessagesToMobileAppHandler;
     };
 }
 

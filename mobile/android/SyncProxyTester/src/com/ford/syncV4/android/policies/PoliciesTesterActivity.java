@@ -18,6 +18,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
@@ -42,13 +43,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.service.EncodedSyncPDataHeader;
 import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 
 import android.os.AsyncTask;
+import android.os.Environment;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -76,6 +81,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.exception.SyncException;
 
+@SuppressLint("NewApi")
 public class PoliciesTesterActivity extends Activity implements OnClickListener {
     private static final int SOCKET_TIMEOUT = 3;
 	/** Called when the activity is first created. */
@@ -92,6 +98,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 	private int requestCounter = 1;
 	
 	protected static byte[] _ESN;
+	static EncodedSyncPDataHeader _encodedSyncPDataHeader;
 	
 	private static BluetoothAdapter _btAdapter = null;	
 	protected static PoliciesTesterActivity _instance = null;
@@ -101,6 +108,8 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 	private ScrollView _scroller = null;
 	private ListView _listview = null;
 	private Spinner spinner2;
+	private Spinner spinner3;
+	private Spinner spinner4;
 	public int timeout;
 	String url = "http://applinkdev1.cloudapp.net/api/policies?appid=1234";
 	//String url = "http://applinkdevap.cloudapp.net/api/policies?appid=1234";
@@ -111,6 +120,11 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
      **********************/
 	public static void setESN(byte[] ESN) {
 		_ESN = ESN;
+	}
+	
+	public static void setHeader(EncodedSyncPDataHeader encodedSyncPDataHeader) {
+		Log.i("syncp", "_encodedSyncPDataHeader = encodedSyncPDataHeader");
+		_encodedSyncPDataHeader = encodedSyncPDataHeader;		
 	}
 	
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -175,6 +189,9 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 			}
 		});
 		addItemsOnSpinner2();
+		addItemsOnSpinner3();
+		addItemsOnSpinner4();
+		requestGPStoGetESN();
 		// Create and Start the AppLink Service
 		//startAppLinkService();
 		
@@ -192,6 +209,23 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 	}
 	public Context getMainContext () {
 		return this;
+	}
+	
+	public void requestGPStoGetESN() {
+		//EncodedSyncPData
+		EncodedSyncPData msg = new EncodedSyncPData();
+		Vector<String> syncPData = new Vector<String>();
+		syncPData.add("AAM4AAkAAAAAAAAAAAA=");
+		msg.setData(syncPData);
+		msg.setCorrelationID(6000);
+		
+		if (ProxyService.getInstance().getProxyInstance() != null) {
+			try {
+				ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+			} catch (SyncException e) {
+				Log.e(logTag,"Error sending requestGPStoGetESN: " + e);
+			}
+		}
 	}
 	
 	//add items into spinner dynamically
@@ -217,6 +251,28 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 			spinner2.setAdapter(dataAdapter);
 		}
 		
+	public void addItemsOnSpinner3() {
+		spinner3 = (Spinner) findViewById(R.id.spinner3);
+		List<String> list = new ArrayList<String>();
+		//list.add("start packet EU");
+		//list.add("start packet APA");
+		list.add("send to cloud");
+		list.add("send to SYNC");
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,list);
+		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner3.setAdapter(dataAdapter);
+	}
+	
+	public void addItemsOnSpinner4() {
+		spinner4 = (Spinner) findViewById(R.id.spinner4);
+		List<String> list = new ArrayList<String>();
+		list.add("NA Endpoint URL");
+		list.add("APA Endpoint URL");
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,list);
+		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner4.setAdapter(dataAdapter);
+	}
+	
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		if (v == findViewById(R.id.btnSend)) {
@@ -234,6 +290,14 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 			//clear keyboard
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+			
+			Log.i("dropdown", String.valueOf(spinner4.getSelectedItem()));
+			if (spinner4.getSelectedItem() == "NA Endpoint URL"){
+				url = "http://applinkdev1.cloudapp.net/api/policies?appid=1234";
+			}
+			if (spinner4.getSelectedItem() == "APA Endpoint URL"){
+				url = "http://applinkdevap.cloudapp.net/api/policies?appid=1234";
+			}
 			
 			Log.i("dropdown", String.valueOf(spinner2.getSelectedItem()));
 			//		final String data = "{\"data\":[\"HwcaAABt2lhQMjIwMEtHAAAABQAAAAUAHRHcxKMmVbBKTj6F3qEH4Wq0/zA=\"]}";
@@ -383,30 +447,102 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 			//policies go!
 			//policies(timeout, data);
 			
-			if (data != null){
-				logMessage("sending request... #" + requestCounter);
-				//sendEncodedSyncPDataToUrl(url, data, timeout);
-				new Thread(new Runnable() {
-			        public void run() {
-			        	sendEncodedSyncPDataToUrl(url, data, timeout);
-			        	logMessage("done with request #" + requestCounter++);
-			        }
-			    }).start();
+			Log.i("dropdown", String.valueOf(spinner3.getSelectedItem()));
+			if (spinner3.getSelectedItem() == "send to cloud"){
+				if (data != null){
+					logMessage("sending request... #" + requestCounter);
+					//sendEncodedSyncPDataToUrl(url, data, timeout);
+					new Thread(new Runnable() {
+				        public void run() {
+				        	sendEncodedSyncPDataToUrl(url, data, timeout);
+				        	logMessage("done with request #" + requestCounter++);
+				        }
+				    }).start();
+				}
+				else {
+					logMessage("data = null, request not sent");
+				}
 			}
-			else {
-				logMessage("data = null, request not sent");
-			}
-		}
+			else if(spinner3.getSelectedItem() == "send to SYNC"){
+				//add text from file to header in ProxyService.java
+				String ptsyncPstring = null;
+				byte[] databytes;
+				Log.i(logTag, "data: " + data);
+				if (data != null){
+					if (ProxyService.getInstance().getProxyInstance().getIsConnected() == true) {
+						try {
+							String[] dataspilt4 = data.split("\"");
+							
+							//Log.i("syncp", "dataspilt4: " + dataspilt4[3]);
+							
+							databytes = dataspilt4[3].getBytes("UTF-8");
+							
+							//Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(databytes);
+							//((Vector<String>) mhash.get(1)).get("data");
+							//Base64.decode(mhash.get("data").toString(), Base64.DEFAULT);
+							//byte[] ptPacketforSync = assembleHeader(Base64.decode((String) mhash.get("data"), Base64.DEFAULT).length, Base64.decode((String) mhash.get("data"), Base64.DEFAULT));
+							
+							byte[] ptPacketforSync = assembleHeader(databytes.length, databytes);
+							ptsyncPstring = Base64.encodeToString(ptPacketforSync, Base64.DEFAULT);
+		
+							Log.i("syncp", "ptsyncPstring: " + ptsyncPstring);
+						
+				
+							//send to syncs
+							logMessage("sending to SYNC");
+							EncodedSyncPData msg = new EncodedSyncPData();
+							Vector<String> syncPData = new Vector<String>();
+							syncPData.add(ptsyncPstring);
+							msg.setData(syncPData);
+							msg.setCorrelationID(6001);
+							Log.i("syncp", "msg: " + msg);
+							
+							
+							
+							ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+							
+							} catch (SyncException e) {
+								_msgAdapter.logMessage("Error sending syncp to sync: " + e, Log.ERROR, e);
+							}catch (UnsupportedEncodingException e) {
+								e.printStackTrace();
+							}
+					}//if proxy is connected
+					else {
+						Log.i(logTag, "proxy is not connected");
+						runOnUiThread(new Runnable() {
+							public void run() { _UImsgAdapter1.add("proxy not connected"); }
+						});
+					}
+			} // if data != null
+				else {
+					Log.i(logTag, "data is null");
+					runOnUiThread(new Runnable() {
+						public void run() { _UImsgAdapter1.add("can't send to sync, data = null"); }
+					});
+				}
+		} // send to sync
+	} //if button = Send
 		
     
 	}
 	
+	public byte[] assembleHeader(int payloadSize, byte[] payload){
+		Log.i("syncp", "assembling header");
+		_encodedSyncPDataHeader.setPayloadSize(payloadSize);
+		_encodedSyncPDataHeader.setPayload(payload);
+		_encodedSyncPDataHeader.setSigned(false);
+		_encodedSyncPDataHeader.setEncrypted(false);
+		_encodedSyncPDataHeader.setServiceType((byte) 7);
+		
+		
+		return _encodedSyncPDataHeader.assembleEncodedSyncPDataHeaderBytes();
+	}
 
 	
 	public String readFile() {
 		String jsonData = new String();
 		try {
-			Scanner scanner = new Scanner(new FileReader("/sdcard/policiesRequest.txt"));
+			Scanner scanner = new Scanner(new FileReader(Environment.getExternalStorageDirectory().getPath() + "/policiesRequest.txt"));
 		
 			jsonData = scanner.nextLine();
 			//Log.e(logTag, "first line: " + jsonData);
@@ -421,7 +557,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 				e.printStackTrace();
 				Log.e(logTag, "FileNotFoundException " + e);
 				runOnUiThread(new Runnable() {
-					public void run() { _UImsgAdapter1.add("connected to PC? unmount sdcard"); }
+					public void run() { _UImsgAdapter1.add("connected to PC? file saved on sdcard?"); }
 				});
 				return null;
 				//_msgAdapter.logMessage("ensure the phone is not connected to PC. unmount sdcard");
@@ -692,7 +828,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 	}
 
     
-    public void sendToSync(Vector<String> encodedSyncPDataReceived) {
+    /*public void sendToSync(Vector<String> encodedSyncPDataReceived) {
     	EncodedSyncPData encodedSyncPDataRequest = RPCRequestFactory.buildEncodedSyncPData(encodedSyncPDataReceived, 65535);
 		if(_syncProxy != null){
 			//sendRPCRequestPrivate(encodedSyncPDataRequest);
@@ -702,5 +838,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 				_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 			}
 		}
-    }
+    }*/
+
+	
 }

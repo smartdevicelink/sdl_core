@@ -19,7 +19,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 
     appsActive: function(){
         if(MFT.States.info.apps.active == true){
-            FFW.AppLinkCoreClient.getAppList();
+            FFW.BasicCommunication.getAppList();
         }
     }.observes('MFT.States.info.apps.active'),
 
@@ -32,6 +32,13 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		'listOfApplications'
 	],
 
+	/**
+	 * Method to check registered apps for the first activation
+	 */
+	afterRender: function(){
+		this.showAppList();
+	},
+
     /** 
      * Function to add application to application list
      */
@@ -42,25 +49,25 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
         this.listOfApplications.list.refresh();
 
         var i=0,
-            apps = MFT.ApplinkModel.registeredApps;
+            apps = MFT.SDLModel.registeredApps;
 
         for( i in apps){
             this.get('listOfApplications.list.childViews').pushObject(
                 MFT.Button.create({
-                    action:                 'onActivateApplinkApp',
-                    target:                 'MFT.ApplinkController',
+                    action:                 'onActivateSDLApp',
+                    target:                 'MFT.SDLController',
                     text:                   apps[i].appName + " - " + apps[i].deviceName,
                     appName:                apps[i].appName,
                     appId:                  apps[i].appId,
                     classNames:             'list-item button',
-                    iconBinding:            'MFT.ApplinkModel.registeredApps.' + apps[i].appId + '.appIcon'
+                    iconBinding:            'MFT.SDLModel.registeredApps.' + apps[i].appId + '.appIcon'
                 })
             );
         }
 
         //MFT.InfoAppsView.listOfApplications.list.refresh();
 
-    }.observes('MFT.ApplinkModel.applicationsList.@each'),
+    }.observes('MFT.SDLModel.applicationsList.@each'),
 	
 	vehicleHealthReport:   MFT.Button.extend({
 		goToState:			'vehicle.healthReport',
@@ -103,29 +110,29 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	findNewApps:   MFT.Button.extend({
 		goToState:			'settings.system.installApplications',
-		/*icon:				'images/info/ico_info_install.png',*/
+		icon:				'images/sdl/new_apps.png',
 		textBinding:		'MFT.locale.label.view_info_apps_vehicle_FindNewApplications',
 		elementId:			'infoAppsFindNewApps',
 		classNames:			'button findNewApps leftButtons',
 		arrow:				true,
 		action:				'findNewApps',
-		target:				'MFT.ApplinkController',
+		target:				'MFT.SDLController',
 		disabledBinding:	'MFT.helpMode',
 		onDown:				false,
-        templateName:       'text'
+        //templateName:       'text'
 	}),
 
     getDeviceList:   MFT.Button.extend({
-        /*icon:             'images/info/ico_info_install.png',*/
+        icon:				'images/sdl/devices.png',
         textBinding:        'MFT.locale.label.view_info_apps_vehicle_GetDeviceList',
         elementId:          'infoAppsGetDeviceList',
         classNames:         'button getDeviceList leftButtons',
         arrow:              true,
         action:             'onGetDeviceList',
-        target:             'MFT.ApplinkController',
+        target:             'MFT.SDLController',
         //disabledBinding:    'MFT.helpMode',
         onDown:             false,
-        templateName:       'text'
+        //templateName:       'text'
     }),
 
 	listOfApplications: MFT.List.extend({

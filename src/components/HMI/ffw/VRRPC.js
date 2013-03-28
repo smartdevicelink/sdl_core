@@ -2,8 +2,8 @@
  * Reference implementation of VR component.
  * 
  * Interface to get or set some essential information
- * sent from ApplinkCore. VR is responsible for receiving voice commands
- * choosed by user and sending notification of chosen commands to ApplinkCore.
+ * sent from SDLCore. VR is responsible for receiving voice commands
+ * choosed by user and sending notification of chosen commands to SDLCore.
  *
  * @author Andriy Melnik
  */
@@ -105,14 +105,14 @@ FFW.VR = FFW.RPCObserver.create({
 		switch (request.method) {
 			case "VR.AddCommand":{
 				
-				MFT.ApplinkModel.addCommandVR(request.params);
+				MFT.SDLModel.addCommandVR(request.params);
 
 				// send repsonse
 				var JSONMessage = {
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result"	: 	{
-						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" 	:  "SUCCESS", //  type (enum) from SDL protocol
 						"method" 	:  request.method + "Response"
 					}
 				};
@@ -122,14 +122,14 @@ FFW.VR = FFW.RPCObserver.create({
 			}
 			case "VR.DeleteCommand":{
 
-				MFT.ApplinkModel.deleteCommandVR(request.params.cmdId);
+				MFT.SDLModel.deleteCommandVR(request.params.cmdId);
 
 				// send repsonse
 				var JSONMessage = {
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result"	: 	{
-						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" 	:  "SUCCESS", //  type (enum) from SDL protocol
 						"method" 	:  request.method + "Response"
 					}
 				};
@@ -143,9 +143,9 @@ FFW.VR = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "VR.GetSupportedLanguagesResponse",
-						"languages" : MFT.ApplinkModel.applinkLanguagesList
+						"languages" : MFT.SDLModel.sdlLanguagesList
 					}
 				};
 				this.client.send(JSONMessage);
@@ -158,9 +158,9 @@ FFW.VR = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "VR.GetLanguageResponse",
-						"language" : MFT.ApplinkModel.hmiTTSVRLanguage
+						"language" : MFT.SDLModel.hmiTTSVRLanguage
 					}
 				};
 				this.client.send(JSONMessage);
@@ -176,7 +176,7 @@ FFW.VR = FFW.RPCObserver.create({
 					"result"	:	{
 						"capabilities": ["TEXT"],
 						"method"	:	"VR.GetCapabilitiesResponse",
-						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS" //  type (enum) from SDL protocol
 					}
 				};
 				this.client.send(JSONMessage);
@@ -185,14 +185,14 @@ FFW.VR = FFW.RPCObserver.create({
 			}
 			case "VR.ChangeRegistration":{
 
-				MFT.ApplinkModel.changeRegistrationTTSVR(request.params.language);
+				MFT.SDLModel.changeRegistrationTTSVR(request.params.language);
 
 				// send repsonse
 				var JSONMessage = {
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result"	: 	{
-						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" 	:  "SUCCESS", //  type (enum) from SDL protocol
 						"method" 	:  request.method + "Response"
 					}
 				};
@@ -242,7 +242,7 @@ FFW.VR = FFW.RPCObserver.create({
 	},
 
 	/*
-	 * Notifies if applink VR components language was changed
+	 * Notifies if sdl VR components language was changed
  	 */	
 	OnLanguageChange: function( lang ) {
 		Em.Logger.log("FFW.VR.OnLanguageChange");

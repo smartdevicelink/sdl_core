@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" ontouchmove="event.preventDefault();"><html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>Ford Applink HMI</title>
+		<title>Ford Smart Device HMI</title>
 		<!--Styles-->
 		<link rel="stylesheet" type="text/css" href="css/buttonControls.css" />
 		<link rel="stylesheet" type="text/css" href="css/ffw.css" />
@@ -16,7 +16,7 @@
         <link rel="stylesheet" type="text/css" href="css/media.css" />
         <link rel="stylesheet" type="text/css" href="css/help.css" />
         <link rel="stylesheet" type="text/css" href="css/fr.css" />
-        <link rel="stylesheet" type="text/css" href="css/applink.css" />
+        <link rel="stylesheet" type="text/css" href="css/sdl.css" />
 		 
 		<!--Libs-->
 
@@ -56,8 +56,8 @@
 		<script type="text/javascript" src="ffw/UIRPC.js"></script>
 		<script type="text/javascript" src="ffw/TTSRPC.js"></script>
 		<script type="text/javascript" src="ffw/VRRPC.js"></script>
-        <script type="text/javascript" src="ffw/VehicleInfo.js"></script>
-		<script type="text/javascript" src="ffw/AppLinkCoreClientRPC.js"></script>
+        <script type="text/javascript" src="ffw/VehicleInfoRPC.js"></script>
+		<script type="text/javascript" src="ffw/BasicCommunicationRPC.js"></script>
 		<script type="text/javascript" src="ffw/Scale.js"></script>
 		
         <script type="text/javascript" src="ffw/ImagePreloader.js"></script>
@@ -100,7 +100,7 @@
         <script type="text/javascript" src="app/controlls/MenuList.js"></script>
         <script type="text/javascript" src="app/controlls/ScrollableText.js"></script>
         
-        <script type="text/javascript" src="app/controlls/applink/PresetButton.js"></script>
+        <script type="text/javascript" src="app/controlls/sdl/PresetButton.js"></script>
 
 		<!-- utils -->
 		<script type="text/javascript" src="app/util/Audio.js"></script>
@@ -135,13 +135,13 @@
         <script type="text/javascript" src="app/model/HTMLVideoPlayerModel.js"></script>
         <script type="text/javascript" src="app/model/FAQModel.js"></script>
 		
-		<!-- Applink models -->
-        <script type="text/javascript" src="app/model/applink/ApplinkVehicleInfoModel.js"></script>
-		<script type="text/javascript" src="app/model/applink/AppModel.js"></script>
-        <script type="text/javascript" src="app/model/applink/NonMediaModel.js"></script>
-        <script type="text/javascript" src="app/model/applink/ApplinkMediaModel.js"></script>
-        <script type="text/javascript" src="app/model/applink/ApplinkModel.js"></script>
-        <!-- Applink models END -->
+		<!-- SDL models -->
+        <script type="text/javascript" src="app/model/sdl/VehicleInfoModel.js"></script>
+		<script type="text/javascript" src="app/model/sdl/AppModel.js"></script>
+        <script type="text/javascript" src="app/model/sdl/NonMediaModel.js"></script>
+        <script type="text/javascript" src="app/model/sdl/MediaModel.js"></script>
+        <script type="text/javascript" src="app/model/sdl/Model.js"></script>
+        <!-- SDL models END -->
 
 		<script type="text/javascript" src="app/view/SelectSystemPopup.js"></script>
 		<!-- Controllers -->
@@ -155,12 +155,14 @@
         <script type="text/javascript" src="app/controller/InfoController.js"></script>
         <script type="text/javascript" src="app/controller/VideoPlayerController.js"></script>
         
-        <script type="text/javascript" src="app/controller/applink/ApplinkController.js"></script>
-        <script type="text/javascript" src="app/controller/applink/AppController.js"></script>  
-        <script type="text/javascript" src="app/controller/applink/NonMediaController.js"></script>  
-        <script type="text/javascript" src="app/controller/applink/ApplinkMediaController.js"></script>  
+        <script type="text/javascript" src="app/controller/sdl/Controller.js"></script>
+        <script type="text/javascript" src="app/controller/sdl/AppController.js"></script>  
+        <script type="text/javascript" src="app/controller/sdl/NonMediaController.js"></script>  
+        <script type="text/javascript" src="app/controller/sdl/MediaController.js"></script>  
 
         <script type="text/javascript" src="app/mixins/ScriptLoad.js"></script>
+        <script type="text/javascript" src="app/mixins/PresetEvents.js"></script>
+        <script type="text/javascript" src="app/mixins/PresetEventCustom.js"></script>
 
 		<!-- Views -->
         <!--Video Error Popup View-->
@@ -175,8 +177,8 @@
         <script type="text/javascript" src="app/view/media/common/DirectTune.js"></script>
 		<script type="text/javascript" src="app/view/media/common/LeftMenuView.js"></script>
         <script type="text/javascript" src="app/view/media/common/RightMenuView.js"></script>
-        <script type="text/javascript" src="app/view/media/applink/applinkMediaControllsV1View.js"></script>
-        <script type="text/javascript" src="app/view/media/applink/applinkMediaControllsV2View.js"></script>
+        <script type="text/javascript" src="app/view/media/sdl/controllsV1View.js"></script>
+        <script type="text/javascript" src="app/view/media/sdl/controllsV2View.js"></script>
 
 		<!-- home views -->
 		<script type="text/javascript" src="app/view/home/controlButtons.js"></script>
@@ -195,22 +197,22 @@
 		
 		
 		
-		<!-- Applink views -->
-		<script type="text/javascript" src="app/view/applink/shared/AbstractView.js"></script>
-		<script type="text/javascript" src="app/view/applink/shared/interactionChoicesView.js"></script>
-        <script type="text/javascript" src="app/view/applink/shared/sliderView.js"></script>
-        <script type="text/javascript" src="app/view/applink/shared/optionsView.js"></script>
-        <script type="text/javascript" src="app/view/applink/shared/scrollableMessage.js"></script>
-        <script type="text/javascript" src="app/view/applink/shared/turnByTurnView.js"></script>
-        <script type="text/javascript" src="app/view/applink/shared/tbtTurnList.js"></script>
-        <script type="text/javascript" src="app/view/applink/TTSPopUp.js"></script>
-        <script type="text/javascript" src="app/view/applink/AlertPopUp.js"></script>
-        <script type="text/javascript" src="app/view/applink/AlertManeuverPopUp.js"></script>
-        <script type="text/javascript" src="app/view/applink/AudioPassThruPopUp.js"></script>
-        <script type="text/javascript" src="app/view/applink/VRPopUp.js"></script>
-        <script type="text/javascript" src="app/view/applink/VehicleInfoView.js"></script>
-        <script type="text/javascript" src="app/view/applink/tbtClientStateView.js"></script>
-        <script type="text/javascript" src="app/view/applink/driverDistraction.js"></script>
+		<!-- SDL views -->
+		<script type="text/javascript" src="app/view/sdl/shared/AbstractView.js"></script>
+		<script type="text/javascript" src="app/view/sdl/shared/interactionChoicesView.js"></script>
+        <script type="text/javascript" src="app/view/sdl/shared/sliderView.js"></script>
+        <script type="text/javascript" src="app/view/sdl/shared/optionsView.js"></script>
+        <script type="text/javascript" src="app/view/sdl/shared/scrollableMessage.js"></script>
+        <script type="text/javascript" src="app/view/sdl/shared/turnByTurnView.js"></script>
+        <script type="text/javascript" src="app/view/sdl/shared/tbtTurnList.js"></script>
+        <script type="text/javascript" src="app/view/sdl/TTSPopUp.js"></script>
+        <script type="text/javascript" src="app/view/sdl/AlertPopUp.js"></script>
+        <script type="text/javascript" src="app/view/sdl/AlertManeuverPopUp.js"></script>
+        <script type="text/javascript" src="app/view/sdl/AudioPassThruPopUp.js"></script>
+        <script type="text/javascript" src="app/view/sdl/VRPopUp.js"></script>
+        <script type="text/javascript" src="app/view/sdl/VehicleInfoView.js"></script>
+        <script type="text/javascript" src="app/view/sdl/tbtClientStateView.js"></script>
+        <script type="text/javascript" src="app/view/sdl/driverDistraction.js"></script>
         
 		
 		<script type="text/javascript" src="app/StateManager.js"></script>		

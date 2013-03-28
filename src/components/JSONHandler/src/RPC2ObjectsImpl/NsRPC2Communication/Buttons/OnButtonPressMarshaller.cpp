@@ -1,7 +1,39 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonPress.h"
-#include "../src/ALRPCObjectsImpl/V2/ButtonNameMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ButtonPressModeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ButtonNameMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ButtonPressModeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/OnButtonPressMarshaller.h"
 
 /*
@@ -9,7 +41,7 @@
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication::Buttons;
@@ -46,9 +78,9 @@ const std::string OnButtonPressMarshaller::toString(const OnButtonPress& e)
 
 bool OnButtonPressMarshaller::checkIntegrityConst(const OnButtonPress& s)
 {
-  if(!NsAppLinkRPCV2::ButtonNameMarshaller::checkIntegrityConst(s.name))  return false;
+  if(!NsSmartDeviceLinkRPCV2::ButtonNameMarshaller::checkIntegrityConst(s.name))  return false;
 
-  if(!NsAppLinkRPCV2::ButtonPressModeMarshaller::checkIntegrityConst(s.mode))  return false;
+  if(!NsSmartDeviceLinkRPCV2::ButtonPressModeMarshaller::checkIntegrityConst(s.mode))  return false;
 
   if(s.customButtonID && (s.customButtonID[0]>65536))  return false;
 
@@ -66,8 +98,8 @@ Json::Value OnButtonPressMarshaller::toJSON(const OnButtonPress& e)
   json["method"]=Json::Value("Buttons.OnButtonPress");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["name"]=NsAppLinkRPCV2::ButtonNameMarshaller::toJSON(e.name);;
-  json["params"]["mode"]=NsAppLinkRPCV2::ButtonPressModeMarshaller::toJSON(e.mode);;
+  json["params"]["name"]=NsSmartDeviceLinkRPCV2::ButtonNameMarshaller::toJSON(e.name);;
+  json["params"]["mode"]=NsSmartDeviceLinkRPCV2::ButtonPressModeMarshaller::toJSON(e.mode);;
   if(e.customButtonID)
     json["params"]["customButtonID"]=Json::Value(e.customButtonID[0]);;
   return json;
@@ -86,9 +118,9 @@ bool OnButtonPressMarshaller::fromJSON(const Json::Value& json,OnButtonPress& c)
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("name") || !NsAppLinkRPCV2::ButtonNameMarshaller::fromJSON(js["name"],c.name))  return false;
+    if(!js.isMember("name") || !NsSmartDeviceLinkRPCV2::ButtonNameMarshaller::fromJSON(js["name"],c.name))  return false;
 
-    if(!js.isMember("mode") || !NsAppLinkRPCV2::ButtonPressModeMarshaller::fromJSON(js["mode"],c.mode))  return false;
+    if(!js.isMember("mode") || !NsSmartDeviceLinkRPCV2::ButtonPressModeMarshaller::fromJSON(js["mode"],c.mode))  return false;
 
     if(c.customButtonID)  delete c.customButtonID;
     c.customButtonID=0;

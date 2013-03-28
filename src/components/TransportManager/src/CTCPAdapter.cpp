@@ -1,3 +1,37 @@
+/**
+ * \file CTCPAdapter.cpp
+ * \brief Class CTCPAdapter.
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include <memory.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -8,17 +42,17 @@
 #include "CTCPAdapter.hpp"
 #include "IHandleGenerator.hpp"
 
-NsAppLink::NsTransportManager::CTCPAdapter::STCPDevice::STCPDevice(const char* Name, const in_addr_t & Address):
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPDevice::STCPDevice(const char* Name, const in_addr_t & Address):
 SDevice(Name),
 mAddress(Address)
 {
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::STCPDevice::~STCPDevice(void)
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPDevice::~STCPDevice(void)
 {
 }
 
-bool NsAppLink::NsTransportManager::CTCPAdapter::STCPDevice::isSameAs(const NsAppLink::NsTransportManager::CDeviceAdapter::SDevice * OtherDevice) const
+bool NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPDevice::isSameAs(const NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SDevice * OtherDevice) const
 {
     bool result = false;
 
@@ -35,18 +69,18 @@ bool NsAppLink::NsTransportManager::CTCPAdapter::STCPDevice::isSameAs(const NsAp
     return result;
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::STCPConnection(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, int ConnectionSocket, const in_port_t Port):
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPConnection::STCPConnection(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, int ConnectionSocket, const in_port_t Port):
 SConnection(DeviceHandle),
 mPort(Port)
 {
     mConnectionSocket = ConnectionSocket;
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::~STCPConnection(void)
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPConnection::~STCPConnection(void)
 {
 }
 
-bool NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::isSameAs(const NsAppLink::NsTransportManager::CDeviceAdapter::SConnection* OtherConnection) const
+bool NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPConnection::isSameAs(const NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection* OtherConnection) const
 {
     bool result = false;
 
@@ -63,22 +97,22 @@ bool NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::isSameAs(const 
     return result;
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::CTCPAdapter(NsAppLink::NsTransportManager::IDeviceAdapterListener & Listener, NsAppLink::NsTransportManager::IHandleGenerator & HandleGenerator):
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::CTCPAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapterListener & Listener, NsSmartDeviceLink::NsTransportManager::IHandleGenerator & HandleGenerator):
 CDeviceAdapter(Listener, HandleGenerator)
 {
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::~CTCPAdapter(void)
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::~CTCPAdapter(void)
 {
     waitForThreadsTermination();
 }
 
-NsAppLink::NsTransportManager::EDeviceType NsAppLink::NsTransportManager::CTCPAdapter::getDeviceType(void) const
+NsSmartDeviceLink::NsTransportManager::EDeviceType NsSmartDeviceLink::NsTransportManager::CTCPAdapter::getDeviceType(void) const
 {
     return DeviceWiFi;
 }
 
-void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
+void NsSmartDeviceLink::NsTransportManager::CTCPAdapter::mainThread(void)
 {
     LOG4CPLUS_INFO(mLogger, "Main thread initialized");
 
@@ -213,7 +247,7 @@ void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
     LOG4CPLUS_INFO(mLogger, "Main thread finished");
 }
 
-void NsAppLink::NsTransportManager::CTCPAdapter::connectionThread(const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
+void NsSmartDeviceLink::NsTransportManager::CTCPAdapter::connectionThread(const NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
     handleCommunication(ConnectionHandle);
 

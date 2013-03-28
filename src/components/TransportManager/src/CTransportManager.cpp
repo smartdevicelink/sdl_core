@@ -1,3 +1,37 @@
+/**
+ * \file CTransportManager.cpp
+ * \brief Class CTransportManager.
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "LoggerHelper.hpp"
 
 #include "CTransportManager.hpp"
@@ -7,9 +41,9 @@
 
 #include <algorithm>
 
-using namespace NsAppLink::NsTransportManager;
+using namespace NsSmartDeviceLink::NsTransportManager;
 
-NsAppLink::NsTransportManager::CTransportManager::CTransportManager(void):
+NsSmartDeviceLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager"))),
 mDataListenersMutex(),
@@ -40,7 +74,7 @@ mClientInterfaceMutex()
     LOG4CPLUS_INFO(mLogger, "TransportManager constructed");
 }
 
-NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
+NsSmartDeviceLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 {
     LOG4CPLUS_INFO(mLogger, "TransportManager destructor");
 
@@ -90,7 +124,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     LOG4CPLUS_INFO(mLogger, "Component terminated");
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::run(void)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::run(void)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
     initializeDeviceAdapters();
@@ -105,7 +139,7 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
     LOG4CPLUS_INFO(mLogger, "Scanning new devices on all registered device adapters");
@@ -119,49 +153,49 @@ void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::connectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
     connectDisconnectDevice(DeviceHandle, true);
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::disconnectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
     connectDisconnectDevice(DeviceHandle, false);
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::addDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::addDataListener(NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener * Listener)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
     mDataListeners.push_back(Listener);
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::removeDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::removeDataListener(NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener * Listener)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
     mDataListeners.erase(std::remove(mDataListeners.begin(), mDataListeners.end(), Listener), mDataListeners.end());
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::addDeviceListener(NsAppLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::addDeviceListener(NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
     mDeviceListeners.push_back(Listener);
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::removeDeviceListener(NsAppLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::removeDeviceListener(NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
     mDeviceListeners.erase(std::remove(mDeviceListeners.begin(), mDeviceListeners.end(), Listener), mDeviceListeners.end());
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::sendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, const int UserData)
+void NsSmartDeviceLink::NsTransportManager::CTransportManager::sendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, const int UserData)
 {
     TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "sendFrame called. DataSize: "<<DataSize);
 
@@ -211,7 +245,7 @@ void NsAppLink::NsTransportManager::CTransportManager::sendFrame(tConnectionHand
     }
 }
 
-NsAppLink::NsTransportManager::tDeviceHandle NsAppLink::NsTransportManager::CTransportManager::generateNewDeviceHandle(void)
+NsSmartDeviceLink::NsTransportManager::tDeviceHandle NsSmartDeviceLink::NsTransportManager::CTransportManager::generateNewDeviceHandle(void)
 {
     tDeviceHandle outputDeviceHandle;
 
@@ -223,7 +257,7 @@ NsAppLink::NsTransportManager::tDeviceHandle NsAppLink::NsTransportManager::CTra
     return outputDeviceHandle;
 }
 
-NsAppLink::NsTransportManager::tConnectionHandle NsAppLink::NsTransportManager::CTransportManager::generateNewConnectionHandle(void)
+NsSmartDeviceLink::NsTransportManager::tConnectionHandle NsSmartDeviceLink::NsTransportManager::CTransportManager::generateNewConnectionHandle(void)
 {
     tConnectionHandle outputConnectionHandle;
 
@@ -584,7 +618,7 @@ CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManage
 , mData(0)
 , mDataSize(DataSize)
 , mUserData()
-, mSendStatus(NsAppLink::NsTransportManager::SendStatusUnknownError)
+, mSendStatus(NsSmartDeviceLink::NsTransportManager::SendStatusUnknownError)
 {
     if ((0 != Data) &&
         (0u != DataSize))
@@ -609,7 +643,7 @@ CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManage
 
 }
 
-NsAppLink::NsTransportManager::CTransportManager::SDataListenerCallback::SDataListenerCallback(const SDataListenerCallback& other)
+NsSmartDeviceLink::NsTransportManager::CTransportManager::SDataListenerCallback::SDataListenerCallback(const SDataListenerCallback& other)
 : mCallbackType(other.mCallbackType)
 , mConnectionHandle(other.mConnectionHandle)
 , mData(0)
@@ -630,7 +664,7 @@ NsAppLink::NsTransportManager::CTransportManager::SDataListenerCallback::SDataLi
     }
 }
 
-bool NsAppLink::NsTransportManager::CTransportManager::SDataListenerCallback::operator==( const SDataListenerCallback& i_other ) const
+bool NsSmartDeviceLink::NsTransportManager::CTransportManager::SDataListenerCallback::operator==( const SDataListenerCallback& i_other ) const
 {
     return ( (mCallbackType == i_other.mCallbackType)
           && (mConnectionHandle == i_other.mConnectionHandle)
@@ -1214,7 +1248,7 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t *& Data, s
 }
 
 
-NsAppLink::NsTransportManager::CTransportManager::SFrameDataForConnection::SFrameDataForConnection(const SFrameDataForConnection& other)
+NsSmartDeviceLink::NsTransportManager::CTransportManager::SFrameDataForConnection::SFrameDataForConnection(const SFrameDataForConnection& other)
 : mDataSize(other.mDataSize)
 , mBufferSize(other.mBufferSize)
 , mConnectionHandle(other.mConnectionHandle)
@@ -1226,7 +1260,7 @@ NsAppLink::NsTransportManager::CTransportManager::SFrameDataForConnection::SFram
     TM_CH_LOG4CPLUS_INFO(mLogger, mConnectionHandle, "Initialized frame data for connection container");
 }
 
-bool NsAppLink::NsTransportManager::CTransportManager::SFrameDataForConnection::operator==( const SFrameDataForConnection& i_other ) const
+bool NsSmartDeviceLink::NsTransportManager::CTransportManager::SFrameDataForConnection::operator==( const SFrameDataForConnection& i_other ) const
 {
     return ( (mDataSize == i_other.mDataSize)
           && (mBufferSize == i_other.mBufferSize)

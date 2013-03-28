@@ -116,9 +116,9 @@ MFT.MediaController = Em.Object.create({
 			this.playerDataArray.pop().set('active',false);
 		}
 
-		//Deactivate applinkMediaModel, flag for status bar
-		if( MFT.ApplinkAppController.model ){
-			MFT.ApplinkAppController.model.set('active', false);
+		//Deactivate sdlMediaModel, flag for status bar
+		if( MFT.SDLAppController.model ){
+			MFT.SDLAppController.model.set('active', false);
 		}
 
 		if(MFT.BTModel.active){
@@ -391,15 +391,15 @@ MFT.MediaController = Em.Object.create({
 	},
 
     /** Switching on Application */
-    turnOnApplink: function(){
+    turnOnSDL: function(){
 
         // Exit form player or radio
         this.onPlayerExit();
         this.onRadioExit();
-        // Set Applink Data active, flag for status bar
-        MFT.ApplinkAppController.model.set('active',true);
-        // Go to Applink state
-        MFT.States.goToState('media.applink');
+        // Set SDL Data active, flag for status bar
+        MFT.SDLAppController.model.set('active',true);
+        // Go to SDL state
+        MFT.States.goToState('media.sdlmedia');
         // hide directTune
         this.offDirectTune();
         if(this.directTuneSelected){

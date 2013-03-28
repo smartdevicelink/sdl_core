@@ -1,18 +1,50 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include <cstring>
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateApp.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateAppResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppList.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppListResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceList.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceListResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppDeactivated.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppUnregistered.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnDeviceListUpdated.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/SendData.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/SendDataResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/ActivateApp.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/ActivateAppResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/GetAppList.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/GetAppListResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/GetDeviceList.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/GetDeviceListResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/OnAppDeactivated.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/OnAppRegistered.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/OnAppUnregistered.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/OnDeviceListUpdated.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/SendData.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/BasicCommunication/SendDataResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Buttons/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Buttons/OnButtonEvent.h"
@@ -116,7 +148,7 @@
 /*
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication;
@@ -180,25 +212,25 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
 
     switch(m)
     {
-      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATED:
+      case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPDEACTIVATED:
       {
-        NsRPC2Communication::AppLinkCore::OnAppDeactivated *rv=new NsRPC2Communication::AppLinkCore::OnAppDeactivated;
-        return NsRPC2Communication::AppLinkCore::OnAppDeactivatedMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::BasicCommunication::OnAppDeactivated *rv=new NsRPC2Communication::BasicCommunication::OnAppDeactivated;
+        return NsRPC2Communication::BasicCommunication::OnAppDeactivatedMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED:
+      case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPREGISTERED:
       {
-        NsRPC2Communication::AppLinkCore::OnAppRegistered *rv=new NsRPC2Communication::AppLinkCore::OnAppRegistered;
-        return NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::BasicCommunication::OnAppRegistered *rv=new NsRPC2Communication::BasicCommunication::OnAppRegistered;
+        return NsRPC2Communication::BasicCommunication::OnAppRegisteredMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
+      case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPUNREGISTERED:
       {
-        NsRPC2Communication::AppLinkCore::OnAppUnregistered *rv=new NsRPC2Communication::AppLinkCore::OnAppUnregistered;
-        return NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::BasicCommunication::OnAppUnregistered *rv=new NsRPC2Communication::BasicCommunication::OnAppUnregistered;
+        return NsRPC2Communication::BasicCommunication::OnAppUnregisteredMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONDEVICELISTUPDATED:
+      case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONDEVICELISTUPDATED:
       {
-        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated *rv=new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
-        return NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::BasicCommunication::OnDeviceListUpdated *rv=new NsRPC2Communication::BasicCommunication::OnDeviceListUpdated;
+        return NsRPC2Communication::BasicCommunication::OnDeviceListUpdatedMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
       {
@@ -278,26 +310,26 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     Methods m=getIndex(json["method"].asString().c_str());
     switch(m)
     {
-      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP:
+      case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ACTIVATEAPP:
       {
-        NsRPC2Communication::AppLinkCore::ActivateApp *rv=new NsRPC2Communication::AppLinkCore::ActivateApp;
-        return NsRPC2Communication::AppLinkCore::ActivateAppMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::BasicCommunication::ActivateApp *rv=new NsRPC2Communication::BasicCommunication::ActivateApp;
+        return NsRPC2Communication::BasicCommunication::ActivateAppMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
+      case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETAPPLIST:
       {
-        NsRPC2Communication::AppLinkCore::GetAppList *rv=new NsRPC2Communication::AppLinkCore::GetAppList;
-        return NsRPC2Communication::AppLinkCore::GetAppListMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::BasicCommunication::GetAppList *rv=new NsRPC2Communication::BasicCommunication::GetAppList;
+        return NsRPC2Communication::BasicCommunication::GetAppListMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST:
+      case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETDEVICELIST:
       {
-        NsRPC2Communication::AppLinkCore::GetDeviceList *rv=new NsRPC2Communication::AppLinkCore::GetDeviceList;
-        return NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::BasicCommunication::GetDeviceList *rv=new NsRPC2Communication::BasicCommunication::GetDeviceList;
+        return NsRPC2Communication::BasicCommunication::GetDeviceListMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
 
-      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
+      case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__SENDDATA:
       {
-        NsRPC2Communication::AppLinkCore::SendData *rv=new NsRPC2Communication::AppLinkCore::SendData;
-        return NsRPC2Communication::AppLinkCore::SendDataMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::BasicCommunication::SendData *rv=new NsRPC2Communication::BasicCommunication::SendData;
+        return NsRPC2Communication::BasicCommunication::SendDataMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIES:
       {
@@ -527,25 +559,25 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
 
   switch(m)
   {
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPPRESPONSE:
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ACTIVATEAPPRESPONSE:
     {
-      NsRPC2Communication::AppLinkCore::ActivateAppResponse *rv=new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
-      return NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+      NsRPC2Communication::BasicCommunication::ActivateAppResponse *rv=new NsRPC2Communication::BasicCommunication::ActivateAppResponse;
+      return NsRPC2Communication::BasicCommunication::ActivateAppResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE:
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETAPPLISTRESPONSE:
     {
-      NsRPC2Communication::AppLinkCore::GetAppListResponse *rv=new NsRPC2Communication::AppLinkCore::GetAppListResponse;
-      return NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+      NsRPC2Communication::BasicCommunication::GetAppListResponse *rv=new NsRPC2Communication::BasicCommunication::GetAppListResponse;
+      return NsRPC2Communication::BasicCommunication::GetAppListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE:
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETDEVICELISTRESPONSE:
     {
-      NsRPC2Communication::AppLinkCore::GetDeviceListResponse *rv=new NsRPC2Communication::AppLinkCore::GetDeviceListResponse;
-      return NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+      NsRPC2Communication::BasicCommunication::GetDeviceListResponse *rv=new NsRPC2Communication::BasicCommunication::GetDeviceListResponse;
+      return NsRPC2Communication::BasicCommunication::GetDeviceListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__SENDDATARESPONSE:
     {
-      NsRPC2Communication::AppLinkCore::SendDataResponse *rv=new NsRPC2Communication::AppLinkCore::SendDataResponse;
-      return NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+      NsRPC2Communication::BasicCommunication::SendDataResponse *rv=new NsRPC2Communication::BasicCommunication::SendDataResponse;
+      return NsRPC2Communication::BasicCommunication::SendDataResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
     {
@@ -772,12 +804,12 @@ Json::Value Marshaller::Notification2JSON(const NsRPC2Communication::RPC2Notific
 
   switch(msg->getMethod())
   {
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED:
-      return NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::OnAppRegistered*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
-      return NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::OnAppUnregistered*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONDEVICELISTUPDATED:
-      return NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::OnDeviceListUpdated*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPREGISTERED:
+      return NsRPC2Communication::BasicCommunication::OnAppRegisteredMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::OnAppRegistered*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPUNREGISTERED:
+      return NsRPC2Communication::BasicCommunication::OnAppUnregisteredMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::OnAppUnregistered*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONDEVICELISTUPDATED:
+      return NsRPC2Communication::BasicCommunication::OnDeviceListUpdatedMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::OnDeviceListUpdated*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
       return NsRPC2Communication::Buttons::OnButtonEventMarshaller::toJSON(*static_cast<const NsRPC2Communication::Buttons::OnButtonEvent*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS:
@@ -816,16 +848,16 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
   if(!msg) return j;
   switch(msg->getMethod())
   {
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP:
-      return NsRPC2Communication::AppLinkCore::ActivateAppMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::ActivateApp*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
-      return NsRPC2Communication::AppLinkCore::GetAppListMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetAppList*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST:
-      return NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetDeviceList*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATED:
-      return NsRPC2Communication::AppLinkCore::OnAppDeactivatedMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::OnAppDeactivated*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
-      return NsRPC2Communication::AppLinkCore::SendDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendData*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ACTIVATEAPP:
+      return NsRPC2Communication::BasicCommunication::ActivateAppMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::ActivateApp*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETAPPLIST:
+      return NsRPC2Communication::BasicCommunication::GetAppListMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::GetAppList*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETDEVICELIST:
+      return NsRPC2Communication::BasicCommunication::GetDeviceListMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::GetDeviceList*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPDEACTIVATED:
+      return NsRPC2Communication::BasicCommunication::OnAppDeactivatedMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::OnAppDeactivated*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__SENDDATA:
+      return NsRPC2Communication::BasicCommunication::SendDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::SendData*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIES:
       return NsRPC2Communication::Buttons::GetCapabilitiesMarshaller::toJSON(*static_cast<const NsRPC2Communication::Buttons::GetCapabilities*>(msg));
     case METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATION:
@@ -922,14 +954,14 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
   if(!msg) return j;
   switch(msg->getMethod())
   {
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPPRESPONSE:
-      return NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::ActivateAppResponse*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE:
-      return NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetAppListResponse*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE:
-      return NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetDeviceListResponse*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
-      return NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendDataResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ACTIVATEAPPRESPONSE:
+      return NsRPC2Communication::BasicCommunication::ActivateAppResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::ActivateAppResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETAPPLISTRESPONSE:
+      return NsRPC2Communication::BasicCommunication::GetAppListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::GetAppListResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETDEVICELISTRESPONSE:
+      return NsRPC2Communication::BasicCommunication::GetDeviceListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::GetDeviceListResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__SENDDATARESPONSE:
+      return NsRPC2Communication::BasicCommunication::SendDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::BasicCommunication::SendDataResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
       return NsRPC2Communication::Buttons::GetCapabilitiesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::Buttons::GetCapabilitiesResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE:
@@ -1046,19 +1078,19 @@ Json::Value Marshaller::toJSON(const RPC2Command* msg)
 
 const Marshaller::localHash Marshaller::mHashTable[110]=
 {
-  {"AppLinkCore.ActivateApp",0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp},
-  {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
-  {"AppLinkCore.GetAppList",2,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList},
-  {"AppLinkCore.GetAppListResponse",3,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse},
-  {"AppLinkCore.GetDeviceList",4,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList},
-  {"AppLinkCore.GetDeviceListResponse",5,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse},
-  {"AppLinkCore.OnAppDeactivated",6,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivated},
-  {"AppLinkCore.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivated},
-  {"AppLinkCore.OnAppRegistered",8,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered},
-  {"AppLinkCore.OnAppUnregistered",9,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered},
-  {"AppLinkCore.OnDeviceListUpdated",10,&Marshaller::mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated},
-  {"AppLinkCore.SendData",11,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData},
-  {"AppLinkCore.SendDataResponse",12,&Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse},
+  {"BasicCommunication.ActivateApp",0,&Marshaller::mNsRPC2Communication_BasicCommunication__ActivateApp},
+  {"BasicCommunication.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_BasicCommunication__ActivateAppResponse},
+  {"BasicCommunication.GetAppList",2,&Marshaller::mNsRPC2Communication_BasicCommunication__GetAppList},
+  {"BasicCommunication.GetAppListResponse",3,&Marshaller::mNsRPC2Communication_BasicCommunication__GetAppListResponse},
+  {"BasicCommunication.GetDeviceList",4,&Marshaller::mNsRPC2Communication_BasicCommunication__GetDeviceList},
+  {"BasicCommunication.GetDeviceListResponse",5,&Marshaller::mNsRPC2Communication_BasicCommunication__GetDeviceListResponse},
+  {"BasicCommunication.OnAppDeactivated",6,&Marshaller::mNsRPC2Communication_BasicCommunication__OnAppDeactivated},
+  {"BasicCommunication.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_BasicCommunication__OnAppDeactivated},
+  {"BasicCommunication.OnAppRegistered",8,&Marshaller::mNsRPC2Communication_BasicCommunication__OnAppRegistered},
+  {"BasicCommunication.OnAppUnregistered",9,&Marshaller::mNsRPC2Communication_BasicCommunication__OnAppUnregistered},
+  {"BasicCommunication.OnDeviceListUpdated",10,&Marshaller::mNsRPC2Communication_BasicCommunication__OnDeviceListUpdated},
+  {"BasicCommunication.SendData",11,&Marshaller::mNsRPC2Communication_BasicCommunication__SendData},
+  {"BasicCommunication.SendDataResponse",12,&Marshaller::mNsRPC2Communication_BasicCommunication__SendDataResponse},
   {"Buttons.GetCapabilities",13,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilities},
   {"Buttons.GetCapabilitiesResponse",14,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse},
   {"Buttons.OnButtonEvent",15,&Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent},
@@ -1161,18 +1193,18 @@ const Marshaller::localHash Marshaller::mHashTable[110]=
 
 NsRPC2Communication::RPC2ErrorMarshaller Marshaller::mRPC2ErrorInternal;
 
-NsRPC2Communication::AppLinkCore::ActivateAppMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp;
-NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse;
-NsRPC2Communication::AppLinkCore::GetAppListMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList;
-NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse;
-NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList;
-NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse;
-NsRPC2Communication::AppLinkCore::OnAppDeactivatedMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivated;
-NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered;
-NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered;
-NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated;
-NsRPC2Communication::AppLinkCore::SendDataMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__SendData;
-NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse;
+NsRPC2Communication::BasicCommunication::ActivateAppMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__ActivateApp;
+NsRPC2Communication::BasicCommunication::ActivateAppResponseMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__ActivateAppResponse;
+NsRPC2Communication::BasicCommunication::GetAppListMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__GetAppList;
+NsRPC2Communication::BasicCommunication::GetAppListResponseMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__GetAppListResponse;
+NsRPC2Communication::BasicCommunication::GetDeviceListMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__GetDeviceList;
+NsRPC2Communication::BasicCommunication::GetDeviceListResponseMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__GetDeviceListResponse;
+NsRPC2Communication::BasicCommunication::OnAppDeactivatedMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__OnAppDeactivated;
+NsRPC2Communication::BasicCommunication::OnAppRegisteredMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__OnAppRegistered;
+NsRPC2Communication::BasicCommunication::OnAppUnregisteredMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__OnAppUnregistered;
+NsRPC2Communication::BasicCommunication::OnDeviceListUpdatedMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__OnDeviceListUpdated;
+NsRPC2Communication::BasicCommunication::SendDataMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__SendData;
+NsRPC2Communication::BasicCommunication::SendDataResponseMarshaller Marshaller::mNsRPC2Communication_BasicCommunication__SendDataResponse;
 NsRPC2Communication::Buttons::GetCapabilitiesMarshaller Marshaller::mNsRPC2Communication_Buttons__GetCapabilities;
 NsRPC2Communication::Buttons::GetCapabilitiesResponseMarshaller Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse;
 NsRPC2Communication::Buttons::OnButtonEventMarshaller Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent;

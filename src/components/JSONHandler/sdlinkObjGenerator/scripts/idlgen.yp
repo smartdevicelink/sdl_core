@@ -1,0 +1,1652 @@
+#!/usr/bin/yapp
+# $Id$
+
+%{
+ use IO::Handle;
+ use Data::Dumper;
+ use File::Spec;
+ use Cwd;
+
+  sub lex_open;
+  sub lex_close;
+  sub lex_next;
+
+%}
+# _number _ident raw comment
+%%
+
+
+all:	interface						{  [$_[1]];}
+|	all interface						{ push @{$_[1]},$_[2]; $_[1]; }
+;
+
+interface:	'interface' namespace '{'  prefix_section  main_section	 '}'		{ { 'name' => $_[2], 'defs' => $_[4], 'data' => $_[5]}; }
+;
+
+prefix_section: prefix_section_item				{ [$_[1]]; }
+|		prefix_section prefix_section_item		{ push @{$_[1]},$_[2]; $_[1]; }
+;
+
+prefix_section_item:	'version' _string ';'			{ [$_[1],$_[2]];}
+|			'prefix' _string ';'			{ [$_[1],$_[2]];}
+;
+
+namespace:	_ident						{ $_[1];}
+|		namespace '::' _ident				{  sprintf "%s::%s",$_[1],$_[3]; }
+;
+
+main_section:	definition					{ [$_[1]]; }
+|		main_section definition				{ push @{$_[1]},$_[2]; $_[1]; }
+;
+
+definition:	notword _ident '(' arglist2 ')' ';'		{ ['method',0, $_[2], $_[4]]; }
+|		 _ident '(' arglist2 ')' ';'			{ ['method',1, $_[1], $_[3], []]; }
+|		 _ident '(' arglist2 delim arglist2 ')' ';'	{ ['method',1, $_[1], $_[3], $_[5]]; }
+;
+
+
+notword:	'oneway'
+|		'notification'
+;
+
+delim:		'->' | ';'
+;
+
+
+arglist2:						{ [];}
+|		arglist					{ $_[1]; }
+;
+
+arglist:	arg					{ [$_[1]];}
+|		arglist ',' arg				{ push @{$_[1]},$_[3];$_[1];}
+;
+
+arg:		type constraint pointer _ident array	{ [$_[1],$_[2],$_[3],$_[4],$_[5]];}
+;
+
+
+type:		'bool'					{ 'b'; }
+|		'unsigned' 'int'			{ 'u' }
+|		'int'					{ 'i' }
+|		'string' 				{ 's';}
+|		'float'					{ 'f'; }
+|		_ident					{ [$_[1]]; }
+;
+
+constraint:						{ [undef,undef]; }
+|		'(' _number cd _number ')'		{ [$_[2],$_[4]]; }
+|		'(' cd _number ')'			{ [undef,$_[3]]; }
+|		'(' _number cd ')'			{ [$_[2],undef]; }
+|		'(' _number ')'				{ [undef,$_[2]]; }
+;
+
+
+cd:		':'					{ $_[1]; }
+|		'~'					{ $_[1]; }
+;
+
+pointer:						{ ''; }
+|		'*'					{ '*'; }
+;
+
+array:							{ ''; }
+|		'[' ']'					{ [0,undef]; }
+|		'[' _number cd _number ']'		{ [$_[2],$_[4]]; }
+|		'[' cd _number ']'			{ [undef,$_[3]]; }
+|		'[' _number cd ']'			{ [$_[2],undef]; }
+|		'[' _number ']'				{ [undef,$_[2]]; }
+;
+
+%%
+
+
+use strict;
+
+sub lex_open
+{
+  my $fn=shift;
+
+my $lx=
+{
+  'keywords'=> [
+              '(::|;|-\>|\[|\]|\)|\(|\*|:|,|\{|\})',
+	      '(interface)',
+	      '(int)',
+	      '(unsigned)',
+	      '(bool)',
+	      '(float)',
+	      '(string)',
+	      '(version)',
+#	      '(using)',
+	      '(prefix)',
+	      '(notification)',
+	      '(oneway)'
+             ],
+  'tokens'=> { 
+#           _number => '(\-?\d+)', 
+#           _dnumber => '(\-?((\d+\.\d*)|(\.\d+))([eE]\-?\d+)?)',
+           _number => #'(\-?((\d+\.\d*)|(\.\d+))([eE]\-?\d+)?)',
+                       '(\-?((\d+\.\d*)|(\.\d+)|(\d+))([eE]\-?\d+)?)',
+           _ident => '([a-zA-Z][a-zA-Z_0-9]*)', 
+#           _inumber => '(\-?\d+)', 
+#           _pinumber => '(\d+)', 
+           _string =>"\"(([^\\\\\"]|(\\\\(([abfnrtvUEu'\"?\\\\])|([0-7]{1,3})|(x[0-9a-fA-F]+))))*?)\""
+	   },
+
+  'file' => $fn,
+  'cfile'=> $fn,
+  'line' => 0,
+  'input' => ''
+};
+
+  $lx->{'fh'}=IO::Handle->new();
+#  open($lx->{'fh'},'<',$lx->{'file'}) or die "Can't open file ".$lx->{'file'};
+  open($lx->{'fh'},'-|',sprintf('cpp %s',$lx->{'file'})) or die "Can't open file ".$lx->{'file'};
+  return $lx;
+}
+
+
+sub lex_close
+{
+  my $lx=shift;
+  
+  die if not ref $lx;
+  close $lx->{'fh'};
+}
+
+
+sub lex_next
+{
+  my $lx=shift;
+  
+  while(1)
+  {
+    if(not $lx->{'input'})
+    {
+      my $f=$lx->{'fh'};
+      do
+      {
+        $lx->{'input'}=<$f>;
+        $lx->{'line'}++;
+        return undef if not defined $lx->{'input'};
+        if($lx->{'input'}=~/^#\s+(\d+)\s+"(.+)"/)
+        {
+          $lx->{'cfile'}=$2;
+          $lx->{'line'}=$1;
+          $lx->{'input'}='';
+          redo;
+        }
+        
+        $lx->{'input'}=~s/^\s+//;
+        $lx->{'input'}=~s/\n+$//gs;
+      } while($lx->{'input'}=~/^\s*$/);
+    }
+
+   my $k;
+   for $k (@{$lx->{'keywords'}})
+   {
+     return ($1,$1) if($lx->{input}=~s/^\s*$k$//);
+     return ($1,$1) if($lx->{input}=~s/^\s*$k\s+//);
+     return ($1,$1) if($lx->{input}=~s/^\s*$k\b//);
+#     return ($1,$1) if($lx->{input}=~s/^\s*$k//);
+     return ($1,$1) if($lx->{input}=~s/^\s*$k(\W)/$2/);
+   }
+
+   for $k (sort keys %{$lx->{'tokens'}})
+   {
+      my $v=$lx->{'tokens'}->{$k};
+      return ($k,$1) if($lx->{input}=~s/^\s*$v\s*//);
+   }
+   die sprintf "lexer error at %s:%u\n>>>%s",$lx->{'cfile'},$lx->{'line'},$lx->{'input'};
+  }
+}
+
+
+
+sub _Error {
+    my $self=shift;
+=pod=
+        exists $self->YYData->{'ERRMSG'}
+    and do {
+        print $self->YYData->{'ERRMSG'};
+        delete $self->YYData->{'ERRMSG'};
+        return;
+    };
+=cut=    
+    die sprintf "Syntax error in %s:%u\nCurtok:\t'%s':\nCurval:\t'%s':\nExpected:\t'%s':\n",
+          $self->YYData->{'DATA'}[0]->{'cfile'},
+	  $self->YYData->{'DATA'}[0]->{'line'},
+          ($self->YYCurtok),($self->YYCurval),($self->YYExpect);
+
+#    printf STDERR "File:%s\nLine:%s\n",$self->YYData->{DATA}[0]->{'curfilename'},
+#	  $self->YYData->{DATA}[0]->{'curline'};
+#   die Dumper($self->YYCurtok,$self->YYCurval,$self->YYExpect,$self->YYData->{DATA}[0]);
+}
+
+sub _Lexer {
+    my($parser)=shift;
+    return lex_next($parser->YYData->{'DATA'}[0]);
+}
+
+sub Run {
+    my($self)=shift;
+    my $fname=shift;
+    my $lx=lex_open($fname);
+
+
+    $self->YYData->{'DATA'}=[$lx];
+    my $rv=$self->YYParse( 'yylex' => \&_Lexer, 'yyerror' => \&_Error
+#          ,yydebug => 0x1f
+           );
+   lex_close($lx);
+   return $rv;
+}
+
+package main;
+use Data::Dumper;
+
+
+my %config;
+
+# args parse
+sub args_parse
+{
+   my @args=@ARGV;
+   my $t;
+   while($t=shift @args)
+   {
+     if($t eq '-i')    {  $config{'idl'}=shift @args;   next;   }
+     if($t eq '-o')   {  $config{'gen'}=shift @args; $config{'pimpl'}=shift @args; $config{'lib'}=shift @args; next; }
+     if($t eq '-f')   {  $config{'alrpc'}=shift @args; $config{'aimpl'}=shift @args; next; }
+     if($t eq '-b')   {  $config{'base'}=shift @args; next; }
+
+     if($t eq '-n')   {  $config{'ns'}=shift @args; next; }
+     if($t eq '-fn')   {  $config{'nsa'}=shift @args; next; }
+     if($t eq '-g')    {  $config{'pragma'}=1;   next;   }
+     if($t eq '-s')   {  $config{'style'}=shift @args; next; }
+     if($t eq '-sh')   {  $config{'sh'}=shift @args; next; }
+     if($t eq '-sc')   {  $config{'sc'}=shift @args; next; }
+     if($t eq '-ee')   {  $config{'ee'}=1; next; }
+#     if($t eq '-a')   {  $config{'abs'}=1; next; }
+     if($t eq '-m')   {   $config{'mk'}=shift @args; next; }
+
+     die 'unknown in command line '.$t;
+   }
+}
+
+args_parse();
+
+die 'no input' if not exists $config{'idl'};
+die sprintf "cant open input idl %s",$config{'idl'} if not -e $config{'idl'};
+
+die 'path not defined' if $config{'lib'} eq '';
+
+$config{'base'}='rpc2' if not exists $config{'base'};
+$config{'gen'}='include' if not exists $config{'gen'};
+$config{'pimpl'}='src' if not exists $config{'pimpl'};
+
+
+my $parser=new idlgen;
+
+my $list=$parser->Run($config{'idl'});
+
+# .o files dependencies
+my $mkdep=[];
+# all files with path
+my $mklist=[];
+
+my %data;
+my %global;
+my %funcs;
+my %wire;
+
+foreach(@$list)
+{
+  die sprintf "duplicate interface name %s in idl",$_->{'name'} if exists $data{$_->{'name'}};
+  my $p=$_;
+  $data{$p->{'name'}}={};
+  
+  if(exists $p->{'defs'})
+  {
+    foreach(@{$p->{'defs'}})
+    {
+      printf STDERR "warning, %s redefined to %s in interface %s\n",$_->[0],$_->[1],$p->{'name'}  if exists $data{$p->{'name'}}->{$_->[0]};
+      $data{$p->{'name'}}->{$_->[0]}=$_->[1];
+    }
+  }
+  else
+  {
+    $data{$p->{'name'}}->{'version'}='not defined';
+    $data{$p->{'name'}}->{'prefix'}='';
+  }
+  $data{$p->{'name'}}->{'funcs'}={};
+  
+  if(not exists $p->{'data'} or @{$p->{'data'}}==0)
+  {
+     printf STDERR "warning, no methods defined in interface %s\n",$p->{'name'};
+     next;
+  }
+  foreach(@{$p->{'data'}})
+  {
+    my $t=$_;
+    shift @$t;
+    die sprintf "method %s defined twice at interface %s",$t->[1],$p->{'name'} if exists $data{$p->{'name'}}->{'funcs'}->{$t->[1]};
+    my $fqn=sprintf "%s%s",$data{$p->{'name'}}->{'prefix'},$t->[1];
+    printf STDERR "methods %s and %s in interfaces %s and %s have same wire name %s",$t->[1],$wire{$fqn}->[1],$p->{'name'},$wire{$fqn}->[0],$fqn
+              if exists $wire{$fqn};
+    $wire{$fqn}=[$p->{'name'},$t->[1]];
+    $data{$p->{'name'}}->{'funcs'}->{$t->[1]}=$t;
+  }
+}
+
+sub interface;
+
+
+my ($path,$pimpl,$lib,$p2i,$i2p,$i2l,$i2a,$p2a,$p2p,$p2m);
+
+my ($ns,$nsa,$timemod,$pragma);
+
+my $sh=exists $config{'sh'} ? $config{'sh'} : 'hh';
+my $sc=exists $config{'sc'} ? $config{'sc'} : 'cc';
+my $timestamp=gmtime(time());
+
+$pragma = sprintf "#pragma GCC dependency \"%s\"\n\n",Cwd::realpath($config{'idl'}) if exists $config{'pragma'};
+
+{
+  my @a=stat $config{'idl'};
+  $timemod=gmtime(@a[9]);
+  undef @a;
+}
+
+sub getfort
+{
+  my $x=`fortune -s`;
+
+  $x=~s/\*\//* \//gs;
+  $x=~s/\/\*/\/ \*/gs;
+  return $x eq '' ? '' : sprintf "/*\n%s*/\n\n",$x;
+}
+
+my $dd=`ddate`;
+$dd=~s/\n/ /gs;
+
+my $lib=$config{'lib'};
+$lib ='lib' if $lib eq '';
+$lib=~s/\/$//;
+$lib.='/';
+
+my $base=$config{'base'};
+$base=~s/\/\//\//;
+$base=~s/\/$//;
+$base.='/';
+
+$p2m=sprintf "%s/%s/",$config{'base'},$config{'gen'};
+$p2m=~s/\/\//\//;$p2m=~s/\/$//;$p2m.='/';
+
+my %json=(
+  'f' => 'Double',
+  'i' => 'Int',
+  'u' => 'Int',
+  'b' => 'Bool',
+  's' => 'String'
+);
+
+my %json2=(
+  'f' => 'Numeric',
+  'i' => 'Int',
+  'u' => 'Int',
+  'b' => 'Bool',
+  's' => 'String'
+);
+
+my @gclasses;
+my @gnclasses;
+
+foreach(sort keys %data)
+{
+  my $p=$_;
+  undef %funcs;
+  undef %global;
+  %funcs=%{$data{$p}->{'funcs'}};
+  $global{'interface'}=$p;
+  $global{'version'}=$data{$p}->{'version'};
+  $global{'prefix'}=$data{$p}->{'prefix'};
+
+  my $t=$p;
+  $t=~s/::/\//g;
+
+  $path=sprintf "%s/%s/%s",$config{'base'},$config{'gen'},$t;
+  $path=~s/\/\//\//;
+  $path=~s/\/$//;
+  $path.='/';
+
+  $pimpl=sprintf "%s/%s/%s",$config{'base'},$config{'pimpl'},$t;
+  $pimpl=~s/\/\//\//;
+  $pimpl=~s/\/$//;
+  $pimpl.='/';
+
+=pod=
+  $p2i=File::Spec->abs2rel($path,$pimpl);
+  $i2p=File::Spec->abs2rel($pimpl,$path);
+  $i2l=File::Spec->abs2rel($lib,$path);
+  
+#  $p2m=File::Spec->abs2rel(sprintf "%s/%s",$config{'base'},$config{'gen'},$pimpl) if not exists $config{'abs'};
+
+  $i2a=File::Spec->abs2rel($config{'alrpc'},$path);
+  $p2a=File::Spec->abs2rel($config{'alrpc'},$pimpl);
+  $p2p=File::Spec->abs2rel($config{'aimpl'},$pimpl);
+
+  $p2i=$path if exists $config{'abs'};
+  $i2p=$pimpl if exists $config{'abs'};
+  $i2l=$lib if exists $config{'abs'};
+
+  $i2a=$config{'alrpc'} if exists $config{'abs'};
+  $p2a=$config{'alrpc'} if exists $config{'abs'};
+  $p2p=$config{'aimpl'} if exists $config{'abs'};
+=cut=
+  
+#  $p2m=File::Spec->abs2rel(sprintf "%s/%s",$config{'base'},$config{'gen'},$pimpl) if not exists $config{'abs'};
+
+  $p2i=$path;
+  $i2p=$pimpl;
+  $i2l=$lib;
+  $i2a=$config{'alrpc'};
+  $p2a=$config{'alrpc'};
+  $p2p=$config{'aimpl'};
+
+
+  $p2i=~s/\/$//;$p2i=~s/\/\//\//;
+  $i2p=~s/\/$//;$i2p=~s/\/\//\//;
+  $i2l=~s/\/$//;$i2l=~s/\/\//\//;
+  $i2a=~s/\/$//;$i2a=~s/\/\//\//;
+  $p2a=~s/\/$//;$p2a=~s/\/\//\//;
+  $p2p=~s/\/$//;$p2p=~s/\/\//\//;
+  $p2m=~s/\/$//;$p2m=~s/\/\//\//;
+
+  interface($p);
+}
+
+
+
+# code let's rock!
+# generation block!
+# :L
+
+
+
+sub mkpath
+{
+  my $x=shift;
+  my $s=shift;
+#  $x=$path.'/'.$x.'.'.$s;
+  $x.='.'.$s;
+  push @$mklist,$x;
+  push @$mkdep,$x if $s eq $sc;
+  return '>'.$x if not exists $config{'style'};
+  return sprintf "| %s > %s",$config{'style'},$x;
+}
+
+sub printhat
+{
+  my $n=shift;
+  my $p=shift;
+  return sprintf "#ifndef %s%s_INCLUDE\n#define %s%s_INCLUDE\n\n%s",$p,uc $n,$p,uc $n,$pragma;
+}
+
+sub check
+{
+  my $z=$_;
+#    die Dumper($z);
+#    my $isarr= ref $z->[4];
+#    my $isstr= $z->[0] eq 's';
+#    my $isint= not ref $z->[0];
+#    my $isopt= $z->[2] eq '*';
+
+  return '' if not ref $z->[0] and not ref $z->[4] and not defined $z->[1]->[0] and not defined $z->[1]->[1];
+  return '' if not ref $z->[0] and ref $z->[4] and not defined $z->[4]->[0] and not defined $z->[4]->[1]
+           and not defined $z->[1]->[0] and not defined $z->[1]->[1];
+
+
+  my $n=$z->[3];
+  my $n2=$n.( $z->[2] eq '*' ? '[0]' : '');
+  my $n3=$n2.(ref $z->[4] ? '[i]' : '');
+  my $tp= ref $z->[0] ? $z->[0]->[0] : $z->[0];
+  my $c;
+
+  if(ref $z->[1] and (defined $z->[1]->[0] or defined $z->[1]->[1]))
+  {
+     my $c2= $z->[0] eq 's' ? '.length()' : '';
+     if(defined $z->[1]->[0] and defined $z->[1]->[1])
+     {
+       $c=sprintf "s.#iname#%s<%s || s.#iname#%s>%s",$c2,$z->[1]->[0],$c2,$z->[1]->[1];
+     }
+     else
+     {
+       $c=sprintf "s.#iname#%s<%s",$c2,$z->[1]->[0] if defined $z->[1]->[0];
+       $c=sprintf "s.#iname#%s>%s",$c2,$z->[1]->[1] if defined $z->[1]->[1];
+     }
+  }
+
+  $c='!#type#Marshaller::checkIntegrityConst(s.#iname#)' if ref $z->[0];
+
+  if($c ne '' or ref $z->[4])
+  {
+    if(ref $z->[4])
+    {
+      my $q;
+      $q="  if(s.#name#)\n" if $z->[2] eq '*';
+      $q.="  {\n    unsigned int i=s.#pname#.size();\n";
+      $q.=sprintf "    if(i<%s)  return false;\n",$z->[4]->[0] if defined $z->[4]->[0];
+      $q.=sprintf "    if(i>%s)  return false;\n",$z->[4]->[1] if defined $z->[4]->[1];
+      if(defined $z->[1]->[0] or defined $z->[1]->[1])
+      {
+        $q.="    while(i--)\n    {\n";
+        $q.="      if($c)  return false;\n";
+        $q.="    }\n";
+      }
+      $q.="  }\n";
+      $c=$q;
+    }
+    else
+    {
+      $c= $z->[2] eq '*' ? sprintf "  if(s.#name# && (%s))  return false;\n",$c
+                         : sprintf "  if(%s)  return false;\n",$c;
+    }
+  }
+
+  $c=~s/#pname#/$n2/gs;
+  $c=~s/#iname#/$n3/gs;
+  $c=~s/#name#/$n/gs;
+  my $tp2=ref $z->[0] ? $nsa.'::'.$tp :$tp;
+  $c=~s/#type#/$tp2/gs;
+
+  return $c ? "$c\n" : '';
+}
+
+
+sub interface
+{
+
+  my $iface=shift;
+
+#print "global settings:\n",Dumper(\%global);
+#print "methods:\n",Dumper(\%funcs);
+
+my $using0;
+
+$ns=$config{'ns'};
+$nsa=$config{'nsa'};
+
+
+`mkdir -p $path`;
+`mkdir -p $pimpl`;
+
+
+my $hat=sprintf "\n/*\n  interface\t%s\n  version\t%s\n  generated at\t%s\n  source stamp\t%s\n  author\tRC\n*/\n\n",
+        $global{'interface'},$global{'version'},$timestamp,$timemod;
+
+$hat= sprintf "\n// %s%s",$dd,$hat if exists $config{'ee'} and $dd ne '';
+
+
+my @nss=split('::',$global{'interface'});
+unshift @nss,split('::',$ns) if $ns ne '';
+
+my $nsbra='';
+my $nsket='';
+
+if(@nss)
+{
+  my $i='';
+  foreach(@nss)
+  {
+    $nsbra.=sprintf "%snamespace %s\n%s{\n",$i,$_,$i;
+    $nsket=sprintf "%s}\n%s",$i,$nsket;
+    $i.='  ';
+  }
+}
+
+#my $ind= @nss ?  ('  ' x scalar @nss) : '';
+my $ind= @nss ?  '  ' x @nss : '';
+my $using; #="using namespace NsRPC2Communication;\n";
+#$using.=sprintf "using namespace %s;\n",$nsa if $nsa ne '';
+$using.=sprintf "using namespace %s;\n",join('::',@nss) if @nss;
+
+my $using2; #="using namespace NsRPC2Communication;\n";
+$using2.=sprintf "using namespace %s;\n",join('::',@nss) if @nss;
+
+my $nsap='';
+$nsap=$nsa.'::' if $nsa;
+
+my $prefix=@nss ? uc join('_',@nss) : '';
+$prefix.='_' if @nss;
+
+
+my @classes;
+foreach(sort keys %funcs)
+{
+  push @classes,$_;
+  push @classes,$_."Response" if $funcs{$_}->[0]==1;
+  my $g=[];
+  @$g=split('::',$iface);
+  push @gclasses,[$iface,$_,$g,$global{'prefix'}];
+  push @gclasses,[$iface,$_."Response",$g,$global{'prefix'}] if $funcs{$_}->[0]==1;
+}
+
+open(FO,mkpath($path.'RPC2',$sh)) or die;
+print FO printhat('RPC2',$prefix);
+#printf FO "#ifndef %s%s_INCLUDE\n#define %sRPC2_INCLUDE\n\n%s",$prefix,$prefix,$pragma;
+print FO "#include <string>\n#include <json/json.h>\n\n";
+printf FO "#include \"%s%s.%s\"\n",$path,$_,$sh foreach @classes;
+printf FO "\n#include \"%s/Marshaller.%s\"\n\n",$p2m,$sh;
+
+print FO $hat;
+print FO "\n#endif\n";
+close FO;
+
+my @nclasses;
+foreach(sort keys %funcs)
+{
+  my $d=$_;
+  if($funcs{$d}->[0]==0)
+  {
+    my $r=[$d,$d,0,0,0,[]];  # method name, class name, type, hasstr,hasarr, list of external entities from SmartDeviceLink
+
+    foreach(@{$funcs{$d}->[2]})
+    {
+      $r->[3]=1 if $_->[0] eq 's';
+      $r->[4]=1 if ref $_->[4];
+      push @{$r->[5]},$_->[0]->[0] if ref $_->[0];
+    }
+    push @nclasses,$r;
+    my $r2=[$iface];
+    push @$r2,@$r;
+    push @gnclasses,$r2;
+    next;
+  }
+  my $r=[$d,$d,1,0,0,[]];
+  my $r2=[$iface];
+  foreach(@{$funcs{$d}->[2]})
+  {
+    $r->[3]=1 if $_->[0] eq 's';
+    $r->[4]=1 if ref $_->[4];
+    push @{$r->[5]},$_->[0]->[0] if ref $_->[0];
+  }
+  push @$r2,@$r;
+  push @gnclasses,$r2;
+  push @nclasses,$r;
+
+  $r=[$d,$d.'Response',2,0,0,[]];
+  $r2=[$iface];
+ 
+  foreach(@{$funcs{$d}->[3]})
+  {
+    $r->[3]=1 if $_->[0] eq 's';
+    $r->[4]=1 if ref $_->[4];
+    push @{$r->[5]},$_->[0]->[0] if ref $_->[0];
+  }
+  push @$r2,@$r;
+  push @gnclasses,$r2;
+  push @nclasses,$r;
+}
+
+my @tp=qw{RPC2Notification RPC2Request RPC2Response};
+
+my %tps= 
+(
+  'b' => 'bool',
+  'i' => 'int',
+  'u' => 'unsigned int',
+  's' => 'std::string',
+  'f' => 'float'
+);
+
+my $useext=0;
+
+# !!! check moved
+
+foreach(@nclasses)
+{
+  my $f=$_;
+  my $n=$f->[1];
+  my $base=@tp[$f->[2]];
+  my @args;
+  {
+    my $n=2;
+    $n=3 if $f->[2]==2;
+    @args=@{$funcs{$f->[0]}->[$n]};
+  }
+
+  my $mname=sprintf 'METHOD_%s__%s',uc join('_',split('::',$iface)),uc $n;
+
+  open(FO,mkpath($path.$n,$sh)) or die;
+  print FO printhat ($n,$prefix);
+# check vector/string
+  print FO "#include <string>\n" if $f->[3]==1;
+  print FO "#include <vector>\n" if $f->[4]==1;
+
+  printf FO qq!#include "%s/%s.h"\n!,$i2l,$base;
+
+  print FO "\n";
+# check foreign classes
+  printf FO qq!#include "%s/%s.%s"\n!,$i2a,$_,$sh foreach @{$f->[5]};
+
+  print FO $hat;
+  print FO $nsbra;
+
+  my $t=qq!\nclass #name# : public ::NsRPC2Communication::#base#\n{\npublic:\n\n  #name#(const #name#& c);\n  #name#(void);\n\n!.
+        qq!  #name#& operator =(const #name#&);\n\n  virtual ~#name#(void);\n\n  bool checkIntegrity(void);\n!;
+
+
+  $t=~s/\n/\n$ind/gs;
+  $t=~s/#name#/$n/gs;
+  $t=~s/#base#/$base/gs;
+  
+  print FO $t."\n";
+
+#  gettes/setters
+
+  my $g;
+  my $s;
+  my $p;
+
+  foreach(@args)
+  {
+    my $z=$_;
+#    die Dumper($z);
+#    my $isarr= ref $z->[4];
+#    my $isstr= $z->[0] eq 's';
+#    my $isint= not ref $z->[0];
+#    my $isopt= $z->[2] eq '*';
+
+    my $nm=$z->[3];
+    my $tp= ref $z->[0] ? $z->[0]->[0] : exists $tps{$z->[0]} ? $tps{$z->[0]} : $z->[0];
+    $tp=$nsa.'::'.$tp if ref $z->[0];
+#    $tp='::'.$tp if ref $z->[0];
+    $tp=sprintf("std::vector< %s>",$tp) if ref $z->[4];
+    
+    my $r;
+    my $u;
+# constraints in comments
+
+    my $cmt;
+    {
+      my $l;
+      my $r;
+      my $m;
+      $l=sprintf "%s <= ",$z->[1]->[0] if ref $z->[1] and defined $z->[1]->[0];
+      $r=sprintf " <= %s",$z->[1]->[1] if ref $z->[1] and defined $z->[1]->[1];
+
+      if($l or $r)
+      {
+        $cmt=$nm;
+        $cmt.='[]' if ref $z->[4];
+        $cmt=$l.$cmt if $l;
+        $cmt.=$r if $r;
+      }
+
+      if(ref $z->[4] and defined $z->[4]->[0] and defined $z->[4]->[1]) # array
+      {
+         $cmt.=" ; " if $cmt;
+         $cmt.=sprintf "%s <= ",$z->[4]->[0] if defined $z->[4]->[0];
+         $cmt.="size";
+         $cmt.=sprintf " <= %s",$z->[4]->[1] if defined $z->[4]->[1];
+      }
+    }
+    $cmt=sprintf "/// %s\n",$cmt if $cmt;
+    
+#    printf FO Dumper($z);
+     $u.=$cmt;
+    if($z->[2] eq '*')
+    {
+      $r=sprintf "  %sconst %s* get_%s(void);\n",$ind,$tp,$nm;
+
+      $u.=sprintf "  %sbool set_%s(const %s& %s);\n\n",$ind,$nm,$tp,$nm;
+      $u.=sprintf "  %svoid reset_%s(void);\n\n",$ind,$nm;
+      $p.=sprintf "  %s%s* %s;\n",$ind,$tp,$nm;
+    }
+    elsif((not ref $z->[0]) and $z->[0] ne 's' and not ref $z->[4])
+    {
+      $r=sprintf "  %s%s get_%s(void);\n\n",$ind,$tp,$nm;
+      $u.=sprintf "  %sbool set_%s(%s %s);\n\n",$ind,$nm,$tp,$nm;
+      $p.=sprintf "  %s%s %s;\n",$ind,$tp,$nm;
+    }
+    else
+    {
+      $r=sprintf "  %sconst %s& get_%s(void);\n\n",$ind,$tp,$nm;
+      $u.=sprintf "  %sbool set_%s(const %s& %s);\n\n",$ind,$nm,$tp,$nm;
+      $p.=sprintf "  %s%s %s;\n",$ind,$tp,$nm;
+    }
+    
+=pod=
+reserve space for future bug fixing
+:-)
+=cut=
+    $g.=$r;
+    $s.=$u;
+  }
+  
+  print FO "// getters\n" if $g ne '';
+  print FO $g;
+  print FO "\n// setters\n" if $s ne '';
+  print FO $s;
+  
+  printf FO qq!\n%sprivate:\n\n%s  friend class %sMarshaller;\n\n!,$ind,$ind,$n;
+
+  print FO $p;
+
+  
+  printf FO "\n%s};\n",$ind;
+  
+  print FO $nsket;
+  print FO "\n#endif\n";
+  close FO;
+
+# implementations, ooh
+
+  open(FO,mkpath($pimpl.$n.'Marshaller',$sh)) or die;
+  print FO printhat($n.'Marshaller',$prefix);
+
+  print FO "#include <string>\n#include <json/json.h>\n\n";
+  printf FO qq!#include "%s/%s.%s"\n!,$p2i,$n,$sh;
+
+  print FO "\n".$nsbra;
+  my $z=qq!\nstruct #Marshaller\n{\n  static bool checkIntegrity(#& e);\n!.
+qq!  static bool checkIntegrityConst(const #& e);\n\n  static bool fromString(const std::string& s,#& e);\n!.
+qq!  static const std::string toString(const #& e);\n\n  static bool fromJSON(const Json::Value& s,#& e);\n!.
+qq!  static Json::Value toJSON(const #& e);!;
+
+  $z=~s/\n/\n$ind/gs;
+  $z=~s/#/$n/gs;
+  
+  print FO $z;
+
+  printf FO "\n%s};\n",$ind;
+  
+  print FO $nsket;
+  print FO "\n#endif\n";
+  close FO;
+
+# *Marshaller.cc
+
+  open(FO,mkpath($pimpl.$n.'Marshaller',$sc)) or die;
+  print FO $pragma;
+
+  printf FO qq!#include "%s/%s.%s"\n!,$p2i,$n,$sh;
+
+  printf FO qq!#include "%s/%sMarshaller.%s"\n!,$p2p,$_,$sh foreach @{$f->[5]};
+  printf FO qq!#include "%s/ResultMarshaller.%s"\n!,$p2p,$sh;
+#  printf FO qq!#include "%s/Marshaller.%s"\n!,$i2a,$sh;
+
+  printf FO qq!#include "%s%sMarshaller.%s"\n!,$pimpl,$n,$sh;
+  print FO $hat;
+  
+  {
+    my $o=getfort();
+    print FO $o if exists $config{'ee'} and $o ne '';
+  }
+  
+  
+  my $jf='params';
+  $jf='result' if $f->[2]==2;
+  
+  {
+    my $t='';
+#    $t=1 if $f->[2] == 2;
+    foreach(@args)
+    {
+      $t=1 if ref $_->[0];
+    }  
+    $using0= $t ? $using : $using2;
+    $useext=1 if $t==1;
+  }
+#  print FO $using0;
+  print FO $using;
+  
+  $z=qq~\nbool #Marshaller::checkIntegrity(#& s)\n{\n  return checkIntegrityConst(s);\n}\n\n\nbool #Marshaller::fromString(const std::string& s,#& e)\n~.
+     qq~{\n  try\n  {\n    Json::Reader reader;\n    Json::Value json;\n    if(!reader.parse(s,json,false))  return false;\n~.
+     qq~    if(!fromJSON(json,e))  return false;\n  }\n  catch(...)\n  {\n    return false;\n  }\n  return true;\n}\n\n\n~.
+     qq~const std::string #Marshaller::toString(const #& e)\n{\n  Json::FastWriter writer;\n  return checkIntegrityConst(e) ? writer.write(toJSON(e)) : ~.
+     qq~"";\n}\n\n\nbool #Marshaller::checkIntegrityConst(const #& s)\n{\n~;
+
+  $z=~s/#/$n/gs;
+  print FO $z;
+
+# there are 12 cases. try to pack them, MDL rulezzz!
+  print FO check($_) foreach @args;
+
+  print FO qq!  return true;\n}\n\n\n!;
+  
+  printf FO qq~Json::Value %sMarshaller::toJSON(const %s& e)\n{\n  Json::Value json(Json::objectValue);\n~.
+qq~  if(!checkIntegrityConst(e))\n    return Json::Value(Json::nullValue);\n\n~,$n,$n;
+
+  my $pr;
+  $pr=qq~  json["params"]=Json::Value(Json::objectValue);\n~ if @args;
+
+  printf FO qq~  json["jsonrpc"]=Json::Value("2.0");\n  json["method"]=Json::Value("%s%s");\n%s\n~,
+            $global{'prefix'},$n,$pr if $f->[2] == 0;
+  printf FO qq~  json["jsonrpc"]=Json::Value("2.0");\n  json["method"]=Json::Value("%s%s");\n\n~.
+qq~  json["id"]=Json::Value(e.getId());\n%s~,$global{'prefix'},$n,$pr if $f->[2] == 1;
+  printf FO qq~  json["jsonrpc"]=Json::Value("2.0");\n  json["id"]=Json::Value(e.getId());\n  json["result"]=Json::Value(Json::objectValue);\n~.
+qq~  ~.$nsap.qq~Result r(static_cast<~.$nsap.qq~Result::ResultInternal>(e.getResult()));\n  json["result"]["resultCode"]=~.$nsap.qq~ResultMarshaller::toJSON(r);\n~.
+qq~  json["result"]["method"]=Json::Value("%s%s");\n\n~,$global{'prefix'},$n if $f->[2] == 2;
+
+  foreach(@args)
+  {
+    my $z=$_;
+    my $q; $q='[0]' if $z->[2] eq '*';
+    printf FO "  if(e.%s)\n",$z->[3] if $z->[2] eq '*';
+
+    my $u='Json::Value';
+    $u=sprintf '%s::%sMarshaller::toJSON',$nsa,$z->[0]->[0] if ref $z->[0];
+   
+   if(ref $z->[4])
+   {
+     printf FO qq~  {\n    unsigned int i=e.%s%s.size();\n    Json::Value j=Json::Value(Json::arrayValue);\n~.
+qq~    j.resize(i);\n    while(i--)\n      j[i]=%s(e.%s%s[i]);\n\n    json["%s"]["%s"]=j;\n  }\n~,$z->[3],$q,$u,$z->[3],$q,$jf,$z->[3];
+
+   }
+   else
+   {
+     print FO '  ' if $q;
+     printf FO qq~  json["%s"]["%s"]=%s(e.%s%s);;\n~,$jf,$z->[3],$u,$z->[3],$q;
+   }
+    
+  }
+  
+  print FO "  return json;\n}\n\n\n";
+  
+  printf FO qq~bool %sMarshaller::fromJSON(const Json::Value& json,%s& c)\n{\n  try\n  {\n    if(!json.isObject())  return false;\n~.
+qq~    if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;\n~,$n,$n;
+
+
+  if($f->[2]==0)	#notify
+  {
+    printf FO qq~    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("%s%s"))  return false;\n~,$global{'prefix'},$n;
+    print FO
+qq~    if(!json.isMember("params")) return false;\n\n    Json::Value js=json["params"];\n    if(!js.isObject())  return false;\n\n~ if @args;
+
+  }
+  elsif($f->[2]==1)	#request
+  {
+    printf FO qq~    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("%s%s"))  return false;\n~.
+qq~    if(!json.isMember("id") || !json["id"].isInt()) return false;\n    c.setId(json["id"].asInt());\n\n~,$global{'prefix'},$n;
+    print FO
+qq~    if(!json.isMember("params")) return false;\n\n    Json::Value js=json["params"];\n    if(!js.isObject())  return false;\n~ if @args;
+
+  }
+  elsif($f->[2]==2)	#response
+  {
+    printf FO qq~    if(!json.isMember("id") || !json["id"].isInt()) return false;\n    c.setId(json["id"].asInt());\n\n~.
+qq~    if(!json.isMember("result")) return false;\n\n    Json::Value js=json["result"];\n~.
+qq~    if(!js.isObject())  return false;\n\n    ~.$nsap.qq~Result r;\n    if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;\n~.
+qq~    if(!js.isMember("method") || !js["method"].isString())  return false;\n    if(js["method"].asString().compare("%s%s")) return false;\n\n~.
+qq~    if(!~.$nsap.qq~ResultMarshaller::fromJSON(js["resultCode"],r))  return false;\n    c.setResult(r.get());\n~,$global{'prefix'},$n;
+
+  }
+  else
+  {
+    die 'something wrong in our kingdom';
+  }
+# deep deep tree :-)
+
+  foreach(@args)
+  {
+    my $z=$_;
+    my $l;
+
+    my $ct;
+    if(ref $z->[1] and (defined $z->[1]->[0] or defined $z->[1]->[1]))
+    {
+      my $c2= $z->[0] eq 's' ? '.length()' : '';
+     if(defined $z->[1]->[0] and defined $z->[1]->[1])
+      {
+        $ct=sprintf "#aname#%s<%s || #aname#%s>%s",$c2,$z->[1]->[0],$c2,$z->[1]->[1];
+      }
+     else
+     {
+       $ct=sprintf "#aname#%s<%s",$c2,$z->[1]->[0] if defined $z->[1]->[0];
+       $ct=sprintf "#aname#%s>%s",$c2,$z->[1]->[1] if defined $z->[1]->[1];
+     }
+     $ct=sprintf "if(%s)  return false;\n",$ct if $ct;
+     my $f=$z->[3];
+     $f.='[0]' if $z->[2] eq '*';
+     if(ref $z->[4])
+     {
+       $f.='[i]';
+     }
+     $ct=~s/#aname#/c.$f/gs if $ct;
+    }
+
+
+     if(ref $z->[4])			#array
+     {
+       my $ca;
+
+       $ca.=sprintf "      if(i<%s)  return false;\n",$z->[4]->[0] if defined $z->[4]->[0];
+       $ca.=sprintf "      if(i>%s)  return false;\n",$z->[4]->[1] if defined $z->[4]->[1];
+ 
+       if($z->[2] eq '*')		#array optional
+       {
+         if(ref $z->[0])		#array optional not simple type
+         {
+$l=qq~    if(c.#name#)  delete c.#name#;\n    c.#name#=0;\n~.
+   qq~    if(js.isMember("#name#"))\n    {\n      if(!js["#name#"].isArray()) return false;\n~.
+   qq~      unsigned int i=js["#name#"].size();\n~.$ca.
+   qq~\n      c.#name#=new std::vector<#type#>();\n~.
+   qq~      c.#name#->resize(js["#name#"].size());\n\n      while(i--)\n~.
+   qq~        if(!#type#Marshaller::fromJSON(js["#name#"][i],c.#name#[0][i]))  return false;\n    }\n\n~;
+
+         }
+         else				#array optional simple type
+         {
+$l=sprintf
+   qq~    if(c.#name#)  delete c.#name#;\n    c.#name#=0;\n~.
+   qq~    if(js.isMember("#name#"))\n    {\n      if(!js["#name#"].isArray()) return false;\n~.
+   qq~      unsigned int i=js["#name#"].size();\n~.$ca."\n".
+   qq~      c.#name#=new std::vector<#type#>();\n~.
+   qq~      c.#name#->resize(js["#name#"].size());\n\n      while(i--)\n      {\n~.
+   qq~        if(!js["#name#"][i].is%s())\n          return false;\n\n        c.#name#[0][i]=js["#name#"][i].as%s();\n        ~.$ct.
+   qq~      }\n    }\n\n~,$json2{$z->[0]},$json{$z->[0]};
+         }
+       }
+       else				#array not optional
+       {
+         if(ref $z->[0])		#array not optional not simple type
+         {
+
+#$l=qq~    if(!js.isMember("#name#") || !js["#name#"].isArray())  return false;\n~.
+#   qq~    {\n      unsigned int i=js["#name#"].size();\n~.$ca.qq~      std::vector<#type#> z(i);\n      while(i--)\n~.
+#   qq~        if(!#type#Marshaller::fromJSON(js["#name#"][i],c.#name#[i]))  return false;\n      c.#name#=z;\n    }\n~;
+
+$l=qq~    if(!js.isMember("#name#") || !js["#name#"].isArray())  return false;\n~.
+   qq~    {\n      unsigned int i=js["#name#"].size();\n~.$ca.qq~      c.#name#.resize(i);\n      while(i--)\n      {\n        #type# t;\n~.
+   qq~        if(!#type#Marshaller::fromJSON(js["#name#"][i],t))\n          return false;\n         c.#name#[i]=t;\n      }\n    }\n~;
+
+         }
+         else				#array not optional simple type
+         {
+$l=sprintf
+   qq~    if(!js.isMember("#name#") || !js["#name#"].isArray())\n      return false;\n    {\n~.
+   qq~      c.#name#.clear();\n      unsigned int i=js["#name#"].size();\n~.$ca.
+   qq~      c.#name#.resize(i);\n      while(i--)\n~.
+   qq~      {\n        if(!js["#name#"][i].is%s())\n          return false;\n        c.#name#[i]=js["#name#"][i].as%s();\n        ~.$ct.
+   qq~\n      }\n    }\n\n~,$json2{$z->[0]},$json{$z->[0]};
+
+
+         }
+       }
+     }
+     else				# not array
+     {
+       if($z->[2] eq '*')		#not array optional
+       {
+         if(ref $z->[0])		#not array optional not simple type
+         {
+$l=qq~    if(c.#name#)  delete c.#name#;\n    c.#name#=0;\n~.
+   qq~    if(js.isMember("#name#"))\n    {\n      c.#name#=new #type#();\n~.
+   qq~      if(!#type#Marshaller::fromJSON(js["#name#"],c.#name#[0]))  return false;\n    }\n~;
+         }
+         else				#not array optional simple type
+         {
+$l=sprintf
+   qq~    if(c.#name#)  delete c.#name#;\n    c.#name#=0;\n~.
+   qq~    if(js.isMember("#name#"))\n    {\n      if(!js["#name#"].is%s())  return false;\n      c.#name#=new #type#();\n~.
+   qq~      c.#name#[0]=js["#name#"].as%s();\n      ~.$ct."\n    }\n",
+          $json2{$z->[0]},$json{$z->[0]};
+         }
+       }
+       else				#not array not optional
+       {
+         if(ref $z->[0])		#not array not optional not simple type
+         {
+$l.=qq~    if(!js.isMember("#name#") || !#type#Marshaller::fromJSON(js["#name#"],c.#name#))  return false;\n~;
+         }
+         else				#not array not optional simple type
+         {
+$l=sprintf
+   qq~    if(!js.isMember("#name#") || !js["#name#"].is%s())  return false;\n~.
+   qq~    c.#name#=js["#name#"].as%s();\n    ~.$ct,
+          $json2{$z->[0]},$json{$z->[0]};
+         }
+       }
+     }
+     my $n=$z->[3];
+     my $t=$tps{$z->[0]};
+     $t=$nsa.'::'.$z->[0]->[0] if ref $z->[0];
+     $l=~s/#name#/$n/gs;
+     $l=~s/#type#/$t/gs;
+     $l.="\n";
+     print FO $l; 
+  }
+  print FO qq~  }\n  catch(...)\n  {\n    return false;\n  }\n  return checkIntegrity(c);\n}\n~;
+
+  close FO;
+
+# *.cc
+
+# oops, those getters...
+# many dumb works only for stupid C++ common rules...
+# i think i should kill Stroustrup
+
+  open(FO,mkpath($pimpl.$n,$sc)) or die;
+  print FO $pragma;
+
+  printf FO qq!#include "%s/%s.%s"\n!,$p2i,$n,$sh;
+  printf FO qq!#include "%s/Marshaller.%s"\n!,$p2m,$sh;
+  print FO $hat;
+
+  {
+    my $o=getfort();
+    print FO $o if exists $config{'ee'} and $o ne '';
+  }
+  
+
+  print FO $using0;
+  
+  printf FO "\n\n%s& %s::operator =(const %s& c)\n{\n",$n,$n,$n;
+  
+  foreach (@args)
+  {
+    my $z=$_;
+    my $l;
+    if($z->[2] eq '*')
+    {
+      $l=sprintf "  if(%s)  delete %s;\n",$z->[3],$z->[3];
+      if(ref $z->[4])
+      {
+        $l.=sprintf "  %s= c.%s ? new std::vector<%s>(c.%s[0]) : 0;\n",$z->[3],$z->[3],
+                      (ref $z->[0] ? $nsa.'::'.$z->[0]->[0] : $tps{$z->[0]}),$z->[3];
+      }
+      else
+      {
+        $l.=sprintf "  %s= c.%s ? new %s(c.%s[0]) : 0;\n",$z->[3],$z->[3],
+                      (ref $z->[0] ? $nsa.'::'.$z->[0]->[0] : $tps{$z->[0]}),$z->[3];
+      }
+    }
+    else
+    {
+      $l=sprintf "  %s=c.%s;\n",$z->[3],$z->[3];
+    }
+    print FO $l;
+  }
+  
+  printf FO "  return *this;\n}\n\n\n%s::~%s(void)\n{\n",$n,$n;
+
+  foreach(@args)
+  {
+    printf FO "  if(%s)  delete %s;\n",$_->[3],$_->[3] if $_->[2] eq '*';
+  }
+  
+  print FO "}\n\n\n";
+
+# two constructors
+#  my $l1=sprintf "%s::%s(void) : \n  %s(Marshaller::METHOD_%s)",$n,$n,@tp[$f->[2]],uc $n;
+#  my $l2=sprintf "%s::%s(const %s& c) : %s(Marshaller::METHOD_%s",$n,$n,$n,@tp[$f->[2]],uc $n;
+  my $l1=sprintf "%s::%s(void) : \n  %s(Marshaller::%s)",$n,$n,@tp[$f->[2]],$mname;
+  my $l2=sprintf "%s::%s(const %s& c) : %s(Marshaller::%s",$n,$n,$n,@tp[$f->[2]],$mname;
+
+  foreach(@args)
+  {
+    my $z=$_;
+    $l1.=sprintf ",\n  %s(0)",$z->[3] if $z->[2] eq '*';
+  }
+
+  $l1.="\n{\n}\n\n\n";
+
+  if($f->[2]==0) # notification
+  {
+    $l2.=')';
+  }
+  elsif($f->[2]==1) # request
+  {
+    $l2.=',c.getId())'
+
+  }
+  elsif($f->[2]==2) # response
+  {
+    $l2.=',c.getId(),c.getResult())';
+  }
+  else
+  {
+    die "oops!";
+  }
+
+  $l2.="\n{\n  *this=c;\n}\n\n\n";
+
+  print FO $l1;
+  print FO $l2;
+
+# getters and setters
+
+  my $g;
+  my $s;
+  foreach(@args)
+  {
+    my $z=$_;
+    my $nm=$z->[3];
+    my $tp= ref $z->[0] ? $nsa.'::'.$z->[0]->[0] : exists $tps{$z->[0]} ? $tps{$z->[0]} : $z->[0];
+    $tp=sprintf("std::vector< %s>",$tp) if ref $z->[4];
+    
+    $g=$s='';
+    my $p=sprintf "%s::",$n;
+    if($z->[2] eq '*')
+    {
+      $g=sprintf "const %s* %s::get_%s(void)\n{\n  return %s;\n}\n\n",$tp,$n,$nm,$nm;
+#      $s=sprintf "bool %s::set_%s(%s* %s_)\n{\n  if(%s)  delete %s;\n  %s=%s_;\n  return true;\n}\n\n",$n,$nm,$tp,$nm,$nm,$nm,$nm,$nm;
+
+      $s=sprintf "bool %s::set_%s(const %s& %s_)\n{\n  if(%s)  delete %s;\n  %s=new %s(%s_);\n  return true;\n}\n\n",$n,$nm,$tp,$nm,$nm,$nm,$nm,$tp,$nm;
+      $s.=sprintf "void %s::reset_%s(void)\n{\n  if(%s)  delete %s;\n  %s=0;\n}\n\n",$n,$nm,$nm,$nm,$nm;
+    }
+    elsif((not ref $z->[0]) and $z->[0] ne 's' and not ref $z->[4])
+    {
+      $g=sprintf "%s %s::get_%s(void)\n{\n  return %s;\n}\n\n",$tp,$n,$nm,$nm;
+      $s=sprintf "bool %s::set_%s(%s %s_)\n{\n  %s=%s_;\n  return true;\n}\n\n",$n,$nm,$tp,$nm,$nm,$nm;
+    }
+    else
+    {
+      $g=sprintf "const %s& %s::get_%s(void)\n{\n  return %s;\n}\n\n",$tp,$n,$nm,$nm;
+      $s=sprintf "bool %s::set_%s(const %s& %s_)\n{\n  %s=%s_;\n  return true;\n}\n\n",$n,$nm,$tp,$nm,$nm,$nm;
+    }
+    printf FO $g;
+    printf FO $s;
+  }
+
+  printf FO "bool %s::checkIntegrity(void)\n{\n  return %sMarshaller::checkIntegrity(*this);\n}\n",$n,$n;
+  close FO;
+}
+
+
+}
+
+#################################################################### code common for all interfaces
+
+$ns=$config{'ns'};
+
+my $nsbra='';
+my $nsket='';
+
+my @nss2;
+@nss2=split('::',$ns) if $ns ne '';
+
+if(@nss2)
+{
+  my $i='';
+  foreach(@nss2)
+  {
+    $nsbra.=sprintf "%snamespace %s\n%s{\n",$i,$_,$i;
+    $nsket=sprintf "%s}\n%s",$i,$nsket;
+    $i.='  ';
+  }
+}
+
+my $ind= @nss2 ?  '  ' x @nss2 : '';
+
+
+my $hat=sprintf "\n/*\n  generated at\t%s\n  source stamp\t%s\n  author\tRC\n*/\n\n",$timestamp,$timemod;
+
+$hat= sprintf "\n// %s%s",$dd,$hat if exists $config{'ee'} and $dd ne '';
+
+sub printhat2
+{
+  my $n=shift;
+  my $p;
+  $p.=join('_',@nss2);
+  $p.= $p eq '' ? '' : '_';
+  return sprintf "#ifndef %sMARSHALLER_INCLUDE\n#define %sMARSHALLER_INCLUDE\n\n%s",uc $p,uc $p,$pragma;
+}
+
+$path=sprintf "%s/%s",$config{'base'},$config{'gen'};
+$pimpl=sprintf "%s/%s",$config{'base'},$config{'pimpl'};
+
+$path=~s/\/\//\//g;$path=~s/\/$//g;$path.='/';
+$pimpl=~s/\/\//\//g;$pimpl=~s/\/$//g;$pimpl.='/';
+
+open(FO,mkpath($path.'Marshaller',$sh)) or die;
+print FO printhat2 'Marshaller';
+#printf FO "#ifndef %sRPC2_INCLUDE\n#define %sRPC2_INCLUDE\n\n%s",$prefix,$prefix,$pragma;
+print FO "#include <string>\n#include <json/json.h>\n\n";
+
+my $t=qq!#include "RPC2Error.h"\n#include "RPC2Notification.h"\n#include "RPC2Request.h"\n#include "RPC2Response.h"\n!.
+      qq!\n#include "RPC2ErrorMarshaller.h"\n\n!;
+
+
+my $i2l=File::Spec->abs2rel($lib,$base);
+$i2l=$lib;
+$i2l=~s/\/$//;$i2l=~s/\/\//\//;
+
+$t=~s/ "/ "$i2l\//gs;
+
+print FO $t;
+
+foreach(@gclasses)
+{
+  my $pth=join('/',@{$_->[2]});
+  $pth=sprintf "%s/%s/%s",$base,$config{'pimpl'},$pth;
+#  $pth=File::Spec->abs2rel($pth,$base) if not exists $config{'abs'};
+  $pth=~s/\/$//;$pth=~s/\/\//\//;
+  
+  printf FO "#include \"%s/%sMarshaller.%s\"\n",$pth,$_->[1],$sh;
+}
+
+print FO $hat;
+
+print FO $nsbra;
+
+my $t=qq!\nclass Marshaller\n{\npublic:\n\n  enum Methods\n  {\n    METHOD_INVALID=-1,!;
+$t=~s/\n/\n$ind/gs;
+
+print FO $t;
+
+$t=join(",\n" ,map { sprintf '#METHOD_%s__%s',uc join('_',@{$_->[2]}),uc $_->[1] } @gclasses);
+
+$t=~s/#/$ind    /g;
+
+printf FO "\n%s\n  %s};\n\n",$t,$ind;
+
+#my @classes;
+
+$t=qq!\nMarshaller()\t\t\t{}\n~Marshaller()\t\t\t{}\n\nstatic ::NsRPC2Communication::RPC2Command* fromString(const std::string&);\n!.
+   qq!static std::string toString(const ::NsRPC2Communication::RPC2Command* msg);\n\n!.
+   qq!static ::NsRPC2Communication::RPC2Command* fromJSON(const Json::Value&);\nstatic Json::Value toJSON(const ::NsRPC2Communication::RPC2Command* msg);!.
+   qq!\n\nprotected:!;
+   
+#   qq!static std::string toString(const ::NsRPC2Communication::RPC2Command* msg);\n\nprotected:\n\n!.
+#   qq!static ::NsRPC2Communication::RPC2Command* fromJSON(const Json::Value&);\nstatic Json::Value toJSON(const ::NsRPC2Communication::RPC2Command* msg);!;
+
+$t=~s/\n/\n$ind  /gs;
+$t=~s/  protected:/protected:/g;
+
+print FO $t;
+print FO "\n\n";
+
+
+foreach(@gclasses)
+{
+  my $n=sprintf "%s::%s",$_->[0],$_->[1];
+  my $x=sprintf "%s__%s",join('_',@{$_->[2]}),$_->[1];
+  my $t= "// #type#\nstatic bool fromString(const std::string& str, #type#& res)\n{\n  return m#name#.fromString(str, res);\n}\n\n".
+         "static std::string toString(const #type#& res)\n{\n  return m#name#.toString(res);\n}";
+
+  $t=~s/#type#/$n/gs;
+  $t=~s/#name#/$x/gs;
+  $t=~s/\n/\n$ind  /gs;
+  print FO $t;
+  print FO "\n\n";
+}
+
+
+$t=qq~\nstruct localHash\n{\n  const char *name;\n  unsigned int idx;\n  void* marshaller;\t\t\t\t\t// Bingo!!!  old good plain C with direct casting!!!\n~.
+   qq!};\n\nprivate:\n\nstatic Json::Value Request2JSON(const ::NsRPC2Communication::RPC2Request* msg);\n!.
+   qq!static Json::Value Response2JSON(const ::NsRPC2Communication::RPC2Response* msg);\n!.
+   qq!static Json::Value Notification2JSON(const ::NsRPC2Communication::RPC2Notification* msg);\n\n!.
+   qq!static const char* getName(Methods e)\n{\n!.
+   qq!  return (e>=0 && e<#) ? mHashTable[e].name : NULL;\n}\n\nstatic const Methods getIndex(const char* s);\n\n!.
+   qq!static const localHash mHashTable[#];\nfriend class Marshaller_intHash;\n\n!.
+   qq!static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;!;
+
+$t=~s/\n/\n$ind  /gs;
+$t=~s/  private:/private:/gs;
+my $z=scalar(@gclasses);
+$t=~s/#/$z/gs;
+print FO $t;
+print FO "\n\n";
+
+foreach(@gclasses)
+{
+  my $n=sprintf "%s::%s",$_->[0],$_->[1];
+  my $x=sprintf "%s__%s",join('_',@{$_->[2]}),$_->[1];
+
+  printf FO "%s  static %sMarshaller m%s;\n",$ind,$n,$x;
+}
+
+printf FO "\n%s};\n",$ind;
+
+print FO $nsket;
+
+print FO "\n#endif\n";
+close FO;
+
+open(FO,'>',$pimpl.'/Marshaller.gp') or die;
+print FO qq!%language=C++\n%struct-type\n%define lookup-function-name getPointer\n%define class-name Marshaller_intHash\n!.
+            qq!%omit-struct-type\n%readonly-tables\n%compare-strncmp\n%compare-lengths\n\nstruct Marshaller::localHash\n{\n!.
+            qq!  const char *name;\n  unsigned int idx;\n  void* method;\n};\n\n%%\n!;
+
+my $z;
+
+
+for($z=0;$z<@gclasses;$z++)
+{
+  my $q=join('_',@{@gclasses[$z]->[2]});
+  printf FO "%s%s,%u,&Marshaller::m%s__%s\n",@gclasses[$z]->[3],@gclasses[$z]->[1],$z,$q,@gclasses[$z]->[1];
+}
+close FO;
+
+
+#**  my @g=split('::',$iface);
+#**  push @gclasses,[$iface,$_,\@g,$global{$prefix}];
+
+  open(FO,mkpath($pimpl.'Marshaller',$sc)) or die;
+  print FO $pragma;
+#  print FO printhat $n;
+# check vector/string
+  print FO "#include <cstring>\n";
+
+  printf FO qq!#include "%sMarshaller.%s"\n!,$path,$sh;
+
+  print FO "\n";
+
+#  printf FO qq!#include "%s/%s.%s"\n!,$p2i,$_,$sh foreach @classes;
+
+foreach(@gclasses)
+{
+  my $pth=join('/',@{$_->[2]});
+  $pth=sprintf "%s/%s/%s",$base,$config{'gen'},$pth;
+#  $pth=File::Spec->abs2rel($pth,$base) if not exists $config{'abs'};
+  $pth=~s/\/$//;$pth=~s/\/\//\//;
+  
+  printf FO "#include \"%s/%s.%s\"\n",$pth,$_->[1],$sh;
+}
+
+
+  print FO "\n";
+  print FO $nsbra;
+  printf FO qq!#include "%sMarshaller.inc"\n!,$pimpl;
+  print FO $nsket;
+
+  print FO $hat;
+
+  {
+    my $o=getfort();
+    print FO $o if exists $config{'ee'} and $o ne '';
+  }
+  
+  print FO "using namespace NsRPC2Communication;\n";
+  printf FO "using namespace %s;\n",$config{'ns'} if $config{'ns'} ne '';
+
+
+
+  print FO qq#\n\nconst Marshaller::Methods Marshaller::getIndex(const char* s)\n{\n  if(!s)\n    return METHOD_INVALID;#.
+qq#  const struct localHash* p=Marshaller_intHash::getPointer(s,strlen(s));\n#.
+qq#  return p ? static_cast<Methods>(p->idx) : METHOD_INVALID;\n}\n\nRPC2Command* Marshaller::fromString(const std::string& s)\n#.
+qq#{\n  RPC2Command* rv=0;\n  try\n  {\n    Json::Reader reader;\n    Json::Value json;\n\n    if(!reader.parse(s,json,false))  return 0;#.
+qq#    if(!(rv=fromJSON(json)))  return 0;\n  }\n  catch(...)\n  {\n    return 0;\n  }\n  return rv;\n}\n\n#.
+qq#std::string Marshaller::toString(const RPC2Command* msg)\n{\n  if(!msg)  return "";\n\n  Json::Value json=toJSON(msg);\n\n#.
+qq#  if(json.isNull()) return "";\n\n  Json::FastWriter writer;\n  std::string rv;\n  return writer.write(json);\n}\n\n#.
+qq#RPC2Command* Marshaller::fromJSON(const Json::Value& json)\n{\n  if(!json.isObject())  return 0;\n#.
+qq#  if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return 0;\n\n#.
+qq#  if(json.isMember("error"))				// error\n  {\n    RPC2Error rv;\n    if(!RPC2ErrorMarshaller::fromJSON(json,rv))  return 0;\n\n#.
+qq#    return new RPC2Error(rv);\n  }\n\n  if(!json.isMember("id"))				// notification\n  {\n#.
+qq#    if(!json.isMember("method") || !json["method"].isString())  return 0;\n\n    Methods m=getIndex(json["method"].asString().c_str());\n\n#.
+qq#    switch(m)\n    {\n#;
+
+  my @tx;
+  my @rx;
+# notification
+#    my $r=[$d,$d,0,0,0,[]];  # method name, class name, type, hasstr,hasarr, list of external entities from SmartDeviceLink
+
+  foreach(@gnclasses)
+  {
+    my $f=$_;
+    my $u=shift @$f;
+
+    my $n=$f->[1];
+    my $z=qq!      case METHOD_#IF#__#NAME#:\n      {\n        #if#::#name# *rv=new #if#::#name#;\n        return #if#::#name#Marshaller::fromJSON(json,*rv) ? rv : 0;\n      }\n!;
+    $z=~s/#name#/$n/gs;
+    $z=~s/#if#/$u/gs;
+    my $t=uc $n;
+    my $t2=uc $u;$t2=~s/::/_/g;
+    $z=~s/#NAME#/$t/gs;
+    $z=~s/#IF#/$t2/gs;
+    @tx[$f->[2]].=$z;
+    $z=qq~    case METHOD_#IF#__#NAME#:\n      return #if#::#name#Marshaller::toJSON(*static_cast<const #if#::#name#*>(msg));\n~;
+    $z=~s/#name#/$n/gs;
+    $z=~s/#NAME#/$t/gs;
+    $z=~s/#IF#/$t2/gs;
+    $z=~s/#if#/$u/gs;
+    @rx[$f->[2]].=$z;
+  }
+
+  print FO @tx[0];
+  print FO qq#      default:\n        return 0;\n    }\n    return 0;\n  }\n\n#.
+qq#  if(json.isMember("method"))				// request\n  {\n    if(!json["id"].isInt())  return 0;\n\n#.
+qq#    Methods m=getIndex(json["method"].asString().c_str());\n    switch(m)\n    {\n#;
+
+  print FO @tx[1];
+
+
+  print FO qq#      default:\n        return 0;\n    }\n    return 0;\n  }\n#.
+qq#							// response\n#.
+qq#  if(!json.isMember("result"))  return 0;\n\n  if(!json["id"].isInt()) return 0;\n\n#.
+qq#// here is extension of protocol, two fields added: _Result and _Method\n#.
+qq#  if(!json["result"].isMember("resultCode") || !json["result"]["resultCode"].isString())  return 0;\n#.
+qq#  if(!json["result"].isMember("method") || !json["result"]["method"].isString())  return 0;\n\n#.
+qq#  Methods m=getIndex(json["result"]["method"].asString().c_str());\n\n  switch(m)\n  {\n#;
+
+  @tx[2]=~s/\n  /\n/gs;
+  @tx[2]=~s/^  //gs;
+  print FO @tx[2];
+
+  print FO qq#    default:\n      return 0;\n  }\n\n  return 0;\n}\n\n\n#.
+qq#Json::Value Marshaller::Notification2JSON(const NsRPC2Communication::RPC2Notification* msg)\n{\n#.
+qq#  Json::Value j=Json::Value(Json::nullValue);\n  if(!msg) return j;\n\n  switch(msg->getMethod())\n  {\n#;
+
+  print FO @rx[0];
+
+  print FO qq#    default:\n      return j;\n  }\n}\n\n\n#.
+qq#Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg)\n{\n#.
+qq#  Json::Value j=Json::Value(Json::nullValue);\n  if(!msg) return j;\n  switch(msg->getMethod())\n  {\n#;
+
+  print FO @rx[1];
+
+  print FO qq#    default:\n      return j;\n  }\n}\n\n\n#.
+qq#Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* msg)\n{\n#.
+qq#  Json::Value j=Json::Value(Json::nullValue);\n  if(!msg) return j;\n  switch(msg->getMethod())\n  {\n#;
+
+  print FO @rx[2];
+
+#  my $z=join('::',@nss);
+#  $z.='::' if $z;
+
+  print FO qq#    default:\n      return j;\n  }\n}\n\n\nJson::Value Marshaller::toJSON(const RPC2Command* msg)\n{\n#.
+qq#  Json::Value j=Json::Value(Json::nullValue);\n  if(!msg) return j;\n\n  switch(msg->getCommandType())\n  {\n#.
+qq#    case RPC2Command::REQUEST:\n      return Request2JSON(static_cast<const RPC2Request*>(msg));\n    case RPC2Command::RESPONSE:\n#.
+qq#      return Response2JSON(static_cast<const RPC2Response*>(msg));\n    case RPC2Command::NOTIFICATION:\n#.
+qq#      return Notification2JSON(static_cast<const RPC2Notification*>(msg));\n\n    case RPC2Command::ERROR:\n#.
+qq#      return RPC2ErrorMarshaller::toJSON(*static_cast<const RPC2Error*>(msg));\n\n    case RPC2Command::UNDEFINED:\n#.
+qq#    default:\n      return j;\n  }\n}\n\n\nconst Marshaller::localHash Marshaller::mHashTable[#.@gclasses.
+qq#]=\n{\n#;
+
+  my $i;
+  my @tmp;
+  for($i=0;$i<@gclasses;$i++)
+  {
+    my $q=join('_',@{@gclasses[$i]->[2]});
+    push @tmp,sprintf '  {"%s%s",%u,&Marshaller::m%s__%s}',@gclasses[$i]->[3],@gclasses[$i]->[1],$i,$q,@gclasses[$i]->[1];
+  }
+
+  print FO join(",\n",@tmp);
+  print FO "\n\n};\n\nNsRPC2Communication::RPC2ErrorMarshaller Marshaller::mRPC2ErrorInternal;\n\n";
+
+foreach(@gclasses)
+{
+#  my $n=sprintf "%s::%s::%s",$config{'ns'},$_->[0],$_->[1];
+  my $n=sprintf "%s::%s",$_->[0],$_->[1];
+  my $x=sprintf "%s__%s",join('_',@{$_->[2]}),$_->[1];
+
+  printf FO "%sMarshaller Marshaller::m%s;\n",$n,$x;
+}
+
+close FO;
+
+sub fold
+{
+  my $t=shift;
+#rewrite, fold is buggy  
+#  $t=`echo "$t" | fold -s -w 80`;
+  my @x=split(/\s+/s,$t);
+  my $r;
+  my $a='';
+  my $len=60;
+  foreach(@x)
+  {
+    my $z=$_;
+    if(length($a)>=$len)
+    {
+      $r.=$a." \\\n ";
+      $a=$z;
+      next;
+    }
+    $a.=' '.$z;
+  }
+  $r=sprintf "%s %s\n\n",$r,$a;
+  $r=~s/  */ /gs;
+  $r=~s/^  */ /g;
+  $r=~s/^ +//;
+  return $r;
+}
+
+if(exists $config{'mk'})
+{
+  open(FO,'>',$config{'mk'}) or die "cant create mk file ".$config{'mk'};
+  my $prefix='XX';
+  my $t=sprintf "%s_SRC=",$prefix;
+  $t.="$_ " foreach @$mkdep;
+  print FO fold $t;
+
+  my $idl=$config{'idl'};
+
+  $t='#p#_OBJ=$(#p#_SRC:.#s#=.o)'."\n#p#_GP=#b#Marshaller.gp\n#p#_LIB=#b##p#.a\n#p#_INC=".'$'."(#p#_GP:.gp=.inc)\nIDL=#i#\n\n#p#_all: ".'$'."(#p#_OBJ)\n\n";
+  $t.='#p#_lib: $(#p#_LIB)'."\n\n";
+  
+  $t.='$(#p#_LIB): (#p#_OBJ)'."\n\t".'ar rcsu $@ $^'."\n\n";
+  $t=~s/#p#/$prefix/gs;
+  $t=~s/#i#/$idl/gs;
+  $t=~s/#b#/$base/gs;
+  $t=~s/#s#/$sc/gs;
+  print FO $t;
+
+  $t=sprintf "%sMarshaller.gp %s : %s",$base,join(' ',@$mklist),$idl;
+  print FO fold $t;
+  print FO "\n";
+  printf FO "%sMarshaller.inc : %sMarshaller.gp\n\tgperf %s --output-file=%s\n\n",$base,$base,'$<','$@';
+
+
+  $t='';
+#  $t.=`g++ -MM -MG -I. $_ `."\n\n" foreach @$mkdep;
+  my @deps;
+  foreach(@$mkdep)
+  {
+    my $p=$_;
+    my $o=$p;$o=~s/.$sc$/.o/;
+    my $d; (undef,$d,undef)=File::Spec->splitpath($p);
+    push @deps,[$d,scalar `g++ -MM -MG -MQ $o -I. $p `];
+  }
+
+  print FO join("\n\n",map { $_->[1] } @deps);
+
+  close FO;
+}
+
+print "done\n";
+
+1;

@@ -23,5 +23,6 @@
     <string name="softButtons">Edit Soft Buttons</string>
     <string name="updateturnlist_iconList">Icon List (comma-separated, one for each turn)</string>
     <string name="updateturnlist_defaultIconList">turn_left.png,turn_right.png,turn_forward.png</string>
+    <string name="addcommand_iconFilename">action.png</string>
     
 </resources>

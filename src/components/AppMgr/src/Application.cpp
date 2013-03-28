@@ -1,8 +1,34 @@
-/**
- * \file Application.cpp
- * \brief Application metaphor
- * \author vsalo
- */
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #include "AppMgr/Application.h"
 #include "LoggerHelper.hpp"
@@ -339,7 +365,7 @@ namespace NsAppManager
      * \brief retrieve application audio streaming state
      * \return application audio streaming state
      */
-    const NsAppLinkRPCV2::AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
+    const NsSmartDeviceLinkRPCV2::AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
     {
         return mAudioStreamingState;
     }
@@ -348,7 +374,7 @@ namespace NsAppManager
      * \brief retrieve application system context
      * \return application system context
      */
-    const NsAppLinkRPCV2::SystemContext &Application::getSystemContext() const
+    const NsSmartDeviceLinkRPCV2::SystemContext &Application::getSystemContext() const
     {
         return mSystemContext;
     }
@@ -357,7 +383,7 @@ namespace NsAppManager
      * \brief retrieve aplication HMI status level
      * \return HMI status level of application
      */
-    const NsAppLinkRPCV2::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
+    const NsSmartDeviceLinkRPCV2::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
     {
         return mHMIStatusLevel;
     }
@@ -366,7 +392,7 @@ namespace NsAppManager
      * \brief Set application audio streaming state
      * \param streamingState audio streaming state of application
      */
-    void Application::setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& streamingState )
+    void Application::setApplicationAudioStreamingState( const NsSmartDeviceLinkRPCV2::AudioStreamingState& streamingState )
     {
         mAudioStreamingState = streamingState;
     }
@@ -375,7 +401,7 @@ namespace NsAppManager
      * \brief set application system context
      * \param application system context
      */
-    void Application::setSystemContext(NsAppLinkRPCV2::SystemContext value)
+    void Application::setSystemContext(NsSmartDeviceLinkRPCV2::SystemContext value)
     {
         mSystemContext = value;
     }
@@ -384,7 +410,7 @@ namespace NsAppManager
      * \brief Set application HMI status level
      * \param hmiLevel HMI status level of application
      */
-    void Application::setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel )
+    void Application::setApplicationHMIStatusLevel( const NsSmartDeviceLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel )
     {
         mHMIStatusLevel = hmiLevel;
     }
@@ -413,6 +439,16 @@ namespace NsAppManager
             return true;
         }
         return false;
+    }
+
+    int Application::getDeviceHandle() const
+    {
+        return mDeviceHandle;
+    }
+
+    void Application::setDeviceHandle(int deviceHandle)
+    {
+        mDeviceHandle = deviceHandle;
     }
 
 }

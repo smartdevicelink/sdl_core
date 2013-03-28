@@ -26,7 +26,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			'sdButton',
 			'btButton',
 			'avinButton',
-			'applinkButton'
+			'sdlButton'
 		],
 		/** Border decoration*/
 		border: Em.View.extend({
@@ -141,20 +141,20 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			target:				'MFT.MediaController',
 			textBinding:		   Ember.Binding.oneWay('MFT.locale.label.view_media_avi')
 		}),
-		/** APPLINK Button*/
-		applinkButton:  MFT.Button.extend({
+		/** SDL Button*/
+		sdlButton:  MFT.Button.extend({
 			classNameBindings:	[
-									'MFT.States.media.applink.active:active_state',
+									'MFT.States.media.sdlmedia.active:active_state',
 									'MFT.MediaController.isTopListMenu:displayed'
 								],
-			elementId:			'media_applinkButton',
+			elementId:			'media_sdlButton',
 			classNames:			['media-ls-item'],
 			hidden: function() {
-			    return !MFT.ApplinkMediaController.currentAppId;
-			}.property('MFT.ApplinkMediaController.currentAppId'),
-			textBinding:		'MFT.ApplinkMediaController.currentAppName',
-			iconBinding:		'MFT.ApplinkMediaController.currentAppIcon',
-			action:				'turnOnApplink',
+			    return !MFT.SDLMediaController.currentAppId;
+			}.property('MFT.SDLMediaController.currentAppId'),
+			textBinding:		'MFT.SDLMediaController.currentAppName',
+			iconBinding:		'MFT.SDLMediaController.currentAppIcon',
+			action:				'turnOnSDL',
 			target:				'MFT.MediaController'
 		})
 			

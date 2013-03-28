@@ -239,9 +239,9 @@
 #media_avinButton.displayed {
 	display: none !important;
 }
-/**APPLINK*/
+/**SDL*/
 
-#media_applinkButton {
+#media_sdlButton {
 	font-size: 18px;
 	line-height: 48px;
 	display: block;
@@ -249,11 +249,11 @@
 	text-overflow: ellipsis;
 }
 
-#media_applinkButton.displayed {
+#media_sdlButton.displayed {
 	display: none !important;
 }
 
-#media_applinkButton span {
+#media_sdlButton span {
 	margin-left: 50px;
 }
 
@@ -1016,16 +1016,16 @@
 	-webkit-border-radius: 3px;
 }
 
-#applink_view_container .track-info{
+#sdl_view_container .track-info{
 	left: 165px;
 	top: 55px;
 }
 
-#applink_view_container .list-content{
+#sdl_view_container .list-content{
 	border: none;
 }
 
-#applink_view_container .list-item {
+#sdl_view_container .list-item {
 	position: relative;
 	width: 100%;
 	height: 48px;
@@ -2830,7 +2830,7 @@
 .cancelBarAnimation{-webkit-transition:none !important;}
 
 
-#media_applink_soft_buttons_view.media_applink_soft_buttons_view{
+#media_sdl_soft_buttons_view.media_sdl_soft_buttons_view{
 	position: absolute;
 	width: 800px;
 	height: 480px;
@@ -2838,13 +2838,13 @@
 	background-image: url(../images/media/bg.png);
 }
 
-#applink_view_container .ffw_list_menu {
+#sdl_view_container .ffw_list_menu {
 	top: 90px;
 	left: 650px;
 	width: 140px;
 }
 
-#media_rightmenu_topButton_applinkSoftButtons.media_rightmenu_topButton {
+#media_rightmenu_topButton_sdlSoftButtons.media_rightmenu_topButton {
 	right: 4px;
 	top: 90px;
 	width: 152px;
@@ -2855,7 +2855,7 @@
 	border-top-right-radius: 5px;
 }
 
-#media_appScrollWrapper_applinkSoftButtons{
+#media_appScrollWrapper_sdlSoftButtons{
 	overflow: hidden;
 	position: absolute;
 	right: 4px;
@@ -2869,7 +2869,7 @@
 	height: 300px;
 }
 
-#media_rightmenu_bottomButton_applinkSoftButtons.media_rightmenu_bottomButton {
+#media_rightmenu_bottomButton_sdlSoftButtons.media_rightmenu_bottomButton {
 	right: 4px;
 	top: 342px;
 	width: 152px;
@@ -2880,7 +2880,7 @@
 	border-bottom-right-radius: 5px;
 }
 
-#applink_view_container .buttonsWrapper{
+#sdl_view_container .buttonsWrapper{
 	top: 135px;
 	left: 100px;
 	width: 600px;
@@ -2888,13 +2888,13 @@
 	overflow: hidden;
 }
 
-#applink_view_container .scrollBar{
+#sdl_view_container .scrollBar{
 	position: relative;
 	height: 260px;
 	float: right;
 }
 
-#applink_view_container .scrollArrowUp {
+#sdl_view_container .scrollArrowUp {
 	position: relative;
 	height: 47px;
 	width: 47px;
@@ -2902,14 +2902,14 @@
 	border-radius: 2px;
 }
 
-#applink_view_container .scroller{
+#sdl_view_container .scroller{
 	position: relative;
 	height: 20px;
 	background: #555;
 	-webkit-transition: 0.4s;
 }
 
-#applink_view_container .scrollArrowDown {
+#sdl_view_container .scrollArrowDown {
 	height: 47px;
 	width: 47px;
 	border: #393939 1px solid;
@@ -2917,7 +2917,7 @@
 	bottom: 0;
 }
 
-#applink_view_container .rs-item{
+#sdl_view_container .rs-item{
 	width: 536px;
 }
 
@@ -2937,6 +2937,6 @@
 	padding: 15px;
 }
 /*
-#applink_view_container .ffw-button span{
+#sdl_view_container .ffw-button span{
 	padding-left: 20px;
 }*/
