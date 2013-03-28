@@ -6463,7 +6463,7 @@ namespace NsAppManager
 
                 mApplications.insert( std::pair<int, Application*>(appId, application) );
                 LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId <<
-                        " to mApplications " << (int)mApplications[appId]);
+                        " to mApplications " << mApplications[appId]);
                 for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
                         it != mDevices.end();
                         ++it )
@@ -6531,7 +6531,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
                 mApplications.insert( std::pair<int, Application*>(appId, application) );
                 LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId <<
-                        " to mApplications " << (int)mApplications[appId]);
+                        " to mApplications " << mApplications[appId]);
                 for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
                         it != mDevices.end();
                         ++it )
