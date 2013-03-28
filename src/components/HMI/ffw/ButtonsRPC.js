@@ -1,7 +1,7 @@
 /*
  * Reference implementation of Buttons component.
  * 
- *  Buttons sends to ApplinkCore press and hold events of
+ *  Buttons sends to SDLCore press and hold events of
  * soft buttons, presets and some hard keys. 
  * 
  * @author Andriy Melnik
@@ -189,7 +189,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 					],
 					"presetBankCapabilities": {"onScreenPresetsAvailable": true},
 					"method"	:	"Buttons.GetCapabilitiesResponse",
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+					"resultCode" : "SUCCESS" //  type (enum) from SDL protocol
 				}
 			};
 			this.client.send(JSONMessage);

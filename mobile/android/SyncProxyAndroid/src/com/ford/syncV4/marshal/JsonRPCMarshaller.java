@@ -79,6 +79,44 @@ public class JsonRPCMarshaller {
 		return ret;
 	}
 	
+	private static JSONArray serializeVector(Vector vector) throws JSONException{
+		JSONArray toPut = new JSONArray();
+		Iterator<Object> valueIterator = (vector).iterator();
+		while(valueIterator.hasNext()){
+			Object anObject = valueIterator.next();
+			if (anObject instanceof RPCStruct) {
+				RPCStruct toSerialize = (RPCStruct) anObject;
+				toPut.put(toSerialize.serializeJSON());
+			} else if(anObject instanceof Hashtable){
+				Hashtable toSerialize = (Hashtable)anObject;
+				toPut.put(serializeHashtable(toSerialize));
+			} else {
+				toPut.put(anObject);
+			}
+		}
+		return toPut;
+	}
+
+	public static JSONObject serializeHashtable(Hashtable<String, Object> hash) throws JSONException{
+		JSONObject obj = new JSONObject();
+		Iterator<String> hashKeyIterator = hash.keySet().iterator();
+		while (hashKeyIterator.hasNext()){
+			String key = (String) hashKeyIterator.next();
+			Object value = hash.get(key);
+			if (value instanceof RPCStruct) {
+				obj.put(key, ((RPCStruct) value).serializeJSON());
+			} else if (value instanceof Vector<?>) {
+				obj.put(key, serializeVector((Vector) value));
+			} else if (value instanceof Hashtable) {
+				obj.put(key, serializeHashtable((Hashtable)value));
+			} else {
+				obj.put(key, value);
+			}
+		}
+		return obj;
+	}
+	
+	/*
 	public static JSONObject serializeHashtable(Hashtable<String, Object> hash) 
 			throws JSONException {
 		JSONObject obj = new JSONObject();
@@ -96,6 +134,10 @@ public class JsonRPCMarshaller {
 					if (anObject instanceof RPCStruct) {
 						RPCStruct toSerialize = (RPCStruct) anObject;
 						toPut.put(toSerialize.serializeJSON());
+					} else if (anObject instanceof Hashtable) {
+						Hashtable hashtable = (Hashtable) anObject;
+						RPCStruct toSerialize = new RPCStruct(hashtable);
+						toPut.put(toSerialize.serializeJSON());
 					} else {
 						toPut.put(anObject);
 					}
@@ -109,4 +151,5 @@ public class JsonRPCMarshaller {
 		}
 		return obj;
 	}
+	*/
 }

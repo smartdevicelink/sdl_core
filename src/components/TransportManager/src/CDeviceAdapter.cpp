@@ -1,3 +1,37 @@
+/**
+ * \file CDeviceAdapter.cpp
+ * \brief Class CDeviceAdapter.
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include <fcntl.h>
 #include <memory.h>
 #include <poll.h>
@@ -9,7 +43,7 @@
 #include "IHandleGenerator.hpp"
 #include "CDeviceAdapter.hpp"
 
-NsAppLink::NsTransportManager::CDeviceAdapter::SFrame::SFrame(int UserData, const uint8_t* Data, const size_t DataSize):
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SFrame::SFrame(int UserData, const uint8_t* Data, const size_t DataSize):
 mUserData(UserData),
 mData(0),
 mDataSize(0)
@@ -27,7 +61,7 @@ mDataSize(0)
     }
 }
 
-NsAppLink::NsTransportManager::CDeviceAdapter::SFrame::~SFrame(void)
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SFrame::~SFrame(void)
 {
     if (0 != mData)
     {
@@ -35,22 +69,22 @@ NsAppLink::NsTransportManager::CDeviceAdapter::SFrame::~SFrame(void)
     }
 }
 
-NsAppLink::NsTransportManager::CDeviceAdapter::SDevice::SDevice(const char * Name):
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SDevice::SDevice(const char * Name):
 mName(Name),
 mUniqueDeviceId()
 {
 }
 
-NsAppLink::NsTransportManager::CDeviceAdapter::SDevice::~SDevice(void)
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SDevice::~SDevice(void)
 {
 }
 
-bool NsAppLink::NsTransportManager::CDeviceAdapter::SDevice::isSameAs(const NsAppLink::NsTransportManager::CDeviceAdapter::SDevice * OtherDevice) const
+bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SDevice::isSameAs(const NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SDevice * OtherDevice) const
 {
     return true;
 }
 
-NsAppLink::NsTransportManager::CDeviceAdapter::SConnection::SConnection(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle):
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection::SConnection(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle):
 mDeviceHandle(DeviceHandle),
 mConnectionThread(),
 mNotificationPipeFds(),
@@ -60,7 +94,7 @@ mTerminateFlag(false)
 {
 }
 
-NsAppLink::NsTransportManager::CDeviceAdapter::SConnection::~SConnection(void)
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection::~SConnection(void)
 {
     while (false == mFramesToSend.empty())
     {
@@ -69,7 +103,7 @@ NsAppLink::NsTransportManager::CDeviceAdapter::SConnection::~SConnection(void)
     }
 }
 
-bool NsAppLink::NsTransportManager::CDeviceAdapter::SConnection::isSameAs(const NsAppLink::NsTransportManager::CDeviceAdapter::SConnection * OtherConnection) const
+bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection::isSameAs(const NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection * OtherConnection) const
 {
     bool result = false;
 
@@ -81,13 +115,13 @@ bool NsAppLink::NsTransportManager::CDeviceAdapter::SConnection::isSameAs(const 
     return result;
 }
 
-NsAppLink::NsTransportManager::CDeviceAdapter::SConnectionThreadParameters::SConnectionThreadParameters(NsAppLink::NsTransportManager::CDeviceAdapter & DeviceAdapter, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle):
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnectionThreadParameters::SConnectionThreadParameters(NsSmartDeviceLink::NsTransportManager::CDeviceAdapter & DeviceAdapter, NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle):
 mDeviceAdapter(DeviceAdapter),
 mConnectionHandle(ConnectionHandle)
 {
 }
 
-NsAppLink::NsTransportManager::CDeviceAdapter::CDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapterListener& Listener, IHandleGenerator& HandleGenerator):
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::CDeviceAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapterListener& Listener, IHandleGenerator& HandleGenerator):
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager"))),
 mListener(Listener),
 mHandleGenerator(HandleGenerator),
@@ -108,7 +142,7 @@ mMainThreadStarted(false)
     pthread_mutex_init(&mConnectionsMutex, 0);
 }
 
-NsAppLink::NsTransportManager::CDeviceAdapter::~CDeviceAdapter(void)
+NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::~CDeviceAdapter(void)
 {
     pthread_mutex_destroy(&mConnectionsMutex);
     pthread_mutex_destroy(&mDevicesMutex);
@@ -116,7 +150,7 @@ NsAppLink::NsTransportManager::CDeviceAdapter::~CDeviceAdapter(void)
     pthread_cond_destroy(&mDeviceScanRequestedCond);
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::run(void)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::run(void)
 {
     LOG4CPLUS_INFO(mLogger, "Initializing device adapter");
 
@@ -133,7 +167,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::run(void)
     }
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(void)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(void)
 {
     pthread_mutex_lock(&mDeviceScanRequestedMutex);
 
@@ -152,7 +186,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(void)
     pthread_mutex_unlock(&mDeviceScanRequestedMutex);
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
     bool isDeviceValid = false;
 
@@ -190,7 +224,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsAppLin
     }
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::disconnectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
     bool isDeviceValid = false;
 
@@ -239,7 +273,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::disconnectDevice(const NsApp
     }
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::sendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData)
 {
     if (0u == DataSize)
     {
@@ -282,7 +316,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::sendFrame(NsAppLink::NsTrans
     }
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermination(void)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermination(void)
 {
     mShutdownFlag = true;
 
@@ -332,7 +366,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermination(vo
     LOG4CPLUS_INFO(mLogger, "Connection threads terminated");
 }
 
-bool NsAppLink::NsTransportManager::CDeviceAdapter::startConnection(NsAppLink::NsTransportManager::CDeviceAdapter::SConnection * Connection)
+bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::startConnection(NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection * Connection)
 {
     bool isConnectionThreadStarted = false;
 
@@ -421,7 +455,7 @@ bool NsAppLink::NsTransportManager::CDeviceAdapter::startConnection(NsAppLink::N
     return isConnectionThreadStarted;
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::stopConnection(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::stopConnection(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
     pthread_mutex_lock(&mConnectionsMutex);
 
@@ -465,7 +499,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::stopConnection(NsAppLink::Ns
     pthread_mutex_unlock(&mConnectionsMutex);
 }
 
-bool NsAppLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanRequest(const time_t Timeout)
+bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanRequest(const time_t Timeout)
 {
     bool deviceScanRequested = false;
 
@@ -512,7 +546,7 @@ bool NsAppLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanRequest(con
     return deviceScanRequested;
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(const NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
     SConnection * connection = 0;
     bool isPipeCreated = false;
@@ -773,7 +807,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
     }
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::updateClientDeviceList(void )
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::updateClientDeviceList(void )
 {
     LOG4CPLUS_INFO(mLogger, "Updating client device list");
 
@@ -796,12 +830,12 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::updateClientDeviceList(void 
     mListener.onDeviceListUpdated(this, clientDeviceList);
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::createConnectionsListForDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector<NsAppLink::NsTransportManager::CDeviceAdapter::SConnection *> & ConnectionsList)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::createConnectionsListForDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector<NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection *> & ConnectionsList)
 {
     ConnectionsList.clear();
 }
 
-void * NsAppLink::NsTransportManager::CDeviceAdapter::mainThreadStartRoutine(void * Data)
+void * NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::mainThreadStartRoutine(void * Data)
 {
     CDeviceAdapter * deviceAdapter = static_cast<CDeviceAdapter*>(Data);
 
@@ -813,7 +847,7 @@ void * NsAppLink::NsTransportManager::CDeviceAdapter::mainThreadStartRoutine(voi
     return 0;
 }
 
-void * NsAppLink::NsTransportManager::CDeviceAdapter::connectionThreadStartRoutine(void * Data)
+void * NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectionThreadStartRoutine(void * Data)
 {
     SConnectionThreadParameters * connectionThreadParameters = static_cast<SConnectionThreadParameters*>(Data);
 

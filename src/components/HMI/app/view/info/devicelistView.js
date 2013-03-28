@@ -34,7 +34,7 @@ MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
         action:            'turnChangeDeviceViewBack',
-        target:            'MFT.ApplinkController',  
+        target:            'MFT.SDLController',  
         icon:              'images/media/ico_back.png',   
     }),
 
@@ -67,7 +67,7 @@ MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
                     classNames:             'ffw-button notpressed list-item',
                     templateName:           params.icon ? 'rightIcon' : 'text',
                     action:                 'onDeviceChoosed',
-                    target:                 'MFT.ApplinkController',
+                    target:                 'MFT.SDLController',
                     onDown:                 false
                 })
             );

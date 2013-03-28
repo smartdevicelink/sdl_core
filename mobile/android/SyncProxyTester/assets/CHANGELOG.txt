@@ -1,4 +1,40 @@
+[CW12]
+* UpdateTurnList dialog: change the way how Turn items are parsed from the GUI.
++ Add an option to disable screen locking while doing XML tests. It can be toggled in the options menu, "Lock screen while testing" item. The change will NOT affect currently running tests, if any.
+* Fix: remove all the commands that were added to the submenu when it's deleted.
++ ModuleTest: the user can now specify the source data for a PutFile request as a filename (with path starting at "/sdcard/") or a Base64-encoded string (starting with "base64:").
+* Fix crash when integer fields are empty in the following dialogs: Alert, PerformAudioPassThru, ReadDID, GetDTCs, ShowConstantTBT, Slider, and SetGlobalProperties.
+
+[CW11]
++ (Experimental) ModuleTest: allow to test the responses to Register/UnregisterAppInterface requests. The SyncProxyAndroid SDK had to be patched to let the responses propagate to the SyncProxyTester app.
+
+[CW10]
+* ModuleTest: increase the delay between sending consecutive requests to 1 sec.
++ Display the requests sent by the app on connection in the log.
+* SetGlobalProperties dialog: allow to send helpPrompt and timeoutPrompt as arrays.
+* Fix CreateInteractionChoiceSet, SetGlobalProperties, and Speak layouts.
+
+[CW9]
+* Fix: don't send a Show request on OnHMIStatus after an Alert response.
+* ModuleTest: add a delay between sending consecutive requests.
+* Ford Commit: XML scripter update, AudioPassThru without JSON, Policies Tester update, other minor bug fixes.
+
+[CW8]
+* Cut the number of debug logs during the test XML parsing process.
+* Fix empty <Vector> tags parsing in test XML.
+* Make the console log scrolling smoother.
+* Don't remove interaction choice set from the choiceSets list until a successful DeleteChoiceSetResponse has come.
+* Don't show null in the log if the responses' info is null.
+* AddCommand message: set an existing icon by default.
+
 [CW7]
+* Fix displaying the success flag, info, and result code of the messages in the log.
+* Fix displaying long messages in the log on narrow screens.
+* Don't drop the connection to the core when pressing the Back button. Now, to disconnect use the Exit options menu item.
++ Show message's correlation ID in the Raw JSON popup.
+* Update the turn list icons.
+* SyncProxyAndroid SDK: when serializing a JSON RPCMessage, serialize hashtable as RPCStruct. Fix for the XML Test feature in SyncProxyTester.
+- Revert: "SyncProxyAndroid SDK: Interim fix: revert the change of protocol v2 JSON messages (the "parameters" key) until the AppLinkCore has changed the parser."
 * Fix a crash when trying to open Speak dialog.
 * SyncProxyAndroid SDK: Interim fix: revert the change of protocol v2 JSON messages (the "parameters" key) until the AppLinkCore has changed the parser.
 - SyncProxyAndroid SDK: remove MP3 and WAV values from the AudioType enum (affects AudioPassThru).

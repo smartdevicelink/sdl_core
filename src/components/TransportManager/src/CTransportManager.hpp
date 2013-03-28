@@ -1,3 +1,37 @@
+/**
+ * \file CTransportManager.hpp
+ * \brief Class CTransportManager header.
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef __TRANSPORTMANAGER_CTRANSPORTMANAGER_HPP__
 #define __TRANSPORTMANAGER_CTRANSPORTMANAGER_HPP__
 
@@ -9,7 +43,7 @@
 #include <pthread.h>
 #include <vector>
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {
@@ -299,7 +333,7 @@ namespace NsAppLink
                  * @param Data Data
                  * @param DataSize Size of the data
                  **/
-                SDataListenerCallback(NsAppLink::NsTransportManager::CTransportManager::EDataListenerCallbackType CallbackType, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize);
+                SDataListenerCallback(NsSmartDeviceLink::NsTransportManager::CTransportManager::EDataListenerCallbackType CallbackType, NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize);
 
                 /**
                  * @brief Constructor for creating FrameSendCompleted callback
@@ -374,7 +408,7 @@ namespace NsAppLink
                  * @param TransportManager Pointer to the Transport Manager
                  * @param ConnectionHandle Connection Handle
                  **/
-                SDataThreadStartupParams(NsAppLink::NsTransportManager::CTransportManager* TransportManager, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle);
+                SDataThreadStartupParams(NsSmartDeviceLink::NsTransportManager::CTransportManager* TransportManager, NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle);
 
                 /**
                  * @brief Pointer to Transport Manager
@@ -648,7 +682,7 @@ namespace NsAppLink
              * @param DeviceAdapter Device adapter to add
              * @return void
              **/
-            void addDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
+            void addDeviceAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
 
             /**
              * @brief Removes device adapter
@@ -658,7 +692,7 @@ namespace NsAppLink
              * @param DeviceAdapter Device adapter to remove
              * @return void
              **/
-            void removeDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
+            void removeDeviceAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
 
             /**
              * @brief All device adapters initialized here
@@ -682,7 +716,7 @@ namespace NsAppLink
              * @param Connect Flag of device operation: true for connect, false for disconnect. Defaults to true.
              * @return void
              **/
-            void connectDisconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, bool Connect = true);
+            void connectDisconnectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, bool Connect = true);
 
             /**
              * @brief Sends data callback

@@ -1,7 +1,39 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/SetMediaClockTimer.h"
-#include "../src/ALRPCObjectsImpl/V2/StartTimeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/UpdateModeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/StartTimeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/UpdateModeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetMediaClockTimerMarshaller.h"
 
 /*
@@ -9,7 +41,7 @@
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication::UI;
@@ -46,9 +78,9 @@ const std::string SetMediaClockTimerMarshaller::toString(const SetMediaClockTime
 
 bool SetMediaClockTimerMarshaller::checkIntegrityConst(const SetMediaClockTimer& s)
 {
-  if(s.startTime && (!NsAppLinkRPCV2::StartTimeMarshaller::checkIntegrityConst(s.startTime[0])))  return false;
+  if(s.startTime && (!NsSmartDeviceLinkRPCV2::StartTimeMarshaller::checkIntegrityConst(s.startTime[0])))  return false;
 
-  if(!NsAppLinkRPCV2::UpdateModeMarshaller::checkIntegrityConst(s.updateMode))  return false;
+  if(!NsSmartDeviceLinkRPCV2::UpdateModeMarshaller::checkIntegrityConst(s.updateMode))  return false;
 
   return true;
 }
@@ -66,8 +98,8 @@ Json::Value SetMediaClockTimerMarshaller::toJSON(const SetMediaClockTimer& e)
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
   if(e.startTime)
-    json["params"]["startTime"]=NsAppLinkRPCV2::StartTimeMarshaller::toJSON(e.startTime[0]);;
-  json["params"]["updateMode"]=NsAppLinkRPCV2::UpdateModeMarshaller::toJSON(e.updateMode);;
+    json["params"]["startTime"]=NsSmartDeviceLinkRPCV2::StartTimeMarshaller::toJSON(e.startTime[0]);;
+  json["params"]["updateMode"]=NsSmartDeviceLinkRPCV2::UpdateModeMarshaller::toJSON(e.updateMode);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -91,11 +123,11 @@ bool SetMediaClockTimerMarshaller::fromJSON(const Json::Value& json,SetMediaCloc
     c.startTime=0;
     if(js.isMember("startTime"))
     {
-      c.startTime=new NsAppLinkRPCV2::StartTime();
-      if(!NsAppLinkRPCV2::StartTimeMarshaller::fromJSON(js["startTime"],c.startTime[0]))  return false;
+      c.startTime=new NsSmartDeviceLinkRPCV2::StartTime();
+      if(!NsSmartDeviceLinkRPCV2::StartTimeMarshaller::fromJSON(js["startTime"],c.startTime[0]))  return false;
     }
 
-    if(!js.isMember("updateMode") || !NsAppLinkRPCV2::UpdateModeMarshaller::fromJSON(js["updateMode"],c.updateMode))  return false;
+    if(!js.isMember("updateMode") || !NsSmartDeviceLinkRPCV2::UpdateModeMarshaller::fromJSON(js["updateMode"],c.updateMode))  return false;
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();

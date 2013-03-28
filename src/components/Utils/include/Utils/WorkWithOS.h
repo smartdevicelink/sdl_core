@@ -1,7 +1,6 @@
 /**
 * \file WorkWithOS.h
 * \brief class source file.
-* \author PVyshnevska
 */
 
 #ifndef WORKWITHSYSTEM_INCLUDE

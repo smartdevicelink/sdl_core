@@ -1,8 +1,34 @@
-/**
- * \file Application.h
- * \brief Application metaphor
- * \author vsalo
- */
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
@@ -10,12 +36,12 @@
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/AppMenus.h"
-#include "JSONHandler/ALRPCObjects/V2/AudioStreamingState.h"
-#include "JSONHandler/ALRPCObjects/V2/SystemContext.h"
-#include "JSONHandler/ALRPCObjects/V2/HMILevel.h"
-#include "JSONHandler/ALRPCObjects/V1/AudioStreamingState.h"
-#include "JSONHandler/ALRPCObjects/V1/SystemContext.h"
-#include "JSONHandler/ALRPCObjects/V1/HMILevel.h"
+#include "JSONHandler/SDLRPCObjects/V2/AudioStreamingState.h"
+#include "JSONHandler/SDLRPCObjects/V2/SystemContext.h"
+#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "JSONHandler/SDLRPCObjects/V1/AudioStreamingState.h"
+#include "JSONHandler/SDLRPCObjects/V1/SystemContext.h"
+#include "JSONHandler/SDLRPCObjects/V1/HMILevel.h"
 #include <string>
 #include <vector>
 #include <tuple>
@@ -258,41 +284,44 @@ namespace NsAppManager
          * \brief set application system context
          * \param application system context
          */
-        virtual void setSystemContext( NsAppLinkRPCV2::SystemContext value );
+        virtual void setSystemContext( NsSmartDeviceLinkRPCV2::SystemContext value );
 
         /**
          * \brief retrieve application system context
          * \return application system context
          */
-        virtual const NsAppLinkRPCV2::SystemContext& getSystemContext() const;
+        virtual const NsSmartDeviceLinkRPCV2::SystemContext& getSystemContext() const;
 
         /**
          * \brief Set application audio streaming state
          * \param streamingState audio streaming state of application
          */
-        virtual void setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& hmiLevel );
+        virtual void setApplicationAudioStreamingState( const NsSmartDeviceLinkRPCV2::AudioStreamingState& hmiLevel );
 
         /**
          * \brief retreive application audio streaming state
          * \return application audio streaming state
          */
-        virtual const NsAppLinkRPCV2::AudioStreamingState& getApplicationAudioStreamingState( ) const;
+        virtual const NsSmartDeviceLinkRPCV2::AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
         /**
          * \brief Set application HMI status level
          * \param hmiLevel HMI status level of application
          */
-        virtual void setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel );
+        virtual void setApplicationHMIStatusLevel( const NsSmartDeviceLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel );
 
         /**
          * \brief retrieve aplication HMI status level
          * \return HMI status level of application
          */
-        virtual const NsAppLinkRPCV2::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
+        virtual const NsSmartDeviceLinkRPCV2::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
 
         void addPersistentFile(const std::string& file);
         void removePersistentFile(const std::string& file);
         bool isPersistentFile(const std::string& file);
+
+        int getDeviceHandle() const;
+        void setDeviceHandle(int deviceHandle);
 
 
     protected:
@@ -315,9 +344,11 @@ namespace NsAppManager
         CommandMapping   mCommandMapping;
         AppMenus mMenus;
 
-        NsAppLinkRPCV2::SystemContext mSystemContext;
-        NsAppLinkRPCV2::AudioStreamingState mAudioStreamingState;
-        NsAppLinkRPCV2::HMILevel::HMILevelInternal mHMIStatusLevel;
+        NsSmartDeviceLinkRPCV2::SystemContext mSystemContext;
+        NsSmartDeviceLinkRPCV2::AudioStreamingState mAudioStreamingState;
+        NsSmartDeviceLinkRPCV2::HMILevel::HMILevelInternal mHMIStatusLevel;
+
+        int mDeviceHandle;
     };
 
 } // namespace NsAppManager

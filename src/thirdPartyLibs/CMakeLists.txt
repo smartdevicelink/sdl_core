@@ -9,5 +9,5 @@ add_subdirectory(./jsoncpp)
 # --- MessageBroker
 add_subdirectory(./MessageBroker)
 
-# --- axisCode
-#add_subdirectory(./axisCore)
+# --- encryption
+add_subdirectory(./encryption)

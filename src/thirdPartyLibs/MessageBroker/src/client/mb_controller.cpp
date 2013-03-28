@@ -283,30 +283,10 @@ namespace NsMessageBroker
       DBG_MSG(("CMessageBrokerController::checkMessage()\n"));
       Json::Value err;
    
-      /* check the JSON-RPC version => 2.0 */
-      if (!root.isObject() || !root.isMember("jsonrpc") || root["jsonrpc"] != "2.0") 
+      try
       {
-         error["id"] = Json::Value::null;
-         error["jsonrpc"] = "2.0";
-         err["code"] = NsMessageBroker::INVALID_REQUEST;
-         err["message"] = "Invalid MessageBroker request.";
-         error["error"] = err;
-         return false;
-      }
-
-      if (root.isMember("id") && (root["id"].isArray() || root["id"].isObject()))
-      {
-         error["id"] = Json::Value::null;
-         error["jsonrpc"] = "2.0";
-         err["code"] = NsMessageBroker::INVALID_REQUEST;
-         err["message"] = "Invalid MessageBroker request.";
-         error["error"] = err;
-         return false;
-      }
-
-      if (root.isMember("method"))
-      {
-         if (!root["method"].isString())
+         /* check the JSON-RPC version => 2.0 */
+         if (!root.isObject() || !root.isMember("jsonrpc") || root["jsonrpc"] != "2.0") 
          {
             error["id"] = Json::Value::null;
             error["jsonrpc"] = "2.0";
@@ -315,21 +295,48 @@ namespace NsMessageBroker
             error["error"] = err;
             return false;
          }
-         /* Check the params is  an object*/
-         if (root.isMember("params") && !root["params"].isObject())
+
+         if (root.isMember("id") && (root["id"].isArray() || root["id"].isObject()))
          {
             error["id"] = Json::Value::null;
             error["jsonrpc"] = "2.0";
-            err["code"] = INVALID_REQUEST;
-            err["message"] = "Invalid JSONRPC params.";
+            err["code"] = NsMessageBroker::INVALID_REQUEST;
+            err["message"] = "Invalid MessageBroker request.";
             error["error"] = err;
             return false;
          }
-      } else if (!root.isMember("result"))
+
+         if (root.isMember("method"))
+         {
+            if (!root["method"].isString())
+            {
+               error["id"] = Json::Value::null;
+               error["jsonrpc"] = "2.0";
+               err["code"] = NsMessageBroker::INVALID_REQUEST;
+               err["message"] = "Invalid MessageBroker request.";
+               error["error"] = err;
+               return false;
+            }
+            /* Check the params is  an object*/
+            if (root.isMember("params") && !root["params"].isObject())
+            {
+               error["id"] = Json::Value::null;
+               error["jsonrpc"] = "2.0";
+               err["code"] = INVALID_REQUEST;
+               err["message"] = "Invalid JSONRPC params.";
+               error["error"] = err;
+               return false;
+            }
+         } else if (!root.isMember("result"))
+         {
+            return false;
+         }
+         return true;
+      } catch (...)
       {
+         DBG_MSG_ERROR(("CMessageBrokerController::checkMessage() EXCEPTION has been caught!\n"));
          return false;
       }
-      return true;
    }
 
 } /* namespace NsMessageBroker */

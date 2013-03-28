@@ -1,5 +1,12 @@
 package com.ford.syncV4.proxy;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -12,13 +19,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.util.Hashtable;
-import java.util.Vector;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -39,9 +39,10 @@ import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
-import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
 import com.ford.syncV4.proxy.callbacks.OnError;
+import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerBase;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
@@ -83,9 +84,9 @@ import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
-import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PresetBankCapabilities;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
@@ -101,10 +102,10 @@ import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
 import com.ford.syncV4.proxy.rpc.Show;
-import com.ford.syncV4.proxy.rpc.ShowResponse;
-import com.ford.syncV4.proxy.rpc.SoftButtonCapabilities;
-import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.ShowConstantTBTResponse;
+import com.ford.syncV4.proxy.rpc.ShowResponse;
+import com.ford.syncV4.proxy.rpc.SliderResponse;
+import com.ford.syncV4.proxy.rpc.SoftButtonCapabilities;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
@@ -117,9 +118,9 @@ import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.VehicleType;
 import com.ford.syncV4.proxy.rpc.enums.AppType;
-import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
@@ -137,8 +138,8 @@ import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.trace.TraceDeviceInfo;
 import com.ford.syncV4.trace.SyncTrace;
+import com.ford.syncV4.trace.TraceDeviceInfo;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.SiphonServer;
@@ -274,10 +275,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			if (_proxyHeartBeat != null && _heartBeatEnabled) {
 				_proxyHeartBeat.recordMostRecentIncomingProtocolInterfaceActivity();
 			} // end-if
-
-			if (msg.getData().length > 0) {
-				queueIncomingMessage(msg);
-			} // end-if
+			
+			try {if (msg.getData().length > 0) queueIncomingMessage(msg);}
+			catch (Exception e) {}
+			try {if (msg.getBulkData().length > 0) queueIncomingMessage(msg);}
+			catch (Exception e) {}
 		}
 
 		@Override
@@ -1028,7 +1030,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	}
 	
 	// Protected isConnected method to allow legacy proxy to poll isConnected state
-	protected Boolean getIsConnected() {
+	public Boolean getIsConnected() {
 		return _syncConnection.getIsConnected();
 	}
 	
@@ -1223,13 +1225,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					if (_wiproVersion == 1) {
 						if (message.getVersion() == 2) setWiProVersion(message.getVersion());
 					}
-					final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
 					
 					Hashtable hash = new Hashtable();
 					if (_wiproVersion == 2) {
 						Hashtable hashTemp = new Hashtable();
 						hashTemp.put(Names.correlationID, message.getCorrID());
-						hashTemp.put(Names.parameters, mhash.get(Names.parameters));
+						if (message.getJsonSize() > 0) {
+							final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
+							//hashTemp.put(Names.parameters, mhash.get(Names.parameters));
+							hashTemp.put(Names.parameters, mhash);
+						}
 						FunctionID functionID = new FunctionID();
 						hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID()));
 						if (message.getRPCType() == 0x00) {
@@ -1241,6 +1246,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						}
 						if (message.getBulkData() != null) hash.put(Names.bulkData, message.getBulkData());
 					} else {
+						final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
 						hash = mhash;
 					}
 					handleRPCMessage(hash);							
@@ -1444,6 +1450,26 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						notifyProxyClosed("Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: ", 
 								new SyncException("Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " + msg.getResultCode(), SyncExceptionCause.SYNC_REGISTRATION_ERROR));
 					}
+					
+					if (_callbackToUIThread) {
+						// Run in UI thread
+						_mainUIHandler.post(new Runnable() {
+							@Override
+							public void run() {
+								if (_proxyListener instanceof IProxyListener) {
+									((IProxyListener)_proxyListener).onRegisterAppInterfaceResponse(msg);
+								} else if (_proxyListener instanceof IProxyListenerALMTesting) {
+									((IProxyListenerALMTesting)_proxyListener).onRegisterAppInterfaceResponse(msg);
+								}
+							}
+						});
+					} else {
+						if (_proxyListener instanceof IProxyListener) {
+							((IProxyListener)_proxyListener).onRegisterAppInterfaceResponse(msg);
+						} else if (_proxyListener instanceof IProxyListenerALMTesting) {
+							((IProxyListenerALMTesting)_proxyListener).onRegisterAppInterfaceResponse(msg);
+						}
+					}
 				} else if ((new RPCResponse(hash)).getCorrelationID() == POLICIES_CORRELATION_ID 
 						&& functionName.equals(Names.OnEncodedSyncPData)) {
 					// OnEncodedSyncPData
@@ -1497,17 +1523,24 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						notifyProxyClosed("Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: ", 
 								new SyncException("Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " + msg.getResultCode(), SyncExceptionCause.SYNC_REGISTRATION_ERROR));
 					}
-				} else {	
-					if (_callbackToUIThread) {
-						// Run in UI thread
-						_mainUIHandler.post(new Runnable() {
-							@Override
-							public void run() {
+				}
+				if (_callbackToUIThread) {
+					// Run in UI thread
+					_mainUIHandler.post(new Runnable() {
+						@Override
+						public void run() {
+							if (_proxyListener instanceof IProxyListener) {
 								((IProxyListener)_proxyListener).onRegisterAppInterfaceResponse(msg);
+							} else if (_proxyListener instanceof IProxyListenerALMTesting) {
+								((IProxyListenerALMTesting)_proxyListener).onRegisterAppInterfaceResponse(msg);
 							}
-						});
-					} else {
-						((IProxyListener)_proxyListener).onRegisterAppInterfaceResponse(msg);							
+						}
+					});
+				} else {
+					if (_proxyListener instanceof IProxyListener) {
+						((IProxyListener)_proxyListener).onRegisterAppInterfaceResponse(msg);
+					} else if (_proxyListener instanceof IProxyListenerALMTesting) {
+						((IProxyListenerALMTesting)_proxyListener).onRegisterAppInterfaceResponse(msg);
 					}
 				}
 			} else if (functionName.equals(Names.Speak)) {
@@ -1771,11 +1804,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					_mainUIHandler.post(new Runnable() {
 						@Override
 						public void run() {
-							((IProxyListener)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+							if (_proxyListener instanceof IProxyListener) {
+								((IProxyListener)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+							} else if (_proxyListener instanceof IProxyListenerALMTesting) {
+								((IProxyListenerALMTesting)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+							}
 						}
 					});
 				} else {
-					((IProxyListener)_proxyListener).onUnregisterAppInterfaceResponse(msg);	
+					if (_proxyListener instanceof IProxyListener) {
+						((IProxyListener)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+					} else if (_proxyListener instanceof IProxyListenerALMTesting) {
+						((IProxyListenerALMTesting)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+					}
 				}
 				
 				notifyProxyClosed("UnregisterAppInterfaceResponse", null);
@@ -2370,10 +2411,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		if (_advancedLifecycleManagementEnabled) {
 			if (		   request.getFunctionName() == Names.RegisterAppInterface
 					|| request.getFunctionName() == Names.UnregisterAppInterface) {
-				
-				SyncTrace.logProxyEvent("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.", SYNC_LIB_TRACE_KEY);
-				throw new SyncException("The RPCRequest, " + request.getFunctionName() + 
-						", is unnallowed using the Advanced Lifecycle Management Model.", SyncExceptionCause.INCORRECT_LIFECYCLE_MODEL);
+				if (!(_proxyListener instanceof IProxyListenerALMTesting)) {
+					SyncTrace.logProxyEvent("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.", SYNC_LIB_TRACE_KEY);
+					throw new SyncException("The RPCRequest, " + request.getFunctionName() + 
+							", is unnallowed using the Advanced Lifecycle Management Model.", SyncExceptionCause.INCORRECT_LIFECYCLE_MODEL);
+				}
 			}
 		}
 		

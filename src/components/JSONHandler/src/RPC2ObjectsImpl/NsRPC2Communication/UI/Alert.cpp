@@ -1,3 +1,35 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Alert.h"
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
@@ -6,7 +38,7 @@
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication::UI;
@@ -21,13 +53,13 @@ Alert& Alert::operator =(const Alert& c)
   if(AlertText3)  delete AlertText3;
   AlertText3= c.AlertText3 ? new std::string(c.AlertText3[0]) : 0;
   if(ttsChunks)  delete ttsChunks;
-  ttsChunks= c.ttsChunks ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.ttsChunks[0]) : 0;
+  ttsChunks= c.ttsChunks ? new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>(c.ttsChunks[0]) : 0;
   if(duration)  delete duration;
   duration= c.duration ? new unsigned int(c.duration[0]) : 0;
   if(playTone)  delete playTone;
   playTone= c.playTone ? new bool(c.playTone[0]) : 0;
   if(softButtons)  delete softButtons;
-  softButtons= c.softButtons ? new std::vector<NsAppLinkRPCV2::SoftButton>(c.softButtons[0]) : 0;
+  softButtons= c.softButtons ? new std::vector<NsSmartDeviceLinkRPCV2::SoftButton>(c.softButtons[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -118,15 +150,15 @@ void Alert::reset_AlertText3(void)
   AlertText3=0;
 }
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>* Alert::get_ttsChunks(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* Alert::get_ttsChunks(void)
 {
   return ttsChunks;
 }
 
-bool Alert::set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks_)
+bool Alert::set_ttsChunks(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& ttsChunks_)
 {
   if(ttsChunks)  delete ttsChunks;
-  ttsChunks=new std::vector< NsAppLinkRPCV2::TTSChunk>(ttsChunks_);
+  ttsChunks=new std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>(ttsChunks_);
   return true;
 }
 
@@ -172,15 +204,15 @@ void Alert::reset_playTone(void)
   playTone=0;
 }
 
-const std::vector< NsAppLinkRPCV2::SoftButton>* Alert::get_softButtons(void)
+const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* Alert::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool Alert::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
+bool Alert::set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons_)
 {
   if(softButtons)  delete softButtons;
-  softButtons=new std::vector< NsAppLinkRPCV2::SoftButton>(softButtons_);
+  softButtons=new std::vector< NsSmartDeviceLinkRPCV2::SoftButton>(softButtons_);
   return true;
 }
 

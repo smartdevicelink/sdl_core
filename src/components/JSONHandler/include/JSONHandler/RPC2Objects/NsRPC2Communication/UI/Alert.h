@@ -1,3 +1,35 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #ifndef NSRPC2COMMUNICATION_UI_ALERT_INCLUDE
 #define NSRPC2COMMUNICATION_UI_ALERT_INCLUDE
 
@@ -5,15 +37,14 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
 */
 
 namespace NsRPC2Communication
@@ -38,10 +69,10 @@ namespace NsRPC2Communication
       const std::string* get_AlertText1(void);
       const std::string* get_AlertText2(void);
       const std::string* get_AlertText3(void);
-      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_ttsChunks(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* get_ttsChunks(void);
       const unsigned int* get_duration(void);
       const bool* get_playTone(void);
-      const std::vector< NsAppLinkRPCV2::SoftButton>* get_softButtons(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* get_softButtons(void);
       int get_appId(void);
 
 
@@ -62,7 +93,7 @@ namespace NsRPC2Communication
       void reset_AlertText3(void);
 
 /// 1 <= size <= 100
-      bool set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks);
+      bool set_ttsChunks(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& ttsChunks);
 
       void reset_ttsChunks(void);
 
@@ -76,7 +107,7 @@ namespace NsRPC2Communication
       void reset_playTone(void);
 
 /// 0 <= size <= 4
-      bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
+      bool set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons);
 
       void reset_softButtons(void);
 
@@ -90,10 +121,10 @@ namespace NsRPC2Communication
       std::string* AlertText1;
       std::string* AlertText2;
       std::string* AlertText3;
-      std::vector< NsAppLinkRPCV2::TTSChunk>* ttsChunks;
+      std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* ttsChunks;
       unsigned int* duration;
       bool* playTone;
-      std::vector< NsAppLinkRPCV2::SoftButton>* softButtons;
+      std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* softButtons;
       int appId;
 
     };

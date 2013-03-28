@@ -1,3 +1,37 @@
+/**
+ * \file CBluetoothAdapter.cpp
+ * \brief Class CBluetoothAdapter.
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include <errno.h>
 #include <iomanip>
 #include <set>
@@ -16,15 +50,15 @@
 #include "IHandleGenerator.hpp"
 #include "CBluetoothAdapter.hpp"
 
-NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::SBluetoothDevice(const bdaddr_t & Address, const char * Name, const NsAppLink::NsTransportManager::CBluetoothAdapter::tRFCOMMChannelVector & AppLinkRFCOMMChannels):
+NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::SBluetoothDevice(const bdaddr_t & Address, const char * Name, const NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::tRFCOMMChannelVector & SmartDeviceLinkRFCOMMChannels):
 SDevice(Name),
 mAddress(Address),
-mAppLinkRFCOMMChannels(AppLinkRFCOMMChannels)
+mSmartDeviceLinkRFCOMMChannels(SmartDeviceLinkRFCOMMChannels)
 {
     mUniqueDeviceId = getUniqueDeviceId(Address);
 }
 
-bool NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::isSameAs(const NsAppLink::NsTransportManager::CDeviceAdapter::SDevice * OtherDevice) const
+bool NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::isSameAs(const NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SDevice * OtherDevice) const
 {
     bool result = false;
 
@@ -41,13 +75,13 @@ bool NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::isSameA
     return result;
 }
 
-NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConnection(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, const uint8_t RFCOMMChannel):
+NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConnection(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, const uint8_t RFCOMMChannel):
 SConnection(DeviceHandle),
 mRFCOMMChannel(RFCOMMChannel)
 {
 }
 
-bool NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::isSameAs(const NsAppLink::NsTransportManager::CDeviceAdapter::SConnection * OtherConnection) const
+bool NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::isSameAs(const NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection * OtherConnection) const
 {
     bool result = false;
 
@@ -64,29 +98,29 @@ bool NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::isSame
     return result;
 }
 
-NsAppLink::NsTransportManager::CBluetoothAdapter::CBluetoothAdapter(NsAppLink::NsTransportManager::IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator):
+NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::CBluetoothAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator):
 CDeviceAdapter(Listener, HandleGenerator),
-mAppLinkServiceUUID()
+mSmartDeviceLinkServiceUUID()
 {
     LOG4CPLUS_INFO(mLogger, "BluetoothAdapter constructed");
 
-    uint8_t appLinkServiceUUIDData[] = {0x93, 0x6D, 0xA0, 0x1F, 0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8};
-    sdp_uuid128_create(&mAppLinkServiceUUID, appLinkServiceUUIDData);
+    uint8_t SmartDeviceLinkServiceUUIDData[] = {0x93, 0x6D, 0xA0, 0x1F, 0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8};
+    sdp_uuid128_create(&mSmartDeviceLinkServiceUUID, SmartDeviceLinkServiceUUIDData);
 }
 
-NsAppLink::NsTransportManager::CBluetoothAdapter::~CBluetoothAdapter(void)
+NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::~CBluetoothAdapter(void)
 {
     LOG4CPLUS_INFO(mLogger, "BluetoothAdapter destructor");
 
     waitForThreadsTermination();
 }
 
-NsAppLink::NsTransportManager::EDeviceType NsAppLink::NsTransportManager::CBluetoothAdapter::getDeviceType(void) const
+NsSmartDeviceLink::NsTransportManager::EDeviceType NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::getDeviceType(void) const
 {
     return DeviceBluetooth;
 }
 
-void NsAppLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector< NsAppLink::NsTransportManager::CDeviceAdapter::SConnection* >& ConnectionsList)
+void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector< NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection* >& ConnectionsList)
 {
     bdaddr_t deviceAddress;
     tRFCOMMChannelVector rfcommChannels;
@@ -105,7 +139,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForD
         if (0 != device)
         {
             memcpy(&deviceAddress, &device->mAddress, sizeof(bdaddr_t));
-            rfcommChannels = device->mAppLinkRFCOMMChannels;
+            rfcommChannels = device->mSmartDeviceLinkRFCOMMChannels;
             isDeviceValid = true;
         }
         else
@@ -153,12 +187,12 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForD
         }
         else
         {
-            LOG4CPLUS_WARN(mLogger, "AppLink service was not discovered on device " << DeviceHandle);
+            LOG4CPLUS_WARN(mLogger, "SmartDeviceLink service was not discovered on device " << DeviceHandle);
         }
     }
 }
 
-void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
+void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 {
     LOG4CPLUS_INFO(mLogger, "Bluetooth adapter main thread initialized");
 
@@ -194,10 +228,10 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
                         for (int i = 0; i < numberOfDevices; ++i)
                         {
-                            tRFCOMMChannelVector appLinkRFCOMMChannels;
-                            discoverAppLinkRFCOMMChannels(inquiryInfoList[i].bdaddr, appLinkRFCOMMChannels);
+                            tRFCOMMChannelVector SmartDeviceLinkRFCOMMChannels;
+                            discoverSmartDeviceLinkRFCOMMChannels(inquiryInfoList[i].bdaddr, SmartDeviceLinkRFCOMMChannels);
 
-                            if (false == appLinkRFCOMMChannels.empty())
+                            if (false == SmartDeviceLinkRFCOMMChannels.empty())
                             {
                                 char deviceName[256];
 
@@ -207,7 +241,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                                     strncpy(deviceName, getUniqueDeviceId(inquiryInfoList[i].bdaddr).c_str(), sizeof(deviceName) / sizeof(deviceName[0]));
                                 }
 
-                                discoveredDevices.push_back(new SBluetoothDevice(inquiryInfoList[i].bdaddr, deviceName, appLinkRFCOMMChannels));
+                                discoveredDevices.push_back(new SBluetoothDevice(inquiryInfoList[i].bdaddr, deviceName, SmartDeviceLinkRFCOMMChannels));
                             }
                         }
                     }
@@ -254,18 +288,54 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                 }
             }
 
+            pthread_mutex_lock(&mConnectionsMutex);
+
+            std::set<tDeviceHandle> connectedDevices;
+
+            for (tConnectionMap::const_iterator connectionIterator = mConnections.begin(); connectionIterator != mConnections.end(); ++connectionIterator)
+            {
+                const SConnection * connection = connectionIterator->second;
+
+                if (0 != connection)
+                {
+                    if (connectedDevices.end() == connectedDevices.find(connection->mDeviceHandle))
+                    {
+                        connectedDevices.insert(connection->mDeviceHandle);
+                    }
+                }
+            }
+
+            pthread_mutex_unlock(&mConnectionsMutex);
+
             pthread_mutex_lock(&mDevicesMutex);
 
             for (tDeviceMap::iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
             {
-                delete deviceIterator->second;
+                SDevice * device = deviceIterator->second;
+
+                if (0 != device)
+                {
+                    if (newDevices.end() == newDevices.find(deviceIterator->first))
+                    {
+                        if (connectedDevices.end() != connectedDevices.find(deviceIterator->first))
+                        {
+                            newDevices[deviceIterator->first] = device;
+                            device = 0;
+                        }
+                    }
+
+                    if (0 != device)
+                    {
+                        delete device;
+                    }
+                }
             }
 
             mDevices = newDevices;
 
             pthread_mutex_unlock(&mDevicesMutex);
 
-            LOG4CPLUS_INFO(mLogger, "Discovered " << newDevices.size() << " device" << ((1u == newDevices.size()) ? "" : "s") << " with AppLink service. New devices map:");
+            LOG4CPLUS_INFO(mLogger, "Discovered " << newDevices.size() << " device" << ((1u == newDevices.size()) ? "" : "s") << " with SmartDeviceLink service. New devices map:");
 
             for (tDeviceMap::iterator deviceIterator = newDevices.begin(); deviceIterator != newDevices.end(); ++deviceIterator)
             {
@@ -292,7 +362,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
     LOG4CPLUS_INFO(mLogger, "Bluetooth adapter main thread finished");
 }
 
-void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
+void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::connectionThread(const NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
     LOG4CPLUS_INFO(mLogger, "Connection thread started for connection " << ConnectionHandle);
 
@@ -400,7 +470,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
     LOG4CPLUS_INFO(mLogger, "Connection thread finished for connection " << ConnectionHandle);
 }
 
-std::string NsAppLink::NsTransportManager::CBluetoothAdapter::getUniqueDeviceId(const bdaddr_t & DeviceAddress)
+std::string NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::getUniqueDeviceId(const bdaddr_t & DeviceAddress)
 {
     char deviceAddressString[32];
 
@@ -409,9 +479,9 @@ std::string NsAppLink::NsTransportManager::CBluetoothAdapter::getUniqueDeviceId(
     return std::string("BT-") + deviceAddressString;
 }
 
-void NsAppLink::NsTransportManager::CBluetoothAdapter::discoverAppLinkRFCOMMChannels(const bdaddr_t & DeviceAddress, NsAppLink::NsTransportManager::CBluetoothAdapter::tRFCOMMChannelVector & AppLinkRFCOMMChannels)
+void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::discoverSmartDeviceLinkRFCOMMChannels(const bdaddr_t & DeviceAddress, NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::tRFCOMMChannelVector & SmartDeviceLinkRFCOMMChannels)
 {
-    AppLinkRFCOMMChannels.clear();
+    SmartDeviceLinkRFCOMMChannels.clear();
 
     static bdaddr_t anyAddress = {{0, 0, 0, 0, 0, 0}};
 
@@ -419,7 +489,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::discoverAppLinkRFCOMMChan
 
     if (0 != sdpSession)
     {
-        sdp_list_t * searchList = sdp_list_append(0, &mAppLinkServiceUUID);
+        sdp_list_t * searchList = sdp_list_append(0, &mSmartDeviceLinkServiceUUID);
         uint32_t range = 0x0000ffff;
         sdp_list_t * attrList = sdp_list_append(0, &range);
         sdp_list_t * responseList = 0;
@@ -455,7 +525,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::discoverAppLinkRFCOMMChan
                                     case SDP_UINT8:
                                         if (RFCOMM_UUID == proto)
                                         {
-                                            AppLinkRFCOMMChannels.push_back(d->val.uint8);
+                                            SmartDeviceLinkRFCOMMChannels.push_back(d->val.uint8);
                                         }
                                         break;
                                 }
@@ -480,13 +550,13 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::discoverAppLinkRFCOMMChan
         LOG4CPLUS_ERROR(mLogger, "Service discovery failed for " << getUniqueDeviceId(DeviceAddress));
     }
 
-    if (false == AppLinkRFCOMMChannels.empty())
+    if (false == SmartDeviceLinkRFCOMMChannels.empty())
     {
         std::stringstream rfcommChannelsString;
 
-        for (tRFCOMMChannelVector::const_iterator channelIterator = AppLinkRFCOMMChannels.begin(); channelIterator != AppLinkRFCOMMChannels.end(); ++channelIterator)
+        for (tRFCOMMChannelVector::const_iterator channelIterator = SmartDeviceLinkRFCOMMChannels.begin(); channelIterator != SmartDeviceLinkRFCOMMChannels.end(); ++channelIterator)
         {
-            if (channelIterator != AppLinkRFCOMMChannels.begin())
+            if (channelIterator != SmartDeviceLinkRFCOMMChannels.begin())
             {
                 rfcommChannelsString << ", ";
             }
@@ -494,10 +564,10 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::discoverAppLinkRFCOMMChan
             rfcommChannelsString << static_cast<uint32_t>(*channelIterator);
         }
 
-        LOG4CPLUS_INFO(mLogger, "AppLink service was discovered on device " << getUniqueDeviceId(DeviceAddress) << " at channel(s): " << rfcommChannelsString.str().c_str());
+        LOG4CPLUS_INFO(mLogger, "SmartDeviceLink service was discovered on device " << getUniqueDeviceId(DeviceAddress) << " at channel(s): " << rfcommChannelsString.str().c_str());
     }
     else
     {
-        LOG4CPLUS_INFO(mLogger, "AppLink service was not discovered on device " << getUniqueDeviceId(DeviceAddress));
+        LOG4CPLUS_INFO(mLogger, "SmartDeviceLink service was not discovered on device " << getUniqueDeviceId(DeviceAddress));
     }
 }

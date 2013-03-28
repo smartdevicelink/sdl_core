@@ -1,10 +1,42 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/PerformInteraction.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/InteractionModeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/InteractionModeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformInteractionMarshaller.h"
 
 /*
@@ -12,7 +44,7 @@
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication::UI;
@@ -57,7 +89,7 @@ bool PerformInteractionMarshaller::checkIntegrityConst(const PerformInteraction&
     if(i>100)  return false;
   }
 
-  if(!NsAppLinkRPCV2::InteractionModeMarshaller::checkIntegrityConst(s.interactionMode))  return false;
+  if(!NsSmartDeviceLinkRPCV2::InteractionModeMarshaller::checkIntegrityConst(s.interactionMode))  return false;
 
   {
     unsigned int i=s.interactionChoiceSetIDList.size();
@@ -113,11 +145,11 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.initialPrompt[i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.initialPrompt[i]);
 
     json["params"]["initialPrompt"]=j;
   }
-  json["params"]["interactionMode"]=NsAppLinkRPCV2::InteractionModeMarshaller::toJSON(e.interactionMode);;
+  json["params"]["interactionMode"]=NsSmartDeviceLinkRPCV2::InteractionModeMarshaller::toJSON(e.interactionMode);;
   {
     unsigned int i=e.interactionChoiceSetIDList.size();
     Json::Value j=Json::Value(Json::arrayValue);
@@ -133,7 +165,7 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.helpPrompt[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.helpPrompt[0][i]);
 
     json["params"]["helpPrompt"]=j;
   }
@@ -143,7 +175,7 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
 
     json["params"]["timeoutPrompt"]=j;
   }
@@ -155,7 +187,7 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
 
     json["params"]["vrHelp"]=j;
   }
@@ -190,14 +222,14 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       c.initialPrompt.resize(i);
       while(i--)
       {
-        NsAppLinkRPCV2::TTSChunk t;
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
+        NsSmartDeviceLinkRPCV2::TTSChunk t;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
           return false;
          c.initialPrompt[i]=t;
       }
     }
 
-    if(!js.isMember("interactionMode") || !NsAppLinkRPCV2::InteractionModeMarshaller::fromJSON(js["interactionMode"],c.interactionMode))  return false;
+    if(!js.isMember("interactionMode") || !NsSmartDeviceLinkRPCV2::InteractionModeMarshaller::fromJSON(js["interactionMode"],c.interactionMode))  return false;
 
     if(!js.isMember("interactionChoiceSetIDList") || !js["interactionChoiceSetIDList"].isArray())
       return false;
@@ -227,11 +259,11 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.helpPrompt=new std::vector<NsAppLinkRPCV2::TTSChunk>();
+      c.helpPrompt=new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>();
       c.helpPrompt->resize(js["helpPrompt"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["helpPrompt"][i],c.helpPrompt[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["helpPrompt"][i],c.helpPrompt[0][i]))  return false;
     }
 
 
@@ -244,11 +276,11 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.timeoutPrompt=new std::vector<NsAppLinkRPCV2::TTSChunk>();
+      c.timeoutPrompt=new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>();
       c.timeoutPrompt->resize(js["timeoutPrompt"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["timeoutPrompt"][i],c.timeoutPrompt[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["timeoutPrompt"][i],c.timeoutPrompt[0][i]))  return false;
     }
 
 
@@ -272,11 +304,11 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.vrHelp=new std::vector<NsAppLinkRPCV2::VrHelpItem>();
+      c.vrHelp=new std::vector<NsSmartDeviceLinkRPCV2::VrHelpItem>();
       c.vrHelp->resize(js["vrHelp"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
     }
 
 

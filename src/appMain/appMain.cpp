@@ -1,7 +1,35 @@
 /**
  * \file appMain.cpp
- * \brief AppLink main application sources
- * \author AKara
+ * \brief SmartDeviceLink main application sources
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <cstdio>
@@ -39,29 +67,29 @@
 #include "TransportManager/ITransportManager.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 
-class CTransportManagerListener : public NsAppLink::NsTransportManager::ITransportManagerDeviceListener
+class CTransportManagerListener : public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener
 {
 public:
-    
-    CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager * transportManager);
-    
+
+    CTransportManagerListener(NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager);
+
 private:
-    
-    virtual void onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList);
-    
-    NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
+
+    virtual void onDeviceListUpdated(const NsSmartDeviceLink::NsTransportManager::tDeviceList& DeviceList);
+
+    NsSmartDeviceLink::NsTransportManager::ITransportManager * mTransportManager;
 };
- 
-CTransportManagerListener::CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager* transportManager)
+
+CTransportManagerListener::CTransportManagerListener(NsSmartDeviceLink::NsTransportManager::ITransportManager* transportManager)
 : mTransportManager(transportManager)
 {
 }
- 
-void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList)
+
+void CTransportManagerListener::onDeviceListUpdated(const NsSmartDeviceLink::NsTransportManager::tDeviceList& DeviceList)
 {
     if(DeviceList.empty())
     {
-        printf("Device list is updated. No devices with AppLink service are available\n");
+        printf("Device list is updated. No devices with SmartDeviceLink service are available\n");
     }
     else
     {
@@ -69,9 +97,9 @@ void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransport
         printf("If You don\'t want to connect to any device enter 0\n\n");
 
         int i = 1;
-        for(NsAppLink::NsTransportManager::tDeviceList::const_iterator it = DeviceList.begin(); it != DeviceList.end(); it++)
+        for(NsSmartDeviceLink::NsTransportManager::tDeviceList::const_iterator it = DeviceList.begin(); it != DeviceList.end(); it++)
         {
-            NsAppLink::NsTransportManager::SDeviceInfo device = *it;
+          NsSmartDeviceLink::NsTransportManager::SDeviceInfo device = *it;
             printf("%d: %s (%s)\n", i++, device.mUniqueDeviceId.c_str(), device.mUserFriendlyName.c_str());
         }
 
@@ -79,7 +107,7 @@ void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransport
 
         if ((0 < i) && (i <= DeviceList.size()))
         {
-            NsAppLink::NsTransportManager::SDeviceInfo device = DeviceList[i-1];
+          NsSmartDeviceLink::NsTransportManager::SDeviceInfo device = DeviceList[i-1];
             printf("Performing connect to: %s (%s)\n", device.mUniqueDeviceId.c_str(), device.mUserFriendlyName.c_str());
             mTransportManager->connectDevice(device.mDeviceHandle);
         }
@@ -106,10 +134,10 @@ int main(int argc, char** argv)
     PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
     LOG4CPLUS_INFO(logger, " Application started!");
 
-    NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
+    NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager = NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
     CTransportManagerListener tsl(transportManager);
-    
-    
+
+
 
     JSONHandler jsonHandler;
 
@@ -118,23 +146,22 @@ int main(int argc, char** argv)
     pProtocolHandler -> setProtocolObserver( &jsonHandler );
 
     transportManager -> addDataListener( pProtocolHandler );
-    
+
     jsonHandler.setProtocolHandler(pProtocolHandler);
 
     NsConnectionHandler::CConnectionHandler * connectionHandler = NsConnectionHandler::CConnectionHandler::getInstance();
 
     pProtocolHandler -> setSessionObserver( connectionHandler );
 
-    connectionHandler -> setTransportManager( transportManager );
+    connectionHandler -> set_transport_manager( transportManager );
 
     transportManager->addDeviceListener(connectionHandler);
-    transportManager->run();
 
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 
     jsonHandler.setRPCMessagesObserver(&appMgr);
 
-    connectionHandler -> setConnectionHandlerObserver(&appMgr);
+    connectionHandler -> set_connection_handler_observer(&appMgr);
 
     appMgr.setJsonHandler(&jsonHandler);
 
@@ -192,7 +219,6 @@ int main(int argc, char** argv)
     th2.Start(false);
 
     LOG4CPLUS_INFO(logger, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
-    //System::Thread th3(new System::ThreadArgImpl<NsAppManager::AppLinkInterface>(appLinkInterface, &NsAppManager::AppLinkInterface::MethodForReceiverThread, NULL));
     System::Thread th3(new System::ThreadArgImpl<JSONRPC2Handler>(jsonRPC2Handler, &JSONRPC2Handler::MethodForReceiverThread, NULL));
     th3.Start(false);
 
@@ -279,17 +305,9 @@ int main(int argc, char** argv)
     }
     /**********************************/
 
-//    transportManager->scanForNewDevices();
     while(true)
     {
         sleep(100500);
     }
-    
-    if (0 != pid_hmi)
-    {
-      kill(pid_hmi, SIGQUIT);
-    }
-
-    return EXIT_SUCCESS;
-} 
+}
 

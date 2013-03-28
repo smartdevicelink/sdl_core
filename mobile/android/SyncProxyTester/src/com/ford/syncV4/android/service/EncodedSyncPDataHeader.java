@@ -158,8 +158,11 @@ public class EncodedSyncPDataHeader {
 	
 	public byte[] assembleEncodedSyncPDataHeaderBytes() {
 		int EncodedSyncPDataHeader = 0;
+		//assign value on the right to EncodedSyncPHeader
 		EncodedSyncPDataHeader |= protocolVersion;
+		//shift 1 bit to the left
 		EncodedSyncPDataHeader <<= 1;
+		//convert boolean to int, then assign value 
 		EncodedSyncPDataHeader |= (responseRequired ? 1 : 0);
 		EncodedSyncPDataHeader <<= 1;
 		EncodedSyncPDataHeader |= (highBandwidth ? 1 : 0);

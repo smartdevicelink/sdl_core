@@ -1,7 +1,7 @@
 /*
  * Reference implementation of TTS component.
  * 
- * TTS is responsible for playing sound data sent from ApplinkCore
+ * TTS is responsible for playing sound data sent from SDLCore
  * to notify user about some events happened.
  *
  * @author Andriy Melnik
@@ -88,14 +88,14 @@ FFW.TTS = FFW.RPCObserver.create({
 		
 		switch (request.method) {
 		    case "TTS.Speak":{
-		    	MFT.ApplinkModel.onPrompt(request.params.ttsChunks.splice(0, 1));
+		    	MFT.SDLModel.onPrompt(request.params.ttsChunks.splice(0, 1));
 
 				// send repsonse
 				var JSONMessage = {
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method"   :    "TTS.SpeakResponse"
 					}
 				};
@@ -112,7 +112,7 @@ FFW.TTS = FFW.RPCObserver.create({
 					"result"	:	{
 						"capabilities":["TEXT"],
 
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "TTS.GetCapabilitiesResponse"
 					}
 				};
@@ -126,9 +126,9 @@ FFW.TTS = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "TTS.GetSupportedLanguagesResponse",
-						"languages" : MFT.ApplinkModel.applinkLanguagesList
+						"languages" : MFT.SDLModel.sdlLanguagesList
 					}
 				};
 				this.client.send(JSONMessage);
@@ -141,9 +141,9 @@ FFW.TTS = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "TTS.GetLanguageResponse",
-						"language" : MFT.ApplinkModel.hmiTTSVRLanguage
+						"language" : MFT.SDLModel.hmiTTSVRLanguage
 					}
 				};
 				this.client.send(JSONMessage);
@@ -152,14 +152,14 @@ FFW.TTS = FFW.RPCObserver.create({
 		    }
 			case "TTS.ChangeRegistration":{
 
-				MFT.ApplinkModel.changeRegistrationTTSVR(request.params.language);
+				MFT.SDLModel.changeRegistrationTTSVR(request.params.language);
 
 				// send repsonse
 				var JSONMessage = {
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method"   :    "TTS.ChangeRegistrationResponse"
 					}
 				};
@@ -176,7 +176,7 @@ FFW.TTS = FFW.RPCObserver.create({
 	},
 
 	/*
-	 * Notifies if applink TTS components language was changed
+	 * Notifies if sdl TTS components language was changed
  	 */	
 	OnLanguageChange: function( lang ) {
 		Em.Logger.log("FFW.TTS.OnLanguageChange");

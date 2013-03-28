@@ -1,25 +1,57 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #ifndef APPLICATION_V2_H
 #define APPLICATION_V2_H
 
 #include "AppMgr/Application.h"
 #include "AppMgr/AppChoiceSets.h"
 
-#include "JSONHandler/ALRPCObjects/V2/Language.h"
-#include "JSONHandler/ALRPCObjects/V2/AppType.h"
-#include "JSONHandler/ALRPCObjects/V2/SyncMsgVersion.h"
-#include "JSONHandler/ALRPCObjects/V2/TTSChunk.h"
+#include "JSONHandler/SDLRPCObjects/V2/Language.h"
+#include "JSONHandler/SDLRPCObjects/V2/AppType.h"
+#include "JSONHandler/SDLRPCObjects/V2/SyncMsgVersion.h"
+#include "JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
 
 namespace NsAppManager
 {
     /**
      * \brief Application types
      */
-    typedef std::vector<NsAppLinkRPCV2::AppType> AppTypes;
+    typedef std::vector<NsSmartDeviceLinkRPCV2::AppType> AppTypes;
 
     /**
      * \brief TTS name
      */
-    typedef std::vector<NsAppLinkRPCV2::TTSChunk> TTSName;
+    typedef std::vector<NsSmartDeviceLinkRPCV2::TTSChunk> TTSName;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application of protocol v2 being registered on HMI
@@ -44,25 +76,25 @@ namespace NsAppManager
          * \brief Set application desired languuage
          * \param value application desired language
          */
-        void setLanguageDesired(NsAppLinkRPCV2::Language value);
+        void setLanguageDesired(NsSmartDeviceLinkRPCV2::Language value);
 
         /**
          * \brief retrieve application desired language
          * \return application desired language
          */
-        const NsAppLinkRPCV2::Language& getLanguageDesired( ) const;
+        const NsSmartDeviceLinkRPCV2::Language& getLanguageDesired( ) const;
 
         /**
          * \brief Set application HMI desired display language
          * \param value application HMI desired display language
          */
-        void setHMIDisplayLanguageDesired( NsAppLinkRPCV2::Language value );
+        void setHMIDisplayLanguageDesired( NsSmartDeviceLinkRPCV2::Language value );
 
         /**
          * \brief retrieve application HMI desired display language
          * \return application HMI desired display language
          */
-        const NsAppLinkRPCV2::Language& getHMIDisplayLanguageDesired( ) const;
+        const NsSmartDeviceLinkRPCV2::Language& getHMIDisplayLanguageDesired( ) const;
 
         /**
          * \brief Set application type
@@ -80,13 +112,13 @@ namespace NsAppManager
          * \brief Set application sync message version
          * \param value application sync message version
          */
-        void setSyncMsgVersion(NsAppLinkRPCV2::SyncMsgVersion value);
+        void setSyncMsgVersion(NsSmartDeviceLinkRPCV2::SyncMsgVersion value);
 
         /**
          * \brief retrieve application sync message version
          * \return application sync msg version
          */
-        const NsAppLinkRPCV2::SyncMsgVersion& getSyncMsgVersion( ) const;
+        const NsSmartDeviceLinkRPCV2::SyncMsgVersion& getSyncMsgVersion( ) const;
 
         /**
          * \brief Set application text-to-speech name
@@ -139,11 +171,11 @@ namespace NsAppManager
          */
         Application_v2(const Application_v2& );
 
-        NsAppLinkRPCV2::Language mLanguageDesired;
+        NsSmartDeviceLinkRPCV2::Language mLanguageDesired;
         
-        NsAppLinkRPCV2::Language mHMIDisplayLanguageDesired;
+        NsSmartDeviceLinkRPCV2::Language mHMIDisplayLanguageDesired;
 
-        NsAppLinkRPCV2::SyncMsgVersion mSyncMsgVersion;
+        NsSmartDeviceLinkRPCV2::SyncMsgVersion mSyncMsgVersion;
 
    //     std::string mAppID;
         AppTypes mAppType;

@@ -47,10 +47,11 @@ public class RPCStruct {
 		if (version == 2) {
 			String messageType = (String)store.keys().nextElement();
 			Hashtable function = (Hashtable)store.get(messageType);
-			Hashtable hash = (Hashtable)function.get(Names.parameters);
-			Hashtable hashToSend = new Hashtable();
-			hashToSend.put(Names.parameters, hash);
-			return JsonRPCMarshaller.serializeHashtable(hashToSend);
+            Hashtable parameters = (Hashtable)function.get(Names.parameters);
+			return JsonRPCMarshaller.serializeHashtable(parameters);
+			//Hashtable hashToSend = new Hashtable();
+			//hashToSend.put(Names.parameters, parameters);
+			//return JsonRPCMarshaller.serializeHashtable(hashToSend);
 		} else return JsonRPCMarshaller.serializeHashtable(store);
 	}
 

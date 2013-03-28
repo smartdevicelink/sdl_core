@@ -1,8 +1,34 @@
-/**
- * \file AppMgrCore.h
- * \brief App manager core functionality
- * \author vsalo
- */
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #ifndef APPMGR_H_
 #define APPMGR_H_
@@ -11,33 +37,34 @@
 #include "AppMgr/Application.h"
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/VehicleDataMapping.h"
-#include "AppMgr/MessageMapping.h"
-#include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
 #include "AppMgr/SyncPManager.h"
 #include "AppMgr/DeviceList.h"
 #include "AppMgr/DeviceHandler.h"
-#include "JSONHandler/ALRPCObjects/V2/DisplayCapabilities.h"
-#include "JSONHandler/ALRPCObjects/V2/OnDriverDistraction.h"
+#include "JSONHandler/SDLRPCObjects/V2/DisplayCapabilities.h"
+#include "JSONHandler/SDLRPCObjects/V2/OnDriverDistraction.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonEvent.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonPress.h"
-#include "JSONHandler/ALRPCObjects/V2/VehicleType.h"
-#include "JSONHandler/ALRPCObjects/V1/Language.h"
-#include "JSONHandler/ALRPCObjects/V2/Language.h"
+#include "JSONHandler/SDLRPCObjects/V2/VehicleType.h"
+#include "JSONHandler/SDLRPCObjects/V1/Language.h"
+#include "JSONHandler/SDLRPCObjects/V2/Language.h"
 #include "AppMgr/MessageChaining.hpp"
+#include "AppMgr/DeviceStorage.hpp"
 
-namespace NsAppLinkRPC
+#include "Utils/threads/thread.h"
+
+namespace NsSmartDeviceLinkRPC
 {
-    class ALRPCMessage;
+    class SDLRPCMessage;
 }
 class JSONHandler;
 class JSONRPC2Handler;
 
-namespace NsAppLinkRPC
+namespace NsSmartDeviceLinkRPC
 {
     class RegisterAppInterface_request;
     class OnDriverDistraction;
-    class ALRPCRequest;
+    class SDLRPCRequest;
 }
 
 namespace NsRPC2Communication
@@ -57,7 +84,6 @@ namespace NsConnectionHandler
 
 namespace NsAppManager
 {
-
     class RegistryItem;
     template< class QueueType >
     class AppMgrCoreQueue;
@@ -65,7 +91,7 @@ namespace NsAppManager
     /**
      * \brief a connection between a mobile RPC message and a session
      */
-    typedef std::pair<NsAppLinkRPC::ALRPCMessage*, int> Message;
+    typedef std::pair<NsSmartDeviceLinkRPC::SDLRPCMessage*, int> Message;
 
     /**
      * \brief a list of device names
@@ -100,7 +126,7 @@ namespace NsAppManager
          * \brief push mobile RPC message to a queue
          * \param message a message to be pushed
          */
-        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , int appId);
+        void pushMobileRPCMessage(NsSmartDeviceLinkRPC::SDLRPCMessage * message , int appId);
 
         /**
          * \brief push HMI RPC2 message to a queue
@@ -166,18 +192,19 @@ namespace NsAppManager
          * \param sessionKey session/connection key
          * \param device device handler
          */
-        void addDevice( const int& sessionKey, const NsConnectionHandler::tDeviceHandle& device );
+        void addDevice( const NsConnectionHandler::tDeviceHandle &device,
+            const int &sessionKey, int firstSessionKey );
 
         /**
          * \brief remove a device from a mapping
          * \param sessionKey session/connection key
          */
-        void removeDevice(const int& sessionKey);
+        void removeDevice(const int &sessionKey, int firstSessionKey);
 
         bool getAudioPassThruFlag() const;
         void setAudioPassThruFlag(bool flag);
 
-        const MessageMapping& getMessageMapping() const;
+        //const MessageMapping& getMessageMapping() const;
 
         /**
          * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
@@ -199,6 +226,8 @@ namespace NsAppManager
          * \return bool Success of operation
          */
         bool performActivitiesForActivatingApp( Application * app );
+
+        Application * getItem( int applicationId );
 
     private:
 
@@ -233,7 +262,7 @@ namespace NsAppManager
          * \param sessionID an id of the session which will be associated with the application
          * \return A instance of RegistryItem created for application
          */
-        const RegistryItem* registerApplication(NsAppLinkRPC::ALRPCMessage *request , int sessionKey);
+        const Application* registerApplication(NsSmartDeviceLinkRPC::SDLRPCMessage *request , int sessionKey);
 
         /**
          * \brief unregister an application associated with the given session
@@ -283,55 +312,73 @@ namespace NsAppManager
         /**
          * \brief Inserts message chain
          * \param chain Pointer to @MessageChain
-         * \param connectionKey Id of connection for Mobile side 
+         * \param connectionKey Id of connection for Mobile side
          * \param correlationID Correlation id for response for Mobile side
          * \return @MessageChaining* pointer to result chain
          */
         MessageChaining * addChain(MessageChaining * chain, int connectionKey, unsigned int correlationID);
 
-        AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
+        void differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList );
+
+        Application * getActiveItem();
+
+        Application * getApplicationByCommand(const unsigned int &cmdId, int appId);
+
+        bool activateApp( Application * appToBeActivated );
+
+        AppMgrCoreQueue<Message>* mQueueRPCSmartDeviceLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
-        //CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPCV2::ButtonCapabilities> mButtonCapabilitiesV2;
-        NsAppLinkRPC::DisplayCapabilities mDisplayCapabilitiesV1;
-        NsAppLinkRPCV2::DisplayCapabilities mDisplayCapabilitiesV2;
-        NsAppLinkRPCV2::PresetBankCapabilities mPresetBankCapabilities;
-        //CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPCV2::HmiZoneCapabilities> mHmiZoneCapabilitiesV2;
-        //CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilitiesV1;
-        //CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
-        CapabilitiesContainer<NsAppLinkRPCV2::SpeechCapabilities> mSpeechCapabilitiesV2;
-        CapabilitiesContainer<NsAppLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
+        //CapabilitiesContainer<NsSmartDeviceLinkRPC::ButtonCapabilities> mButtonCapabilitiesV1;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::ButtonCapabilities> mButtonCapabilitiesV2;
+        NsSmartDeviceLinkRPC::DisplayCapabilities mDisplayCapabilitiesV1;
+        NsSmartDeviceLinkRPCV2::DisplayCapabilities mDisplayCapabilitiesV2;
+        NsSmartDeviceLinkRPCV2::PresetBankCapabilities mPresetBankCapabilities;
+        //CapabilitiesContainer<NsSmartDeviceLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilitiesV1;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::HmiZoneCapabilities> mHmiZoneCapabilitiesV2;
+        //CapabilitiesContainer<NsSmartDeviceLinkRPC::VrCapabilities> mVrCapabilitiesV1;
+        //CapabilitiesContainer<NsSmartDeviceLinkRPC::SpeechCapabilities> mSpeechCapabilitiesV1;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::SpeechCapabilities> mSpeechCapabilitiesV2;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
         ButtonMapping       mButtonsMapping;
         VehicleDataMapping  mVehicleDataMapping;
-        MessageMapping      mMessageMapping;
-        RequestMapping      mRequestMapping;
-        DeviceList          mDeviceList;
+        //MessageMapping      mMessageMapping;
+        //RequestMapping      mRequestMapping;
+        //DeviceList          mDeviceList;
         DeviceHandler       mDeviceHandler;
-        
+
         MessageChains mMessageChaining;
 
-        NsAppLinkRPC::OnDriverDistraction* mDriverDistractionV1;
-        NsAppLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;
+        NsSmartDeviceLinkRPC::OnDriverDistraction* mDriverDistractionV1;
+        NsSmartDeviceLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;
 
-        NsAppLinkRPC::Language mUiLanguageV1;
-        NsAppLinkRPC::Language mVrLanguageV1;
-        NsAppLinkRPC::Language mTtsLanguageV1;
-        NsAppLinkRPCV2::Language mUiLanguageV2;
-        NsAppLinkRPCV2::Language mVrLanguageV2;
-        NsAppLinkRPCV2::Language mTtsLanguageV2;
-        std::vector<NsAppLinkRPCV2::Language> mUISupportedLanguages;
-        std::vector<NsAppLinkRPCV2::Language> mVRSupportedLanguages;
-        std::vector<NsAppLinkRPCV2::Language> mTTSSupportedLanguages;
+        NsSmartDeviceLinkRPC::Language mUiLanguageV1;
+        NsSmartDeviceLinkRPC::Language mVrLanguageV1;
+        NsSmartDeviceLinkRPC::Language mTtsLanguageV1;
+        NsSmartDeviceLinkRPCV2::Language mUiLanguageV2;
+        NsSmartDeviceLinkRPCV2::Language mVrLanguageV2;
+        NsSmartDeviceLinkRPCV2::Language mTtsLanguageV2;
+        std::vector<NsSmartDeviceLinkRPCV2::Language> mUISupportedLanguages;
+        std::vector<NsSmartDeviceLinkRPCV2::Language> mVRSupportedLanguages;
+        std::vector<NsSmartDeviceLinkRPCV2::Language> mTTSSupportedLanguages;
 
-        NsAppLinkRPCV2::VehicleType mVehicleType;
+        NsSmartDeviceLinkRPCV2::VehicleType mVehicleType;
         bool mAudioPassThruFlag;
+        int mPerformInteractionFlag;
+        int mHMIStartupFlag;
+
+        std::map<int, int> menuMapping;  // map<request_id, menu_id>
 
         SyncPManager     mSyncPManager;
 
         static log4cplus::Logger mLogger;
+
+        std::map<int, Application*> mApplications;
+        std::map<int, DeviceStorage> mDevices;
+        //NsConnectionHandler::tDeviceList mDevices;
+
+        threads::Thread* perform_audio_thread_;
     };
 
 } // namespace NsAppManager

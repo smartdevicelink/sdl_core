@@ -13,6 +13,7 @@ public class Const {
 	public static final String PREFS_KEY_APPNAME = "appName";
 	public static final String PREFS_KEY_LANG = "desiredLang";
 	public static final String PREFS_KEY_HMILANG = "desiredHMILang";
+	public static final String PREFS_KEY_DISABLE_LOCK_WHEN_TESTING = "disableLockWhenTesting";
 
 	// Default values
 	public static final int PREFS_DEFAULT_PROTOCOLVERSION = 1;
@@ -20,6 +21,7 @@ public class Const {
 	public static final String PREFS_DEFAULT_APPNAME = "SyncProxyTester";
 	public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
+	public static final boolean PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING = false;
 
 	// Transport properties
 	public static final class Transport {

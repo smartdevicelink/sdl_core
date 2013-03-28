@@ -1,3 +1,35 @@
+//
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/GetVehicleDataResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
@@ -6,7 +38,7 @@
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication::VehicleInfo;
@@ -15,7 +47,7 @@ using namespace NsRPC2Communication::VehicleInfo;
 GetVehicleDataResponse& GetVehicleDataResponse::operator =(const GetVehicleDataResponse& c)
 {
   if(gps)  delete gps;
-  gps= c.gps ? new NsAppLinkRPCV2::GPSData(c.gps[0]) : 0;
+  gps= c.gps ? new NsSmartDeviceLinkRPCV2::GPSData(c.gps[0]) : 0;
   if(speed)  delete speed;
   speed= c.speed ? new float(c.speed[0]) : 0;
   if(rpm)  delete rpm;
@@ -31,9 +63,9 @@ GetVehicleDataResponse& GetVehicleDataResponse::operator =(const GetVehicleDataR
   if(vin)  delete vin;
   vin= c.vin ? new std::string(c.vin[0]) : 0;
   if(prndl)  delete prndl;
-  prndl= c.prndl ? new NsAppLinkRPCV2::PRNDL(c.prndl[0]) : 0;
+  prndl= c.prndl ? new NsSmartDeviceLinkRPCV2::PRNDL(c.prndl[0]) : 0;
   if(tirePressure)  delete tirePressure;
-  tirePressure= c.tirePressure ? new NsAppLinkRPCV2::TireStatus(c.tirePressure[0]) : 0;
+  tirePressure= c.tirePressure ? new NsSmartDeviceLinkRPCV2::TireStatus(c.tirePressure[0]) : 0;
   if(batteryPackVoltage)  delete batteryPackVoltage;
   batteryPackVoltage= c.batteryPackVoltage ? new float(c.batteryPackVoltage[0]) : 0;
   if(batteryPackCurrent)  delete batteryPackCurrent;
@@ -103,15 +135,15 @@ GetVehicleDataResponse::GetVehicleDataResponse(const GetVehicleDataResponse& c) 
 }
 
 
-const NsAppLinkRPCV2::GPSData* GetVehicleDataResponse::get_gps(void)
+const NsSmartDeviceLinkRPCV2::GPSData* GetVehicleDataResponse::get_gps(void)
 {
   return gps;
 }
 
-bool GetVehicleDataResponse::set_gps(const NsAppLinkRPCV2::GPSData& gps_)
+bool GetVehicleDataResponse::set_gps(const NsSmartDeviceLinkRPCV2::GPSData& gps_)
 {
   if(gps)  delete gps;
-  gps=new NsAppLinkRPCV2::GPSData(gps_);
+  gps=new NsSmartDeviceLinkRPCV2::GPSData(gps_);
   return true;
 }
 
@@ -247,15 +279,15 @@ void GetVehicleDataResponse::reset_vin(void)
   vin=0;
 }
 
-const NsAppLinkRPCV2::PRNDL* GetVehicleDataResponse::get_prndl(void)
+const NsSmartDeviceLinkRPCV2::PRNDL* GetVehicleDataResponse::get_prndl(void)
 {
   return prndl;
 }
 
-bool GetVehicleDataResponse::set_prndl(const NsAppLinkRPCV2::PRNDL& prndl_)
+bool GetVehicleDataResponse::set_prndl(const NsSmartDeviceLinkRPCV2::PRNDL& prndl_)
 {
   if(prndl)  delete prndl;
-  prndl=new NsAppLinkRPCV2::PRNDL(prndl_);
+  prndl=new NsSmartDeviceLinkRPCV2::PRNDL(prndl_);
   return true;
 }
 
@@ -265,15 +297,15 @@ void GetVehicleDataResponse::reset_prndl(void)
   prndl=0;
 }
 
-const NsAppLinkRPCV2::TireStatus* GetVehicleDataResponse::get_tirePressure(void)
+const NsSmartDeviceLinkRPCV2::TireStatus* GetVehicleDataResponse::get_tirePressure(void)
 {
   return tirePressure;
 }
 
-bool GetVehicleDataResponse::set_tirePressure(const NsAppLinkRPCV2::TireStatus& tirePressure_)
+bool GetVehicleDataResponse::set_tirePressure(const NsSmartDeviceLinkRPCV2::TireStatus& tirePressure_)
 {
   if(tirePressure)  delete tirePressure;
-  tirePressure=new NsAppLinkRPCV2::TireStatus(tirePressure_);
+  tirePressure=new NsSmartDeviceLinkRPCV2::TireStatus(tirePressure_);
   return true;
 }
 
