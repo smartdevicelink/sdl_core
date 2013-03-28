@@ -79,7 +79,7 @@ namespace log4cplus
 
 namespace connection_handler
 {
-    class IDevicesDiscoveryStarter;
+    class DevicesDiscoveryStarter;
 }
 
 namespace NsAppManager
@@ -167,13 +167,13 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(connection_handler::IDevicesDiscoveryStarter* handler);
+        void setConnectionHandler(connection_handler::DevicesDiscoveryStarter* handler);
 
         /**
          * \brief Gets connection handler instance
          * \return connection handler
          */
-        connection_handler::IDevicesDiscoveryStarter* getConnectionHandler( ) const;
+        connection_handler::DevicesDiscoveryStarter* getConnectionHandler( ) const;
 
         /**
          * \brief set device list

@@ -1,5 +1,5 @@
 /**
- * \file CConnection.hpp
+ * \file Connection.hpp
  * \brief Connection class.
  * Stores connection information
  *
@@ -62,21 +62,21 @@ typedef std::vector<unsigned char> SessionList;
 typedef std::vector<unsigned char>::iterator SessionListIterator;
 
 /**
- * \class CConnection
+ * \class Connection
  * \brief Connection class
  */
-class CConnection {
+class Connection {
  public:
   /**
    * \brief Class constructor
    */
-  CConnection(ConnectionHandle aConnectionHandle,
-              DeviceHandle aConnectionDeviceHandle);
+  Connection(ConnectionHandle connection_handle,
+              DeviceHandle connection_device_handle);
 
   /**
    * \brief Destructor
    */
-  ~CConnection();
+  ~Connection();
 
   /**
    * \brief Returns device handle
@@ -101,7 +101,7 @@ class CConnection {
    * \param aSession session ID
    * \return sessionID or -1 in case of issues
    */
-  int RemoveSession(unsigned char aSession);
+  int RemoveSession(unsigned char session);
 
   /**
    * \brief Returns ID of first session from connection
@@ -147,12 +147,12 @@ class CConnection {
  * \brief Type for Connections map
  * Key is ConnectionHandle which is uniq
  */
-typedef std::map<int, CConnection> ConnectionList;
+typedef std::map<int, Connection> ConnectionList;
 
 /**
  * \brief Type for Connections map iterator
  */
-typedef std::map<int, CConnection>::iterator ConnectionListIterator;
+typedef std::map<int, Connection>::iterator ConnectionListIterator;
 
 }/* namespace connection_handler */
 

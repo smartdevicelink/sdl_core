@@ -149,7 +149,7 @@ int main(int argc, char** argv)
 
     jsonHandler.setProtocolHandler(pProtocolHandler);
 
-    connection_handler::CConnectionHandler * connectionHandler = connection_handler::CConnectionHandler::getInstance();
+    connection_handler::ConnectionHandlerImpl * connectionHandler = connection_handler::ConnectionHandlerImpl::getInstance();
 
     pProtocolHandler -> setSessionObserver( connectionHandler );
 

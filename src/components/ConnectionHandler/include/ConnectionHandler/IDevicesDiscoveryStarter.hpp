@@ -1,5 +1,5 @@
 /**
- * \file IDevicesDiscoveryStarter.hpp
+ * \file DevicesDiscoveryStarter.hpp
  * \brief Starter of devices discovering process.
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -44,10 +44,10 @@
  */
 namespace connection_handler {
 /**
- * \class IDevicesDiscoveryStarter
+ * \class DevicesDiscoveryStarter
  * \brief Starter of devices discovering process class
  */
-class IDevicesDiscoveryStarter {
+class DevicesDiscoveryStarter {
  public:
   /**
    * \brief Method which should start devices discoveryng
@@ -59,7 +59,7 @@ class IDevicesDiscoveryStarter {
    * \param deviceHandle Handle of device to connect to
    */
   virtual void ConnectToDevice(
-      connection_handler::DeviceHandle deviceHandle) = 0;
+      connection_handler::DeviceHandle device_handle) = 0;
 
   virtual void StartTransportManager() = 0;
 
@@ -67,7 +67,7 @@ class IDevicesDiscoveryStarter {
   /**
    * \brief Destructor
    */
-  virtual ~IDevicesDiscoveryStarter() {
+  virtual ~DevicesDiscoveryStarter() {
   }
   ;
 };

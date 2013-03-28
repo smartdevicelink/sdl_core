@@ -1,5 +1,5 @@
 /**
- * \file CConnectionHandler.hpp
+ * \file ConnectionHandlerImpl.hpp
  * \brief Connection handler class.
  * Observes TransportManager and ProtocolHandler, stores information regarding connections
  * and sessions and provides it to AppManager.
@@ -56,30 +56,30 @@
  */
 namespace connection_handler {
 /**
- * \class CConnectionHandler
+ * \class ConnectionHandlerImpl
  * \brief SmartDeviceLink ConnectionHandler main class
  */
-class CConnectionHandler :
+class ConnectionHandlerImpl :
     public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener,
-    public NsProtocolHandler::ISessionObserver, public IDevicesDiscoveryStarter,
-    public IConnectionHandler {
+    public NsProtocolHandler::ISessionObserver, public DevicesDiscoveryStarter,
+    public ConnectionHandler {
  public:
   /**
    * \brief Singletone instantiator.
-   * \return pointer to CConnectionHandler instance.
+   * \return pointer to ConnectionHandlerImpl instance.
    */
-  static CConnectionHandler* getInstance();
+  static ConnectionHandlerImpl* getInstance();
 
   /**
    * \brief Destructor
    */
-  ~CConnectionHandler();
+  ~ConnectionHandlerImpl();
 
   /**
    * \brief Sets observer pointer for ConnectionHandler.
    * \param observer Pointer to observer object.
    **/
-  virtual void set_connection_handler_observer(IConnectionHandlerObserver * observer);
+  virtual void set_connection_handler_observer(ConnectionHandlerObserver * observer);
 
   /**
    * \brief Available devices list updated.
@@ -196,7 +196,7 @@ class CConnectionHandler :
    * \brief Connects to all services of device
    * \param deviceHandle Handle of device to connect to
    */
-  virtual void ConnectToDevice(connection_handler::DeviceHandle deviceHandle);
+  virtual void ConnectToDevice(connection_handler::DeviceHandle device_handle);
 
   virtual void StartTransportManager();
 
@@ -204,12 +204,12 @@ class CConnectionHandler :
   /**
    * \brief Default class constructor
    */
-  CConnectionHandler();
+  ConnectionHandlerImpl();
 
   /**
    * \brief Copy constructor
    */
-  CConnectionHandler(const CConnectionHandler&);
+  ConnectionHandlerImpl(const ConnectionHandlerImpl&);
 
   /**
    * \brief Checks does device exist in list from TransportManager
@@ -218,15 +218,15 @@ class CConnectionHandler :
   * \return True if device exists.
    */
   bool DoesDeviceExistInTMList(
-      const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList,
-      const connection_handler::DeviceHandle DeviceHandle);
+      const NsSmartDeviceLink::NsTransportManager::tDeviceList & device_list,
+      const connection_handler::DeviceHandle device_handle);
 
   /**
    * \brief Checks does device exist in list and adds if not
    * \param DeviceHandle Handle of device for checking.
    */
   void AddDeviceInDeviceListIfNotExist(
-      const NsSmartDeviceLink::NsTransportManager::SDeviceInfo DeviceInfo);
+      const NsSmartDeviceLink::NsTransportManager::SDeviceInfo device_info);
 
   /**
    * \brief Disconnect application.
@@ -240,7 +240,7 @@ class CConnectionHandler :
   /**
    * \brief Pointer to observer
    */
-  IConnectionHandlerObserver* connection_handler_observer_;
+  ConnectionHandlerObserver* connection_handler_observer_;
 
   /**
    * \brief Pointer to TransportManager

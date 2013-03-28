@@ -82,7 +82,7 @@ namespace NsAppManager
      * \param handle device handle
      * \return device associated with the given handle
      */
-    const connection_handler::CDevice* DeviceList::findDeviceByHandle(const connection_handler::DeviceHandle &handle) const
+    const connection_handler::Device* DeviceList::findDeviceByHandle(const connection_handler::DeviceHandle &handle) const
     {
         connection_handler::DeviceList::const_iterator it = mDeviceList.find(handle);
         if(it != mDeviceList.end())
@@ -98,11 +98,11 @@ namespace NsAppManager
      * \param name device name
      * \return device associated with the given name
      */
-    const connection_handler::CDevice *DeviceList::findDeviceByName(const std::string &name) const
+    const connection_handler::Device *DeviceList::findDeviceByName(const std::string &name) const
     {
         for(connection_handler::DeviceList::const_iterator it = mDeviceList.begin(); it != mDeviceList.end(); it++)
         {
-            const connection_handler::CDevice& device = it->second;
+            const connection_handler::Device& device = it->second;
             if(device.user_friendly_name() == name)
             {
                 return &device;

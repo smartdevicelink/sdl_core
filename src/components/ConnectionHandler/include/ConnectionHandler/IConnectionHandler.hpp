@@ -1,5 +1,5 @@
 /**
- * \file IConnectionHandler.hpp
+ * \file ConnectionHandler.hpp
  * \brief Connection handler interface class.
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -50,24 +50,24 @@
  */
 namespace connection_handler {
 /**
- * \class IConnectionHandler
+ * \class ConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler interface class
  */
-class IConnectionHandler {
+class ConnectionHandler {
  public:
   /**
    * \brief Sets observer pointer for ConnectionHandler.
    * \param observer Pointer to observer object.
    **/
   virtual void set_connection_handler_observer(
-      IConnectionHandlerObserver * observer)=0;
+      ConnectionHandlerObserver * observer)=0;
 
   /**
    * \brief Sets pointer to TransportManager.
    * \param transportManager Pointer to TransportManager object.
    **/
   virtual void set_transport_manager(
-      NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager)=0;
+      NsSmartDeviceLink::NsTransportManager::ITransportManager * transport_manager)=0;
 
   virtual void StartTransportManager() = 0;
 
@@ -75,7 +75,7 @@ class IConnectionHandler {
   /**
    * \brief Destructor
    */
-  virtual ~IConnectionHandler() {
+  virtual ~ConnectionHandler() {
   }
   ;
 

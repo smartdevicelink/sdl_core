@@ -52,7 +52,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void ConnectionHandler::setConnectionHandler(connection_handler::IDevicesDiscoveryStarter *handler)
+    void ConnectionHandler::setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -66,7 +66,7 @@ namespace NsAppManager
      * \brief Gets connection handler instance
      * \return connection handler
      */
-    connection_handler::IDevicesDiscoveryStarter *ConnectionHandler::getConnectionHandler() const
+    connection_handler::DevicesDiscoveryStarter *ConnectionHandler::getConnectionHandler() const
     {
         if(!mConnectionHandler)
         {

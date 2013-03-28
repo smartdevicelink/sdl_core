@@ -1,5 +1,5 @@
 /**
- * \file CConnection.cpp
+ * \file Connection.cpp
  * \brief Connection class implementation.
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -45,20 +45,20 @@
  */
 namespace connection_handler {
 
-log4cplus::Logger CConnection::logger_ = log4cplus::Logger::getInstance(
+log4cplus::Logger Connection::logger_ = log4cplus::Logger::getInstance(
     LOG4CPLUS_TEXT("ConnectionHandler"));
 
-CConnection::CConnection(ConnectionHandle aConnectionHandle,
-                         DeviceHandle aConnectionDeviceHandle)
-    : connection_handle_(aConnectionHandle),
-      connection_device_handle_(aConnectionDeviceHandle),
+Connection::Connection(ConnectionHandle connection_handle,
+                         DeviceHandle connection_device_handle)
+    : connection_handle_(connection_handle),
+      connection_device_handle_(connection_device_handle),
       session_id_counter_(1) {
 }
 
-CConnection::~CConnection() {
+Connection::~Connection() {
 }
 
-int CConnection::AddNewSession() {
+int Connection::AddNewSession() {
   int result = -1;
   if (255 > session_id_counter_) {
     session_list_.push_back(session_id_counter_);
@@ -67,20 +67,20 @@ int CConnection::AddNewSession() {
   return result;
 }
 
-int CConnection::RemoveSession(unsigned char aSession) {
+int Connection::RemoveSession(unsigned char session) {
   int result = -1;
   SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
-                                      aSession);
+                                     session);
   if (session_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Session not found in this connection!");
   } else {
     session_list_.erase(it);
-    result = aSession;
+    result = session;
   }
   return result;
 }
 
-int CConnection::GetFirstSessionID() {
+int Connection::GetFirstSessionID() {
   int result = -1;
   SessionListIterator it = session_list_.begin();
   if (session_list_.end() != it) {
@@ -89,15 +89,15 @@ int CConnection::GetFirstSessionID() {
   return result;
 }
 
-ConnectionHandle CConnection::connection_handle() {
+ConnectionHandle Connection::connection_handle() {
   return connection_handle_;
 }
 
-DeviceHandle CConnection::connection_device_handle() {
+DeviceHandle Connection::connection_device_handle() {
   return connection_device_handle_;
 }
 
-void CConnection::GetSessionList(SessionList & session_list) {
+void Connection::GetSessionList(SessionList & session_list) {
   session_list = session_list_;
 }
 }/* namespace connection_handler */

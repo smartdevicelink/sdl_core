@@ -103,7 +103,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgr::setConnectionHandler(connection_handler::IDevicesDiscoveryStarter *handler)
+    void AppMgr::setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {

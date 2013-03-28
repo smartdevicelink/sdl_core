@@ -1,6 +1,6 @@
 /**
- * \file CDevice.cpp
- * \brief CDevice class implementation.
+ * \file Device.cpp
+ * \brief Device class implementation.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -43,24 +43,24 @@
  */
 namespace connection_handler {
 
-log4cplus::Logger CDevice::logger_ = log4cplus::Logger::getInstance(
+log4cplus::Logger Device::logger_ = log4cplus::Logger::getInstance(
     LOG4CPLUS_TEXT("ConnectionHandler"));
 
-CDevice::CDevice(DeviceHandle device_handle, std::string user_friendly_name)
+Device::Device(DeviceHandle device_handle, std::string user_friendly_name)
     : device_handle_(device_handle),
       user_friendly_name_(user_friendly_name) {
 
 }
 
-CDevice::~CDevice() {
+Device::~Device() {
 
 }
 
-DeviceHandle CDevice::device_handle() const {
+DeviceHandle Device::device_handle() const {
   return device_handle_;
 }
 
-std::string CDevice::user_friendly_name() const {
+std::string Device::user_friendly_name() const {
   return user_friendly_name_;
 }
 }/* namespace connection_handler */

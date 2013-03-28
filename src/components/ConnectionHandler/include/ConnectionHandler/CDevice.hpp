@@ -1,6 +1,6 @@
 /**
- * \file CDevice.hpp
- * \brief CDevice class.
+ * \file Device.hpp
+ * \brief Device class.
  * Stores device information
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -53,20 +53,20 @@ namespace connection_handler {
 typedef int DeviceHandle;
 
 /**
- * \class CDevice
+ * \class Device
  * \brief Connection class
  */
-class CDevice {
+class Device {
  public:
   /**
    * \brief Class constructor
    */
-  CDevice(DeviceHandle device_handle, std::string user_friendly_name);
+  Device(DeviceHandle device_handle, std::string user_friendly_name);
 
   /**
    * \brief Destructor
    */
-  ~CDevice();
+  ~Device();
 
   /**
    * \brief Returns device handle
@@ -100,13 +100,13 @@ class CDevice {
 /**
  * \brief Type for Devices map
  */
-typedef std::map<int, CDevice> DeviceList;
+typedef std::map<int, Device> DeviceList;
 
 /**
  * \brief Type for Devices map iterator
  * Key is DeviceHandle which is uniq
  */
-typedef std::map<int, CDevice>::iterator DeviceListIterator;
+typedef std::map<int, Device>::iterator DeviceListIterator;
 
 }/* namespace connection_handler */
 

@@ -82,14 +82,14 @@ namespace NsAppManager
          * \param handle device handle
          * \return device associated with the given handle
          */
-        const connection_handler::CDevice *findDeviceByHandle(const connection_handler::DeviceHandle& handle) const;
+        const connection_handler::Device *findDeviceByHandle(const connection_handler::DeviceHandle& handle) const;
 
         /**
          * \brief find device associated with the given name
          * \param name device name
          * \return device associated with the given name
          */
-        const connection_handler::CDevice *findDeviceByName(const std::string& name) const;
+        const connection_handler::Device *findDeviceByName(const std::string& name) const;
 
     private:
 

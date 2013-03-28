@@ -249,7 +249,7 @@ namespace NsAppManager
         AppMgrCore* core = (AppMgrCore*)pThis;
         const unsigned int& protocolVersion = mobileMsg->getProtocolVersion();
         /*const connection_handler::DeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
-        const connection_handler::CDevice* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
+        const connection_handler::Device* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
         if(!currentDevice)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with session key " << sessionKey << " !");
@@ -5037,7 +5037,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDeviceChosen notification has been income");
                 NsRPC2Communication::UI::OnDeviceChosen* chosen = (NsRPC2Communication::UI::OnDeviceChosen*)msg;
                 const std::string& deviceName = chosen->get_deviceName();
-                //const connection_handler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
+                //const connection_handler::Device* device = core->mDeviceList.findDeviceByName(deviceName);
                 for(std::map<int, DeviceStorage>::const_iterator it = core->mDevices.begin();
                         it != core->mDevices.end();
                         ++it)
@@ -5908,7 +5908,7 @@ namespace NsAppManager
                         << " is media? " << app->getIsMediaApplication() );
 
                     /*const connection_handler::DeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
-                    const connection_handler::CDevice* device = core->mDeviceList.findDeviceByHandle(deviceHandle);
+                    const connection_handler::Device* device = core->mDeviceList.findDeviceByHandle(deviceHandle);
                     if(!device)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with app ID " << app->getAppID() << " !");
@@ -6905,7 +6905,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgrCore::setConnectionHandler(connection_handler::IDevicesDiscoveryStarter *handler)
+    void AppMgrCore::setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -6919,7 +6919,7 @@ namespace NsAppManager
      * \brief Gets connection handler instance
      * \return connection handler
      */
-    connection_handler::IDevicesDiscoveryStarter *AppMgrCore::getConnectionHandler() const
+    connection_handler::DevicesDiscoveryStarter *AppMgrCore::getConnectionHandler() const
     {
         return ConnectionHandler::getInstance().getConnectionHandler();
     }

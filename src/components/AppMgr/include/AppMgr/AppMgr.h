@@ -53,7 +53,7 @@ namespace NsRPC2Communication
 
 namespace connection_handler
 {
-    class IDevicesDiscoveryStarter;
+    class DevicesDiscoveryStarter;
 }
 
 namespace NsAppManager
@@ -65,7 +65,7 @@ namespace NsAppManager
     /**
     * \brief a main app manager class which acts like container for other classes
     */
-    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public connection_handler::IConnectionHandlerObserver
+    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public connection_handler::ConnectionHandlerObserver
     {
     public:
 
@@ -149,7 +149,7 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(connection_handler::IDevicesDiscoveryStarter *handler);
+        void setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler);
 
         /**
          * \brief method to execute threads.

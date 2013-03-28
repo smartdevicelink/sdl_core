@@ -1,6 +1,6 @@
 /**
- * \file IConnectionHandlerObserver.hpp
- * \brief IConnectionHandlerObserver class.
+ * \file ConnectionHandlerObserver.hpp
+ * \brief ConnectionHandlerObserver class.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -47,10 +47,10 @@
  */
 namespace connection_handler {
 /**
- * \class IConnectionHandlerObserver
- * \brief IConnectionHandlerObserver class
+ * \class ConnectionHandlerObserver
+ * \brief ConnectionHandlerObserver class
  */
-class IConnectionHandlerObserver {
+class ConnectionHandlerObserver {
  public:
 
   /**
@@ -62,7 +62,7 @@ class IConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void OnDeviceListUpdated(
-      const connection_handler::DeviceList & DeviceList) = 0;
+      const connection_handler::DeviceList & device_list) = 0;
 
   /**
    * \brief Updates device list.
@@ -72,7 +72,7 @@ class IConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void UpdateDeviceList(
-      const connection_handler::DeviceList & DeviceList) = 0;
+      const connection_handler::DeviceList & device_list) = 0;
 
   /**
    * \brief Removes device.
@@ -82,7 +82,7 @@ class IConnectionHandlerObserver {
    * \param DeviceHandle Handle of removed device.
    **/
   virtual void RemoveDevice(
-      const connection_handler::DeviceHandle DeviceHandle) = 0;
+      const connection_handler::DeviceHandle device_handle) = 0;
 
   /**
    * \brief Callback function used by ConnectionHandler
@@ -92,8 +92,8 @@ class IConnectionHandlerObserver {
    * \param firstSessionKey Session key of first session in this connection.
    */
   virtual void OnSessionStartedCallback(
-      connection_handler::DeviceHandle deviceHandle, int sessionKey,
-      int firstSessionKey) = 0;
+      connection_handler::DeviceHandle device_handle, int session_key,
+      int first_session_key) = 0;
 
   /**
    * \brief Callback function used by ConnectionHandler
@@ -101,13 +101,13 @@ class IConnectionHandlerObserver {
    * \param sessionKey Key of session which should be ended
    * \param firstSessionKey Session key of first session in this connection
    */
-  virtual void OnSessionEndedCallback(int sessionKey, int firstSessionKey) = 0;
+  virtual void OnSessionEndedCallback(int session_key, int first_session_key) = 0;
 
  protected:
   /**
    * \brief Destructor
    */
-  virtual ~IConnectionHandlerObserver() {
+  virtual ~ConnectionHandlerObserver() {
   }
   ;
 };
