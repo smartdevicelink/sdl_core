@@ -7,6 +7,9 @@ include_directories (
   ../../../src/components/SmartObjects/include
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
+  ../../../src/components/JSONHandler/include/
+  ../../../src//thirdPartyLibs/jsoncpp/include/
+  
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
@@ -31,6 +34,10 @@ set (SOURCES_INVALID_TEST
     ./SmartObjectInvalidTest.cpp
 )
 
+set (SOURCES_CONVERTION_TIME_TEST
+    SmartObjectConvertionTimeTest.cpp
+)
+
 # Libraries are the same for all SmartObject test
 set (LIBRARIES
     gtest
@@ -38,6 +45,8 @@ set (LIBRARIES
     gmock
     gmock_main
     SmartObjects
+    JSONHandler
+    jsoncpp
     log4cplus
 )
 
@@ -60,3 +69,7 @@ add_test(test_TSharedPtrTest test_TSharedPtrTest)
 add_executable("test_SmartObjectInvalidTest" ${SOURCES_INVALID_TEST})
 target_link_libraries("test_SmartObjectInvalidTest" ${LIBRARIES})
 add_test(test_SmartObjectInvalidTest test_SmartObjectInvalidTest)
+
+add_executable("test_SmartObjectConvertionTimeTest" ${SOURCES_CONVERTION_TIME_TEST})
+target_link_libraries("test_SmartObjectConvertionTimeTest" ${LIBRARIES})
+add_test(test_SmartObjectConvertionTimeTest test_SmartObjectConvertionTimeTest)
