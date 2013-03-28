@@ -38,7 +38,7 @@
 #define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_
 
 #include "Logger.hpp"
-#include "ConnectionHandler/CDevice.hpp"
+#include "ConnectionHandler/device.hpp"
 
 /**
  * \namespace connection_handler

@@ -38,8 +38,8 @@
 
 #include "Logger.hpp"
 
-#include "ConnectionHandler/CDevice.hpp"
-#include "ConnectionHandler/CConnection.hpp"
+#include "ConnectionHandler/device.hpp"
+#include "ConnectionHandler/connection.hpp"
 
 /**
  * \namespace connection_handler

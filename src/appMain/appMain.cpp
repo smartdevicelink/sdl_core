@@ -49,7 +49,7 @@
 
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
-#include "ConnectionHandler/CConnectionHandler.hpp"
+#include "ConnectionHandler/connection_handler_impl.hpp"
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppMgrCore.h"

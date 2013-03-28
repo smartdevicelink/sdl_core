@@ -1,6 +1,6 @@
 /**
- * \file Connection.cpp
- * \brief Connection class implementation.
+ * \file ConnectionHandler.hpp
+ * \brief Connection handler interface class.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,71 +33,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_
 
-#include "Logger.hpp"
-
-#include "ConnectionHandler/CConnection.hpp"
+#include "TransportManager/ITransportManagerDeviceListener.hpp"
+#include "TransportManager/SDeviceInfo.hpp"
+#include "ProtocolHandler/ISessionObserver.h"
+#include "ConnectionHandler/connection_handler_observer.hpp"
+#include "ConnectionHandler/device.hpp"
+#include "ConnectionHandler/connection.hpp"
+#include "ConnectionHandler/devices_discovery_starter.hpp"
 
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
 namespace connection_handler {
+/**
+ * \class ConnectionHandler
+ * \brief SmartDeviceLink ConnectionHandler interface class
+ */
+class ConnectionHandler {
+ public:
+  /**
+   * \brief Sets observer pointer for ConnectionHandler.
+   * \param observer Pointer to observer object.
+   **/
+  virtual void set_connection_handler_observer(
+      ConnectionHandlerObserver * observer)=0;
 
-log4cplus::Logger Connection::logger_ = log4cplus::Logger::getInstance(
-    LOG4CPLUS_TEXT("ConnectionHandler"));
+  /**
+   * \brief Sets pointer to TransportManager.
+   * \param transportManager Pointer to TransportManager object.
+   **/
+  virtual void set_transport_manager(
+      NsSmartDeviceLink::NsTransportManager::ITransportManager * transport_manager)=0;
 
-Connection::Connection(ConnectionHandle connection_handle,
-                         DeviceHandle connection_device_handle)
-    : connection_handle_(connection_handle),
-      connection_device_handle_(connection_device_handle),
-      session_id_counter_(1) {
-}
+  virtual void StartTransportManager() = 0;
 
-Connection::~Connection() {
-}
-
-int Connection::AddNewSession() {
-  int result = -1;
-  if (255 > session_id_counter_) {
-    session_list_.push_back(session_id_counter_);
-    result = session_id_counter_++;
+ protected:
+  /**
+   * \brief Destructor
+   */
+  virtual ~ConnectionHandler() {
   }
-  return result;
-}
+  ;
 
-int Connection::RemoveSession(unsigned char session) {
-  int result = -1;
-  SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
-                                     session);
-  if (session_list_.end() == it) {
-    LOG4CPLUS_ERROR(logger_, "Session not found in this connection!");
-  } else {
-    session_list_.erase(it);
-    result = session;
-  }
-  return result;
-}
-
-int Connection::GetFirstSessionID() {
-  int result = -1;
-  SessionListIterator it = session_list_.begin();
-  if (session_list_.end() != it) {
-    result = *it;
-  }
-  return result;
-}
-
-ConnectionHandle Connection::connection_handle() {
-  return connection_handle_;
-}
-
-DeviceHandle Connection::connection_device_handle() {
-  return connection_device_handle_;
-}
-
-void Connection::GetSessionList(SessionList & session_list) {
-  session_list = session_list_;
-}
+};
 }/* namespace connection_handler */
+
+#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_ */

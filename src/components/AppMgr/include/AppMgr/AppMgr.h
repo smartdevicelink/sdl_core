@@ -35,7 +35,7 @@
 
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
-#include "ConnectionHandler/IConnectionHandlerObserver.hpp"
+#include "ConnectionHandler/connection_handler_observer.hpp"
 
 class JSONHandler;
 class SDLRPCMessage;

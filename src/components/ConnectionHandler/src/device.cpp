@@ -1,6 +1,6 @@
 /**
- * \file ConnectionHandler.hpp
- * \brief Connection handler interface class.
+ * \file Device.cpp
+ * \brief Device class implementation.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,53 +33,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_
+#include "Logger.hpp"
 
-#include "TransportManager/ITransportManagerDeviceListener.hpp"
-#include "TransportManager/SDeviceInfo.hpp"
-#include "ProtocolHandler/ISessionObserver.h"
-#include "ConnectionHandler/IConnectionHandlerObserver.hpp"
-#include "ConnectionHandler/CDevice.hpp"
-#include "ConnectionHandler/CConnection.hpp"
-#include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"
+#include "ConnectionHandler/device.hpp"
 
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
 namespace connection_handler {
-/**
- * \class ConnectionHandler
- * \brief SmartDeviceLink ConnectionHandler interface class
- */
-class ConnectionHandler {
- public:
-  /**
-   * \brief Sets observer pointer for ConnectionHandler.
-   * \param observer Pointer to observer object.
-   **/
-  virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver * observer)=0;
 
-  /**
-   * \brief Sets pointer to TransportManager.
-   * \param transportManager Pointer to TransportManager object.
-   **/
-  virtual void set_transport_manager(
-      NsSmartDeviceLink::NsTransportManager::ITransportManager * transport_manager)=0;
+log4cplus::Logger Device::logger_ = log4cplus::Logger::getInstance(
+    LOG4CPLUS_TEXT("ConnectionHandler"));
 
-  virtual void StartTransportManager() = 0;
+Device::Device(DeviceHandle device_handle, std::string user_friendly_name)
+    : device_handle_(device_handle),
+      user_friendly_name_(user_friendly_name) {
 
- protected:
-  /**
-   * \brief Destructor
-   */
-  virtual ~ConnectionHandler() {
-  }
-  ;
+}
 
-};
+Device::~Device() {
+
+}
+
+DeviceHandle Device::device_handle() const {
+  return device_handle_;
+}
+
+std::string Device::user_friendly_name() const {
+  return user_friendly_name_;
+}
 }/* namespace connection_handler */
-
-#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_ */

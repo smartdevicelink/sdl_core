@@ -1,6 +1,6 @@
 /**
- * \file Device.cpp
- * \brief Device class implementation.
+ * \file Connection.cpp
+ * \brief Connection class implementation.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,9 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
+
 #include "Logger.hpp"
 
-#include "ConnectionHandler/CDevice.hpp"
+#include "ConnectionHandler/connection.hpp"
 
 /**
  * \namespace connection_handler
@@ -43,24 +45,59 @@
  */
 namespace connection_handler {
 
-log4cplus::Logger Device::logger_ = log4cplus::Logger::getInstance(
+log4cplus::Logger Connection::logger_ = log4cplus::Logger::getInstance(
     LOG4CPLUS_TEXT("ConnectionHandler"));
 
-Device::Device(DeviceHandle device_handle, std::string user_friendly_name)
-    : device_handle_(device_handle),
-      user_friendly_name_(user_friendly_name) {
-
+Connection::Connection(ConnectionHandle connection_handle,
+                         DeviceHandle connection_device_handle)
+    : connection_handle_(connection_handle),
+      connection_device_handle_(connection_device_handle),
+      session_id_counter_(1) {
 }
 
-Device::~Device() {
-
+Connection::~Connection() {
 }
 
-DeviceHandle Device::device_handle() const {
-  return device_handle_;
+int Connection::AddNewSession() {
+  int result = -1;
+  if (255 > session_id_counter_) {
+    session_list_.push_back(session_id_counter_);
+    result = session_id_counter_++;
+  }
+  return result;
 }
 
-std::string Device::user_friendly_name() const {
-  return user_friendly_name_;
+int Connection::RemoveSession(unsigned char session) {
+  int result = -1;
+  SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
+                                     session);
+  if (session_list_.end() == it) {
+    LOG4CPLUS_ERROR(logger_, "Session not found in this connection!");
+  } else {
+    session_list_.erase(it);
+    result = session;
+  }
+  return result;
+}
+
+int Connection::GetFirstSessionID() {
+  int result = -1;
+  SessionListIterator it = session_list_.begin();
+  if (session_list_.end() != it) {
+    result = *it;
+  }
+  return result;
+}
+
+ConnectionHandle Connection::connection_handle() {
+  return connection_handle_;
+}
+
+DeviceHandle Connection::connection_device_handle() {
+  return connection_device_handle_;
+}
+
+void Connection::GetSessionList(SessionList & session_list) {
+  session_list = session_list_;
 }
 }/* namespace connection_handler */

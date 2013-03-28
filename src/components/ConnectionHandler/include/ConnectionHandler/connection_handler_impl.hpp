@@ -45,11 +45,11 @@
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
 #include "ProtocolHandler/ISessionObserver.h"
-#include "ConnectionHandler/IConnectionHandlerObserver.hpp"
-#include "ConnectionHandler/CDevice.hpp"
-#include "ConnectionHandler/CConnection.hpp"
-#include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"
-#include "ConnectionHandler/IConnectionHandler.hpp"
+#include "ConnectionHandler/connection_handler_observer.hpp"
+#include "ConnectionHandler/device.hpp"
+#include "ConnectionHandler/connection.hpp"
+#include "ConnectionHandler/devices_discovery_starter.hpp"
+#include "ConnectionHandler/connection_handler.hpp"
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.

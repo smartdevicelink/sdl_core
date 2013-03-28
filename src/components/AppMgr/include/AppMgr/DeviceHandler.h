@@ -33,7 +33,7 @@
 #ifndef DEVICEHANDLER_H
 #define DEVICEHANDLER_H
 
-#include "ConnectionHandler/CDevice.hpp"
+#include "ConnectionHandler/device.hpp"
 
 #include <map>
 

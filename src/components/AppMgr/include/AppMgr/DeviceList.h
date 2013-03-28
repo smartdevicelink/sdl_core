@@ -33,7 +33,7 @@
 #ifndef DEVICELIST_H
 #define DEVICELIST_H
 
-#include "ConnectionHandler/CDevice.hpp"
+#include "ConnectionHandler/device.hpp"
 
 namespace log4cplus
 {
