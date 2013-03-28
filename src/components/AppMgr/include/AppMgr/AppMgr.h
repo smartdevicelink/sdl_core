@@ -51,7 +51,7 @@ namespace NsRPC2Communication
     class RPC2Command;
 }
 
-namespace NsConnectionHandler
+namespace connection_handler
 {
     class IDevicesDiscoveryStarter;
 }
@@ -65,7 +65,7 @@ namespace NsAppManager
     /**
     * \brief a main app manager class which acts like container for other classes
     */
-    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public NsConnectionHandler::IConnectionHandlerObserver
+    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public connection_handler::IConnectionHandlerObserver
     {
     public:
 
@@ -96,7 +96,7 @@ namespace NsAppManager
          *
          * \param deviceList New list of available devices.
          **/
-        virtual void OnDeviceListUpdated(const NsConnectionHandler::DeviceList & deviceList);
+        virtual void OnDeviceListUpdated(const connection_handler::DeviceList & deviceList);
 
         /**
          * \brief Updates device list.
@@ -105,7 +105,7 @@ namespace NsAppManager
          *
          * \param DeviceList New list of available devices.
          **/
-        virtual void UpdateDeviceList(const NsConnectionHandler::DeviceList & DeviceList);
+        virtual void UpdateDeviceList(const connection_handler::DeviceList & DeviceList);
 
         /**
          * \brief Removes device.
@@ -114,7 +114,7 @@ namespace NsAppManager
          *
          * \param DeviceHandle Handle of removed device.
          **/
-        virtual void RemoveDevice(const NsConnectionHandler::DeviceHandle DeviceHandle);
+        virtual void RemoveDevice(const connection_handler::DeviceHandle DeviceHandle);
 
         /**
          * \brief Callback function used by ConnectionHandler
@@ -123,7 +123,7 @@ namespace NsAppManager
          * \param sessionKey Key of started session.
          * \param firstSessionKey Session key of first session in this connection.
          */
-        virtual void OnSessionStartedCallback(NsConnectionHandler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
+        virtual void OnSessionStartedCallback(connection_handler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
 
         /**
          * \brief Callback function used by ConnectionHandler
@@ -149,7 +149,7 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler);
+        void setConnectionHandler(connection_handler::IDevicesDiscoveryStarter *handler);
 
         /**
          * \brief method to execute threads.

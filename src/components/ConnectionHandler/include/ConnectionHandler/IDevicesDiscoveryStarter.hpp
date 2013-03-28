@@ -33,16 +33,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IDEVICESDISCOVERYSTARTER_H
-#define IDEVICESDISCOVERYSTARTER_H
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_IDEVICESDISCOVERYSTARTER_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_IDEVICESDISCOVERYSTARTER_H_
 
 #include "ConnectionHandler/CDevice.hpp"
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 /**
  * \class IDevicesDiscoveryStarter
  * \brief Starter of devices discovering process class
@@ -59,7 +59,7 @@ class IDevicesDiscoveryStarter {
    * \param deviceHandle Handle of device to connect to
    */
   virtual void ConnectToDevice(
-      NsConnectionHandler::DeviceHandle deviceHandle) = 0;
+      connection_handler::DeviceHandle deviceHandle) = 0;
 
   virtual void StartTransportManager() = 0;
 
@@ -71,6 +71,6 @@ class IDevicesDiscoveryStarter {
   }
   ;
 };
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */
 
-#endif /* IDEVICESDISCOVERYSTARTER_H */
+#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_IDEVICESDISCOVERYSTARTER_H_ */

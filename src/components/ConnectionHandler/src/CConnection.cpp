@@ -40,64 +40,64 @@
 #include "ConnectionHandler/CConnection.hpp"
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 
-log4cplus::Logger CConnection::mLogger = log4cplus::Logger::getInstance(
+log4cplus::Logger CConnection::logger_ = log4cplus::Logger::getInstance(
     LOG4CPLUS_TEXT("ConnectionHandler"));
 
-CConnection::CConnection(tConnectionHandle aConnectionHandle,
+CConnection::CConnection(ConnectionHandle aConnectionHandle,
                          DeviceHandle aConnectionDeviceHandle)
-    : mConnectionHandle(aConnectionHandle),
-      mConnectionDeviceHandle(aConnectionDeviceHandle),
-      mSessionIDCounter(1) {
+    : connection_handle_(aConnectionHandle),
+      connection_device_handle_(aConnectionDeviceHandle),
+      session_id_counter_(1) {
 }
 
 CConnection::~CConnection() {
 }
 
-int CConnection::addNewSession() {
+int CConnection::AddNewSession() {
   int result = -1;
-  if (255 > mSessionIDCounter) {
-    mSessionList.push_back(mSessionIDCounter);
-    result = mSessionIDCounter++;
+  if (255 > session_id_counter_) {
+    session_list_.push_back(session_id_counter_);
+    result = session_id_counter_++;
   }
   return result;
 }
 
-int CConnection::removeSession(unsigned char aSession) {
+int CConnection::RemoveSession(unsigned char aSession) {
   int result = -1;
-  tSessionListIterator it = std::find(mSessionList.begin(), mSessionList.end(),
+  SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
                                       aSession);
-  if (mSessionList.end() == it) {
-    LOG4CPLUS_ERROR(mLogger, "Session not found in this connection!");
+  if (session_list_.end() == it) {
+    LOG4CPLUS_ERROR(logger_, "Session not found in this connection!");
   } else {
-    mSessionList.erase(it);
+    session_list_.erase(it);
     result = aSession;
   }
   return result;
 }
 
-int CConnection::getFirstSessionID() {
+int CConnection::GetFirstSessionID() {
   int result = -1;
-  tSessionListIterator it = mSessionList.begin();
-  if (mSessionList.end() != it) {
+  SessionListIterator it = session_list_.begin();
+  if (session_list_.end() != it) {
     result = *it;
   }
   return result;
 }
 
-tConnectionHandle CConnection::getConnectionHandle() {
-  return mConnectionHandle;
+ConnectionHandle CConnection::connection_handle() {
+  return connection_handle_;
 }
 
-DeviceHandle CConnection::getConnectionDeviceHandle() {
-  return mConnectionDeviceHandle;
+DeviceHandle CConnection::connection_device_handle() {
+  return connection_device_handle_;
 }
 
-void CConnection::GetSessionList(tSessionList & session_list) {
-  session_list = mSessionList;
+void CConnection::GetSessionList(SessionList & session_list) {
+  session_list = session_list_;
 }
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */

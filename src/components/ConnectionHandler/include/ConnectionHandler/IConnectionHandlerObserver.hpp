@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONNECTIONHANDLEROBSERVER_H 
-#define CONNECTIONHANDLEROBSERVER_H 
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLEROBSERVER_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLEROBSERVER_H_
 
 #include "Logger.hpp"
 
@@ -42,10 +42,10 @@
 #include "ConnectionHandler/CConnection.hpp"
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 /**
  * \class IConnectionHandlerObserver
  * \brief IConnectionHandlerObserver class
@@ -62,7 +62,7 @@ class IConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void OnDeviceListUpdated(
-      const NsConnectionHandler::DeviceList & DeviceList) = 0;
+      const connection_handler::DeviceList & DeviceList) = 0;
 
   /**
    * \brief Updates device list.
@@ -72,7 +72,7 @@ class IConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void UpdateDeviceList(
-      const NsConnectionHandler::DeviceList & DeviceList) = 0;
+      const connection_handler::DeviceList & DeviceList) = 0;
 
   /**
    * \brief Removes device.
@@ -82,7 +82,7 @@ class IConnectionHandlerObserver {
    * \param DeviceHandle Handle of removed device.
    **/
   virtual void RemoveDevice(
-      const NsConnectionHandler::DeviceHandle DeviceHandle) = 0;
+      const connection_handler::DeviceHandle DeviceHandle) = 0;
 
   /**
    * \brief Callback function used by ConnectionHandler
@@ -92,7 +92,7 @@ class IConnectionHandlerObserver {
    * \param firstSessionKey Session key of first session in this connection.
    */
   virtual void OnSessionStartedCallback(
-      NsConnectionHandler::DeviceHandle deviceHandle, int sessionKey,
+      connection_handler::DeviceHandle deviceHandle, int sessionKey,
       int firstSessionKey) = 0;
 
   /**
@@ -111,6 +111,6 @@ class IConnectionHandlerObserver {
   }
   ;
 };
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */
 
-#endif /* CONNECTIONHANDLEROBSERVER_H */
+#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLEROBSERVER_H_ */

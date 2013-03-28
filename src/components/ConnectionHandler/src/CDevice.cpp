@@ -38,10 +38,10 @@
 #include "ConnectionHandler/CDevice.hpp"
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 
 log4cplus::Logger CDevice::logger_ = log4cplus::Logger::getInstance(
     LOG4CPLUS_TEXT("ConnectionHandler"));
@@ -63,4 +63,4 @@ DeviceHandle CDevice::device_handle() const {
 std::string CDevice::user_friendly_name() const {
   return user_friendly_name_;
 }
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */

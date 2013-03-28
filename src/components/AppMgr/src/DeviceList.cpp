@@ -54,7 +54,7 @@ namespace NsAppManager
      * \brief set device list
      * \param deviceList device list
      */
-    void DeviceList::setDeviceList(const NsConnectionHandler::DeviceList &deviceList)
+    void DeviceList::setDeviceList(const connection_handler::DeviceList &deviceList)
     {
         mDeviceList = deviceList;
     }
@@ -63,7 +63,7 @@ namespace NsAppManager
      * \brief get device list
      * \return device list
      */
-    const NsConnectionHandler::DeviceList &DeviceList::getDeviceList() const
+    const connection_handler::DeviceList &DeviceList::getDeviceList() const
     {
         return mDeviceList;
     }
@@ -82,9 +82,9 @@ namespace NsAppManager
      * \param handle device handle
      * \return device associated with the given handle
      */
-    const NsConnectionHandler::CDevice* DeviceList::findDeviceByHandle(const NsConnectionHandler::DeviceHandle &handle) const
+    const connection_handler::CDevice* DeviceList::findDeviceByHandle(const connection_handler::DeviceHandle &handle) const
     {
-        NsConnectionHandler::DeviceList::const_iterator it = mDeviceList.find(handle);
+        connection_handler::DeviceList::const_iterator it = mDeviceList.find(handle);
         if(it != mDeviceList.end())
         {
             return &it->second;
@@ -98,11 +98,11 @@ namespace NsAppManager
      * \param name device name
      * \return device associated with the given name
      */
-    const NsConnectionHandler::CDevice *DeviceList::findDeviceByName(const std::string &name) const
+    const connection_handler::CDevice *DeviceList::findDeviceByName(const std::string &name) const
     {
-        for(NsConnectionHandler::DeviceList::const_iterator it = mDeviceList.begin(); it != mDeviceList.end(); it++)
+        for(connection_handler::DeviceList::const_iterator it = mDeviceList.begin(); it != mDeviceList.end(); it++)
         {
-            const NsConnectionHandler::CDevice& device = it->second;
+            const connection_handler::CDevice& device = it->second;
             if(device.user_friendly_name() == name)
             {
                 return &device;

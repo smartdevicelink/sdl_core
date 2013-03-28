@@ -34,18 +34,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DEVICE_H 
-#define DEVICE_H 
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
 
 #include "Logger.hpp"
 #include <string>
 #include <map>
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 
 /**
  * \brief Type for DeviceHandle
@@ -108,6 +108,6 @@ typedef std::map<int, CDevice> DeviceList;
  */
 typedef std::map<int, CDevice>::iterator DeviceListIterator;
 
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */
 
-#endif /* DEVICE_H */
+#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_ */

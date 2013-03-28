@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ICONNECTIONHANDLER_H
-#define ICONNECTIONHANDLER_H
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_
 
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
@@ -45,10 +45,10 @@
 #include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 /**
  * \class IConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler interface class
@@ -80,6 +80,6 @@ class IConnectionHandler {
   ;
 
 };
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */
 
-#endif /* ICONNECTIONHANDLER_H */
+#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_ */

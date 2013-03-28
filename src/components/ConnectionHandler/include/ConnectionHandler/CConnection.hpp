@@ -34,32 +34,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONNECTION_H 
-#define CONNECTION_H 
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_
 
 #include "Logger.hpp"
 #include "ConnectionHandler/CDevice.hpp"
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 
 /**
  * \brief Type for ConnectionHandle
  */
-typedef int tConnectionHandle;
+typedef int ConnectionHandle;
 
 /**
  * \brief Type for Sessions vector
  */
-typedef std::vector<unsigned char> tSessionList;
+typedef std::vector<unsigned char> SessionList;
 
 /**
  * \brief Type for Sessions vector iterator
  */
-typedef std::vector<unsigned char>::iterator tSessionListIterator;
+typedef std::vector<unsigned char>::iterator SessionListIterator;
 
 /**
  * \class CConnection
@@ -70,7 +70,7 @@ class CConnection {
   /**
    * \brief Class constructor
    */
-  CConnection(tConnectionHandle aConnectionHandle,
+  CConnection(ConnectionHandle aConnectionHandle,
               DeviceHandle aConnectionDeviceHandle);
 
   /**
@@ -82,78 +82,78 @@ class CConnection {
    * \brief Returns device handle
    * \return DeviceHandle
    */
-  tConnectionHandle getConnectionHandle();
+  ConnectionHandle connection_handle();
 
   /**
    * \brief Returns connection device handle
    * \return ConnectionDeviceHandle
    */
-  DeviceHandle getConnectionDeviceHandle();
+  DeviceHandle connection_device_handle();
 
   /**
    * \brief Adds session to connection
    * \return sessionID or -1 in case of issues
    */
-  int addNewSession();
+  int AddNewSession();
 
   /**
    * \brief Removes session from connection
    * \param aSession session ID
    * \return sessionID or -1 in case of issues
    */
-  int removeSession(unsigned char aSession);
+  int RemoveSession(unsigned char aSession);
 
   /**
    * \brief Returns ID of first session from connection
    * \return first sessionID or -1 in case of issues
    */
-  int getFirstSessionID();
+  int GetFirstSessionID();
 
   /**
    * \brief Returns list of sessions which have been opened in
    *  current connection.
    * \param session_list list of sessions
    */
-  void GetSessionList(tSessionList & session_list);
+  void GetSessionList(SessionList & session_list);
  private:
 
   /**
    * \brief Current connection handle.
    */
-  tConnectionHandle mConnectionHandle;
+  ConnectionHandle connection_handle_;
 
   /**
    * \brief DeviceHandle of this connection.
    */
-  DeviceHandle mConnectionDeviceHandle;
+  DeviceHandle connection_device_handle_;
 
   /**
    * \brief Counter to generate session id's.
    */
-  unsigned char mSessionIDCounter;
+  unsigned char session_id_counter_;
 
   /**
    * \brief Counter to generate session id's.
    */
-  tSessionList mSessionList;
+  SessionList session_list_;
 
   /**
    * \brief For logging.
    */
-  static log4cplus::Logger mLogger;
+  static log4cplus::Logger logger_;
 };
 
 /**
  * \brief Type for Connections map
  * Key is ConnectionHandle which is uniq
  */
-typedef std::map<int, CConnection> tConnectionList;
+typedef std::map<int, CConnection> ConnectionList;
 
 /**
  * \brief Type for Connections map iterator
  */
-typedef std::map<int, CConnection>::iterator tConnectionListIterator;
+typedef std::map<int, CConnection>::iterator ConnectionListIterator;
 
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */
 
-#endif /* CONNECTION_H */
+#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_ */

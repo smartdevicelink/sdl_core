@@ -560,8 +560,8 @@ namespace NsAppManager
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
         const unsigned int& protocolVersion = mobileMsg->getProtocolVersion();
-        /*const NsConnectionHandler::DeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
-        const NsConnectionHandler::CDevice* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
+        /*const connection_handler::DeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
+        const connection_handler::CDevice* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
         if(!currentDevice)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with session key " << sessionKey << " !");
@@ -5357,7 +5357,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDeviceChosen notification has been income");
                 NsRPC2Communication::UI::OnDeviceChosen* chosen = (NsRPC2Communication::UI::OnDeviceChosen*)msg;
                 const std::string& deviceName = chosen->get_deviceName();
-                //const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
+                //const connection_handler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
                 for(std::map<int, DeviceStorage>::const_iterator it = core->mDevices.begin();
                         it != core->mDevices.end();
                         ++it)
@@ -5370,7 +5370,7 @@ namespace NsAppManager
                 }/*
                 if (device)
                 {
-                    const NsConnectionHandler::DeviceHandle& handle = device->getDeviceHandle();
+                    const connection_handler::DeviceHandle& handle = device->getDeviceHandle();
                     ConnectionHandler::getInstance().ConnectToDevice(handle);
                 }*/
                 return;
@@ -6227,8 +6227,8 @@ namespace NsAppManager
                         << " application id " << app->getAppID()
                         << " is media? " << app->getIsMediaApplication() );
 
-                    /*const NsConnectionHandler::DeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
-                    const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByHandle(deviceHandle);
+                    /*const connection_handler::DeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
+                    const connection_handler::CDevice* device = core->mDeviceList.findDeviceByHandle(deviceHandle);
                     if(!device)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with app ID " << app->getAppID() << " !");
@@ -7225,7 +7225,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgrCore::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
+    void AppMgrCore::setConnectionHandler(connection_handler::IDevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -7239,7 +7239,7 @@ namespace NsAppManager
      * \brief Gets connection handler instance
      * \return connection handler
      */
-    NsConnectionHandler::IDevicesDiscoveryStarter *AppMgrCore::getConnectionHandler() const
+    connection_handler::IDevicesDiscoveryStarter *AppMgrCore::getConnectionHandler() const
     {
         return ConnectionHandler::getInstance().getConnectionHandler();
     }
@@ -7248,7 +7248,7 @@ namespace NsAppManager
      * \brief set device list
      * \param deviceList device list
      */
-    void AppMgrCore::setDeviceList(const NsConnectionHandler::DeviceList &deviceList)
+    void AppMgrCore::setDeviceList(const connection_handler::DeviceList &deviceList)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Updating device list: " << deviceList.size() << " devices");
         //mDeviceList.setDeviceList(deviceList);
@@ -7268,10 +7268,10 @@ namespace NsAppManager
         HMIHandler::getInstance().sendNotification(deviceListUpdated);
     }
 
-    void AppMgrCore::differenceBetweenLists( const NsConnectionHandler::DeviceList &deviceList )
+    void AppMgrCore::differenceBetweenLists( const connection_handler::DeviceList &deviceList )
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Start finding diff.");
-        typedef NsConnectionHandler::DeviceList::const_iterator NewIterator;
+        typedef connection_handler::DeviceList::const_iterator NewIterator;
         typedef std::map<int, DeviceStorage>::const_iterator ExistingIterator;
         typedef std::map<int, Application*>::const_iterator ApplicationIterator;
 
@@ -7374,7 +7374,7 @@ namespace NsAppManager
      * \brief get device list
      * \return device list
      */
-    /*const NsConnectionHandler::DeviceList &AppMgrCore::getDeviceList() const
+    /*const connection_handler::DeviceList &AppMgrCore::getDeviceList() const
     {
         return mDeviceList.getDeviceList();
     }*/
@@ -7384,7 +7384,7 @@ namespace NsAppManager
      * \param connectionKey session/connection key
      * \param device device handler
      */
-    void AppMgrCore::addDevice(const NsConnectionHandler::DeviceHandle &device,
+    void AppMgrCore::addDevice(const connection_handler::DeviceHandle &device,
             const int &sessionKey, int firstSessionKey)
     {
         //mDeviceHandler.addDevice(sessionKey, device);

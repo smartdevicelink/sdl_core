@@ -57,7 +57,7 @@ namespace NsAppManager
      * \param sessionKey session/connection key
      * \param device device handler
      */
-    void DeviceHandler::addDevice(const int &sessionKey, const NsConnectionHandler::DeviceHandle &device)
+    void DeviceHandler::addDevice(const int &sessionKey, const connection_handler::DeviceHandle &device)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Adding a device " << device << " with a session " << sessionKey );
         mDeviceMapping.insert(DeviceMapItem(sessionKey, device));
@@ -77,7 +77,7 @@ namespace NsAppManager
      * \brief remove an application from a mapping
      * \param device device to remove all associated sessions from mapping
      */
-    void DeviceHandler::removeSession(const NsConnectionHandler::DeviceHandle &device)
+    void DeviceHandler::removeSession(const connection_handler::DeviceHandle &device)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Removing all sessions associated with device " << device );
         for(DeviceMap::iterator it = mDeviceMapping.begin(); it != mDeviceMapping.end(); it++)
@@ -95,7 +95,7 @@ namespace NsAppManager
      * \param sessionKey session/connection key
      * \return device handler
      */
-    NsConnectionHandler::DeviceHandle DeviceHandler::findDeviceAssignedToSession(const int &sessionKey) const
+    connection_handler::DeviceHandle DeviceHandler::findDeviceAssignedToSession(const int &sessionKey) const
     {
         DeviceMap::const_iterator it = mDeviceMapping.find(sessionKey);
         if(it != mDeviceMapping.end())

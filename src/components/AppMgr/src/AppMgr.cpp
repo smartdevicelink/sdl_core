@@ -103,7 +103,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgr::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
+    void AppMgr::setConnectionHandler(connection_handler::IDevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -152,16 +152,16 @@ namespace NsAppManager
      *
      * \param deviceList New list of available devices.
      **/
-    void AppMgr::OnDeviceListUpdated(const NsConnectionHandler::DeviceList &deviceList)
+    void AppMgr::OnDeviceListUpdated(const connection_handler::DeviceList &deviceList)
     {
         AppMgrCore::getInstance().setDeviceList(deviceList);
     }
 
-    void AppMgr::UpdateDeviceList(const NsConnectionHandler::DeviceList & DeviceList)
+    void AppMgr::UpdateDeviceList(const connection_handler::DeviceList & DeviceList)
     {
     }
 
-    void AppMgr::RemoveDevice(const NsConnectionHandler::DeviceHandle DeviceHandle)
+    void AppMgr::RemoveDevice(const connection_handler::DeviceHandle DeviceHandle)
     {
     }
 
@@ -170,7 +170,7 @@ namespace NsAppManager
      * \param deviceHandle
      * \param sessionKey
      */
-    void AppMgr::OnSessionStartedCallback(NsConnectionHandler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey)
+    void AppMgr::OnSessionStartedCallback(connection_handler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey)
     {
         AppMgrCore::getInstance().addDevice(deviceHandle, sessionKey, firstSessionKey);
     }

@@ -35,8 +35,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONNECTIONHANDLER_H
-#define CONNECTIONHANDLER_H
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLER_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLER_H_
 
 #include <map>
 #include <list>
@@ -51,10 +51,10 @@
 #include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"
 #include "ConnectionHandler/IConnectionHandler.hpp"
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 /**
  * \class CConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler main class
@@ -196,7 +196,7 @@ class CConnectionHandler :
    * \brief Connects to all services of device
    * \param deviceHandle Handle of device to connect to
    */
-  virtual void ConnectToDevice(NsConnectionHandler::DeviceHandle deviceHandle);
+  virtual void ConnectToDevice(connection_handler::DeviceHandle deviceHandle);
 
   virtual void StartTransportManager();
 
@@ -219,7 +219,7 @@ class CConnectionHandler :
    */
   bool DoesDeviceExistInTMList(
       const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList,
-      const NsConnectionHandler::DeviceHandle DeviceHandle);
+      const connection_handler::DeviceHandle DeviceHandle);
 
   /**
    * \brief Checks does device exist in list and adds if not
@@ -235,7 +235,7 @@ class CConnectionHandler :
    * \param connection_handle Connection handle.
    **/
   void RemoveConnection(
-      const tConnectionHandle connection_handle);
+      const ConnectionHandle connection_handle);
 
   /**
    * \brief Pointer to observer
@@ -255,13 +255,13 @@ class CConnectionHandler :
   /**
    * \brief List of connections
    */
-  tConnectionList connection_list_;
+  ConnectionList connection_list_;
 
   /**
    *\brief For logging.
    */
   static log4cplus::Logger logger_;
 };
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */
 
-#endif /* CONNECTIONHANDLER_H */
+#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLER_H_ */
