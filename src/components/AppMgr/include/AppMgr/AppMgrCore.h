@@ -51,6 +51,8 @@
 #include "AppMgr/MessageChaining.hpp"
 #include "AppMgr/DeviceStorage.hpp"
 
+#include "Utils/threads/thread.h"
+
 namespace NsSmartDeviceLinkRPC
 {
     class SDLRPCMessage;
@@ -375,6 +377,8 @@ namespace NsAppManager
         std::map<int, Application*> mApplications;
         std::map<int, DeviceStorage> mDevices;
         //connection_handler::DeviceList mDevices;
+
+        threads::Thread* perform_audio_thread_;
     };
 
 } // namespace NsAppManager

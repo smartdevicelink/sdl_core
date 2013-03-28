@@ -37,6 +37,7 @@ set (SOURCES
     ./src/DeviceList.cpp
     ./src/DeviceHandler.cpp
     ./src/VehicleDataMapping.cpp
+    ./src/audio_pass_thru_thread_impl.cc
 )
 
 add_library("AppMgr" ${SOURCES})

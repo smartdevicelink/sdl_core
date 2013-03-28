@@ -7,6 +7,7 @@ include_directories (
 
 set (SOURCES
     ./src/WorkWithOS.cpp
+    ./src/threads/posix_thread.cc
 )
 
 add_library("Utils" ${SOURCES})

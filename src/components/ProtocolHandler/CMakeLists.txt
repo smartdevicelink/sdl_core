@@ -11,6 +11,8 @@ set (SOURCES
     ./src/SmartDeviceLinkRawMessage.cpp
     ./src/ProtocolHandler.cpp
     ./src/ProtocolPacket.cpp
+    ./src/message_from_mobile_app_handler.cc
+    ./src/messages_to_mobile_app_handler.cc
 )
 
 add_library("ProtocolHandler" ${SOURCES})

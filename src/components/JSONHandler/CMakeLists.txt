@@ -605,6 +605,8 @@ set (SOURCES
     ./src/RPC2Response.cpp
     ./src/RPC2Error.cpp
     ./src/RPC2ErrorMarshaller.cpp
+    ./src/incoming_thread_impl.cc
+    ./src/outgoing_thread_impl.cc
 )
 
 add_library("JSONHandler" ${SOURCES}
