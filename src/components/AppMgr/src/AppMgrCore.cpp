@@ -5920,11 +5920,11 @@ namespace NsAppManager
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
 
-                    std::map<int,DeviceStorage>::const_iterator it = core->mDevices.find( app->getDeviceHandle() );
+                    std::map<int,DeviceStorage>::const_iterator i = core->mDevices.find( app->getDeviceHandle() );
                     std::string deviceName = "";
-                    if ( core->mDevices.end() != it )
+                    if ( core->mDevices.end() != i )
                     {
-                        deviceName = it->second.getUserFriendlyName();
+                        deviceName = i->second.getUserFriendlyName();
                     }
 
                     hmiApp.set_deviceName(deviceName);
