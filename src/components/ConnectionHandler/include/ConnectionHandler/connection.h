@@ -37,8 +37,11 @@
 #ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_
 #define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_
 
+#include <map>
+#include <vector>
+
 #include "Logger.hpp"
-#include "ConnectionHandler/device.hpp"
+#include "ConnectionHandler/device.h"
 
 /**
  * \namespace connection_handler
@@ -115,8 +118,8 @@ class Connection {
    * \param session_list list of sessions
    */
   void GetSessionList(SessionList & session_list);
- private:
 
+ private:
   /**
    * \brief Current connection handle.
    */
@@ -156,4 +159,4 @@ typedef std::map<int, Connection>::iterator ConnectionListIterator;
 
 }/* namespace connection_handler */
 
-#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_ */
+#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_

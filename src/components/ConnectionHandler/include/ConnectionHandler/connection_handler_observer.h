@@ -33,13 +33,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLEROBSERVER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLEROBSERVER_H_
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_OBSERVER_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_OBSERVER_H_
 
 #include "Logger.hpp"
 
-#include "ConnectionHandler/device.hpp"
-#include "ConnectionHandler/connection.hpp"
+#include "ConnectionHandler/device.h"
+#include "ConnectionHandler/connection.h"
 
 /**
  * \namespace connection_handler
@@ -52,7 +52,6 @@ namespace connection_handler {
  */
 class ConnectionHandlerObserver {
  public:
-
   /**
    * \brief Available devices list updated.
    *
@@ -101,7 +100,8 @@ class ConnectionHandlerObserver {
    * \param sessionKey Key of session which should be ended
    * \param firstSessionKey Session key of first session in this connection
    */
-  virtual void OnSessionEndedCallback(int session_key, int first_session_key) = 0;
+  virtual void OnSessionEndedCallback(int session_key,
+                                      int first_session_key) = 0;
 
  protected:
   /**
@@ -109,8 +109,7 @@ class ConnectionHandlerObserver {
    */
   virtual ~ConnectionHandlerObserver() {
   }
-  ;
 };
 }/* namespace connection_handler */
 
-#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLEROBSERVER_H_ */
+#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_OBSERVER_H_

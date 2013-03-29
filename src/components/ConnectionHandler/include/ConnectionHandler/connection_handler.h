@@ -33,16 +33,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
 
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
 #include "ProtocolHandler/ISessionObserver.h"
-#include "ConnectionHandler/connection_handler_observer.hpp"
-#include "ConnectionHandler/device.hpp"
-#include "ConnectionHandler/connection.hpp"
-#include "ConnectionHandler/devices_discovery_starter.hpp"
+#include "ConnectionHandler/connection_handler_observer.h"
+#include "ConnectionHandler/device.h"
+#include "ConnectionHandler/connection.h"
+#include "ConnectionHandler/devices_discovery_starter.h"
 
 /**
  * \namespace connection_handler
@@ -77,9 +77,7 @@ class ConnectionHandler {
    */
   virtual ~ConnectionHandler() {
   }
-  ;
-
 };
 }/* namespace connection_handler */
 
-#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_ICONNECTIONHANDLER_H_ */
+#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_

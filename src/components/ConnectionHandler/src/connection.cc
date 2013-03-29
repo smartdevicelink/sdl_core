@@ -1,7 +1,6 @@
 /**
- * \file Device.hpp
- * \brief Device class.
- * Stores device information
+ * \file Connection.cpp
+ * \brief Connection class implementation.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -34,12 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#include <algorithm>
 
 #include "Logger.hpp"
-#include <string>
-#include <map>
+
+#include "ConnectionHandler/connection.h"
 
 /**
  * \namespace connection_handler
@@ -47,67 +45,59 @@
  */
 namespace connection_handler {
 
-/**
- * \brief Type for DeviceHandle
- */
-typedef int DeviceHandle;
+log4cplus::Logger Connection::logger_ = log4cplus::Logger::getInstance(
+    LOG4CPLUS_TEXT("ConnectionHandler"));
 
-/**
- * \class Device
- * \brief Connection class
- */
-class Device {
- public:
-  /**
-   * \brief Class constructor
-   */
-  Device(DeviceHandle device_handle, std::string user_friendly_name);
+Connection::Connection(ConnectionHandle connection_handle,
+                         DeviceHandle connection_device_handle)
+    : connection_handle_(connection_handle),
+      connection_device_handle_(connection_device_handle),
+      session_id_counter_(1) {
+}
 
-  /**
-   * \brief Destructor
-   */
-  ~Device();
+Connection::~Connection() {
+}
 
-  /**
-   * \brief Returns device handle
-   * \return DeviceHandle
-   */
-  DeviceHandle device_handle() const;
+int Connection::AddNewSession() {
+  int result = -1;
+  if (255 > session_id_counter_) {
+    session_list_.push_back(session_id_counter_);
+    result = session_id_counter_++;
+  }
+  return result;
+}
 
-  /**
-   * \brief Returns user frendly device name
-   * \return UserFriendlyName
-   */
-  std::string user_friendly_name() const;
+int Connection::RemoveSession(unsigned char session) {
+  int result = -1;
+  SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
+                                     session);
+  if (session_list_.end() == it) {
+    LOG4CPLUS_ERROR(logger_, "Session not found in this connection!");
+  } else {
+    session_list_.erase(it);
+    result = session;
+  }
+  return result;
+}
 
- private:
-  /**
-   * \brief Uniq device handle.
-   */
-  DeviceHandle device_handle_;
+int Connection::GetFirstSessionID() {
+  int result = -1;
+  SessionListIterator it = session_list_.begin();
+  if (session_list_.end() != it) {
+    result = *it;
+  }
+  return result;
+}
 
-  /**
-   * \brief User-friendly device name.
-   */
-  std::string user_friendly_name_;
+ConnectionHandle Connection::connection_handle() {
+  return connection_handle_;
+}
 
-  /**
-   * \brief For logging.
-   */
-  static log4cplus::Logger logger_;
-};
+DeviceHandle Connection::connection_device_handle() {
+  return connection_device_handle_;
+}
 
-/**
- * \brief Type for Devices map
- */
-typedef std::map<int, Device> DeviceList;
-
-/**
- * \brief Type for Devices map iterator
- * Key is DeviceHandle which is uniq
- */
-typedef std::map<int, Device>::iterator DeviceListIterator;
-
+void Connection::GetSessionList(SessionList & session_list) {
+  session_list = session_list_;
+}
 }/* namespace connection_handler */
-
-#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_ */

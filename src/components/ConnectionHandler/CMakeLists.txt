@@ -8,9 +8,9 @@ include_directories (
 )
 
 set (SOURCES
-    ./src/connection_handler_impl.cpp
-    ./src/connection.cpp
-    ./src/device.cpp
+    ./src/connection_handler_impl.cc
+    ./src/connection.cc
+    ./src/device.cc
 )
 
 add_library("connectionHandler" ${SOURCES})

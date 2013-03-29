@@ -35,21 +35,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLER_H_
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_IMPL_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_IMPL_H_
 
 #include <map>
 #include <list>
+#include <string>
 
 #include "Logger.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
 #include "ProtocolHandler/ISessionObserver.h"
-#include "ConnectionHandler/connection_handler_observer.hpp"
-#include "ConnectionHandler/device.hpp"
-#include "ConnectionHandler/connection.hpp"
-#include "ConnectionHandler/devices_discovery_starter.hpp"
-#include "ConnectionHandler/connection_handler.hpp"
+#include "ConnectionHandler/connection_handler_observer.h"
+#include "ConnectionHandler/device.h"
+#include "ConnectionHandler/connection.h"
+#include "ConnectionHandler/devices_discovery_starter.h"
+#include "ConnectionHandler/connection_handler.h"
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
@@ -59,10 +60,9 @@ namespace connection_handler {
  * \class ConnectionHandlerImpl
  * \brief SmartDeviceLink ConnectionHandler main class
  */
-class ConnectionHandlerImpl :
+class ConnectionHandlerImpl : public ConnectionHandler,
     public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener,
-    public NsProtocolHandler::ISessionObserver, public DevicesDiscoveryStarter,
-    public ConnectionHandler {
+    public NsProtocolHandler::ISessionObserver, public DevicesDiscoveryStarter {
  public:
   /**
    * \brief Singletone instantiator.
@@ -79,7 +79,8 @@ class ConnectionHandlerImpl :
    * \brief Sets observer pointer for ConnectionHandler.
    * \param observer Pointer to observer object.
    **/
-  virtual void set_connection_handler_observer(ConnectionHandlerObserver * observer);
+  virtual void set_connection_handler_observer(
+      ConnectionHandlerObserver * observer);
 
   /**
    * \brief Available devices list updated.
@@ -166,8 +167,8 @@ class ConnectionHandlerImpl :
    * \return int -1 in case of error or 0 in case of success
    */
   virtual int GetDataOnSessionKey(int key, int & app_id,
-                                     std::list<int> & sessions_list,
-                                     int & device_id);
+                                  std::list<int> & sessions_list,
+                                  int & device_id);
 
   /**
    * \brief information about given Connection Key.
@@ -178,13 +179,13 @@ class ConnectionHandlerImpl :
    * \return int -1 in case of error or 0 in case of success
    */
   virtual int GetDataOnDeviceID(int device_id, std::string & device_name,
-                                     std::list<int> & applications_list);
+                                std::list<int> & applications_list);
 
   /**
    * \brief Sets pointer to TransportManager.
    * \param transportManager Pointer to TransportManager object.
    **/
- virtual void set_transport_manager(
+  virtual void set_transport_manager(
       NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager);
 
   /**
@@ -215,7 +216,7 @@ class ConnectionHandlerImpl :
    * \brief Checks does device exist in list from TransportManager
    * \param DeviceHandle Handle of device for checking.
    * \param DeviceHandle Handle of device for checking.
-  * \return True if device exists.
+   * \return True if device exists.
    */
   bool DoesDeviceExistInTMList(
       const NsSmartDeviceLink::NsTransportManager::tDeviceList & device_list,
@@ -234,8 +235,7 @@ class ConnectionHandlerImpl :
    * \param device_handle DeviceHandle of disconnected device.
    * \param connection_handle Connection handle.
    **/
-  void RemoveConnection(
-      const ConnectionHandle connection_handle);
+  void RemoveConnection(const ConnectionHandle connection_handle);
 
   /**
    * \brief Pointer to observer
@@ -264,4 +264,4 @@ class ConnectionHandlerImpl :
 };
 }/* namespace connection_handler */
 
-#endif /* SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTIONHANDLER_H_ */
+#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_IMPL_H_

@@ -62,7 +62,7 @@
 #include "JSONHandler/SDLRPCObjects/V2/AppType.h"
 #include "JSONHandler/SDLRPCObjects/V2/VehicleDataType.h"
 
-#include "ConnectionHandler/connection_handler_impl.hpp"
+#include "ConnectionHandler/connection_handler_impl.h"
 
 #include "AppMgr/rpc_helper.h"
 #include "AppMgr/audio_pass_thru_thread_impl.h"

@@ -39,7 +39,7 @@
 
 #include "Logger.hpp"
 
-#include "ConnectionHandler/connection_handler_impl.hpp"
+#include "ConnectionHandler/connection_handler_impl.h"
 
 /**
  * \namespace connection_handler
