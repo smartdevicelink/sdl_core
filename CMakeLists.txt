@@ -64,6 +64,7 @@ add_subdirectory(./src/appMain)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 if(BUILD_TESTS)
     enable_testing()
+    include(Dart)
     # Framework GoogleTest is also integrated together gmock
     # and must not be added separately
     add_subdirectory(./src/thirdPartyLibs/gmock-1.6.0)
