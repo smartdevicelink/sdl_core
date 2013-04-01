@@ -1,6 +1,6 @@
 /*! \page components_smartobjects_types_cast Type cast for SmartObjects
 
-One of easy and probably intuitive way to work with values in the Smart Object is simple using of the type casts. Implementation of NsAppLink::NsSmartObjects::CSmartObject class has all necessary declarations to support all required types.
+One of easy and probably intuitive way to work with values in the Smart Object is simple use of the type casts. Implementation of NsAppLink::NsSmartObjects::CSmartObject class has all necessary declarations to support all required types.
 
 Example 1 (Work with int value):
 
@@ -55,7 +55,7 @@ Example 5 (Work with bool value):
 
 NsAppLink::NsSmartObjects::CSmartObject obj;
 
-obj = ture;         //Assign bool value
+obj = true;         //Assign bool value
 
 bool b = (bool)obj; //Get bool value
 
