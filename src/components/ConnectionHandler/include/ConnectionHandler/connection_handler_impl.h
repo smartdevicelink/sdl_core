@@ -45,12 +45,14 @@
 #include "Logger.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
-#include "ProtocolHandler/ISessionObserver.h"
+
+#include "protocol_handler/session_observer.h"
 #include "ConnectionHandler/connection_handler_observer.h"
 #include "ConnectionHandler/device.h"
 #include "ConnectionHandler/connection.h"
 #include "ConnectionHandler/devices_discovery_starter.h"
 #include "ConnectionHandler/connection_handler.h"
+
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
@@ -62,7 +64,7 @@ namespace connection_handler {
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
     public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener,
-    public NsProtocolHandler::ISessionObserver, public DevicesDiscoveryStarter {
+    public protocol_handler::SessionObserver, public DevicesDiscoveryStarter {
  public:
   /**
    * \brief Singletone instantiator.

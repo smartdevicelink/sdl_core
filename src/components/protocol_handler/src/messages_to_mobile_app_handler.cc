@@ -30,17 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ProtocolHandler/messages_to_mobile_app_handler.h"
-#include "ProtocolHandler/ISessionObserver.h"
+#include "protocol_handler/messages_to_mobile_app_handler.h"
+#include "protocol_handler/session_observer.h"
 #include "LoggerHelper.hpp"
 
 using NsSmartDeviceLink::NsTransportManager::tConnectionHandle;
 
-namespace NsProtocolHandler {
+namespace protocol_handler {
 log4cplus::Logger MessagesToMobileAppHandler::logger_ =
     log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ProtocolHandler"));
 
-MessagesToMobileAppHandler::MessagesToMobileAppHandler(ProtocolHandler* handler)
+MessagesToMobileAppHandler::MessagesToMobileAppHandler(
+    ProtocolHandlerImpl* handler)
     : handler_(handler) {
   DCHECK(handler_);
 }
@@ -51,23 +52,23 @@ MessagesToMobileAppHandler::~MessagesToMobileAppHandler() {
 void MessagesToMobileAppHandler::threadMain() {
   // TODO(PV): check if continue running condition.
   while (1) {
-    while (!handler_->mMessagesToMobileApp.empty()) {
-      const SmartDeviceLinkRawMessage* message = handler_->mMessagesToMobileApp
+    while (!handler_->messages_to_mobile_app_.empty()) {
+      const RawMessage* message = handler_->messages_to_mobile_app_
           .pop();
       LOG4CPLUS_INFO_EXT(
           logger_,
-          "Message to mobile app: connection " << message->getConnectionKey()
-            << "; dataSize: " << message->getDataSize()
-            << " ; protocolVersion " << message->getProtocolVersion());
+          "Message to mobile app: connection " << message->connection_key()
+            << "; dataSize: " << message->data_size()
+            << " ; protocolVersion " << message->protocol_version());
 
       unsigned int maxDataSize = 0;
-      if (PROTOCOL_VERSION_1 == message->getProtocolVersion()) {
+      if (PROTOCOL_VERSION_1 == message->protocol_version()) {
         maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
-      } else if (PROTOCOL_VERSION_2 == message->getProtocolVersion()) {
+      } else if (PROTOCOL_VERSION_2 == message->protocol_version()) {
         maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
       }
 
-      if (!handler_->mSessionObserver) {
+      if (!handler_->session_observer_) {
         LOG4CPLUS_ERROR(
             logger_,
             "Cannot handle message to mobile app:"
@@ -76,13 +77,13 @@ void MessagesToMobileAppHandler::threadMain() {
       }
       tConnectionHandle connectionHandle = 0;
       unsigned char sessionID = 0;
-      handler_->mSessionObserver->pairFromKey(message->getConnectionKey(),
+      handler_->session_observer_->pairFromKey(message->connection_key(),
                                               connectionHandle, sessionID);
 
-      if (message->getDataSize() <= maxDataSize) {
+      if (message->data_size() <= maxDataSize) {
         RESULT_CODE result = handler_->sendSingleFrameMessage(
-            connectionHandle, sessionID, message->getProtocolVersion(),
-            SERVICE_TYPE_RPC, message->getDataSize(), message->getData(),
+            connectionHandle, sessionID, message->protocol_version(),
+            SERVICE_TYPE_RPC, message->data_size(), message->data(),
             false);
         if (result != RESULT_OK) {
           LOG4CPLUS_ERROR(
@@ -97,8 +98,8 @@ void MessagesToMobileAppHandler::threadMain() {
         // TODO(PV) : check if this is correct assumption; and remove this
         // hot fix because it is not supposed to be so.
         RESULT_CODE result = handler_->sendMultiFrameMessage(
-            connectionHandle, sessionID, message->getProtocolVersion(),
-            SERVICE_TYPE_RPC, message->getDataSize(), message->getData(), false,
+            connectionHandle, sessionID, message->protocol_version(),
+            SERVICE_TYPE_RPC, message->data_size(), message->data(), false,
             maxDataSize);
         if (result != RESULT_OK) {
           LOG4CPLUS_ERROR(
@@ -106,7 +107,7 @@ void MessagesToMobileAppHandler::threadMain() {
         }
       }
     }
-    handler_->mMessagesToMobileApp.wait();
+    handler_->messages_to_mobile_app_.wait();
   }
 }
-}  // namespace NsProtocolHandler
+}  // namespace protocol_handler

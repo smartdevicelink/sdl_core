@@ -41,9 +41,9 @@
 #include "JSONHandler/SDLRPCMessage.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IJsonHandler.h"
-#include "ProtocolHandler/SmartDeviceLinkRawMessage.h"
-#include "ProtocolHandler/IProtocolObserver.h"
-#include "ProtocolHandler/ProtocolHandler.h"
+#include "protocol_handler/raw_message.h"
+#include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/protocol_handler_impl.h"
 
 const unsigned char RPC_REQUEST = 0x0;
 const unsigned char RPC_RESPONSE = 0x1;
@@ -63,14 +63,14 @@ class OutgoingThreadImpl;
  * Receives SmartDeviceLink Json message from Protocol layer, creates corresponding object and sends it to Application Manager.
  * Receives SmartDeviceLink message object from Application manager, serializes it into Json string and sends to Protocol Layer.
 */
-class JSONHandler : public IJsonHandler, public NsProtocolHandler::IProtocolObserver
+class JSONHandler : public IJsonHandler, public protocol_handler::ProtocolObserver
 {
 public:
     /**
      * \brief Constructor
      * \param protocolHandler Pointer to Protocol Layer handler for message exchange.
     */
-    JSONHandler( NsProtocolHandler::ProtocolHandler * protocolHandler = 0 );
+    JSONHandler( protocol_handler::ProtocolHandlerImpl * protocolHandler = 0 );
 
     /**
      * \brief Destructor
@@ -82,13 +82,13 @@ public:
      * \brief Sets pointer for Protocol layer handler for message exchange.
      * \param protocolHandler Pointer to Protocol layer handler.
      */
-    void setProtocolHandler( NsProtocolHandler::ProtocolHandler * protocolHandler );
+    void setProtocolHandler( protocol_handler::ProtocolHandlerImpl * protocolHandler );
 
     /**
      * \brief Callback for Protocol layer handler to notify of message received.
      * \param message Object containing received data, size of it and connection key.
      */
-    void onDataReceivedCallback( const NsProtocolHandler::SmartDeviceLinkRawMessage * message );
+    void onDataReceivedCallback( const protocol_handler::RawMessage * message );
     /*end of methods from IProtocolObserver*/
 
     /*Methods for IRPCMessagesObserver*/
@@ -118,15 +118,15 @@ protected:
     std::string clearEmptySpaces( const std::string & input );
 
     NsSmartDeviceLinkRPC::SDLRPCMessage * handleIncomingMessageProtocolV1(
-            const NsProtocolHandler::SmartDeviceLinkRawMessage * message );
+            const protocol_handler::RawMessage * message );
 
     NsSmartDeviceLinkRPC::SDLRPCMessage * handleIncomingMessageProtocolV2(
-            const NsProtocolHandler::SmartDeviceLinkRawMessage * message );
+            const protocol_handler::RawMessage * message );
 
-    NsProtocolHandler::SmartDeviceLinkRawMessage * handleOutgoingMessageProtocolV1( 
+    protocol_handler::RawMessage * handleOutgoingMessageProtocolV1( 
             int connectionKey, const NsSmartDeviceLinkRPC::SDLRPCMessage *  message );
 
-    NsProtocolHandler::SmartDeviceLinkRawMessage * handleOutgoingMessageProtocolV2( 
+    protocol_handler::RawMessage * handleOutgoingMessageProtocolV2( 
             int connectionKey, const NsSmartDeviceLinkRPC::SDLRPCMessage *  message );
     
 private:
@@ -144,7 +144,7 @@ private:
     /**
       *\brief Points on instance of Protocol layer handler for message exchange.
     */
-    NsProtocolHandler::ProtocolHandler *         mProtocolHandler;
+    protocol_handler::ProtocolHandlerImpl *         mProtocolHandler;
 
     /* End IProtocolObserver data */
 
@@ -152,7 +152,7 @@ private:
       *\brief Queue of messages from Mobile Application.
       *\sa MessageQueue
     */
-    MessageQueue<const NsProtocolHandler::SmartDeviceLinkRawMessage*>          mIncomingMessages;
+    MessageQueue<const protocol_handler::RawMessage*>          mIncomingMessages;
 
     /**
       *\brief Queue of messages to Mobile Application.

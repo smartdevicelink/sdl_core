@@ -18,7 +18,7 @@ set(LIBRARIES
 
 include_directories (
   ./
-  ../components/ProtocolHandler/include/
+  ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/
   ../components/JSONHandler/include
   ../components/AppMgr/include

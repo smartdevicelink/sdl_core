@@ -1,6 +1,6 @@
 /**
- * \file ConnectionHandler.hpp
- * \brief Connection handler interface class.
+ * \file IProtocolObserver.h
+ * \brief IProtocolObserver class header.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,51 +33,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
-
-#include "TransportManager/ITransportManagerDeviceListener.hpp"
-#include "TransportManager/SDeviceInfo.hpp"
-#include "protocol_handler/session_observer.h"
-#include "ConnectionHandler/connection_handler_observer.h"
-#include "ConnectionHandler/device.h"
-#include "ConnectionHandler/connection.h"
-#include "ConnectionHandler/devices_discovery_starter.h"
+#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
+#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
 
 /**
- * \namespace connection_handler
- * \brief SmartDeviceLink ConnectionHandler namespace.
+ *\namespace NsProtocolHandler
+ *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
-namespace connection_handler {
+namespace protocol_handler {
+class RawMessage;
+
 /**
- * \class ConnectionHandler
- * \brief SmartDeviceLink ConnectionHandler interface class
+ * \class IProtocolObserver
+ * \brief Interface for making a bridge between
+ * ProtocolHandler and JSONHandler components.
  */
-class ConnectionHandler {
+class ProtocolObserver {
  public:
   /**
-   * \brief Sets observer pointer for ConnectionHandler.
-   * \param observer Pointer to observer object.
-   **/
-  virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver * observer)=0;
-
-  /**
-   * \brief Sets pointer to TransportManager.
-   * \param transportManager Pointer to TransportManager object.
-   **/
-  virtual void set_transport_manager(
-      NsSmartDeviceLink::NsTransportManager::ITransportManager * transport_manager)=0;
-
-  virtual void StartTransportManager() = 0;
+   * \brief Callback function which is used by ProtocolHandler
+   * when new message is received from Mobile Application.
+   * \param message Message with supporting params received
+   */
+  virtual void onDataReceivedCallback(const RawMessage* message) = 0;
 
  protected:
   /**
    * \brief Destructor
    */
-  virtual ~ConnectionHandler() {
+  virtual ~ProtocolObserver() {
   }
 };
-}/* namespace connection_handler */
+}  // namespace protocol_handler
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_

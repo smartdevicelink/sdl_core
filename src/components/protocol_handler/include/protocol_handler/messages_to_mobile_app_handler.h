@@ -30,28 +30,28 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_PROTOCOLHANDLER_INCLUDE_PROTOCOLHANDLER_MESSAGES_TO_MOBILE_APP_HANDLER_H_
-#define SRC_COMPONENTS_PROTOCOLHANDLER_INCLUDE_PROTOCOLHANDLER_MESSAGES_TO_MOBILE_APP_HANDLER_H_
+#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MESSAGES_TO_MOBILE_APP_HANDLER_H_
+#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MESSAGES_TO_MOBILE_APP_HANDLER_H_
 
 #include "Utils/macro.h"
 #include "Utils/threads/thread_delegate.h"
 
-#include "ProtocolHandler/ProtocolHandler.h"
+#include "protocol_handler/protocol_handler_impl.h"
 
-namespace NsProtocolHandler {
+namespace protocol_handler {
 class MessagesToMobileAppHandler : public threads::IThreadDelegate {
  public:
-  explicit MessagesToMobileAppHandler(ProtocolHandler* handler);
+  explicit MessagesToMobileAppHandler(ProtocolHandlerImpl* handler);
   ~MessagesToMobileAppHandler();
 
   void threadMain();
 
  private:
-  ProtocolHandler* handler_;
+  ProtocolHandlerImpl* handler_;
   static log4cplus::Logger logger_;
 
   DISALLOW_COPY_AND_ASSIGN(MessagesToMobileAppHandler);
 };
-}  // namespace NsProtocolHandler
+}  // namespace protocol_handler
 
-#endif  // SRC_COMPONENTS_PROTOCOLHANDLER_INCLUDE_PROTOCOLHANDLER_MESSAGES_TO_MOBILE_APP_HANDLER_H_
+#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MESSAGES_TO_MOBILE_APP_HANDLER_H_
