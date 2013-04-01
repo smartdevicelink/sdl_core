@@ -10,14 +10,43 @@ namespace NsAppLink
     {
         class CSmartObject;
 
+        /**
+         * @brief Smart Schema.
+         */ 
         class CSmartSchema
         {
         public:
 
+            /**
+             * @brief Constructor.
+             *
+             * Default constructor. Creates empty schema.
+             */
             CSmartSchema();
+
+            /**
+             * @brief Constructor.
+             *
+             * Creates schema with given root schema item.
+             *
+             * @param SchemaItem Root schema item.
+             */
             CSmartSchema(TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem);
 
-            Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject& object);
+            /**
+             * @brief Validate smart object.
+             *
+             * @param Object SmartObject to validate.
+             *
+             * @return Result of validation.
+             */ 
+            Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject& Object);
+
+            /**
+             * @brief Set new root schema item.
+             *
+             * @param SchemaItem Root schema item.
+             */
             void setSchemaItem(TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem);
 
             /**
@@ -35,6 +64,10 @@ namespace NsAppLink
             virtual void unapplySchema(NsAppLink::NsSmartObjects::CSmartObject& object);
 
         protected:
+
+            /**
+             * @brief Root schema item.
+             */
             TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> mSchemaItem;
         };
     }
