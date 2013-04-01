@@ -12,8 +12,18 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
     class CFormatterJsonBase
     {
     private:
+
+        /**
+         * @brief Constructor.
+         */ 
         CFormatterJsonBase();
-        CFormatterJsonBase(const CFormatterJsonBase&);
+
+        /**
+         * @brief Copy constructor.
+         *
+         * @param obj Object to copy.
+         */
+        CFormatterJsonBase(const CFormatterJsonBase &obj);
 
     protected:
 

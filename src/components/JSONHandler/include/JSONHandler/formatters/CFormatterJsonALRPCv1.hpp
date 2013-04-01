@@ -44,10 +44,30 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
         static const std::string getMessageType(const Json::Value& root);
 
         // ALRPCv1 string consts
+
+        /**
+         * @brief String constant for REQUEST.
+         */
         static const std::string S_REQUEST;
+
+        /**
+         * @brief String constant for RESPONSE.
+         */
         static const std::string S_RESPONSE;
+
+        /**
+         * @brief String constant for PARAMETERS.
+         */        
         static const std::string S_PARAMETERS;
+
+        /**
+         * @brief String constant for NAME.
+         */        
         static const std::string S_NAME;
+
+        /**
+         * @brief String constant for CORRELATION_ID.
+         */        
         static const std::string S_CORRELATION_ID;
 
     public:
