@@ -10,42 +10,119 @@ namespace NsAppLink
 {
     namespace NsJSONHandler
     {
+        /**
+         * @brief String constants used by SmartFactory.
+         */ 
         namespace strings
         {
+            /**
+             * @brief String constant for MSG_PARAMS.
+             */ 
             extern const std::string S_MSG_PARAMS;
+
+            /**
+             * @brief String constant for PARAMS.
+             */ 
             extern const std::string S_PARAMS;
+
+            /**
+             * @brief String constant for FUNCTION_ID.
+             */            
             extern const std::string S_FUNCTION_ID;
+
+            /**
+             * @brief String constant for MESSAGE_TYPE.
+             */            
             extern const std::string S_MESSAGE_TYPE;
+
+            /**
+             * @brief String constant for PROTOCOL_VERSION.
+             */            
             extern const std::string S_PROTOCOL_VERSION;
+
+            /**
+             * @brief String constant for PROTOCOL_TYPE.
+             */            
             extern const std::string S_PROTOCOL_TYPE;
+
+            /**
+             * @brief String constant for CORRELATION_ID.
+             */            
             extern const std::string S_CORRELATION_ID;
         }
 
+        /**
+         * @brief Smart Schema key.
+         *
+         * @tparam FunctionIdEnum Type of function ID enum.
+         * @tparam MessageTypeEnum Type of messageType enum.
+         */
         template <class FunctionIdEnum, class MessageTypeEnum>
         struct SmartSchemaKey
         {
+            /**
+             * @brief Value of function ID for the key.
+             */ 
             FunctionIdEnum functionId;
+
+            /**
+             * @brief Value of messageType for the key.
+             */ 
             MessageTypeEnum messageType;
 
+            /**
+             * @brief Constructor.
+             *
+             * @param functionIdParam Value of function ID.
+             * @param messageTypeParam Value of message type.
+             */ 
             SmartSchemaKey(FunctionIdEnum functionIdParam, MessageTypeEnum messageTypeParam);
         };
 
-
+        /**
+         * @brief Smart Factory.
+         *
+         * This class is used as base class for generated factories.
+         * Clients should use methods of this class to access all
+         * SmartSchema validation features.
+         *
+         * @tparam FunctionIdEnum Type of function ID enum.
+         * @tparam MessageTypeEnum Type of messageType enum.
+         */
         template <class FunctionIdEnum, class MessageTypeEnum>
         class CSmartFactory
         {
         public:
-            CSmartFactory();
+
+            /**
+             * @brief Constructor.
+             */
+            CSmartFactory(void);
+
+            /**
+             * @brief Attach schema to the SmartObject.
+             *
+             * @param object SmartObject to attach schema for.
+             *
+             * @return True if operation was successful or false otherwise.
+             */ 
             bool attachSchema(NsAppLink::NsSmartObjects::CSmartObject& object);
 
         protected:
 
+            /**
+             * @brief Defines map of SmartSchemaKeys to the SmartSchems.
+             */ 
             typedef std::map<SmartSchemaKey<FunctionIdEnum, MessageTypeEnum>, NsAppLink::NsSmartObjects::CSmartSchema> SchemaMap;
+
+            /**
+             * @brief Map of all schemas for this factory.
+             */
             SchemaMap mSchemas;
         };
 
         template <class FunctionIdEnum, class MessageTypeEnum>
-        CSmartFactory<FunctionIdEnum, MessageTypeEnum>::CSmartFactory()
+        CSmartFactory<FunctionIdEnum, MessageTypeEnum>::CSmartFactory(void)
         : mSchemas()
         {
         }
