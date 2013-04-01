@@ -72,7 +72,6 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
 
     public:
 
-        // TODO: Make const input params
         /**
          * @brief Creates a JSON string from a SmartObject.
          *
