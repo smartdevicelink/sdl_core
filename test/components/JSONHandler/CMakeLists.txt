@@ -1,6 +1,6 @@
 # Generating interface
-GenerateInterface("test_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler2" "alrpcv2")
-GenerateInterface("test_v4_protocol_v1_2_no_extra.xml" "Gen::test::components::JSONHandler1" "alrpcv1")
+GenerateInterface("test_JSONHandler_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler2" "alrpcv2")
+GenerateInterface("test_JSONHandler_v4_protocol_v1_2_no_extra.xml" "Gen::test::components::JSONHandler1" "alrpcv1")
 
 # --- Formatters
 add_subdirectory(./formatters)
@@ -17,16 +17,12 @@ include_directories (
   ${CMAKE_BINARY_DIR}
 )
 
-set (SOURCES_DRAFT_TEST
-    ./SmartSchemaDraftTest.cpp
-)
-
 set(LIBRARIES
     gtest
     gtest_main
     gmock
     gmock_main
-    test_v4_protocol_v2_0_revP
+    test_JSONHandler_v4_protocol_v2_0_revP
     SmartObjects
     log4cplus
     JSONHandler
@@ -34,6 +30,4 @@ set(LIBRARIES
   #v4_protocol_v2_0_revP
 )
 
-add_executable("test_SmartSchemaDraftTest" ${SOURCES_DRAFT_TEST})
-target_link_libraries("test_SmartSchemaDraftTest" ${LIBRARIES})
-add_test(test_SmartSchemaDraftTest test_SmartSchemaDraftTest)
+create_test("test_JSONHandler_SmartSchemaDraftTest" "./SmartSchemaDraftTest.cpp" "${LIBRARIES}")

@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
-#include "test/components/JSONHandler/test_v4_protocol_v2_0_revP.hpp"
+#include "test/components/JSONHandler/test_JSONHandler_v4_protocol_v2_0_revP.hpp"
 
 using namespace Gen::test::components::JSONHandler2;
 using namespace NsAppLink::NsSmartObjects;
@@ -68,7 +68,7 @@ namespace test { namespace components { namespace JSONHandler { namespace SmartS
         //obj["msg_params"]["vrSynonyms"][1] = "Synonym2";
 
         // STEP 2. Attaching schema to object
-        test_v4_protocol_v2_0_revP factory;
+        test_JSONHandler_v4_protocol_v2_0_revP factory;
 
         bResult = factory.attachSchema(obj);
         ASSERT_TRUE(bResult);
