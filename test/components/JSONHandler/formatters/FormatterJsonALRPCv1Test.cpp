@@ -33,19 +33,35 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         // JSON --> SmartObjects
         NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, dstObj);
 
-        // Compare SmartObjects
-        ASSERT_EQ("APP NAME",  static_cast<std::string>(dstObj[S_MSG_PARAMS]["appName"]));
-        ASSERT_EQ(10, static_cast<int>(dstObj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"]));
-        ASSERT_EQ("TEXT", static_cast<std::string>(dstObj[S_MSG_PARAMS]["ttsName"][0]["type"]));
-        ASSERT_TRUE(static_cast<bool>(dstObj[S_MSG_PARAMS]["isMediaApplication"]));
 
-        ASSERT_EQ("request", static_cast<std::string>(dstObj[S_PARAMS][S_MESSAGE_TYPE]));
-        ASSERT_EQ("some function", static_cast<std::string>(dstObj[S_PARAMS][S_FUNCTION_ID]));
-        ASSERT_EQ(12, static_cast<int>(dstObj[S_PARAMS][S_CORRELATION_ID]));
-        ASSERT_EQ(0, static_cast<int>(dstObj[S_PARAMS][S_PROTOCOL_TYPE]));
-        ASSERT_EQ(1, static_cast<int>(dstObj[S_PARAMS][S_PROTOCOL_VERSION]));
+        compareObjects(srcObj, dstObj);
+    }
 
-        ASSERT_TRUE(srcObj == dstObj);      // High level comparison
+    TEST_F(CFormatterTestHelper, test_fromJsonALRPCv1)
+    {
+        std::string str = "\
+        {\
+            \"request\": {\
+                \"name\" : \"some name\",\
+                \"correlationID\": 11,\
+                \"parameters\": {\
+                    \"syncMsgVersion\": \"version\",\
+                    \"appName\": \"some app name\"\
+                }\
+            }\
+        }";
+
+        NsAppLink::NsSmartObjects::CSmartObject obj;
+        bool result;
+
+        result = NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, obj);
+
+        ASSERT_TRUE(result) << "Error parsing JSON string";
+
+        ASSERT_EQ("some name", (std::string)obj[S_PARAMS][S_FUNCTION_ID]);
+        ASSERT_EQ(11, (int)obj[S_PARAMS][S_CORRELATION_ID]);
+        ASSERT_EQ("version", (std::string)obj[S_MSG_PARAMS]["syncMsgVersion"]);
+        ASSERT_EQ("some app name", (std::string)obj[S_MSG_PARAMS]["appName"]);
     }
 
 }}}}

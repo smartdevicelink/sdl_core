@@ -34,19 +34,8 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
             fromString<std::string, std::string>(str, dstObj, "some function", "request", 12);
 
-        // Compare SmartObjects
-        ASSERT_EQ("APP NAME",  static_cast<std::string>(dstObj[S_MSG_PARAMS]["appName"]));
-        ASSERT_EQ(10, static_cast<int>(dstObj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"]));
-        ASSERT_EQ("TEXT", static_cast<std::string>(dstObj[S_MSG_PARAMS]["ttsName"][0]["type"]));
-        ASSERT_TRUE(static_cast<bool>(dstObj[S_MSG_PARAMS]["isMediaApplication"]));
 
-        ASSERT_EQ("request", static_cast<std::string>(dstObj[S_PARAMS][S_MESSAGE_TYPE]));
-        ASSERT_EQ("some function", static_cast<std::string>(dstObj[S_PARAMS][S_FUNCTION_ID]));
-        ASSERT_EQ(12, static_cast<int>(dstObj[S_PARAMS][S_CORRELATION_ID]));
-        ASSERT_EQ(0, static_cast<int>(dstObj[S_PARAMS][S_PROTOCOL_TYPE]));
-        ASSERT_EQ(2, static_cast<int>(dstObj[S_PARAMS][S_PROTOCOL_VERSION]));
-
-        ASSERT_TRUE(srcObj == dstObj);      // High level comparison
+        compareObjects(srcObj, dstObj);
     }
 
 }}}}

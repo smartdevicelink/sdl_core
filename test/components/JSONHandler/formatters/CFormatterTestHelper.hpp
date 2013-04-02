@@ -14,7 +14,10 @@ namespace test { namespace components { namespace JSONHandler { namespace format
     protected:
         void fillTestObject(NsAppLink::NsSmartObjects::CSmartObject& obj);
 
-        bool checkTestObject(const NsAppLink::NsSmartObjects::CSmartObject& obj);
+        //bool checkTestObject(const NsAppLink::NsSmartObjects::CSmartObject& obj);
+
+        void compareObjects(const NsAppLink::NsSmartObjects::CSmartObject& first,
+                            const NsAppLink::NsSmartObjects::CSmartObject& second);
     };
 
 }}}}
