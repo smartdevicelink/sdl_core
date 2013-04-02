@@ -52,6 +52,12 @@ macro (GenerateInterface arg_xml_name arg_namespace parser_type)
     add_library("${file_name}" ${cpp_file})
 endmacro(GenerateInterface)
 
+# --- Useful macro
+macro(create_test NAME SOURCES LIBS)
+    add_executable("${NAME}" ${SOURCES})
+    target_link_libraries("${NAME}" ${LIBS})
+    add_test(${NAME} ${NAME})
+endmacro(create_test)
 
 
 # Building application
