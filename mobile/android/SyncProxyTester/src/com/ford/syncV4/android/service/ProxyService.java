@@ -504,9 +504,28 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		HMILevel curHMILevel = notification.getHmiLevel();
 		if (prevHMILevel != curHMILevel) {
 			boolean hmiChange = false;
+			boolean hmiFull = false;
 			switch(curHMILevel) {
 				case HMI_FULL:
-					if (firstHMIStatusChange && !isModuleTesting()) {
+					hmiFull = true;
+					hmiChange = true;
+					break;
+				case HMI_LIMITED:
+					hmiChange = true;
+					break;
+				case HMI_BACKGROUND:
+					hmiChange = true;
+					break;
+				case HMI_NONE:
+					break;
+				default:
+					return;
+			}
+			prevHMILevel = curHMILevel;
+			
+			if (_syncProxy.getAppInterfaceRegistered()) {
+				if (hmiFull) {
+					if (firstHMIStatusChange) {
 						showLockMain();
 						_testerMain = new ModuleTest();
 						_testerMain = ModuleTest.getModuleTestInstance();
@@ -523,48 +542,36 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 							else Log.e(TAG, "Error sending show", e);
 						}
 					}
-					hmiChange = true;
-					break;
-				case HMI_LIMITED:
-					hmiChange = true;
-					break;
-				case HMI_BACKGROUND:
-					hmiChange = true;
-					break;
-				case HMI_NONE:
-					break;
-				default:
-					return;
-			}
-			prevHMILevel = curHMILevel;
-			
-			boolean setAppIconSupported = getCurrentProtocolVersion() >= 2;
-			if (setAppIconSupported && hmiChange && firstHMIStatusChange) {
-				firstHMIStatusChange = false;
+				}
 				
-				InputStream is = null;
-				try {
-					PutFile putFile = new PutFile();
-					putFile.setFileType(FileType.GRAPHIC_PNG);
-					putFile.setSyncFileName(ICON_SYNC_FILENAME);
-					putFile.setCorrelationID(nextCorrID());
-					putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-					_msgAdapter.logMessage(putFile, true);
-					getProxyInstance().sendRPCRequest(putFile);
+				boolean setAppIconSupported = getCurrentProtocolVersion() >= 2;
+				if (setAppIconSupported && hmiChange && firstHMIStatusChange) {
+					firstHMIStatusChange = false;
 					
-					SetAppIcon setAppIcon = new SetAppIcon();
-					setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-					setAppIcon.setCorrelationID(nextCorrID());
-					_msgAdapter.logMessage(setAppIcon, true);
-					getProxyInstance().sendRPCRequest(setAppIcon);
-					
-					// upload turn icons
-					sendIconFromResource(R.drawable.turn_left);
-					sendIconFromResource(R.drawable.turn_right);
-					sendIconFromResource(R.drawable.turn_forward);
-					sendIconFromResource(R.drawable.action);
-				} catch (SyncException e) {
-					Log.w(TAG, "Failed to set app icon", e);
+					InputStream is = null;
+					try {
+						PutFile putFile = new PutFile();
+						putFile.setFileType(FileType.GRAPHIC_PNG);
+						putFile.setSyncFileName(ICON_SYNC_FILENAME);
+						putFile.setCorrelationID(nextCorrID());
+						putFile.setBulkData(contentsOfResource(R.raw.fiesta));
+						_msgAdapter.logMessage(putFile, true);
+						getProxyInstance().sendRPCRequest(putFile);
+						
+						SetAppIcon setAppIcon = new SetAppIcon();
+						setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+						setAppIcon.setCorrelationID(nextCorrID());
+						_msgAdapter.logMessage(setAppIcon, true);
+						getProxyInstance().sendRPCRequest(setAppIcon);
+						
+						// upload turn icons
+						sendIconFromResource(R.drawable.turn_left);
+						sendIconFromResource(R.drawable.turn_right);
+						sendIconFromResource(R.drawable.turn_forward);
+						sendIconFromResource(R.drawable.action);
+					} catch (SyncException e) {
+						Log.w(TAG, "Failed to set app icon", e);
+					}
 				}
 			}
 		}

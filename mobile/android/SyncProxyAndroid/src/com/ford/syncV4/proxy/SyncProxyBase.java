@@ -1034,6 +1034,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		return _syncConnection.getIsConnected();
 	}
 	
+	/**
+	 * Returns whether the application is registered in SYNC. Note: for testing
+	 * purposes, it's possible that the connection is established, but the
+	 * application is not registered.
+	 * 
+	 * @return true if the application is registered in SYNC
+	 */
+	public Boolean getAppInterfaceRegistered() {
+		return _appInterfaceRegisterd;
+	}
+	
 	
 	// Function to initialize new proxy connection
 	private void initializeProxy() throws SyncException {		
