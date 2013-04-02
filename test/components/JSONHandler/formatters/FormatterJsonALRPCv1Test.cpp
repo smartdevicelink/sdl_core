@@ -7,11 +7,13 @@
 #include "json/json.h"
 #include "JSONHandler/CSmartFactory.hpp"
 
+#include "CFormatterTestHelper.hpp"
+
 namespace test { namespace components { namespace JSONHandler { namespace formatters {
 
     using namespace NsAppLink::NsJSONHandler::strings;
 
-    TEST(test_SimpleTwoWaysTest, test_JsonALRPCv1)
+    TEST_F(CFormatterTestHelper, test_JsonALRPCv1)
     {
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
         Json::Reader reader;    // the same thing
@@ -20,27 +22,8 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         NsAppLink::NsSmartObjects::CSmartObject srcObj;
         NsAppLink::NsSmartObjects::CSmartObject dstObj;
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
-        srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
-        srcObj[S_PARAMS][S_CORRELATION_ID] = 12;
-        srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+        fillTestObject(srcObj);
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
-        srcObj[S_MSG_PARAMS]["appId"] = "APP ID";
-        srcObj[S_MSG_PARAMS]["appName"] = "APP NAME";
-        srcObj[S_MSG_PARAMS]["appType"][0] = "SYSTEM";
-        srcObj[S_MSG_PARAMS]["appType"][1] = "COMMUNICATION";
-        srcObj[S_MSG_PARAMS]["hmiDisplayLanguageDesired"] = "RU-RU";
-        srcObj[S_MSG_PARAMS]["isMediaApplication"] = true;
-        srcObj[S_MSG_PARAMS]["languageDesired"] = "EN-US";
-        srcObj[S_MSG_PARAMS]["ngnMediaScreenAppName"] = "SCREEN NAME";
-        srcObj[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 2;
-        srcObj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 10;
-        srcObj[S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
-        srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
-        srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
-        srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-        srcObj[S_MSG_PARAMS]["null"] = NsAppLink::NsSmartObjects::CSmartObject();
-        srcObj[S_MSG_PARAMS]["double"] = -0.1234;
 
         // SmartObjects --> JSON
         NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::toString(srcObj, str);

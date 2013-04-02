@@ -21,6 +21,6 @@ set (LIBRARIES
     JSONHandler
 )
 
-create_test("test_JSONHandler_FormatterJsonALRPCv2Test" "./FormatterJsonALRPCv2Test.cpp" "${LIBRARIES}")
-create_test("test_JSONHandler_FormatterJsonALRPCv1Test" "./FormatterJsonALRPCv1Test.cpp" "${LIBRARIES}")
+create_test("test_JSONHandler_FormatterJsonALRPCv2Test" "./CFormatterTestHelper.cpp;./FormatterJsonALRPCv2Test.cpp" "${LIBRARIES}")
+create_test("test_JSONHandler_FormatterJsonALRPCv1Test" "./CFormatterTestHelper.cpp;./FormatterJsonALRPCv1Test.cpp" "${LIBRARIES}")
 #create_test("test_JSONHandler_FormatterJsonRPC2Test" "./FormatterJsonRPC2Test.cpp" "${LIBRARIES}")
