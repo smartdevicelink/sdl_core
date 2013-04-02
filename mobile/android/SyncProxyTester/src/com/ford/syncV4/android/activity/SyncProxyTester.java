@@ -599,7 +599,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		_commandIdToParentSubmenuMap = new Hashtable<Integer, Integer>();
 
 		_choiceSetAdapter = new ArrayAdapter<Integer>(this,
-				android.R.layout.select_dialog_item);
+				android.R.layout.simple_spinner_item);
 		_choiceSetAdapter
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -1670,38 +1670,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.PerformInteraction) {
-							//something
-							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-							builder.setAdapter(_choiceSetAdapter, new DialogInterface.OnClickListener() {
-
-								public void onClick(DialogInterface dialog, int which) {
-									PerformInteraction msg = new PerformInteraction();
-									msg.setCorrelationID(autoIncCorrId++);
-									Vector<Integer> interactionChoiceSetIDs = new Vector<Integer>();
-									interactionChoiceSetIDs.add(_choiceSetAdapter.getItem(which));
-									Vector<TTSChunk> initChunks = TTSChunkFactory
-											.createSimpleTTSChunks("Pick a command");
-									Vector<TTSChunk> helpChunks = TTSChunkFactory
-											.createSimpleTTSChunks("help me, I'm melting");
-									Vector<TTSChunk> timeoutChunks = TTSChunkFactory
-											.createSimpleTTSChunks("hurry it up");
-									msg.setInitialPrompt(initChunks);
-									msg.setInitialText("Pick number:");
-									msg.setInteractionChoiceSetIDList(interactionChoiceSetIDs);
-									msg.setInteractionMode(InteractionMode.BOTH);
-									msg.setTimeout(10000);
-									msg.setHelpPrompt(helpChunks);
-									msg.setTimeoutPrompt(timeoutChunks);
-									try {
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-								}
-							});
-							AlertDialog dlg = builder.create();
-							dlg.show();
+							sendPerformInteraction();
 						} else if (adapter.getItem(which) == Names.EncodedSyncPData) {
 							//EncodedSyncPData
 							EncodedSyncPData msg = new EncodedSyncPData();
@@ -2345,6 +2314,140 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+
+					/**
+					 * Opens the dialog for PerformInteraction message and sends it.
+					 */
+					private void sendPerformInteraction() {
+						final Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.performinteraction,
+								(ViewGroup) findViewById(R.id.performinteraction_Root));
+						
+						final EditText initialText = (EditText) layout.findViewById(R.id.performinteraction_initialText);
+						final EditText initialPrompt = (EditText) layout.findViewById(R.id.performinteraction_initialPrompt);
+						final Spinner interactionModeSpinner = (Spinner) layout.findViewById(R.id.performinteraction_interactionModeSpinner);
+						final Spinner interactionChoiceSetIDSpinner = (Spinner) layout.findViewById(R.id.performinteraction_interactionChoiceSetIDSpinner);
+						final CheckBox helpPromptCheck = (CheckBox) layout.findViewById(R.id.performinteraction_helpPromptCheck);
+						final EditText helpPrompt = (EditText) layout.findViewById(R.id.performinteraction_helpPrompt);
+						final CheckBox timeoutPromptCheck = (CheckBox) layout.findViewById(R.id.performinteraction_timeoutPromptCheck);
+						final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.performinteraction_timeoutPrompt);
+						final CheckBox timeoutCheck = (CheckBox) layout.findViewById(R.id.performinteraction_timeoutCheck);
+						final EditText timeout = (EditText) layout.findViewById(R.id.performinteraction_timeout);
+						final CheckBox vrHelpItemCheck = (CheckBox) layout.findViewById(R.id.performinteraction_vrHelpItemCheck);
+						final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemPos);
+						final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemText);
+						final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemImage);
+						
+						final ArrayAdapter<InteractionMode> interactionModeAdapter = new ArrayAdapter<InteractionMode>(
+								mContext, android.R.layout.simple_spinner_item, InteractionMode.values());
+						interactionModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+						interactionModeSpinner.setAdapter(interactionModeAdapter);
+						interactionModeSpinner.setSelection(interactionModeAdapter.getPosition(InteractionMode.BOTH));
+						
+						interactionChoiceSetIDSpinner.setAdapter(_choiceSetAdapter);
+						
+						final boolean vrHelpEnabled = getCurrentProtocolVersion() >= 2;
+						if (!vrHelpEnabled) {
+							// disable VR help title and VR help item
+							int visibility = android.view.View.GONE;
+							vrHelpItemCheck.setVisibility(visibility);
+							vrHelpItemPos.setVisibility(visibility);
+							vrHelpItemText.setVisibility(visibility);
+							vrHelpItemImage.setVisibility(visibility);
+						}
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							// string to join/split initial and help prompts, and VR helps
+							private String joinString = ",";
+
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// fail if no interaction choice set selected
+								if (interactionChoiceSetIDSpinner.getSelectedItemPosition() != Spinner.INVALID_POSITION) {
+									Vector<Integer> choiceSetIDs = new Vector<Integer>();
+									choiceSetIDs.add(_choiceSetAdapter.getItem(interactionChoiceSetIDSpinner.getSelectedItemPosition()));
+									
+									PerformInteraction msg = new PerformInteraction();
+									msg.setCorrelationID(autoIncCorrId++);
+									msg.setInitialText(initialText.getText().toString());
+									msg.setInitialPrompt(ttsChunksFromString(initialPrompt.getText().toString()));
+									msg.setInteractionMode(interactionModeAdapter.getItem(interactionModeSpinner.getSelectedItemPosition()));
+									msg.setInteractionChoiceSetIDList(choiceSetIDs);
+									
+									if (helpPromptCheck.isChecked()) {
+										msg.setHelpPrompt(ttsChunksFromString(helpPrompt.getText().toString()));
+									}
+									
+									if (timeoutPromptCheck.isChecked()) {
+										msg.setTimeoutPrompt(ttsChunksFromString(timeoutPrompt.getText().toString()));
+									}
+									
+									if (timeoutCheck.isChecked()) {
+										try {
+											msg.setTimeout(Integer.parseInt(timeout.getText().toString()));
+										} catch (NumberFormatException e) {
+											// set default timeout
+											msg.setTimeout(10000);
+										}
+									}
+									
+									if (vrHelpEnabled && vrHelpItemCheck.isChecked()) {
+										Vector<VrHelpItem> vrHelpItems = new Vector<VrHelpItem>();
+										VrHelpItem item = new VrHelpItem();
+										item.setText(vrHelpItemText.getText().toString());
+										
+										try {
+											item.setPosition(Integer.parseInt(vrHelpItemPos.getText().toString()));
+										} catch (NumberFormatException e) {
+											// set default position
+											item.setPosition(1);
+										}
+										
+										Image image = new Image();
+										image.setValue(vrHelpItemImage.getText().toString());
+										image.setImageType(ImageType.STATIC);
+										item.setImage(image);
+										
+										vrHelpItems.add(item);
+										msg.setVrHelp(vrHelpItems);
+									}
+									
+									try {
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
+								} else {
+									Toast.makeText(mContext, "No interaction choice set selected", Toast.LENGTH_LONG).show();
+								}
+							}
+
+							/**
+							 * Splits the string with a comma and returns a vector of TTSChunks.
+							 */
+							private Vector<TTSChunk> ttsChunksFromString(String string) {
+								Vector<TTSChunk> chunks = new Vector<TTSChunk>();
+								for (String stringChunk : string.split(joinString )) {
+									TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, stringChunk);
+									chunks.add(chunk);
+								}
+								return chunks;
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								dialog.cancel();
+							}
+						});
+						
+						builder.setView(layout);
+						builder.show();
 					}
 
 					private void sendUpdateTurnList() {
