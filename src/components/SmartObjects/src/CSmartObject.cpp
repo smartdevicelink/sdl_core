@@ -827,11 +827,8 @@ size_t NsAppLink::NsSmartObjects::CSmartObject::length() const
 
 void NsAppLink::NsSmartObjects::CSmartObject::set_new_type(SmartType NewType)
 {
-    if(m_type != NewType)
-    {
-        cleanup_data();
-        m_type = NewType;
-    }
+    cleanup_data();
+    m_type = NewType;
 }
 
 double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const std::string* Value)
