@@ -13,31 +13,6 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
-# Sources are separated for each SmartObject test
-set (SOURCES_DRAFT_TEST
-    ./SmartObjectDraftTest.cpp
-)
-
-set (SOURCES_UNIT_TEST
-    ./SmartObjectUnitTest.cpp
-)
-
-set (SOURCES_STRESS_TEST
-    ./SmartObjectStressTest.cpp
-)
-
-set (SOURCES_TSHAREDPTR_TEST
-    ./TSharedPtrTest.cpp
-)
-
-set (SOURCES_INVALID_TEST
-    ./SmartObjectInvalidTest.cpp
-)
-
-set (SOURCES_CONVERTION_TIME_TEST
-    SmartObjectConvertionTimeTest.cpp
-)
-
 # Libraries are the same for all SmartObject test
 set (LIBRARIES
     gtest
@@ -50,9 +25,9 @@ set (LIBRARIES
     log4cplus
 )
 
-create_test("test_SmartObject_DraftTest" ${SOURCES_DRAFT_TEST} ${LIBRARIES})
-create_test("test_SmartObject_UnitTest" ${SOURCES_UNIT_TEST} ${LIBRARIES})
-create_test("test_SmartObject_StressTest" ${SOURCES_STRESS_TEST} ${LIBRARIES})
-create_test("test_SmartObject_InvalidTest" ${SOURCES_INVALID_TEST} ${LIBRARIES})
-create_test("test_SmartObject_ConvertionTimeTest" ${SOURCES_CONVERTION_TIME_TEST} ${LIBRARIES})
-create_test("test_TSharedPtrTest" ${SOURCES_TSHAREDPTR_TEST} ${LIBRARIES})
+create_test("test_SmartObject_DraftTest" "./SmartObjectDraftTest.cpp" "${LIBRARIES}")
+create_test("test_SmartObject_UnitTest" "./SmartObjectUnitTest.cpp" "${LIBRARIES}")
+create_test("test_SmartObject_StressTest" "./SmartObjectStressTest.cpp" "${LIBRARIES}")
+create_test("test_SmartObject_InvalidTest" "./SmartObjectInvalidTest.cpp" "${LIBRARIES}")
+create_test("test_SmartObject_ConvertionTimeTest" "./SmartObjectConvertionTimeTest.cpp" "${LIBRARIES}")
+create_test("test_TSharedPtrTest" "./TSharedPtrTest.cpp" "${LIBRARIES}")
