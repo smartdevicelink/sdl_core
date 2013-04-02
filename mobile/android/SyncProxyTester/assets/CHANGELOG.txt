@@ -1,4 +1,5 @@
 [CW14]
++ Allow to send test requests when the app is not registered.
 + Add GUI for PerformInteraction message.
 
 [CW12]
