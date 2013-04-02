@@ -9,7 +9,7 @@ include_directories (
   ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
   ../../../src/components/JSONHandler/include/
   ../../../src//thirdPartyLibs/jsoncpp/include/
-  
+
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
@@ -50,26 +50,9 @@ set (LIBRARIES
     log4cplus
 )
 
-add_executable("test_SmartObjectDraftTest" ${SOURCES_DRAFT_TEST})
-target_link_libraries("test_SmartObjectDraftTest" ${LIBRARIES})
-add_test(test_SmartObjectDraftTest test_SmartObjectDraftTest)
-
-add_executable("test_SmartObjectUnitTest" ${SOURCES_UNIT_TEST})
-target_link_libraries("test_SmartObjectUnitTest" ${LIBRARIES})
-add_test(test_SmartObjectUnitTest test_SmartObjectUnitTest)
-
-add_executable("test_SmartObjectStressTest" ${SOURCES_STRESS_TEST})
-target_link_libraries("test_SmartObjectStressTest" ${LIBRARIES})
-add_test(test_SmartObjectStressTest test_SmartObjectStressTest)
-
-add_executable("test_TSharedPtrTest" ${SOURCES_TSHAREDPTR_TEST})
-target_link_libraries("test_TSharedPtrTest" ${LIBRARIES})
-add_test(test_TSharedPtrTest test_TSharedPtrTest)
-
-add_executable("test_SmartObjectInvalidTest" ${SOURCES_INVALID_TEST})
-target_link_libraries("test_SmartObjectInvalidTest" ${LIBRARIES})
-add_test(test_SmartObjectInvalidTest test_SmartObjectInvalidTest)
-
-add_executable("test_SmartObjectConvertionTimeTest" ${SOURCES_CONVERTION_TIME_TEST})
-target_link_libraries("test_SmartObjectConvertionTimeTest" ${LIBRARIES})
-add_test(test_SmartObjectConvertionTimeTest test_SmartObjectConvertionTimeTest)
+create_test("test_SmartObject_DraftTest" ${SOURCES_DRAFT_TEST} ${LIBRARIES})
+create_test("test_SmartObject_UnitTest" ${SOURCES_UNIT_TEST} ${LIBRARIES})
+create_test("test_SmartObject_StressTest" ${SOURCES_STRESS_TEST} ${LIBRARIES})
+create_test("test_SmartObject_InvalidTest" ${SOURCES_INVALID_TEST} ${LIBRARIES})
+create_test("test_SmartObject_ConvertionTimeTest" ${SOURCES_CONVERTION_TIME_TEST} ${LIBRARIES})
+create_test("test_TSharedPtrTest" ${SOURCES_TSHAREDPTR_TEST} ${LIBRARIES})
