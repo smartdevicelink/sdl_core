@@ -18,11 +18,14 @@ optional arguments:
 
 import os.path
 import argparse
+import errno
+import sys
 
 import generator.parsers.ALRPCV1
 import generator.parsers.ALRPCV2
 import generator.Model
 import generator.generators.SmartSchema
+from generator.parsers.ALRPCBase import ParseError
 
 SUPPORTED_PARSERS = {
     "alrpcv1": generator.parsers.ALRPCV1.Parser,
@@ -69,11 +72,20 @@ Generating interface source code with following parameters:
 
     # Converting incoming xml to internal model
     parser = SUPPORTED_PARSERS[parser_type]()
-    interface = parser.parse(args["source-xml"])
+    try:
+        interface = parser.parse(args["source-xml"])
 
-    # There is only one generator available now
-    schema_generator = generator.generators.SmartSchema.SmartSchema()
-    schema_generator.generate(interface, src_xml_name, namespace, output_dir)
+        # There is only one generator available now
+        schema_generator = generator.generators.SmartSchema.SmartSchema()
+        schema_generator.generate(interface,
+                                  src_xml_name,
+                                  namespace,
+                                  output_dir)
+    except ParseError as error:
+        print(error.message)
+        print
+        sys.exit(errno.EINVAL)
+
 
     print("Done.")
 
