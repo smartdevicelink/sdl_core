@@ -506,7 +506,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			boolean hmiChange = false;
 			switch(curHMILevel) {
 				case HMI_FULL:
-					if (firstHMIStatusChange) {
+					if (firstHMIStatusChange && !(waitingForResponse && _testerMain.getThreadContext() != null)) {
 						showLockMain();
 						_testerMain = new ModuleTest();
 						_testerMain = ModuleTest.getModuleTestInstance();
