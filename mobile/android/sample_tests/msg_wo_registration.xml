@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file>
+    <type type="unit"/>
+
+    <!-- NB! First we unregister the current application. -->
+    <test testName="UnregisterAppInterface_Success">
+        <UnregisterAppInterface correlationID="42" />
+
+        <result correlationID="42" return="SUCCESS"/>
+    </test>
+
+    <test testName="AlertTest">
+        <Alert correlationID="1">
+            <String alertText1="Alert 1" />
+            <String alertText2="Alert 1" />
+            <Vector name="ttsChunks">
+                <TTSChunk>
+                    <String text="This is the first T T S" />
+                    <String type="TEXT" />
+                </TTSChunk>
+                <TTSChunk>
+                    <String text="This is the second T T S" />
+                    <String type="TEXT" />
+                </TTSChunk>
+            </Vector>
+            <Integer duration="5000" />
+            <Boolean playtone="false" />
+        </Alert>
+
+        <result correlationID="1" return="APPLICATION_NOT_REGISTERED"/>
+    </test>
+
+    <test testName="RegisterAppInterface_Success">
+        <RegisterAppInterface correlationID="45">
+            <syncMsgVersion>
+                <Integer majorVersion="1" />
+                <Integer minorVersion="0" />
+            </syncMsgVersion>
+            <String appName="Ford Drive Green" />
+            <Boolean isMediaApplication="true" />
+            <String languageDesired="EN-US" />
+            <String hmiDisplayLanguageDesired="EN-US" />
+            <String appID="8675309" />
+        </RegisterAppInterface>
+
+        <result correlationID="45" return="SUCCESS"/>
+    </test>
+
+</file>

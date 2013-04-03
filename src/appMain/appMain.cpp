@@ -45,11 +45,11 @@
 
 #include "appMain.hpp"
 
-#include "ProtocolHandler/ProtocolHandler.h"
+#include "protocol_handler/protocol_handler_impl.h"
 
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
-#include "ConnectionHandler/CConnectionHandler.hpp"
+#include "ConnectionHandler/connection_handler_impl.h"
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppMgrCore.h"
@@ -141,17 +141,17 @@ int main(int argc, char** argv)
 
     JSONHandler jsonHandler;
 
-    NsProtocolHandler::ProtocolHandler* pProtocolHandler = new NsProtocolHandler::ProtocolHandler(transportManager);
+    protocol_handler::ProtocolHandlerImpl* pProtocolHandler = new protocol_handler::ProtocolHandlerImpl(transportManager);
 
-    pProtocolHandler -> setProtocolObserver( &jsonHandler );
+    pProtocolHandler -> set_protocol_observer( &jsonHandler );
 
     transportManager -> addDataListener( pProtocolHandler );
 
     jsonHandler.setProtocolHandler(pProtocolHandler);
 
-    NsConnectionHandler::CConnectionHandler * connectionHandler = NsConnectionHandler::CConnectionHandler::getInstance();
+    connection_handler::ConnectionHandlerImpl * connectionHandler = connection_handler::ConnectionHandlerImpl::getInstance();
 
-    pProtocolHandler -> setSessionObserver( connectionHandler );
+    pProtocolHandler -> set_session_observer( connectionHandler );
 
     connectionHandler -> set_transport_manager( transportManager );
 

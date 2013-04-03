@@ -1,3 +1,8 @@
+[CW14]
+* Show dialog: add extra fields.
++ Allow to send test requests when the app is not registered.
++ Add GUI for PerformInteraction message.
+
 [CW12]
 * UpdateTurnList dialog: change the way how Turn items are parsed from the GUI.
 + Add an option to disable screen locking while doing XML tests. It can be toggled in the options menu, "Lock screen while testing" item. The change will NOT affect currently running tests, if any.

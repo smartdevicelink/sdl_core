@@ -1,6 +1,6 @@
 /**
- * \file CDevice.hpp
- * \brief CDevice class.
+ * \file Device.hpp
+ * \brief Device class.
  * Stores device information
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -34,82 +34,81 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DEVICE_H 
-#define DEVICE_H 
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
 
-#include "Logger.hpp"
 #include <string>
 #include <map>
 
+#include "Logger.hpp"
+
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
- */ 
-namespace NsConnectionHandler
-{
+ */
+namespace connection_handler {
 
-    /**
-     * \brief Type for DeviceHandle
-     */
-    typedef int tDeviceHandle;
+/**
+ * \brief Type for DeviceHandle
+ */
+typedef int DeviceHandle;
 
-    /**
-    * \class CDevice
-    * \brief Connection class
-    */
-    class CDevice
-    {
-    public:
-        /**
-         * \brief Class constructor
-         */
-        CDevice(tDeviceHandle aDeviceHandle, std::string aUserFriendlyName);
+/**
+ * \class Device
+ * \brief Connection class
+ */
+class Device {
+ public:
+  /**
+   * \brief Class constructor
+   */
+  Device(DeviceHandle device_handle, std::string user_friendly_name);
 
-        /**
-         * \brief Destructor
-         */
-        ~CDevice();
+  /**
+   * \brief Destructor
+   */
+  ~Device();
 
-        /**
-         * \brief Returns device handle
-         * \return DeviceHandle
-         */
-        tDeviceHandle getDeviceHandle() const;
+  /**
+   * \brief Returns device handle
+   * \return DeviceHandle
+   */
+  DeviceHandle device_handle() const;
 
-        /**
-         * \brief Returns user frendly device name
-         * \return UserFriendlyName
-         */
-        std::string getUserFriendlyName() const;
+  /**
+   * \brief Returns user frendly device name
+   * \return UserFriendlyName
+   */
+  std::string user_friendly_name() const;
 
-    private:
-        /**
-         * \brief Uniq device handle.
-         */
-        tDeviceHandle mDeviceHandle;
+ private:
+  /**
+   * \brief Uniq device handle.
+   */
+  DeviceHandle device_handle_;
 
-        /**
-         * \brief User-friendly device name.
-         */
-        std::string mUserFriendlyName;
+  /**
+   * \brief User-friendly device name.
+   */
+  std::string user_friendly_name_;
 
-        /**
-         * \brief For logging.
-         */
-        static log4cplus::Logger mLogger;
-    };
+  /**
+   * \brief For logging.
+   */
+  static log4cplus::Logger logger_;
+};
 
-    /**
-     * \brief Type for Devices map
-     */
-    typedef std::map<int, CDevice> tDeviceList;
+/**
+ * \brief Type for Devices map
+ */
+typedef std::map<int, Device> DeviceList;
 
-    /**
-     * \brief Type for Devices map iterator
-     * Key is DeviceHandle which is uniq
-     */
-    typedef std::map<int, CDevice>::iterator tDeviceListIterator;
+/**
+ * \brief Type for Devices map iterator
+ * Key is DeviceHandle which is uniq
+ */
+typedef std::map<int, Device>::iterator DeviceListIterator;
 
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */
 
-#endif /* DEVICE_H */
+#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_

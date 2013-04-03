@@ -11,7 +11,7 @@ add_subdirectory(./AppMgr)
 add_subdirectory(./JSONHandler)
 
 # --- ProtocolHandler
-add_subdirectory(./ProtocolHandler)
+add_subdirectory(./protocol_handler)
 
 # --- ConnectionHandler
 add_subdirectory(./ConnectionHandler)

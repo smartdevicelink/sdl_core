@@ -35,7 +35,7 @@
 
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
-#include "ConnectionHandler/IConnectionHandlerObserver.hpp"
+#include "ConnectionHandler/connection_handler_observer.h"
 
 class JSONHandler;
 class SDLRPCMessage;
@@ -51,9 +51,9 @@ namespace NsRPC2Communication
     class RPC2Command;
 }
 
-namespace NsConnectionHandler
+namespace connection_handler
 {
-    class IDevicesDiscoveryStarter;
+    class DevicesDiscoveryStarter;
 }
 
 namespace NsAppManager
@@ -65,7 +65,7 @@ namespace NsAppManager
     /**
     * \brief a main app manager class which acts like container for other classes
     */
-    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public NsConnectionHandler::IConnectionHandlerObserver
+    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public connection_handler::ConnectionHandlerObserver
     {
     public:
 
@@ -96,7 +96,7 @@ namespace NsAppManager
          *
          * \param deviceList New list of available devices.
          **/
-        virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & deviceList);
+        virtual void OnDeviceListUpdated(const connection_handler::DeviceList & deviceList);
 
         /**
          * \brief Updates device list.
@@ -105,7 +105,7 @@ namespace NsAppManager
          *
          * \param DeviceList New list of available devices.
          **/
-        virtual void UpdateDeviceList(const NsConnectionHandler::tDeviceList & DeviceList);
+        virtual void UpdateDeviceList(const connection_handler::DeviceList & DeviceList);
 
         /**
          * \brief Removes device.
@@ -114,7 +114,7 @@ namespace NsAppManager
          *
          * \param DeviceHandle Handle of removed device.
          **/
-        virtual void RemoveDevice(const NsConnectionHandler::tDeviceHandle DeviceHandle);
+        virtual void RemoveDevice(const connection_handler::DeviceHandle DeviceHandle);
 
         /**
          * \brief Callback function used by ConnectionHandler
@@ -123,7 +123,7 @@ namespace NsAppManager
          * \param sessionKey Key of started session.
          * \param firstSessionKey Session key of first session in this connection.
          */
-        virtual void onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
+        virtual void OnSessionStartedCallback(connection_handler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
 
         /**
          * \brief Callback function used by ConnectionHandler
@@ -131,7 +131,7 @@ namespace NsAppManager
          * \param sessionKey Key of session which should be ended
          * \param firstSessionKey Session key of first session in this connection
          */
-        virtual void onSessionEndedCallback(int sessionKey, int firstSessionKey);
+        virtual void OnSessionEndedCallback(int sessionKey, int firstSessionKey);
 
         /**
          * \brief Sets Json mobile handler instance
@@ -149,7 +149,7 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler);
+        void setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler);
 
         /**
          * \brief method to execute threads.

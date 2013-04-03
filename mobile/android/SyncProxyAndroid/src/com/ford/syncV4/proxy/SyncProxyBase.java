@@ -1034,6 +1034,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		return _syncConnection.getIsConnected();
 	}
 	
+	/**
+	 * Returns whether the application is registered in SYNC. Note: for testing
+	 * purposes, it's possible that the connection is established, but the
+	 * application is not registered.
+	 * 
+	 * @return true if the application is registered in SYNC
+	 */
+	public Boolean getAppInterfaceRegistered() {
+		return _appInterfaceRegisterd;
+	}
+	
 	
 	// Function to initialize new proxy connection
 	private void initializeProxy() throws SyncException {		
@@ -2403,15 +2414,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		
 		// Throw exception if RPCRequest is sent when SYNC is unavailable 
 		if (!_appInterfaceRegisterd && request.getFunctionName() != Names.RegisterAppInterface) {
-			
-			SyncTrace.logProxyEvent("Application attempted to send an RPCRequest (non-registerAppInterface), before the interface was registerd.", SYNC_LIB_TRACE_KEY);
-			throw new SyncException("SYNC is currently unavailable. RPC Requests cannot be sent.", SyncExceptionCause.SYNC_UNAVAILALBE);
+			if (!allowExtraTesting()) {
+				SyncTrace.logProxyEvent("Application attempted to send an RPCRequest (non-registerAppInterface), before the interface was registerd.", SYNC_LIB_TRACE_KEY);
+				throw new SyncException("SYNC is currently unavailable. RPC Requests cannot be sent.", SyncExceptionCause.SYNC_UNAVAILALBE);
+			}
 		}
 				
 		if (_advancedLifecycleManagementEnabled) {
 			if (		   request.getFunctionName() == Names.RegisterAppInterface
 					|| request.getFunctionName() == Names.UnregisterAppInterface) {
-				if (!(_proxyListener instanceof IProxyListenerALMTesting)) {
+				if (!allowExtraTesting()) {
 					SyncTrace.logProxyEvent("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.", SYNC_LIB_TRACE_KEY);
 					throw new SyncException("The RPCRequest, " + request.getFunctionName() + 
 							", is unnallowed using the Advanced Lifecycle Management Model.", SyncExceptionCause.INCORRECT_LIFECYCLE_MODEL);
@@ -2421,6 +2433,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		
 		sendRPCRequestPrivate(request);
 	} // end-method
+	
+	/**
+	 * Returns whether the class allows some extra testing features. For this,
+	 * the _proxyListener must be an instance of the IProxyListenerALMTesting
+	 * class.
+	 * 
+	 * @return true if the extra testing features are enabled
+	 */
+	private boolean allowExtraTesting() {
+		return _proxyListener instanceof IProxyListenerALMTesting;
+	}
 	
 	public void sendRPCRequest(RPCMessage request) throws SyncException {
 		sendRPCRequest(request);

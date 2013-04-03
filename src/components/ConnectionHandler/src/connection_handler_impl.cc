@@ -1,5 +1,5 @@
 /**
- * \file CConnectionHandler.cpp
+ * \file ConnectionHandlerImpl.cpp
  * \brief Connection handler class.
  * \Observes TransportManager and ProtocolHandler, stores information regarding connections
  * \and sessions and provides it to AppManager.
@@ -39,32 +39,32 @@
 
 #include "Logger.hpp"
 
-#include "ConnectionHandler/CConnectionHandler.hpp"
+#include "ConnectionHandler/connection_handler_impl.h"
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
-namespace NsConnectionHandler {
+namespace connection_handler {
 
-log4cplus::Logger CConnectionHandler::logger_ = log4cplus::Logger::getInstance(
+log4cplus::Logger ConnectionHandlerImpl::logger_ = log4cplus::Logger::getInstance(
     LOG4CPLUS_TEXT("ConnectionHandler"));
 
-CConnectionHandler* CConnectionHandler::getInstance() {
-  static CConnectionHandler instance;
+ConnectionHandlerImpl* ConnectionHandlerImpl::getInstance() {
+  static ConnectionHandlerImpl instance;
   return &instance;
 }
 
-CConnectionHandler::CConnectionHandler()
+ConnectionHandlerImpl::ConnectionHandlerImpl()
     : connection_handler_observer_(NULL),
       transport_manager_(NULL) {
 }
 
-CConnectionHandler::~CConnectionHandler() {
+ConnectionHandlerImpl::~ConnectionHandlerImpl() {
 }
 
-void CConnectionHandler::set_connection_handler_observer(
-    IConnectionHandlerObserver * observer) {
+void ConnectionHandlerImpl::set_connection_handler_observer(
+    ConnectionHandlerObserver * observer) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::setConnectionHandlerObserver()");
   if (!observer) {
     LOG4CPLUS_ERROR(logger_, "Null pointer to observer.");
@@ -73,21 +73,21 @@ void CConnectionHandler::set_connection_handler_observer(
   connection_handler_observer_ = observer;
 }
 
-void CConnectionHandler::onDeviceListUpdated(
+void ConnectionHandlerImpl::onDeviceListUpdated(
     const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::onDeviceListUpdated()");
-  for (tDeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
+  for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
       ++itr) {
     if (!DoesDeviceExistInTMList(DeviceList, (*itr).first)) {
       // Device has been removed. Perform all needed actions.
       // 1. Delete all the connections and sessions of this device
       // 2. Delete device from a list
       // 3. Let observer know that device has been deleted.
-      tDeviceHandle device_for_remove_handle = (*itr).first;
-      for (tConnectionListIterator it = connection_list_.begin();
+      DeviceHandle device_for_remove_handle = (*itr).first;
+      for (ConnectionListIterator it = connection_list_.begin();
           it != connection_list_.end(); ++it) {
         if (device_for_remove_handle
-            == (*it).second.getConnectionDeviceHandle()) {
+            == (*it).second.connection_device_handle()) {
           RemoveConnection((*it).first);
         }
       }
@@ -102,18 +102,18 @@ void CConnectionHandler::onDeviceListUpdated(
     AddDeviceInDeviceListIfNotExist((*it_in));
   }
   if (connection_handler_observer_) {
-    connection_handler_observer_->onDeviceListUpdated(device_list_);
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
     connection_handler_observer_->UpdateDeviceList(device_list_);
   }
 }
 
-bool CConnectionHandler::DoesDeviceExistInTMList(
-    const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList,
-    const NsConnectionHandler::tDeviceHandle DeviceHandle) {
+bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
+    const NsSmartDeviceLink::NsTransportManager::tDeviceList & device_list,
+    const connection_handler::DeviceHandle device_handle) {
   bool result = false;
   for (NsSmartDeviceLink::NsTransportManager::tDeviceList::const_iterator it_in =
-      DeviceList.begin(); it_in != DeviceList.end(); ++it_in) {
-    if ((*it_in).mDeviceHandle == DeviceHandle) {
+      device_list.begin(); it_in != device_list.end(); ++it_in) {
+    if ((*it_in).mDeviceHandle == device_handle) {
       result = true;
       break;
     }
@@ -121,38 +121,38 @@ bool CConnectionHandler::DoesDeviceExistInTMList(
   return result;
 }
 
-void CConnectionHandler::AddDeviceInDeviceListIfNotExist(
-    const NsSmartDeviceLink::NsTransportManager::SDeviceInfo DeviceInfo) {
-  tDeviceListIterator it = device_list_.find(DeviceInfo.mDeviceHandle);
+void ConnectionHandlerImpl::AddDeviceInDeviceListIfNotExist(
+    const NsSmartDeviceLink::NsTransportManager::SDeviceInfo device_info) {
+  DeviceListIterator it = device_list_.find(device_info.mDeviceHandle);
   if (device_list_.end() == it) {
     LOG4CPLUS_INFO(logger_, "Adding new device!");
     device_list_.insert(
-        tDeviceList::value_type(
-            DeviceInfo.mDeviceHandle,
-            CDevice(DeviceInfo.mDeviceHandle, DeviceInfo.mUserFriendlyName)));
+        DeviceList::value_type(
+            device_info.mDeviceHandle,
+            Device(device_info.mDeviceHandle, device_info.mUserFriendlyName)));
   }
 }
 
-void CConnectionHandler::onApplicationConnected(
+void ConnectionHandlerImpl::onApplicationConnected(
     const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & ConnectedDevice,
-    const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection) {
+    const NsSmartDeviceLink::NsTransportManager::tConnectionHandle connection) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::onApplicationConnected()");
-  tDeviceListIterator it = device_list_.find(ConnectedDevice.mDeviceHandle);
+  DeviceListIterator it = device_list_.find(ConnectedDevice.mDeviceHandle);
   if (device_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Unknown device!");
     return;
   }
-  LOG4CPLUS_INFO(logger_, "Add Connection:" << Connection << " to the list.");
+  LOG4CPLUS_INFO(logger_, "Add Connection:" << connection << " to the list.");
   connection_list_.insert(
-      tConnectionList::value_type(
-          Connection, CConnection(Connection, ConnectedDevice.mDeviceHandle)));
+      ConnectionList::value_type(
+          connection, Connection(connection, ConnectedDevice.mDeviceHandle)));
 }
 
-void CConnectionHandler::onApplicationDisconnected(
+void ConnectionHandlerImpl::onApplicationDisconnected(
     const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice,
     const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::onApplicationDisconnected()");
-  tDeviceListIterator it = device_list_.find(DisconnectedDevice.mDeviceHandle);
+  DeviceListIterator it = device_list_.find(DisconnectedDevice.mDeviceHandle);
   if (device_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Unknown device!");
     return;
@@ -160,19 +160,19 @@ void CConnectionHandler::onApplicationDisconnected(
   LOG4CPLUS_INFO(
       logger_,
       "Delete Connection:" << static_cast<int>(Connection) << "from the list.");
-  tConnectionListIterator itr = connection_list_.find(Connection);
+  ConnectionListIterator itr = connection_list_.find(Connection);
   if (connection_list_.end() == itr) {
     LOG4CPLUS_ERROR(logger_, "Connection not found!");
     return;
   } else {
     if (0 != connection_handler_observer_) {
-      int firstSessionID = (itr->second).getFirstSessionID();
+      int firstSessionID = (itr->second).GetFirstSessionID();
       if (0 < firstSessionID) {
         firstSessionID = keyFromPair(Connection, firstSessionID);
-        // In case bot parameters of onSessionEndedCallback are the same
+        // In case bot parameters of OnSessionEndedCallback are the same
         // AppMgr knows that Application with id=firstSessionID
         // should be closed.
-        connection_handler_observer_->onSessionEndedCallback(firstSessionID,
+        connection_handler_observer_->OnSessionEndedCallback(firstSessionID,
                                                              firstSessionID);
       }
     }
@@ -184,27 +184,27 @@ void CConnectionHandler::onApplicationDisconnected(
   }
 }
 
-void CConnectionHandler::RemoveConnection(
-    const tConnectionHandle connection_handle) {
+void ConnectionHandlerImpl::RemoveConnection(
+    const ConnectionHandle connection_handle) {
 
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::DisconnectApplication()");
   LOG4CPLUS_INFO(
       logger_,
       "Delete Connection:" << static_cast<int>(connection_handle)
       << "from the list.");
-  tConnectionListIterator itr = connection_list_.find(connection_handle);
+  ConnectionListIterator itr = connection_list_.find(connection_handle);
   if (connection_list_.end() == itr) {
     LOG4CPLUS_ERROR(logger_, "Connection not found!");
     return;
   } else {
     if (0 != connection_handler_observer_) {
-      int firstSessionID = (itr->second).getFirstSessionID();
+      int firstSessionID = (itr->second).GetFirstSessionID();
       if (0 < firstSessionID) {
         firstSessionID = keyFromPair(connection_handle, firstSessionID);
-        // In case both parameters of onSessionEndedCallback are the same
+        // In case both parameters of OnSessionEndedCallback are the same
         // AppMgr knows that Application with id=firstSessionID
         // should be closed.
-        connection_handler_observer_->onSessionEndedCallback(firstSessionID,
+        connection_handler_observer_->OnSessionEndedCallback(firstSessionID,
                                                              firstSessionID);
       }
     }
@@ -212,16 +212,16 @@ void CConnectionHandler::RemoveConnection(
   }
 }
 
-int CConnectionHandler::onSessionStartedCallback(
+int ConnectionHandlerImpl::onSessionStartedCallback(
     NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::onSessionStartedCallback()");
   int newSessionID = -1;
-  tConnectionListIterator it = connection_list_.find(connectionHandle);
+  ConnectionListIterator it = connection_list_.find(connectionHandle);
   if (connection_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Unknown connection!");
   } else {
-    newSessionID = (it->second).addNewSession();
-    int firstSessionID = (it->second).getFirstSessionID();
+    newSessionID = (it->second).AddNewSession();
+    int firstSessionID = (it->second).GetFirstSessionID();
     if (0 > newSessionID) {
       LOG4CPLUS_ERROR(logger_, "Not possible to start session!");
     } else {
@@ -232,8 +232,8 @@ int CConnectionHandler::onSessionStartedCallback(
           firstSessionID = keyFromPair(connectionHandle, firstSessionID);
         }
         int sessionKey = keyFromPair(connectionHandle, newSessionID);
-        connection_handler_observer_->onSessionStartedCallback(
-            (it->second).getConnectionDeviceHandle(), sessionKey,
+        connection_handler_observer_->OnSessionStartedCallback(
+            (it->second).connection_device_handle(), sessionKey,
             firstSessionID);
       }
     }
@@ -241,17 +241,17 @@ int CConnectionHandler::onSessionStartedCallback(
   return newSessionID;
 }
 
-int CConnectionHandler::onSessionEndedCallback(
+int ConnectionHandlerImpl::onSessionEndedCallback(
     NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
     unsigned char sessionId, unsigned int hashCode) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::onSessionEndedCallback()");
   int result = -1;
-  tConnectionListIterator it = connection_list_.find(connectionHandle);
+  ConnectionListIterator it = connection_list_.find(connectionHandle);
   if (connection_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Unknown connection!");
   } else {
-    int firstSessionID = (it->second).getFirstSessionID();
-    result = (it->second).removeSession(sessionId);
+    int firstSessionID = (it->second).GetFirstSessionID();
+    result = (it->second).RemoveSession(sessionId);
     if (0 > result) {
       LOG4CPLUS_ERROR(logger_, "Not possible to remove session!");
     } else {
@@ -261,7 +261,7 @@ int CConnectionHandler::onSessionEndedCallback(
           firstSessionID = keyFromPair(connectionHandle, firstSessionID);
         }
         int sessionKey = keyFromPair(connectionHandle, sessionId);
-        connection_handler_observer_->onSessionEndedCallback(sessionKey,
+        connection_handler_observer_->OnSessionEndedCallback(sessionKey,
                                                              firstSessionID);
         result = sessionKey;
       }
@@ -270,7 +270,7 @@ int CConnectionHandler::onSessionEndedCallback(
   return result;
 }
 
-int CConnectionHandler::keyFromPair(
+int ConnectionHandlerImpl::keyFromPair(
     NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
     unsigned char sessionId) {
   int key = connectionHandle | (sessionId << 16);
@@ -282,7 +282,7 @@ int CConnectionHandler::keyFromPair(
   return key;
 }
 
-void CConnectionHandler::pairFromKey(
+void ConnectionHandlerImpl::pairFromKey(
     int key,
     NsSmartDeviceLink::NsTransportManager::tConnectionHandle & connectionHandle,
     unsigned char & sessionId) {
@@ -294,7 +294,7 @@ void CConnectionHandler::pairFromKey(
       << static_cast<int>(sessionId) << " for key:" << static_cast<int>(key));
 }
 
-int CConnectionHandler::GetDataOnSessionKey(int key, int & app_id,
+int ConnectionHandlerImpl::GetDataOnSessionKey(int key, int & app_id,
                                             std::list<int> & sessions_list,
                                             int & device_id) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::GetDataOnSessionKey()");
@@ -302,13 +302,13 @@ int CConnectionHandler::GetDataOnSessionKey(int key, int & app_id,
   NsSmartDeviceLink::NsTransportManager::tConnectionHandle conn_handle = 0;
   unsigned char session_id = 0;
   pairFromKey(key, conn_handle, session_id);
-  tConnectionListIterator it = connection_list_.find(conn_handle);
+  ConnectionListIterator it = connection_list_.find(conn_handle);
   if (connection_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Unknown connection!");
   } else {
-    CConnection connection = it->second;
-    device_id = connection.getConnectionDeviceHandle();
-    int first_session_id = connection.getFirstSessionID();
+    Connection connection = it->second;
+    device_id = connection.connection_device_handle();
+    int first_session_id = connection.GetFirstSessionID();
     sessions_list.clear();
     if (0 == first_session_id) {
       LOG4CPLUS_INFO(
@@ -317,13 +317,13 @@ int CConnectionHandler::GetDataOnSessionKey(int key, int & app_id,
       app_id = 0;
     } else {
       app_id = keyFromPair(conn_handle, first_session_id);
-      tSessionList session_list;
+      SessionList session_list;
       connection.GetSessionList(session_list);
       LOG4CPLUS_INFO(
           logger_,
           "Connection " << static_cast<int>(conn_handle) << "has "
           << static_cast<int>(session_list.size()) << "sessions.");
-      for (tSessionListIterator itr = session_list.begin();
+      for (SessionListIterator itr = session_list.begin();
           itr != session_list.end(); ++itr) {
         sessions_list.push_back(keyFromPair(conn_handle, *itr));
       }
@@ -333,21 +333,21 @@ int CConnectionHandler::GetDataOnSessionKey(int key, int & app_id,
   return result;
 }
 
-int CConnectionHandler::GetDataOnDeviceID(int device_id,
+int ConnectionHandlerImpl::GetDataOnDeviceID(int device_id,
                                           std::string & device_name,
                                           std::list<int> & applications_list) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::GetDataOnDeviceID()");
   int result = -1;
-  tDeviceListIterator it = device_list_.find(device_id);
+  DeviceListIterator it = device_list_.find(device_id);
   if (device_list_.end() == it) {
     LOG4CPLUS_ERROR(logger_, "Device not found!");
   } else {
-    device_name = (*it).second.getUserFriendlyName();
+    device_name = (*it).second.user_friendly_name();
     applications_list.clear();
-    for (tConnectionListIterator itr = connection_list_.begin();
+    for (ConnectionListIterator itr = connection_list_.begin();
         itr != connection_list_.end(); ++itr) {
-      if (device_id == (*itr).second.getConnectionDeviceHandle()) {
-        applications_list.push_back((*itr).second.getFirstSessionID());
+      if (device_id == (*itr).second.connection_device_handle()) {
+        applications_list.push_back((*itr).second.GetFirstSessionID());
       }
     }
     result = 0;
@@ -355,7 +355,7 @@ int CConnectionHandler::GetDataOnDeviceID(int device_id,
   return result;
 }
 
-void CConnectionHandler::set_transport_manager(
+void ConnectionHandlerImpl::set_transport_manager(
     NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager) {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::setTransportManager()");
   if (!transportManager) {
@@ -364,7 +364,7 @@ void CConnectionHandler::set_transport_manager(
   }
   transport_manager_ = transportManager;
 }
-void CConnectionHandler::startDevicesDiscovery() {
+void ConnectionHandlerImpl::StartDevicesDiscovery() {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::startDevicesDiscovery()");
   if (NULL == transport_manager_) {
     LOG4CPLUS_ERROR(logger_, "Null pointer to TransportManager.");
@@ -373,16 +373,16 @@ void CConnectionHandler::startDevicesDiscovery() {
   transport_manager_->scanForNewDevices();
 }
 
-void CConnectionHandler::connectToDevice(
-    NsConnectionHandler::tDeviceHandle deviceHandle) {
-  NsConnectionHandler::tDeviceList::const_iterator it_in;
-  it_in = device_list_.find(deviceHandle);
+void ConnectionHandlerImpl::ConnectToDevice(
+    connection_handler::DeviceHandle device_handle) {
+  connection_handler::DeviceList::const_iterator it_in;
+  it_in = device_list_.find(device_handle);
   if (device_list_.end() != it_in) {
     LOG4CPLUS_INFO_EXT(
         logger_,
-        "Connecting to device with handle " << static_cast<int>(deviceHandle));
+        "Connecting to device with handle " << static_cast<int>(device_handle));
     if (transport_manager_) {
-      transport_manager_->connectDevice(deviceHandle);
+      transport_manager_->connectDevice(device_handle);
     }
   } else {
     LOG4CPLUS_ERROR(
@@ -391,7 +391,7 @@ void CConnectionHandler::connectToDevice(
   }
 }
 
-void CConnectionHandler::StartTransportManager() {
+void ConnectionHandlerImpl::StartTransportManager() {
   LOG4CPLUS_INFO(logger_, "CConnectionHandler::startTransportManager()");
   if (NULL == transport_manager_) {
     LOG4CPLUS_ERROR(logger_, "Null pointer to TransportManager.");
@@ -401,4 +401,4 @@ void CConnectionHandler::StartTransportManager() {
   transport_manager_->run();
 }
 
-}/* namespace NsConnectionHandler */
+}/* namespace connection_handler */

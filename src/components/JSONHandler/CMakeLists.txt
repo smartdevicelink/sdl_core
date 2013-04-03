@@ -1,7 +1,7 @@
 include_directories (
   ./include/
   ../TransportManager/include/
-  ../ProtocolHandler/include/
+  ../protocol_handler/include/
   ../Utils/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include

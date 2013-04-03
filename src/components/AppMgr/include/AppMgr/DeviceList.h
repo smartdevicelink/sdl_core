@@ -33,7 +33,7 @@
 #ifndef DEVICELIST_H
 #define DEVICELIST_H
 
-#include "ConnectionHandler/CDevice.hpp"
+#include "ConnectionHandler/device.h"
 
 namespace log4cplus
 {
@@ -63,13 +63,13 @@ namespace NsAppManager
          * \brief set device list
          * \param deviceList device list
          */
-        void setDeviceList( const NsConnectionHandler::tDeviceList& deviceList );
+        void setDeviceList( const connection_handler::DeviceList& deviceList );
 
         /**
          * \brief get device list
          * \return device list
          */
-        const NsConnectionHandler::tDeviceList& getDeviceList() const;
+        const connection_handler::DeviceList& getDeviceList() const;
 
         /**
          * \brief get count of items
@@ -82,14 +82,14 @@ namespace NsAppManager
          * \param handle device handle
          * \return device associated with the given handle
          */
-        const NsConnectionHandler::CDevice *findDeviceByHandle(const NsConnectionHandler::tDeviceHandle& handle) const;
+        const connection_handler::Device *findDeviceByHandle(const connection_handler::DeviceHandle& handle) const;
 
         /**
          * \brief find device associated with the given name
          * \param name device name
          * \return device associated with the given name
          */
-        const NsConnectionHandler::CDevice *findDeviceByName(const std::string& name) const;
+        const connection_handler::Device *findDeviceByName(const std::string& name) const;
 
     private:
 
@@ -98,7 +98,7 @@ namespace NsAppManager
          */
         DeviceList(const DeviceList&);
 
-        NsConnectionHandler::tDeviceList mDeviceList;
+        connection_handler::DeviceList mDeviceList;
         static log4cplus::Logger mLogger;
     };
 }

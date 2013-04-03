@@ -1,6 +1,6 @@
 /**
- * \file IDevicesDiscoveryStarter.hpp
- * \brief Starter of devices discovering process.
+ * \file SmartDeviceLinkRawMessage.cpp
+ * \brief SmartDeviceLinkRawMessage class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,43 +33,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IDEVICESDISCOVERYSTARTER_H
-#define IDEVICESDISCOVERYSTARTER_H
+#include "protocol_handler/raw_message.h"
 
-#include "ConnectionHandler/CDevice.hpp"
+namespace protocol_handler {
 
-/**
- * \namespace NsConnectionHandler
- * \brief SmartDeviceLink ConnectionHandler namespace.
- */
-namespace NsConnectionHandler
-{
-    /**
-    * \class IDevicesDiscoveryStarter
-    * \brief Starter of devices discovering process class
-    */
-    class IDevicesDiscoveryStarter
-    {
-    public:
-        /**
-         * \brief Method which should start devices discoveryng
-         */
-        virtual void startDevicesDiscovery()=0;
+RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
+                       unsigned char* data, unsigned int dataSize)
+    : connection_key_(connectionKey),
+      protocol_version_(protocolVersion),
+      data_(data),
+      data_size_(dataSize) {
+}
 
-        /**
-         * \brief Connects to all services of device
-         * \param deviceHandle Handle of device to connect to
-         */
-        virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle ) = 0;
+RawMessage::~RawMessage() {
+  if (data_) {
+    delete[] data_;
+    data_ = 0;
+  }
+}
 
-        virtual void StartTransportManager() = 0;
+int RawMessage::connection_key() const {
+  return connection_key_;
+}
 
-    protected:
-        /**
-         * \brief Destructor
-         */
-        virtual ~IDevicesDiscoveryStarter() {};
-    };
-}/* namespace NsConnectionHandler */
+unsigned char* RawMessage::data() const {
+  return data_;
+}
 
-#endif /* IDEVICESDISCOVERYSTARTER_H */
+unsigned int RawMessage::data_size() const {
+  return data_size_;
+}
+
+unsigned int RawMessage::protocol_version() const {
+  return protocol_version_;
+}
+}  // namespace protocol_handler

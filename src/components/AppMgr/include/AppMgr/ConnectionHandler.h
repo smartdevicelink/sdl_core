@@ -34,10 +34,10 @@
 #define APPCONNECTIONHANDLER_H
 
 
-namespace NsConnectionHandler
+namespace connection_handler
 {
-    class IDevicesDiscoveryStarter;
-    typedef int tDeviceHandle;
+    class DevicesDiscoveryStarter;
+    typedef int DeviceHandle;
 }
 
 namespace log4cplus
@@ -63,24 +63,24 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler);
+        void setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler);
 
         /**
          * \brief Gets connection handler instance
          * \return connection handler
          */
-        NsConnectionHandler::IDevicesDiscoveryStarter *getConnectionHandler( ) const;
+        connection_handler::DevicesDiscoveryStarter *getConnectionHandler( ) const;
 
         /**
          * \brief Start device discovery
          */
-        void startDevicesDiscovery();
+        void StartDevicesDiscovery();
 
         /**
          * \brief Connect to device specified in params
          * \param deviceHandle device handle
          */
-        void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
+        void ConnectToDevice( connection_handler::DeviceHandle deviceHandle );
 
         void StartTransportManager();
 
@@ -96,7 +96,7 @@ namespace NsAppManager
          */
         ConnectionHandler(const ConnectionHandler&);
 
-        NsConnectionHandler::IDevicesDiscoveryStarter* mConnectionHandler;
+        connection_handler::DevicesDiscoveryStarter* mConnectionHandler;
         static log4cplus::Logger mLogger;
     };
 

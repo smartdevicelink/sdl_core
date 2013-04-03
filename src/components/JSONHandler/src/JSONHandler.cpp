@@ -193,7 +193,7 @@ namespace
 
 log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONHandler"));
 
-JSONHandler::JSONHandler(NsProtocolHandler::ProtocolHandler* protocolHandler)
+JSONHandler::JSONHandler(protocol_handler::ProtocolHandlerImpl* protocolHandler)
     : mProtocolHandler(protocolHandler) {
 
   incoming_thread_ = new threads::Thread(
@@ -242,7 +242,7 @@ void JSONHandler::sendRPCMessage(const NsSmartDeviceLinkRPC::SDLRPCMessage* mess
     }
 }
 /*End of methods for IRPCMessagesObserver*/
-void JSONHandler::setProtocolHandler(NsProtocolHandler::ProtocolHandler* protocolHandler)
+void JSONHandler::setProtocolHandler(protocol_handler::ProtocolHandlerImpl* protocolHandler)
 {
     if (!protocolHandler)
     {
@@ -252,7 +252,7 @@ void JSONHandler::setProtocolHandler(NsProtocolHandler::ProtocolHandler* protoco
     mProtocolHandler = protocolHandler;
 }
 
-void JSONHandler::onDataReceivedCallback(const NsProtocolHandler::SmartDeviceLinkRawMessage* message)
+void JSONHandler::onDataReceivedCallback(const protocol_handler::RawMessage* message)
 {
     if (!message)
     {
@@ -260,8 +260,8 @@ void JSONHandler::onDataReceivedCallback(const NsProtocolHandler::SmartDeviceLin
         return;
     }
 
-    LOG4CPLUS_INFO(mLogger, "Received message from mobile App: " << message->getData()
-                   << " of size " << message->getDataSize());
+    LOG4CPLUS_INFO(mLogger, "Received message from mobile App: " << message->data()
+                   << " of size " << message->data_size());
 
     mIncomingMessages.push(message);
 }
@@ -275,9 +275,9 @@ std::string JSONHandler::clearEmptySpaces(const std::string& input)
 }
 
 NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV1(
-    const NsProtocolHandler::SmartDeviceLinkRawMessage* message)
+    const protocol_handler::RawMessage* message)
 {
-    std::string jsonMessage = std::string((const char*)message->getData(), message->getDataSize());
+    std::string jsonMessage = std::string((const char*)message->data(), message->data_size());
 
     if (jsonMessage.length() == 0)
     {
@@ -302,7 +302,7 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
             return NULL;
         }
 
-        sendRPCMessage(response, message->getConnectionKey());
+        sendRPCMessage(response, message->connection_key());
         return NULL;
     }
 
@@ -310,9 +310,9 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
 }
 
 NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV2(
-    const NsProtocolHandler::SmartDeviceLinkRawMessage* message)
+    const protocol_handler::RawMessage* message)
 {
-    unsigned char* receivedData = message->getData();
+    unsigned char* receivedData = message->data();
     unsigned char offset = 0;
     unsigned char firstByte = receivedData[offset++];
 
@@ -355,7 +355,7 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
 
     LOG4CPLUS_INFO_EXT(mLogger, "Json size is " << jsonSize);
 
-    if (jsonSize > message->getDataSize())
+    if (jsonSize > message->data_size())
     {
         LOG4CPLUS_ERROR(mLogger, "Received invalid json packet header.");
         return 0;
@@ -401,11 +401,11 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
     //   messageObject, static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(functionId),
     //   static_cast<NsSmartDeviceLinkRPCV2::messageType::messageTypeInternal>(rpcType)));
 
-    if (message -> getDataSize() > offset + jsonSize)
+    if (message -> data_size() > offset + jsonSize)
     {
         // unsigned int binarySize = message->getDataSize() - offset - jsonSize;
         std::vector<unsigned char> binaryData(receivedData + offset + jsonSize,
-                                              receivedData + message->getDataSize());
+                                              receivedData + message->data_size());
         LOG4CPLUS_INFO_EXT(mLogger, "Binary data is present in message.");
         messageObject -> setBinaryData(binaryData);
     }
@@ -421,7 +421,7 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
             return NULL;
         }
 
-        sendRPCMessage(response, message->getConnectionKey());
+        sendRPCMessage(response, message->connection_key());
         return NULL;
     }
     else
@@ -437,7 +437,7 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
     return messageObject;
 }
 
-NsProtocolHandler::SmartDeviceLinkRawMessage* JSONHandler::handleOutgoingMessageProtocolV1(int connectionKey,
+protocol_handler::RawMessage* JSONHandler::handleOutgoingMessageProtocolV1(int connectionKey,
         const NsSmartDeviceLinkRPC::SDLRPCMessage*   message)
 {
     LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 1");
@@ -453,7 +453,7 @@ NsProtocolHandler::SmartDeviceLinkRawMessage* JSONHandler::handleOutgoingMessage
     unsigned char* rawMessage = new unsigned char[messageString.length() + 1];
     memcpy(rawMessage, messageString.c_str(), messageString.length() + 1);
 
-    NsProtocolHandler::SmartDeviceLinkRawMessage* msgToProtocolHandler = new NsProtocolHandler::SmartDeviceLinkRawMessage(
+    protocol_handler::RawMessage* msgToProtocolHandler = new protocol_handler::RawMessage(
         connectionKey,
         1,
         rawMessage,
@@ -462,7 +462,7 @@ NsProtocolHandler::SmartDeviceLinkRawMessage* JSONHandler::handleOutgoingMessage
     return msgToProtocolHandler;
 }
 
-NsProtocolHandler::SmartDeviceLinkRawMessage* JSONHandler::handleOutgoingMessageProtocolV2(int connectionKey,
+protocol_handler::RawMessage* JSONHandler::handleOutgoingMessageProtocolV2(int connectionKey,
         const NsSmartDeviceLinkRPC::SDLRPCMessage*   message)
 {
     LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 2");
@@ -518,7 +518,7 @@ NsProtocolHandler::SmartDeviceLinkRawMessage* JSONHandler::handleOutgoingMessage
                 }
             }
 
-            NsProtocolHandler::SmartDeviceLinkRawMessage* msgToProtocolHandler = new NsProtocolHandler::SmartDeviceLinkRawMessage(
+            protocol_handler::RawMessage* msgToProtocolHandler = new protocol_handler::RawMessage(
                 connectionKey,
                 2,
                 dataForSending,
@@ -602,7 +602,7 @@ NsProtocolHandler::SmartDeviceLinkRawMessage* JSONHandler::handleOutgoingMessage
         }
     }
 
-    NsProtocolHandler::SmartDeviceLinkRawMessage* msgToProtocolHandler = new NsProtocolHandler::SmartDeviceLinkRawMessage(
+    protocol_handler::RawMessage* msgToProtocolHandler = new protocol_handler::RawMessage(
         connectionKey,
         2,
         dataForSending,

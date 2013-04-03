@@ -24,5 +24,42 @@
     <string name="updateturnlist_iconList">Icon List (comma-separated, one for each turn)</string>
     <string name="updateturnlist_defaultIconList">turn_left.png,turn_right.png,turn_forward.png</string>
     <string name="addcommand_iconFilename">action.png</string>
-    
+    <string name="performinteraction_initialText">Initial Text</string>
+    <string name="performinteraction_initialTextDefault">Pick number:</string>
+    <string name="performinteraction_initialPrompt">Initial Prompt (comma-separated)</string>
+    <string name="performinteraction_initialPromptDefault">Pick a command</string>
+    <string name="performinteraction_interactionMode">Interaction Mode</string>
+    <string name="performinteraction_interactionChoiceSetID">Interaction Choise Set ID</string>
+    <string name="performinteraction_helpPrompt">Help prompt (comma-separated)</string>
+    <string name="performinteraction_helpPromptDefault">help me,I\'m melting</string>
+    <string name="performinteraction_timeoutPrompt">Timeout prompt (comma-separated)</string>
+    <string name="performinteraction_timeoutPromptDefault">hurry it up</string>
+    <string name="performinteraction_vrHelp">VR Help Item #</string>
+    <string name="performinteraction_vrHelpItemPosDefault">1</string>
+    <string name="performinteraction_vrHelpItemDefault">VR help item</string>
+    <string name="performinteraction_vrHelpItemImageDefault">imageFilename</string>
+    <string name="performinteraction_timeout">Timeout</string>
+    <string name="performinteraction_timeoutDefault">10000</string>
+    <string name="show_mainField1">Main Field 1</string>
+    <string name="show_mainField1Default">Show Line 1</string>
+    <string name="show_mainField2">Main Field 2</string>
+    <string name="show_mainField2Default">Show Line 2</string>
+    <string name="show_mainField3">Main Field 3</string>
+    <string name="show_mainField3Default">Show Line 3</string>
+    <string name="show_mainField4">Main Field 4</string>
+    <string name="show_mainField4Default">Show Line 4</string>
+    <string name="show_textAlignment">Text Alignment</string>
+    <string name="show_statusBar">Status Bar</string>
+    <string name="show_statusBarDefault">status bar</string>
+    <string name="show_mediaTrack">Media Track</string>
+    <string name="show_mediaTrackDefault">Media Track</string>
+    <string name="show_mediaClock">Media Clock</string>
+    <string name="show_mediaClockDefault">12:34</string>
+    <string name="show_graphic">Graphic</string>
+    <string name="show_graphicDefault">imageFilename</string>
+    <string name="show_includeSoftButtons">Include</string>
+    <string name="show_softButtons">Soft Buttons</string>
+    <string name="show_customPresets">Custom Presets (comma-separated)</string>
+    <string name="show_customPresetsDefault">GEN0,GEN1,GEN2,GEN3,GEN4,GEN5</string>
+
 </resources>

@@ -2,7 +2,7 @@ include_directories (
     ./include/
     ../JSONHandler/include/
     ../ConnectionHandler/include/
-    ../ProtocolHandler/include/
+    ../protocol_handler/include/
     ../TransportManager/include/
     ../Utils/include/
     ../../thirdPartyLibs/MessageBroker/include/

@@ -1,6 +1,6 @@
 /**
- * \file CDevice.cpp
- * \brief CDevice class implementation.
+ * \file DevicesDiscoveryStarter.hpp
+ * \brief Starter of devices discovering process.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,38 +33,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Logger.hpp"
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICES_DISCOVERY_STARTER_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICES_DISCOVERY_STARTER_H_
 
-#include "ConnectionHandler/CDevice.hpp"
+#include "ConnectionHandler/device.h"
 
 /**
- * \namespace NsConnectionHandler
+ * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
- */ 
-namespace NsConnectionHandler
-{
+ */
+namespace connection_handler {
+/**
+ * \class DevicesDiscoveryStarter
+ * \brief Starter of devices discovering process class
+ */
+class DevicesDiscoveryStarter {
+ public:
+  /**
+   * \brief Method which should start devices discoveryng
+   */
+  virtual void StartDevicesDiscovery()=0;
 
-    log4cplus::Logger CDevice::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ConnectionHandler"));
+  /**
+   * \brief Connects to all services of device
+   * \param deviceHandle Handle of device to connect to
+   */
+  virtual void ConnectToDevice(
+      connection_handler::DeviceHandle device_handle) = 0;
 
-    CDevice::CDevice(tDeviceHandle aDeviceHandle, std::string aUserFriendlyName):
-    mDeviceHandle(aDeviceHandle),
-    mUserFriendlyName(aUserFriendlyName)
-    {
+  virtual void StartTransportManager() = 0;
 
-    }
+ protected:
+  /**
+   * \brief Destructor
+   */
+  virtual ~DevicesDiscoveryStarter() {
+  }
+};
+}/* namespace connection_handler */
 
-    CDevice::~CDevice()
-    {
-        
-    }
-
-    tDeviceHandle CDevice::getDeviceHandle() const
-    {
-        return mDeviceHandle;
-    }
-
-    std::string CDevice::getUserFriendlyName() const
-    {
-        return mUserFriendlyName;
-    }
-}/* namespace NsConnectionHandler */
+#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICES_DISCOVERY_STARTER_H_

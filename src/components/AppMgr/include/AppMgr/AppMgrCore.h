@@ -77,9 +77,9 @@ namespace log4cplus
     class Logger;
 }
 
-namespace NsConnectionHandler
+namespace connection_handler
 {
-    class IDevicesDiscoveryStarter;
+    class DevicesDiscoveryStarter;
 }
 
 namespace NsAppManager
@@ -167,32 +167,32 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter* handler);
+        void setConnectionHandler(connection_handler::DevicesDiscoveryStarter* handler);
 
         /**
          * \brief Gets connection handler instance
          * \return connection handler
          */
-        NsConnectionHandler::IDevicesDiscoveryStarter* getConnectionHandler( ) const;
+        connection_handler::DevicesDiscoveryStarter* getConnectionHandler( ) const;
 
         /**
          * \brief set device list
          * \param deviceList device list
          */
-        void setDeviceList( const NsConnectionHandler::tDeviceList& deviceList );
+        void setDeviceList( const connection_handler::DeviceList& deviceList );
 
         /**
          * \brief get device list
          * \return device list
          */
-        const NsConnectionHandler::tDeviceList& getDeviceList() const;
+        const connection_handler::DeviceList& getDeviceList() const;
 
         /**
          * \brief add a device to a mapping
          * \param sessionKey session/connection key
          * \param device device handler
          */
-        void addDevice( const NsConnectionHandler::tDeviceHandle &device,
+        void addDevice( const connection_handler::DeviceHandle &device,
             const int &sessionKey, int firstSessionKey );
 
         /**
@@ -318,7 +318,7 @@ namespace NsAppManager
          */
         MessageChaining * addChain(MessageChaining * chain, int connectionKey, unsigned int correlationID);
 
-        void differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList );
+        void differenceBetweenLists( const connection_handler::DeviceList &deviceList );
 
         Application * getActiveItem();
 
@@ -376,7 +376,7 @@ namespace NsAppManager
 
         std::map<int, Application*> mApplications;
         std::map<int, DeviceStorage> mDevices;
-        //NsConnectionHandler::tDeviceList mDevices;
+        //connection_handler::DeviceList mDevices;
 
         threads::Thread* perform_audio_thread_;
     };

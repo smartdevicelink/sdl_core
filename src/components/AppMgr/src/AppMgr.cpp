@@ -103,7 +103,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgr::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
+    void AppMgr::setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -152,16 +152,16 @@ namespace NsAppManager
      *
      * \param deviceList New list of available devices.
      **/
-    void AppMgr::onDeviceListUpdated(const NsConnectionHandler::tDeviceList &deviceList)
+    void AppMgr::OnDeviceListUpdated(const connection_handler::DeviceList &deviceList)
     {
         AppMgrCore::getInstance().setDeviceList(deviceList);
     }
 
-    void AppMgr::UpdateDeviceList(const NsConnectionHandler::tDeviceList & DeviceList)
+    void AppMgr::UpdateDeviceList(const connection_handler::DeviceList & DeviceList)
     {
     }
 
-    void AppMgr::RemoveDevice(const NsConnectionHandler::tDeviceHandle DeviceHandle)
+    void AppMgr::RemoveDevice(const connection_handler::DeviceHandle DeviceHandle)
     {
     }
 
@@ -170,7 +170,7 @@ namespace NsAppManager
      * \param deviceHandle
      * \param sessionKey
      */
-    void AppMgr::onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey)
+    void AppMgr::OnSessionStartedCallback(connection_handler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey)
     {
         AppMgrCore::getInstance().addDevice(deviceHandle, sessionKey, firstSessionKey);
     }
@@ -179,7 +179,7 @@ namespace NsAppManager
      * \brief callback which is called upon session ending
      * \param sessionKey
      */
-    void AppMgr::onSessionEndedCallback(int sessionKey, int firstSessionKey)
+    void AppMgr::OnSessionEndedCallback(int sessionKey, int firstSessionKey)
     {
         AppMgrCore::getInstance().removeDevice(sessionKey, firstSessionKey);
     }

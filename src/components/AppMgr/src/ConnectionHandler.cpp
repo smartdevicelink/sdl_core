@@ -31,7 +31,7 @@
 //
 
 #include "AppMgr/ConnectionHandler.h"
-#include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"
+#include "ConnectionHandler/devices_discovery_starter.h"
 #include "LoggerHelper.hpp"
 
 namespace NsAppManager
@@ -52,7 +52,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void ConnectionHandler::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
+    void ConnectionHandler::setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -66,7 +66,7 @@ namespace NsAppManager
      * \brief Gets connection handler instance
      * \return connection handler
      */
-    NsConnectionHandler::IDevicesDiscoveryStarter *ConnectionHandler::getConnectionHandler() const
+    connection_handler::DevicesDiscoveryStarter *ConnectionHandler::getConnectionHandler() const
     {
         if(!mConnectionHandler)
         {
@@ -78,28 +78,28 @@ namespace NsAppManager
     /**
      * \brief Start device discovery
      */
-    void ConnectionHandler::startDevicesDiscovery()
+    void ConnectionHandler::StartDevicesDiscovery()
     {
         if(!mConnectionHandler)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
             return;
         }
-        mConnectionHandler->startDevicesDiscovery();
+        mConnectionHandler->StartDevicesDiscovery();
     }
 
     /**
      * \brief Connect to device specified in params
      * \param deviceHandle device handle
      */
-    void ConnectionHandler::connectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle)
+    void ConnectionHandler::ConnectToDevice(connection_handler::DeviceHandle deviceHandle)
     {
         if(!mConnectionHandler)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
             return;
         }
-        mConnectionHandler->connectToDevice(deviceHandle);
+        mConnectionHandler->ConnectToDevice(deviceHandle);
     }
 
     void ConnectionHandler::StartTransportManager()

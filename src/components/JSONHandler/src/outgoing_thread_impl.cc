@@ -33,7 +33,7 @@
 #include "JSONHandler/outgoing_thread_impl.h"
 #include "JSONHandler/SDLRPCMessage.h"
 
-#include "ProtocolHandler/SmartDeviceLinkRawMessage.h"
+#include "protocol_handler/raw_message.h"
 #include "LoggerHelper.hpp"
 
 namespace json_handler {
@@ -58,7 +58,7 @@ void OutgoingThreadImpl::threadMain() {
           logger_,
           "Outgoing mobile message " << message->getMethodId() << " received.");
 
-      NsProtocolHandler::SmartDeviceLinkRawMessage* msgToProtocolHandler = 0;
+      protocol_handler::RawMessage* msgToProtocolHandler = 0;
       if (message->getProtocolVersion() == 1) {
         msgToProtocolHandler = handler_->handleOutgoingMessageProtocolV1(
             messagePair.first, message);
@@ -86,8 +86,8 @@ void OutgoingThreadImpl::threadMain() {
 
       LOG4CPLUS_INFO_EXT(
           logger_,
-          "Sending to ProtocolHandler: " << msgToProtocolHandler->getData()
-            << " of size " << msgToProtocolHandler->getDataSize());
+          "Sending to ProtocolHandler: " << msgToProtocolHandler->data()
+            << " of size " << msgToProtocolHandler->data_size());
       handler_->mProtocolHandler->sendData(msgToProtocolHandler);
 
       delete message;

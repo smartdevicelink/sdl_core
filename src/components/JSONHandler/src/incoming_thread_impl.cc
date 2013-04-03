@@ -49,18 +49,18 @@ void IncomingThreadImpl::threadMain() {
   while (1) {
     while (!handler_->mIncomingMessages.empty()) {
       LOG4CPLUS_INFO(logger_, "Incoming mobile message received.");
-      const NsProtocolHandler::SmartDeviceLinkRawMessage* message = handler_
+      const protocol_handler::RawMessage* message = handler_
           ->mIncomingMessages.pop();
 
       NsSmartDeviceLinkRPC::SDLRPCMessage* currentMessage = 0;
 
       LOG4CPLUS_INFO_EXT(
           logger_,
-          "Message of protocol version " << message->getProtocolVersion());
+          "Message of protocol version " << message->protocol_version());
 
-      if (message->getProtocolVersion() == 1) {
+      if (message->protocol_version() == 1) {
         currentMessage = handler_->handleIncomingMessageProtocolV1(message);
-      } else if (message->getProtocolVersion() == 2) {
+      } else if (message->protocol_version() == 2) {
         currentMessage = handler_->handleIncomingMessageProtocolV2(message);
       } else {
         LOG4CPLUS_WARN(logger_, "Message of wrong protocol version received.");
@@ -72,7 +72,7 @@ void IncomingThreadImpl::threadMain() {
         continue;
       }
 
-      currentMessage->setProtocolVersion(message->getProtocolVersion());
+      currentMessage->setProtocolVersion(message->protocol_version());
 
       if (!handler_->mMessagesObserver) {
         LOG4CPLUS_ERROR(
@@ -82,7 +82,7 @@ void IncomingThreadImpl::threadMain() {
       }
 
       handler_->mMessagesObserver->onMessageReceivedCallback(
-          currentMessage, message->getConnectionKey());
+          currentMessage, message->connection_key());
 
       LOG4CPLUS_INFO(logger_, "Incoming mobile message handled.");
     }
