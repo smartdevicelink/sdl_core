@@ -13,7 +13,7 @@ namespace test { namespace components { namespace JSONHandler { namespace format
 
     using namespace NsAppLink::NsJSONHandler::strings;
 
-    TEST_F(CFormatterTestHelper, test_JsonALRPCv1)
+    TEST_F(CFormatterTestHelper, test_fromObjToALRPCv1AndBack)
     {
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
         Json::Reader reader;    // the same thing
@@ -46,7 +46,12 @@ namespace test { namespace components { namespace JSONHandler { namespace format
                 \"correlationID\": 11,\
                 \"parameters\": {\
                     \"syncMsgVersion\": \"version\",\
-                    \"appName\": \"some app name\"\
+                    \"appName\": \"some app name\",\
+                    \"ttsName\": [{\
+                        \"text\": \"ABC\",\
+                        \"type\": \"TEXT\"\
+                    }],\
+                   \"vrSynonyms\": [\"Synonym 1\", \"Synonym 2\"]\
                 }\
             }\
         }";
@@ -62,6 +67,10 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         ASSERT_EQ(11, (int)obj[S_PARAMS][S_CORRELATION_ID]);
         ASSERT_EQ("version", (std::string)obj[S_MSG_PARAMS]["syncMsgVersion"]);
         ASSERT_EQ("some app name", (std::string)obj[S_MSG_PARAMS]["appName"]);
+        ASSERT_EQ("some app name", (std::string)obj[S_MSG_PARAMS]["appName"]);
+        ASSERT_EQ(1, (int)obj[S_PARAMS][S_PROTOCOL_VERSION]);
+        ASSERT_EQ("TEXT", (std::string)obj[S_MSG_PARAMS]["ttsName"][0]["type"]);
+        ASSERT_EQ("Synonym 2", (std::string)obj[S_MSG_PARAMS]["vrSynonyms"][1]);
     }
 
 }}}}
