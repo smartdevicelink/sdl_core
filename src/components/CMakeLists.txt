@@ -1,3 +1,6 @@
+# --- Interfaces
+add_subdirectory(./Interfaces)
+
 # --- TransportManager
 add_subdirectory(./TransportManager)
 
