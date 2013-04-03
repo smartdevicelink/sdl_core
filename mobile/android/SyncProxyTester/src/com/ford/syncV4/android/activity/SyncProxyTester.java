@@ -130,6 +130,7 @@ import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SystemAction;
+import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.transport.TransportType;
@@ -1195,112 +1196,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.Show) {
-							//something
-							AlertDialog.Builder builder;
-							AlertDialog dlg;
-
-							final Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.show, null);
-							final EditText txtShowField1 = (EditText) layout.findViewById(R.id.txtShowField1);
-							final EditText txtShowField2 = (EditText) layout.findViewById(R.id.txtShowField2);
-							final EditText statusBar = (EditText) layout.findViewById(R.id.txtStatusBar);
-							final EditText mediaClock = (EditText) layout.findViewById(R.id.txtMediaClock);
-							final EditText mediaTrack = (EditText) layout.findViewById(R.id.txtMediaTrack);
-							chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
-							final EditText editCustomPresets = (EditText) layout.findViewById(R.id.show_customPresets);
-							
-							if (!getIsMedia()) {
-								int visibility = android.view.View.GONE;
-								mediaClock.setVisibility(visibility);
-								mediaTrack.setVisibility(visibility);
-								layout.findViewById(R.id.lblMediaTrack).setVisibility(visibility);
-								layout.findViewById(R.id.lblMediaClock).setVisibility(visibility);
-							}
-
-							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb1.setText("KeepContext");
-							sb1.setType(SoftButtonType.SBT_TEXT);
-							sb1.setIsHighlighted(false);
-							sb1.setSystemAction(SystemAction.KEEP_CONTEXT);
-							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb2.setText("StealFocus");
-							sb2.setType(SoftButtonType.SBT_TEXT);
-							sb2.setIsHighlighted(false);
-							sb2.setSystemAction(SystemAction.STEAL_FOCUS);
-							SoftButton sb3 = new SoftButton();
-							sb3.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb3.setText("Default");
-							sb3.setType(SoftButtonType.SBT_TEXT);
-							sb3.setIsHighlighted(false);
-							sb3.setSystemAction(SystemAction.DEFAULT_ACTION);
-							currentSoftButtons = new Vector<SoftButton>();
-							currentSoftButtons.add(sb1);
-							currentSoftButtons.add(sb2);
-							currentSoftButtons.add(sb3);
-
-							Button btnSoftButtons = (Button) layout.findViewById(R.id.show_btnSoftButtons);
-							btnSoftButtons.setOnClickListener(new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									IntentHelper.addObjectForKey(currentSoftButtons,
-											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
-									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
-											SHOW_MAXSOFTBUTTONS);
-									startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
-								}
-							});
-
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									try {
-										Show msg = new Show();
-										msg.setCorrelationID(autoIncCorrId++);
-										msg.setMainField1(txtShowField1.getText().toString());
-										msg.setMainField2(txtShowField2.getText().toString());
-										msg.setMainField3("MainField3_test");
-										msg.setMainField4("MainField4_test");
-										msg.setStatusBar(statusBar.getText().toString());
-										if (getIsMedia()) {
-											msg.setMediaClock(mediaClock.getText().toString());
-											msg.setMediaTrack(mediaTrack.getText().toString());
-										}
-										if (chkIncludeSoftButtons.isChecked() &&
-												(currentSoftButtons != null) &&
-												(currentSoftButtons.size() > 0)) {
-											msg.setSoftButtons(currentSoftButtons);
-										}
-										currentSoftButtons = null;
-										chkIncludeSoftButtons = null;
-										if (editCustomPresets.length() > 0) {
-											String splitter = ",";
-											String[] customPresets = editCustomPresets.getText().
-													toString().split(splitter);
-											msg.setCustomPresets(new Vector<String>(Arrays.
-													asList(customPresets)));
-										}
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									currentSoftButtons = null;
-									chkIncludeSoftButtons = null;
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							dlg = builder.create();
-							dlg.show();
+							sendShow();
 						} else if (adapter.getItem(which) == ButtonSubscriptions) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
@@ -2314,6 +2210,177 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+
+					/**
+					 * Opens the dialog for Show message and sends it.
+					 */
+					private void sendShow() {
+						final Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.show, null);
+						
+						final CheckBox mainField1Check = (CheckBox) layout.findViewById(R.id.show_mainField1Check);
+						final EditText mainField1 = (EditText) layout.findViewById(R.id.show_mainField1);
+						final CheckBox mainField2Check = (CheckBox) layout.findViewById(R.id.show_mainField2Check);
+						final EditText mainField2 = (EditText) layout.findViewById(R.id.show_mainField2);
+						final CheckBox mainField3Check = (CheckBox) layout.findViewById(R.id.show_mainField3Check);
+						final EditText mainField3 = (EditText) layout.findViewById(R.id.show_mainField3);
+						final CheckBox mainField4Check = (CheckBox) layout.findViewById(R.id.show_mainField4Check);
+						final EditText mainField4 = (EditText) layout.findViewById(R.id.show_mainField4);
+						final CheckBox textAlignmentCheck = (CheckBox) layout.findViewById(R.id.show_textAlignmentCheck);
+						final Spinner textAlignmentSpinner = (Spinner) layout.findViewById(R.id.show_textAlignmentSpinner);
+						final CheckBox statusBarCheck = (CheckBox) layout.findViewById(R.id.show_statusBarCheck);
+						final EditText statusBar = (EditText) layout.findViewById(R.id.show_statusBar);
+						final CheckBox mediaClockCheck = (CheckBox) layout.findViewById(R.id.show_mediaClockCheck);
+						final EditText mediaClock = (EditText) layout.findViewById(R.id.show_mediaClock);
+						final CheckBox mediaTrackCheck = (CheckBox) layout.findViewById(R.id.show_mediaTrackCheck);
+						final EditText mediaTrack = (EditText) layout.findViewById(R.id.show_mediaTrack);
+						final CheckBox graphicCheck = (CheckBox) layout.findViewById(R.id.show_graphicCheck);
+						final EditText graphic = (EditText) layout.findViewById(R.id.show_graphic);
+						chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
+						final Button softButtons = (Button) layout.findViewById(R.id.show_btnSoftButtons);
+						final CheckBox customPresetsCheck = (CheckBox) layout.findViewById(R.id.show_customPresetsCheck);
+						final EditText customPresets = (EditText) layout.findViewById(R.id.show_customPresets);
+						
+						final ArrayAdapter<TextAlignment> textAlignmentAdapter = new ArrayAdapter<TextAlignment>(
+								mContext, android.R.layout.simple_spinner_item, TextAlignment.values());
+						textAlignmentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+						textAlignmentSpinner.setAdapter(textAlignmentAdapter);
+						textAlignmentSpinner.setSelection(textAlignmentAdapter.getPosition(TextAlignment.CENTERED));
+						
+						final boolean isMedia = getIsMedia();
+						final boolean v2Features = getCurrentProtocolVersion() >= 2;
+						
+						if (!isMedia) {
+							int visibility = android.view.View.GONE;
+							mediaClock.setVisibility(visibility);
+							mediaTrack.setVisibility(visibility);
+							mediaTrackCheck.setVisibility(visibility);
+							mediaClockCheck.setVisibility(visibility);
+						}
+						
+						if (!v2Features) {
+							int visibility = android.view.View.GONE;
+							mainField3Check.setVisibility(visibility);
+							mainField3.setVisibility(visibility);
+							mainField4Check.setVisibility(visibility);
+							mainField4.setVisibility(visibility);
+							graphicCheck.setVisibility(visibility);
+							graphic.setVisibility(visibility);
+							chkIncludeSoftButtons.setVisibility(visibility);
+							softButtons.setVisibility(visibility);
+							customPresetsCheck.setVisibility(visibility);
+							customPresets.setVisibility(visibility);
+						} else {
+							SoftButton sb1 = new SoftButton();
+							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+							sb1.setText("KeepContext");
+							sb1.setType(SoftButtonType.SBT_TEXT);
+							sb1.setIsHighlighted(false);
+							sb1.setSystemAction(SystemAction.KEEP_CONTEXT);
+							SoftButton sb2 = new SoftButton();
+							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+							sb2.setText("StealFocus");
+							sb2.setType(SoftButtonType.SBT_TEXT);
+							sb2.setIsHighlighted(false);
+							sb2.setSystemAction(SystemAction.STEAL_FOCUS);
+							SoftButton sb3 = new SoftButton();
+							sb3.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+							sb3.setText("Default");
+							sb3.setType(SoftButtonType.SBT_TEXT);
+							sb3.setIsHighlighted(false);
+							sb3.setSystemAction(SystemAction.DEFAULT_ACTION);
+							currentSoftButtons = new Vector<SoftButton>();
+							currentSoftButtons.add(sb1);
+							currentSoftButtons.add(sb2);
+							currentSoftButtons.add(sb3);
+
+							Button btnSoftButtons = (Button) layout.findViewById(R.id.show_btnSoftButtons);
+							btnSoftButtons.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									IntentHelper.addObjectForKey(currentSoftButtons,
+											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+											SHOW_MAXSOFTBUTTONS);
+									startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+								}
+							});
+						}
+
+						AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								try {
+									Show msg = new Show();
+									msg.setCorrelationID(autoIncCorrId++);
+									
+									if (mainField1Check.isChecked()) {
+										msg.setMainField1(mainField1.getText().toString());
+									}
+									if (mainField2Check.isChecked()) {
+										msg.setMainField2(mainField2.getText().toString());
+									}
+									if (v2Features && mainField3Check.isChecked()) {
+										msg.setMainField3(mainField3.getText().toString());
+									}
+									if (v2Features && mainField4Check.isChecked()) {
+										msg.setMainField4(mainField4.getText().toString());
+									}
+									if (textAlignmentCheck.isChecked()) {
+										msg.setAlignment(textAlignmentAdapter.getItem(textAlignmentSpinner.getSelectedItemPosition()));
+									}
+									if (statusBarCheck.isChecked()) {
+										msg.setStatusBar(statusBar.getText().toString());
+									}
+									if (isMedia) {
+										if (mediaClockCheck.isChecked()) {
+											msg.setMediaClock(mediaClock.getText().toString());
+										}
+										if (mediaTrackCheck.isChecked()) {
+											msg.setMediaTrack(mediaTrack.getText().toString());
+										}
+									}
+									if (v2Features && graphicCheck.isChecked()) {
+										Image image = new Image();
+										image.setImageType(ImageType.STATIC);
+										image.setValue(graphic.getText().toString());
+										msg.setGraphic(image);
+									}
+									if (v2Features &&
+											chkIncludeSoftButtons.isChecked() &&
+											(currentSoftButtons != null) &&
+											(currentSoftButtons.size() > 0)) {
+										msg.setSoftButtons(currentSoftButtons);
+									}
+									currentSoftButtons = null;
+									chkIncludeSoftButtons = null;
+									if (v2Features && customPresetsCheck.isChecked()) {
+										String splitter = ",";
+										String[] customPresetsList = customPresets.getText().
+												toString().split(splitter);
+										msg.setCustomPresets(new Vector<String>(Arrays.
+												asList(customPresetsList)));
+									}
+									_msgAdapter.logMessage(msg, true);
+									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+								} catch (SyncException e) {
+									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								currentSoftButtons = null;
+								chkIncludeSoftButtons = null;
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.show();
 					}
 
 					/**
