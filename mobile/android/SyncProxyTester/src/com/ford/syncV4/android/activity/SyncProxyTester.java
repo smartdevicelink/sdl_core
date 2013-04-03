@@ -2396,7 +2396,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final EditText initialText = (EditText) layout.findViewById(R.id.performinteraction_initialText);
 						final EditText initialPrompt = (EditText) layout.findViewById(R.id.performinteraction_initialPrompt);
 						final Spinner interactionModeSpinner = (Spinner) layout.findViewById(R.id.performinteraction_interactionModeSpinner);
-						final Spinner interactionChoiceSetIDSpinner = (Spinner) layout.findViewById(R.id.performinteraction_interactionChoiceSetIDSpinner);
+						final Button choiceSetIDs = (Button) layout.findViewById(R.id.performinteraction_choiceSetIDs);
 						final CheckBox helpPromptCheck = (CheckBox) layout.findViewById(R.id.performinteraction_helpPromptCheck);
 						final EditText helpPrompt = (EditText) layout.findViewById(R.id.performinteraction_helpPrompt);
 						final CheckBox timeoutPromptCheck = (CheckBox) layout.findViewById(R.id.performinteraction_timeoutPromptCheck);
@@ -2414,7 +2414,31 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						interactionModeSpinner.setAdapter(interactionModeAdapter);
 						interactionModeSpinner.setSelection(interactionModeAdapter.getPosition(InteractionMode.BOTH));
 						
-						interactionChoiceSetIDSpinner.setAdapter(_choiceSetAdapter);
+						final String[] choiceSetIDStrings = new String[_choiceSetAdapter.getCount()];
+						final boolean[] choiceSetIDSelections = new boolean[choiceSetIDStrings.length];
+						
+						for (int i = 0; i < _choiceSetAdapter.getCount(); ++i) {
+							choiceSetIDStrings[i] = _choiceSetAdapter.getItem(i).toString();
+						}
+						
+						choiceSetIDs.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								new AlertDialog.Builder(mContext).
+									setMultiChoiceItems(choiceSetIDStrings, choiceSetIDSelections, new OnMultiChoiceClickListener() {
+										@Override
+										public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+										}
+									}).
+									setPositiveButton("OK", new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(DialogInterface dialog, int which) {
+											dialog.dismiss();
+										}
+									}).
+									show();
+							}
+						});
 						
 						final boolean vrHelpEnabled = getCurrentProtocolVersion() >= 2;
 						if (!vrHelpEnabled) {
@@ -2434,10 +2458,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								// fail if no interaction choice set selected
-								if (interactionChoiceSetIDSpinner.getSelectedItemPosition() != Spinner.INVALID_POSITION) {
-									Vector<Integer> choiceSetIDs = new Vector<Integer>();
-									choiceSetIDs.add(_choiceSetAdapter.getItem(interactionChoiceSetIDSpinner.getSelectedItemPosition()));
-									
+								Vector<Integer> choiceSetIDs = new Vector<Integer>();
+								for (int i = 0; i < choiceSetIDSelections.length; ++i) {
+									if (choiceSetIDSelections[i]) {
+										choiceSetIDs.add(_choiceSetAdapter.getItem(i));
+									}
+								}
+								
+								if (choiceSetIDs.size() > 0) {
 									PerformInteraction msg = new PerformInteraction();
 									msg.setCorrelationID(autoIncCorrId++);
 									msg.setInitialText(initialText.getText().toString());

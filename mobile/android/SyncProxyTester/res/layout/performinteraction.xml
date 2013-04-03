@@ -55,16 +55,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/performinteraction_interactionChoiceSetID"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <Spinner
-            android:id="@+id/performinteraction_interactionChoiceSetIDSpinner"
+        <Button
+            android:id="@+id/performinteraction_choiceSetIDs"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="@string/performinteraction_interactionChoiceSetID" />
 
         <CheckBox
             android:id="@+id/performinteraction_helpPromptCheck"

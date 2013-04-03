@@ -29,7 +29,7 @@
     <string name="performinteraction_initialPrompt">Initial Prompt (comma-separated)</string>
     <string name="performinteraction_initialPromptDefault">Pick a command</string>
     <string name="performinteraction_interactionMode">Interaction Mode</string>
-    <string name="performinteraction_interactionChoiceSetID">Interaction Choise Set ID</string>
+    <string name="performinteraction_interactionChoiceSetID">Choise Set IDs</string>
     <string name="performinteraction_helpPrompt">Help prompt (comma-separated)</string>
     <string name="performinteraction_helpPromptDefault">help me,I\'m melting</string>
     <string name="performinteraction_timeoutPrompt">Timeout prompt (comma-separated)</string>
