@@ -4,7 +4,7 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
 
-namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
+namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
     /**
      * @brief The base class for all JSON based formatters.
@@ -15,7 +15,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
 
         /**
          * @brief Constructor.
-         */ 
+         */
         CFormatterJsonBase();
 
         /**
@@ -33,7 +33,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param obj Input SmartObject. Can contain a complex structure of objects.
          * @param value The resulting JSON object. It has the same structure as the input SmartObject.
          */
-        static void objToJsonValue(const NsAppLink::NsSmartObjects::CSmartObject &obj,
+        static void objToJsonValue(const NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
                 Json::Value &value);
 
         /**
@@ -43,10 +43,10 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param obj The resulting SmartObject.
          */
         static void jsonValueToObj(const Json::Value &value,
-                NsAppLink::NsSmartObjects::CSmartObject &obj);
+                NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj);
     };
 
 
-} } } // namespace NsAppLink::NsJSONHandler::Formatters
+} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 #endif // __CFORMATTERJSONBASE_HPP__

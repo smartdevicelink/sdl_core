@@ -6,7 +6,7 @@
 
 #include "CFormatterJsonBase.hpp"
 
-namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
+namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
 
     class CFormatterJsonRPC2 : public CFormatterJsonBase
@@ -25,7 +25,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param outStr resulting JSON string
          * @return true if success, false otherwise
          */
-        static bool toString(NsAppLink::NsSmartObjects::CSmartObject &obj,
+        static bool toString(NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
                 std::string& outStr);
 
         /**
@@ -35,10 +35,10 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param out The resulting SmartObject
          */
         static bool fromString(const std::string &str,
-                NsAppLink::NsSmartObjects::CSmartObject &out);
+                NsSmartDeviceLink::NsSmartObjects::CSmartObject &out);
     };
 
-} } } // namespace NsAppLink::NsJSONHandler::Formatters
+} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 
 #endif // __CFORMATTERJSONRPC2_HPP__

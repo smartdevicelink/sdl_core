@@ -3,9 +3,9 @@
 
 #include "JSONHandler/CSmartFactory.hpp"
 
-namespace Formatters = NsAppLink::NsJSONHandler::Formatters;
-namespace SmartObjects = NsAppLink::NsSmartObjects;
-namespace Strings = NsAppLink::NsJSONHandler::strings;
+namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+namespace SmartObjects = NsSmartDeviceLink::NsSmartObjects;
+namespace Strings = NsSmartDeviceLink::NsJSONHandler::strings;
 
 // ----------------------------------------------------------------------------
 

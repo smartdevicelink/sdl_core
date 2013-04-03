@@ -8,7 +8,7 @@
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
@@ -66,21 +66,21 @@ namespace NsAppLink
              *
              * @return NsSmartObjects::Errors::eType
              **/
-            virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
             /**
              * @brief Apply schema.
              *
              * @param Object Object to apply schema.
              **/
-            virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
             /**
              * @brief Unapply schema.
              *
              * @param Object Object to unapply schema.
              **/
-            virtual void unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
         private:
             /**

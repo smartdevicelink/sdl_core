@@ -2,34 +2,34 @@
 #include "SmartObjects/CObjectSchemaItem.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
-NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember::SMember(void):
-mSchemaItem(NsAppLink::NsSmartObjects::CAlwaysFalseSchemaItem::create()),
+NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember::SMember(void):
+mSchemaItem(NsSmartDeviceLink::NsSmartObjects::CAlwaysFalseSchemaItem::create()),
 mIsMandatory(true)
 {
 }
 
-NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember::SMember(const NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::CObjectSchemaItem::ISchemaItem> & SchemaItem,
+NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember::SMember(const NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::ISchemaItem> & SchemaItem,
                                                                const bool IsMandatory):
 mSchemaItem(SchemaItem),
 mIsMandatory(IsMandatory)
 {
 }
 
-NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::CObjectSchemaItem> NsAppLink::NsSmartObjects::CObjectSchemaItem::create(const std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members)
+NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem> NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::create(const std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members)
 {
-    return new NsAppLink::NsSmartObjects::CObjectSchemaItem(Members);
+    return new NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem(Members);
 }
 
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CObjectSchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
+    NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
-    if (NsAppLink::NsSmartObjects::SmartType_Map == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map == Object.getType())
     {
-        result = NsAppLink::NsSmartObjects::Errors::OK;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
         const std::set<std::string> objectKeys = Object.enumerate();
 
-        for (std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember>::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i)
+        for (std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember>::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i)
         {
             if (objectKeys.end() != objectKeys.find(i->first))
             {
@@ -39,23 +39,23 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CObjectSchem
             {
                 if (true == i->second.mIsMandatory)
                 {
-                    result = NsAppLink::NsSmartObjects::Errors::MISSING_MANDATORY_PARAMETER;
+                    result = NsSmartDeviceLink::NsSmartObjects::Errors::MISSING_MANDATORY_PARAMETER;
                 }
             }
 
-            if (NsAppLink::NsSmartObjects::Errors::OK != result)
+            if (NsSmartDeviceLink::NsSmartObjects::Errors::OK != result)
             {
                 break;
             }
         }
 
-        if (NsAppLink::NsSmartObjects::Errors::OK == result)
+        if (NsSmartDeviceLink::NsSmartObjects::Errors::OK == result)
         {
             for (std::set<std::string>::const_iterator k = objectKeys.begin(); k != objectKeys.end(); ++k)
             {
                 if (mMembers.end() == mMembers.find(*k))
                 {
-                    result = NsAppLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER;
+                    result = NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER;
                     break;
                 }
             }
@@ -63,17 +63,17 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CObjectSchem
     }
     else
     {
-        result = NsAppLink::NsSmartObjects::Errors::INVALID_VALUE;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
     }
 
     return result;
 }
 
-void NsAppLink::NsSmartObjects::CObjectSchemaItem::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Map == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map == Object.getType())
     {
-        for (std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember>::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i)
+        for (std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember>::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i)
         {
             if (true == Object.keyExists(i->first))
             {
@@ -83,11 +83,11 @@ void NsAppLink::NsSmartObjects::CObjectSchemaItem::applySchema(NsAppLink::NsSmar
     }
 }
 
-void NsAppLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Map == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map == Object.getType())
     {
-        for (std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember>::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i)
+        for (std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember>::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i)
         {
             if (true == Object.keyExists(i->first))
             {
@@ -97,7 +97,7 @@ void NsAppLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsAppLink::NsSm
     }
 }
 
-NsAppLink::NsSmartObjects::CObjectSchemaItem::CObjectSchemaItem(const std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members):
+NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::CObjectSchemaItem(const std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members):
 mMembers(Members)
 {
 }

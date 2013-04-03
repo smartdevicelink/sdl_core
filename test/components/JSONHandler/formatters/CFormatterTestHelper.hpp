@@ -12,12 +12,12 @@ namespace test { namespace components { namespace JSONHandler { namespace format
     class CFormatterTestHelper : public ::testing::Test
     {
     protected:
-        void fillTestObject(NsAppLink::NsSmartObjects::CSmartObject& obj);
+        void fillTestObject(NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
-        //bool checkTestObject(const NsAppLink::NsSmartObjects::CSmartObject& obj);
+        //bool checkTestObject(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
-        void compareObjects(const NsAppLink::NsSmartObjects::CSmartObject& first,
-                            const NsAppLink::NsSmartObjects::CSmartObject& second);
+        void compareObjects(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
+                            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second);
     };
 
 }}}}

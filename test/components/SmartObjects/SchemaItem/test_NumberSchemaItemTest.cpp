@@ -17,7 +17,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_int_no_default_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -62,7 +62,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_int_min_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -96,7 +96,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_int_max_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -132,7 +132,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_int_min_max_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -176,7 +176,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_int_correct_default_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -237,7 +237,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_int_default_value_out_of_range, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -295,7 +295,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
     TEST(test_int_map_validate, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -342,7 +342,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
     TEST(test_int_array_validate, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -358,19 +358,19 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[3] = 101;
 
         int resultType = item->validate(obj[0]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE, resultType);
 
         resultType = item->validate(obj[1]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OK, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
         resultType = item->validate(obj[2]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OK, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
         resultType = item->validate(obj[3]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE, resultType);
 
         resultType = item->validate(obj);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
 
         bool resDefault = item->setDefaultValue(obj[0]);
         EXPECT_TRUE(resDefault);
@@ -381,13 +381,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(-38, (int)obj);
 
         resultType = item->validate(obj);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OK, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
         resultType = item->validate(obj[0]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
 
         resultType = item->validate(obj);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
     }
 
     /**
@@ -398,7 +398,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_double_no_default_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -445,7 +445,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_double_min_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -479,7 +479,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_double_max_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -515,7 +515,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_double_min_max_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -559,7 +559,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_double_correct_default_value, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -620,7 +620,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_double_default_value_out_of_range, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -678,7 +678,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
     TEST(test_double_map_validate, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -724,7 +724,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
     TEST(test_double_array_validate, test_NumberSchemaItemTest)
     {
-        using namespace NsAppLink::NsSmartObjects;
+        using namespace NsSmartDeviceLink::NsSmartObjects;
 
         CSmartObject obj;
 
@@ -740,19 +740,19 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[3] = 100.000001;
 
         int resultType = item->validate(obj[0]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE, resultType);
 
         resultType = item->validate(obj[1]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OK, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
         resultType = item->validate(obj[2]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OK, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
         resultType = item->validate(obj[3]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE, resultType);
 
         resultType = item->validate(obj);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
 
         bool resDefault = item->setDefaultValue(obj[0]);
         EXPECT_TRUE(resDefault);
@@ -763,13 +763,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(-38.0, (double)obj);
 
         resultType = item->validate(obj);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::OK, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
         resultType = item->validate(obj[0]);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
 
         resultType = item->validate(obj);
-        EXPECT_EQ(NsAppLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
     }
 
 }}}}}

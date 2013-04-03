@@ -4,7 +4,7 @@
 #include "TSharedPtr.hpp"
 #include "ISchemaItem.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
@@ -12,7 +12,7 @@ namespace NsAppLink
 
         /**
          * @brief Smart Schema.
-         */ 
+         */
         class CSmartSchema
         {
         public:
@@ -31,7 +31,7 @@ namespace NsAppLink
              *
              * @param SchemaItem Root schema item.
              */
-            CSmartSchema(TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem);
+            CSmartSchema(TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem);
 
             /**
              * @brief Validate smart object.
@@ -39,36 +39,36 @@ namespace NsAppLink
              * @param Object SmartObject to validate.
              *
              * @return Result of validation.
-             */ 
-            Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject& Object);
+             */
+            Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& Object);
 
             /**
              * @brief Set new root schema item.
              *
              * @param SchemaItem Root schema item.
              */
-            void setSchemaItem(TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem);
+            void setSchemaItem(TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem);
 
             /**
              * @brief Apply schema.
              *
              * @param Object Object to apply schema.
              **/
-            virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
             /**
              * @brief The reverse SmartObject conversion using schema.
              *
              * @param object Object to convert.
              */
-            virtual void unapplySchema(NsAppLink::NsSmartObjects::CSmartObject& object);
+            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object);
 
         protected:
 
             /**
              * @brief Root schema item.
              */
-            TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> mSchemaItem;
+            TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> mSchemaItem;
         };
     }
 }

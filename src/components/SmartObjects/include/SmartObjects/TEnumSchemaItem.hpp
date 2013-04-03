@@ -10,7 +10,7 @@
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
@@ -41,7 +41,7 @@ namespace NsAppLink
              *
              * @return NsSmartObjects::Errors::eType
              **/
-            virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
             /**
              * @brief Set default value to an object.
@@ -121,38 +121,38 @@ namespace NsAppLink
 }
 
 template <typename EnumType>
-NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType> > NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::create(const std::set<EnumType> & AllowedElements,
-                                                                                                                                                          const NsAppLink::NsSmartObjects::TSchemaItemParameter<EnumType> & DefaultValue)
+NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType> > NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::create(const std::set<EnumType> & AllowedElements,
+                                                                                                                                                          const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<EnumType> & DefaultValue)
 {
-    return new NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue);
+    return new NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue);
 }
 
 template <typename EnumType>
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::validate(const NsAppLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
+    NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
-    if (NsAppLink::NsSmartObjects::SmartType_Integer == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer == Object.getType())
     {
         if (mAllowedElements.end() != mAllowedElements.find(static_cast<EnumType>((int)Object)))
         {
-            result = NsAppLink::NsSmartObjects::Errors::OK;
+            result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
         }
         else
         {
-            result = NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE;
+            result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
         }
     }
     else
     {
-        result = NsAppLink::NsSmartObjects::Errors::INVALID_VALUE;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
     }
 
     return result;
 }
 
 template <typename EnumType>
-bool NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::setDefaultValue(NsAppLink::NsSmartObjects::CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
     bool result = false;
     EnumType value;
@@ -167,9 +167,9 @@ bool NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::setDefaultValue(NsApp
 }
 
 template <typename EnumType>
-void NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_String == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_String == Object.getType())
     {
         std::string stringValue = Object;
         const std::map<EnumType, std::string> elementsStringRepresentation = getEnumElementsStringRepresentation();
@@ -186,9 +186,9 @@ void NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(NsAppLink
 }
 
 template <typename EnumType>
-void NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Integer == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer == Object.getType())
     {
         int integerValue = Object;
         const std::map<EnumType, std::string> elementsStringRepresentation = getEnumElementsStringRepresentation();
@@ -202,8 +202,8 @@ void NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema(NsAppLi
 }
 
 template <typename EnumType>
-NsAppLink::NsSmartObjects::TEnumSchemaItem<EnumType>::TEnumSchemaItem(const std::set<EnumType> & AllowedElements,
-                                                                      const NsAppLink::NsSmartObjects::TSchemaItemParameter<EnumType> & DefaultValue):
+NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::TEnumSchemaItem(const std::set<EnumType> & AllowedElements,
+                                                                      const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<EnumType> & DefaultValue):
 mAllowedElements(AllowedElements),
 mDefaultValue(DefaultValue)
 {

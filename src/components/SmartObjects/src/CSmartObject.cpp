@@ -5,14 +5,14 @@
 #include <sstream>
 #include <iomanip>
 
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(void)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(void)
 : m_type(SmartType_Null)
 , m_schema()
 {
     m_data.str_value = NULL;
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const NsAppLink::NsSmartObjects::CSmartObject& Other)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& Other)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -20,7 +20,7 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const NsAppLink::NsSmartOb
     duplicate(Other);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(SmartType Type)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(SmartType Type)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -49,18 +49,18 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(SmartType Type)
     }
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::~CSmartObject()
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::~CSmartObject()
 {
     cleanup_data();
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const NsAppLink::NsSmartObjects::CSmartObject& Other)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& Other)
 {
     if (this != &Other) duplicate(Other);
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(const NsAppLink::NsSmartObjects::CSmartObject& Other) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& Other) const
 {
     if (m_type != Other.m_type) return false;
 
@@ -95,7 +95,7 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(const NsAppLink::NsSmar
 // =============================================================
 // INTEGER TYPE SUPPORT
 // =============================================================
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(int InitialValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(int InitialValue)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -103,17 +103,17 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(int InitialValue)
     set_value_integer(InitialValue);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::operator int(void) const
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator int(void) const
 {
     return convert_int();
 }
 
-int NsAppLink::NsSmartObjects::CSmartObject::asInt()
+int NsSmartDeviceLink::NsSmartObjects::CSmartObject::asInt()
 {
     return (int)(*this);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(int NewValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(int NewValue)
 {
     if(m_type != SmartType_Invalid)
     {
@@ -122,10 +122,10 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(int Value) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(int Value) const
 {
     int comp = convert_int();
-    if(comp == NsAppLink::NsSmartObjects::invalid_int_value)
+    if(comp == NsSmartDeviceLink::NsSmartObjects::invalid_int_value)
     {
         return false;
     }
@@ -135,13 +135,13 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(int Value) const
     }
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_value_integer(int NewValue)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_value_integer(int NewValue)
 {
     set_new_type(SmartType_Integer);
     m_data.long_value = NewValue;
 }
 
-int NsAppLink::NsSmartObjects::CSmartObject::convert_int(void) const
+int NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_int(void) const
 {
     long retval;
 
@@ -175,7 +175,7 @@ int NsAppLink::NsSmartObjects::CSmartObject::convert_int(void) const
 // =============================================================
 // LONG TYPE SUPPORT
 // =============================================================
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(long InitialValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(long InitialValue)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -183,17 +183,17 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(long InitialValue)
     set_value_long(InitialValue);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::operator long(void) const
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator long(void) const
 {
     return convert_long();
 }
 
-long NsAppLink::NsSmartObjects::CSmartObject::asLong()
+long NsSmartDeviceLink::NsSmartObjects::CSmartObject::asLong()
 {
     return (long)(*this);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(long NewValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(long NewValue)
 {
     if(m_type != SmartType_Invalid)
     {
@@ -202,10 +202,10 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(long Value) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(long Value) const
 {
     int comp = convert_long();
-    if(comp == NsAppLink::NsSmartObjects::invalid_int_value)
+    if(comp == NsSmartDeviceLink::NsSmartObjects::invalid_int_value)
     {
         return false;
     }
@@ -215,13 +215,13 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(long Value) const
     }
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_value_long(long NewValue)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_value_long(long NewValue)
 {
     set_new_type(SmartType_Integer);
     m_data.long_value = NewValue;
 }
 
-long NsAppLink::NsSmartObjects::CSmartObject::convert_long(void) const
+long NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_long(void) const
 {
     switch (m_type) {
         case SmartType_String :
@@ -245,7 +245,7 @@ long NsAppLink::NsSmartObjects::CSmartObject::convert_long(void) const
 // =============================================================
 // DOUBLE TYPE SUPPORT
 // =============================================================
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(double InitialValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(double InitialValue)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -253,17 +253,17 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(double InitialValue)
     set_value_double(InitialValue);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::operator double(void) const
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator double(void) const
 {
     return convert_double();
 }
 
-double NsAppLink::NsSmartObjects::CSmartObject::asDouble()
+double NsSmartDeviceLink::NsSmartObjects::CSmartObject::asDouble()
 {
     return (double)(*this);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(double NewValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(double NewValue)
 {
     if(m_type != SmartType_Invalid)
     {
@@ -272,10 +272,10 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(double Value) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(double Value) const
 {
     double comp = convert_double();
-    if(comp == NsAppLink::NsSmartObjects::invalid_double_value)
+    if(comp == NsSmartDeviceLink::NsSmartObjects::invalid_double_value)
     {
         return false;
     }
@@ -285,13 +285,13 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(double Value) const
     }
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_value_double(double NewValue)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_value_double(double NewValue)
 {
     set_new_type(SmartType_Double);
     m_data.double_value = NewValue;
 }
 
-double NsAppLink::NsSmartObjects::CSmartObject::convert_double(void) const
+double NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_double(void) const
 {
     switch (m_type) {
         case SmartType_String:
@@ -313,7 +313,7 @@ double NsAppLink::NsSmartObjects::CSmartObject::convert_double(void) const
 // BOOL TYPE SUPPORT
 // =============================================================
 
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(bool InitialValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(bool InitialValue)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -321,17 +321,17 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(bool InitialValue)
     set_value_bool(InitialValue);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::operator bool(void) const
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator bool(void) const
 {
     return convert_bool();
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::asBool()
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::asBool()
 {
     return (bool)(*this);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(bool NewValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(bool NewValue)
 {
     if(m_type != SmartType_Invalid)
     {
@@ -340,10 +340,10 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(bool Value) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(bool Value) const
 {
     bool comp = convert_bool();
-    if(comp == NsAppLink::NsSmartObjects::invalid_bool_value)
+    if(comp == NsSmartDeviceLink::NsSmartObjects::invalid_bool_value)
     {
         return false;
     }
@@ -353,13 +353,13 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(bool Value) const
     }
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_value_bool(bool NewValue)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_value_bool(bool NewValue)
 {
     set_new_type(SmartType_Boolean);
     m_data.bool_value = NewValue;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::convert_bool(void) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_bool(void) const
 {
     switch (m_type) {
         case SmartType_Boolean :
@@ -384,7 +384,7 @@ bool NsAppLink::NsSmartObjects::CSmartObject::convert_bool(void) const
 // =============================================================
 
 
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(char InitialValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(char InitialValue)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -392,17 +392,17 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(char InitialValue)
     set_value_char(InitialValue);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::operator char(void) const
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator char(void) const
 {
     return convert_char();
 }
 
-char NsAppLink::NsSmartObjects::CSmartObject::asChar()
+char NsSmartDeviceLink::NsSmartObjects::CSmartObject::asChar()
 {
     return (char)(*this);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(char NewValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(char NewValue)
 {
     if(m_type != SmartType_Invalid)
     {
@@ -411,10 +411,10 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(char Value) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(char Value) const
 {
     char comp = convert_char();
-    if(comp == NsAppLink::NsSmartObjects::invalid_char_value)
+    if(comp == NsSmartDeviceLink::NsSmartObjects::invalid_char_value)
     {
         return false;
     }
@@ -424,14 +424,14 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(char Value) const
     }
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_value_char(char NewValue)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_value_char(char NewValue)
 {
     set_new_type(SmartType_Character);
     m_data.char_value = NewValue;
 }
 
 
-char NsAppLink::NsSmartObjects::CSmartObject::convert_char(void) const
+char NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_char(void) const
 {
     switch (m_type) {
         case SmartType_String:
@@ -450,7 +450,7 @@ char NsAppLink::NsSmartObjects::CSmartObject::convert_char(void) const
 // STD::STRING TYPE SUPPORT
 // =============================================================
 
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const std::string InitialValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(const std::string InitialValue)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -458,17 +458,17 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const std::string InitialV
     set_value_string(InitialValue);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::operator std::string(void) const
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator std::string(void) const
 {
     return convert_string();
 }
 
-std::string NsAppLink::NsSmartObjects::CSmartObject::asString()
+std::string NsSmartDeviceLink::NsSmartObjects::CSmartObject::asString()
 {
     return (std::string)(*this);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const std::string& NewValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(const std::string& NewValue)
 {
     if(m_type != SmartType_Invalid)
     {
@@ -477,10 +477,10 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(std::string Value) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(std::string Value) const
 {
     std::string comp = convert_string();
-    if(comp == NsAppLink::NsSmartObjects::invalid_string_value)
+    if(comp == NsSmartDeviceLink::NsSmartObjects::invalid_string_value)
     {
         return false;
     }
@@ -490,13 +490,13 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(std::string Value) cons
     }
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_value_string(const std::string& NewValue)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_value_string(const std::string& NewValue)
 {
     set_new_type(SmartType_String);
     m_data.str_value = new std::string(NewValue);
 }
 
-std::string NsAppLink::NsSmartObjects::CSmartObject::convert_string(void) const
+std::string NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_string(void) const
 {
     switch (m_type) {
         case SmartType_String :
@@ -520,7 +520,7 @@ std::string NsAppLink::NsSmartObjects::CSmartObject::convert_string(void) const
 // CHAR* TYPE SUPPORT
 // =============================================================
 
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(char* InitialValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(char* InitialValue)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -529,12 +529,12 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(char* InitialValue)
     return;
 }
 /*
-NsAppLink::NsSmartObjects::CSmartObject::operator char*(void) const
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator char*(void) const
 {
     return convert_string().c_str();
 }
 */
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const char* NewValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(const char* NewValue)
 {
     if(m_type != SmartType_Invalid)
     {
@@ -543,11 +543,11 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(const char* Value) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(const char* Value) const
 {
     std::string comp = convert_string();
     std::string val(Value);
-    if(comp == NsAppLink::NsSmartObjects::invalid_string_value)
+    if(comp == NsSmartDeviceLink::NsSmartObjects::invalid_string_value)
     {
         return false;
     }
@@ -557,7 +557,7 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(const char* Value) cons
     }
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_value_cstr(const char* NewValue)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_value_cstr(const char* NewValue)
 {
     if (NewValue)
         set_value_string(std::string(NewValue));
@@ -570,7 +570,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_cstr(const char* NewValu
 // =============================================================
 // BINARY TYPE SUPPORT
 // =============================================================
-NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(SmartBinary InitialValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(SmartBinary InitialValue)
 : m_type(SmartType_Null)
 , m_schema()
 {
@@ -578,18 +578,18 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(SmartBinary InitialValue)
     set_value_binary(InitialValue);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject::operator SmartBinary(void) const
+NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator SmartBinary(void) const
 {
     return convert_binary();
 }
 
-NsAppLink::NsSmartObjects::SmartBinary NsAppLink::NsSmartObjects::CSmartObject::asBinary()
+NsSmartDeviceLink::NsSmartObjects::SmartBinary NsSmartDeviceLink::NsSmartObjects::CSmartObject::asBinary()
 {
-    //return static_cast<NsAppLink::NsSmartObjects::SmartBinary>(*this);
+    //return static_cast<NsSmartDeviceLink::NsSmartObjects::SmartBinary>(*this);
     return convert_binary();
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(SmartBinary NewValue)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator=(SmartBinary NewValue)
 {
     if(m_type != SmartType_Invalid)
     {
@@ -598,10 +598,10 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     return *this;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::operator==(SmartBinary Value) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator==(SmartBinary Value) const
 {
     SmartBinary comp = convert_binary();
-    if(comp == NsAppLink::NsSmartObjects::invalid_binary_value)
+    if(comp == NsSmartDeviceLink::NsSmartObjects::invalid_binary_value)
     {
         return false;
     }
@@ -611,13 +611,13 @@ bool NsAppLink::NsSmartObjects::CSmartObject::operator==(SmartBinary Value) cons
     }
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_value_binary(SmartBinary NewValue)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_value_binary(SmartBinary NewValue)
 {
     set_new_type(SmartType_Binary);
     m_data.binary_value = new SmartBinary(NewValue);
 }
 
-NsAppLink::NsSmartObjects::SmartBinary NsAppLink::NsSmartObjects::CSmartObject::convert_binary(void) const
+NsSmartDeviceLink::NsSmartObjects::SmartBinary NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_binary(void) const
 {
     switch (m_type) {
         case SmartType_Binary:
@@ -633,12 +633,12 @@ NsAppLink::NsSmartObjects::SmartBinary NsAppLink::NsSmartObjects::CSmartObject::
 // ARRAY INTERFACE SUPPORT
 // =============================================================
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator[](int Index)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator[](int Index)
 {
     return handle_array_access(Index);
 }
 
-inline NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::handle_array_access(int Index)
+inline NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::handle_array_access(int Index)
 {
     if(m_type == SmartType_Invalid)
     {
@@ -659,7 +659,7 @@ inline NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmar
     }
     if (Index == sz)
     {
-        NsAppLink::NsSmartObjects::CSmartObject uc;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject uc;
         m_data.array_value->push_back(uc);
     }
     if (Index > sz || Index < 0)
@@ -673,26 +673,26 @@ inline NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmar
 // MAP INTERFACE SUPPORT
 // =============================================================
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator[](const std::string Key)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator[](const std::string Key)
 {
     return handle_map_access(Key);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator[](char* Key)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator[](char* Key)
 {
     std::string str(Key);
     return handle_map_access(str);
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator[](const char* Key)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator[](const char* Key)
 {
     std::string str(Key);
     return handle_map_access(str);
 }
 
-const NsAppLink::NsSmartObjects::CSmartObject & NsAppLink::NsSmartObjects::CSmartObject::getElement(size_t Index) const
+const NsSmartDeviceLink::NsSmartObjects::CSmartObject & NsSmartDeviceLink::NsSmartObjects::CSmartObject::getElement(size_t Index) const
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Array == m_type)
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == m_type)
     {
         if (Index < m_data.array_value->size())
         {
@@ -703,9 +703,9 @@ const NsAppLink::NsSmartObjects::CSmartObject & NsAppLink::NsSmartObjects::CSmar
     return invalid_object_value;
 }
 
-const NsAppLink::NsSmartObjects::CSmartObject & NsAppLink::NsSmartObjects::CSmartObject::getElement(const std::string & Key) const
+const NsSmartDeviceLink::NsSmartObjects::CSmartObject & NsSmartDeviceLink::NsSmartObjects::CSmartObject::getElement(const std::string & Key) const
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Map == m_type)
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map == m_type)
     {
         SmartMap::const_iterator i = m_data.map_value->find(Key);
 
@@ -718,7 +718,7 @@ const NsAppLink::NsSmartObjects::CSmartObject & NsAppLink::NsSmartObjects::CSmar
     return invalid_object_value;
 }
 
-NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::handle_map_access(const std::string Key)
+NsSmartDeviceLink::NsSmartObjects::CSmartObject& NsSmartDeviceLink::NsSmartObjects::CSmartObject::handle_map_access(const std::string Key)
 {
     if(m_type == SmartType_Invalid)
     {
@@ -730,7 +730,7 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
     {
         cleanup_data();
         m_type = SmartType_Map;
-        m_data.map_value = new NsAppLink::NsSmartObjects::SmartMap();
+        m_data.map_value = new NsSmartDeviceLink::NsSmartObjects::SmartMap();
     }
 
     //TODO: Add check for key presense
@@ -740,7 +740,7 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
 // =============================================================
 // OTHER METHODS
 // =============================================================
-void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmartObjects::CSmartObject& OtherObject)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::duplicate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& OtherObject)
 {
     SmartData newData;
     SmartType newType = OtherObject.m_type;
@@ -782,7 +782,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmart
     m_schema = newSchema;
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::cleanup_data()
 {
     switch(m_type) {
     case SmartType_String :
@@ -802,7 +802,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
     }
 }
 
-size_t NsAppLink::NsSmartObjects::CSmartObject::length() const
+size_t NsSmartDeviceLink::NsSmartObjects::CSmartObject::length() const
 {
     size_t size = 0;
 
@@ -825,13 +825,13 @@ size_t NsAppLink::NsSmartObjects::CSmartObject::length() const
     return size;
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::set_new_type(SmartType NewType)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::set_new_type(SmartType NewType)
 {
     cleanup_data();
     m_type = NewType;
 }
 
-double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const std::string* Value)
+double NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_string_to_double(const std::string* Value)
 {
     if(0 == Value->size())
     {
@@ -858,7 +858,7 @@ double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const s
 }
 
 
-std::string NsAppLink::NsSmartObjects::CSmartObject::convert_double_to_string(const double& Value)
+std::string NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_double_to_string(const double& Value)
 {
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << Value;         //convert double to string w fixed notation, hi precision
@@ -870,7 +870,7 @@ std::string NsAppLink::NsSmartObjects::CSmartObject::convert_double_to_string(co
     return s;
 }
 
-long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::string* Value)
+long NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::string* Value)
 {
     if(0 == Value->size())
     {
@@ -895,12 +895,12 @@ long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::
     return result;
 }
 
-NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::getType() const
+NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::CSmartObject::getType() const
 {
     return m_type;
 }
 
-std::set<std::string> NsAppLink::NsSmartObjects::CSmartObject::enumerate() const
+std::set<std::string> NsSmartDeviceLink::NsSmartObjects::CSmartObject::enumerate() const
 {
     std::set<std::string> keys;
 
@@ -917,7 +917,7 @@ std::set<std::string> NsAppLink::NsSmartObjects::CSmartObject::enumerate() const
     return keys;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::keyExists(const std::string & Key) const
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::keyExists(const std::string & Key) const
 {
     if(m_type != SmartType_Map)
     {
@@ -927,17 +927,17 @@ bool NsAppLink::NsSmartObjects::CSmartObject::keyExists(const std::string & Key)
     return m_data.map_value->count(Key);
 }
 
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CSmartObject::isValid()
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartObject::isValid()
 {
     return m_schema.validate(*this);
 }
 
-void NsAppLink::NsSmartObjects::CSmartObject::setSchema(NsAppLink::NsSmartObjects::CSmartSchema schema)
+void NsSmartDeviceLink::NsSmartObjects::CSmartObject::setSchema(NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema)
 {
     m_schema = schema;
 }
 
-NsAppLink::NsSmartObjects::CSmartSchema NsAppLink::NsSmartObjects::CSmartObject::getSchema()
+NsSmartDeviceLink::NsSmartObjects::CSmartSchema NsSmartDeviceLink::NsSmartObjects::CSmartObject::getSchema()
 {
     return m_schema;
 }

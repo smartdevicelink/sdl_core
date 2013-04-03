@@ -1,33 +1,33 @@
 #include "SmartObjects/CSmartSchema.hpp"
 #include "SmartObjects/CAlwaysTrueSchemaItem.hpp"
 
-NsAppLink::NsSmartObjects::CSmartSchema::CSmartSchema()
-: mSchemaItem(NsAppLink::NsSmartObjects::CAlwaysTrueSchemaItem::create())
+NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema()
+: mSchemaItem(NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::create())
 {
 }
 
-NsAppLink::NsSmartObjects::CSmartSchema::CSmartSchema(NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem)
+NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema(NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem)
 : mSchemaItem(SchemaItem)
 {
 
 }
 
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CSmartSchema::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartSchema::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object)
 {
     return mSchemaItem->validate(object);
 }
 
-void NsAppLink::NsSmartObjects::CSmartSchema::setSchemaItem(NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem)
+void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::setSchemaItem(NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem)
 {
     mSchemaItem = SchemaItem;
 }
 
-void NsAppLink::NsSmartObjects::CSmartSchema::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
     mSchemaItem->applySchema(Object);
 }
 
-void NsAppLink::NsSmartObjects::CSmartSchema::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
     mSchemaItem->unapplySchema(Object);
 }

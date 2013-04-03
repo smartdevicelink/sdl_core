@@ -57,8 +57,8 @@ CMockObject(id)
 {
 }
 
-typedef NsAppLink::NsSmartObjects::TSharedPtr<test::components::SmartObjects::TSharedPtrTest::CMockObject> tMockObjectPtr;
-typedef NsAppLink::NsSmartObjects::TSharedPtr<test::components::SmartObjects::TSharedPtrTest::CExtendedMockObject> tExtendedMockObjectPtr;
+typedef NsSmartDeviceLink::NsSmartObjects::TSharedPtr<test::components::SmartObjects::TSharedPtrTest::CMockObject> tMockObjectPtr;
+typedef NsSmartDeviceLink::NsSmartObjects::TSharedPtr<test::components::SmartObjects::TSharedPtrTest::CExtendedMockObject> tExtendedMockObjectPtr;
 
 TEST(TSharedPtrTest, Constructor)
 {

@@ -1,15 +1,15 @@
 #include "SmartObjects/CAlwaysTrueSchemaItem.hpp"
 
-NsAppLink::NsSmartObjects::CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem(void)
+NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem(void)
 {
 }
 
-NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::CAlwaysTrueSchemaItem> NsAppLink::NsSmartObjects::CAlwaysTrueSchemaItem::create(void)
+NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem> NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::create(void)
 {
     return new CAlwaysTrueSchemaItem();
 }
 
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CAlwaysTrueSchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object)
 {
-    return NsAppLink::NsSmartObjects::Errors::OK;
+    return NsSmartDeviceLink::NsSmartObjects::Errors::OK;
 }

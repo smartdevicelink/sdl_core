@@ -1,46 +1,46 @@
 #include "SmartObjects/CArraySchemaItem.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
-NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::CArraySchemaItem> NsAppLink::NsSmartObjects::CArraySchemaItem::create(const NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> & ElementSchemaItem,
-                                                                                                                                       const NsAppLink::NsSmartObjects::TSchemaItemParameter<size_t> & MinSize,
-                                                                                                                                       const NsAppLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxSize)
+NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem> NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> & ElementSchemaItem,
+                                                                                                                                       const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MinSize,
+                                                                                                                                       const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxSize)
 {
-    return new NsAppLink::NsSmartObjects::CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize);
+    return new NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize);
 }
 
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CArraySchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
+    NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
-    if (NsAppLink::NsSmartObjects::SmartType_Array == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == Object.getType())
     {
-        result = NsAppLink::NsSmartObjects::Errors::OK;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
         size_t sizeLimit;
 
         if (true == mMinSize.getValue(sizeLimit))
         {
             if (Object.length() < sizeLimit)
             {
-                result = NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE;
+                result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
             }
         }
 
-        if ((NsAppLink::NsSmartObjects::Errors::OK == result) &&
+        if ((NsSmartDeviceLink::NsSmartObjects::Errors::OK == result) &&
             (true == mMaxSize.getValue(sizeLimit)))
         {
             if (Object.length() > sizeLimit)
             {
-                result = NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE;
+                result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
             }
         }
 
-        if (NsAppLink::NsSmartObjects::Errors::OK == result)
+        if (NsSmartDeviceLink::NsSmartObjects::Errors::OK == result)
         {
             for (size_t i = 0U; i < Object.length(); ++i)
             {
                 result = mElementSchemaItem->validate(Object.getElement(i));
 
-                if (NsAppLink::NsSmartObjects::Errors::OK != result)
+                if (NsSmartDeviceLink::NsSmartObjects::Errors::OK != result)
                 {
                     break;
                 }
@@ -49,15 +49,15 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CArraySchema
     }
     else
     {
-        result = NsAppLink::NsSmartObjects::Errors::INVALID_VALUE;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
     }
 
     return result;
 }
 
-void NsAppLink::NsSmartObjects::CArraySchemaItem::applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Array == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == Object.getType())
     {
         for (size_t i = 0U; i < Object.length(); ++i)
         {
@@ -66,9 +66,9 @@ void NsAppLink::NsSmartObjects::CArraySchemaItem::applySchema(NsAppLink::NsSmart
     }
 }
 
-void NsAppLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    if (NsAppLink::NsSmartObjects::SmartType_Array == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == Object.getType())
     {
         for (size_t i = 0U; i < Object.length(); ++i)
         {
@@ -77,7 +77,7 @@ void NsAppLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsAppLink::NsSma
     }
 }
 
-NsAppLink::NsSmartObjects::CArraySchemaItem::CArraySchemaItem(const TSharedPtr<ISchemaItem> & ElementSchemaItem,
+NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::CArraySchemaItem(const TSharedPtr<ISchemaItem> & ElementSchemaItem,
                                                               const TSchemaItemParameter<size_t> & MinSize,
                                                               const TSchemaItemParameter<size_t> & MaxSize):
 mElementSchemaItem(ElementSchemaItem),

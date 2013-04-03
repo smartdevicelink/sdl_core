@@ -3,7 +3,7 @@
 
 #include "Errors.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
@@ -38,14 +38,14 @@ namespace NsAppLink
              *
              * @param Object Object to apply schema.
              **/
-            virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
             /**
              * @brief Unapply schema.
              *
              * @param Object Object to unapply schema.
              **/
-            virtual void unapplySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
         };
     }
 }

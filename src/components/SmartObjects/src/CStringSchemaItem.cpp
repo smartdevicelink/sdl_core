@@ -1,19 +1,19 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CStringSchemaItem.hpp"
 
-NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::CStringSchemaItem> NsAppLink::NsSmartObjects::CStringSchemaItem::create(const NsAppLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
-                                                                                                                                         const NsAppLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue)
+NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem> NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
+                                                                                                                                         const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue)
 {
-    return new NsAppLink::NsSmartObjects::CStringSchemaItem(MaxLength, DefaultValue);
+    return new NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem(MaxLength, DefaultValue);
 }
 
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CStringSchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
+    NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
-    if (NsAppLink::NsSmartObjects::SmartType_String == Object.getType())
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_String == Object.getType())
     {
-        result = NsAppLink::NsSmartObjects::Errors::OK;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
 
         size_t maxLength;
         std::string value = Object;
@@ -22,19 +22,19 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CStringSchem
         {
             if (value.size() > maxLength)
             {
-                result = NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE;
+                result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
             }
         }
     }
     else
     {
-        result = NsAppLink::NsSmartObjects::Errors::INVALID_VALUE;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
     }
 
     return result;
 }
 
-bool NsAppLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsAppLink::NsSmartObjects::CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
     bool result = false;
     std::string value;
@@ -48,8 +48,8 @@ bool NsAppLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsAppLink::Ns
     return result;
 }
 
-NsAppLink::NsSmartObjects::CStringSchemaItem::CStringSchemaItem(const NsAppLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
-                                                                const NsAppLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue):
+NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::CStringSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
+                                                                const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue):
 mMaxLength(MaxLength),
 mDefaultValue(DefaultValue)
 {

@@ -6,48 +6,48 @@
 #include <map>
 #include <string>
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsJSONHandler
     {
         /**
          * @brief String constants used by SmartFactory.
-         */ 
+         */
         namespace strings
         {
             /**
              * @brief String constant for MSG_PARAMS.
-             */ 
+             */
             extern const std::string S_MSG_PARAMS;
 
             /**
              * @brief String constant for PARAMS.
-             */ 
+             */
             extern const std::string S_PARAMS;
 
             /**
              * @brief String constant for FUNCTION_ID.
-             */            
+             */
             extern const std::string S_FUNCTION_ID;
 
             /**
              * @brief String constant for MESSAGE_TYPE.
-             */            
+             */
             extern const std::string S_MESSAGE_TYPE;
 
             /**
              * @brief String constant for PROTOCOL_VERSION.
-             */            
+             */
             extern const std::string S_PROTOCOL_VERSION;
 
             /**
              * @brief String constant for PROTOCOL_TYPE.
-             */            
+             */
             extern const std::string S_PROTOCOL_TYPE;
 
             /**
              * @brief String constant for CORRELATION_ID.
-             */            
+             */
             extern const std::string S_CORRELATION_ID;
         }
 
@@ -62,12 +62,12 @@ namespace NsAppLink
         {
             /**
              * @brief Value of function ID for the key.
-             */ 
+             */
             FunctionIdEnum functionId;
 
             /**
              * @brief Value of messageType for the key.
-             */ 
+             */
             MessageTypeEnum messageType;
 
             /**
@@ -75,7 +75,7 @@ namespace NsAppLink
              *
              * @param functionIdParam Value of function ID.
              * @param messageTypeParam Value of message type.
-             */ 
+             */
             SmartSchemaKey(FunctionIdEnum functionIdParam, MessageTypeEnum messageTypeParam);
         };
 
@@ -105,15 +105,15 @@ namespace NsAppLink
              * @param object SmartObject to attach schema for.
              *
              * @return True if operation was successful or false otherwise.
-             */ 
-            bool attachSchema(NsAppLink::NsSmartObjects::CSmartObject& object);
+             */
+            bool attachSchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object);
 
         protected:
 
             /**
              * @brief Defines map of SmartSchemaKeys to the SmartSchems.
-             */ 
-            typedef std::map<SmartSchemaKey<FunctionIdEnum, MessageTypeEnum>, NsAppLink::NsSmartObjects::CSmartSchema> SchemaMap;
+             */
+            typedef std::map<SmartSchemaKey<FunctionIdEnum, MessageTypeEnum>, NsSmartDeviceLink::NsSmartObjects::CSmartSchema> SchemaMap;
 
             /**
              * @brief Map of all schemas for this factory.
@@ -128,7 +128,7 @@ namespace NsAppLink
         }
 
         template <class FunctionIdEnum, class MessageTypeEnum>
-        bool CSmartFactory<FunctionIdEnum, MessageTypeEnum>::attachSchema(NsAppLink::NsSmartObjects::CSmartObject& object)
+        bool CSmartFactory<FunctionIdEnum, MessageTypeEnum>::attachSchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object)
         {
             if(false == object.keyExists(strings::S_PARAMS)) return false;
             if(false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE)) return false;

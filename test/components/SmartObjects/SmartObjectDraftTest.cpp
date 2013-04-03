@@ -11,7 +11,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_primitive_types, test_SmartObjectsDraftTest)
     {
-        NsAppLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
         obj = 5;
         ASSERT_EQ(5, (int)obj);
@@ -25,7 +25,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_map_access, test_SmartObjectsDraftTest)
     {
-        NsAppLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
         obj["aa"] = true;
         ASSERT_TRUE((bool)obj["aa"]);
@@ -36,7 +36,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_array_access, test_SmartObjectsDraftTest)
     {
-        NsAppLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
         obj[0] = 5;
         obj[-1] = 6; // Appending new item to array
@@ -47,7 +47,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_public_interface, test_SmartObjectsDraftTest)
     {
-        NsAppLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
         // ---- INTEGER ---- //
         obj = 1;
@@ -78,7 +78,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(std::string("Hello, world"), (std::string)obj);
 
         // ---- Binary ---- //
-        NsAppLink::NsSmartObjects::SmartBinary binaryData;
+        NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
         binaryData.push_back('\0');
         binaryData.push_back('a');
         obj = binaryData;
@@ -129,7 +129,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_helper_methods, test_SmartObjectsDraftTest)
     {
-        NsAppLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
         // ---- INTEGER ---- //
         obj = 1;
@@ -156,7 +156,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(std::string("Hello, world"), obj.asString());
 
         // ---- Binary ---- //
-        NsAppLink::NsSmartObjects::SmartBinary binaryData;
+        NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
         binaryData.push_back('\0');
         binaryData.push_back('a');
         obj = binaryData;

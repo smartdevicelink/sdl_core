@@ -8,8 +8,8 @@
 
 
 namespace test { namespace components { namespace SmartObjects { namespace SchemaItem { namespace SchemaItemDraftTest {
-    using namespace NsAppLink::NsSmartObjects;
-    
+    using namespace NsSmartDeviceLink::NsSmartObjects;
+
     /**
      * Test AlwaysFalseSchemaItem
      **/
@@ -33,7 +33,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::ERROR, resultType);
         EXPECT_EQ(std::string("Test"), (std::string)obj);
-        
+
         obj["First"] = "Some string";
         obj["Second"] = 555;
         resultType = item->validate(obj["First"]);
@@ -45,7 +45,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(std::string("Some string"),(std::string)obj["First"]);
         EXPECT_EQ(555, (int)obj["Second"]);
 
-        
+
         obj[0] = true;
         obj[1] = false;
         resultType = item->validate(obj[0]);

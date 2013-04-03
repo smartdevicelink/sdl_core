@@ -1,7 +1,7 @@
 #ifndef __SMARTOBJECT_VALIDATION_TVALIDATORPARAMETER_HPP__
 #define __SMARTOBJECT_VALIDATION_TVALIDATORPARAMETER_HPP__
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
@@ -62,21 +62,21 @@ namespace NsAppLink
 }
 
 template <typename ParameterType>
-NsAppLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::TSchemaItemParameter(void):
+NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::TSchemaItemParameter(void):
 mIsSpecified(false),
 mValue()
 {
 }
 
 template <typename ParameterType>
-NsAppLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::TSchemaItemParameter(const ParameterType & ParameterValue):
+NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::TSchemaItemParameter(const ParameterType & ParameterValue):
 mIsSpecified(true),
 mValue(ParameterValue)
 {
 }
 
 template <typename ParameterType>
-bool NsAppLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::getValue(ParameterType & Value) const
+bool NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::getValue(ParameterType & Value) const
 {
     if (true == mIsSpecified)
     {

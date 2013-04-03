@@ -17,8 +17,8 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         Json::Reader reader;    // the same thing
 
         std::string str;
-        NsAppLink::NsSmartObjects::CSmartObject srcObj;
-        NsAppLink::NsSmartObjects::CSmartObject dstObj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
 
         // TODO: Implement test on valid RPC2 test data
 
@@ -38,16 +38,16 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         srcObj["msg_params"]["ttsName"][0]["type"] = "TEXT";
         srcObj["msg_params"]["vrSynonyms"][0] = "Synonym1";
         srcObj["msg_params"]["vrSynonyms"][1] = "Synonym2";
-        srcObj["msg_params"]["null"] = NsAppLink::NsSmartObjects::CSmartObject();
+        srcObj["msg_params"]["null"] = NsSmartDeviceLink::NsSmartObjects::CSmartObject();
         srcObj["msg_params"]["double"] = -0.1234;
 
         // SmartObjects --> JSON
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::toString(srcObj, str);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::toString(srcObj, str);
 
         std::cout << str << std::endl;
 
         // JSON --> SmartObjects
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::fromString(str, dstObj);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::fromString(str, dstObj);
 
         // Compare SmartObjects
         ASSERT_EQ("APP NAME",  static_cast<std::string>(dstObj["msg_params"]["appName"]));

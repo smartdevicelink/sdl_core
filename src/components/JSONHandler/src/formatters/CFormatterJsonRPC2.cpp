@@ -2,8 +2,8 @@
 #include "JSONHandler/formatters/CFormatterJsonRPC2.hpp"
 
 
-bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::toString(
-        NsAppLink::NsSmartObjects::CSmartObject& obj,
+bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::toString(
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
         std::string& outStr)
 {
     Json::Value root(Json::objectValue);
@@ -19,9 +19,9 @@ bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::toString(
 
 // ----------------------------------------------------------------------------
 
-bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::fromString(
+bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::fromString(
         const std::string& str,
-        NsAppLink::NsSmartObjects::CSmartObject& out)
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject& out)
 {
     Json::Value root;
     Json::Reader reader;

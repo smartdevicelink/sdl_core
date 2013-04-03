@@ -1,7 +1,7 @@
 #ifndef __CSMARTOBJECT_VALIDATION_ERRORS_HPP__
 #define __CSMARTOBJECT_VALIDATION_ERRORS_HPP__
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {

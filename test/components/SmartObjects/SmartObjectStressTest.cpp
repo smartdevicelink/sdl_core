@@ -11,7 +11,7 @@
 
 namespace test { namespace components { namespace SmartObjects { namespace SmartObjectStressTest {
 
-    using namespace NsAppLink::NsSmartObjects;
+    using namespace NsSmartDeviceLink::NsSmartObjects;
 
     class StressTestHelper : public ::testing::Test
     {
@@ -158,7 +158,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 std::string strVal("c:");
                 strVal += strDataVal;
 
-                NsAppLink::NsSmartObjects::SmartBinary binaryVal(dataSize, randomChar);
+                NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryVal(dataSize, randomChar);
 
                 obj = binaryVal;   // string with binary data filled with random chars
                 mVerifyMap[key_path] = strVal;
@@ -235,18 +235,18 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             {
                 std::string etalonData = value.substr(2);
 
-                ASSERT_EQ(NsAppLink::NsSmartObjects::SmartType_Binary, obj.getType());
+                ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::SmartType_Binary, obj.getType());
 
-                NsAppLink::NsSmartObjects::SmartBinary binaryData = obj.asBinary();
+                NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData = obj.asBinary();
                 ASSERT_EQ(etalonData.size(), binaryData.size());
 
                 for (size_t i = 0; i < etalonData.size() ; ++i)
                 {       {
                     std::string etalonData = value.substr(2);
 
-                    ASSERT_EQ(NsAppLink::NsSmartObjects::SmartType_Binary, obj.getType());
+                    ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::SmartType_Binary, obj.getType());
 
-                    NsAppLink::NsSmartObjects::SmartBinary binaryData = obj.asBinary();
+                    NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData = obj.asBinary();
                     ASSERT_EQ(etalonData.size(), binaryData.size());
 
                     for (size_t i = 0; i < etalonData.size() ; ++i)

@@ -6,7 +6,7 @@
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
@@ -39,7 +39,7 @@ namespace NsAppLink
              *
              * @return NsSmartObjects::Errors::eType
              **/
-            virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
             /**
              * @brief Set default value to an object.
@@ -124,21 +124,21 @@ namespace NsAppLink
 }
 
 template <typename NumberType>
-NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType> > NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>::create(const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MinValue,
-                                                                                                                                                                  const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MaxValue,
-                                                                                                                                                                  const NsAppLink::NsSmartObjects::TSchemaItemParameter<NumberType> & DefaultValue)
+NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType> > NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MinValue,
+                                                                                                                                                                  const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MaxValue,
+                                                                                                                                                                  const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & DefaultValue)
 {
-    return new NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue);
+    return new NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue);
 }
 
 template <typename NumberType>
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>::validate(const NsAppLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    NsAppLink::NsSmartObjects::Errors::eType result = NsAppLink::NsSmartObjects::Errors::ERROR;
+    NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
     if (getSmartType() == Object.getType())
     {
-        result = NsAppLink::NsSmartObjects::Errors::OK;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
         NumberType value = Object;
         NumberType rangeLimit;
 
@@ -146,29 +146,29 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::TNumberSchem
         {
             if (value < rangeLimit)
             {
-                result = NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE;
+                result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
             }
         }
 
-        if ((NsAppLink::NsSmartObjects::Errors::OK == result) &&
+        if ((NsSmartDeviceLink::NsSmartObjects::Errors::OK == result) &&
             (true == mMaxValue.getValue(rangeLimit)))
         {
             if (value > rangeLimit)
             {
-                result = NsAppLink::NsSmartObjects::Errors::OUT_OF_RANGE;
+                result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
             }
         }
     }
     else
     {
-        result = NsAppLink::NsSmartObjects::Errors::INVALID_VALUE;
+        result = NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
     }
 
     return result;
 }
 
 template <typename NumberType>
-bool NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaultValue(CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaultValue(CSmartObject & Object)
 {
     bool result = false;
     NumberType value;
@@ -183,7 +183,7 @@ bool NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaultValue(C
 }
 
 template <typename NumberType>
-NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>::TNumberSchemaItem(const TSchemaItemParameter<NumberType> & MinValue,
+NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::TNumberSchemaItem(const TSchemaItemParameter<NumberType> & MinValue,
                                                                             const TSchemaItemParameter<NumberType> & MaxValue,
                                                                             const TSchemaItemParameter<NumberType> & DefaultValue):
 mMinValue(MinValue),
@@ -193,15 +193,15 @@ mDefaultValue(DefaultValue)
 }
 
 template <>
-NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::TNumberSchemaItem<int>::getSmartType(void)
+NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::getSmartType(void)
 {
-    return NsAppLink::NsSmartObjects::SmartType_Integer;
+    return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
 }
 
 template <>
-NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::TNumberSchemaItem<double>::getSmartType(void)
+NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<double>::getSmartType(void)
 {
-    return NsAppLink::NsSmartObjects::SmartType_Double;
+    return NsSmartDeviceLink::NsSmartObjects::SmartType_Double;
 }
 
 #endif

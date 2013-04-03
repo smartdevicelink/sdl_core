@@ -11,7 +11,7 @@
 
 namespace test { namespace components { namespace JSONHandler { namespace formatters {
 
-    using namespace NsAppLink::NsJSONHandler::strings;
+    using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
     TEST_F(CFormatterTestHelper, test_fromObjToALRPCv1AndBack)
     {
@@ -19,19 +19,19 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         Json::Reader reader;    // the same thing
 
         std::string str;
-        NsAppLink::NsSmartObjects::CSmartObject srcObj;
-        NsAppLink::NsSmartObjects::CSmartObject dstObj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
 
         fillTestObject(srcObj);
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
 
         // SmartObjects --> JSON
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::toString(srcObj, str);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::toString(srcObj, str);
 
         //std::cout << str << std::endl;
 
         // JSON --> SmartObjects
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, dstObj);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, dstObj);
 
 
         compareObjects(srcObj, dstObj);
@@ -56,10 +56,10 @@ namespace test { namespace components { namespace JSONHandler { namespace format
             }\
         }";
 
-        NsAppLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
         bool result;
 
-        result = NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, obj);
+        result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, obj);
 
         ASSERT_TRUE(result) << "Error parsing JSON string";
 

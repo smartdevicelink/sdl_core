@@ -7,9 +7,9 @@
 #include "test/components/JSONHandler/test_JSONHandler_v4_protocol_v2_0_revP.hpp"
 
 using namespace Gen::test::components::JSONHandler2;
-using namespace NsAppLink::NsSmartObjects;
-using namespace NsAppLink::NsJSONHandler::strings;
-using namespace NsAppLink::NsJSONHandler::Formatters;
+using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 namespace test { namespace components { namespace JSONHandler { namespace SmartSchemaDraftTest {
 
@@ -74,14 +74,14 @@ namespace test { namespace components { namespace JSONHandler { namespace SmartS
         ASSERT_TRUE(bResult);
 
         // STEP 3. Validating object
-        ASSERT_EQ(NsAppLink::NsSmartObjects::Errors::OK, obj.isValid());
+        ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, obj.isValid());
 
         // STEP 4. Working with object
         obj[S_PARAMS][S_MESSAGE_TYPE] = messageType::notification;
         obj[S_MSG_PARAMS]["appName"] = "NEW APP NAME";
 
         // STEP 5. Validating object
-        ASSERT_EQ(NsAppLink::NsSmartObjects::Errors::OK, obj.isValid());
+        ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, obj.isValid());
 
         // STEP 6. Converting object to json string
 

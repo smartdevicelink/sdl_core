@@ -23,11 +23,11 @@
 
 namespace test { namespace components { namespace SmartObjects { namespace SmartObjectConvertionTimeTest {
 
-    using namespace NsAppLink::NsJSONHandler::strings;
-    
-    class SmartObjectConvertionTimeTest : public ::testing::Test 
+    using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+
+    class SmartObjectConvertionTimeTest : public ::testing::Test
     {
-        
+
     public:
         enum eTestType {
                 APPLICATION_NOT_REGISTERED = 0,
@@ -41,98 +41,98 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 GENERIC_ERROR,
                 DISALLOWED
             };
-            
+
     protected:
 
-        double getConvertionTimeToJsonV2Format(const NsAppLink::NsSmartObjects::CSmartObject & srcObj
-            , std::string & jsonString) 
+        double getConvertionTimeToJsonV2Format(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & srcObj
+            , std::string & jsonString)
         {
             timespec convertionStartTime;
             timespec convertionEndTime;
             double convertionTime;
-            
+
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
-        
+
             // SmartObjects --> JSON
-            NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(srcObj, jsonString);
-            
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(srcObj, jsonString);
+
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
-            
-            convertionTime = static_cast<double>(convertionEndTime.tv_sec - convertionStartTime.tv_sec) 
+
+            convertionTime = static_cast<double>(convertionEndTime.tv_sec - convertionStartTime.tv_sec)
                 + static_cast<double>(convertionEndTime.tv_nsec - convertionStartTime.tv_nsec) * 1e-9;
-            
+
             return convertionTime;
         }
 
         double getConvertionTimeFromJsonV2Format(std::string & jsonString
-            ,NsAppLink::NsSmartObjects::CSmartObject & dstObj) 
+            ,NsSmartDeviceLink::NsSmartObjects::CSmartObject & dstObj)
         {
             timespec convertionStartTime;
             timespec convertionEndTime;
             double convertionTime;
-            
+
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
-        
+
             // JSON --> SmartObjects
-            NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
                 fromString<std::string, std::string>(jsonString, dstObj, "some function", "request", 13);
-            
+
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
-            
-            convertionTime = static_cast<double>(convertionEndTime.tv_sec - convertionStartTime.tv_sec) 
+
+            convertionTime = static_cast<double>(convertionEndTime.tv_sec - convertionStartTime.tv_sec)
                 + static_cast<double>(convertionEndTime.tv_nsec - convertionStartTime.tv_nsec) * 1e-9;
-            
+
             return convertionTime;
         }
 
-        double getConvertionTimeToJsonV1Format(const NsAppLink::NsSmartObjects::CSmartObject & srcObj
-            , std::string & jsonString) 
+        double getConvertionTimeToJsonV1Format(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & srcObj
+            , std::string & jsonString)
         {
             timespec convertionStartTime;
             timespec convertionEndTime;
             double convertionTime;
-            
+
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
-        
+
             // SmartObjects --> JSON
-            NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::toString(srcObj, jsonString);
-            
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::toString(srcObj, jsonString);
+
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
-            
-            convertionTime = static_cast<double>(convertionEndTime.tv_sec - convertionStartTime.tv_sec) 
+
+            convertionTime = static_cast<double>(convertionEndTime.tv_sec - convertionStartTime.tv_sec)
                 + static_cast<double>(convertionEndTime.tv_nsec - convertionStartTime.tv_nsec) * 1e-9;
-            
+
             return convertionTime;
         }
 
         double getConvertionTimeFromJsonV1Format(std::string & jsonString
-            ,NsAppLink::NsSmartObjects::CSmartObject & dstObj) 
+            ,NsSmartDeviceLink::NsSmartObjects::CSmartObject & dstObj)
         {
             timespec convertionStartTime;
             timespec convertionEndTime;
             double convertionTime;
-            
+
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
-        
+
             // JSON --> SmartObjects
-            NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(jsonString, dstObj);
-            
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(jsonString, dstObj);
+
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
-            
-            convertionTime = static_cast<double>(convertionEndTime.tv_sec - convertionStartTime.tv_sec) 
+
+            convertionTime = static_cast<double>(convertionEndTime.tv_sec - convertionStartTime.tv_sec)
                 + static_cast<double>(convertionEndTime.tv_nsec - convertionStartTime.tv_nsec) * 1e-9;
-            
+
             return convertionTime;
         }
-        
-        void calculateConvertionTime(const NsAppLink::NsSmartObjects::CSmartObject & srcObj
-            ,NsAppLink::NsSmartObjects::CSmartObject & dstObj)
+
+        void calculateConvertionTime(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & srcObj
+            ,NsSmartDeviceLink::NsSmartObjects::CSmartObject & dstObj)
         {
             std::string jsonString;
             double convertionToTime = 0.0;
             double convertionFromTime = 0.0;
             int cycles = 10;
-            
+
             for(int i = 0; i < cycles; i++)
             {
                 convertionToTime += getConvertionTimeToJsonV1Format(srcObj, jsonString);
@@ -141,7 +141,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             printf("\nFormat V1. Convertion TO time = %.8f, Convertion FROM time = %.8f\n"
                     , (convertionToTime / (double)cycles)
                     , (convertionFromTime / (double)cycles));
-            
+
             convertionToTime = 0.0;
             convertionFromTime = 0.0;
             for(int i = 0; i < cycles; i++)
@@ -153,21 +153,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     , (convertionToTime / (double)cycles)
                     , (convertionFromTime / (double)cycles));
         }
-        
-        void calculateConvertionTimeWithJsonStringOutput(const NsAppLink::NsSmartObjects::CSmartObject & srcObj
-            ,NsAppLink::NsSmartObjects::CSmartObject & dstObj)
+
+        void calculateConvertionTimeWithJsonStringOutput(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & srcObj
+            ,NsSmartDeviceLink::NsSmartObjects::CSmartObject & dstObj)
         {
             std::string jsonString;
             double convertionToTime;
             double convertionFromTime;
-            
+
             convertionToTime = getConvertionTimeToJsonV1Format(srcObj, jsonString);
             convertionFromTime = getConvertionTimeFromJsonV1Format(jsonString, dstObj);
             printf("\nJSON string V1 = %s", jsonString.c_str());
             printf("\nFormat V1. Convertion TO time = %.8f, Convertion FROM time = %.8f\n"
                     , (convertionToTime)
                     , (convertionFromTime));
-            
+
             convertionToTime = getConvertionTimeToJsonV2Format(srcObj, jsonString);
             convertionFromTime = getConvertionTimeFromJsonV2Format(jsonString, dstObj);
             printf("\nJSON string V2 = %s", jsonString.c_str());
@@ -175,9 +175,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     , (convertionToTime)
                     , (convertionFromTime));
         }
-        
+
         //Create SmartObjectSchema for test object
-        NsAppLink::NsSmartObjects::CSmartSchema initObjectSchema(void)
+        NsSmartDeviceLink::NsSmartObjects::CSmartSchema initObjectSchema(void)
         {
             std::set<eTestType> resultCode_allowedEnumSubsetValues;
             resultCode_allowedEnumSubsetValues.insert(APPLICATION_NOT_REGISTERED);
@@ -191,55 +191,55 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             resultCode_allowedEnumSubsetValues.insert(GENERIC_ERROR);
             resultCode_allowedEnumSubsetValues.insert(DISALLOWED);
 
-            NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> success_SchemaItem = 
-                NsAppLink::NsSmartObjects::CBoolSchemaItem::create(NsAppLink::NsSmartObjects::TSchemaItemParameter<bool>());
+            NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> success_SchemaItem =
+                NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>());
 
-            NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem = 
-                NsAppLink::NsSmartObjects::TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues
-                    , NsAppLink::NsSmartObjects::TSchemaItemParameter<eTestType>());
+            NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem =
+                NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues
+                    , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<eTestType>());
 
-            NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> info_SchemaItem = 
-                NsAppLink::NsSmartObjects::CStringSchemaItem::create(NsAppLink::NsSmartObjects::TSchemaItemParameter<size_t>(1000)
-                    , NsAppLink::NsSmartObjects::TSchemaItemParameter<std::string>());
+            NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
+                NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(1000)
+                    , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string>());
 
-            NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem = 
-                NsAppLink::NsSmartObjects::TNumberSchemaItem<int>::create(NsAppLink::NsSmartObjects::TSchemaItemParameter<int>(0)
-                    , NsAppLink::NsSmartObjects::TSchemaItemParameter<int>(2000000000)
-                    , NsAppLink::NsSmartObjects::TSchemaItemParameter<int>());
+            NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem =
+                NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>(0)
+                    , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>(2000000000)
+                    , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>());
 
-            std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember> schemaMembersMap;
+            std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> schemaMembersMap;
 
-            schemaMembersMap["success"] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(success_SchemaItem, true);
-            schemaMembersMap["resultCode"] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(resultCode_SchemaItem, true);
-            schemaMembersMap["info"] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(info_SchemaItem, false);
-            schemaMembersMap["tryAgainTime"] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(tryAgainTime_SchemaItem, true);
+            schemaMembersMap["success"] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(success_SchemaItem, true);
+            schemaMembersMap["resultCode"] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(resultCode_SchemaItem, true);
+            schemaMembersMap["info"] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(info_SchemaItem, false);
+            schemaMembersMap["tryAgainTime"] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(tryAgainTime_SchemaItem, true);
 
-            std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember> paramsMembersMap;
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_FUNCTION_ID] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(NsAppLink::NsSmartObjects::TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(NsAppLink::NsSmartObjects::TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_CORRELATION_ID] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(NsAppLink::NsSmartObjects::TNumberSchemaItem<int>::create(), true);
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(NsAppLink::NsSmartObjects::TNumberSchemaItem<int>::create(1, 2), true);
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(NsAppLink::NsSmartObjects::TNumberSchemaItem<int>::create(), true);
+            std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> paramsMembersMap;
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(1, 2), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(), true);
 
-            std::map<std::string, NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember> rootMembersMap;
-            rootMembersMap[NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(NsAppLink::NsSmartObjects::CObjectSchemaItem::create(schemaMembersMap), true);
-            rootMembersMap[NsAppLink::NsJSONHandler::strings::S_PARAMS] = NsAppLink::NsSmartObjects::CObjectSchemaItem::SMember(NsAppLink::NsSmartObjects::CObjectSchemaItem::create(paramsMembersMap), true);
+            std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> rootMembersMap;
+            rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::create(schemaMembersMap), true);
+            rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::create(paramsMembersMap), true);
 
-            return NsAppLink::NsSmartObjects::CSmartSchema(NsAppLink::NsSmartObjects::CObjectSchemaItem::create(rootMembersMap));
+            return NsSmartDeviceLink::NsSmartObjects::CSmartSchema(NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::create(rootMembersMap));
         }
     };
-    
+
     TEST_F(SmartObjectConvertionTimeTest, test_int_object_convertion)
     {
-        NsAppLink::NsSmartObjects::CSmartObject srcObj, dstObj;
-       
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
         srcObj[S_MSG_PARAMS]["value"] = 5;
-        
+
         printf("\n INT value.\n");
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
@@ -247,8 +247,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST_F(SmartObjectConvertionTimeTest, test_double_object_convertion)
     {
-        NsAppLink::NsSmartObjects::CSmartObject srcObj, dstObj;
-        
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
@@ -259,16 +259,16 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj[S_MSG_PARAMS]["value3"] = 33.945;
         srcObj[S_MSG_PARAMS]["value4"] = -12.5487698;
         srcObj[S_MSG_PARAMS]["value5"] = 0.61287346;
-        
+
         printf("\n Double value.\n");
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
     }
-    
+
     TEST_F(SmartObjectConvertionTimeTest, test_some_object_convertion)
     {
-        NsAppLink::NsSmartObjects::CSmartObject srcObj, dstObj;
-        
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
@@ -288,65 +288,65 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
         srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
         srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-        srcObj[S_MSG_PARAMS]["null"] = NsAppLink::NsSmartObjects::CSmartObject();
+        srcObj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::CSmartObject();
         srcObj[S_MSG_PARAMS]["double"] = -0.1234;
-        
+
         printf("\n Random object.\n");
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
     }
-    
+
     TEST_F(SmartObjectConvertionTimeTest, test_map_object_convertion)
     {
-        NsAppLink::NsSmartObjects::CSmartObject srcObj, dstObj, mapObj, innerObj;
-       
-// First iteration        
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj, mapObj, innerObj;
+
+// First iteration
         mapObj["request"]["name"] = "My Request";
         mapObj["request"]["id"] = 123;
         mapObj["response"]["name"] = "My Response";
         mapObj["response"]["id"] = 456;
         mapObj["we"]["need"]["to"]["go"]["deeper"] = true;
-        
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
         srcObj[S_MSG_PARAMS]["value"] = mapObj;
-        
+
         printf("\n MAP object.\n");
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
 
-// Second iteration        
+// Second iteration
         innerObj = mapObj;
         mapObj["request"]["value"] = innerObj;
         mapObj["response"]["value"] = innerObj;
         mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
         srcObj[S_MSG_PARAMS]["value"] = mapObj;
-        
+
         printf("\n Complex MAP object.\n");
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
-        
-// Third iteration        
+
+// Third iteration
         innerObj = mapObj;
         mapObj["request"]["value"] = innerObj;
         mapObj["response"]["value"] = innerObj;
         mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
         srcObj[S_MSG_PARAMS]["value"] = mapObj;
-        
+
         printf("\n Very Complex MAP object.\n");
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
-        
+
 // Last iteration
         innerObj = mapObj;
         mapObj["request"]["value"] = innerObj;
         mapObj["response"]["value"] = innerObj;
         mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
         srcObj[S_MSG_PARAMS]["value"] = mapObj;
-        
+
         printf("\n Very Very Complex MAP object.\n");
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
@@ -354,15 +354,15 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST_F(SmartObjectConvertionTimeTest, test_array_convertion)
     {
-        NsAppLink::NsSmartObjects::CSmartObject srcObj, dstObj, arrayObj, innerObj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj, arrayObj, innerObj;
         int arraySize = 10;
-       
-// First iteration        
+
+// First iteration
         for(int i = 0; i < arraySize; i++)
         {
             arrayObj[i] = rand();
         }
-        
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
@@ -373,7 +373,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         printf("\n Array object [%d].\n", arraySize);
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
-        
+
 // Second iteration
         printf("\n Array object [%d x %d].\n", arraySize, arraySize);
         innerObj = arrayObj;
@@ -381,14 +381,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         {
             arrayObj[i] = innerObj;
         }
-        
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
         srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-        
+
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
 
@@ -400,18 +400,18 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         {
             arrayObj[i] = innerObj;
         }
-        
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
         srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-        
+
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
 
-// Fourth iteration        
+// Fourth iteration
         printf("\n Array object [%d x %d x %d x %d].\n"
             , arraySize, arraySize, arraySize, arraySize);
         innerObj = arrayObj;
@@ -419,14 +419,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         {
             arrayObj[i] = innerObj;
         }
-        
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
         srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-        
+
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
 
@@ -438,23 +438,23 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         {
             arrayObj[i] = innerObj;
         }
-        
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
         srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-        
+
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
     }
-    
+
     TEST_F(SmartObjectConvertionTimeTest, test_object_with_enum_convertion)
     {
-        NsAppLink::NsSmartObjects::CSmartObject srcObj, dstObj;
-        NsAppLink::NsSmartObjects::CSmartSchema schema = initObjectSchema();
-        
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema = initObjectSchema();
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
@@ -465,19 +465,19 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj[S_MSG_PARAMS]["info"] = "Some string";
         srcObj[S_MSG_PARAMS]["tryAgainTime"] = 322;
         srcObj.setSchema(schema);
-        
+
         printf("\n Object with enum.\n");
         calculateConvertionTime(srcObj, dstObj);
-        
+
         dstObj.setSchema(schema);
         dstObj.getSchema().applySchema(dstObj);
         EXPECT_TRUE(srcObj == dstObj);
-    }    
+    }
 
         TEST_F(SmartObjectConvertionTimeTest, test_object_without_enum_convertion)
     {
-        NsAppLink::NsSmartObjects::CSmartObject srcObj, dstObj;
-        
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         srcObj[S_PARAMS][S_FUNCTION_ID] = "some function";
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
@@ -487,15 +487,15 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj[S_MSG_PARAMS]["resultCode"] = 2;
         srcObj[S_MSG_PARAMS]["info"] = "Some string";
         srcObj[S_MSG_PARAMS]["tryAgainTime"] = 322;
-        
+
         printf("\n Object without enum.\n");
         calculateConvertionTime(srcObj, dstObj);
         EXPECT_TRUE(srcObj == dstObj);
-    }    
+    }
 
 }}}}
 
-namespace NsAppLink { namespace NsSmartObjects {
+namespace NsSmartDeviceLink { namespace NsSmartObjects {
     template<>
     const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType
         ,std::string> & TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType>::getEnumElementsStringRepresentation(void)
@@ -516,7 +516,7 @@ namespace NsAppLink { namespace NsSmartObjects {
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::USER_DISALLOWED, "USER_DISALLOWED"));
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::GENERIC_ERROR, "GENERIC_ERROR"));
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::DISALLOWED, "DISALLOWED"));
-            
+
             isInitialized = true;
         }
         return enumStringRepresentationMap;

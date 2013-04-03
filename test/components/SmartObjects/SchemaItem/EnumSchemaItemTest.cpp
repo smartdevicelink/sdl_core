@@ -8,10 +8,10 @@
 #include <string>
 
 
-namespace test { namespace components { namespace SmartObjects { namespace SchemaItem { 
+namespace test { namespace components { namespace SmartObjects { namespace SchemaItem {
 
-    using namespace NsAppLink::NsSmartObjects;
-    
+    using namespace NsSmartDeviceLink::NsSmartObjects;
+
     class EnumSchemaItemTest : public ::testing::Test {
     public:
         enum eTestType {
@@ -35,16 +35,16 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
             testEnum.insert(FACTORY_DEFAULTS);
             testEnum.insert(APP_UNAUTHORIZED);
         }
-        
+
         virtual void SetUp() {
         }
-        
+
         std::set<eTestType> testEnum;
     };
-    
+
     /**
      * Test EnumSchemaItem
-     * 
+     *
      * Create SchemaItem with default value. Method setDefaultValue should return true,
      * SmartObject should contain default value.
      * Not Enum SmartObject should converted to intObject and setted up by the default value.
@@ -74,27 +74,27 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object - number
         obj = 3.1415926;
-        
+
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        
+
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
         EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
-        
+
         //Object - string
         obj = "Some string";
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        
+
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
         EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
     }
 
-    /** 
+    /**
      * Test EnumSchemaItem with default value
-     * 
+     *
      * Create SchemaItem without default value. Method setDefaultValue should return false,
      * SmartObject should contain previous value.
      **/
@@ -124,35 +124,35 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object - number
         obj = 3.1415926;
-        
+
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        
+
         resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
         EXPECT_EQ(3.1415926, (double)obj);
-        
+
         //Object - string
         obj = "Some string";
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        
+
         resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
         EXPECT_EQ(std::string("Some string"), (std::string)obj);
-        
+
         //Object - int in range of enum
         obj = 6;
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        
+
         //Object - int out of enum range
         obj = 15;
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
     }
-    
-    /** 
+
+    /**
      * Test apply and unapply EnumSchemaItem
      **/
     TEST_F(EnumSchemaItemTest, test_apply_unapply_schema)
@@ -169,33 +169,33 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
         EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
-        
+
         item->unapplySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
         EXPECT_EQ(std::string("FACTORY_DEFAULTS"), (std::string)obj);
-        
+
         item->applySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
-        
+
         obj = "TOO_MANY_REQUESTS";
         item->applySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         EXPECT_EQ(eTestType::TOO_MANY_REQUESTS, (int)obj);
-        
+
         obj = "ENOUGH_REQUESTS";
         item->applySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
         EXPECT_EQ(std::string("ENOUGH_REQUESTS"), (std::string)obj);
     }
-    
+
 }}}}
 
-namespace NsAppLink { namespace NsSmartObjects {
+namespace NsSmartDeviceLink { namespace NsSmartObjects {
     template<>
     const std::map<test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType, std::string> & TEnumSchemaItem<test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType>::getEnumElementsStringRepresentation(void)
     {
@@ -212,7 +212,7 @@ namespace NsAppLink { namespace NsSmartObjects {
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::MASTER_RESET, "MASTER_RESET"));
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::FACTORY_DEFAULTS, "FACTORY_DEFAULTS"));
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::APP_UNAUTHORIZED, "APP_UNAUTHORIZED"));
-            
+
             isInitialized = true;
         }
 

@@ -1,7 +1,7 @@
 #ifndef __TSHAREDPTR_HPP__
 #define __TSHAREDPTR_HPP__
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
@@ -136,14 +136,14 @@ namespace NsAppLink
 }
 
 template <typename ObjectType>
-inline NsAppLink::NsSmartObjects::TSharedPtr<ObjectType>::TSharedPtr(ObjectType * Object):
+inline NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType>::TSharedPtr(ObjectType * Object):
 mObject(Object),
 mReferenceCounter(new unsigned int(1))
 {
 }
 
 template <typename ObjectType>
-inline NsAppLink::NsSmartObjects::TSharedPtr<ObjectType>::TSharedPtr(const TSharedPtr<ObjectType> & Other):
+inline NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType>::TSharedPtr(const TSharedPtr<ObjectType> & Other):
 mObject(0),
 mReferenceCounter(0)
 {
@@ -152,7 +152,7 @@ mReferenceCounter(0)
 
 template <typename ObjectType>
 template <typename OtherObjectType>
-inline NsAppLink::NsSmartObjects::TSharedPtr<ObjectType>::TSharedPtr(const TSharedPtr<OtherObjectType> & Other):
+inline NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType>::TSharedPtr(const TSharedPtr<OtherObjectType> & Other):
 mObject(0),
 mReferenceCounter(0)
 {
@@ -160,20 +160,20 @@ mReferenceCounter(0)
 }
 
 template <typename ObjectType>
-inline NsAppLink::NsSmartObjects::TSharedPtr<ObjectType>::~TSharedPtr(void)
+inline NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType>::~TSharedPtr(void)
 {
     dropReference();
 }
 
 template <typename ObjectType>
-inline NsAppLink::NsSmartObjects::TSharedPtr<ObjectType> & NsAppLink::NsSmartObjects::TSharedPtr<ObjectType>::operator=(const TSharedPtr<ObjectType> & Other)
+inline NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType> & NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType>::operator=(const TSharedPtr<ObjectType> & Other)
 {
     return operator=<ObjectType>(Other);
 }
 
 template <typename ObjectType>
 template <typename OtherObjectType>
-inline NsAppLink::NsSmartObjects::TSharedPtr<ObjectType> & NsAppLink::NsSmartObjects::TSharedPtr<ObjectType>::operator=(const TSharedPtr<OtherObjectType> & Other)
+inline NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType> & NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType>::operator=(const TSharedPtr<OtherObjectType> & Other)
 {
     dropReference();
 
@@ -189,13 +189,13 @@ inline NsAppLink::NsSmartObjects::TSharedPtr<ObjectType> & NsAppLink::NsSmartObj
 }
 
 template <typename ObjectType>
-ObjectType * NsAppLink::NsSmartObjects::TSharedPtr<ObjectType>::operator->(void) const
+ObjectType * NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType>::operator->(void) const
 {
     return mObject;
 }
 
 template <typename ObjectType>
-inline void NsAppLink::NsSmartObjects::TSharedPtr<ObjectType>::dropReference(void)
+inline void NsSmartDeviceLink::NsSmartObjects::TSharedPtr<ObjectType>::dropReference(void)
 {
     if (0 != mReferenceCounter)
     {

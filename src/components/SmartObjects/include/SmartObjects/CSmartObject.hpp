@@ -8,7 +8,7 @@
 
 #include "CSmartSchema.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {

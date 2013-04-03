@@ -1,17 +1,17 @@
 #include "SmartObjects/CBoolSchemaItem.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
-NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::CBoolSchemaItem> NsAppLink::NsSmartObjects::CBoolSchemaItem::create(const NsAppLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue)
+NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue)
 {
     return new CBoolSchemaItem(DefaultValue);
 }
 
-NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CBoolSchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
-    return (true == NsAppLink::NsSmartObjects::SmartType_Boolean == Object.getType()) ? NsAppLink::NsSmartObjects::Errors::OK : NsAppLink::NsSmartObjects::Errors::INVALID_VALUE;
+    return (true == NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean == Object.getType()) ? NsSmartDeviceLink::NsSmartObjects::Errors::OK : NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
 }
 
-bool NsAppLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsAppLink::NsSmartObjects::CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
 {
     bool result = false;
     bool value = false;
@@ -25,7 +25,7 @@ bool NsAppLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsAppLink::NsSm
     return result;
 }
 
-NsAppLink::NsSmartObjects::CBoolSchemaItem::CBoolSchemaItem(const NsAppLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue):
+NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::CBoolSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue):
 mDefaultValue(DefaultValue)
 {
 }

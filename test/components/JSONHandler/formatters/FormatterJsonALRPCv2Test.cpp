@@ -12,26 +12,26 @@
 
 namespace test { namespace components { namespace JSONHandler { namespace formatters {
 
-    using namespace NsAppLink::NsJSONHandler::strings;
+    using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
     TEST_F(CFormatterTestHelper, test_fromObjToALRPCv2AndBack)
     {
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
 
         std::string str;
-        NsAppLink::NsSmartObjects::CSmartObject srcObj;
-        NsAppLink::NsSmartObjects::CSmartObject dstObj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
 
         fillTestObject(srcObj);
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
 
         // SmartObjects --> JSON
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(srcObj, str);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(srcObj, str);
 
         //std::cout << str << std::endl;
 
         // JSON --> SmartObjects
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
             fromString<std::string, std::string>(str, dstObj, "some function", "request", 12);
 
 
@@ -60,10 +60,10 @@ namespace test { namespace components { namespace JSONHandler { namespace format
             \"vrSynonyms\": [\"Synonym 1\", \"Synonym 2\"]\
         }";
 
-        NsAppLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
         bool result;
 
-        result = NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
+        result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
                 fromString<std::string, std::string>(str, obj, "some name", "request", 12);
 
         ASSERT_TRUE(result) << "Error parsing JSON string";

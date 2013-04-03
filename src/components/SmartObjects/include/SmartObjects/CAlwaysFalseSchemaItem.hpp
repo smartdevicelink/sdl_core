@@ -4,7 +4,7 @@
 #include "TSharedPtr.hpp"
 #include "ISchemaItem.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
@@ -26,9 +26,9 @@ namespace NsAppLink
              *
              * @param Object Object to validate.
              *
-             * @return NsAppLink::NsSmartObjects::Errors::ERROR
+             * @return NsSmartDeviceLink::NsSmartObjects::Errors::ERROR
              **/
-            virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
         private:
             /**

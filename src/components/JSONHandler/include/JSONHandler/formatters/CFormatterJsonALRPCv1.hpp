@@ -6,7 +6,7 @@
 
 #include "CFormatterJsonBase.hpp"
 
-namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
+namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
 
     /**
@@ -34,7 +34,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
         /**
          * @brief Extracts a message type from the SmartObject
          */
-        static const std::string getMessageType(const NsAppLink::NsSmartObjects::CSmartObject& obj);
+        static const std::string getMessageType(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
         /**
          * @brief Extracts a message type from the root JSON object.
@@ -57,17 +57,17 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
 
         /**
          * @brief String constant for PARAMETERS.
-         */        
+         */
         static const std::string S_PARAMETERS;
 
         /**
          * @brief String constant for NAME.
-         */        
+         */
         static const std::string S_NAME;
 
         /**
          * @brief String constant for CORRELATION_ID.
-         */        
+         */
         static const std::string S_CORRELATION_ID;
 
     public:
@@ -79,7 +79,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param outStr resulting JSON string
          * @return true if success, false otherwise
          */
-        static bool toString(const NsAppLink::NsSmartObjects::CSmartObject &obj,
+        static bool toString(const NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
                 std::string& outStr);
 
         /**
@@ -90,10 +90,10 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @return true if success, otherwise - false
          */
         static bool fromString(const std::string &str,
-                NsAppLink::NsSmartObjects::CSmartObject &out);
+                NsSmartDeviceLink::NsSmartObjects::CSmartObject &out);
     };
 
-} } } // namespace NsAppLink::NsJSONHandler::Formatters
+} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 
 #endif // __CFORMATTERJSONALRPCV1_HPP__

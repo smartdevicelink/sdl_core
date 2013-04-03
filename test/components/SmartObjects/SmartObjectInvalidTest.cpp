@@ -4,7 +4,7 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include <string>
 
-using namespace NsAppLink::NsSmartObjects;
+using namespace NsSmartDeviceLink::NsSmartObjects;
 
 
 namespace test { namespace components { namespace SmartObjects { namespace SmartObjectInvalidTest {
@@ -88,7 +88,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(invalid_string_value, (std::string)obj);
 
         // ---- BINARY ---- //
-        NsAppLink::NsSmartObjects::SmartBinary binaryData;
+        NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
         binaryData.push_back('\0');
         binaryData.push_back('a');
         obj = binaryData;

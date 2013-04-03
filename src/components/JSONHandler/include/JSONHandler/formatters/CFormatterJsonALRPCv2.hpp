@@ -7,7 +7,7 @@
 #include "CFormatterJsonBase.hpp"
 #include "JSONHandler/CSmartFactory.hpp"
 
-namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
+namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
 
     /**
@@ -42,7 +42,7 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          * @param outStr resulting JSON string
          * @return true if success, false otherwise
          */
-        static bool toString(const NsAppLink::NsSmartObjects::CSmartObject &obj,
+        static bool toString(const NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
                 std::string& outStr);
 
 
@@ -59,19 +59,19 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
          */
         template<typename FunctionId, typename MessageType>
         static bool fromString(const std::string &str,
-                NsAppLink::NsSmartObjects::CSmartObject &out,
+                NsSmartDeviceLink::NsSmartObjects::CSmartObject &out,
                 FunctionId functionId,
                 MessageType messageType,
                 int correlationId);
     };
 
-} } } // namespace NsAppLink::NsJSONHandler::Formatters
+} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 
 template<typename FunctionId, typename MessageType>
-inline bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromString(
+inline bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromString(
         const std::string& str,
-        NsAppLink::NsSmartObjects::CSmartObject& out,
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject& out,
         FunctionId functionId,
         MessageType messageType,
         int correlationId)
@@ -79,7 +79,7 @@ inline bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromStr
     Json::Value root;
     Json::Reader reader;
 
-    namespace S = NsAppLink::NsJSONHandler::strings;
+    namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
 
     out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
     out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
@@ -91,7 +91,7 @@ inline bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromStr
 
     if (true == parsingSuccessful)
     {
-        jsonValueToObj(root, out[NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS]);
+        jsonValueToObj(root, out[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]);
     }
 
     return parsingSuccessful;

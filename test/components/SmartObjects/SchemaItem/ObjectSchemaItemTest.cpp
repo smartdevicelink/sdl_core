@@ -17,14 +17,14 @@
 
 #include <string>
 
-namespace test { namespace components { namespace SmartObjects { namespace SchemaItem { 
+namespace test { namespace components { namespace SmartObjects { namespace SchemaItem {
 
-    using namespace NsAppLink::NsSmartObjects;
-    using namespace NsAppLink::NsJSONHandler::strings;
-    
+    using namespace NsSmartDeviceLink::NsSmartObjects;
+    using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+
     class ObjectSchemaItemTest : public ::testing::Test
     {
-        
+
     public:
         enum eTestType {
                 APPLICATION_NOT_REGISTERED = 0,
@@ -38,7 +38,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
                 GENERIC_ERROR,
                 DISALLOWED
             };
-            
+
     protected:
 
         //Create SmartObjectSchema for test object
@@ -56,18 +56,18 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
             resultCode_allowedEnumSubsetValues.insert(GENERIC_ERROR);
             resultCode_allowedEnumSubsetValues.insert(DISALLOWED);
 
-            TSharedPtr<ISchemaItem> success_SchemaItem = 
+            TSharedPtr<ISchemaItem> success_SchemaItem =
                 CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
-            TSharedPtr<ISchemaItem> resultCode_SchemaItem = 
+            TSharedPtr<ISchemaItem> resultCode_SchemaItem =
                 TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues
                     , TSchemaItemParameter<eTestType>());
 
-            TSharedPtr<ISchemaItem> info_SchemaItem = 
+            TSharedPtr<ISchemaItem> info_SchemaItem =
                 CStringSchemaItem::create(TSchemaItemParameter<size_t>(10)
                     , TSchemaItemParameter<std::string>());
 
-            TSharedPtr<ISchemaItem> tryAgainTime_SchemaItem = 
+            TSharedPtr<ISchemaItem> tryAgainTime_SchemaItem =
                 TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(0)
                     , TSchemaItemParameter<int>(2000)
                     , TSchemaItemParameter<int>());
@@ -80,41 +80,41 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
             schemaMembersMap["tryAgainTime"] = CObjectSchemaItem::SMember(tryAgainTime_SchemaItem, true);
 
             std::map<std::string, CObjectSchemaItem::SMember> paramsMembersMap;
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(1, 2), true);
-            paramsMembersMap[NsAppLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(1, 2), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
 
             std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
-            rootMembersMap[NsAppLink::NsJSONHandler::strings::S_MSG_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(schemaMembersMap), true);
-            rootMembersMap[NsAppLink::NsJSONHandler::strings::S_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(paramsMembersMap), true);
+            rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(schemaMembersMap), true);
+            rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(paramsMembersMap), true);
 
             return CObjectSchemaItem::create(rootMembersMap);
         }
     };
-    
+
     TEST_F(ObjectSchemaItemTest, test_too_few_object_params)
     {
         CSmartObject obj;
         TSharedPtr<ISchemaItem> item = initObjectSchemaItem();
-       
+
         obj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         obj[S_PARAMS][S_FUNCTION_ID] = "some function";
         obj[S_PARAMS][S_CORRELATION_ID] = 13;
         obj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
         obj[S_MSG_PARAMS]["value"] = 5;
-        
+
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, resultType);
     }
-    
+
     TEST_F(ObjectSchemaItemTest, test_too_many_object_params)
     {
         CSmartObject srcObj;
         TSharedPtr<ISchemaItem> item = initObjectSchemaItem();
-        
+
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = 1;
         srcObj[S_PARAMS][S_FUNCTION_ID] = 3;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
@@ -134,23 +134,23 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
         srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
         srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-        srcObj[S_MSG_PARAMS]["null"] = NsAppLink::NsSmartObjects::CSmartObject();
+        srcObj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::CSmartObject();
         srcObj[S_MSG_PARAMS]["double"] = -0.1234;
         srcObj[S_MSG_PARAMS]["success"] = true;
         srcObj[S_MSG_PARAMS]["resultCode"] = 2;
         srcObj[S_MSG_PARAMS]["info"] = "String";
         srcObj[S_MSG_PARAMS]["tryAgainTime"] = 322;
-        
+
         int resultType = item->validate(srcObj);
         EXPECT_EQ(Errors::UNEXPECTED_PARAMETER, resultType);
     }
-    
-    
+
+
     TEST_F(ObjectSchemaItemTest, test_object_with_correct_params)
     {
         CSmartObject obj, dstObj;
         TSharedPtr<ISchemaItem> item = initObjectSchemaItem();
-        
+
         obj[S_PARAMS][S_MESSAGE_TYPE] = "APPLICATION_NOT_REGISTERED";
         obj[S_PARAMS][S_FUNCTION_ID] = "GENERIC_ERROR";
         obj[S_PARAMS][S_CORRELATION_ID] = 13;
@@ -159,12 +159,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[S_MSG_PARAMS]["success"] = true;
         obj[S_MSG_PARAMS]["resultCode"] = 2;
         obj[S_MSG_PARAMS]["tryAgainTime"] = 322;
-        
+
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        
+
         item->applySchema(obj);
-        
+
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
@@ -176,21 +176,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[S_MSG_PARAMS]["info"] = "Long String";
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-        
+
         obj[S_MSG_PARAMS]["info"] = "String";
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        
+
         obj[S_MSG_PARAMS]["success"] = "OK";
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-    }    
+    }
 
         TEST_F(ObjectSchemaItemTest, test_object_with_incorrect_params)
     {
         CSmartObject obj;
         TSharedPtr<ISchemaItem> item = initObjectSchemaItem();
-        
+
         obj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         obj[S_PARAMS][S_FUNCTION_ID] = "some function";
         obj[S_PARAMS][S_CORRELATION_ID] = 13;
@@ -200,14 +200,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[S_MSG_PARAMS]["resultCode"] = 2;
         obj[S_MSG_PARAMS]["info"] = "Long string";
         obj[S_MSG_PARAMS]["tryAgainTime"] = 322;
-        
+
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-    }    
+    }
 
 }}}}
 
-namespace NsAppLink { namespace NsSmartObjects {
+namespace NsSmartDeviceLink { namespace NsSmartObjects {
     template<>
     const std::map<test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType, std::string> & TEnumSchemaItem<test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType>::getEnumElementsStringRepresentation(void)
     {
@@ -226,7 +226,7 @@ namespace NsAppLink { namespace NsSmartObjects {
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::USER_DISALLOWED, "USER_DISALLOWED"));
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::GENERIC_ERROR, "GENERIC_ERROR"));
             enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::DISALLOWED, "DISALLOWED"));
-            
+
             isInitialized = true;
         }
         return enumStringRepresentationMap;

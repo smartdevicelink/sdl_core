@@ -6,7 +6,7 @@
 
 namespace test { namespace components { namespace SmartObjects { namespace SmartObjectUnitTest {
 
-    using namespace NsAppLink::NsSmartObjects;
+    using namespace NsSmartDeviceLink::NsSmartObjects;
 
 
     class TestHelper : public ::testing::Test
