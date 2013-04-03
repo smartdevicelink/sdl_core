@@ -9,7 +9,6 @@ include_directories (
   ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
   ../../../src/components/JSONHandler/include/
   ../../../src//thirdPartyLibs/jsoncpp/include/
-
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 

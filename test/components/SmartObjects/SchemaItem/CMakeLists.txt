@@ -4,6 +4,8 @@ include_directories (
   ../../../../src/components/SmartObjects/include
   ../../../../src/thirdPartyLibs/logger/include/
   ../../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
+  ../../../../src/components/JSONHandler/include/
+  ../../../../src//thirdPartyLibs/jsoncpp/include/
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
@@ -14,10 +16,16 @@ set (LIBRARIES
     gmock
     gmock_main
     log4cplus
+    jsoncpp
     SmartObjects
+    JSONHandler
 )
 
-create_test("test_SmartObject_BoolSchemaItemTest"   "./test_BoolSchemaItemTest.cpp"   "${LIBRARIES}")
-create_test("test_SmartObject_NumberSchemaItemTest" "./test_NumberSchemaItemTest.cpp" "${LIBRARIES}")
-create_test("test_SmartObject_StringSchemaItemTest" "./test_StringSchemaItemTest.cpp" "${LIBRARIES}")
-create_test("test_SmartObject_ArraySchemaItemTest"  "./test_ArraySchemaItemTest.cpp"  "${LIBRARIES}")
+create_test("test_SmartObject_BoolSchemaItemTest"           "./test_BoolSchemaItemTest.cpp"   "${LIBRARIES}")
+create_test("test_SmartObject_NumberSchemaItemTest"         "./test_NumberSchemaItemTest.cpp" "${LIBRARIES}")
+create_test("test_SmartObject_StringSchemaItemTest"         "./test_StringSchemaItemTest.cpp" "${LIBRARIES}")
+create_test("test_SmartObject_ArraySchemaItemTest"          "./test_ArraySchemaItemTest.cpp"  "${LIBRARIES}")
+create_test("test_SmartObject_EnumSchemaItemTest"           "./EnumSchemaItemTest.cpp"  "${LIBRARIES}")
+create_test("test_SmartObject_ObjectSchemaItemTest"         "./ObjectSchemaItemTest.cpp"  "${LIBRARIES}")
+create_test("test_SmartObject_AlwaysTrueSchemaItemTest"     "./AlwaysTrueSchemaItemTest.cpp"  "${LIBRARIES}")
+create_test("test_SmartObject_AlwaysFalseSchemaItemTest"    "./AlwaysFalseSchemaItemTest.cpp"  "${LIBRARIES}")
