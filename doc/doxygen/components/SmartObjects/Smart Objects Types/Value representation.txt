@@ -4,7 +4,7 @@ As alternative to the type casts NsSmartDeviceLink::NsSmartObjects::CSmartObject
 
 Example:
 
-<code>
+<pre>
 NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
 obj[0] = 1;
@@ -20,6 +20,6 @@ int i = obj[0].asInt();
 char c = obj[1].asChar();
 
 double d = obj[2].asDouble();
-</code>
+</pre>
 
 */

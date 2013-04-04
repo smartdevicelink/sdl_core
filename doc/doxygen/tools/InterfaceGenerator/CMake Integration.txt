@@ -6,8 +6,8 @@ This rule takes 3 arguments - name of source XML file, desired namespace for gen
 
 Example:
 
-<code>
+<pre>
 GenerateInterface("test_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler" "alrpcv2")
-</code>
+</pre>
 
 */

@@ -4,7 +4,7 @@ To run InterfaceGenerator the Python 2.7 interpreter should be installed. As inp
 
 Example1 (Run Generator.py to display help):
 
-<code>
+<pre>
 $ python Generator.py -h
 
 usage: Generator.py [-h] --parser-type {alrpcv1,alrpcv2}
@@ -20,12 +20,12 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --parser-type {alrpcv1,alrpcv2}
-</code>
+</pre>
 
 Example2 (Run Generator.py to generate some code)
 
-<code>
+<pre>
 python Generator.py /home/user1/xml/alrpc1.xml App::Gen:: /home/user1/gen --parser-type=alrpcv2
-</code>
+</pre>
 
 */

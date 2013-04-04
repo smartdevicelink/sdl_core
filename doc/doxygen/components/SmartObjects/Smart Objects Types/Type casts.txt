@@ -4,18 +4,18 @@ One of easy and probably intuitive way to work with values in the Smart Object i
 
 Example 1 (Work with int value):
 
-<code>
+<pre>
 NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
 obj = 1;          //Assign int value
 
 int i = (int)obj; //Get int value
 
-</code>
+</pre>
 
 Example 2 (Work with long value):
 
-<code>
+<pre>
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
@@ -23,11 +23,11 @@ obj = 100l;         //Assign long value
 
 long l = (long)obj; //Get long value
 
-</code>
+</pre>
 
 Example 3 (Work with double value):
 
-<code>
+<pre>
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
@@ -35,11 +35,11 @@ obj = 3.14;             //Assign double value
 
 double d = (double)obj; //Get double value
 
-</code>
+</pre>
 
 Example 4 (Work with char value):
 
-<code>
+<pre>
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
@@ -47,11 +47,11 @@ obj = 'a';          //Assign char value
 
 char c = (char)obj; //Get char value
 
-</code>
+</pre>
 
 Example 5 (Work with bool value):
 
-<code>
+<pre>
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
@@ -59,11 +59,11 @@ obj = true;         //Assign bool value
 
 bool b = (bool)obj; //Get bool value
 
-</code>
+</pre>
 
 Example 6 (Work with string values):
 
-<code>
+<pre>
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
 
@@ -75,11 +75,11 @@ std::string s1 = (std::string)obj1;
 
 std::string s2 = (std::string)obj2;
 
-</code>
+</pre>
 
 Example 7 (Work with arrays):
 
-<code>
+<pre>
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject simpleArray;
 
@@ -113,12 +113,12 @@ double val1_0 = (double)obj[1][0];
 
 bool val1_1_0 = (bool)obj[1][1][0];
 
-</code>
+</pre>
 
 
 Example 8 (Work with maps):
 
-<code>
+<pre>
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject simpleMap;
 
@@ -156,6 +156,6 @@ int responseId = (int)deepMap["response"]["id"];
 
 deepFlag = (bool)deepMap["we"]["need"]["to"]["go"]["deeper"];
 
-</code>
+</pre>
 
 */
