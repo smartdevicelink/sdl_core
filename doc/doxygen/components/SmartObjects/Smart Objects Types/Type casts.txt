@@ -1,11 +1,11 @@
 /*! \page components_smartobjects_types_cast Type cast for SmartObjects
 
-One of easy and probably intuitive way to work with values in the Smart Object is simple use of the type casts. Implementation of NsAppLink::NsSmartObjects::CSmartObject class has all necessary declarations to support all required types.
+One of easy and probably intuitive way to work with values in the Smart Object is simple use of the type casts. Implementation of NsSmartDeviceLink::NsSmartObjects::CSmartObject class has all necessary declarations to support all required types.
 
 Example 1 (Work with int value):
 
 <code>
-NsAppLink::NsSmartObjects::CSmartObject obj;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
 obj = 1;          //Assign int value
 
@@ -17,7 +17,7 @@ Example 2 (Work with long value):
 
 <code>
 
-NsAppLink::NsSmartObjects::CSmartObject obj;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
 obj = 100l;         //Assign long value
 
@@ -29,7 +29,7 @@ Example 3 (Work with double value):
 
 <code>
 
-NsAppLink::NsSmartObjects::CSmartObject obj;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
 obj = 3.14;             //Assign double value
 
@@ -41,7 +41,7 @@ Example 4 (Work with char value):
 
 <code>
 
-NsAppLink::NsSmartObjects::CSmartObject obj;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
 obj = 'a';          //Assign char value
 
@@ -53,7 +53,7 @@ Example 5 (Work with bool value):
 
 <code>
 
-NsAppLink::NsSmartObjects::CSmartObject obj;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
 obj = true;         //Assign bool value
 
@@ -65,7 +65,7 @@ Example 6 (Work with string values):
 
 <code>
 
-NsAppLink::NsSmartObjects::CSmartObject obj1;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
 
 obj1 = "Hello, world";               //Assign char* string value
 
@@ -81,7 +81,7 @@ Example 7 (Work with arrays):
 
 <code>
 
-NsAppLink::NsSmartObjects::CSmartObject simpleArray;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject simpleArray;
 
 simpleArray[0] = 1;
 
@@ -99,7 +99,7 @@ char val2 = (char)simpleArray[2];
 
 double val3 = (double)simpleArray[3];
 
-NsAppLink::NsSmartObjects::CSmartObject deepArray;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject deepArray;
 
 deepArray[0] = 1;
 
@@ -120,7 +120,7 @@ Example 8 (Work with maps):
 
 <code>
 
-NsAppLink::NsSmartObjects::CSmartObject simpleMap;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject simpleMap;
 
 simpleMap["name"] = "My name";
 
@@ -134,7 +134,7 @@ int count =  (int)obj["count"];
 
 bool isValid = (bool)obj["isValid"]);
 
-NsAppLink::NsSmartObjects::CSmartObject deepMap;
+NsSmartDeviceLink::NsSmartObjects::CSmartObject deepMap;
 
 deepMap["request"]["name"] = "My Request";
 

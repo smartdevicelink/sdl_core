@@ -1,4 +1,4 @@
-/*! \mainpage Project AppLink
+/*! \mainpage Project SmartDeviceLink
 
 This is the entry point to the documentation about project.
 

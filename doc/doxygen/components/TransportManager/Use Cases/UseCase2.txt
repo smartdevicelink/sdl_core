@@ -14,12 +14,12 @@
  </tr>
  <tr>
   <td>2</td>
-  <td>Device-2 is connected to Applink Core via Wi-Fi</td>
+  <td>Device-2 is connected to SmartDeviceLink Core via Wi-Fi</td>
   <td>Devices are in the same network</td>
  </tr>
  <tr>
   <td>3</td>
-  <td>Make sure that correct devices are connected to Applink core</td>
+  <td>Make sure that correct devices are connected to SmartDeviceLink core</td>
   <td>IP-address of connected devices are relevant</td>
  </tr>
 </table>
@@ -33,8 +33,8 @@
  </tr>
  <tr>
   <td>1</td>
-  <td>Start Applink application on the Devices</td>
-  <td>Applink application is up and ready</td>
+  <td>Start SmartDeviceLink application on the Devices</td>
+  <td>SmartDeviceLink application is up and ready</td>
  </tr>
  <tr>
   <td>2</td>
@@ -53,12 +53,12 @@
  </tr>
  <tr>
   <td>5</td>
-  <td>Send alert message from Applink application-1</td>
+  <td>Send alert message from SmartDeviceLink application-1</td>
   <td>Alert is displayed on HMI</td>
  </tr>
  <tr>
   <td>6</td>
-  <td>Send alert message from Applink application-2</td>
+  <td>Send alert message from SmartDeviceLink application-2</td>
   <td>Alert is displayed on HMI</td>
  </tr>
  <tr>
@@ -68,7 +68,7 @@
  </tr>
  <tr>
   <td>8</td>
-  <td>Disconnect device-2 from Applink core</td>
+  <td>Disconnect device-2 from SmartDeviceLink core</td>
   <td>Application is marked as disconnected/notification is displayed in HMI</td>
  </tr>
  <tr>
@@ -78,7 +78,7 @@
  </tr>
  <tr>
   <td>10</td>
-  <td>Disconnect device-1 from Applink core</td>
+  <td>Disconnect device-1 from SmartDeviceLink core</td>
   <td>Application is marked as disconnected/notification is displayed in HMI</td>
  </tr>
  <tr>
