@@ -1,4 +1,5 @@
 [CW14]
++ Add an option to the startup screen: "Set app icon after registration".
 * PerformInteraction dialog: allow to select multiple choice set IDs.
 * Show dialog: add extra fields.
 + Allow to send test requests when the app is not registered.

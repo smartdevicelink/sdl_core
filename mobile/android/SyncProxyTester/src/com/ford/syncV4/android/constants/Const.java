@@ -13,6 +13,7 @@ public class Const {
 	public static final String PREFS_KEY_APPNAME = "appName";
 	public static final String PREFS_KEY_LANG = "desiredLang";
 	public static final String PREFS_KEY_HMILANG = "desiredHMILang";
+	public static final String PREFS_KEY_AUTOSETAPPICON = "autoSetAppIcon";
 	public static final String PREFS_KEY_DISABLE_LOCK_WHEN_TESTING = "disableLockWhenTesting";
 
 	// Default values
@@ -21,6 +22,7 @@ public class Const {
 	public static final String PREFS_DEFAULT_APPNAME = "SyncProxyTester";
 	public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
+	public static final boolean PREFS_DEFAULT_AUTOSETAPPICON = true;
 	public static final boolean PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING = false;
 
 	// Transport properties

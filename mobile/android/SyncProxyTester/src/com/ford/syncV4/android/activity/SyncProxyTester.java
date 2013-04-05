@@ -410,6 +410,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				.findViewById(R.id.selectprotocol_tcpPort);
 		final CheckBox autoReconnectCheckBox = (CheckBox) view
 				.findViewById(R.id.selectprotocol_checkAutoReconnect);
+		final CheckBox autoSetAppIconCheckBox = (CheckBox) view
+				.findViewById(R.id.selectprotocol_checkAutoSetAppIcon);
 
 		ipAddressEditText.setEnabled(false);
 		tcpPortEditText.setEnabled(false);
@@ -454,6 +456,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		boolean autoReconnect = prefs.getBoolean(
 				Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
 				Const.Transport.PREFS_DEFAULT_TRANSPORT_RECONNECT_DEFAULT);
+		boolean autoSetAppIcon = prefs.getBoolean(
+				Const.PREFS_KEY_AUTOSETAPPICON,
+				Const.PREFS_DEFAULT_AUTOSETAPPICON);
 
 		int radioButtonId = R.id.selectprotocol_radioV1;
 		switch (protocolVersion) {
@@ -480,6 +485,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		ipAddressEditText.setText(ipAddress);
 		tcpPortEditText.setText(String.valueOf(tcpPort));
 		autoReconnectCheckBox.setChecked(autoReconnect);
+		autoSetAppIconCheckBox.setChecked(autoSetAppIcon);
 
 		new AlertDialog.Builder(context)
 				.setTitle("Please select protocol properties")
@@ -514,6 +520,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								.getText().toString());
 						boolean autoReconnect = autoReconnectCheckBox
 								.isChecked();
+						boolean autoSetAppIcon = autoSetAppIconCheckBox
+								.isChecked();
 
 						// save the configs
 						boolean success = prefs
@@ -533,7 +541,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										tcpPort)
 								.putBoolean(
 										Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
-										autoReconnect).commit();
+										autoReconnect)
+								.putBoolean(Const.PREFS_KEY_AUTOSETAPPICON,
+										autoSetAppIcon).commit();
 						if (!success) {
 							Log.w(logTag,
 									"Can't save selected protocol properties");

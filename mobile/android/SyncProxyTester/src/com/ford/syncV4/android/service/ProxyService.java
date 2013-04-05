@@ -309,6 +309,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				Const.PREFS_DEFAULT_PROTOCOLVERSION);
 	}
 	
+	private boolean getAutoSetAppIconFlag() {
+		return getSharedPreferences(Const.PREFS_NAME, 0).getBoolean(
+				Const.PREFS_KEY_AUTOSETAPPICON,
+				Const.PREFS_DEFAULT_AUTOSETAPPICON);
+	}
+	
 	public void onDestroy() {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("ProxyService.onDestroy()", Log.INFO);
@@ -558,11 +564,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 						_msgAdapter.logMessage(putFile, true);
 						getProxyInstance().sendRPCRequest(putFile);
 						
-						SetAppIcon setAppIcon = new SetAppIcon();
-						setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-						setAppIcon.setCorrelationID(nextCorrID());
-						_msgAdapter.logMessage(setAppIcon, true);
-						getProxyInstance().sendRPCRequest(setAppIcon);
+						if (getAutoSetAppIconFlag()) {
+							SetAppIcon setAppIcon = new SetAppIcon();
+							setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+							setAppIcon.setCorrelationID(nextCorrID());
+							_msgAdapter.logMessage(setAppIcon, true);
+							getProxyInstance().sendRPCRequest(setAppIcon);
+						}
 						
 						// upload turn icons
 						sendIconFromResource(R.drawable.turn_left);
