@@ -1,13 +1,37 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.SDLMediaModel
+ * @name SDL.SDLMediaModel
  * @desc SDL data model
  * @category Model
  * @filesource app/model/media/SDLMediaModel.js
- * @version 2.0
- * @author Andriy Melnik
+ * @version 1.0
  */
 
-MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
+SDL.SDLMediaModel = SDL.SDLAppModel.extend( {
 
     init: function() {
 
@@ -40,14 +64,14 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
     /**
      * Flag for media playing state
      * 
-     * @param {Bool}
+     * @param {Boolean}
      */
     isPlaying: false,
 
     /**
      * Flag for model active state currently used for status bar
      * 
-     * @param {Bool}
+     * @param {Boolean}
      */
     active: false,
 
@@ -78,14 +102,14 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
      * @param {Number}
      */
     onDeleteApplication: function( appId ) {
-        MFT.SDLMediaController.onDeleteApplication( appId );
+        SDL.SDLMediaController.onDeleteApplication( appId );
     },
 
     /**
      * Activate current application model
      */
     turnOnSDL: function() {
-        MFT.SDLMediaController.activateApp( this );
+        SDL.SDLMediaController.activateApp( this );
     },
 
     startTimer: function() {
@@ -144,11 +168,7 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
      */
     sdlSetMediaClockTimer: function( params ) {
 
-        if( params.updateMode == "PAUSE" && this.pause ){
-            return 'IGNORED';
-        }
-
-        if( params.updateMode == "RESUME" && !this.pause ){
+        if( ( params.updateMode == "PAUSE" && this.pause ) || ( params.updateMode == "RESUME" && !this.pause ) ){
             return 'IGNORED';
         }
 
@@ -157,18 +177,13 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
             return 'SUCCESS';
         }
 
-        if( params.updateMode == "COUNTUP" ){
-            this.set( 'countUp', true );
-        }else if( params.updateMode == "COUNTDOWN" ){
-            this.set( 'countUp', false );
-        }
-
         if( params.updateMode == "PAUSE" ){
             this.set( 'pause', true );
         }else if( params.updateMode == "RESUME" ){
             this.set( 'pause', false );
         }else{
             if( params.startTime ){
+                this.set( 'countUp', params.updateMode == "COUNTUP" ? true : false );
                 this.set( 'duration', 0 );
                 this.set( 'duration', params.startTime.hours * 3600 + params.startTime.minutes * 60 + params.startTime.seconds );
             }
@@ -197,7 +212,7 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
         for( i = 0; i < 6; i++ ){
             this.appInfo.set( 'customPresets.' + i, '' );
         }
-        MFT.SDLModel.set( 'protocolVersion2State', false );
+        SDL.SDLModel.set( 'protocolVersion2State', false );
 
     },
 
@@ -233,9 +248,9 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
                     this.appInfo.set( 'customPresets.' + i, '' );
                 }
             }
-            MFT.SDLModel.set( 'protocolVersion2State', true );
+            SDL.SDLModel.set( 'protocolVersion2State', true );
         }else{
-            MFT.SDLModel.set( 'protocolVersion2State', false );
+            SDL.SDLModel.set( 'protocolVersion2State', false );
         }
     }
 } );

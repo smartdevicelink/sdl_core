@@ -1,137 +1,59 @@
-/**
- * @name MFT.ClimateView
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
- * @desc Climate module visual representation
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  * 
- * @category	View
- * @filesource	app/view/climate/ClimateView.js
- * @version		2.0
- *
- * @author		Artem Petrosyan
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
- 
-MFT.TopControls = Em.ContainerView.extend({
-	
-	elementId:			'app_top_menu_cont',
-	
-	childViews: [
-		'controls',
-		'toggleFAQButton'
-	],
-	
-	controls: Em.ContainerView.extend({
-		elementId:		'top_controls',
-		
-		
-		childViews: [
-			'clock',
-			'vSeparator',
-			'toggleHelpButton',
-		],
-		
-		clock: Em.View.extend({
-			elementId:			'clock',
-			
-			classNameBindings: ['FLAGS.HELP_MODE::mcs'],
-					
-			afterRender: function() {
-				MFT.SettingsController.getTime(new Date);
-												
-				setInterval(function(){
-					MFT.SettingsController.getTime(new Date);
-				},60000);
-			},
-			
-			template: Em.Handlebars.compile('<div id="time_num">{{MFT.SettingsController.time}}</div>'),
-			
-			
-			disableClock: function(){
-				if(MFT.States.settings.clock.active){
-					MFT.SettingsController.set('time','--:--');
-				}else{
-					MFT.SettingsController.getTime(new Date);
-				}
-			}.observes('MFT.States.settings.clock.active'),
-			
-			
-			actionDown: function(event) {
-				// Click handeler
-				MFT.States.goToState('settings.clock');
-				
-				// return if state view loaded
-				if ( MFT.States.currentState.viewLoaded ) {
-					return;
-				}
-				
-				// add observer on active state to hide left menu
-				MFT.States.currentState.addObserver('active', function(){
-					if (this.active) {
-						MFT.SettingsClockView.listClockSettings.set('currentPage',1);
-					}
-				});				
-			}
-		}),
-		
-		vSeparator: Em.View.extend({
-			elementId:	'top_controls_separator',
-			
-			classNameBindings: ['FLAGS.HELP_MODE::hidden'],
-			
-			classNames: 'help_dev'
-		}),
-		
-		toggleHelpButton: MFT.Button.extend({
-			elementId:		'help',
-			
-			indClassBinding:	Em.Binding.oneWay('MFT.helpMode'),
-			
-			hidden:			!FLAGS.HELP_MODE,
-					
-			template: Em.Handlebars.compile(
-				'<div class="inact" {{bindAttr class="view.indClass:act"}}></div>'+
-				'<div id="sing" class="white" {{bindAttr class="view.indClass:yellow"}}></div>'+
-				'<div id="help-p"></div>'
-			),
-			
-			/** Toggle Help mode */
-			actionDown: function(event) {
+/**
+ * @name SDL.ClimateView
+ * @desc Climate module visual representation
+ * @category View
+ * @filesource app/view/climate/ClimateView.js
+ * @version 1.0
+ */
 
-				MFT.toggleProperty('helpMode');
-				
-				/** Switch off video player if active */
-				if(MFT.VideoPlayerController.model.isReady) MFT.VideoPlayerController.stop(); 
-				
-				/** Close FAQ state if active */
-				if( MFT.States.faq.active ) {
-					MFT.States.goToState(MFT.States.faq.from);
-				}
-				
-				this._super();
-			}
-		})
-	}),
+SDL.TopControls = Em.ContainerView.extend( {
 
-	toggleFAQButton: MFT.Button.extend({
-		elementId:			'faq_btn',
-		
-		// for helpmode
-		classNames:			['faq_show'],
-		
-		activeBinding:		Em.Binding.oneWay('MFT.States.faq.active'),
-			
-		template: Ember.Handlebars.compile(
-			'<div id="faq_btn_c"></div>'+
-			'<div class="ind_inact" {{bindAttr class="view.active:ind_act"}}></div>'
-		),
-		
-		actionDown: function() {
-			if (MFT.States.faq.active) {
-				MFT.States.goToState(MFT.States.faq.from);
-			} else {
-				MFT.States.goToState('faq');
-			}
-			
-			this._super();
-		}
-	})
-});
+    elementId: 'app_top_menu_cont',
+
+    childViews:
+        [
+            'controls'
+        ],
+
+    controls: Em.ContainerView.extend( {
+        elementId: 'top_controls',
+
+        childViews:
+            [
+                'clock'
+            ],
+
+        clock: Em.View.extend( {
+            elementId: 'clock',
+
+            template: Em.Handlebars.compile( '<div id="time_num">1:47 86°</div>' )
+
+        } )
+    } )
+} );

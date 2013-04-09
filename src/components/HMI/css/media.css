@@ -148,11 +148,9 @@
 /*CD,USB*/
 
 #media_cdButton, #media_usbButton {
-	top: 30px;
 	font-size: 18px;
 	padding-left: 48px;
 	line-height: 48px;
-	display: none;
 }
 
 #media_options_view.help-mode .toogleButtonContainer{
@@ -2723,8 +2721,11 @@
 .appIco { background:url(../images/info/info_leftMenu_apps_ico.png) no-repeat !important}
 
 #media_player_view_container{
-	left:152px;
-	top:55px;
+	background: url(../images/media/player_view.png) no-repeat;
+	width: 635px;
+	height: 323px;
+	top: 70px;
+	left: 161px;
 	z-index:501;
 }
 

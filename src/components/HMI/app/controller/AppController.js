@@ -1,61 +1,37 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.AppController
- * 
+ * @name SDL.AppController
  * @desc App general logic
- * 
- * @category	Controller
- * @filesource	app/controller/AppController.js
- * @version		2.0
- *
- * @author		Igor Zhavoronkin
+ * @category Controller
+ * @filesource app/controller/AppController.js
+ * @version 1.0
  */
 
-MFT.AppController = Em.Object.create({
-	
-	/****   System Settings  Popup Logic   *****/
-	// visual representation variable for system select view popup
-	active: false,
-	// default vehicle option
-	vehicleType: 'edge',
-	// default navigation option
-	navigationEnabled: true,
-	
-	/* Buttons array*/
-	buttons: MFT.SelectSystempopup.content.climate_style.list._childViews,
-	/* Set Active state to pressed button */
-	setActiveButton: function(button){
-		//remove active state for prev button
-		this.buttons.setEach('active',false);
-		// set active to current button
-		button.set('active',true);
-		// set Vechicle Model
-		this.set('vehicleType', button.elementId);
-		
-	},
-	
-	onYespress: function(){
-		this.set('navigationEnabled',true);
-	},
-	
-	onNopress: function(){
-		this.set('navigationEnabled',false);
-	},
-	
-	onSettingsSubmit: function(view){
-		// sen selected options to backend
-		FFW.Backend.set('isNavigationEnabled',this.navigationEnabled);
-		FFW.Backend.set('vehicleModel', this.vehicleType);
-		//remove system settings view
-		view._parentView.remove();
-		// save selected options
-		FFW.Backend.saveVehicleModel();
-		FFW.Backend.saveIsNavigationEnabled();
-	},
-		
-	/****   END System Settings  Popup Logic   *****/
-	
-	// Flag to determine first launch of welcome orientation video in order to show system settings popup on video end
-	
-	wo_video_first_launch: false
-	
-});
+SDL.AppController = Em.Object.create( {
+    active: false
+} );

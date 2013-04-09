@@ -1,13 +1,38 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.SDLMediaController
+ * @name SDL.SDLMediaController
  * @desc SDL Media Controller logic
  * @category Controller
  * @filesource app/controller/sdl/SDLMediaController.js
  * @version 1.0
- * @author Andriy Melnyk
  */
 
-MFT.SDLMediaController = Em.Object.create( {
+SDL.SDLMediaController = Em.Object.create( {
 
     /**
      * Current Media application id
@@ -21,7 +46,7 @@ MFT.SDLMediaController = Em.Object.create( {
      */
     currentAppName: function() {
         if( this.currentAppId ){
-            return MFT.SDLController.getApplicationModel( this.currentAppId ).appName;
+            return SDL.SDLController.getApplicationModel( this.currentAppId ).appName;
         }
     }.property( 'this.currentAppId' ),
 
@@ -30,9 +55,9 @@ MFT.SDLMediaController = Em.Object.create( {
      */
     currentAppIcon: function() {
         if( this.currentAppId ){
-            return MFT.SDLController.getApplicationModel( this.currentAppId ).appIcon;
+            return SDL.SDLController.getApplicationModel( this.currentAppId ).appIcon;
         }
-    }.property( 'this.currentAppId', 'MFT.SDLAppController.model.appIcon' ),
+    }.property( 'this.currentAppId', 'SDL.SDLAppController.model.appIcon' ),
 
     /** Call notification OnCommand on UIRPC */
     onCommand: function( element ) {
@@ -51,13 +76,13 @@ MFT.SDLMediaController = Em.Object.create( {
         this.set( 'currentAppId', applicationModel.appId );
 
         // set active model
-        MFT.SDLAppController.set( 'model', applicationModel );
+        SDL.SDLAppController.set( 'model', applicationModel );
 
         // FFW.BasicCommunication.ActivateApp( applicationModel.appId );
 
-        MFT.MediaController.listDown();
+        // SDL.MediaController.listDown();
 
-        MFT.MediaController.turnOnSDL();
+        SDL.MediaController.turnOnSDL();
 
     },
 
@@ -66,19 +91,19 @@ MFT.SDLMediaController = Em.Object.create( {
      */
     restoreCurrentApp: function() {
 
-        if( MFT.SDLAppController.model.appId === this.currentAppId ){
+        if( SDL.SDLAppController.model.appId === this.currentAppId ){
             FFW.BasicCommunication.ActivateApp( this.currentAppId );
             return;
         }
-        this.activateApp( MFT.SDLController.getApplicationModel( this.currentAppId ) );
+        this.activateApp( SDL.SDLController.getApplicationModel( this.currentAppId ) );
     },
 
     /** SDL perform interaction action from VR */
     onVRPerformInteractionChoosed: function( element ) {
 
-        if( MFT.States.media.sdl.sdlperforminteractionchoise.active ){
+        if( SDL.States.media.sdl.sdlperforminteractionchoise.active ){
             FFW.VR.onChoise( element.choiceID );
-            MFT.States.back();
+            SDL.States.back();
         }
 
     },
@@ -86,9 +111,9 @@ MFT.SDLMediaController = Em.Object.create( {
     /** SDL perform interaction action */
     onPerformInteractionChoosed: function( element ) {
 
-        if( MFT.States.media.sdl.sdlperforminteractionchoise.active ){
+        if( SDL.States.media.sdl.sdlperforminteractionchoise.active ){
             FFW.UI.interactionResponse( "SUCCESS", element.choiceID );
-            MFT.States.back();
+            SDL.States.back();
         }
 
     },
@@ -99,7 +124,7 @@ MFT.SDLMediaController = Em.Object.create( {
      * @param {Number}
      */
     deactivateApp: function() {
-        MFT.SDLController.getApplicationModel( this.currentAppId ).deactivateApp();
+        SDL.SDLController.getApplicationModel( this.currentAppId ).deactivateApp();
     },
 
     /**
@@ -110,13 +135,11 @@ MFT.SDLMediaController = Em.Object.create( {
     onDeleteApplication: function( appId ) {
         if( this.currentAppId == appId ){
 
-            if( MFT.States.media.sdlmedia.active || MFT.SDLAppController.model.active ){
+            if( SDL.States.media.sdlmedia.active || SDL.SDLAppController.model.active ){
 
-                MFT.SDLAppController.model.set( 'active', false );
-                
-                MFT.States.goToState( 'info.apps' );
+                SDL.States.transitionTo( 'info.apps' );
 
-                MFT.MediaController.set( 'activeState', 'media.avin' );
+                SDL.MediaController.set( 'activeState', 'media.player' );
             }
 
             this.set( 'currentAppId', 0 );

@@ -1,13 +1,38 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.SDLController
+ * @name SDL.SDLController
  * @desc Main SDL Controller
  * @category Controller
  * @filesource app/controller/sdl/SDLController.js
  * @version 1.0
- * @author Artem Petrosyan
  */
 
-MFT.SDLController = Em.Object.create( {
+SDL.SDLController = Em.Object.create( {
 
     /**
      * Current system context
@@ -16,30 +41,30 @@ MFT.SDLController = Em.Object.create( {
      */
     sysContext: function() {
 
-        if( MFT.VRPopUp.VRActive ){
+        if( SDL.VRPopUp.VRActive ){
             return 'VRSESSION';
         }
 
-        if( MFT.AlertPopUp.active ){
+        if( SDL.AlertPopUp.active ){
             return 'ALERT';
         }
 
-        if( MFT.TBTClientStateView.active || MFT.VehicleInfo.active || MFT.DriverDistraction.active ){
+        if( SDL.TBTClientStateView.active || SDL.VehicleInfo.active || SDL.DriverDistraction.active ){
             return 'HMI_OBSCURED';
         }
 
-        if( MFT.OptionsView.active ){
+        if( SDL.OptionsView.active ){
             return 'MENU';
         }
 
-        if( MFT.States.info.nonMedia.active || MFT.States.media.sdlmedia.active ){
+        if( SDL.States.info.nonMedia.active || SDL.States.media.sdlmedia.active ){
             return 'MAIN';
         }else{
             return 'MENU';
         }
 
-    }.property( 'MFT.DriverDistraction.active', 'MFT.OptionsView.active', 'MFT.VRPopUp.VRActive', 'MFT.AlertPopUp.active', 'MFT.TBTClientStateView.active',
-                    'MFT.VehicleInfo.active', 'MFT.States.info.nonMedia.active', 'MFT.States.media.sdlmedia.active' ),
+    }.property( 'SDL.DriverDistraction.active', 'SDL.OptionsView.active', 'SDL.VRPopUp.VRActive', 'SDL.AlertPopUp.active', 'SDL.TBTClientStateView.active',
+                    'SDL.VehicleInfo.active', 'SDL.States.info.nonMedia.active', 'SDL.States.media.sdlmedia.active' ),
 
     /**
      * List of SDL application models
@@ -47,8 +72,8 @@ MFT.SDLController = Em.Object.create( {
      * @type object
      */
     applicationModels: {
-        0: MFT.SDLMediaModel,
-        1: MFT.SDLNonMediaModel
+        0: SDL.SDLMediaModel,
+        1: SDL.SDLNonMediaModel
     },
 
     /**
@@ -61,23 +86,23 @@ MFT.SDLController = Em.Object.create( {
         switch( element.groupName ){
 
             case "AlertPopUp": {
-                MFT.AlertPopUp.deactivate( true );
+                SDL.AlertPopUp.deactivate( true );
                 break;
             }
             case "ScrollableMessage": {
-                MFT.ScrollableMessage.deactivate();
+                SDL.ScrollableMessage.deactivate();
                 break;
             }
             case "TurnByTurnView": {
-                MFT.TurnByTurnView.deactivate();
+                SDL.TurnByTurnView.deactivate();
                 break;
             }
             case "NonMediaView": {
-                MFT.SDLController.getApplicationModel( element.appId ).clearAppOverLay();
+                SDL.SDLController.getApplicationModel( element.appId ).clearAppOverLay();
                 break;
             }
             case "MediaView": {
-                MFT.SDLController.getApplicationModel( element.appId ).clearAppOverLay();
+                SDL.SDLController.getApplicationModel( element.appId ).clearAppOverLay();
                 break;
             }
 
@@ -88,7 +113,7 @@ MFT.SDLController = Em.Object.create( {
      * Action to show Voice Recognition PopUp
      */
     activateVRPopUp: function() {
-        MFT.VRPopUp.activateVRPopUp();
+        SDL.VRPopUp.activateVRPopUp();
     },
 
     /**
@@ -101,13 +126,13 @@ MFT.SDLController = Em.Object.create( {
         switch( element.groupName ){
 
             case "AlertPopUp": {
-                MFT.AlertPopUp.deactivate();
-                MFT.SDLController.getApplicationModel( element.appId ).turnOnSDL();
+                SDL.AlertPopUp.deactivate();
+                SDL.SDLController.getApplicationModel( element.appId ).turnOnSDL();
                 break;
             }
             case "ScrollableMessage": {
-                MFT.ScrollableMessage.deactivate();
-                MFT.SDLController.getApplicationModel( element.appId ).turnOnSDL();
+                SDL.ScrollableMessage.deactivate();
+                SDL.SDLController.getApplicationModel( element.appId ).turnOnSDL();
                 break;
             }
 
@@ -124,11 +149,11 @@ MFT.SDLController = Em.Object.create( {
         switch( element.groupName ){
 
             case "AlertPopUp": {
-                MFT.AlertPopUp.set( 'timer', 0 );
+                SDL.AlertPopUp.set( 'timer', 0 );
                 break;
             }
             case "ScrollableMessage": {
-                MFT.ScrollableMessage.set( 'timer', 0 );
+                SDL.ScrollableMessage.set( 'timer', 0 );
                 break;
             }
 
@@ -139,7 +164,7 @@ MFT.SDLController = Em.Object.create( {
      * Method to close AlertMeneuverPopUp view
      */
     closeAlertMeneuverPopUp: function() {
-        MFT.AlertManeuverPopUp.set( 'activate', false );
+        SDL.AlertManeuverPopUp.set( 'activate', false );
     },
 
     /**
@@ -148,7 +173,7 @@ MFT.SDLController = Em.Object.create( {
      * @param {Number} appId AppId of activated sdl application
      */
     tbtTurnList: function( appId ) {
-        MFT.TBTTurnList.activate( appId );
+        SDL.TBTTurnList.activate( appId );
     },
 
     /**
@@ -157,7 +182,7 @@ MFT.SDLController = Em.Object.create( {
      * @param {String}
      */
     tbtClientStateSeleced: function( state ) {
-        FFW.UI.onTBTClientState( state, MFT.SDLAppController.model.appId );
+        FFW.UI.onTBTClientState( state, SDL.SDLAppController.model.appId );
     },
 
     /**
@@ -213,7 +238,7 @@ MFT.SDLController = Em.Object.create( {
      * @param {String} result Result code
      */
     performAudioPassThruResponse: function( result ) {
-        MFT.SDLModel.set( 'AudioPassThruState', false );
+        SDL.SDLModel.set( 'AudioPassThruState', false );
         FFW.UI.sendUIResult( result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru" );
     },
 
@@ -222,17 +247,17 @@ MFT.SDLController = Em.Object.create( {
      * to UIRPC
      */
     onLanguageChangeUI: function() {
-        FFW.UI.OnLanguageChange( MFT.SDLModel.hmiUILanguage );
-    }.observes( 'MFT.SDLModel.hmiUILanguage' ),
+        FFW.UI.OnLanguageChange( SDL.SDLModel.hmiUILanguage );
+    }.observes( 'SDL.SDLModel.hmiUILanguage' ),
 
     /**
      * Method to set language for TTS and VR components with parameters sent
      * from SDLCore to UIRPC
      */
     onLanguageChangeTTSVR: function() {
-        FFW.TTS.OnLanguageChange( MFT.SDLModel.hmiTTSVRLanguage );
-        FFW.VR.OnLanguageChange( MFT.SDLModel.hmiTTSVRLanguage );
-    }.observes( 'MFT.SDLModel.hmiTTSVRLanguage' ),
+        FFW.TTS.OnLanguageChange( SDL.SDLModel.hmiTTSVRLanguage );
+        FFW.VR.OnLanguageChange( SDL.SDLModel.hmiTTSVRLanguage );
+    }.observes( 'SDL.SDLModel.hmiTTSVRLanguage' ),
 
     /**
      * Register application
@@ -242,7 +267,7 @@ MFT.SDLController = Em.Object.create( {
      */
     registerApplication: function( params, applicationType ) {
 
-        MFT.SDLModel.get( 'registeredApps' ).pushObject( MFT.SDLController.applicationModels[applicationType].create( {
+        SDL.SDLModel.get( 'registeredApps' ).pushObject( SDL.SDLController.applicationModels[applicationType].create( {
             appId: params.appId,
             appName: params.appName,
             deviceName: params.deviceName
@@ -259,7 +284,13 @@ MFT.SDLController = Em.Object.create( {
 
         this.getApplicationModel( appId ).onDeleteApplication( appId );
 
-        MFT.SDLModel.get( 'registeredApps' ).shiftObject( MFT.SDLModel.registeredApps.filterProperty( 'appId', appId )[0] );
+        this.getApplicationModel( appId ).set( 'active', false );
+
+        var index = SDL.SDLModel.registeredApps.indexOf( SDL.SDLModel.registeredApps.filterProperty( 'appId', appId )[0] );
+
+        SDL.SDLModel.registeredApps.replace( index, 1 );
+
+        this.set( 'model', null );
 
     },
 
@@ -267,23 +298,23 @@ MFT.SDLController = Em.Object.create( {
      * SDL Driver Distraction ON/OFF switcher
      */
     selectDriverDistraction: function() {
-        if( MFT.SDLModel.driverDistractionState ){
+        if( SDL.SDLModel.driverDistractionState ){
             FFW.UI.onDriverDistraction( "DD_ON" );
         }else{
             FFW.UI.onDriverDistraction( "DD_OFF" );
         }
-    }.observes( 'MFT.SDLModel.driverDistractionState' ),
+    }.observes( 'SDL.SDLModel.driverDistractionState' ),
 
     /**
      * SDL Protocol Version 2 ON/OFF switcher
      */
     selectProtocolVersion: function() {
-        if( MFT.SDLModel.protocolVersion2State ){
+        if( SDL.SDLModel.protocolVersion2State ){
             FFW.BasicCommunication.OnVersionChanged( 2 );
         }else{
             FFW.BasicCommunication.OnVersionChanged( 1 );
         }
-    }.observes( 'MFT.SDLModel.protocolVersion2State' ),
+    }.observes( 'SDL.SDLModel.protocolVersion2State' ),
 
     /**
      * Get application model
@@ -291,28 +322,28 @@ MFT.SDLController = Em.Object.create( {
      * @param {Number}
      */
     getApplicationModel: function( applicationId ) {
-        return MFT.SDLModel.registeredApps.filterProperty( 'appId', applicationId )[0];
+        return SDL.SDLModel.registeredApps.filterProperty( 'appId', applicationId )[0];
     },
 
     /**
      * Function returns ChangeDeviceView back to previous state
      */
     turnChangeDeviceViewBack: function() {
-        MFT.States.goToState( 'info.apps' );
+        SDL.States.transitionTo( 'info.apps' );
     },
 
     /**
      * Enter screen vith list of devices application model
      */
     onGetDeviceList: function() {
-        MFT.States.goToState( 'info.devicelist' );
+        SDL.States.transitionTo( 'info.devicelist' );
         FFW.BasicCommunication.getDeviceList();
     },
 
     /**
      * Send notification if device was choosed
      * 
-     * @param element: MFT.Button
+     * @param element: SDL.Button
      */
     onDeviceChoosed: function( element ) {
         FFW.UI.OnDeviceChosen( element.deviceName );
@@ -326,7 +357,7 @@ MFT.SDLController = Em.Object.create( {
      * @param {Object}
      */
     onGetAppList: function( appList ) {
-        MFT.SDLModel.onGetAppList( appList );
+        SDL.SDLModel.onGetAppList( appList );
     },
 
     /**
@@ -409,7 +440,7 @@ MFT.SDLController = Em.Object.create( {
     onSoftButtonOkActionUp: function( name ) {
         FFW.Buttons.buttonEvent( name, "BUTTONUP" );
         FFW.Buttons.buttonPressed( name, "SHORT" );
-        MFT.SDLAppController.model.set( 'isPlaying', !MFT.SDLAppController.model.isPlaying );
+        SDL.SDLAppController.model.set( 'isPlaying', !SDL.SDLAppController.model.isPlaying );
     },
 
     /**

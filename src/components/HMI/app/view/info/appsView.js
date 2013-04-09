@@ -1,27 +1,45 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.InfoAppsview
+ * @name SDL.InfoAppsview
  * @desc Info Apps visual representation
  * @category View
  * @filesource app/view/info/AppsView.js
- * @version 2.0
- * @author Maksym Gerashchenko
+ * @version 1.0
  */
 
-MFT.InfoAppsView = Em.ContainerView.create( MFT.LoadableView, {
+SDL.InfoAppsView = Em.ContainerView.create( {
 
     elementId: 'info_apps',
 
     classNameBindings:
         [
-            'MFT.helpMode',
-            'MFT.localization'
+            'SDL.States.info.apps.active:active_state:inactive_state'
         ],
-
-    appsActive: function() {
-        if( MFT.States.info.apps.active == true ){
-            FFW.BasicCommunication.getAppList();
-        }
-    }.observes( 'MFT.States.info.apps.active' ),
 
     childViews:
         [
@@ -34,13 +52,6 @@ MFT.InfoAppsView = Em.ContainerView.create( MFT.LoadableView, {
         ],
 
     /**
-     * Method to check registered apps for the first activation
-     */
-    afterRender: function() {
-        // this.showAppList();
-    },
-
-    /**
      * Function to add application to application list
      */
     showAppList: function() {
@@ -49,94 +60,94 @@ MFT.InfoAppsView = Em.ContainerView.create( MFT.LoadableView, {
 
         this.listOfApplications.list.refresh();
 
-        var i, apps = MFT.SDLModel.registeredApps, appIndex;
+        var i, apps = SDL.SDLModel.registeredApps, appIndex;
 
         for( i = 0; i < apps.length; i++ ){
 
-            appIndex = MFT.SDLModel.registeredApps.indexOf( apps[i] );
+            appIndex = SDL.SDLModel.registeredApps.indexOf( apps[i] );
 
-            this.get( 'listOfApplications.list.childViews' ).pushObject( MFT.Button.create( {
+            this.get( 'listOfApplications.list.childViews' ).pushObject( SDL.Button.create( {
                 action: 'onActivateSDLApp',
-                target: 'MFT.SDLController',
+                target: 'SDL.SDLController',
                 text: apps[i].appName + " - " + apps[i].deviceName,
                 appName: apps[i].appName,
                 appId: apps[i].appId,
                 classNames: 'list-item button',
-                iconBinding: 'MFT.SDLModel.registeredApps.' + appIndex + '.appIcon'
+                iconBinding: 'SDL.SDLModel.registeredApps.' + appIndex + '.appIcon'
             } ) );
         }
 
-        // MFT.InfoAppsView.listOfApplications.list.refresh();
+        // SDL.InfoAppsView.listOfApplications.list.refresh();
 
-    }.observes( 'MFT.SDLModel.registeredApps.@each' ),
+    }.observes( 'SDL.SDLModel.registeredApps.@each' ),
 
-    vehicleHealthReport: MFT.Button.extend( {
+    vehicleHealthReport: SDL.Button.extend( {
         goToState: 'vehicle.healthReport',
         classNames: 'button vehicleHealthReport leftButtons',
         icon: 'images/info/ico_vehicle.png',
-        textBinding: 'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+        textBinding: 'SDL.locale.label.view_info_apps_vehicle_VehicleHealthReport',
         elementId: 'infoAppsVehicleHealthReport',
         arrow: true,
         action: 'onState',
-        target: 'MFT.SettingsController',
-        disabledBinding: 'MFT.helpMode',
+        target: 'SDL.SettingsController',
+        disabledBinding: 'SDL.helpMode',
         onDown: false
     } ),
 
-    Asist911: MFT.Button.extend( {
+    Asist911: SDL.Button.extend( {
         goToState: 'help.helpAssist',
         classNames: 'button Asist911 leftButtons',
         icon: 'images/info/ico_assist.png',
-        textBinding: 'MFT.locale.label.view_info_apps_911Assist',
+        textBinding: 'SDL.locale.label.view_info_apps_911Assist',
         elementId: 'infoAppsAsist911',
         arrow: true,
         action: 'onState',
-        target: 'MFT.SettingsController',
-        disabledBinding: 'MFT.helpMode',
+        target: 'SDL.SettingsController',
+        disabledBinding: 'SDL.helpMode',
         onDown: false
     } ),
 
-    installButton: MFT.Button.extend( {
+    installButton: SDL.Button.extend( {
         goToState: 'settings.system.installApplications',
         icon: 'images/info/ico_info_install.png',
-        textBinding: 'MFT.locale.label.view_info_apps_vehicle_InstallApplicationsUp',
+        textBinding: 'SDL.locale.label.view_info_apps_vehicle_InstallApplicationsUp',
         elementId: 'infoAppsInstallButton',
         classNames: 'button installButton leftButtons',
         arrow: true,
         action: 'onState',
-        target: 'MFT.SettingsController',
-        disabledBinding: 'MFT.helpMode',
+        target: 'SDL.SettingsController',
+        disabledBinding: 'SDL.helpMode',
         onDown: false
     } ),
 
-    findNewApps: MFT.Button.extend( {
+    findNewApps: SDL.Button.extend( {
         goToState: 'settings.system.installApplications',
         icon: 'images/sdl/new_apps.png',
-        textBinding: 'MFT.locale.label.view_info_apps_vehicle_FindNewApplications',
+        textBinding: 'SDL.locale.label.view_info_apps_vehicle_FindNewApplications',
         elementId: 'infoAppsFindNewApps',
         classNames: 'button findNewApps leftButtons',
         arrow: true,
         action: 'findNewApps',
-        target: 'MFT.SDLController',
-        disabledBinding: 'MFT.helpMode',
+        target: 'SDL.SDLController',
+        disabledBinding: 'SDL.helpMode',
         onDown: false
     // templateName: 'text'
     } ),
 
-    getDeviceList: MFT.Button.extend( {
+    getDeviceList: SDL.Button.extend( {
         icon: 'images/sdl/devices.png',
-        textBinding: 'MFT.locale.label.view_info_apps_vehicle_GetDeviceList',
+        textBinding: 'SDL.locale.label.view_info_apps_vehicle_GetDeviceList',
         elementId: 'infoAppsGetDeviceList',
         classNames: 'button getDeviceList leftButtons',
         arrow: true,
         action: 'onGetDeviceList',
-        target: 'MFT.SDLController',
-        // disabledBinding: 'MFT.helpMode',
+        target: 'SDL.SDLController',
+        // disabledBinding: 'SDL.helpMode',
         onDown: false
     // templateName: 'text'
     } ),
 
-    listOfApplications: MFT.List.extend( {
+    listOfApplications: SDL.List.extend( {
 
         elementId: 'info_apps_list',
 

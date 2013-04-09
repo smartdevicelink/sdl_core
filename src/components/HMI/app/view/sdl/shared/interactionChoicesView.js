@@ -1,13 +1,38 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.InteractionChoicesView
+ * @name SDL.InteractionChoicesView
  * @desc Interaction Choices visual representation
  * @category View
  * @filesource app/view/sdl/shared/interactionChoicesView.js
  * @version 1.0
- * @author Artem Petrosyan
  */
 
-MFT.InteractionChoicesView = MFT.SDLAbstractView.create( {
+SDL.InteractionChoicesView = SDL.SDLAbstractView.create( {
 
     elementId: 'perform_interaction_view',
 
@@ -18,7 +43,7 @@ MFT.InteractionChoicesView = MFT.SDLAbstractView.create( {
             'listOfChoices'
         ],
 
-    listOfChoices: MFT.List.extend( {
+    listOfChoices: SDL.List.extend( {
         elementId: 'perform_interaction_view_list',
         itemsOnPage: 5,
         items: []
@@ -40,7 +65,7 @@ MFT.InteractionChoicesView = MFT.SDLAbstractView.create( {
         this.set( 'active', false );
 
         if( ABORTED ){
-            MFT.SDLController.interactionChoiseCloseResponse( 'ABORTED', this.performInteractionRequestId );
+            SDL.SDLController.interactionChoiseCloseResponse( 'ABORTED', this.performInteractionRequestId );
         }
     },
 
@@ -72,12 +97,12 @@ MFT.InteractionChoicesView = MFT.SDLAbstractView.create( {
         // temp for testing
         for( i = 0; i < length; i++ ){
             this.listOfChoices.items.push( {
-                type: MFT.Button,
+                type: SDL.Button,
                 params: {
                     text: data[i].menuName,
                     choiceId: data[i].choiceID,
                     action: 'onChoiceInteraction',
-                    target: 'MFT.SDLAppController',
+                    target: 'SDL.SDLAppController',
                     performInteractionRequestId: performInteractionRequestId,
                     templateName: 'text'
                 }

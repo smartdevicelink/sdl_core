@@ -1,96 +1,130 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.ScrollableMessage
- * 
+ * @name SDL.ScrollableMessage
  * @desc ScrollableMessage module visual representation
- * 
- * @category    View
- * @filesource  app/view/sdl/shared/scrollableMessage.js
- * @version     1.0
- *
- * @author      Andriy Melnik
+ * @category View
+ * @filesource app/view/sdl/shared/scrollableMessage.js
+ * @version 1.0
  */
 
-MFT.ScrollableMessage = MFT.SDLAbstractView.create({
+SDL.ScrollableMessage = SDL.SDLAbstractView.create( {
 
-    elementId:          'ScrollableMessage',
+    elementId: 'ScrollableMessage',
 
-    classNames:         'ScrollableMessage',
+    classNames: 'ScrollableMessage',
 
-    classNameBindings:  ['active:active'],
+    classNameBindings:
+        [
+            'active:active'
+        ],
 
     /**
      * Id of current request
+     * 
      * @type {Number}
      */
-    messageRequestId:     null,
+    messageRequestId: null,
 
-    active:             false,
+    active: false,
 
-    appId:              null,
+    appId: null,
 
-    timer:              null,
+    timer: null,
 
-    childViews: [
-        'backButton',
-        'captionText',
-        'softButtons',
-        'listOfCommands'
-    ],
+    childViews:
+        [
+            'backButton',
+            'captionText',
+            'softButtons',
+            'listOfCommands'
+        ],
 
     /**
      * Deactivate View
-     * @param {Object} ABORTED Parameter to indicate status for UI.ScrollableMessageResponse
+     * 
+     * @param {Object} ABORTED Parameter to indicate status for
+     *            UI.ScrollableMessageResponse
      */
     deactivate: function( ABORTED ) {
-        clearTimeout(this.timer);
-        this.set('active',false);
+        clearTimeout( this.timer );
+        this.set( 'active', false );
 
-        MFT.SDLController.scrollableMessageResponse( ABORTED ? 'ABORTED' : 'SUCCESS', this.messageRequestId );
+        SDL.SDLController.scrollableMessageResponse( ABORTED ? 'ABORTED' : 'SUCCESS', this.messageRequestId );
     },
 
-    activate: function( appName, params, messageRequestId ){
-        if(appName){
-            
+    activate: function( appName, params, messageRequestId ) {
+        if( appName ){
+
             var self = this;
-            
+
             this.set( 'messageRequestId', messageRequestId );
-            this.set('captionText.content',appName);
+            this.set( 'captionText.content', appName );
             this.softButtons.addItems( params.softButtons, params.appId );
-            this.set('listOfCommands.items', params.scrollableMessageBody );
-            this.set('active',true);
-            clearTimeout(this.timer);
-            this.timer = setTimeout(
-                function(){
-                    self.deactivate();
-                }, params.timeout);
+            this.set( 'listOfCommands.items', params.scrollableMessageBody );
+            this.set( 'active', true );
+            clearTimeout( this.timer );
+            this.timer = setTimeout( function() {
+                self.deactivate();
+            }, params.timeout );
         }
     },
 
-    softButtons: MFT.MenuList.extend({
+    softButtons: SDL.MenuList.extend( {
 
-        itemsOnPage:    4,
+        itemsOnPage: 4,
 
-        groupName:      "ScrollableMessage",
+        groupName: "ScrollableMessage",
 
-        content: Em.ContainerView.extend({
+        content: Em.ContainerView.extend( {
 
-            classNames: ['content'],
+            classNames:
+                [
+                    'content'
+                ],
 
-            attributeBindings: ['parentView.contentPositon:style'],
+            attributeBindings:
+                [
+                    'parentView.contentPositon:style'
+                ]
 
-        })
-    }),
+        } )
+    } ),
 
-     /**
-      * List for option on SDLOptionsView screen
-      */
-    listOfCommands: MFT.ScrollableText.extend({
+    /**
+     * List for option on SDLOptionsView screen
+     */
+    listOfCommands: SDL.ScrollableText.extend( {
 
-        elementId:      'scrollable_message_list',
+        elementId: 'scrollable_message_list',
 
-        itemsOnPage:    11,
+        itemsOnPage: 11,
 
         /** Items array */
-        items:          'asdasdasd'
-    })
-});
+        items: 'asdasdasd'
+    } )
+} );

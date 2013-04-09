@@ -1,49 +1,60 @@
-/**
- * @name MFT.StatusNavigationView
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
- * @desc Component for Navigation Status bar
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  * 
- * @category	view
- * @filesource	app/view/navigation/StatusNavigationView.js
- * @version		2.0
- *
- * @author		Igor Zhavoronkin
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
-MFT.StatusNavigationView = Em.ContainerView.extend({
-	/** View Id */
-	elementId:	'status_nav',
-	
-	classNames: ['status_bar','hidden'],
+/**
+ * @name SDL.StatusNavigationView
+ * @desc Component for Navigation Status bar
+ * @category view
+ * @filesource app/view/navigation/StatusNavigationView.js
+ * @version 1.0
+ */
+SDL.StatusNavigationView = Em.ContainerView.extend( {
+    /** View Id */
+    elementId: 'status_nav',
 
-	classNameBindings: [
-		'FFW.Backend.isNavigationEnabled:active_state',
-		'MFT.States.navigation.active:selected'
-	],
-	
-	/** Navigation components */		
-	childViews: [
-		'statusOn',
-		'statusHome'
-	],
-	
-	/** Label for Home screen */
-	statusHome: MFT.Label.create({
-		elementId:		'navigation_status_label',
-		classNameBindings: ['MFT.States.home.active:visible'],
-		contentBinding:	    Ember.Binding.oneWay('MFT.locale.label.view_statusNavigation_navigation')
-	}),
-	
-	/** On status view */
-	statusOn: Em.View.create({
-		classNameBindings: ['MFT.States.home.active:hidden_display'],
-		elementId:		'navigation_status_on',
-		template: Em.Handlebars.compile(
-			'<div class="nav_distance">{{MFT.NavigationController.model.distance_left.value}} {{MFT.NavigationController.model.distance_left.longLable}}</div>'+
-			'<img class="ico" src="images/nav/ico_nav_statusbar.png" />'
-		)
-	}),
-	
-	actionUp: function(event){
-		MFT.States.goToState(MFT.NavigationController.activeState);
-	}
-});
+    classNames: 'status_bar',
+
+    /** Navigation components */
+    childViews:
+        [
+            'statusHome'
+        ],
+
+    /** Label for Home screen */
+    statusHome: SDL.Label.create( {
+        elementId: 'navigation_status_label',
+        classNames: 'visible',
+        content: 'Navigation'
+    } ),
+
+    /**
+     * Select phone state should be called when user press phone statusbar
+     */
+    actionUp: function( event ) {
+        SDL.States.transitionTo( 'navigation' );
+    }
+
+} );

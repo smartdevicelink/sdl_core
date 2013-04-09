@@ -1,12 +1,34 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * Reference implementation of BasicCommunication component.
- * 
- * Interface to get or set some essential information from OS.
- * BasicCommunication responsible for handling the basic commands of
- * non-graphical part such as the registration of mobile apps, geting the list
- * of devices and applications and data transfer.
- * 
- * @author Andriy Melnik
+ * Reference implementation of BasicCommunication component. Interface to get or
+ * set some essential information from OS. BasicCommunication responsible for
+ * handling the basic commands of non-graphical part such as the registration of
+ * mobile apps, geting the list of devices and applications and data transfer.
  */
 
 FFW.BasicCommunication = FFW.RPCObserver.create( {
@@ -83,8 +105,8 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
      * Client disconnected.
      */
     onRPCDisconnected: function() {
-        if( MFT.SDLAppController ){
-            MFT.SDLAppController.onSDLDisconected();
+        if( SDL.SDLAppController ){
+            SDL.SDLAppController.onSDLDisconected();
         }
     },
 
@@ -99,14 +121,14 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this._super();
 
         if( response.result.method == "BasicCommunication.GetAppListResponse" ){
-            if( MFT.States.info.active ){
-                MFT.SDLController.onGetAppList( response.result.appList );
+            if( SDL.States.info.active ){
+                SDL.SDLController.onGetAppList( response.result.appList );
             }
         }
 
         if( response.result.method == "BasicCommunication.GetDeviceListResponse" ){
-            if( MFT.States.info.active ){
-                MFT.SDLModel.onGetDeviceList( response.result );
+            if( SDL.States.info.active ){
+                SDL.SDLModel.onGetDeviceList( response.result );
             }
         }
 
@@ -131,17 +153,17 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this._super();
 
         if( notification.method == this.onAppRegisteredNotification ){
-            MFT.SDLModel.onAppRegistered( notification.params.application );
+            SDL.SDLModel.onAppRegistered( notification.params.application );
             this.getAppList();
         }
 
         if( notification.method == this.onAppUnregisteredNotification ){
             // remove app from list
-            MFT.SDLModel.onAppUnregistered( notification.params );
+            SDL.SDLModel.onAppUnregistered( notification.params );
         }
 
         if( notification.method == this.onDeviceListUpdatedNotification ){
-            MFT.SDLModel.onGetDeviceList( notification.params );
+            SDL.SDLModel.onGetDeviceList( notification.params );
         }
     },
 
@@ -172,6 +194,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
 
     /**
      * send notification when version of protocol vas changed
+     * 
      * @params {Number}
      */
     OnVersionChanged: function( version ) {
@@ -213,7 +236,8 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
 
         if( !data ){
             data =
-                ["Data for sending from HMI to Mobile application."
+                [
+                    "Data for sending from HMI to Mobile application."
                 ];
         }
 
@@ -227,7 +251,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
             }
         };
 
-        if( MFT.SDLModel.sendDataExtend ){
+        if( SDL.SDLModel.sendDataExtend ){
             JSONMessage.params["url"] = "ftp://ford-applink.luxoft.com";
             JSONMessage.params["timeout"] = 10000;
         }
@@ -250,7 +274,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
             "id": this.client.idStart,
             "method": "BasicCommunication.ActivateApp",
             "params": {
-                "appName": MFT.SDLController.getApplicationModel( appId ).appName,
+                "appName": SDL.SDLController.getApplicationModel( appId ).appName,
                 "appId": appId
             }
         };

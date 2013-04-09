@@ -1,72 +1,89 @@
-/**
- * @name MFT.StatusMediaView
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
- * @desc Component for Media Status bar
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  * 
- * @category	view
- * @filesource	app/view/media/StatusMediaView.js
- * @version		2.0
- *
- * @author		Igor Zhavoronkin
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
-MFT.StatusMediaView =  Em.ContainerView.extend({
+/**
+ * @name SDL.StatusMediaView
+ * @desc Component for Media Status bar
+ * @category view
+ * @filesource app/view/media/StatusMediaView.js
+ * @version 1.0
+ */
+SDL.StatusMediaView = Em.ContainerView.extend( {
 
-	elementId:	'media_status',
+    elementId: 'media_status',
 
-	classNameBindings: ['MFT.States.media.active:selected'],
+    classNameBindings:
+        [
+            'SDL.States.media.active:selected'
+        ],
 
-	/** Climate components */		
-	childViews: [
-		'statusHome',
-		'statusInfo'
-	],
-	
-	/** Label for Home screen */
-	statusHome: MFT.Label.extend({
-		elementId:	'media_status_homestatus',
-		classNameBindings: ['MFT.States.home.active:visible'],		
-		contentBinding:	Ember.Binding.oneWay('MFT.locale.label.view_mediaStatus_entertainment')
-	}),
-	
-	statusInfo: Em.ContainerView.extend({
-		elementId:	'media_status_radio_container',
-		
-		childViews: [
-			'info'
-		],
-		
-		info: Em.View.extend({
-			elementId:	'media_status_radio_info',
-			controlerBinding: 'MFT.MediaController',
-			/** Bind class for visual representation */	
-			classNameBindings: ['MFT.States.home.active:hidden_display:visible_display'],
-			/** is AVIN active*/
-			isAV: function(){return (this.controler.activeState === 'media.avin');}.property('controler.activeState'),
-			/** Define module layout */
-			template:  Em.Handlebars.compile(
-				'<div class="statusInfo">'+
-					'<div class="station">'+
-						'<span {{bindAttr class="MFT.CDModel.active:visible_display MFT.SDModel.active:visible_display MFT.USBModel.active:visible_display"}}>{{MFT.MediaController.currentModuleData.selectedItem.title}}</span>'+ // title
-						'<span {{bindAttr class="MFT.BTModel.active:visible_display"}}>{{MFT.locale.label.view_mediaStatus_bluetooth}}</span>'+  // BLUETOOTH
-						'<span {{bindAttr class="view.isAV:visible_display"}}{{MFT.locale.label.view_mediaStatus_avIn}}</span>'+ 		//AV IN
-						'<span {{bindAttr class="MFT.SiriusModel.active:visible_display MFT.AmModel.active:visible_display MFT.FmModel.active:visible_display"}}>{{view.controler.currentActiveData.frequency}}</span>'+   // frequency
-						'<span {{bindAttr class="MFT.SDLAppController.model.active:visible_display"}}>{{MFT.SDLAppController.model.statusText}}</span>'+ 		//SDL
-					'</div>'+
-					'<div class="icon  antenaIco"'+
-						'{{bindAttr class="MFT.CDModel.active:cdIco"}}'+ // CD icon
-						'{{bindAttr class="MFT.SDModel.active:sdIco"}}'+ // SD icon
-						'{{bindAttr class="MFT.USBModel.active:usbIco"}}'+ // USB icon
-						'{{bindAttr class="MFT.BTModel.active:btIco"}}'+ // BLUETOOTH icon
-						'{{bindAttr class="view.isAV:avIco"}}'+ // AVIN icon
-						'{{bindAttr class="view.controler.currentModuleData.selectedItem.isHd:statushdicon"}}'+ // HD icon
-						'{{bindAttr class="MFT.SiriusModel.active:siriusIco"}}'+ // Sirius icon
-						'{{bindAttr class="MFT.SDLAppController.model.active:appIco"}}>'+ // SDL
-					'</div>'+
-				'</div>'
-			)
-		})
-	}),
-	actionUp: function(event){
-		MFT.States.goToState(MFT.MediaController.activeState);
-	}
-});
+    /** Climate components */
+    childViews:
+        [
+            'statusHome',
+            'statusInfo'
+        ],
+
+    /** Label for Home screen */
+    statusHome: SDL.Label.extend( {
+        elementId: 'media_status_homestatus',
+        classNameBindings:
+            [
+                'SDL.States.home.active:visible'
+            ],
+        contentBinding: Ember.Binding.oneWay( 'SDL.locale.label.view_mediaStatus_entertainment' )
+    } ),
+
+    statusInfo: Em.ContainerView.extend( {
+        elementId: 'media_status_radio_container',
+
+        childViews:
+            [
+                'info'
+            ],
+
+        info: Em.View.extend( {
+            elementId: 'media_status_radio_info',
+            controlerBinding: 'SDL.MediaController',
+            /** Bind class for visual representation */
+            classNameBindings:
+                [
+                    'SDL.States.home.active:hidden_display:visible_display'
+                ],
+            /** Define module layout */
+            template: Em.Handlebars.compile( '<div class="statusInfo">' + '<div class="station">'
+                            + '<span {{bindAttr class="SDL.CDModel.active:visible_display"}}>{{SDL.CDModel.statusBar}}</span>' + // title
+                            '<span {{bindAttr class="SDL.SDLAppController.model.active:visible_display"}}>{{SDL.SDLAppController.model.statusText}}</span>' + // SDL
+                            '</div>' + '<div class="icon cdIco"' + '{{bindAttr class="SDL.CDModel.active:cdIco"}}' + // CD
+                            // icon
+                            '{{bindAttr class="SDL.SDLAppController.model.active:appIco"}}>' + // SDL
+                            '</div>' + '</div>' )
+        } )
+    } ),
+    actionUp: function( event ) {
+        SDL.States.transitionTo( SDL.MediaController.activeState );
+    }
+} );

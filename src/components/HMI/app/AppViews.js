@@ -1,86 +1,91 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT
- * 
- * @desc Setup application container for all views 
- * 
- * @category	Application
- * @filesource	app/AppViews.js
- * @version	2.0
- *
- * @author	Artem Petrosyan
+ * @name SDL
+ * @desc Setup application container for all views
+ * @category Application
+ * @filesource app/AppViews.js
+ * @version 1.0
  */
 
 /** Appending views */
-MFT.AppViews = Em.ContainerView.extend({
-	
-	elementId:	'app',
-	
-	classNameBindings: [
-		'MFT.localization',
-		'MFT.helpMode:helpmode'
-	],
-	
-	childViews: [
-		//MFT.WelcomeOrientationView,
-		MFT.TurnByTurnView,
-		MFT.TBTTurnList,
-		MFT.OptionsView,
-		MFT.InteractionChoicesView,
-		MFT.ScrollableMessage,
-		MFT.SliderView,
-		MFT.SelectSystempopup,
-		//MFT.WOSkippButtonView,
-		MFT.StatusClimateView,
-		MFT.StatusMediaView,
-		MFT.StatusNavigationView,
-		MFT.StatusInfoView,
-		MFT.StatusPhoneView,
-		MFT.TopControls,
-		MFT.BottomControls,
-		MFT.TTSPopUp,
-		MFT.AlertPopUp,
-		MFT.AlertManeuverPopUp,
-		MFT.AudioPassThruPopUp,
-		MFT.VRPopUp,
-		MFT.VehicleInfo,
-		MFT.TBTClientStateView,
-		MFT.DriverDistraction,
-		//MFT.PlayerControllsView,
-		//MFT.VideoErrorPopupView,
-		MFT.ControlButtons,
-		'activeAview'
-	],
-	
-	// Active module view container
-	activeAview: Em.ContainerView.extend({
-		elementId:	'active_view'
-	}),
+SDL.AppViews = Em.ContainerView.extend( {
 
-	/*
-	 * This method is called when the app is fully rendered
-	 * and ready to be displayed.
-	 * We notify the backend to hide the splash
-	 * and load internal view modules
-	 */
-	didInsertElement: function() {
-		this._super();
+    elementId: 'app',
 
-		//Em.Logger.log('MFT Rendered!');
-		//if ( FLAGS.MCS_ENABLED ) {
-		//	WarningOkButtonView.appLoaded();
-		//} else {
-			FFW.Backend.notifyAppLoaded();
-			MFT.set('appReady',true);
-		//}
+    classNameBindings:
+        [
+            'SDL.localization',
+            'SDL.helpMode:helpmode'
+        ],
 
-		// preload other views
-		//FFW.AppendScript.pushScript('phone');
-		FFW.AppendScript.pushScript('media');
-		
-		FFW.AppendScript.pushScript('info');
-		
-		// preload big images
-		// to resolve blinking issue
-		FFW.PreloadImages.preload();
-	}
-});
+    childViews:
+        [
+            SDL.HomeView,
+            SDL.MediaView,
+            SDL.InfoView,
+            SDL.PhoneView,
+            SDL.NavigationView,
+            SDL.ClimateView,
+            SDL.SettingsView,
+            SDL.TurnByTurnView,
+            SDL.TBTTurnList,
+            SDL.OptionsView,
+            SDL.InteractionChoicesView,
+            SDL.ScrollableMessage,
+            SDL.SliderView,
+            SDL.StatusClimateView,
+            SDL.StatusMediaView,
+            SDL.StatusNavigationView,
+            SDL.StatusInfoView,
+            SDL.StatusPhoneView,
+            SDL.TopControls,
+            SDL.BottomControls,
+            SDL.TTSPopUp,
+            SDL.AlertPopUp,
+            SDL.AlertManeuverPopUp,
+            SDL.AudioPassThruPopUp,
+            SDL.VRPopUp,
+            SDL.VehicleInfo,
+            SDL.TBTClientStateView,
+            SDL.DriverDistraction,
+            SDL.ControlButtons
+        ],
+
+    /*
+     * This method is called when the app is fully rendered and ready to be
+     * displayed. We notify the backend to hide the splash and load internal
+     * view modules
+     */
+    didInsertElement: function() {
+        this._super();
+
+        SDL.set( 'appReady', true );
+     
+        FFW.PreloadImages.preload();
+    }
+} );

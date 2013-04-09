@@ -44,6 +44,14 @@ div {
 	padding: 0;
 }
 
+.windowText {
+	top: 190px;
+	width: 800px;
+	font-size: 80px;
+	color: white;
+	text-align: center;
+}
+
 /*FORD CONTAINER  DEFAULT DIMANSIONS */
 
 #app {
@@ -259,7 +267,7 @@ div {
 #clock {
 	font-size: 28px;
 	text-align: center;
-	width: 160px;
+	width: 225px;
 	height: 50px;
 	position: relative;
 	float: left;

@@ -1,150 +1,69 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.StatusClimateView
- * 
+ * @name SDL.StatusClimateView
  * @desc Climate statusbar visual representation
- * 
- * @category	View
- * @filesource	app/view/climate/StatusClimateView.js
- * @version		2.0
- *
- * @author		Artem Petrosyan
+ * @category View
+ * @filesource app/view/climate/StatusClimateView.js
+ * @version 1.0
  */
 
-MFT.StatusClimateView = Em.ContainerView.extend({
-	
-	elementId:	'status_climate',
-	
-	classNames: ['status_bar'],
-	
-	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.climate.active:selected'],
-	
-	/** Climate components */		
-	childViews: [
-		'statusOn',
-		'statusOff',
-		'statusHome'
-	],
-	
-	/** Label for Home screen */
-	statusHome: MFT.Label.create({
-		elementId:		'status_climate_label',
-	
-		classNameBindings: ['MFT.States.home.active:visible'],
-		
-		contentBinding:	    Ember.Binding.oneWay('MFT.locale.label.view_statusClimate_climate')
-	}),
-	
-	/** Off status view */
-	statusOff: Em.View.create({
-		classNameBindings: ['MFT.States.home.active:hidden_display'],
-		
-		elementId:		'status_climate_off',
-		
-		template: Em.Handlebars.compile(
-			'{{#if MFT.ClimateController.isOff}}<img class="key" src="images/climate/key.png"">Climate Off{{/if}}'
-		)
-	}),
-	
-	/** On status view */
-	statusOn: Em.ContainerView.create({
-		classNameBindings: ['MFT.States.home.active:hidden_display'],
-		
-		elementId:		'status_climate_on',
-		
-		childViews: [
-			'driverTemp',
-			'passangerTemp',
-			'driverSeat',
-			'passangerSeat'
-		],
-		
-		/** Driver temperature status */
-		driverTemp: MFT.Label.create({
-			classNameBindings: ['MFT.ClimateController.isOff:hidden'],
-			
-			elementId:		'status_climate_driverTemp',
-			
-			contentBinding:	Em.Binding.oneWay('MFT.ClimateController.model.driverTemp.valueStr')
-		}),
-		
-		/** Passanger temperature status */
-		passangerTemp: MFT.Label.create({
-			classNameBindings: ['MFT.ClimateController.isOff:hidden'],
-			
-			elementId:		'status_climate_passangerTemp',
-		
-			contentBinding:	Em.Binding.oneWay('MFT.ClimateController.model.passangerTemp.valueStr')
-		}),
-		
-		/** Driver seat status */
-		driverSeat: Em.View.create({
-			
-			elementId:			'status_climate_driverSeat',
-			
-			classNameBindings:	[
-				'MFT.ClimateController.isOff:hidden',
-				'MFT.ClimateController.isSimple:hidden_display'
-			],
-						
-			heatBinding:		Em.Binding.oneWay('MFT.ClimateController.model.driverHeatedSeat.value'),
-			coolBinding:		Em.Binding.oneWay('MFT.ClimateController.model.driverCooledSeat.value'),
-			
-			isActive: function() {
-				( this.cool || this.heat ) ? this.set('active', true) : this.set('active', false);
-			}.observes('cool','heat'),
-			
-			icon: function() {							
-				if (this.cool) {
-					return 'images/climate/status/cool'+this.cool+'.png';
-				}
-				if (this.heat) {
-					return 'images/climate/status/heat'+this.heat+'.png';
-				}
-			}.property('cool','heat'),
-						
-			template: Em.Handlebars.compile(
-				'{{#if view.active}}<img {{bindAttr src="view.icon"}}>{{/if}}'
-			)
-		}),
-		
-		/** Passanger seat status */
-		passangerSeat: Em.View.create({
-			
-			elementId:			'status_climate_passangerSeat',
-			
-			classNameBindings:	[
-				'MFT.ClimateController.isOff:hidden',
-				'MFT.ClimateController.isSimple:hidden_display'
-			],
-			
-			heatBinding:		Em.Binding.oneWay('MFT.ClimateController.model.passangerHeatedSeat.value'),
-			coolBinding:		Em.Binding.oneWay('MFT.ClimateController.model.passangerCooledSeat.value'),
-			
-			isActive: function() {
-				( this.cool || this.heat ) ? this.set('active', true) : this.set('active', false);
-			}.observes('cool','heat'),
-			
-			icon: function() {							
-				if (this.cool) {
-					return 'images/climate/status/cool'+this.cool+'.png';
-				}
-				if (this.heat) {
-					return 'images/climate/status/heat'+this.heat+'.png';
-				}
-			}.property('cool','heat'),
-						
-			template: Em.Handlebars.compile(
-				'{{#if view.active}}<img {{bindAttr src="view.icon"}}>{{/if}}'
-			)
-		})
-	}),
-	
-	/**
-	 * Select climate state
-	 * should be called when user press climate statusbar
-	 */
-	actionUp: function(event){
-		MFT.States.goToState( MFT.ClimateController.get('climateVechicleMode') );
-	}
-});
+SDL.StatusClimateView = Em.ContainerView.extend( {
+
+    elementId: 'status_climate',
+
+    classNames:
+        [
+            'status_bar'
+        ],
+
+    /** Climate components */
+    childViews:
+        [
+            'statusHome'
+        ],
+
+    /** Label for Home screen */
+    statusHome: SDL.Label.create( {
+        elementId: 'status_climate_label',
+
+        classNames:
+            [
+                'visible'
+            ],
+
+        content: 'Climate'
+    } ),
+
+    /**
+     * Select phone state should be called when user press phone statusbar
+     */
+    actionUp: function( event ) {
+        SDL.States.transitionTo( 'climate' );
+    }
+
+} );

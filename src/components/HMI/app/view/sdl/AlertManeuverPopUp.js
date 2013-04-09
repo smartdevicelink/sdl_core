@@ -1,13 +1,38 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.AlertManeuverPopUp
+ * @name SDL.AlertManeuverPopUp
  * @desc AlertManeuverPopUp module visual representation
  * @category View
  * @filesource app/view/sdl/AlertManeuverPopUp.js
- * @version 2.0
- * @author Andriy Melnik
+ * @version 1.0
  */
 
-MFT.AlertManeuverPopUp = Em.ContainerView.create( {
+SDL.AlertManeuverPopUp = Em.ContainerView.create( {
 
     elementId: 'AlertManeuverPopUp',
 
@@ -45,7 +70,7 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create( {
         classNames: 'alertManeuverPopUpImage'
     } ),
 
-    applicationName: MFT.Label.extend( {
+    applicationName: SDL.Label.extend( {
 
         elementId: 'applicationName',
 
@@ -54,7 +79,7 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create( {
         contentBinding: 'parentView.appName'
     } ),
 
-    message1: MFT.Label.extend( {
+    message1: SDL.Label.extend( {
 
         elementId: 'message1',
 
@@ -63,7 +88,7 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create( {
         contentBinding: 'parentView.content1'
     } ),
 
-    message2: MFT.Label.extend( {
+    message2: SDL.Label.extend( {
 
         elementId: 'message2',
 
@@ -72,7 +97,7 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create( {
         contentBinding: 'parentView.content2'
     } ),
 
-    message3: MFT.Label.extend( {
+    message3: SDL.Label.extend( {
 
         elementId: 'message3',
 
@@ -93,11 +118,11 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create( {
     /**
      * Close button
      */
-    closeButton: MFT.Button.create( {
+    closeButton: SDL.Button.create( {
         text: 'Close',
         classNames: 'closeButton softButton',
         action: 'closeAlertMeneuverPopUp',
-        target: 'MFT.SDLController',
+        target: 'SDL.SDLController',
         templateName: 'text'
     } ),
 
@@ -128,7 +153,7 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create( {
             }
 
             for( var i = 0; i < params.length; i++ ){
-                this.get( 'softbuttons.childViews' ).pushObject( MFT.Button.create( MFT.PresetEventsCustom, {
+                this.get( 'softbuttons.childViews' ).pushObject( SDL.Button.create( SDL.PresetEventsCustom, {
                     softButtonID: params[i].softButtonID,
                     icon: params[i].image,
                     text: params[i].text,
@@ -146,15 +171,15 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create( {
 
         // play audio alert
         if( message.playTone ){
-            MFT.Audio.play( 'audio/alert.wav' );
+            SDL.Audio.play( 'audio/alert.wav' );
         }
 
         this.addSoftButtons( message.softButtons );
         if( message.ttsChunks ){
-            MFT.SDLModel.onPrompt( message.ttsChunks.ttsChunks );
+            SDL.SDLModel.onPrompt( message.ttsChunks.ttsChunks );
         }
 
-        this.set( 'appName', MFT.SDLController.getApplicationModel( message.appId ).appName );
+        this.set( 'appName', SDL.SDLController.getApplicationModel( message.appId ).appName );
 
         this.set( 'activate', true );
 

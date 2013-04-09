@@ -1,68 +1,91 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
  * @name DataImages
- * 
- * @desc URLs for big images wich shuold be preloaded on application state 
- * 
- * @category	Data
- * @filesource	app/DataImages.js
- * @version		2.0
- *
- * @author		Igor Zhavoronkin
+ * @desc URLs for big images wich shuold be preloaded on application state
+ * @category Data
+ * @filesource app/DataImages.js
+ * @version 1.0
  */
-var DataImages = [
-		//navigation
-		"images/nav/map2d_heading_up_zoom_0.png" ,
-		"images/nav/map2d_heading_up_zoom_1.png" ,
-		"images/nav/map2d_heading_up_zoom_2.png" ,
-		"images/nav/map2d_heading_up_zoom_3.png" ,
-		"images/nav/map2d_north_zoom_0.png" ,
-		"images/nav/map2d_north_zoom_1.png" ,
-		"images/nav/map2d_north_zoom_2.png" ,
-		"images/nav/map2d_north_zoom_3.png" ,
-		"images/nav/map3d_zoom_0.png" ,
-		"images/nav/map3d_zoom_1.png" ,
-		"images/nav/map3d_zoom_2.png" ,
-		"images/nav/map3d_zoom_3.png" ,
-		"images/nav/help/navigation_destnation_bg_help.png" ,
-		"images/nav/dest/navi_destination_MyHome_bg.png" ,
-		"images/nav/dest/navi_destination_MyHome_bg_help.png" ,
-		"images/nav/dest/navi_destination_Favorites_bg.png" ,
-		"images/nav/dest/navi_destination_Favorites_bg_help.png" ,
-		"images/nav/dest/navi_destination_Previous_bg.png" ,
-		"images/nav/dest/navi_destination_Previous_bg_help.png" ,
-		"images/nav/dest/navi_destination_POI_bg.png" ,
-		"images/nav/dest/navi_destination_POI_bg_help.png" ,
-		"images/nav/dest/navi_destination_Emergency_bg.png" ,
-		"images/nav/dest/navi_destination_Emergency_bg_help.png" ,
-		"images/nav/dest/navi_destination_StreetAddress_bg.png" ,
-		"images/nav/dest/navi_destination_StreetAddress_bg_help.png" ,
-		"images/nav/dest/navi_destination_Intersection_bg.png" ,
-		"images/nav/dest/navi_destination_Intersection_bg.png" ,
-		"images/nav/dest/navi_destination_CityCenter_bg.png" ,
-		"images/nav/dest/navi_destination_CityCenter_bg_help.png" ,
-		"images/nav/dest/navi_destination_Freeway_bg.png" ,
-		"images/nav/dest/navi_destination_Freeway_bg_help.png" ,
-		"images/nav/dest/navi_destination_LatitudeLongitude_bg.png" ,
-		"images/nav/dest/navi_destination_LatitudeLongitude_bg_help.png",
-		//phone
-		/*
-		"images/phone/phone_help_dialpad.jpg" ,
-		"images/phone/phone_help_quickdial.jpg" ,
-		"images/phone/phone_help_phonebook.jpg" ,
-		"images/phone/phone_help_history.jpg" ,
-		"images/phone/phone_help_messaging.jpg" ,
-		"images/phone/phone_help_settings.jpg" ,
-		*/
-		"images/phone/phone_settings_bluetoothDevices_bg_help.png" ,
-		"images/phone/phone_settings_phoneRinger_bg_help.png" ,
-		"images/phone/phone_settings_textMessageNotification_bg_help.png" ,
-		"images/phone/phone_settings_internetDataConnection_bg_help.png" ,
-		"images/phone/phone_settings_phoneBook_bg_help.png" ,
-		//media
-		"images/media/help/others_browse_blur.png" ,
-		"images/media/help/cd_bro_view_blur.png" ,
-		"images/media/help/sir_bro_view_blur.png" ,
-		"images/media/help/broall_view_blur.jpg" ,
-		//Settings
-		"images/settings/view_settings_help_911Assist_bg_help.png" 
-];
+var DataImages =
+    [
+        // navigation
+        "images/nav/map2d_heading_up_zoom_0.png",
+        "images/nav/map2d_heading_up_zoom_1.png",
+        "images/nav/map2d_heading_up_zoom_2.png",
+        "images/nav/map2d_heading_up_zoom_3.png",
+        "images/nav/map2d_north_zoom_0.png",
+        "images/nav/map2d_north_zoom_1.png",
+        "images/nav/map2d_north_zoom_2.png",
+        "images/nav/map2d_north_zoom_3.png",
+        "images/nav/map3d_zoom_0.png",
+        "images/nav/map3d_zoom_1.png",
+        "images/nav/map3d_zoom_2.png",
+        "images/nav/map3d_zoom_3.png",
+        "images/nav/help/navigation_destnation_bg_help.png",
+        "images/nav/dest/navi_destination_MyHome_bg.png",
+        "images/nav/dest/navi_destination_MyHome_bg_help.png",
+        "images/nav/dest/navi_destination_Favorites_bg.png",
+        "images/nav/dest/navi_destination_Favorites_bg_help.png",
+        "images/nav/dest/navi_destination_Previous_bg.png",
+        "images/nav/dest/navi_destination_Previous_bg_help.png",
+        "images/nav/dest/navi_destination_POI_bg.png",
+        "images/nav/dest/navi_destination_POI_bg_help.png",
+        "images/nav/dest/navi_destination_Emergency_bg.png",
+        "images/nav/dest/navi_destination_Emergency_bg_help.png",
+        "images/nav/dest/navi_destination_StreetAddress_bg.png",
+        "images/nav/dest/navi_destination_StreetAddress_bg_help.png",
+        "images/nav/dest/navi_destination_Intersection_bg.png",
+        "images/nav/dest/navi_destination_Intersection_bg.png",
+        "images/nav/dest/navi_destination_CityCenter_bg.png",
+        "images/nav/dest/navi_destination_CityCenter_bg_help.png",
+        "images/nav/dest/navi_destination_Freeway_bg.png",
+        "images/nav/dest/navi_destination_Freeway_bg_help.png",
+        "images/nav/dest/navi_destination_LatitudeLongitude_bg.png",
+        "images/nav/dest/navi_destination_LatitudeLongitude_bg_help.png",
+        // phone
+        /*
+         * "images/phone/phone_help_dialpad.jpg" ,
+         * "images/phone/phone_help_quickdial.jpg" ,
+         * "images/phone/phone_help_phonebook.jpg" ,
+         * "images/phone/phone_help_history.jpg" ,
+         * "images/phone/phone_help_messaging.jpg" ,
+         * "images/phone/phone_help_settings.jpg" ,
+         */
+        "images/phone/phone_settings_bluetoothDevices_bg_help.png",
+        "images/phone/phone_settings_phoneRinger_bg_help.png",
+        "images/phone/phone_settings_textMessageNotification_bg_help.png",
+        "images/phone/phone_settings_internetDataConnection_bg_help.png",
+        "images/phone/phone_settings_phoneBook_bg_help.png",
+        // media
+        "images/media/help/others_browse_blur.png",
+        "images/media/help/cd_bro_view_blur.png",
+        "images/media/help/sir_bro_view_blur.png",
+        "images/media/help/broall_view_blur.jpg",
+        // Settings
+        "images/settings/view_settings_help_911Assist_bg_help.png"
+    ];
