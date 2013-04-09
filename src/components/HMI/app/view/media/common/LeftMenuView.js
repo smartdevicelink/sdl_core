@@ -31,6 +31,7 @@
  * @filesource app/view/media/SiriusView.js
  * @version 1.0
  */
+
 SDL.LeftMenuView = Em.ContainerView.extend( {
     /** View ID */
     elementId: 'media_leftmenu',
