@@ -56,15 +56,6 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend( {
     },
 
     /**
-     * Method calls from model method to deactivate application
-     * 
-     * @param {Number}
-     */
-    deactivateApp: function() {
-        SDL.SDLController.getApplicationModel( this.currentAppId ).deactivateApp();
-    },
-
-    /**
      * Method hides sdl activation button and sdl application
      * 
      * @param {Number}

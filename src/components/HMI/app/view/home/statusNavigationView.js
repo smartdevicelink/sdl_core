@@ -54,7 +54,7 @@ SDL.StatusNavigationView = Em.ContainerView.extend( {
      * Select phone state should be called when user press phone statusbar
      */
     actionUp: function( event ) {
-        SDL.States.transitionTo( 'navigation' );
+        SDL.States.goToStates( 'navigation' );
     }
 
 } );

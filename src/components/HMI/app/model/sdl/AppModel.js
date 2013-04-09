@@ -112,16 +112,6 @@ SDL.SDLAppModel = Em.Object.extend( {
     commandsList: [],
 
     /**
-     * Notification of deactivation of current application model initiated in
-     * StateManager
-     */
-    deactivateApp: function() {
-
-        SDL.SDLModel.onDeactivateApp( SDL.TransitionIterator.finalPath, this.appId, this.appName );
-
-    },
-
-    /**
      * Return current menu commands
      * 
      * @return {Array}

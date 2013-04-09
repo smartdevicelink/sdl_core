@@ -63,7 +63,7 @@ SDL.StatusClimateView = Em.ContainerView.extend( {
      * Select phone state should be called when user press phone statusbar
      */
     actionUp: function( event ) {
-        SDL.States.transitionTo( 'climate' );
+        SDL.States.goToStates( 'climate' );
     }
 
 } );

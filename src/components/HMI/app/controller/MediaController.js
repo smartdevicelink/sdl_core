@@ -44,7 +44,7 @@ SDL.MediaController = Em.Object.create( {
     turnOnCD: function() {
 
         if( !SDL.States.media.player.active ){
-            SDL.States.transitionTo( 'media.player' );
+            SDL.States.goToStates( 'media.player' );
         }
 
         if( SDL.SDLAppController.model ){
@@ -68,7 +68,7 @@ SDL.MediaController = Em.Object.create( {
         /**
          * Go to SDL state
          */
-        SDL.States.transitionTo( 'media.sdlmedia' );
+        SDL.States.goToStates( 'media.sdlmedia' );
 
     }
 } );

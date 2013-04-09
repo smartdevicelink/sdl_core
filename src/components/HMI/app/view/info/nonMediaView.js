@@ -67,7 +67,7 @@ SDL.InfoNonMedia = Em.ContainerView.create( {
          * Deactivate View
          */
         deactivate: function() {
-            SDL.States.transitionTo( 'info.apps' );
+            SDL.States.goToStates( 'info.apps' );
         },
 
         deviceName: SDL.Label.extend( {

@@ -329,14 +329,14 @@ SDL.SDLController = Em.Object.create( {
      * Function returns ChangeDeviceView back to previous state
      */
     turnChangeDeviceViewBack: function() {
-        SDL.States.transitionTo( 'info.apps' );
+        SDL.States.goToStates( 'info.apps' );
     },
 
     /**
      * Enter screen vith list of devices application model
      */
     onGetDeviceList: function() {
-        SDL.States.transitionTo( 'info.devicelist' );
+        SDL.States.goToStates( 'info.devicelist' );
         FFW.BasicCommunication.getDeviceList();
     },
 

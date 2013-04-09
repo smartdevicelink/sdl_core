@@ -58,7 +58,7 @@ SDL.sdlView = Em.ContainerView.create( {
      * Deactivate View
      */
     deactivate: function() {
-        SDL.States.transitionTo( 'info.apps' );
+        SDL.States.goToStates( 'info.apps' );
     },
 
     innerMenu: SDL.MenuList.extend( {

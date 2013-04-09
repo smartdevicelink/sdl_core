@@ -119,15 +119,6 @@ SDL.SDLMediaController = Em.Object.create( {
     },
 
     /**
-     * Method calls from model method to deactivate application
-     * 
-     * @param {Number}
-     */
-    deactivateApp: function() {
-        SDL.SDLController.getApplicationModel( this.currentAppId ).deactivateApp();
-    },
-
-    /**
      * Method hides sdl activation button and sdl application
      * 
      * @param {Number}
@@ -137,7 +128,7 @@ SDL.SDLMediaController = Em.Object.create( {
 
             if( SDL.States.media.sdlmedia.active || SDL.SDLAppController.model.active ){
 
-                SDL.States.transitionTo( 'info.apps' );
+                SDL.States.goToStates( 'info.apps' );
 
                 SDL.MediaController.set( 'activeState', 'media.player' );
             }

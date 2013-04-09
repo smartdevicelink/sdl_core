@@ -54,7 +54,7 @@ SDL.BottomControls = Em.ContainerView.extend( {
 
         actionDown: function( event ) {
             if( !SDL.States.info.active ){
-                SDL.States.transitionTo( SDL.InfoController.activeState );
+                SDL.States.goToStates( SDL.InfoController.activeState );
             }
         }
     } ),
@@ -69,7 +69,7 @@ SDL.BottomControls = Em.ContainerView.extend( {
         template: Em.Handlebars.compile( '<div id="home_but_click"></div>' ),
 
         actionDown: function( event ) {
-            SDL.States.transitionTo( 'home' );
+            SDL.States.goToStates( 'home' );
         }
     } ),
 
@@ -82,7 +82,7 @@ SDL.BottomControls = Em.ContainerView.extend( {
 
         actionDown: function( event ) {
             if( !SDL.States.settings.active ){
-                SDL.States.transitionTo( 'settings' );
+                SDL.States.goToStates( 'settings' );
             }
         }
     } )

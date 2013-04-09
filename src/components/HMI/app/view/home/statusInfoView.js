@@ -59,6 +59,6 @@ SDL.StatusInfoView = Em.ContainerView.extend( {
     } ),
 
     actionUp: function( event ) {
-        SDL.States.transitionTo( SDL.InfoController.activeState );
+        SDL.States.goToStates( SDL.InfoController.activeState );
     }
 } );

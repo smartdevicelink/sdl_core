@@ -84,6 +84,6 @@ SDL.StatusMediaView = Em.ContainerView.extend( {
         } )
     } ),
     actionUp: function( event ) {
-        SDL.States.transitionTo( SDL.MediaController.activeState );
+        SDL.States.goToStates( SDL.MediaController.activeState );
     }
 } );

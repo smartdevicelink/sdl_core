@@ -76,16 +76,7 @@ SDL.NonMediaController = Em.Object.create( {
         // FFW.BasicCommunication.ActivateApp( applicationModel.appId );
 
         // Go to SDL state
-        SDL.States.transitionTo( 'info.nonMedia' );
-    },
-
-    /**
-     * Method calls from model method to deactivate application
-     * 
-     * @param {Number}
-     */
-    deactivateApp: function() {
-        SDL.SDLController.getApplicationModel( this.currentAppId ).deactivateApp();
+        SDL.States.goToStates( 'info.nonMedia' );
     },
 
     /**
@@ -107,7 +98,7 @@ SDL.NonMediaController = Em.Object.create( {
     onDeleteApplication: function( appId ) {
         if( this.currentAppId == appId ){
             if( SDL.States.info.nonMedia.active ){
-                SDL.States.transitionTo( 'info.apps' );
+                SDL.States.goToStates( 'info.apps' );
             }
             this.set( 'currentAppId', 0 );
         }

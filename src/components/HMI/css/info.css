@@ -778,6 +778,11 @@
 #info_apps_list .list-item .ico{
 	width: 50px;
 	height: 50px;
+	position: absolute;
+}
+
+#info_apps_list .list-item span{
+	margin-left: 50px;
 }
 
 #info_apps_list .list-item{

@@ -101,6 +101,18 @@ SDL.SDLAppController = Em.Object.create( {
     },
 
     /**
+     * Notification of deactivation of current application model initiated in
+     * StateManager
+     */
+    deactivateApp: function() {
+
+        if( this.model ){
+            SDL.SDLModel.onDeactivateApp( SDL.States.nextState, this.model.appId, this.model.appName );
+        }
+
+    },
+
+    /**
      * Method clears all applications data and unregister models
      */
     onSDLDisconected: function() {

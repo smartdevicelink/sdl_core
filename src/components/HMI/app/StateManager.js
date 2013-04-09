@@ -39,11 +39,15 @@ Em.State.reopen( {
     active: false,
 
     enter: function() {
-
         this.set( 'active', true );
     },
 
     exit: function() {
+        if( SDL.States ){
+            if( this.name == "sdlmedia" || this.name == "nonMedia" ){
+                SDL.SDLAppController.deactivateApp();
+            }
+        }
         this.set( 'active', false );
     }
 } );
@@ -53,17 +57,27 @@ var StateManager = Em.StateManager.extend( {
 
     // default state
     initialState: 'home',
+    
     /**
-     * During development enabled a StateManager's enableLogging property to
-     * true to receive console messages of state transitions.
+     *  Name of the next state to which at the moment is a transition
      */
+    nextState: 'home',
+    
+    /**
+     * Method used for determine previous currentState and
+     * make 
+     */
+    goToStates: function( stateName ){
+        this.set( 'nextState', stateName );
+        this.transitionTo( stateName );
+    },
 
     /** Go to parent state */
     back: function() {
         if( this.currentState.parentState.hasOwnProperty( 'name' ) ){
-            this.transitionTo( this.currentState.parentState.get( 'path' ) );
+            this.goToStates( this.currentState.parentState.get( 'path' ) );
         }else{
-            this.transitionTo( 'home' );
+            this.goToStates( 'home' );
         }
 
         SDL.StateVisitor.visit( this.currentState );
@@ -123,12 +137,6 @@ var StateManager = Em.StateManager.extend( {
                 this._super();
 
                 SDL.NonMediaController.restoreCurrentApp();
-            },
-
-            exit: function() {
-                this._super();
-
-                SDL.NonMediaController.deactivateApp();
             }
         } )
     } ),
@@ -154,12 +162,6 @@ var StateManager = Em.StateManager.extend( {
                 this._super();
 
                 SDL.SDLMediaController.restoreCurrentApp();
-            },
-
-            exit: function() {
-                this._super();
-
-                SDL.SDLMediaController.deactivateApp();
             }
 
         } )

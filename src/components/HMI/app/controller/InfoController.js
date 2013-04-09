@@ -39,11 +39,11 @@ SDL.InfoController = Em.Object.create( {
     hiddenLeftMenu: false,
 
     onState: function( event ) {
-        SDL.States.transitionTo( 'info.' + event.goToState );
+        SDL.States.goToStates( 'info.' + event.goToState );
     },
 
     onChildState: function( event ) {
 
-        SDL.States.transitionTo( SDL.States.currentState.get( 'path' ) + '.' + event.goToState );
+        SDL.States.goToStates( SDL.States.currentState.get( 'path' ) + '.' + event.goToState );
     }
 } );

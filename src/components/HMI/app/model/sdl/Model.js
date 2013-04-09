@@ -236,7 +236,7 @@ SDL.SDLModel = Em.Object.create( {
      */
     dialNumber: function( params ) {
         this.set( 'phoneCall', true );
-        SDL.States.transitionTo( 'phone.dialpad' );
+        SDL.States.goToStates( 'phone.dialpad' );
         SDL.PhoneModel.set( 'dialpadNumber', params.number );
         SDL.PhoneController.onDialCall();
     },

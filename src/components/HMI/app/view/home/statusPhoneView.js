@@ -66,6 +66,6 @@ SDL.StatusPhoneView = Em.ContainerView.extend( {
      * Select phone state should be called when user press phone statusbar
      */
     actionUp: function( event ) {
-        SDL.States.transitionTo( 'phone.dialpad' );
+        SDL.States.goToStates( 'phone.dialpad' );
     }
 } );
