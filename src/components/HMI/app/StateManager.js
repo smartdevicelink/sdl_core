@@ -43,11 +43,6 @@ Em.State.reopen( {
     },
 
     exit: function() {
-        if( SDL.States ){
-            if( this.name == "sdlmedia" || this.name == "nonMedia" ){
-                SDL.SDLAppController.deactivateApp();
-            }
-        }
         this.set( 'active', false );
     }
 } );
@@ -137,6 +132,10 @@ var StateManager = Em.StateManager.extend( {
                 this._super();
 
                 SDL.NonMediaController.restoreCurrentApp();
+            },
+
+            exit: function(){
+                SDL.SDLAppController.deactivateApp();
             }
         } )
     } ),
@@ -162,6 +161,12 @@ var StateManager = Em.StateManager.extend( {
                 this._super();
 
                 SDL.SDLMediaController.restoreCurrentApp();
+            },
+
+            exit: function(){
+                this._super();
+
+                SDL.SDLAppController.deactivateApp();
             }
 
         } )
