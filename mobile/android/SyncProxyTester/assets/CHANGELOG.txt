@@ -1,4 +1,5 @@
 [CW15]
+* Fix (protocol v1): don't send initialization requests when switching to already registered app from another screen (on HMI).
 * Fix an incorrect app name when the phone is using Russian locale.
 
 [CW14]

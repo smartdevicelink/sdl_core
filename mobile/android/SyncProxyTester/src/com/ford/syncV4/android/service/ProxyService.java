@@ -550,35 +550,37 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 					}
 				}
 				
-				boolean setAppIconSupported = getCurrentProtocolVersion() >= 2;
-				if (setAppIconSupported && hmiChange && firstHMIStatusChange) {
+				if (hmiChange && firstHMIStatusChange) {
 					firstHMIStatusChange = false;
 					
-					InputStream is = null;
-					try {
-						PutFile putFile = new PutFile();
-						putFile.setFileType(FileType.GRAPHIC_PNG);
-						putFile.setSyncFileName(ICON_SYNC_FILENAME);
-						putFile.setCorrelationID(nextCorrID());
-						putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-						_msgAdapter.logMessage(putFile, true);
-						getProxyInstance().sendRPCRequest(putFile);
-						
-						if (getAutoSetAppIconFlag()) {
-							SetAppIcon setAppIcon = new SetAppIcon();
-							setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-							setAppIcon.setCorrelationID(nextCorrID());
-							_msgAdapter.logMessage(setAppIcon, true);
-							getProxyInstance().sendRPCRequest(setAppIcon);
+					boolean setAppIconSupported = getCurrentProtocolVersion() >= 2;
+					if (setAppIconSupported) {
+						InputStream is = null;
+						try {
+							PutFile putFile = new PutFile();
+							putFile.setFileType(FileType.GRAPHIC_PNG);
+							putFile.setSyncFileName(ICON_SYNC_FILENAME);
+							putFile.setCorrelationID(nextCorrID());
+							putFile.setBulkData(contentsOfResource(R.raw.fiesta));
+							_msgAdapter.logMessage(putFile, true);
+							getProxyInstance().sendRPCRequest(putFile);
+
+							if (getAutoSetAppIconFlag()) {
+								SetAppIcon setAppIcon = new SetAppIcon();
+								setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+								setAppIcon.setCorrelationID(nextCorrID());
+								_msgAdapter.logMessage(setAppIcon, true);
+								getProxyInstance().sendRPCRequest(setAppIcon);
+							}
+
+							// upload turn icons
+							sendIconFromResource(R.drawable.turn_left);
+							sendIconFromResource(R.drawable.turn_right);
+							sendIconFromResource(R.drawable.turn_forward);
+							sendIconFromResource(R.drawable.action);
+						} catch (SyncException e) {
+							Log.w(TAG, "Failed to set app icon", e);
 						}
-						
-						// upload turn icons
-						sendIconFromResource(R.drawable.turn_left);
-						sendIconFromResource(R.drawable.turn_right);
-						sendIconFromResource(R.drawable.turn_forward);
-						sendIconFromResource(R.drawable.action);
-					} catch (SyncException e) {
-						Log.w(TAG, "Failed to set app icon", e);
 					}
 				}
 			}
