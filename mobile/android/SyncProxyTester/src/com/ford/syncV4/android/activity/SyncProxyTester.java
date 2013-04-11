@@ -632,7 +632,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
 				Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE) == Const.Transport.KEY_TCP ? "WiFi"
 				: "BT";
-		setTitle(getResources().getString(R.string.app_name) + " (v"
+		setTitle(getResources().getString(R.string.tester_app_name) + " (v"
 				+ protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
 				+ transportType + ")");
 	}

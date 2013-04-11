@@ -1,3 +1,6 @@
+[CW15]
+* Fix an incorrect app name when the phone is using Russian locale.
+
 [CW14]
 + Add an option to the startup screen: "Set app icon after registration".
 * PerformInteraction dialog: allow to select multiple choice set IDs.

@@ -2,7 +2,7 @@
 <resources>
 
     <string name="type_here">Type here:</string>
-    <string name="app_name">SyncProxyTester</string>
+    <string name="tester_app_name">SyncProxyTester</string>
     <string name="connect">Connect</string>
     <string name="speak">Speak</string>
     <string name="slider_footer">Slider Footer</string>
