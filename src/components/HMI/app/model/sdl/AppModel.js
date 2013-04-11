@@ -237,7 +237,7 @@ SDL.SDLAppModel = Em.Object.extend( {
             var choiceSetId = message.interactionChoiceSetIDList[i];
             SDL.InteractionChoicesView.preformChoices( this.interactionChoices[choiceSetId], performInteractionRequestId, message.timeout );
 
-            SDL.VRPopUp.CreateInteractionChoise( this.interactionChoices[choiceSetId] );
+            SDL.VRPopUp.CreateInteractionChoise( this.interactionChoices[choiceSetId], performInteractionRequestId );
         }
 
         SDL.InteractionChoicesView.activate( message.initialText );

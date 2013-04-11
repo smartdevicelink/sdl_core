@@ -102,6 +102,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create( {
                     text: data[i].menuName,
                     choiceId: data[i].choiceID,
                     action: 'onChoiceInteraction',
+                    onDown: false,
                     target: 'SDL.SDLAppController',
                     performInteractionRequestId: performInteractionRequestId,
                     templateName: 'text'

@@ -118,7 +118,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     },
 
-    CreateInteractionChoise: function( params ) {
+    CreateInteractionChoise: function( params, performInteractionRequestId ) {
 
         if( !params ){
             return;
@@ -132,6 +132,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
                     choiceId: params[i].choiceID,
                     btnType: 'interactionChoice',
                     text: params[i].vrCommands[j],
+                    performInteractionRequestId: performInteractionRequestId,
                     classNames: 'list-item',
                     templateName: 'text'
                 } ) );

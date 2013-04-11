@@ -135,6 +135,8 @@ var StateManager = Em.StateManager.extend( {
             },
 
             exit: function(){
+                this._super();
+
                 SDL.SDLAppController.deactivateApp();
             }
         } )
