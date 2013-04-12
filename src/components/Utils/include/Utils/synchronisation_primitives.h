@@ -52,6 +52,7 @@ typedef pthread_cond_t PlatformConditionalVar;
 #endif
 #endif
 #include "Logger.hpp"
+#include "Utils/macro.h"
 
 namespace threads {
 
