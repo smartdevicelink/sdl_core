@@ -124,7 +124,13 @@ var StateManager = Em.StateManager.extend( {
         } ),
 
         devicelist: Em.State.create( {
-
+            /**
+             * Calls function to clear device list on DeviceListView
+             */
+            enter: function() {
+                this._super();
+                SDL.DeviceListView.clearDeviceList();
+            }
         } ),
 
         nonMedia: Em.State.create( {

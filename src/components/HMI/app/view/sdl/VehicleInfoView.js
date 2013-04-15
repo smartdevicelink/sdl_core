@@ -157,11 +157,7 @@ SDL.VehicleInfo = Em.ContainerView.create( {
 
         contentBinding: 'SDL.SDLVehicleInfoModel.vehicleInfoPRNDL',
 
-        optionValuePath: 'content.id',
-
-        optionLabelPath: 'content.name',
-
-        valeuBinding: 'SDL.SDLVehicleInfoModel.prndlSelectState'
+        valueBinding: 'SDL.SDLVehicleInfoModel.prndlSelectState'
     } ),
 
     /**

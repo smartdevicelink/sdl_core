@@ -42,26 +42,11 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      */
     vehicleInfoPRNDL:
         [
-            {
-                name: "PARK",
-                id: 0
-            },
-            {
-                name: "REVERSE",
-                id: 1
-            },
-            {
-                name: "NEUTRAL",
-                id: 2
-            },
-            {
-                name: "FORWARD_DRIVE_2",
-                id: 3
-            },
-            {
-                name: "LOWGEAR",
-                id: 4
-            }
+            "PARK",
+            "REVERSE",
+            "NEUTRAL",
+            "FORWARD_DRIVE_2",
+            "LOWGEAR"
         ],
 
     /**
@@ -69,7 +54,7 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      * 
      * @type {String}
      */
-    prndlSelectState: 'EN-US',
+    prndlSelectState: 'PARK',
 
     /**
      * Stored VehicleInfo Data
@@ -196,17 +181,15 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
             },
             type: 'gps'
         }
-    /*
-     * 'VEHICLEDATA_TIREPRESSURE':{ data: { 'leftFront': { 'status': 'NORMAL',
-     * 'pressure': 2 } }, type: 'tirePressure' }
-     */
     },
 
     /**
      * Method to set selected state of vehicle transmission to vehicleData
      */
     onPRNDLSelected: function() {
-        this.set( 'vehicleData.VEHICLEDATA_PRNDLSTATUS.data', this.prndlSelectState );
+        if( this.prndlSelectState ) {
+            this.set( 'vehicleData.VEHICLEDATA_PRNDLSTATUS.data', this.prndlSelectState );
+        }
     }.observes( 'this.prndlSelectState' ),
 
     /**

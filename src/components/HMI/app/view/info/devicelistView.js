@@ -113,7 +113,7 @@ SDL.DeviceListView = Em.ContainerView.create( {
     clearDeviceList: function() {
         this.get( 'listOfDevices.list' ).removeAllChildren();
         this.listOfDevices.rerender();
-    }.observes( 'this.stateObj.active' ),
+    },
 
     /**
      * List for option on DeviceListView screen
