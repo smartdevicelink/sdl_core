@@ -1,0 +1,212 @@
+<?xml version="1.0" standalone="no"?>
+<?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
+
+<interfaces>
+
+<interface name="Common" version="1.0" date="2013-04-12">
+
+<enum name="Result">
+	<element name="SUCCESS" value="0"/>
+    <element name="UNSUPPORTED_VERSION" value="1"/>
+    <element name="UNSUPPORTED_REQUEST" value="2"/>
+    <element name="UNSUPPORTED_RESOURCE" value="3"/>
+    <element name="DISALLOWED" value="4"/>
+    <element name="REJECTED" value="5"/>
+    <element name="ABORTED" value="6"/>
+    <element name="IGNORED" value="7"/>
+    <element name="RETRY" value="8"/>
+    <element name="IN_USE"  value="9"/>
+    <element name="DATA_NOT_AVAILABLE" value="10"/>
+    <element name="TIMED_OUT" value="11"/>
+    <element name="INVALID_DATA" value="12"/>
+    <element name="CHAR_LIMIT_EXCEEDED" value="13"/>
+    <element name="INVALID_ID" value="14"/>
+    <element name="DUPLICATE_NAME" value="15"/>
+    <element name="SUBSCRIBED_ALREADY" value="16"/>
+    <element name="APPLICATION_NOT_REGISTERED" value="17"/>
+    <element name="WRONG_LANGUAGE" value="18"/>
+    <element name="OUT_OF_MEMORY" value="19"/>
+    <element name="TOO_MANY_PENDING_REQUESTS" value="20"/>
+    <element name="CANCEL_ROUTE" value="21"/>
+    <element name="NO_APPS_REGISTERED" value="22"/>
+    <element name="NO_DEVICES_CONNECTED" value="23"/>
+    <element name="WARNINGS" value="24"/>
+    <element name="GENERIC_ERROR" value="25"/>
+</enum>
+
+<enum name="ButtonName">
+    <description>Defines the hard (physical) and soft (touchscreen) buttons available from SYNC</description>
+    <element name="OK"/>
+    <element name="SEEKLEFT"/>
+    <element name="SEEKRIGHT"/>
+    <element name="TUNEUP"/>
+    <element name="TUNEDOWN"/>
+    <element name="PRESET_0"/>
+    <element name="PRESET_1"/>
+    <element name="PRESET_2"/>
+    <element name="PRESET_3"/>
+    <element name="PRESET_4"/>
+    <element name="PRESET_5"/>
+    <element name="PRESET_6"/>
+    <element name="PRESET_8"/>
+    <element name="PRESET_9"/>
+    <element name="CUSTOM_BUTTON"/>
+</enum>
+
+<enum name="ButtonEventMode">
+    <element name="BUTTONUP">
+        <description>A button has been released up</description>
+    </element>
+    <element name="BUTTONDOWN">
+        <description>A button has been pressed down</description>
+    </element>
+</enum>
+
+<enum name="ButtonPressMode">
+    <element name="LONG">
+        <description>A button was released, after it was pressed for a long time. Actual timing is defined by Sync and may vary</description>
+    </element>
+    <element name="SHORT">
+        <description>A button was released, after it was pressed for a short time. Actual timing is defined by Sync and may vary</description>
+    </element>
+</enum>
+
+ <enum name="Language">
+     <element name="EN-US" internal_name="EN_US">
+      <description>US English</description>
+    </element>
+    <element name="ES-MX" internal_name="ES_MX">
+      <description>Mexican Spanish</description>
+    </element>
+    <element name="FR-CA" internal_name="FR_CA">
+      <description>Canadian French</description>
+    </element>
+    <element name="DE-EU" internal_name="DE">
+      <description>EU German</description>     
+    </element>
+     <element name="ES-EU" internal_name="ES">
+      <description>EU Spanish</description>     
+    </element>
+    <element name="EN-EU" internal_name="EN_GB">
+      <description>UK English</description>     
+    </element>
+     <element name="RU-RU" internal_name="RU">
+      <description>Russian</description>     
+    </element>
+     <element name="TR-TR" internal_name="TR">
+      <description>Turkish</description>     
+    </element>
+     <element name="PL-EU" internal_name="PL_EU">
+      <description>EU Polish</description>     
+    </element>
+     <element name="FR-EU" internal_name="FR">
+      <description>French</description>     
+    </element>
+     <element name="IT-EU" internal_name="IT">
+      <description>Italian</description>     
+    </element>
+     <element name="SV-EU" internal_name="SV_EU">
+      <description>Swedish</description>     
+    </element>
+     <element name="PT-EU" internal_name="PT">
+      <description>Portuguese</description>     
+    </element>
+     <element name="NL-EU" internal_name="NL">
+      <description>Dutch (Standard)</description>     
+    </element>
+     <element name="EN-AU" internal_name="EN_AU">
+      <description>Australian English</description>     
+    </element>
+     <element name="ZH-CN" internal_name="ZH_CN">
+      <description>Chinese (Mandarin)</description>     
+    </element>
+     <element name="ZH-TW" internal_name="ZH_TW">
+      <description>Taiwanese (Mandarin)</description>     
+    </element>
+     <element name="JA-JP" internal_name="JA">
+      <description>Japanese</description>     
+    </element>
+     <element name="AR-SA" internal_name="AR_SA">
+      <description>Arabic</description>     
+    </element>
+     <element name="KO-KR" internal_name="KO">
+      <description>Korean</description>     
+    </element>
+</enum>
+
+<struct name="ButtonCapabilities">
+    <description>Contains information about a button's capabilities.</description>
+    <param name="name" type="ButtonName" mandatory="true"/>
+    <param name="shortPressAvailable" type="Boolean" mandatory="true">
+        <description>The button supports a short press. Whenever the button is pressed short, onButtonPressed(SHORT) will be invoked.</description>
+    </param>
+    <param name="longPressAvailable" type="Boolean" mandatory="true">
+        <description>The button supports a LONG press. Whenever the button is pressed long, onButtonPressed(LONG) will be invoked.</description>
+    </param>
+    <param name="upDownAvailable" type="Boolean" mandatory="true">
+        <description>The button supports "button down" and "button up". Whenever the button is pressed, onButtonEvent(DOWN) will be invoked. Whenever the button is released, onButtonEvent(UP) will be invoked.</description>
+    </param>
+</struct>
+
+<struct name="PresetBankCapabilities">
+    <description>Contains information about on-screen preset capabilities. </description>
+    <param name="onScreenPresetsAvailable" type="Boolean" mandatory="true">
+        <description>Onscreen custom presets are available.</description>
+    </param>
+</struct>
+
+</interface>
+
+<interface name="Buttons" version="1.0" date="2013-04-12">
+	<function name="GetCapabilities" messagetype="request">
+		<description>Method should be invoked at system startup. Provides information about all supported hardware buttons and their capabilites</description>
+    </function>
+    <function name="GetCapabilities" messagetype="response">
+        <param name="code" type="Common.Result" mandatory="true"/>
+        <param name="method" type="String" mandatory="true"/>
+        <param name="message" type="String" mandatory="false"/>
+        <param name="capabilities" type="Common.ButtonCapabilities" array="true" minsize="1" maxsize="100" mandatory="true">
+        	<description>See ButtonCapabilities</description>
+        </param>
+        <param name="presetBankCapabilities" type="Common.PresetBankCapabilities" mandatory="false">
+        	<description>If returned, the platform supports custom on-screen Presets</description>
+    	</param>
+    </function>
+    <function name="OnButtonEvent" messagetype="notification">
+    	<description>Notifies application of UP/DOWN events for buttons</description>
+    	<param name="name" type="Common.ButtonName" mandatory="true"/>
+    	<param name="mode" type="Common.ButtonEventMode" mandatory="true">
+            <description>Indicates whether this is an UP or DOWN event.</description>
+    	</param>
+    	<param name="customButtonID" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
+    		<description>If ButtonName is “CUSTOM_BUTTON", this references the integer ID passed by a custom button. (e.g. softButtonName)</description>
+    	</param>
+    </function>
+    <function name="OnButtonPress" messagetype="notification">
+        <param name="name" type="Common.ButtonName" mandatory="true"/>
+        <param name="mode" type="Common.ButtonPressMode" mandatory="true">
+            <description>Indicates whether this is a LONG or SHORT button press event.</description>
+        </param>
+        <param name="customButtonID" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
+            <description>If ButtonName is “CUSTOM_BUTTON", this references the string passed by a custom button. (e.g. softButtonName)</description>
+        </param>
+    </function>
+</interface>
+
+<interface name="BasicCommunication" version="1.0" date="2013-04-12">
+    <function name="GetDeviceList" messagetype="request">
+        <description>Request from HMI to SmartDeviceLink to get the list of devices</description>
+    </function>
+    <function name="GetDeviceList" messagetype="response">
+        <param name="code" type="Common.Result" mandatory="true"/>
+        <param name="method" type="String" mandatory="true"/>
+        <param name="message" type="String" mandatory="false"/>
+        <param name="deviceList" type="String" mandatory="false" array="true" minsize="1" maxsize="100"/>
+    </function>
+    <function name="OnDeviceListUpdated" messagetype="notification">
+        <description>Notification from SmartDeviceLink to HMI about changes in device list.</description>
+        <param name="deviceList" type="String" mandatory="false" array="true" minsize="1" maxsize="100"/>
+    </function>
+</interface>
+
+</interfaces>
