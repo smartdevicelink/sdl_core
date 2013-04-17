@@ -38,7 +38,6 @@ SDL.InfoServicesView = Em.View.create( {
 
     classNameBindings:
         [
-            'SDL.helpMode',
             'SDL.States.info.services.active:active_state:inactive_state'
         ],
 

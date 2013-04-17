@@ -37,12 +37,6 @@ SDL.AppViews = Em.ContainerView.extend( {
 
     elementId: 'app',
 
-    classNameBindings:
-        [
-            'SDL.localization',
-            'SDL.helpMode:helpmode'
-        ],
-
     childViews:
         [
             SDL.HomeView,
@@ -85,7 +79,5 @@ SDL.AppViews = Em.ContainerView.extend( {
         this._super();
 
         SDL.set( 'appReady', true );
-     
-        FFW.PreloadImages.preload();
     }
 } );

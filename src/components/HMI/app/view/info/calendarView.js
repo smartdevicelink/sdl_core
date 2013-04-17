@@ -36,7 +36,6 @@ SDL.InfoCalendarView = Em.View.create( {
     /** Bind class for visual representation */
     classNameBindings:
         [
-            'SDL.helpMode',
             'SDL.States.info.calendar.active:active_state:inactive_state'
         ],
 

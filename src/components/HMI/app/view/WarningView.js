@@ -38,7 +38,6 @@ SDL.warningView = Em.ContainerView.extend( {
         [
             'fade:fadeAnimation:fadeWarning',
             'hide:inactive_state',
-            'SDL.localization'
         ],
 
     elementId: 'warning_view',

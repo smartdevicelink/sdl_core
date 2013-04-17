@@ -187,24 +187,6 @@ var StateManager = Em.StateManager.extend( {
 
     /** Phone state */
     phone: Em.State.create( {
-/*
-        enter: function() {
-            SDL.PhoneController.set( 'hideMenu', false );
-
-            this._super();
-        },
-
-        exit: function() {
-            this._super();
-
-            var path = SDL.States.currentState.get( 'path' );
-
-            if( path.split( '.' ).length > 2 ){
-                SDL.PhoneController.set( 'activeState', path.substring( 0, path.indexOf( '.', 6 ) ) );
-            }else{
-                SDL.PhoneController.set( 'activeState', path );
-            }
-        },*/
 
         dialpad: Em.State.create( {
 

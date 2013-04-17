@@ -77,8 +77,6 @@ SDL.InfoAppsView = Em.ContainerView.create( {
             } ) );
         }
 
-        // SDL.InfoAppsView.listOfApplications.list.refresh();
-
     }.observes( 'SDL.SDLModel.registeredApps.@each' ),
 
     vehicleHealthReport: SDL.Button.extend( {
@@ -88,9 +86,6 @@ SDL.InfoAppsView = Em.ContainerView.create( {
         textBinding: 'SDL.locale.label.view_info_apps_vehicle_VehicleHealthReport',
         elementId: 'infoAppsVehicleHealthReport',
         arrow: true,
-        action: 'onState',
-        target: 'SDL.SettingsController',
-        disabledBinding: 'SDL.helpMode',
         onDown: false
     } ),
 
@@ -101,9 +96,6 @@ SDL.InfoAppsView = Em.ContainerView.create( {
         textBinding: 'SDL.locale.label.view_info_apps_911Assist',
         elementId: 'infoAppsAsist911',
         arrow: true,
-        action: 'onState',
-        target: 'SDL.SettingsController',
-        disabledBinding: 'SDL.helpMode',
         onDown: false
     } ),
 
@@ -114,9 +106,6 @@ SDL.InfoAppsView = Em.ContainerView.create( {
         elementId: 'infoAppsInstallButton',
         classNames: 'button installButton leftButtons',
         arrow: true,
-        action: 'onState',
-        target: 'SDL.SettingsController',
-        disabledBinding: 'SDL.helpMode',
         onDown: false
     } ),
 
@@ -129,9 +118,7 @@ SDL.InfoAppsView = Em.ContainerView.create( {
         arrow: true,
         action: 'findNewApps',
         target: 'SDL.SDLController',
-        disabledBinding: 'SDL.helpMode',
         onDown: false
-    // templateName: 'text'
     } ),
 
     getDeviceList: SDL.Button.extend( {
@@ -142,9 +129,7 @@ SDL.InfoAppsView = Em.ContainerView.create( {
         arrow: true,
         action: 'onGetDeviceList',
         target: 'SDL.SDLController',
-        // disabledBinding: 'SDL.helpMode',
         onDown: false
-    // templateName: 'text'
     } ),
 
     listOfApplications: SDL.List.extend( {

@@ -26,20 +26,10 @@
 		
 		<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
 		<script type="text/javascript" src="lib/ember-1.0.pre.min.js"></script>
-		
-		
-		<!-- DEBUG versions -->
-		<!--<script type="text/javascript" src="lib/jquery-1.7.2.js"></script>
-		<script type="text/javascript" src="lib/ember-1.0.pre.js"></script>-->
 	
 		
 	</head>
 	<body ontouchmove="event.preventDefault();">
-	
-         <!--  video id="html5Player" onTimeUpdate="SDL.HTMLVideoPlayer.timeupdate()" onError="SDL.HTMLVideoPlayer.onError()" webkit-playsinline></video-->	
-
-
-
 
         <!-- Framework -->
 		<script type="text/javascript" src="ffw/Framework.js"></script>
@@ -52,13 +42,10 @@
 		<script type="text/javascript" src="ffw/VRRPC.js"></script>
         <script type="text/javascript" src="ffw/VehicleInfoRPC.js"></script>
 		<script type="text/javascript" src="ffw/BasicCommunicationRPC.js"></script>
-		
-        <script type="text/javascript" src="ffw/ImagePreloader.js"></script>
 
 		<!-- APP -->
 		<script type="text/javascript" src="app/Flags.js"></script>
 		<script type="text/javascript" src="app/SDLApp.js"></script>
-        <script type="text/javascript" src="app/DataImages.js"></script>
 		<!-- locales -->
 		<script type="text/javascript" src="locale/eng.js"></script>
         <!-- script type="text/javascript" src="locale/fr.js"></script-->
@@ -67,11 +54,6 @@
 		<script type="text/javascript" src="app/view/WarningView.js"></script>
         
 		<script type="text/x-handlebars">
-			{{#if FLAGS.DEBUG_MODE}}
-			<div id="debug_view">
-				{{SDL.debugText}}
-			</div>
-			{{/if}}
 			 {{view SDL.warningView}}
 		 </script>
 		
@@ -80,7 +62,6 @@
 		<script type="text/javascript" src="app/controlls/Label.js"></script>
 		<script type="text/javascript" src="app/controlls/ScrollBar.js"></script>
 		<script type="text/javascript" src="app/controlls/List.js"></script>
-        <script type="text/javascript" src="app/controlls/PresetButton.js"></script>
 		<script type="text/javascript" src="app/controlls/Indicator.js"></script>
         <script type="text/javascript" src="app/controlls/MenuList.js"></script>
         <script type="text/javascript" src="app/controlls/ScrollableText.js"></script>

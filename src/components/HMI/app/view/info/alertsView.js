@@ -45,8 +45,7 @@ SDL.InfoAlertsView = Em.ContainerView.create( {
         [
             'listCaption',
             'mainlist',
-            'rightlist',
-            'helpModeBg'
+            'rightlist'
         ],
 
     listCaption: SDL.LabelPlusToggleButton.extend( {
@@ -126,14 +125,5 @@ SDL.InfoAlertsView = Em.ContainerView.create( {
                     }
                 }
             ]
-    } ),
-
-    helpModeBg: Em.View.extend( {
-        elementId: 'info_alert_bg_helpMode',
-        classNameBindings:
-            [
-                'SDL.helpMode: active_state'
-            ],
-        classNames: 'hidden'
     } )
 } );

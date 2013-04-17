@@ -34,11 +34,6 @@
 
 FFW = Em.Object.create( {
 
-    /** Check for mobile devices */
-    isAndroid: navigator.userAgent.toLowerCase().indexOf( "android" ) > -1,
-
-    isIOS: ( navigator.userAgent.toLowerCase().indexOf( 'ipad' ) != -1 || navigator.userAgent.toLowerCase().indexOf( 'iphone' ) != -1 ),
-
     init: function() {
         Em.Logger.log( 'FFW: Framework init' );
     }

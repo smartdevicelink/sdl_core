@@ -82,16 +82,5 @@ SDL = Em.Application.create( {
 
         /** container for all views */
         SDL.views = SDL.AppViews.create().appendTo( 'body' );
-
-        if( FLAGS.APP_HIDE_MOUSE_CURSOR ){
-            var style = document.createElement( 'style' );
-            style.setAttribute( 'type', 'text/css' );
-            style.innerHTML = '*{cursor:none !important}';
-
-            document.getElementsByTagName( "head" )[0].appendChild( style );
-        }
-
-        /** connect to video player engine */
-        // SDL.VideoPlayerController.connect();
     }
 } );

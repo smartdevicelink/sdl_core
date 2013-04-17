@@ -89,23 +89,6 @@ SDL.Button = Em.View.extend( Ember.TargetActionSupport, {
         /** Set Mouse Leave Event Flag to false */
         this.set( 'mouseleave', false );
 
-        /**
-         * Only for IOS Simulation of mouseleave event for touch
-         * devices Save reference to element on which touchstart
-         * event triggered
-         */
-        if( FFW.isIOS ){
-            if( SDL.helpMode && event.originalEvent.touches[0] ){
-                this.set( 'targetElement', document.elementFromPoint( event.originalEvent.touches[0].pageX, event.originalEvent.touches[0].pageY ) );
-            }
-        }
-        /*
-         * Not trigger action when help mode active, only for
-         * helpMode buttons
-         */
-        if( this.helpMode && SDL.helpMode ){
-            return;
-        }
 
         // Default trigger action
         if( this.onDown ){
@@ -131,13 +114,6 @@ SDL.Button = Em.View.extend( Ember.TargetActionSupport, {
             if( this.touchleave == true ){
                 this.set( 'touchleave', false );
             }
-            return;
-        }
-        /*
-         * Not trigger action when help mode active, only for
-         * helpMode buttons
-         */
-        if( this.helpMode && SDL.helpMode ){
             return;
         }
 
@@ -182,16 +158,4 @@ SDL.Button = Em.View.extend( Ember.TargetActionSupport, {
         rightIcon: Em.Handlebars.compile( '<img class="ico" {{bindAttr src="view.icon"}} />' + '<span>{{view.text}}</span>'
                         + '<img class="right_ico" {{bindAttr src="view.righticon"}} />' )
     }
-    
-    /** Define button template */
-    /*
-     * template: Ember.Handlebars.compile( '{{#with view}}'+ '{{#if
-     * icon}}<img class="ico" {{bindAttr src="icon"}} />{{/if}}'+
-     * '{{#if text}}<span>{{text}}</span>{{/if}}'+ '{{#if
-     * rightText}}<span class="right_text">{{rightText}}</span>{{/if}}'+
-     * '{{#if righticon}}<img class="right_ico" {{bindAttr
-     * src="righticon"}} />{{/if}}'+ '{{#if arrow}}<img
-     * class="arrow-ico" src="images/common/arrow_ico.png"
-     * />{{/if}}'+ '{{/with}}' )
-     */
 } );

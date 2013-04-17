@@ -44,9 +44,6 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * connect to RPC bus
      */
     connect: function() {
-        // to be removed
-        // this.stubGetValues();
-
         this.client.connect( this, 200 );
     },
 

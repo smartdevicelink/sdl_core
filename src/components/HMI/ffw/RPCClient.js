@@ -43,7 +43,6 @@ FFW.RPCClient = Em.Object.extend( {
      * url for message broker
      */
     url: "ws://localhost:8087",
-    // url: "ws://echo.websocket.org/",
 
     /*
      * Component name in RPC system It is unique.
@@ -75,9 +74,7 @@ FFW.RPCClient = Em.Object.extend( {
         this.observer = observer;
         this.idStart = startId;
 
-        this.socket = ( FFW.isAndroid || ( FLAGS.EMULATE_ANDROID && FLAGS.EMULATE_WS ) ) ? FFW.WebSocket.create( {
-            clientName: this.componentName
-        } ) : new WebSocket( this.url, 'sample' );
+        this.socket = new WebSocket( this.url, 'sample' );
 
         var self = this;
 
@@ -94,10 +91,6 @@ FFW.RPCClient = Em.Object.extend( {
             self.onWSError( evt )
         };
 
-        // only for Android!!! emulate that connection is openned
-        if( FFW.isAndroid || ( FLAGS.EMULATE_ANDROID && FLAGS.EMULATE_WS ) ){
-            this.socket.onopen( null );
-        }
     },
 
     /*

@@ -40,62 +40,6 @@ FLAGS = Em.Object.create( {
     /**
      * Set language for localization
      */
-    SET_LOCALIZATION: 'eng',
+    SET_LOCALIZATION: 'eng'
 
-    /**
-     * Emulate CAN network for Climate true for SDL Guide production build
-     */
-    EMULATE_CAN_CLIMATE: true,
-
-    /**
-     * Emulate Phone true for SDL Guide production build
-     */
-    EMULATE_PHONE: true,
-
-    /**
-     * Emulate WebSocket connection false for SDL Guide production build
-     */
-    EMULATE_WS: true,
-
-    /**
-     * Emulate Android environment it is necessary to debug some interfaces
-     * under browser false for SDL Guide production build
-     */
-    EMULATE_ANDROID: false,
-
-    /**
-     * Extended logging only for debug and development !!! MUST BE false for
-     * release build !!!
-     */
-    DEBUG_MODE: false,
-
-    /** hide mouse cursor from screen */
-    APP_HIDE_MOUSE_CURSOR: false,
-
-    /**
-     * show MCS screen in settings -> vehicle menu to be disabled until v2.1, in
-     * version v2.1 this feature will be released to end user
-     */
-    MCS_ENABLED: false,
-
-    /**
-     * show MCS screen in settings -> vehicle menu to be disabled until v2.1, in
-     * version v2.1 this feature will be released to end user
-     */
-    HELP_MODE: false,
-
-    /**
-     * Emulate CAN network for Multi Contour Seat false for SDL Guide production
-     * build
-     */
-    MCS_EMULATE_CAN: true,
-
-    /** Sync bladders activity in MCS */
-    MCS_BLADDERS_SYNC: true,
-
-    /**
-     * Active concept for MCS massage feature
-     */
-
-    MCS_ACTIVE_CONCEPT: 1
 } );

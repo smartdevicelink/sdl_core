@@ -36,8 +36,6 @@ SDL.InfoTravelLinkView = Em.ContainerView.create( {
 
     classNameBindings:
         [
-            'SDL.helpMode',
-            'SDL.localization',
             'SDL.States.info.travelLink.active:active_state:inactive_state'
         ],
 
