@@ -1384,25 +1384,32 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	// Private sendPRCRequest method. All RPCRequests are funneled through this method after
 		// error checking. 
 	private void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
-		SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
-
-		byte[] msgBytes = JsonRPCMarshaller.marshall(request, _wiproVersion);
-
-		ProtocolMessage pm = new ProtocolMessage();
-		pm.setData(msgBytes);
-		pm.setSessionID(_rpcSessionID);
-		pm.setMessageType(MessageType.RPC);
-		pm.setSessionType(SessionType.RPC);
-		pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
-		pm.setCorrID(request.getCorrelationID());
-		if (request.getBulkData() != null) 
-			pm.setBulkData(request.getBulkData());
-		
-		// Queue this outgoing message
-		synchronized(OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
-			if (_outgoingProxyMessageDispatcher != null) {
-				_outgoingProxyMessageDispatcher.queueMessage(pm);
+		try {
+			SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
+	
+			byte[] msgBytes = JsonRPCMarshaller.marshall(request, _wiproVersion);
+			Log.w(TAG, " msg length in bytes " + msgBytes.length);
+	
+			ProtocolMessage pm = new ProtocolMessage();
+			pm.setData(msgBytes);
+			pm.setSessionID(_rpcSessionID);
+			pm.setMessageType(MessageType.RPC);
+			pm.setSessionType(SessionType.RPC);
+			pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
+			pm.setCorrID(request.getCorrelationID());
+			if (request.getBulkData() != null) 
+				pm.setBulkData(request.getBulkData());
+			Log.w(TAG, "  bulk data len = " + (pm.getBulkData() != null ? pm.getBulkData().length : -998));
+			
+			// Queue this outgoing message
+			synchronized(OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+				if (_outgoingProxyMessageDispatcher != null) {
+						_outgoingProxyMessageDispatcher.queueMessage(pm);
+				}
 			}
+		} catch (OutOfMemoryError e) {
+			SyncTrace.logProxyEvent("OutOfMemory exception while sending request " + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
+			throw new SyncException("OutOfMemory exception while sending request " + request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
 		}
 
 		// Record most recent heart beat activity 
