@@ -1388,7 +1388,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
 	
 			byte[] msgBytes = JsonRPCMarshaller.marshall(request, _wiproVersion);
-			Log.w(TAG, " msg length in bytes " + msgBytes.length);
 	
 			ProtocolMessage pm = new ProtocolMessage();
 			pm.setData(msgBytes);
@@ -1399,7 +1398,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			pm.setCorrID(request.getCorrelationID());
 			if (request.getBulkData() != null) 
 				pm.setBulkData(request.getBulkData());
-			Log.w(TAG, "  bulk data len = " + (pm.getBulkData() != null ? pm.getBulkData().length : -998));
 			
 			// Queue this outgoing message
 			synchronized(OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
