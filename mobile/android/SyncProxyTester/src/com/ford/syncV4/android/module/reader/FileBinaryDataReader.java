@@ -61,6 +61,9 @@ public class FileBinaryDataReader implements BinaryDataReader {
 		} catch (IOException e) {
 			Log.w(TAG, "Can't read file " + input, e);
 			return null;
+		} catch (OutOfMemoryError e) {
+			Log.e(TAG, "File " + input + " is too big", e);
+			return null;
 		} finally {
 			if (is != null) {
 				try {

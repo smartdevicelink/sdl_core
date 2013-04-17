@@ -160,6 +160,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
 
 	private static final int REQUEST_PUTFILE_OPEN = 42;
+	
+	private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
 
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
@@ -1754,25 +1756,32 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
-									byte[] data = contentsOfFile(txtLocalFileName.getText().toString());
-									if (data != null) {
-										String syncFileName = txtSyncFileName.getText().toString();
-										try {
-											PutFile msg = new PutFile();
-											msg.setSyncFileName(syncFileName);
-											msg.setFileType((FileType) spnFileType.getSelectedItem());
-											msg.setPersistentFile(chkPersistentFile.isChecked());
-											msg.setCorrelationID(autoIncCorrId++);
-											msg.setBulkData(data);
-											
-											_msgAdapter.logMessage(msg, true);
-											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-										} catch (SyncException e) {
-											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									String filename = txtLocalFileName.getText().toString();
+									long filesize = new File(filename).length();
+									if (filesize <= PUTFILE_MAXFILESIZE) {
+										byte[] data = contentsOfFile(filename);
+										if (data != null) {
+											String syncFileName = txtSyncFileName.getText().toString();
+											try {
+												PutFile msg = new PutFile();
+												msg.setSyncFileName(syncFileName);
+												msg.setFileType((FileType) spnFileType.getSelectedItem());
+												msg.setPersistentFile(chkPersistentFile.isChecked());
+												msg.setCorrelationID(autoIncCorrId++);
+												msg.setBulkData(data);
+												
+												_msgAdapter.logMessage(msg, true);
+												ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+											} catch (SyncException e) {
+												_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+											}
+											_putFileAdapter.add(syncFileName);
+										} else {
+											Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
 										}
-										_putFileAdapter.add(syncFileName);
 									} else {
-										Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
+										Toast.makeText(mContext, "The size of the file exceeds the limit of " +
+												(PUTFILE_MAXFILESIZE / (1024 * 1024)) + " MB", Toast.LENGTH_LONG).show();
 									}
 									txtLocalFileName = null;
 								}
@@ -3476,6 +3485,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			return os.toByteArray();
 		} catch (IOException e) {
 			Log.w(logTag, "Can't read file " + filename, e);
+			return null;
+		} catch (OutOfMemoryError e) {
+			Log.e(logTag, "File " + filename + " is too big", e);
 			return null;
 		} finally {
 			if (is != null) {
