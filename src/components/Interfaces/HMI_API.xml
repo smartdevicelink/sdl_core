@@ -134,6 +134,62 @@
     </element>
 </enum>
 
+<enum name="SoftButtonType">
+  <description>Contains information about the SoftButton capabilities.</description>
+  <element name="TEXT" internal_name="SBT_TEXT"/>
+  <element name="IMAGE" internal_name="SBT_IMAGE"/>
+  <element name="BOTH" internal_name="SBT_BOTH"/>
+</enum>
+
+<enum name="SystemAction">
+  <description>Enumeration that describes system actions that can be triggered.</description>
+  <element name="DEFAULT_ACTION">
+    <description>Default action occurs.  Standard behavior (e.g. SoftButton clears overlay).</description>
+  </element>
+  <element name="STEAL_FOCUS">
+    <description>App is brought into HMI_FULL.</description>
+  </element>
+  <element name="KEEP_CONTEXT">
+    <description>Current system context is maintained.  An overlay is persisted even though a SoftButton has been pressed and the notification sent.</description>
+  </element>
+</enum>
+
+<enum name="AppType">
+  <description>Enumeration listing possible app types.</description>
+  <element name="DEFAULT" />
+  <element name="COMMUNICATION" />
+  <element name="MEDIA" />
+  <element name="MESSAGING" />
+  <element name="NAVIGATION" />
+  <element name="INFORMATION" />
+  <element name="SOCIAL" />
+  <element name="BACKGROUND_PROCESS" />
+  <element name="TESTING" />
+  <element name="SYSTEM" />
+</enum>
+
+<enum name="DeactivateReason">
+  <description>Enum of reasons of user navigating from application used by HMI.</description>
+  <element name="AUDIO">
+      <description>Navigated to audio(radio, etc)</description>
+  </element>
+  <element name="PHONECALL">
+      <description>Navigated to make a call.</description>
+  </element>
+  <element name="NAVIGATIONMAP">
+      <description>Navigated to navigation screen.</description>
+  </element>
+  <element name="PHONEMENU">
+      <description>Navigated to phone menu.</description>
+  </element>
+  <element name="SYNCSETTINGS">
+      <description>Navigated to settings menu.</description>
+  </element>
+  <element name="GENERAL">
+      <description>Other screens navigation apart from other mobile app.</description>
+  </element>
+</enum>
+
 <struct name="ButtonCapabilities">
     <description>Contains information about a button's capabilities.</description>
     <param name="name" type="ButtonName" mandatory="true"/>
@@ -152,6 +208,72 @@
     <description>Contains information about on-screen preset capabilities. </description>
     <param name="onScreenPresetsAvailable" type="Boolean" mandatory="true">
         <description>Onscreen custom presets are available.</description>
+    </param>
+</struct>
+
+<struct name="SoftButton">
+    <param name="type" type="SoftButtonType" mandatory="true">
+      <description>Describes, whether it is text, highlighted text, icon, or dynamic image. See softButtonType</description>
+    </param>
+    <param name="text" maxlength="500" type="String" mandatory="false">
+      <description>Optional text to display (if defined as TEXT or BOTH)</description>
+    </param>
+    <param name="image" type="Image" mandatory="false">
+      <description>Optional image struct for SoftButton (if defined as IMAGE or BOTH)</description>
+    </param>
+    <param name="isHighlighted" type="Boolean" mandatory="false">
+      <description>True, if highlighted</description>
+      <description>False, if not highlighted</description>
+    </param>
+    <param name="softButtonID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Value which is returned via OnButtonPress / OnButtonEvent</description>
+    </param>
+    <param name="systemAction" type="SystemAction" mandatory="false">
+      <description>Parameter indicating whether selecting a SoftButton shall call a specific system action.  This is intended to allow Notifications to bring the callee into full / focus; or in the case of persistent overlays, the overlay can persist when a SoftButton is pressed.</description>
+    </param>
+ </struct>
+
+<struct name="Image">
+  <param name="path" maxlength="65535" type="String" mandatory="true">
+    <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
+  </param>
+</struct>
+
+<struct name="TTSChunk">
+    <description>A TTS chunk, that consists of the text/phonemes to speak</description>
+    <param name="text" type="String" mandatory="true" maxlength="500">
+        <description>The text or phonemes to speak.</description>
+    </param>
+</struct>
+
+<struct name="HMIApplication">
+    <description>Data type containing information about application needed by HMI.</description>
+    <param name="appName" type="String" maxlength="100" mandatory="true">
+      <description>The mobile application name, e.g. "Ford Drive Green".</description>
+    </param>
+    <param name="ngnMediaScreenAppName" type="String" maxlength="100" mandatory="false">
+      <description>Provides an abbreviated version of the app name (if needed), that will be displayed on the NGN media screen.</description>
+      <description>If not provided, the appName is used instead (and will be truncated if too long)</description>
+    </param>
+    <param name="icon" type="String" mandatory="false">
+      <description>Path to application icon.</description>
+    </param>
+    <param name="deviceName" type="String" mandatory="true">
+      <description>Name of device on which provided application is running.</description>
+    </param>
+    <param name="appId" type="Integer" mandatory="true">
+      <description>Unique(during ignition cycle) id of application. To be used in all commands sent by application for identification.</description>
+    </param>
+    <param name="hmiDisplayLanguageDesired" type="Language" mandatory="true">
+      <description>Current app’s expected display language</description>
+    </param>
+    <param name="isMediaApplication" type="Boolean" mandatory="true">
+      <description>Indicates if the application is a media or a non-media application.</description>
+      <description>Only media applications will be able to stream audio to Sync that is audible outside of the BT media source.</description>
+    </param>
+    <param name="appType" type="AppType" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>List of all applicable app types stating which classifications to be given to the app.</description>
+      <description>e.g. for platforms like GEN2, this will determine which "corner(s)" the app can populate.</description>
     </param>
 </struct>
 
@@ -198,14 +320,80 @@
         <description>Request from HMI to SmartDeviceLink to get the list of devices</description>
     </function>
     <function name="GetDeviceList" messagetype="response">
-        <param name="code" type="Common.Result" mandatory="true"/>
-        <param name="method" type="String" mandatory="true"/>
-        <param name="message" type="String" mandatory="false"/>
         <param name="deviceList" type="String" mandatory="false" array="true" minsize="1" maxsize="100"/>
     </function>
     <function name="OnDeviceListUpdated" messagetype="notification">
         <description>Notification from SmartDeviceLink to HMI about changes in device list.</description>
         <param name="deviceList" type="String" mandatory="false" array="true" minsize="1" maxsize="100"/>
+    </function>
+    <function name="GetAppList" messagetype="request">
+        <description>This methos is usually invoked by HMI to get list of registered apps.</description>
+    </function>
+    <function name="GetAppList" messagetype="response">
+        <param name="appList" type="HMIApplication" mandatory="false" array="true" minsize="1"/>
+    </function>
+    <function name="ActivateApp" messagetype="request">
+      <description>Invoked by UI component when user clicks on app in the list of registered apps. Application is shown on recieving successful response.</description>
+      <param name="appId" type="Integer" mandatory="true">
+        <description>Id of selected application.</description>
+      </param>
+    </function>
+    <function name="ActivateApp" messagetype="response">
+    </function>
+    <function name="OnAppDeactivated" messagetype="notification">
+      <description>Invoked by UI component when user switches to any functionality which is not other mobile application.</description>
+      <param name="appId" type="Integer" mandatory="true">
+        <description>Id of deactivated application.</description>
+      </param>
+      <param name="reason" type="DeactivateReason" mandatory="true">
+        <description>Specifies the functionality user switched to.</description>
+      </param>
+    </function>
+    <function name="OnAppRegistered" messagetype="notification">
+      <description>Issued by SDL to notify HMI about new application registered.</description>
+      <param name="application" type="HMIApplication" mandatory="true"/>
+    </function>
+    <function name="OnAppUnregistered" messagetype="notification">
+      <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
+      <param name="appId" type="Integer" mandatory="true"/>
+    </function>
+</interface>
+
+<interface name="UI" version="1.0" date="2013-04-16">
+    <function name="Alert" messagetype="request">
+        <description>Shows an alert which typically consists of text-to-speech message and text on the display. At least either alertText1, alertText2 or TTSChunks need to be provided.</description>
+        <param name="alertText1" type="String" mandatory="false" maxlength="500">
+          <description>The first line of the alert text field</description>
+        </param>
+        <param name="alertText2" type="String" mandatory="false" maxlength="500">
+          <description>The second line of the alert text field</description>
+        </param>
+        <param name="alertText3" type="String" mandatory="false" maxlength="500">
+          <description>The third line of the alert text field</description>
+        </param>
+        <param name="ttsChunks" type="TTSChunk" mandatory="false" minsize="1" maxsize="100" array="true">
+          <description>An array of text chunks of type TTSChunk. See TTSChunk</description>
+        </param>
+        <param name="duration" type="Integer" mandatory="false" minvalue="3000" maxvalue="10000" defvalue="5000">
+          <description>Timeout in milliseconds. Typical timeouts are 3-5 seconds. If omitted, timeout is set to 5s.</description>
+        </param>
+        <param name="playTone" type="Boolean" mandatory="false">
+          <description>Defines if tone should be played. Tone is played before TTS. If omitted, no tone is played.</description>
+        </param>
+        <param name="softButtons" type="SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
+          <description>App defined SoftButtons</description>
+        </param>
+        <param name="appId" type="Integer" mandatory="true">
+          <description>Id of application requested this RPC.</description>
+        </param>
+    </function>
+    <function name="Alert" messagetype="response">
+      <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="2000000000">
+        <description>Amount of time (in seconds) that an app must wait before resending an alert.</description>
+      </param>
+    </function>
+    <function name="OnReady" messagetype="notification">
+      <description>HMI notifies SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
 </interface>
 
