@@ -1,4 +1,5 @@
 [CW16]
++ CreateInteractionChoiceSet dialog: add support for Image fields.
 * PutFile dialog: don't allow to send files larger than 4 MB.
 * SyncProxyAndroid SDK: prevent crashing of the application when trying to send a request with large bulk data.
 

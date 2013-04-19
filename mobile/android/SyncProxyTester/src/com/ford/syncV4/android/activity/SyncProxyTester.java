@@ -1466,93 +1466,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.CreateInteractionChoiceSet) {
-							//something
-							AlertDialog.Builder builder;
-							AlertDialog createCommandSet;
-
-							Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.createinteractionchoices,
-									(ViewGroup) findViewById(R.id.createcommands_Root));
-
-							final EditText command1 = (EditText) layout.findViewById(R.id.createcommands_command1);
-							final EditText command2 = (EditText) layout.findViewById(R.id.createcommands_command2);
-							final EditText command3 = (EditText) layout.findViewById(R.id.createcommands_command3);
-							final EditText vr1 = (EditText) layout.findViewById(R.id.createcommands_vr1);
-							final EditText vr2 = (EditText) layout.findViewById(R.id.createcommands_vr2);
-							final EditText vr3 = (EditText) layout.findViewById(R.id.createcommands_vr3);
-							final CheckBox choice1 = (CheckBox) layout.findViewById(R.id.createcommands_choice1);
-							final CheckBox choice2 = (CheckBox) layout.findViewById(R.id.createcommands_choice2);
-							final CheckBox choice3 = (CheckBox) layout.findViewById(R.id.createcommands_choice3);
-
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									Vector<Choice> commands = new Vector<Choice>();
-									Image image = new Image();
-									image.setImageType(ImageType.STATIC);
-									image.setValue("iconFilename");
-									
-									if (choice1.isChecked()) {
-										Choice one = new Choice();
-										one.setChoiceID(autoIncChoiceSetIdCmdId++);
-										one.setMenuName(command1.getText().toString());
-										one.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command1.getText().toString(),
-												vr1.getText().toString() })));
-										one.setImage(image);
-										commands.add(one);
-									}
-									
-									if (choice2.isChecked()) {
-										Choice two = new Choice();
-										two.setChoiceID(autoIncChoiceSetIdCmdId++);
-										two.setMenuName(command2.getText().toString());
-										two.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command2.getText().toString(),
-												vr2.getText().toString() })));
-										two.setImage(image);
-										commands.add(two);
-									}
-									
-									if (choice3.isChecked()) {
-										Choice three = new Choice();
-										three.setChoiceID(autoIncChoiceSetIdCmdId++);
-										three.setMenuName(command3.getText().toString());
-										three.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command3.getText().toString(),
-												vr3.getText().toString() })));
-										three.setImage(image);
-										commands.add(three);
-									}
-									
-									if (!commands.isEmpty()) {
-										CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
-										msg.setCorrelationID(autoIncCorrId++);
-										int choiceSetID = autoIncChoiceSetId++;
-										msg.setInteractionChoiceSetID(choiceSetID);
-										msg.setChoiceSet(commands);
-										try {
-											_msgAdapter.logMessage(msg, true);
-											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-											if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
-												Log.w(logTag, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
-											}
-											_latestCreateChoiceSetId = choiceSetID;
-										} catch (SyncException e) {
-											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-										}
-									} else {
-										Toast.makeText(getApplicationContext(), "No commands to set", Toast.LENGTH_SHORT).show();
-									}
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							createCommandSet = builder.create();
-							createCommandSet.show();
+							sendCreateInteractionChoiceSet();
 						} else if (adapter.getItem(which) == Names.DeleteInteractionChoiceSet) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
@@ -2229,6 +2143,134 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+
+					/**
+					 * Opens the dialog for CreateInteractionChoiceSet message and sends it.
+					 */
+					private void sendCreateInteractionChoiceSet() {
+						Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.createinteractionchoices,
+								(ViewGroup) findViewById(R.id.createcommands_Root));
+
+						final EditText command1 = (EditText) layout.findViewById(R.id.createcommands_command1);
+						final EditText command2 = (EditText) layout.findViewById(R.id.createcommands_command2);
+						final EditText command3 = (EditText) layout.findViewById(R.id.createcommands_command3);
+						final EditText vr1 = (EditText) layout.findViewById(R.id.createcommands_vr1);
+						final EditText vr2 = (EditText) layout.findViewById(R.id.createcommands_vr2);
+						final EditText vr3 = (EditText) layout.findViewById(R.id.createcommands_vr3);
+						final CheckBox choice1 = (CheckBox) layout.findViewById(R.id.createcommands_choice1);
+						final CheckBox choice2 = (CheckBox) layout.findViewById(R.id.createcommands_choice2);
+						final CheckBox choice3 = (CheckBox) layout.findViewById(R.id.createcommands_choice3);
+						final CheckBox image1Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image1Check);
+						final CheckBox image2Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image2Check);
+						final CheckBox image3Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image3Check);
+						final Spinner image1Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image1Type);
+						final Spinner image2Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image2Type);
+						final Spinner image3Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image3Type);
+						final EditText image1Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image1Value);
+						final EditText image2Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image2Value);
+						final EditText image3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image3Value);
+						
+						final ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
+								mContext, android.R.layout.simple_spinner_item, ImageType.values());
+						imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+						
+						final boolean v2Features = getCurrentProtocolVersion() >= 2;
+						if (v2Features) {
+							image1Type.setAdapter(imageTypeAdapter);
+							image2Type.setAdapter(imageTypeAdapter);
+							image3Type.setAdapter(imageTypeAdapter);
+						} else {
+							int visibility = android.view.View.GONE;
+							View[] views = { image1Check, image2Check, image3Check,
+									image1Type, image2Type, image3Type,
+									image1Value, image2Value, image3Value };
+							for (View view : views) {
+								view.setVisibility(visibility);
+							}
+						}
+
+						AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								Vector<Choice> commands = new Vector<Choice>();
+								
+								if (choice1.isChecked()) {
+									Choice one = new Choice();
+									one.setChoiceID(autoIncChoiceSetIdCmdId++);
+									one.setMenuName(command1.getText().toString());
+									one.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command1.getText().toString(),
+											vr1.getText().toString() })));
+									if (v2Features && image1Check.isChecked()) {
+										Image image = new Image();
+										image.setImageType(imageTypeAdapter.getItem(image1Type.getSelectedItemPosition()));
+										image.setValue(image1Value.getText().toString());
+										one.setImage(image);
+									}
+									commands.add(one);
+								}
+								
+								if (choice2.isChecked()) {
+									Choice two = new Choice();
+									two.setChoiceID(autoIncChoiceSetIdCmdId++);
+									two.setMenuName(command2.getText().toString());
+									two.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command2.getText().toString(),
+											vr2.getText().toString() })));
+									if (v2Features && image2Check.isChecked()) {
+										Image image = new Image();
+										image.setImageType(imageTypeAdapter.getItem(image2Type.getSelectedItemPosition()));
+										image.setValue(image2Value.getText().toString());
+										two.setImage(image);
+									}
+									commands.add(two);
+								}
+								
+								if (choice3.isChecked()) {
+									Choice three = new Choice();
+									three.setChoiceID(autoIncChoiceSetIdCmdId++);
+									three.setMenuName(command3.getText().toString());
+									three.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command3.getText().toString(),
+											vr3.getText().toString() })));
+									if (v2Features && image3Check.isChecked()) {
+										Image image = new Image();
+										image.setImageType(imageTypeAdapter.getItem(image3Type.getSelectedItemPosition()));
+										image.setValue(image3Value.getText().toString());
+										three.setImage(image);
+									}
+									commands.add(three);
+								}
+								
+								if (!commands.isEmpty()) {
+									CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
+									msg.setCorrelationID(autoIncCorrId++);
+									int choiceSetID = autoIncChoiceSetId++;
+									msg.setInteractionChoiceSetID(choiceSetID);
+									msg.setChoiceSet(commands);
+									try {
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+										if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+											Log.w(logTag, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
+										}
+										_latestCreateChoiceSetId = choiceSetID;
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
+								} else {
+									Toast.makeText(getApplicationContext(), "No commands to set", Toast.LENGTH_SHORT).show();
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.show();
 					}
 
 					/**
