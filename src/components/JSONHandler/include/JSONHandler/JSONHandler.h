@@ -40,9 +40,8 @@
 #include "JSONHandler/SDLRPCMessage.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IJsonHandler.h"
-#include "protocol_handler/raw_message.h"
 #include "protocol_handler/protocol_observer.h"
-#include "protocol_handler/protocol_handler_impl.h"
+#include "protocol_handler/protocol_handler.h"
 
 const unsigned char RPC_REQUEST = 0x0;
 const unsigned char RPC_RESPONSE = 0x1;
@@ -71,7 +70,7 @@ public:
      * \brief Constructor
      * \param protocolHandler Pointer to Protocol Layer handler for message exchange.
     */
-    JSONHandler( protocol_handler::ProtocolHandlerImpl * protocolHandler = 0 );
+    JSONHandler( protocol_handler::ProtocolHandler * protocolHandler = 0 );
 
     /**
      * \brief Destructor
@@ -83,13 +82,13 @@ public:
      * \brief Sets pointer for Protocol layer handler for message exchange.
      * \param protocolHandler Pointer to Protocol layer handler.
      */
-    void setProtocolHandler( protocol_handler::ProtocolHandlerImpl * protocolHandler );
+    void setProtocolHandler( protocol_handler::ProtocolHandler * protocolHandler );
 
     /**
      * \brief Callback for Protocol layer handler to notify of message received.
      * \param message Object containing received data, size of it and connection key.
      */
-    void onDataReceivedCallback( const protocol_handler::RawMessage * message );
+    void onMessageReceived( const protocol_handler::RawMessage * message );
     /*end of methods from IProtocolObserver*/
 
     /*Methods for IRPCMessagesObserver*/
@@ -145,7 +144,7 @@ private:
     /**
       *\brief Points on instance of Protocol layer handler for message exchange.
     */
-    protocol_handler::ProtocolHandlerImpl *         mProtocolHandler;
+    protocol_handler::ProtocolHandler *         mProtocolHandler;
 
     /* End IProtocolObserver data */
 

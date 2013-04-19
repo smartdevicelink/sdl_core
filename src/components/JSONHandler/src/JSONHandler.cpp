@@ -193,7 +193,7 @@ namespace
 
 log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONHandler"));
 
-JSONHandler::JSONHandler(protocol_handler::ProtocolHandlerImpl* protocolHandler)
+JSONHandler::JSONHandler(protocol_handler::ProtocolHandler* protocolHandler)
     : mProtocolHandler(protocolHandler) {
 
   incoming_thread_ = new threads::Thread(
@@ -242,7 +242,7 @@ void JSONHandler::sendRPCMessage(const NsSmartDeviceLinkRPC::SDLRPCMessage* mess
     }
 }
 /*End of methods for IRPCMessagesObserver*/
-void JSONHandler::setProtocolHandler(protocol_handler::ProtocolHandlerImpl* protocolHandler)
+void JSONHandler::setProtocolHandler(protocol_handler::ProtocolHandler* protocolHandler)
 {
     if (!protocolHandler)
     {
@@ -252,7 +252,7 @@ void JSONHandler::setProtocolHandler(protocol_handler::ProtocolHandlerImpl* prot
     mProtocolHandler = protocolHandler;
 }
 
-void JSONHandler::onDataReceivedCallback(const protocol_handler::RawMessage* message)
+void JSONHandler::onMessageReceived(const protocol_handler::RawMessage* message)
 {
     if (!message)
     {

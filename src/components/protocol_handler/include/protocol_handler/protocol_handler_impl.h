@@ -1,6 +1,6 @@
 /**
- * \file ProtocolHandler.h
- * \brief ProtocolHandler class header file.
+ * \file protocol_handler.h
+ * \brief ProtocolHandlerImpl class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -40,7 +40,7 @@
 #include "Logger.hpp"
 #include "Utils/MessageQueue.h"
 
-#include "protocol_handler/raw_message.h"
+#include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/session_observer.h"
@@ -64,14 +64,15 @@ class MessagesFromMobileAppHandler;
 class MessagesToMobileAppHandler;
 
 /**
- * \class ProtocolHandler
+ * \class ProtocolHandlerImpl
  * \brief Class for handling message exchange between Transport and higher
  * layers. Receives message in form of array of bytes, parses its protocol,
  * handles according to parsing results (version number, start/end session etc
  * and if needed passes message to JSON Handler or notifies Connection Handler
  * about activities around sessions.
  */
-class ProtocolHandlerImpl : public ITransportManagerDataListener {
+class ProtocolHandlerImpl : public ITransportManagerDataListener,
+                            public ProtocolHandler {
  public:
   /**
    * \brief Constructor
@@ -103,7 +104,7 @@ class ProtocolHandlerImpl : public ITransportManagerDataListener {
    * \brief Method for sending message to Mobile Application.
    * \param message Message with params to be sent to Mobile App.
    */
-  void sendData(const RawMessage* message);
+  void sendMessageToMobileApp(const RawMessage* message);
 
  protected:
   /**

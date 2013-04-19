@@ -154,7 +154,7 @@ void ProtocolHandlerImpl::sendStartSessionNAck(
   }
 }
 
-void ProtocolHandlerImpl::sendData(const RawMessage* message) {
+void ProtocolHandlerImpl::sendMessageToMobileApp(const RawMessage* message) {
   LOG4CPLUS_TRACE_METHOD(logger_, __PRETTY_FUNCTION__);
   if (!message) {
     LOG4CPLUS_ERROR(logger_,
@@ -357,7 +357,7 @@ RESULT_CODE ProtocolHandlerImpl::handleMessage(
                                               packet->data_size());
 
       if (protocol_observer_)
-        protocol_observer_->onDataReceivedCallback(rawMessage);
+        protocol_observer_->onMessageReceived(rawMessage);
 
       break;
     }
@@ -437,7 +437,7 @@ RESULT_CODE ProtocolHandlerImpl::handleMultiFrameMessage(
           key, completePacket->version(), completePacket->data(),
           completePacket->total_data_bytes());
 
-      protocol_observer_->onDataReceivedCallback(rawMessage);
+      protocol_observer_->onMessageReceived(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
     }

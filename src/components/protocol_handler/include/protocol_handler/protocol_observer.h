@@ -55,7 +55,7 @@ class ProtocolObserver {
    * when new message is received from Mobile Application.
    * \param message Message with supporting params received
    */
-  virtual void onDataReceivedCallback(const RawMessage* message) = 0;
+  virtual void onMessageReceived(const RawMessage* message) = 0;
 
  protected:
   /**

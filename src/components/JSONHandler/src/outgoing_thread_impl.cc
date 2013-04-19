@@ -88,7 +88,7 @@ void OutgoingThreadImpl::threadMain() {
           logger_,
           "Sending to ProtocolHandler: " << msgToProtocolHandler->data()
             << " of size " << msgToProtocolHandler->data_size());
-      handler_->mProtocolHandler->sendData(msgToProtocolHandler);
+      handler_->mProtocolHandler->sendMessageToMobileApp(msgToProtocolHandler);
 
       delete message;
       LOG4CPLUS_INFO(logger_, "Outgoing mobile message handled.");
