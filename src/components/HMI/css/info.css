@@ -18,11 +18,6 @@
 	padding-right: 11px;
 }
 
-/******************* For Help-Mode *******************/
-#info_view.help-mode .list-item span{
-	line-height: 54px;
-	left: 1px;
-}
 
 #info_view {
 	width: 800px;
@@ -88,37 +83,6 @@
 #info_left_calendar {top: 166px;}
 #info_left_apps {top: 216px;}
 
-.help-mode #info{
-	background: url(../images/info/info_blur.png) no-repeat 0 -5px;
-}
-
-#info_view.help-mode #info_sync_services,
-#info_view.help-mode #info_traff,
-#info_view.help-mode #info_traffic_report,
-#info_view.help-mode #info_traffic_pts,
-#info_view.help-mode #info_traffic_hear,
-#info_view.help-mode #info_connect,
-#info_view.help-mode #info_log,
-
-#info_view.help-mode #info_left_services,
-#info_view.help-mode #info_left_travel_link,
-#info_view.help-mode #info_left_alerts,
-#info_view.help-mode #info_left_calendar,
-#info_view.help-mode #info_left_apps,
-#info_view.help-mode .inner-wrapper div{
-	color: transparent !important;
-	text-shadow: 0 0 3px #999 !important;
-}
-
-#info_view.help-mode #info_connect{
-	background: none !important;
-	border: none !important;
-}
-
-#info_view.help-mode .list-content{
-	border: none !important;
-}
-
 /******************* For Info.Services *******************/
 #info_services_view{
 	top: 48px;
@@ -131,15 +95,6 @@
 #info_services_view .inner-content{
 	left: 30px;
 	top: 49px;
-}
-
-.help-mode #info_services_view #info_traffic_pts{
-	text-shadow: 0 0 3px #65CDD9 !important;
-}
-
-.help-mode #info_services_view{
-	background-image:url(../images/info/info_services_bg_help.png);
-	background-position: 0px 40px;
 }
 
 /******************* For Info.travelLink *******************/
@@ -216,240 +171,15 @@
 	text-align: center;
 }
 
-.helpmode #info_travelLink_listLeft{
-	margin-left: -1px;
-	top: 91px;
-}
-
-.helpmode #info_travelLink_listRight{
-	margin-right: 2px;
-}
-
 #info_travelLink_listRight .list-item:first-of-type {
 	height: 48px !important;
 }
 
-.helpmode #info_travelLink {
-	background-image: url(../images/info/info_travelLink_bg_help.png);
-	background-repeat: no-repeat;
-	border: none !important;
-}
-
-.helpmode #info_travelLink_logo {
-	opacity: 0;
-}
-
-.helpmode #info_travelLink .lat{
-	text-shadow: 0 0 3px lime !important;
-}
-
-.helpmode #info_travelLink .list-item span{
-	text-shadow: 0 0 3px #999 !important;
-}
-
-.helpmode #info_travelLink_listRight .list-item:first-of-type {
-	height: 48px !important;	
-	line-height: 48px;
-}
-
-.helpmode #info_travelLink_listRight .list-item:first-of-type span{
-	line-height: 51px;
-}
-
-.helpmode #info_travelLink_listRight .list-item span{
-	margin-left: 43px;
-}
-
 /******************* For Info.Alerts menu *****************/
 
-#info_alerts {
-	left: 153px;
-	top: 48px;
-	width: 647px;
-	height: 384px;
-	font-size: 20px;
-}
 
-#info_alerts_listCaption {
-	top: 66px;
-	left: 13px;
-	height: 39px;	
-}
- 
-#info_alerts_listCaption .lableToggle {
-	position: relative;
-	line-height: 40px;
-	float: left;
-	margin-left: 0px !important;
-	margin-top: 0px !important;
-	width: 134px;
-	text-align: right;
-}
 
-#info_alerts_listCaption .lableToggle span{
-	z-index: 2;
-	position: relative;
-}
 
-#info_alerts_listCaption .toogleButtonContainer{
-	height: 39px;
-	width: 260px;
-	border-radius: 0;
-	margin: 0 11px;
-	border: 1px solid #393939;
-	border-bottom: none;
-	line-height: 39px;
-	float: left;
-}
-
-#info_alerts_listCaption .toogleButtonContainer .delim{
-	width: 4px;
-	height: 39px;
-	background: url(../images/info/delim_40.png) no-repeat;
-	z-index: 100;
-	border: none;
-}
-
-#info_alerts_listCaption .toggles {
-	height: 39px;
-	width: 128px;
-}
-
-#info_alerts_listCaption .toogleButtonContainer span{
-	line-height: 40px;
-	z-index: 2;
-	margin-left: 0px !important;
-	margin-top: 0px !important;
-}
-
-#info_alerts  .toogleButtonContainer .active {
-	background: url(../images/info/btn_40_bg_active_invert.png) !important;
-}
-
-#info_alerts_list {
-	position: relative;
-	float: left;
-	top: 67px;
-	left: 13px;
-	width: 468px;
-	height: 301px;
-}
-
-#info_alerts_list .list-content {
-	width: 406px;
-	border-top: none;
-	border-left: none;
-}
-
-#info_alerts_list .list-item {
-	width: 405px;
-}
-
-#info_alerts_list .list-item:first-of-type{
-	height: 39px !important;
-	line-height: 39px !important;
-}
-
-#info_alerts_list_item1 {
-	border-left: 1px solid #393939;
-}
-
-#info_alerts_list_item1 .right_ico {
-	position: absolute;
-	right: 7px;
-}
-#info_alerts_list_item1 .ico {
-	border: none !important;
-}
-
-#info_alerts_list_item1 span {
-	position: absolute;
-	bottom: -2px;
-	width: 250px;
-	font-size: 19px;
-	z-index: 2;
-}
-
-.helpmode #info_alerts_list_item1 span {
-	bottom: -3px;
-	margin: 0px 0 0 94px;
-}
-
-.fr #info_alerts_list_item1 span {
-	line-height: 18px;
-	bottom: 4px;
-}
-
-.helpmode.fr #info_alerts_list_item1 span {
-	line-height: 18px;
-	bottom: 5px;
-}
-
-#info_alerts_list .list-item.active {
-	background-image: url(../images/info/btn_50_bg_active_invert.png);
-}
-
-#info_alerts_list .toogleButtonContainer .delim {
-	width: 4px;
-	height: 39px;
-	background: url(../images/info/delim_40.png) no-repeat;
-	z-index: 100;
-	border: none;
-}
-
-#info_alerts_rightList {
-	position: relative;
-	float: left;
-	top: 67px;
-	left: 23px;
-	height: 151px;
-	width: 152px;
-}
-
-#info_alerts_rightList .list-content {
-	width: 150px;
-}
-
-#info_alerts_rightList .list-item {
-	border-bottom: 1px solid #393939 !important;
-}
-
-#info_alerts_rightList .list-item > span {
-	margin-left: 15px;
-	position: relative;
-	z-index: 2;
-}
-
-.helpmode #info_alerts_rightList{
-	top: 67px;
-	left: 23px;
-}
-
-.helpmode #info_alerts_rightList .list-item{
-	height: 49px !important;
-}
-
-.helpmode #info_alerts_rightList .list-item span{
-	line-height: 51px !important;
-}
-
-.helpmode #info_alerts_rightList .list-item .ico{
-	border: none !important;
-}
-
-.helpmode #info_alerts span{
-	text-shadow: 0 0 3px #999 !important;
-}
-
-#info_alert_bg_helpMode{
-	width: 647px;
-	height: 384px;
-	background-image: url(../images/info/info_alerts_bg_help.png);
-}
-
-.help-mode #info_alerts_list .list-item:first-of-type {
-	border-bottom: 1px solid #393939 !important;
-}
 
 /******************* For Info.Calendar menu ***************/
 #info_calendar {
@@ -664,28 +394,6 @@
 	top: 174px;
 }
 
-#info_calendar.help-mode {
-    background-image: url(../images/info/view_info_calendar-help.png);
-	background-position: 1px 33px;
-}
-
-#info_calendar.help-mode .c-btn, #info_calendar.help-mode .day.active {
-	background: none !important;
-}
-
-#info_calendar.help-mode div.day{
-	text-shadow: 0 0 3px #FFF !important;
-}
-
-.help-mode #info_calendar .today {
-	border: none !important;
-	background: none !important;
-}
-
-.help-mode #info_calendar .today span {
-	text-shadow: 0 0 3px #999 !important;
-}
-
 /******************* For Info.DeviceList *******************/
 #info_view .info_apps_deviceList_view{
 	background: black;
@@ -701,6 +409,12 @@
 	height: 48px;
 	border: 1px solid #333;
 	border-radius: 2px;
+	left: 5px;
+}
+
+#info_apps_deviceList_view .backButton .ico {
+	margin-top: 13px;
+	margin-left: 8px;
 }
 
 #info_apps_deviceList_view .list{
@@ -872,32 +586,4 @@
 	border-radius: 2px;
 	top: 269px;
 	left: 303px;
-}
-
-.helpmode #info_apps{
-	background-image: url(../images/info/info_apps_bg_help.png) !important;
-	background-repeat: no-repeat;
-}
-
-.helpmode #info_apps_list span {
-	margin-left: -1px;
-	line-height: 51px !important;
-}
-
-.helpmode #info_apps_install_Button{
-	border: none;
-	background: none;
-}
-
-.helpmode #info_apps #info_apps_install_Button span{
-	margin-top: 1px;
-	left: 51px;
-}
-
-.helpmode #info_apps_install_Button .arrow-ico{
-	opacity: 0;
-}
-
-#info_apps.help-mode #info_apps_install_Button .ico{
-	opacity: 0;
 }
