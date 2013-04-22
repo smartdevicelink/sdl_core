@@ -1,10 +1,7 @@
-<?xml version="1.0" standalone="no"?>
-<?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
+<?xml version="1.0" standalone="yes"?>
 
-<interfaces>
-
-<description>
-     * Copyright (c) 2013, Ford Motor Company
+<!--
+* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +29,10 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
-</description>
+ * POSSIBILITY OF SUCH DAMAGE. -->
+
+
+<interfaces name="SmartDeviceLink HMI API">
 
 <interface name="Common" version="1.0" date="2013-04-12">
 
@@ -360,6 +359,13 @@
   <element name="DATA_ALREADY_SUBSCRIBED" internal_name="VDRC_DATA_ALREADY_SUBSCRIBED"/>
   <element name="DATA_NOT_SUBSCRIBED" internal_name="VDRC_DATA_NOT_SUBSCRIBED"/>
   <element name="IGNORED" internal_name="VDRC_IGNORED"/>    
+</enum>
+
+<enum name="ApplicationsCloseReason">
+  <description>Describes reason for exiting application.</description>
+  <element name="IGNITION_OFF" />
+  <element name="MASTER_RESET" />
+  <element name="FACTORY_DEFAULTS" />
 </enum>
 
 <struct name="ButtonCapabilities">
@@ -895,6 +901,30 @@
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
       <param name="appId" type="Integer" mandatory="true"/>
     </function>
+    <function name="ExitApplication" messagetype="request">
+      <description>Used by HMI when User chooses to exit application. Sent from HMI to SDL.</description>
+      <param name="appId" type="Integer" mandatory="true">
+        <description>Id of application that requested this RPC.</description>
+      </param>
+    </function>
+    <function name="ExitApplication" messagetype="response">
+      <description>Success of operation.</description>
+    </function>
+    <function name="ExitAllApplications" messagetype="request">
+      <description>Sent by HMI to SDL to close all registered applications.</description>
+      <param name="reason" type="ApplicationsCloseReason" mandatory="true">
+        <description>Specifies reason for exiting all apllications.</description>
+      </param>
+    </function>
+    <function name="ExitAllApplications" messagetype="response">
+    </function>
+    <function name="MixingAudioSupported" messagetype="request">
+      <description>Request from SDL to HMI to find out if the last one supports mixing audio (ie recording TTS command and playing audio).</description>
+    </function>
+    <function name="MixingAudioSupported" messagetype="response">
+      <description>If no response received SDL suggest that mixing audio is not supported</description>
+      <param name="attenuatedSupported" type="Boolean" mandatory="true"/>
+    </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
@@ -902,7 +932,7 @@
     <description>Method should be invoked at system startup. Response provides information about presence of VR module and its readiness to cooperate with SDL.</description>
   </function>
   <function name="IsReady" messagetype="response">
-    <param name="isPresent" type="Boolean" mandatory="true">
+    <param name="availabe" type="Boolean" mandatory="true">
       <description>If true then VR is present and ready to communicate with SDL.</description>
     </param>
   </function>
@@ -985,7 +1015,7 @@
     <description>Method should be invoked at system startup. Response provides information about presence of TTS module and its readiness to cooperate with SDL.</description>
   </function>
   <function name="IsReady" messagetype="response">
-    <param name="isPresent" type="Boolean" mandatory="true">
+    <param name="availabe" type="Boolean" mandatory="true">
       <description>If true then TTS is present and ready to communicate with SDL.</description>
     </param>
   </function>
@@ -1526,7 +1556,7 @@
       <description>The status of the seat belts.</description>
     </param>
     <param name="bodyInformation" type="Boolean" mandatory="false">                                                           
-      <description>The body information including ignition status & internal temp.</description>
+      <description>The body information including ignition status and internal temp.</description>
     </param>
     <param name="deviceStatus" type="Boolean" mandatory="false">                                                           
       <description>The device status including signal and battery strength.</description>
