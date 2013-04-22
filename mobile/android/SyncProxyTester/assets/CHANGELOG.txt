@@ -1,3 +1,6 @@
+[CW17]
++ XML testing: <test> and request tags now support the 'pause' attribute, which inserts a delay after completing the test or sending the request, respectively. Its value is the delay in milliseconds. If the attribute is missing, no delay is inserted.
+
 [CW16]
 + CreateInteractionChoiceSet dialog: add support for Image fields.
 * PutFile dialog: don't allow to send files larger than 4 MB.

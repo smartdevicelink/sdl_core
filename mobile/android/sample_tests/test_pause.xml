@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file>
+    <type type="unit"/>
+
+    <!-- The 'pause' attribute can be used in a <test> or a request tag, and
+         it inserts a delay after completing the test or sending the request,
+         respectively. Its value is the delay in milliseconds. If the attribute
+         is missing, no delay is inserted. Examples follow. -->
+
+    <test testName="AlertTest" pause="6000">
+        <Alert correlationID="1">
+            <String alertText1="Alert 1" />
+            <String alertText2="Alert 1" />
+            <Vector name="ttsChunks">
+                <TTSChunk>
+                    <String text="This is the first T T S" />
+                    <String type="TEXT" />
+                </TTSChunk>
+                <TTSChunk>
+                    <String text="This is the second T T S" />
+                    <String type="TEXT" />
+                </TTSChunk>
+            </Vector>
+            <Integer duration="5000" />
+            <Boolean playtone="false" />
+        </Alert>
+
+        <result correlationID="1" return="SUCCESS"/>
+    </test>
+
+    <test testName="AlertTest2">
+        <Alert correlationID="2" pause="4000">
+            <String alertText1="Alert 2" />
+            <String alertText2="Alert 2" />
+            <Vector name="ttsChunks">
+                <TTSChunk>
+                    <String text="This is the first T T S" />
+                    <String type="TEXT" />
+                </TTSChunk>
+                <TTSChunk>
+                    <String text="This is the second T T S" />
+                    <String type="TEXT" />
+                </TTSChunk>
+            </Vector>
+            <Integer duration="3000" />
+            <Boolean playtone="false" />
+        </Alert>
+
+        <Show correlationID="3" pause="500">
+            <String mainField1="Show line 1" />
+            <String mainField2="Show line 2" />
+            <String mainField3="Show line 3" />
+            <String mainField4="Show line 4" />
+            <String mediaClock="11:59" />
+            <String mediaTrack="Media Track" />
+            <String statusBar="Status Bar" />
+            <Vector name="customPresets">
+                <String add="GEN0" />
+                <String add="GEN1" />
+                <String add="GEN2" />
+                <String add="GEN3" />
+                <String add="GEN4" />
+                <String add="GEN5" />
+            </Vector>
+            <Vector name="softButtons">
+                <SoftButton>
+                    <Integer softButtonID="5432" />
+                    <String text="KeepContext" />
+                    <String type="TEXT" />
+                    <Boolean isHighlighted="false" />
+                    <String systemAction="KEEP_CONTEXT" />
+                </SoftButton>
+                <SoftButton>
+                    <Integer softButtonID="5431" />
+                    <String text="StealFocus" />
+                    <String type="TEXT" />
+                    <Boolean isHighlighted="false" />
+                    <String systemAction="STEAL_FOCUS" />
+                </SoftButton>
+                <SoftButton>
+                    <Integer softButtonID="5430" />
+                    <String text="Default" />
+                    <String type="TEXT" />
+                    <Boolean isHighlighted="false" />
+                    <String systemAction="DEFAULT_ACTION" />
+                </SoftButton>
+            </Vector>
+        </Show>
+
+        <result correlationID="2" return="SUCCESS"/>
+        <result correlationID="3" return="SUCCESS"/>
+    </test>
+
+</file>

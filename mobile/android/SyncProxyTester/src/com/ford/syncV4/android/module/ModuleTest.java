@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -77,6 +78,85 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class ModuleTest {
+	
+	/** Wraps the {@link RPCRequest} class to add the pause field. */
+	class RPCRequestWrapper {
+		private RPCRequest request = null;
+		private long pause = 0;
+		
+		public RPCRequestWrapper(RPCRequest request, long pause) {
+			this.request = request;
+			this.pause = pause;
+		}
+
+		public long getPause() {
+			return pause;
+		}
+
+		public void setPause(long pause) {
+			this.pause = pause;
+		}
+
+		public RPCRequest getRequest() {
+			return request;
+		}
+	}
+	
+	/** Represents a test as read from the test file. */
+	class Test {
+		private String name = null;
+		private long pause = 0;
+		private List<RPCRequestWrapper> requests = null;
+		
+		public Test() {
+			super();
+		}
+
+		public Test(String name, long pause, List<RPCRequestWrapper> requests) {
+			this.name = name;
+			this.pause = pause;
+			this.requests = requests;
+		}
+		
+		/**
+		 * Adds the specified request to the list. If the list is null, it's
+		 * created first.
+		 * 
+		 * @param request request to add
+		 */
+		public void addRequest(RPCRequestWrapper request) {
+			if (requests == null) {
+				requests = new ArrayList<ModuleTest.RPCRequestWrapper>();
+			}
+			
+			requests.add(request);
+		}
+
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public long getPause() {
+			return pause;
+		}
+		
+		public void setPause(long pause) {
+			this.pause = pause;
+		}
+		
+		public List<RPCRequestWrapper> getRequests() {
+			return requests;
+		}
+		
+		public void setRequests(List<RPCRequestWrapper> requests) {
+			this.requests = requests;
+		}
+	}
+	
 	/** Log tag for the class. */
 	private static final String TAG = ModuleTest.class.getSimpleName();
 	/** Specifies whether to display debug info from the XML parser. */
@@ -93,6 +173,12 @@ public class ModuleTest {
 	 * {@link RPCStruct#setBulkData(byte[])} method).
 	 */
 	private final static String BULK_DATA_ATTR = "bulkData";
+	/** Attribute name that defines the test's name in a &lt;test&gt; tag. */
+	private final static String TEST_NAME_ATTR = "testName";
+	/** Attribute name that defines the timeout of a &lt;test&gt; or a request. */
+	private final static String PAUSE_ATTR = "pause";
+	/** Attribute name of request's correlation ID. */
+	private final static String CORRELATION_ID_ATTR = "correlationID";
 	
 	private static ModuleTest _instance;
 	private SyncProxyTester _mainInstance;
@@ -108,7 +194,7 @@ public class ModuleTest {
 	private int numIterations;
 	
 	private ArrayList<Pair<Integer, Result>> expecting = new ArrayList<Pair<Integer, Result>>();
-	private ArrayList<Pair<String, ArrayList<RPCRequest>>> testList = new ArrayList<Pair<String, ArrayList<RPCRequest>>> ();
+	private Test currentTest = null;
 	
 	public static ArrayList<Pair<Integer, Result>> responses = new ArrayList<Pair<Integer, Result>>();
 	
@@ -275,7 +361,18 @@ public class ModuleTest {
 								name = parser.getName();
 								if (name.equalsIgnoreCase("test")) {
 									_msgAdapter.logMessage("test " + parser.getAttributeValue(0), true);
-									testList.add(new Pair<String, ArrayList<RPCRequest>> (parser.getAttributeValue(0), new ArrayList<RPCRequest> ()));
+									
+									long pause = 0;
+									String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
+									if (pauseString != null) {
+										try {
+											pause = Long.parseLong(pauseString);
+										} catch (NumberFormatException e) {
+											Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+										}
+									}
+									currentTest = new Test(parser.getAttributeValue(null, TEST_NAME_ATTR),
+											pause, null);
 									expecting.clear();
 									responses.clear();
 									try {
@@ -395,10 +492,20 @@ public class ModuleTest {
 										rpc = new SetGlobalProperties();
 									}
 
-									if (parser.getAttributeName(0) != null && 
-											parser.getAttributeName(0).equalsIgnoreCase("correlationID")) {
-										try {rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(0)));} 
-										catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
+									try {
+										rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(null, CORRELATION_ID_ATTR)));
+									} catch (NumberFormatException e) {
+										Log.e(TAG, "Unable to parse correlation ID");
+									}
+									
+									long pause = 0;
+									String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
+									if (pauseString != null) {
+										try {
+											pause = Long.parseLong(pauseString);
+										} catch (NumberFormatException e) {
+											Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+										}
 									}
 									
 									//TODO: Set rpc parameters
@@ -415,13 +522,14 @@ public class ModuleTest {
 									
 								    Iterator it = hash.entrySet().iterator();
 								    while (it.hasNext()) {
-								    	Hashtable.Entry pairs = (Hashtable.Entry)it.next();
-								        System.out.println(pairs.getKey() + " = " + pairs.getValue());
+								    		Hashtable.Entry pairs = (Hashtable.Entry)it.next();
+								        logParserDebugInfo(pairs.getKey() + " = " + pairs.getValue());
 								    }
 									
-									Pair<String, ArrayList<RPCRequest>> temp = testList.get(testList.size()-1);
-									temp.second.add(rpc);
-									testList.set(testList.size()-1, temp);
+								    if (currentTest != null) {
+								    		RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause);
+								    		currentTest.addRequest(wrapper);
+								    }
 								} else if (name.equalsIgnoreCase("result")) {
 									expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
 								} else if (name.equalsIgnoreCase("userPrompt") && integration) {
@@ -441,12 +549,25 @@ public class ModuleTest {
 											else localPass = false;
 											i--;
 										}
-										if (localPass) writer.write("" + testList.get(testList.size()-1).first + ", Pass, " + numPass + ", " + numIterations + "\n");
-										if (!localPass) writer.write("" + testList.get(testList.size()-1).first + ", Fail, " + numPass + ", " + numIterations + "\n");
-										Log.i(TAG, "" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations);
-										_msgAdapter.logMessage("" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations, true);
+										
+										if (currentTest != null) {
+											String FIELD_SEPARATOR = ", ";
+											StringBuilder result = new StringBuilder(currentTest.getName());
+											String[] fields = { (localPass ? "Pass" : "Fail"), String.valueOf(numPass), String.valueOf(numIterations) };
+											for (String field : fields) {
+												result.append(FIELD_SEPARATOR);
+												result.append(field);
+											}
+											String resultLine = result.toString();
+											
+											writer.write(resultLine + "\n");
+											Log.i(TAG, resultLine);
+											_msgAdapter.logMessage(resultLine, true);
+										}
 									} catch (Exception e) {
-										_msgAdapter.logMessage("Test " + testList.get(testList.size()-1).first + " Failed! ", Log.ERROR, e);
+										if (currentTest != null) {
+											_msgAdapter.logMessage("Test " + currentTest.getName() + " Failed! ", Log.ERROR, e);
+										}
 									}
 								}
 								break;
@@ -477,7 +598,10 @@ public class ModuleTest {
 							eventType = parser.next();
 						}
 						writer.close();
-
+						Log.d(TAG, "Tests finished");
+						
+						currentTest = null;
+						
 						Intent email = new Intent(Intent.ACTION_SEND);
 						email.setType("plain/text");
 						email.putExtra(Intent.EXTRA_EMAIL, new String[]{"youremail@ford.com"});		  
@@ -680,7 +804,9 @@ public class ModuleTest {
 				int numResponses = expecting.size();
 				if (numResponses > 0) ProxyService.waiting(true);
 				
-				for (RPCRequest rpc : testList.get(testList.size()-1).second) {
+				for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
+					RPCRequest rpc = wrapper.getRequest();
+					
 					_msgAdapter.logMessage(rpc, true);
 					try {
 						ProxyService.getProxyInstance().sendRPCRequest(rpc);
@@ -688,28 +814,38 @@ public class ModuleTest {
 						_msgAdapter.logMessage("Error sending RPC", Log.ERROR, e, true);
 					}
 					
+					long pause = wrapper.getPause();
+					if (pause > 0) {
+						Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName() + "." + rpc.getFunctionName());
+						try {
+							// delay between requests of one test
+							synchronized (this) {
+								this.wait(pause);
+							}
+						} catch (InterruptedException e) {
+							_msgAdapter.logMessage("InterruptedException", true);
+						}
+					} else {
+						Log.i(TAG, "No pause after " + currentTest.getName() + "." + rpc.getFunctionName());
+					}
+				}
+				
+				long pause = currentTest.getPause();
+				if (pause > 0) {
+					Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName());
 					try {
+						// delay after the test
 						synchronized (this) {
-							this.wait(1000);
+							this.wait(pause);
 						}
 					} catch (InterruptedException e) {
 						_msgAdapter.logMessage("InterruptedException", true);
 					}
-				}
-				
-				try {
-					for (int i = 0; i < numResponses; i++) synchronized (this) { this.wait(10000);}
-				} catch (InterruptedException e) {
-					_msgAdapter.logMessage("InterruptedException", true);
+				} else {
+					Log.i(TAG, "No pause after " + currentTest.getName());
 				}
 				
 				ProxyService.waiting(false);
-				
-				try {
-					synchronized (this) { this.wait(5000);}
-				} catch (InterruptedException e) {
-					_msgAdapter.logMessage("InterruptedException", true);
-				}
 				
 				if (expecting.equals(responses)) {
 					pass = true;
