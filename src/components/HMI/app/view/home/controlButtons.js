@@ -167,7 +167,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
         action: function() {
             FFW.BasicCommunication.SendData( null );
         },
-        text: 'Send Data'
+        text: 'Send Data',
+        templateName: 'text'
     } ),
 
     /**
@@ -205,7 +206,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
         action: function() {
             // this._super();
             SDL.VehicleInfo.toggleActivity();
-        }
+        },
+        templateName: 'text'
     } ),
 
     /**
@@ -218,7 +220,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
         action: function() {
             // this._super();
             SDL.TBTClientStateView.toggleActivity();
-        }
+        },
+        templateName: 'text'
     } ),
 
     /**
@@ -438,7 +441,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'OneBtn btnNotPressed',
             text: '1',
             time: 0,
-            presetName: 'PRESET_1'
+            presetName: 'PRESET_1',
+            templateName: 'text'
         } ),
 
         /** Two button */
@@ -447,7 +451,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'TwoBtn btnNotPressed',
             text: '2',
             time: 0,
-            presetName: 'PRESET_2'
+            presetName: 'PRESET_2',
+            templateName: 'text'
         } ),
 
         /** Three button */
@@ -456,7 +461,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'ThreeBtn btnNotPressed',
             text: '3',
             time: 0,
-            presetName: 'PRESET_3'
+            presetName: 'PRESET_3',
+            templateName: 'text'
         } ),
 
         /** Four button */
@@ -465,7 +471,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'FourBtn btnNotPressed',
             text: '4',
             time: 0,
-            presetName: 'PRESET_4'
+            presetName: 'PRESET_4',
+            templateName: 'text'
         } ),
 
         /** Five button */
@@ -474,7 +481,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'FiveBtn btnNotPressed',
             text: '5',
             time: 0,
-            presetName: 'PRESET_5'
+            presetName: 'PRESET_5',
+            templateName: 'text'
         } ),
 
         /** One button */
@@ -483,7 +491,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'SixBtn btnNotPressed',
             text: '6',
             time: 0,
-            presetName: 'PRESET_6'
+            presetName: 'PRESET_6',
+            templateName: 'text'
         } ),
 
         /** One button */
@@ -492,7 +501,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'SevenBtn btnNotPressed',
             text: '7',
             time: 0,
-            presetName: 'PRESET_7'
+            presetName: 'PRESET_7',
+            templateName: 'text'
         } ),
 
         /** One button */
@@ -501,7 +511,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'EightBtn btnNotPressed',
             text: '8',
             time: 0,
-            presetName: 'PRESET_8'
+            presetName: 'PRESET_8',
+            templateName: 'text'
         } ),
 
         /** One button */
@@ -510,7 +521,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'NineBtn btnNotPressed',
             text: '9',
             time: 0,
-            presetName: 'PRESET_9'
+            presetName: 'PRESET_9',
+            templateName: 'text'
         } ),
 
         /** One button */
@@ -519,7 +531,8 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'ZiroBtn btnNotPressed',
             text: '0',
             time: 0,
-            presetName: 'PRESET_0'
+            presetName: 'PRESET_0',
+            templateName: 'text'
         } )
     } )
 } );

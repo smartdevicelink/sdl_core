@@ -426,15 +426,6 @@
 	top: 154px;
 }
 
-#info_apps_deviceList_view .deviceListLabel{
-	top: 80px;
-	left: 75px;
-	width: 620px;
-	height: 20px;
-	background: #393939;
-	padding: 15px;
-}
-
 #info_apps_deviceList_view .list-content{
 	width: 578px;
 	border: none;

@@ -158,6 +158,8 @@ div {
 	left: 10px;
 	width: 278px;
 	height: 81px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 #TTSPopUp.active{

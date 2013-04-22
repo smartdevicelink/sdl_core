@@ -65,17 +65,27 @@ SDL.OptionsView = SDL.SDLAbstractView.create( {
          */
 
         refreshItems: function() {
-            var commands = SDL.SDLAppController.model.get( 'currentCommandsList' ), i, len;
+            var commands = SDL.SDLAppController.model.get( 'currentCommandsList' ), 
+                i, 
+                len,
+                template;
 
             this.items = [];
 
             len = commands.length;
 
             for( i = 0; i < len; i++ ){
+                
+                if( commands[i].menuId ){
+                    template = 'arrow';
+                }else{
+                    template = commands[i].icon ? 'rightText' : 'text';
+                }
+                
                 this.items.push( {
                     type: SDL.Button,
                     params: {
-                        templateName: commands[i].menuId ? 'arrow' : '',
+                        templateName: template,
                         text: commands[i].name,
                         commandId: commands[i].commandId,
                         menuId: commands[i].menuId,

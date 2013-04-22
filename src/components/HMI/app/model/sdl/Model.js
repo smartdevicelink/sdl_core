@@ -536,6 +536,13 @@ SDL.SDLModel = Em.Object.create( {
     },
 
     onDeactivateApp: function( target, appId, appName ) {
+        
+        /**
+         * Close Options menu if opened
+         */
+        if( SDL.OptionsView.active ){
+            SDL.OptionsView.set( 'active', false );
+        }
 
         var dest = target.split( '.' ), reason;
 
