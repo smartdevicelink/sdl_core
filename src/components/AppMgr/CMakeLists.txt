@@ -10,12 +10,14 @@ include_directories (
     ../../thirdPartyLibs/logger/include/
     ../../thirdPartyLibs/logger/log4cplus-1.1.0/include/
     ../../thirdPartyLibs/encryption/include/
+  ../../../src/components/SmartObjects/include
     ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
 set (SOURCES
     ./src/AppMgr.cpp
     ./src/AppMgrCore.cpp
+    ./src/ApplicationCore.cpp
     ./src/MessageChaining.cpp
     ./src/DeviceStorage.cpp
     ./src/Application.cpp
