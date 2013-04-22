@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPMGR_INCLUDE_APPMGR_APPLICATIONCORE_H_
 
 #include "AppMgrCore.h"
+#include "Utils/macro.h"
 #include "SmartObjects/CSmartObject.hpp"
 
 namespace NsAppManager {
@@ -67,7 +68,7 @@ namespace NsAppManager {
       virtual tSharedPtr processInMessage(const Message& message) = 0;
 
       /**
-       * @brief Converts incoming message from TSharedPtr<CSmartObject> type to the NsAppManager::Message type
+       * @brief Converts outgoing message from TSharedPtr<CSmartObject> type to the NsAppManager::Message type
        * @param message Incoming TSharedPtr<CSmartObject>
        *
        * @return AppMngrCore::Message for transfered message
@@ -75,10 +76,7 @@ namespace NsAppManager {
       virtual Message processOutMessage(const tSharedPtr message) = 0;
 
     private:
-        /**
-         * @brief Copy constructor is private to avoid misusing
-         */
-        ApplicationCore(const ApplicationCore& appCore);
+      DISALLOW_COPY_AND_ASSIGN(ApplicationCore);
     };
 }  // namespace NsAppManager
 

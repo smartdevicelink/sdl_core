@@ -34,12 +34,10 @@
 
 namespace NsAppManager {
 
-ApplicationCore::ApplicationCore()
-{
+ApplicationCore::ApplicationCore() {
 }
 
-ApplicationCore::~ApplicationCore()
-{
+ApplicationCore::~ApplicationCore() {
 }
 
 }
