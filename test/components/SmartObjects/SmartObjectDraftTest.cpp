@@ -192,6 +192,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj = binaryData;
         ASSERT_THAT(obj.asBinary(), ElementsAre('\0', 'a'));
     }
+
 }}}}
 
 int main(int argc, char **argv) {
