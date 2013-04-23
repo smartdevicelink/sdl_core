@@ -34,8 +34,13 @@
 #define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGE_H_
 
 #include <string>
+#include <vector>
+
+ #include "Utils/shared_ptr.h"
 
 namespace mobile_message_handler {
+
+typedef std::vector<unsigned char> BinaryData;
 
 enum MessageType {
   Unknown = -1,
@@ -44,42 +49,42 @@ enum MessageType {
   Notification = 2
 };
 
-struct Message {
-  Message()
-    : id(0)
-    , type(Unknown)
-    , correlation_id(0)
-    , connection_key(0) {
+class Message {
+public:
+  Message();
+  Message(const Message& message);
+  Message& operator=(const Message& message);
+  ~Message();
 
-  }
+  //! --------------------------------------------------------------------------
+  int function_id() const;
+  int correlation_id() const;
+  int connection_key() const;
 
-  /**
-   * Function ID
-   * @remark protocol V2.
-   */
-  int id;
+  MessageType type() const;
 
-  /**
-   * Type of message
-   * @remark protocol V2.
-   */
-  MessageType type;
+  const std::string& json_message() const;
+  const BinaryData* binary_data() const;
+  bool hasBinaryData() const;
 
-  /**
-   * Message.
-   */
-  std::string string;
+  //! --------------------------------------------------------------------------
+  void set_function_id(int id);
+  void set_correlation_id(int id);
+  void set_connection_key(int key);
+  void set_message_type(MessageType type);
+  void set_binary_data(BinaryData* data);
+  void set_json_message(const std::string& json_message);
 
-  /**
-   * Correlation ID
-   * @remark protocol V2
-   */
-  int correlation_id;
+private:
+  int function_id_;  // @remark protocol V2.
+  int correlation_id_;  // @remark protocol V2.
+  int connection_key_;
+  MessageType type_;  // @remark protocol V2.
 
-  /**
-   * Current application connection key.
-   */
-  int connection_key;
+  std::string json_message_;
+
+  // TODO(akandul): replace with shared_ptr
+  BinaryData* binary_data_;
 };
 }  // namespace mobile_message_handler
 

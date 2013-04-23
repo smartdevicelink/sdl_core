@@ -101,11 +101,11 @@ Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV1(
     //TODO(AK): check memory allocation here.
   }
 
-  outgoing_message->string = std::string(
+  outgoing_message->set_json_message(std::string(
                                reinterpret_cast<const char*>(message->data()),
-                               message->data_size());
+                               message->data_size()));
 
-  if (outgoing_message->string.empty()) {
+  if (outgoing_message->json_message().empty()) {
     return NULL;
   }
 
@@ -162,25 +162,35 @@ Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
     return NULL;
   }
 
-  outgoing_message->string = std::string(
+  std::string json_string = std::string(
     reinterpret_cast<const char*>(receivedData) + offset, jsonSize);
-  if (outgoing_message->string.empty()) {
-    delete outgoing_message;
-    // Received invalid json packet.
-    return NULL;
-  }
 
-  outgoing_message->id = functionId;
-  outgoing_message->type = static_cast<MessageType>(rpcType);
-  outgoing_message->correlation_id = correlationId;
-  outgoing_message->connection_key = message->connection_key();
-  if (outgoing_message->id == 0 || outgoing_message->type == Unknown ||
-    outgoing_message->correlation_id == 0 ||
-    outgoing_message->connection_key == 0) {
+
+  if (functionId == 0 || rpcType == Unknown ||
+      correlationId == 0 || message->connection_key() == 0 ||
+      outgoing_message->json_message().empty()) {
 
     delete outgoing_message;
     // Invaled message constructed.
     return NULL;
+  }
+
+  outgoing_message->set_json_message(json_string);
+  outgoing_message->set_function_id(functionId);
+  outgoing_message->set_message_type(static_cast<MessageType>(rpcType));
+  outgoing_message->set_correlation_id(correlationId);
+  outgoing_message->set_connection_key(message->connection_key());
+
+  if (message->data_size() > (offset + jsonSize)) {
+    BinaryData* binaryData= new BinaryData(receivedData + offset + jsonSize,
+      receivedData + message->data_size());
+
+    if (!binaryData) {
+      delete outgoing_message;
+      return NULL;
+    }
+
+    outgoing_message->set_binary_data(binaryData);
   }
 
   return outgoing_message;
