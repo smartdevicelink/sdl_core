@@ -1047,6 +1047,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			new AlertDialog.Builder(this)  
 		       .setTitle("Pick a Function (v" + protocolVersion + ")")
 		       .setAdapter(adapter, new DialogInterface.OnClickListener() {
+					final boolean v2Features = getCurrentProtocolVersion() >= 2;
+
 					public void onClick(DialogInterface dialog, int which) {
 						if(adapter.getItem(which) == Names.Alert){
 							AlertDialog.Builder builder;
@@ -1063,7 +1065,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
 							final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
 							
-							final boolean v2Features = getCurrentProtocolVersion() >= 2;
 							if (v2Features) {
 								chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 	
@@ -1274,7 +1275,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText editIconValue = (EditText) layout.findViewById(R.id.addcommand_iconValue);
 							final Spinner spnIconType = (Spinner) layout.findViewById(R.id.addcommand_iconType);
 							
-							final boolean v2Features = getCurrentProtocolVersion() >= 2;
 							if (!v2Features) {
 								int visibility = android.view.View.GONE;
 								View[] views = { chkUseIcon, editIconValue, spnIconType };
@@ -2203,7 +2203,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								mContext, android.R.layout.simple_spinner_item, ImageType.values());
 						imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 						
-						final boolean v2Features = getCurrentProtocolVersion() >= 2;
 						if (v2Features) {
 							image1Type.setAdapter(imageTypeAdapter);
 							image2Type.setAdapter(imageTypeAdapter);
@@ -2337,7 +2336,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						textAlignmentSpinner.setSelection(textAlignmentAdapter.getPosition(TextAlignment.CENTERED));
 						
 						final boolean isMedia = getIsMedia();
-						final boolean v2Features = getCurrentProtocolVersion() >= 2;
 						
 						if (!isMedia) {
 							int visibility = android.view.View.GONE;
