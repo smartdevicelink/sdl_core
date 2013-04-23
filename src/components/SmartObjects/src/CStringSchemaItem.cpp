@@ -35,7 +35,7 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CStringSchemaItem.hpp"
 
-NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem> NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
+utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem> NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
                                                                                                                                          const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue)
 {
     return new NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem(MaxLength, DefaultValue);

@@ -38,7 +38,8 @@
 #include <stddef.h>
 #include <string>
 
-#include "TSharedPtr.hpp"
+#include "Utils/shared_ptr.h"
+
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
 
@@ -60,7 +61,7 @@ namespace NsSmartDeviceLink
              *
              * @return Shared pointer to a new schema item.
              **/
-            static TSharedPtr<CStringSchemaItem> create(const TSchemaItemParameter<size_t> & MaxLength = TSchemaItemParameter<size_t>(),
+            static utils::SharedPtr<CStringSchemaItem> create(const TSchemaItemParameter<size_t> & MaxLength = TSchemaItemParameter<size_t>(),
                                                         const TSchemaItemParameter<std::string> & DefaultValue = TSchemaItemParameter<std::string>());
 
             /**

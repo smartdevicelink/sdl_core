@@ -48,7 +48,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         CSmartObject obj;
 
-        TSharedPtr<ISchemaItem> item = CAlwaysTrueSchemaItem::create();
+        utils::SharedPtr<ISchemaItem> item = CAlwaysTrueSchemaItem::create();
 
         obj = 5;
         int resultType = item->validate(obj);

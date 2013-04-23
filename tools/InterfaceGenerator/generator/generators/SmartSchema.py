@@ -1103,7 +1103,7 @@ class SmartSchema(object):
         u'''#include "JSONHandler/CSmartFactory.hpp"\n'''
         u'''#include "SmartObjects/CSmartSchema.hpp"\n'''
         u'''#include "SmartObjects/ISchemaItem.hpp"\n'''
-        u'''#include "SmartObjects/TSharedPtr.hpp"\n'''
+        u'''#include "Utils/shared_ptr.h"\n'''
         u'''\n'''
         u'''$namespace_open'''
         u'''$enums_content'''
@@ -1204,7 +1204,7 @@ class SmartSchema(object):
         u'''FunctionIDItems, MessageTypeItems);\n'''
         u'''}\n'''
         u'''\n'''
-        u'''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
+        u'''utils::SharedPtr<ISchemaItem> $namespace::$class_name::'''
         u'''provideObjectSchemaItemForStruct('''
         u'''const TStructsSchemaItems & StructsSchemaItems, '''
         u'''const std::string & StructName)\n'''
@@ -1291,7 +1291,7 @@ class SmartSchema(object):
         u'''StructsSchemaItems, FunctionIDItems, MessageTypeItems)));''')
 
     _struct_impl_template = string.Template(
-        u'''TSharedPtr<ISchemaItem> $namespace::$class_name::'''
+        u'''utils::SharedPtr<ISchemaItem> $namespace::$class_name::'''
         u'''initStructSchemaItem_${struct_name}('''
         u'''TStructsSchemaItems & StructsSchemaItems)\n'''
         u'''{\n'''
@@ -1314,7 +1314,7 @@ class SmartSchema(object):
 
     _impl_code_item_decl_temlate = string.Template(
         u'''${comment}'''
-        u'''TSharedPtr<ISchemaItem> ${var_name} = ${item_decl};''')
+        u'''utils::SharedPtr<ISchemaItem> ${var_name} = ${item_decl};''')
 
     _impl_code_integer_item_template = string.Template(
         u'''TNumberSchemaItem<${type}>::create(${params})''')
@@ -1407,9 +1407,8 @@ class SmartSchema(object):
         u'''    /**\n'''
         u'''     * @brief Type that maps of struct names to schema items.\n'''
         u'''     */\n'''
-        u'''    typedef std::map<std::string, NsSmartDeviceLink::'''
-        u'''NsSmartObjects::'''
-        u'''TSharedPtr<NsSmartDeviceLink::NsSmartObjects::'''
+        u'''    typedef std::map<std::string, '''
+        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::'''
         u'''ISchemaItem> > TStructsSchemaItems;\n'''
         u'''\n'''
         u'''    /**\n'''
@@ -1417,10 +1416,10 @@ class SmartSchema(object):
         u'''     *\n'''
         u'''     * @param StructName Name of structure to provide.\n'''
         u'''     *\n'''
-        u'''     * @return TSharedPtr of strucute\n'''
+        u'''     * @return utils::SharedPtr of strucute\n'''
         u'''     */\n'''
-        u'''    static NsSmartDeviceLink::NsSmartObjects::'''
-        u'''TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
+        u'''    static '''
+        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
         u'''provideObjectSchemaItemForStruct(const TStructsSchemaItems & '''
         u'''StructsSchemaItems, const std::string & StructName);\n'''
         u'''\n'''
@@ -1463,8 +1462,8 @@ class SmartSchema(object):
 
     _struct_decl_template = string.Template(
         u'''$comment\n'''
-        u'''static NsSmartDeviceLink::NsSmartObjects::'''
-        u'''TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
+        u'''static '''
+        u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
         u'''initStructSchemaItem_${struct_name}('''
         u'''TStructsSchemaItems & StructsSchemaItems);''')
 

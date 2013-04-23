@@ -49,7 +49,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
-        NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
+        utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(); // No default value
 
         obj = 5;
@@ -89,7 +89,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
 
-        NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
+        utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(false); // Default value = false
 
         obj = 5;
@@ -124,7 +124,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_map_validate, test_BoolSchemaItemTest)
     {
         NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
-        NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
+        utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(false); // Default value = false
 
         obj["aa"] = true;
@@ -155,7 +155,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_array_validate, test_BoolSchemaItemTest)
     {
         NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
-        NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
+        utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create();
 
         obj[0] = true;

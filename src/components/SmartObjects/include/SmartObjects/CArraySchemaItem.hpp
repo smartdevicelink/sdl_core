@@ -37,7 +37,7 @@
 
 #include <stddef.h>
 
-#include "TSharedPtr.hpp"
+#include "Utils/shared_ptr.h"
 #include "ISchemaItem.hpp"
 #include "CAlwaysTrueSchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
@@ -61,7 +61,7 @@ namespace NsSmartDeviceLink
              *
              * @return Shared pointer to a new schema item.
              **/
-            static TSharedPtr<CArraySchemaItem> create(const TSharedPtr<ISchemaItem> & ElementSchemaItem = CAlwaysTrueSchemaItem::create(),
+            static utils::SharedPtr<CArraySchemaItem> create(const utils::SharedPtr<ISchemaItem> & ElementSchemaItem = CAlwaysTrueSchemaItem::create(),
                                                        const TSchemaItemParameter<size_t> & MinSize = TSchemaItemParameter<size_t>(),
                                                        const TSchemaItemParameter<size_t> & MaxSize = TSchemaItemParameter<size_t>());
 
@@ -96,7 +96,7 @@ namespace NsSmartDeviceLink
              * @param MinSize Minimum allowed size.
              * @param MaxSize Maximum allowed size.
              **/
-            CArraySchemaItem(const TSharedPtr<ISchemaItem> & ElementSchemaItem,
+            CArraySchemaItem(const utils::SharedPtr<ISchemaItem> & ElementSchemaItem,
                              const TSchemaItemParameter<size_t> & MinSize,
                              const TSchemaItemParameter<size_t> & MaxSize);
 
@@ -123,7 +123,7 @@ namespace NsSmartDeviceLink
             /**
              * @brief SchemaItem for array elements.
              **/
-            const TSharedPtr<ISchemaItem> mElementSchemaItem;
+            const utils::SharedPtr<ISchemaItem> mElementSchemaItem;
 
             /**
              * @brief Minimum allowed size.

@@ -31,10 +31,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "Utils/shared_ptr.h"
+
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CSmartSchema.hpp"
 #include "SmartObjects/ISchemaItem.hpp"
-#include "SmartObjects/TSharedPtr.hpp"
 #include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
 #include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
 #include "SmartObjects/CArraySchemaItem.hpp"
@@ -221,18 +222,18 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             resultCode_allowedEnumSubsetValues.insert(GENERIC_ERROR);
             resultCode_allowedEnumSubsetValues.insert(DISALLOWED);
 
-            NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> success_SchemaItem =
+            utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> success_SchemaItem =
                 NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>());
 
-            NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem =
+            utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem =
                 NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues
                     , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<eTestType>());
 
-            NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
+            utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
                 NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(1000)
                     , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string>());
 
-            NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem =
+            utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem =
                 NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>(0)
                     , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>(2000000000)
                     , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>());

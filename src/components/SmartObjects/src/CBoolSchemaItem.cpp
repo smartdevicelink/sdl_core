@@ -35,7 +35,7 @@
 #include "SmartObjects/CBoolSchemaItem.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
-NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue)
+utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue)
 {
     return new CBoolSchemaItem(DefaultValue);
 }

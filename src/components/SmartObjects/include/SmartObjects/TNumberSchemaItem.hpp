@@ -35,8 +35,9 @@
 #ifndef __SMARTOBJECT_TNUMBERSCHEMAITEM_HPP__
 #define __SMARTOBJECT_TNUMBERSCHEMAITEM_HPP__
 
+#include "Utils/shared_ptr.h"
+
 #include "CSmartObject.hpp"
-#include "TSharedPtr.hpp"
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
 
@@ -62,7 +63,7 @@ namespace NsSmartDeviceLink
              *
              * @return Shared pointer to a new schema item.
              **/
-            static TSharedPtr<TNumberSchemaItem> create(const TSchemaItemParameter<NumberType> & MinValue = TSchemaItemParameter<NumberType>(),
+            static utils::SharedPtr<TNumberSchemaItem> create(const TSchemaItemParameter<NumberType> & MinValue = TSchemaItemParameter<NumberType>(),
                                                         const TSchemaItemParameter<NumberType> & MaxValue = TSchemaItemParameter<NumberType>(),
                                                         const TSchemaItemParameter<NumberType> & DefaultValue = TSchemaItemParameter<NumberType>());
 
@@ -158,7 +159,7 @@ namespace NsSmartDeviceLink
 }
 
 template <typename NumberType>
-NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType> > NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MinValue,
+utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType> > NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MinValue,
                                                                                                                                                                   const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MaxValue,
                                                                                                                                                                   const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & DefaultValue)
 {

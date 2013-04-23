@@ -38,7 +38,7 @@ NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem(
 {
 }
 
-NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem> NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::create(void)
+utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem> NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::create(void)
 {
     return new CAlwaysTrueSchemaItem();
 }

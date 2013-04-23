@@ -35,7 +35,7 @@
 #include "SmartObjects/CArraySchemaItem.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
-NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem> NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> & ElementSchemaItem,
+utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem> NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::create(const utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> & ElementSchemaItem,
                                                                                                                                        const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MinSize,
                                                                                                                                        const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxSize)
 {
@@ -111,7 +111,7 @@ void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsSmartD
     }
 }
 
-NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::CArraySchemaItem(const TSharedPtr<ISchemaItem> & ElementSchemaItem,
+NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::CArraySchemaItem(const utils::SharedPtr<ISchemaItem> & ElementSchemaItem,
                                                               const TSchemaItemParameter<size_t> & MinSize,
                                                               const TSchemaItemParameter<size_t> & MaxSize):
 mElementSchemaItem(ElementSchemaItem),

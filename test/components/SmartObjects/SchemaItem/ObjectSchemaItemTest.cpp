@@ -31,10 +31,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "Utils/shared_ptr.h"
+
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CSmartSchema.hpp"
 #include "SmartObjects/ISchemaItem.hpp"
-#include "SmartObjects/TSharedPtr.hpp"
 #include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
 #include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
 #include "SmartObjects/CArraySchemaItem.hpp"
@@ -72,7 +73,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     protected:
 
         //Create SmartObjectSchema for test object
-        TSharedPtr<ISchemaItem> initObjectSchemaItem(void)
+        utils::SharedPtr<ISchemaItem> initObjectSchemaItem(void)
         {
             std::set<eTestType> resultCode_allowedEnumSubsetValues;
             resultCode_allowedEnumSubsetValues.insert(APPLICATION_NOT_REGISTERED);
@@ -86,18 +87,18 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
             resultCode_allowedEnumSubsetValues.insert(GENERIC_ERROR);
             resultCode_allowedEnumSubsetValues.insert(DISALLOWED);
 
-            TSharedPtr<ISchemaItem> success_SchemaItem =
+            utils::SharedPtr<ISchemaItem> success_SchemaItem =
                 CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
-            TSharedPtr<ISchemaItem> resultCode_SchemaItem =
+            utils::SharedPtr<ISchemaItem> resultCode_SchemaItem =
                 TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues
                     , TSchemaItemParameter<eTestType>());
 
-            TSharedPtr<ISchemaItem> info_SchemaItem =
+            utils::SharedPtr<ISchemaItem> info_SchemaItem =
                 CStringSchemaItem::create(TSchemaItemParameter<size_t>(10)
                     , TSchemaItemParameter<std::string>());
 
-            TSharedPtr<ISchemaItem> tryAgainTime_SchemaItem =
+            utils::SharedPtr<ISchemaItem> tryAgainTime_SchemaItem =
                 TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(0)
                     , TSchemaItemParameter<int>(2000)
                     , TSchemaItemParameter<int>());
@@ -127,7 +128,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST_F(ObjectSchemaItemTest, test_too_few_object_params)
     {
         CSmartObject obj;
-        TSharedPtr<ISchemaItem> item = initObjectSchemaItem();
+        utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
 
         obj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         obj[S_PARAMS][S_FUNCTION_ID] = "some function";
@@ -143,7 +144,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST_F(ObjectSchemaItemTest, test_too_many_object_params)
     {
         CSmartObject srcObj;
-        TSharedPtr<ISchemaItem> item = initObjectSchemaItem();
+        utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
 
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = 1;
         srcObj[S_PARAMS][S_FUNCTION_ID] = 3;
@@ -179,7 +180,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST_F(ObjectSchemaItemTest, test_object_with_correct_params)
     {
         CSmartObject obj, dstObj;
-        TSharedPtr<ISchemaItem> item = initObjectSchemaItem();
+        utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
 
         obj[S_PARAMS][S_MESSAGE_TYPE] = "APPLICATION_NOT_REGISTERED";
         obj[S_PARAMS][S_FUNCTION_ID] = "GENERIC_ERROR";
@@ -219,7 +220,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         TEST_F(ObjectSchemaItemTest, test_object_with_incorrect_params)
     {
         CSmartObject obj;
-        TSharedPtr<ISchemaItem> item = initObjectSchemaItem();
+        utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
 
         obj[S_PARAMS][S_MESSAGE_TYPE] = "request";
         obj[S_PARAMS][S_FUNCTION_ID] = "some function";

@@ -42,14 +42,14 @@ mIsMandatory(true)
 {
 }
 
-NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember::SMember(const NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::ISchemaItem> & SchemaItem,
+NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember::SMember(const utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::ISchemaItem> & SchemaItem,
                                                                const bool IsMandatory):
 mSchemaItem(SchemaItem),
 mIsMandatory(IsMandatory)
 {
 }
 
-NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem> NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::create(const std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members)
+utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem> NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::create(const std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members)
 {
     return new NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem(Members);
 }

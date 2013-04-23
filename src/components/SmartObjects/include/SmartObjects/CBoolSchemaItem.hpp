@@ -35,8 +35,9 @@
 #ifndef __SMARTOBJECT_CBOOLSCHEMAITEM_HPP__
 #define __SMARTOBJECT_CBOOLSCHEMAITEM_HPP__
 
+#include "Utils/shared_ptr.h"
+
 #include "TSchemaItemParameter.hpp"
-#include "TSharedPtr.hpp"
 #include "ISchemaItem.hpp"
 
 namespace NsSmartDeviceLink
@@ -56,7 +57,7 @@ namespace NsSmartDeviceLink
              *
              * @return Shared pointer to a new schema item.
              **/
-            static TSharedPtr<CBoolSchemaItem> create(const TSchemaItemParameter<bool> & DefaultValue = TSchemaItemParameter<bool>());
+            static utils::SharedPtr<CBoolSchemaItem> create(const TSchemaItemParameter<bool> & DefaultValue = TSchemaItemParameter<bool>());
 
             /**
              * @brief Validate smart object.

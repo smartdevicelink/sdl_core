@@ -40,7 +40,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema()
 {
 }
 
-NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema(NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem)
+NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema(utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem)
 : mSchemaItem(SchemaItem)
 {
 
@@ -51,7 +51,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
     return mSchemaItem->validate(object);
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::setSchemaItem(NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem)
+void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::setSchemaItem(utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem)
 {
     mSchemaItem = SchemaItem;
 }

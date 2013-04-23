@@ -38,7 +38,8 @@
 #include <map>
 #include <string>
 
-#include "TSharedPtr.hpp"
+#include "Utils/shared_ptr.h"
+
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
 
@@ -69,13 +70,13 @@ namespace NsSmartDeviceLink
                  * @param IsMandatory true if member is mandatory, false
                  *                    otherwise. Defaults to true.
                  **/
-                SMember(const TSharedPtr<ISchemaItem> & SchemaItem,
+                SMember(const utils::SharedPtr<ISchemaItem> & SchemaItem,
                         const bool IsMandatory = true);
 
                 /**
                  * @brief Member schema item.
                  **/
-                TSharedPtr<ISchemaItem> mSchemaItem;
+                utils::SharedPtr<ISchemaItem> mSchemaItem;
 
                 /**
                  * @brief true if member is mandatory, false otherwise.
@@ -91,7 +92,7 @@ namespace NsSmartDeviceLink
              *
              * @return Shared pointer to a new schema item.
              **/
-            static TSharedPtr<CObjectSchemaItem> create(const std::map<std::string, SMember> & Members);
+            static utils::SharedPtr<CObjectSchemaItem> create(const std::map<std::string, SMember> & Members);
 
             /**
              * @brief Validate smart object.

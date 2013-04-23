@@ -35,7 +35,7 @@
 #ifndef __CSMARTSCHEMA_HPP__
 #define __CSMARTSCHEMA_HPP__
 
-#include "TSharedPtr.hpp"
+#include "Utils/shared_ptr.h"
 #include "ISchemaItem.hpp"
 
 namespace NsSmartDeviceLink
@@ -65,7 +65,7 @@ namespace NsSmartDeviceLink
              *
              * @param SchemaItem Root schema item.
              */
-            CSmartSchema(TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem);
+            CSmartSchema(utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem);
 
             /**
              * @brief Validate smart object.
@@ -81,7 +81,7 @@ namespace NsSmartDeviceLink
              *
              * @param SchemaItem Root schema item.
              */
-            void setSchemaItem(TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem);
+            void setSchemaItem(utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem);
 
             /**
              * @brief Apply schema.
@@ -102,7 +102,7 @@ namespace NsSmartDeviceLink
             /**
              * @brief Root schema item.
              */
-            TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> mSchemaItem;
+            utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> mSchemaItem;
         };
     }
 }

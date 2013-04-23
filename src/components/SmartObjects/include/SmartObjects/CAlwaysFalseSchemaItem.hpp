@@ -35,7 +35,7 @@
 #ifndef __SMARTOBJECT_CALWAYSFALSESCHEMAITEM_HPP__
 #define __SMARTOBJECT_CALWAYSFALSESCHEMAITEM_HPP__
 
-#include "TSharedPtr.hpp"
+#include "Utils/shared_ptr.h"
 #include "ISchemaItem.hpp"
 
 namespace NsSmartDeviceLink
@@ -53,7 +53,7 @@ namespace NsSmartDeviceLink
              *
              * @return Shared pointer to a new schema item.
              **/
-            static TSharedPtr<CAlwaysFalseSchemaItem> create(void);
+            static utils::SharedPtr<CAlwaysFalseSchemaItem> create(void);
 
             /**
              * @brief Validate smart object.

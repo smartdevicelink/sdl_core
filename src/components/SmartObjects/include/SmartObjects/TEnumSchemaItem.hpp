@@ -39,8 +39,9 @@
 #include <set>
 #include <string>
 
+#include "Utils/shared_ptr.h"
+
 #include "CSmartObject.hpp"
-#include "TSharedPtr.hpp"
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
 
@@ -65,7 +66,7 @@ namespace NsSmartDeviceLink
              *
              * @return Shared pointer to a new schema item.
              **/
-            static TSharedPtr<TEnumSchemaItem> create(const std::set<EnumType> & AllowedElements,
+            static utils::SharedPtr<TEnumSchemaItem> create(const std::set<EnumType> & AllowedElements,
                                                       const TSchemaItemParameter<EnumType> & DefaultValue = TSchemaItemParameter<EnumType>());
 
             /**
@@ -155,7 +156,7 @@ namespace NsSmartDeviceLink
 }
 
 template <typename EnumType>
-NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType> > NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::create(const std::set<EnumType> & AllowedElements,
+utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType> > NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::create(const std::set<EnumType> & AllowedElements,
                                                                                                                                                           const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<EnumType> & DefaultValue)
 {
     return new NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue);

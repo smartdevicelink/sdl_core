@@ -34,15 +34,15 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "SmartObjects/TSharedPtr.hpp"
+#include "Utils/shared_ptr.h"
 
 namespace test
 {
     namespace components
     {
-        namespace SmartObjects
+        namespace utils
         {
-            namespace TSharedPtrTest
+            namespace SharedPtrTest
             {
                 class CMockObject
                 {
@@ -67,33 +67,33 @@ namespace test
     }
 }
 
-test::components::SmartObjects::TSharedPtrTest::CMockObject::CMockObject(int id):
+test::components::utils::SharedPtrTest::CMockObject::CMockObject(int id):
 mId(id)
 {
 }
 
-test::components::SmartObjects::TSharedPtrTest::CMockObject::~CMockObject(void)
+test::components::utils::SharedPtrTest::CMockObject::~CMockObject(void)
 {
     destructor();
 }
 
-int test::components::SmartObjects::TSharedPtrTest::CMockObject::getId(void) const
+int test::components::utils::SharedPtrTest::CMockObject::getId(void) const
 {
     return mId;
 }
 
-test::components::SmartObjects::TSharedPtrTest::CExtendedMockObject::CExtendedMockObject(int id):
+test::components::utils::SharedPtrTest::CExtendedMockObject::CExtendedMockObject(int id):
 CMockObject(id)
 {
 }
 
-typedef NsSmartDeviceLink::NsSmartObjects::TSharedPtr<test::components::SmartObjects::TSharedPtrTest::CMockObject> tMockObjectPtr;
-typedef NsSmartDeviceLink::NsSmartObjects::TSharedPtr<test::components::SmartObjects::TSharedPtrTest::CExtendedMockObject> tExtendedMockObjectPtr;
+typedef utils::SharedPtr<test::components::utils::SharedPtrTest::CMockObject> tMockObjectPtr;
+typedef utils::SharedPtr<test::components::utils::SharedPtrTest::CExtendedMockObject> tExtendedMockObjectPtr;
 
-TEST(TSharedPtrTest, Constructor)
+TEST(SharedPtrTest, Constructor)
 {
-    test::components::SmartObjects::TSharedPtrTest::CMockObject * object1 = new test::components::SmartObjects::TSharedPtrTest::CMockObject(1);
-    test::components::SmartObjects::TSharedPtrTest::CMockObject * object2 = new test::components::SmartObjects::TSharedPtrTest::CMockObject(2);
+    test::components::utils::SharedPtrTest::CMockObject * object1 = new test::components::utils::SharedPtrTest::CMockObject(1);
+    test::components::utils::SharedPtrTest::CMockObject * object2 = new test::components::utils::SharedPtrTest::CMockObject(2);
 
     EXPECT_CALL(*object1, destructor()).Times(0);
     EXPECT_CALL(*object2, destructor()).Times(0);
@@ -117,10 +117,10 @@ TEST(TSharedPtrTest, Constructor)
     EXPECT_CALL(*object2, destructor()).Times(1);
 }
 
-TEST(TSharedPtrTest, PointerTypeCast)
+TEST(SharedPtrTest, PointerTypeCast)
 {
-    test::components::SmartObjects::TSharedPtrTest::CExtendedMockObject * object1 = new test::components::SmartObjects::TSharedPtrTest::CExtendedMockObject(1);
-    test::components::SmartObjects::TSharedPtrTest::CExtendedMockObject * object2 = new test::components::SmartObjects::TSharedPtrTest::CExtendedMockObject(2);
+    test::components::utils::SharedPtrTest::CExtendedMockObject * object1 = new test::components::utils::SharedPtrTest::CExtendedMockObject(1);
+    test::components::utils::SharedPtrTest::CExtendedMockObject * object2 = new test::components::utils::SharedPtrTest::CExtendedMockObject(2);
 
     EXPECT_CALL(*object1, destructor()).Times(0);
     EXPECT_CALL(*object2, destructor()).Times(0);
@@ -141,7 +141,7 @@ TEST(TSharedPtrTest, PointerTypeCast)
     EXPECT_CALL(*object2, destructor()).Times(1);
 }
 
-TEST(TSharedPtrTest, StressTest)
+TEST(SharedPtrTest, StressTest)
 {
     const size_t cNumIterations = 1024U * 1024U;
 
@@ -155,7 +155,7 @@ TEST(TSharedPtrTest, StressTest)
         if ((true == objects.empty()) ||
             (0 == rand() % 256))
         {
-            test::components::SmartObjects::TSharedPtrTest::CMockObject * object = new test::components::SmartObjects::TSharedPtrTest::CMockObject(0);
+            test::components::utils::SharedPtrTest::CMockObject * object = new test::components::utils::SharedPtrTest::CMockObject(0);
             EXPECT_CALL(*object, destructor()).Times(1);
 
             objects.push_back(object);

@@ -1,4 +1,5 @@
 include_directories (
+  ${CMAKE_SOURCE_DIR}/src/components/Utils/include
   ${CMAKE_SOURCE_DIR}/src/components/JSONHandler/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/include

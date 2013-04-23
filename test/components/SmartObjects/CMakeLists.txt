@@ -2,6 +2,7 @@
 add_subdirectory(./SchemaItem)
 
 include_directories (
+  ${CMAKE_SOURCE_DIR}/src/components/Utils/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/components/SmartObjects/include
