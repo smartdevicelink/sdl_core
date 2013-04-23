@@ -1062,36 +1062,48 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtAlertField3 = (EditText) layout.findViewById(R.id.txtAlertField3);
 							final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
 							final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
-							chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
-
-							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb1.setText("ReRoute");
-							sb1.setType(SoftButtonType.SBT_TEXT);
-							sb1.setIsHighlighted(false);
-							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb2.setText("Close");
-							sb2.setType(SoftButtonType.SBT_TEXT);
-							sb2.setIsHighlighted(false);
-							sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-							currentSoftButtons = new Vector<SoftButton>();
-							currentSoftButtons.add(sb1);
-							currentSoftButtons.add(sb2);
-
-							Button btnSoftButtons = (Button) layout.findViewById(R.id.alert_btnSoftButtons);
-							btnSoftButtons.setOnClickListener(new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									IntentHelper.addObjectForKey(currentSoftButtons,
-											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
-									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
-											ALERT_MAXSOFTBUTTONS);
-									startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+							
+							final boolean v2Features = getCurrentProtocolVersion() >= 2;
+							if (v2Features) {
+								chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
+	
+								SoftButton sb1 = new SoftButton();
+								sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+								sb1.setText("ReRoute");
+								sb1.setType(SoftButtonType.SBT_TEXT);
+								sb1.setIsHighlighted(false);
+								sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+								SoftButton sb2 = new SoftButton();
+								sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+								sb2.setText("Close");
+								sb2.setType(SoftButtonType.SBT_TEXT);
+								sb2.setIsHighlighted(false);
+								sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+								currentSoftButtons = new Vector<SoftButton>();
+								currentSoftButtons.add(sb1);
+								currentSoftButtons.add(sb2);
+	
+								Button btnSoftButtons = (Button) layout.findViewById(R.id.alert_btnSoftButtons);
+								btnSoftButtons.setOnClickListener(new OnClickListener() {
+									@Override
+									public void onClick(View v) {
+										IntentHelper.addObjectForKey(currentSoftButtons,
+												Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+										Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+										intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+												ALERT_MAXSOFTBUTTONS);
+										startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+									}
+								});
+							} else {
+								int visibility = android.view.View.GONE;
+								View[] views = { txtAlertField3,
+										layout.findViewById(R.id.alert_line3),
+										layout.findViewById(R.id.alert_softButtonsLayout) };
+								for (View view : views) {
+									view.setVisibility(visibility);
 								}
-							});
+							}
 							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -1102,14 +1114,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setCorrelationID(autoIncCorrId++);
 										msg.setAlertText1(txtAlertField1.getText().toString());
 										msg.setAlertText2(txtAlertField2.getText().toString());
-										msg.setAlertText3(txtAlertField3.getText().toString());
+										if (v2Features) {
+											msg.setAlertText3(txtAlertField3.getText().toString());
+										}
 										msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
 										msg.setPlayTone(chkPlayTone.isChecked());
 										if (toSpeak.length() > 0) {
 											Vector<TTSChunk> ttsChunks = TTSChunkFactory.createSimpleTTSChunks(toSpeak);
 											msg.setTtsChunks(ttsChunks);
 										}
-										if (chkIncludeSoftButtons.isChecked() &&
+										if (v2Features &&
+												chkIncludeSoftButtons.isChecked() &&
 												(currentSoftButtons != null) &&
 												(currentSoftButtons.size() > 0)) {
 											msg.setSoftButtons(currentSoftButtons);

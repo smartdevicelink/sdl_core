@@ -1,4 +1,5 @@
 [CW17]
+* Alert dialog (v1): hide Line 3 and Soft Buttons fields.
 * AddCommand dialog (v1): hide icon-related fields.
 + XML testing: <test> and request tags now support the 'pause' attribute, which inserts a delay after completing the test or sending the request, respectively. Its value is the delay in milliseconds. If the attribute is missing, no delay is inserted.
 
