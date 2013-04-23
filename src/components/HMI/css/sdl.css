@@ -23,6 +23,7 @@
 
 .ffw_list_menu .ffw-button span {
 	margin-left: 20px;
+	height: 50px;
 	width: 120px;
 	position: absolute;
 	overflow: hidden;
