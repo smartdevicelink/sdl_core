@@ -23,6 +23,10 @@
 
 .ffw_list_menu .ffw-button span {
 	margin-left: 20px;
+	width: 120px;
+	position: absolute;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .ffw_list_menu .content {
@@ -622,6 +626,8 @@
 	float: left;
 	margin: 10px;
 	position: relative;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 #AlertManeuverPopUp .closeButton{
 	width: 170px;
