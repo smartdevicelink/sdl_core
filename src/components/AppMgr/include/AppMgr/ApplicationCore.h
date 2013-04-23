@@ -35,13 +35,14 @@
 
 #include "AppMgrCore.h"
 #include "Utils/macro.h"
+#include "Utils/shared_ptr.h"
 #include "SmartObjects/CSmartObject.hpp"
 
 namespace NsAppManager {
     /**
      * @brief typedef for TSharedPtr<CSmartObject> type
      */
-    typedef NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> tSharedPtr;
+    typedef utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> tSharedPtr;
 
     /**
      * @brief class ApplicationCore is intended to provide interfaces for serializing/deserializing between

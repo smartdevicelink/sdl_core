@@ -34,6 +34,7 @@
 #include "gmock/gmock.h"
 
 #include "AppMgr/ApplicationCore.h"
+#include "Utils/shared_ptr.h"
 #include "JSONHandler/SDLRPCObjects/V1/Marshaller.h"
 
 namespace test {
@@ -153,7 +154,7 @@ TEST(ApplicationCoreTest, GetApplicationCoreSmartPointer) {
     NsSmartDeviceLink::NsSmartObjects::CSmartObject* obj =
         new NsSmartDeviceLink::NsSmartObjects::CSmartObject(tmpObj);
 
-    NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> smartObject(obj);
+    utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> smartObject(obj);
 
     NsAppManager::Message msg  = object1->processOutMessage(smartObject);
     NsSmartDeviceLink::NsSmartObjects::CSmartObject sessionKey = smartObject->getElement(0);
