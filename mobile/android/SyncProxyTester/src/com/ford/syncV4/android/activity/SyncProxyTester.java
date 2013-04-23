@@ -1258,6 +1258,16 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final CheckBox chkUseIcon = (CheckBox) layout.findViewById(R.id.addcommand_useIcon);
 							final EditText editIconValue = (EditText) layout.findViewById(R.id.addcommand_iconValue);
 							final Spinner spnIconType = (Spinner) layout.findViewById(R.id.addcommand_iconType);
+							
+							final boolean v2Features = getCurrentProtocolVersion() >= 2;
+							if (!v2Features) {
+								int visibility = android.view.View.GONE;
+								View[] views = { chkUseIcon, editIconValue, spnIconType };
+								for (View view : views) {
+									view.setVisibility(visibility);
+								}
+							}
+							
 							ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
 									mContext, android.R.layout.simple_spinner_item, ImageType.values());
 							imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -1284,7 +1294,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setVrCommands(vrCommands);
 									}
 									
-									if (chkUseIcon.isChecked()) {
+									if (v2Features && chkUseIcon.isChecked()) {
 										Image icon = new Image();
 										icon.setValue(editIconValue.getText().toString());
 										icon.setImageType((ImageType) spnIconType.getSelectedItem());
