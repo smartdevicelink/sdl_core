@@ -61,10 +61,10 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
   ~MobileMessageHandlerImpl();
 
   Message* handleIncomingMessageProtocolV1(
-            const protocol_handler::RawMessage* message);
+      const protocol_handler::RawMessage* message);
 
   Message* handleIncomingMessageProtocolV2(
-            const protocol_handler::RawMessage* message);
+      const protocol_handler::RawMessage* message);
 
   protocol_handler::ProtocolHandler* protocol_handler_;
 

@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
- #include "Utils/shared_ptr.h"
+#include "Utils/shared_ptr.h"
 
 namespace mobile_message_handler {
 
@@ -50,7 +50,7 @@ enum MessageType {
 };
 
 class Message {
-public:
+ public:
   Message();
   Message(const Message& message);
   Message& operator=(const Message& message);
@@ -65,7 +65,7 @@ public:
 
   const std::string& json_message() const;
   const BinaryData* binary_data() const;
-  bool hasBinaryData() const;
+  bool has_binary_data() const;
 
   //! --------------------------------------------------------------------------
   void set_function_id(int id);
@@ -75,7 +75,7 @@ public:
   void set_binary_data(BinaryData* data);
   void set_json_message(const std::string& json_message);
 
-private:
+ private:
   int function_id_;  // @remark protocol V2.
   int correlation_id_;  // @remark protocol V2.
   int connection_key_;

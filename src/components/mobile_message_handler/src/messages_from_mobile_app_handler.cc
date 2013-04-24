@@ -48,14 +48,14 @@ void MessagesFromMobileAppHandler::threadMain() {
 
   while (1) {
     while (!handler->messages_from_mobile_app_.empty()) {
-      const protocol_handler::RawMessage* message
-        = handler->messages_from_mobile_app_.pop();
+      const protocol_handler::RawMessage* message = handler
+          ->messages_from_mobile_app_.pop();
 
       Message* outgoing_message = new Message;
       if (message->protocol_version() == 1) {
         outgoing_message = handler->handleIncomingMessageProtocolV1(message);
       } else if (message->protocol_version() == 2) {
-         outgoing_message = handler->handleIncomingMessageProtocolV2(message);
+        outgoing_message = handler->handleIncomingMessageProtocolV2(message);
       } else {
         continue;
       }
@@ -70,4 +70,4 @@ void MessagesFromMobileAppHandler::threadMain() {
     handler->messages_from_mobile_app_.wait();
   }
 }
-}
+}  // // namespace mobile_message_handler

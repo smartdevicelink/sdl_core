@@ -45,20 +45,21 @@ const unsigned char kUnknown = 0xF;
 namespace mobile_message_handler {
 //! ----------------------------------------------------------------------------
 log4cplus::Logger MobileMessageHandlerImpl::logger_ =
-  log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("MobileMessageHandler"));
+    log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("MobileMessageHandler"));
 
 MobileMessageHandlerImpl* MobileMessageHandlerImpl::self_ = NULL;
 //! ----------------------------------------------------------------------------
 
 MobileMessageHandlerImpl::MobileMessageHandlerImpl()
-  : handle_messages_from_mobile_app_(NULL) {
+    : handle_messages_from_mobile_app_(NULL),
+      protocol_handler_(NULL) {
 
   handle_messages_from_mobile_app_ = new threads::Thread(
-    "MobileMessageHandler::MessagesFromMobileAppHandler",
-    new MessagesFromMobileAppHandler());
+      "MobileMessageHandler::MessagesFromMobileAppHandler",
+      new MessagesFromMobileAppHandler());
 
   handle_messages_from_mobile_app_->startWithOptions(
-    threads::ThreadOptions(threads::Thread::kMinStackSize));
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 MobileMessageHandlerImpl::~MobileMessageHandlerImpl() {
@@ -76,13 +77,13 @@ MobileMessageHandlerImpl* MobileMessageHandlerImpl::getInstance() {
 }
 
 void MobileMessageHandlerImpl::setProtocolHandler(
-  protocol_handler::ProtocolHandler* protocolHandler) {
+    protocol_handler::ProtocolHandler* protocolHandler) {
   DCHECK(protocolHandler);
   protocol_handler_ = protocolHandler;
 }
 
 void MobileMessageHandlerImpl::onMessageReceived(
-  const protocol_handler::RawMessage* message) {
+    const protocol_handler::RawMessage* message) {
   DCHECK(message);
 }
 
@@ -93,17 +94,17 @@ bool MobileMessageHandlerImpl::sendMessageToMobileApp(const Message* message) {
 }
 
 Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV1(
-  const protocol_handler::RawMessage* message) {
+    const protocol_handler::RawMessage* message) {
   Message* outgoing_message = new Message;
   if (!message) {
     NOTREACHED();
 
-    //TODO(AK): check memory allocation here.
+    // TODO(AK): check memory allocation here.
   }
 
-  outgoing_message->set_json_message(std::string(
-                               reinterpret_cast<const char*>(message->data()),
-                               message->data_size()));
+  outgoing_message->set_json_message(
+      std::string(reinterpret_cast<const char*>(message->data()),
+                  message->data_size()));
 
   if (outgoing_message->json_message().empty()) {
     return NULL;
@@ -113,12 +114,12 @@ Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV1(
 }
 
 Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
-  const protocol_handler::RawMessage* message) {
+    const protocol_handler::RawMessage* message) {
   Message* outgoing_message = new Message;
   if (!message) {
     NOTREACHED();
 
-    //TODO(AK): check memory allocation here.
+    // TODO(AK): check memory allocation here.
   }
 
   unsigned char* receivedData = message->data();
@@ -163,13 +164,11 @@ Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
   }
 
   std::string json_string = std::string(
-    reinterpret_cast<const char*>(receivedData) + offset, jsonSize);
+      reinterpret_cast<const char*>(receivedData) + offset, jsonSize);
 
-
-  if (functionId == 0 || rpcType == Unknown ||
-      correlationId == 0 || message->connection_key() == 0 ||
-      outgoing_message->json_message().empty()) {
-
+  if (functionId == 0 || rpcType == Unknown || correlationId == 0
+      || message->connection_key() == 0
+      || outgoing_message->json_message().empty()) {
     delete outgoing_message;
     // Invaled message constructed.
     return NULL;
@@ -182,8 +181,8 @@ Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
   outgoing_message->set_connection_key(message->connection_key());
 
   if (message->data_size() > (offset + jsonSize)) {
-    BinaryData* binaryData= new BinaryData(receivedData + offset + jsonSize,
-      receivedData + message->data_size());
+    BinaryData* binaryData = new BinaryData(
+        receivedData + offset + jsonSize, receivedData + message->data_size());
 
     if (!binaryData) {
       delete outgoing_message;
