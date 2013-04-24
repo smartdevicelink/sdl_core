@@ -33,13 +33,14 @@
 #ifndef SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MOBILE_MESSAGE_HANDLER_H_
 #define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MOBILE_MESSAGE_HANDLER_H_
 
-#include "mobile_message_handler/message.h"
+#include "application_manager/message.h"
 
 namespace mobile_message_handler {
 class MobileMessageHandler {
  public:
   // TODO(akandul): replace with smart pointer
-  virtual bool sendMessageToMobileApp(const Message* message) = 0;
+  virtual bool sendMessageToMobileApp(
+      const application_manager::Message* message) = 0;
   virtual ~MobileMessageHandler() = 0;
 };
 }  // namespace mobile_message_handler

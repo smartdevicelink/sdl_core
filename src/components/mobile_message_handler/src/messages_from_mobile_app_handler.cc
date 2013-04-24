@@ -32,7 +32,7 @@
 
 #include "mobile_message_handler/messages_from_mobile_app_handler.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
-#include "mobile_message_handler/message.h"
+#include "application_manager/message.h"
 #include "LoggerHelper.hpp"
 
 namespace mobile_message_handler {
@@ -51,7 +51,8 @@ void MessagesFromMobileAppHandler::threadMain() {
       const protocol_handler::RawMessage* message = handler
           ->messages_from_mobile_app_.pop();
 
-      Message* outgoing_message = new Message;
+      application_manager::Message* outgoing_message =
+          new application_manager::Message;
       if (message->protocol_version() == 1) {
         outgoing_message = handler->handleIncomingMessageProtocolV1(message);
       } else if (message->protocol_version() == 2) {

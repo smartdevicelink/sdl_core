@@ -1,6 +1,7 @@
 include_directories (
   ./include/
   ../Utils/include/
+  ../application_manager/include/
   ../protocol_handler/include/
   ../../thirdPartyLibs/logger/include
   ../../thirdPartyLibs/logger/log4cplus-1.1.0/include
@@ -8,7 +9,6 @@ include_directories (
 )
 
 set (SOURCES
-./src/message.cc
 ./src/mobile_message_handler_impl.cc
 ./src/messages_from_mobile_app_handler.cc
 )

@@ -53,23 +53,23 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
 
   void setProtocolHandler(protocol_handler::ProtocolHandler* protocolHandler);
   void onMessageReceived(const protocol_handler::RawMessage* message);
-  bool sendMessageToMobileApp(const Message* message);
+  bool sendMessageToMobileApp(const application_manager::Message* message);
 
  private:
   // TODO(akandul): add message listener here.
   MobileMessageHandlerImpl();
   ~MobileMessageHandlerImpl();
 
-  Message* handleIncomingMessageProtocolV1(
+  application_manager::Message* handleIncomingMessageProtocolV1(
       const protocol_handler::RawMessage* message);
 
-  Message* handleIncomingMessageProtocolV2(
+  application_manager::Message* handleIncomingMessageProtocolV2(
       const protocol_handler::RawMessage* message);
 
   protocol_handler::ProtocolHandler* protocol_handler_;
 
   MessageQueue<const protocol_handler::RawMessage*> messages_from_mobile_app_;
-  MessageQueue<Message*> messages_to_mobile_app_;
+  MessageQueue<application_manager::Message*> messages_to_mobile_app_;
 
   // Thread for handling messages from Mobile side.
   threads::Thread* handle_messages_from_mobile_app_;

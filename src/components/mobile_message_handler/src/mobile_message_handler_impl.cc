@@ -87,15 +87,18 @@ void MobileMessageHandlerImpl::onMessageReceived(
   DCHECK(message);
 }
 
-bool MobileMessageHandlerImpl::sendMessageToMobileApp(const Message* message) {
+bool MobileMessageHandlerImpl::sendMessageToMobileApp(
+    const application_manager::Message* message) {
   DCHECK(message);
 
   return true;
 }
 
-Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV1(
+application_manager::Message*
+MobileMessageHandlerImpl::handleIncomingMessageProtocolV1(
     const protocol_handler::RawMessage* message) {
-  Message* outgoing_message = new Message;
+  application_manager::Message* outgoing_message =
+      new application_manager::Message;
   if (!message) {
     NOTREACHED();
 
@@ -113,9 +116,11 @@ Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV1(
   return outgoing_message;
 }
 
-Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
+application_manager::Message*
+MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
     const protocol_handler::RawMessage* message) {
-  Message* outgoing_message = new Message;
+  application_manager::Message* outgoing_message =
+      new application_manager::Message;
   if (!message) {
     NOTREACHED();
 
@@ -166,8 +171,8 @@ Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
   std::string json_string = std::string(
       reinterpret_cast<const char*>(receivedData) + offset, jsonSize);
 
-  if (functionId == 0 || rpcType == Unknown || correlationId == 0
-      || message->connection_key() == 0
+  if (functionId == 0 || rpcType == application_manager::Unknown
+      || correlationId == 0 || message->connection_key() == 0
       || outgoing_message->json_message().empty()) {
     delete outgoing_message;
     // Invaled message constructed.
@@ -176,13 +181,16 @@ Message* MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
 
   outgoing_message->set_json_message(json_string);
   outgoing_message->set_function_id(functionId);
-  outgoing_message->set_message_type(static_cast<MessageType>(rpcType));
+  outgoing_message->set_message_type(
+      static_cast<application_manager::MessageType>(rpcType));
   outgoing_message->set_correlation_id(correlationId);
   outgoing_message->set_connection_key(message->connection_key());
 
   if (message->data_size() > (offset + jsonSize)) {
-    BinaryData* binaryData = new BinaryData(
-        receivedData + offset + jsonSize, receivedData + message->data_size());
+    application_manager::BinaryData* binaryData =
+        new application_manager::BinaryData(
+            receivedData + offset + jsonSize,
+            receivedData + message->data_size());
 
     if (!binaryData) {
       delete outgoing_message;

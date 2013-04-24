@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mobile_message_handler/message.h"
+#include "application_manager/message.h"
 #include "Utils/macro.h"
 
-namespace mobile_message_handler {
+namespace application_manager {
 
 Message::Message()
     : function_id_(0),
@@ -119,4 +119,4 @@ void Message::set_json_message(const std::string& json_message) {
   json_message_ = json_message;
 }
 
-}  // namespace mobile_message_handler
+}  // namespace application_manager
