@@ -58,11 +58,10 @@
     <element name="WRONG_LANGUAGE" value="18"/>
     <element name="OUT_OF_MEMORY" value="19"/>
     <element name="TOO_MANY_PENDING_REQUESTS" value="20"/>
-    <element name="CANCEL_ROUTE" value="21"/>
-    <element name="NO_APPS_REGISTERED" value="22"/>
-    <element name="NO_DEVICES_CONNECTED" value="23"/>
-    <element name="WARNINGS" value="24"/>
-    <element name="GENERIC_ERROR" value="25"/>
+    <element name="NO_APPS_REGISTERED" value="21"/>
+    <element name="NO_DEVICES_CONNECTED" value="22"/>
+    <element name="WARNINGS" value="23"/>
+    <element name="GENERIC_ERROR" value="24"/>
 </enum>
 
 <enum name="ButtonName">

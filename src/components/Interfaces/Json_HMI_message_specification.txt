@@ -33,7 +33,8 @@
 Version = 1.0
 
 This file describes message structure for communication between SDL and HMI.
-
+JSON RPC 2.0 format is taken as basis. Please refer to http://www.jsonrpc.org/specification. Additions to this format are marked as 'Additions' hereinafter. Blocks marked as 'Spec' are excerpt from oficial specification of JSON RPC 2.0. Samples are also provided.
+This document comes in pair with HMI_API.xml.
 
 #########################################################################################
 
@@ -114,6 +115,13 @@ Notifications:
 	}
 }
 
+//No params in request
+{
+	"id" : 19,
+	"jsonrpc" : "2.0",
+	"method" : "Buttons.GetCapabilities"
+}
+
 /****
 	* Spec (from http://www.jsonrpc.org/specification):
 	Response object
@@ -128,7 +136,7 @@ Notifications:
 		error
 		This member is REQUIRED on error.
 		This member MUST NOT exist if there was no error triggered during invocation.
-		The value for this member MUST be an Object as defined in section 5.1.
+		The value for this member MUST be an Object as defined below.
 		id
 		This member is REQUIRED.
 		It MUST be the same as the value of the id member in the Request Object.
@@ -154,7 +162,7 @@ Notifications:
 	
 
 	* Additions:
-		result along with error MUST contain code which is value from Result enum
+		result along with error MUST contain 'code' which is value from Result enum provided in HMI_API.xml
 ****/
 
 //Response with no params in it (code and method are necessary)
@@ -167,13 +175,7 @@ Notifications:
 	}
 }
 
-//No params in request; extra params in response; methods are described in xml
-{
-	"id" : 19,
-	"jsonrpc" : "2.0",
-	"method" : "Buttons.GetCapabilities"
-}
-
+// extra params in response
 {
 	"id" : 19,
 	"jsonrpc" : "2.0",
