@@ -16,3 +16,4 @@ set (SOURCES
 )
 
 add_library("ProtocolHandler" ${SOURCES})
+target_link_libraries ("ProtocolHandler" log4cxx)

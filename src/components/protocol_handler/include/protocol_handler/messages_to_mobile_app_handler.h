@@ -48,7 +48,7 @@ class MessagesToMobileAppHandler : public threads::IThreadDelegate {
 
  private:
   ProtocolHandlerImpl* handler_;
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
 
   DISALLOW_COPY_AND_ASSIGN(MessagesToMobileAppHandler);
 };

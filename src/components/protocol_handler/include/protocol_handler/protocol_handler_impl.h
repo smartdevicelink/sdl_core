@@ -37,7 +37,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 
 #include <map>
-#include "Logger.hpp"
+#include "LOG4CXXLogger.hpp"
 #include "Utils/MessageQueue.h"
 
 #include "protocol_handler/protocol_handler.h"
@@ -276,7 +276,7 @@ class ProtocolHandlerImpl : public ITransportManagerDataListener,
   /**
    * \brief For logging.
    */
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
 
   /**
    *\brief Pointer on instance of class implementing IProtocolObserver

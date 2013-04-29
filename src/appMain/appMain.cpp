@@ -63,6 +63,7 @@
 #include "system.h"
 
 #include "Logger.hpp"
+#include "LOG4CXXLogger.hpp"
 
 #include "TransportManager/ITransportManager.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
@@ -132,12 +133,13 @@ int main(int argc, char** argv)
     /**********************************/
     Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("appMain"));
     PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
+
+    log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+
     LOG4CPLUS_INFO(logger, " Application started!");
 
     NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager = NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
     CTransportManagerListener tsl(transportManager);
-
-
 
     JSONHandler jsonHandler;
 

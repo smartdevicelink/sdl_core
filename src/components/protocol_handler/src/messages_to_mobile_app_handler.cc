@@ -37,8 +37,8 @@
 using NsSmartDeviceLink::NsTransportManager::tConnectionHandle;
 
 namespace protocol_handler {
-log4cplus::Logger MessagesToMobileAppHandler::logger_ =
-    log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ProtocolHandler"));
+log4cxx::LoggerPtr MessagesToMobileAppHandler::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ProtocolHandler"));
 
 MessagesToMobileAppHandler::MessagesToMobileAppHandler(
     ProtocolHandlerImpl* handler)
@@ -55,7 +55,7 @@ void MessagesToMobileAppHandler::threadMain() {
     while (!handler_->messages_to_mobile_app_.empty()) {
       const RawMessage* message = handler_->messages_to_mobile_app_
           .pop();
-      LOG4CPLUS_INFO_EXT(
+      LOG4CXX_INFO_EXT(
           logger_,
           "Message to mobile app: connection " << message->connection_key()
             << "; dataSize: " << message->data_size()
@@ -69,7 +69,7 @@ void MessagesToMobileAppHandler::threadMain() {
       }
 
       if (!handler_->session_observer_) {
-        LOG4CPLUS_ERROR(
+        LOG4CXX_ERROR(
             logger_,
             "Cannot handle message to mobile app:"
               << " ISessionObserver doesn't exist.");
@@ -86,11 +86,11 @@ void MessagesToMobileAppHandler::threadMain() {
             SERVICE_TYPE_RPC, message->data_size(), message->data(),
             false);
         if (result != RESULT_OK) {
-          LOG4CPLUS_ERROR(
+          LOG4CXX_ERROR(
               logger_, "ProtocolHandler failed to send single frame message.");
         }
       } else {
-        LOG4CPLUS_INFO_EXT(
+        LOG4CXX_INFO_EXT(
             logger_,
             "Message will be sent in multiple frames; max size is "
               << maxDataSize);
@@ -102,7 +102,7 @@ void MessagesToMobileAppHandler::threadMain() {
             SERVICE_TYPE_RPC, message->data_size(), message->data(), false,
             maxDataSize);
         if (result != RESULT_OK) {
-          LOG4CPLUS_ERROR(
+          LOG4CXX_ERROR(
               logger_, "ProtocolHandler failed to send multiframe messages.");
         }
       }

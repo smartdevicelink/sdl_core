@@ -34,8 +34,8 @@
 #include "LoggerHelper.hpp"
 
 namespace protocol_handler {
-log4cplus::Logger MessagesFromMobileAppHandler::logger_ =
-    log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ProtocolHandler"));
+log4cxx::LoggerPtr MessagesFromMobileAppHandler::logger_ =
+      log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ProtocolHandler"));
 
 MessagesFromMobileAppHandler::MessagesFromMobileAppHandler(
     ProtocolHandlerImpl* handler)
@@ -51,7 +51,7 @@ void MessagesFromMobileAppHandler::threadMain() {
     while (!handler_->messages_from_mobile_app_.empty()) {
       ProtocolHandlerImpl::IncomingMessage* message = handler_
           ->messages_from_mobile_app_.pop();
-      LOG4CPLUS_INFO_EXT(
+      LOG4CXX_INFO_EXT(
           logger_,
           "Message " << message->data << " from mobile app received of size "
               << message->data_size);
@@ -62,18 +62,18 @@ void MessagesFromMobileAppHandler::threadMain() {
           && (MAXIMUM_FRAME_DATA_SIZE + PROTOCOL_HEADER_V2_SIZE
               >= message->data_size)) {
         ProtocolPacket * packet = new ProtocolPacket;
-        LOG4CPLUS_INFO_EXT(logger_, "Data: " << packet->data());
+        LOG4CXX_INFO_EXT(logger_, "Data: " << packet->data());
         if (packet->deserializePacket(message->data, message->data_size)
             == RESULT_FAIL) {
-          LOG4CPLUS_ERROR(logger_, "Failed to parse received message.");
+          LOG4CXX_ERROR(logger_, "Failed to parse received message.");
           delete packet;
         } else {
-          LOG4CPLUS_INFO_EXT(logger_,
+          LOG4CXX_INFO_EXT(logger_,
                              "Packet: dataSize " << packet->data_size());
           handler_->handleMessage(message->connection_handle, packet);
         }
       } else {
-        LOG4CPLUS_WARN(
+        LOG4CXX_WARN(
             logger_, "handleMessagesFromMobileApp() - incorrect or NULL data");
       }
 
