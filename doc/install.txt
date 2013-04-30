@@ -28,6 +28,8 @@
   To run InterfaceGenerator some python libraries are required and must be
   installed with following command:
   sudo pip install -r tools/InterfaceGenerator/requirements.txt
+  For logging Apache log4cxx library is used. Install required packages with the following command:
+  sudo apt-get install liblog4cxx10 liblog4cxx10-dev
 
 * Build application
   =================
