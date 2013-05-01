@@ -30,9 +30,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "AppMgr/ApplicationCore.h"
+#include "application_manager/application_core.h"
 
-namespace NsAppManager {
+namespace application_manager {
 
 ApplicationCore::ApplicationCore() {
 }

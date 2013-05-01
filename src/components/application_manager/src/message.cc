@@ -37,10 +37,11 @@ namespace application_manager {
 
 Message::Message()
     : function_id_(0),
-      type_(Unknown),
+      type_(kUnknownType),
       correlation_id_(0),
       connection_key_(0),
-      binary_data_(NULL) {
+      binary_data_(NULL),
+      version_(kUnknownProtocol) {
 }
 
 Message::Message(const Message& message) {
@@ -54,6 +55,7 @@ Message& Message::operator=(const Message& message) {
   set_message_type(message.type_);
   set_binary_data(message.binary_data_);
   set_json_message(message.json_message_);
+  set_protocol_version(message.protocol_version());
 
   return *this;
 }
@@ -75,6 +77,10 @@ int Message::connection_key() const {
 
 MessageType Message::type() const {
   return type_;
+}
+
+ProtocolVersion Message::protocol_version() const {
+  return version_;
 }
 
 const std::string& Message::json_message() const {
@@ -117,6 +123,10 @@ void Message::set_binary_data(BinaryData* data) {
 
 void Message::set_json_message(const std::string& json_message) {
   json_message_ = json_message;
+}
+
+void Message::set_protocol_version(ProtocolVersion version) {
+  version_ = version;
 }
 
 }  // namespace application_manager

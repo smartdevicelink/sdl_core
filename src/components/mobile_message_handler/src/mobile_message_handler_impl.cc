@@ -171,7 +171,7 @@ MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
   std::string json_string = std::string(
       reinterpret_cast<const char*>(receivedData) + offset, jsonSize);
 
-  if (functionId == 0 || rpcType == application_manager::Unknown
+  if (functionId == 0 || rpcType == application_manager::kUnknownType
       || correlationId == 0 || message->connection_key() == 0
       || outgoing_message->json_message().empty()) {
     delete outgoing_message;

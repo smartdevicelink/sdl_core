@@ -30,55 +30,55 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef SRC_COMPONENTS_APPMGR_INCLUDE_APPMGR_APPLICATIONCORE_H_
-#define SRC_COMPONENTS_APPMGR_INCLUDE_APPMGR_APPLICATIONCORE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_CORE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_CORE_H_
 
-#include "AppMgrCore.h"
 #include "Utils/macro.h"
 #include "Utils/shared_ptr.h"
 #include "SmartObjects/CSmartObject.hpp"
+#include "application_manager/message.h"
 
-namespace NsAppManager {
-    /**
-     * @brief typedef for TSharedPtr<CSmartObject> type
-     */
-    typedef utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> tSharedPtr;
+namespace application_manager {
+/**
+ * @brief typedef for SharedPtr<CSmartObject> type
+ */
+typedef utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> tSharedPtr;
 
-    /**
-     * @brief class ApplicationCore is intended to provide interfaces for serializing/deserializing between
-     * AppMngJSON data to CSmartObject and vice versa.
-     */
-    class ApplicationCore {
-    public:
-        /**
-         * @brief Class constructor
-         */
-        ApplicationCore();
+/**
+ * @brief class ApplicationCore is intended to provide interfaces for serializing/deserializing between
+ * AppMngJSON data to CSmartObject and vice versa.
+ */
+class ApplicationCore {
+ public:
+  /**
+   * @brief Class constructor
+   */
+  ApplicationCore();
 
-        /**
-         * @brief Default class destructor
-         */
-        virtual ~ApplicationCore();
+  /**
+   * @brief Default class destructor
+   */
+  virtual ~ApplicationCore();
 
-      /**
-       * @brief Converts incoming message from NsAppManager::Message to the TSharedPtr<CSmartObject>
-       * @param message Incoming NsAppManager::Message message to be converted
-       *
-       * @return TSharedPtr<CSmartObject> for transfered message
-       */
-      virtual tSharedPtr processInMessage(const Message& message) = 0;
+  /**
+   * @brief Converts incoming message from NsAppManager::Message to the TSharedPtr<CSmartObject>
+   * @param message Incoming NsAppManager::Message message to be converted
+   *
+   * @return TSharedPtr<CSmartObject> for transfered message
+   */
+  virtual tSharedPtr processInMessage(const Message& message) = 0;
 
-      /**
-       * @brief Converts outgoing message from TSharedPtr<CSmartObject> type to the NsAppManager::Message type
-       * @param message Incoming TSharedPtr<CSmartObject>
-       *
-       * @return AppMngrCore::Message for transfered message
-       */
-      virtual Message processOutMessage(const tSharedPtr message) = 0;
+  /**
+   * @brief Converts outgoing message from TSharedPtr<CSmartObject> type to the NsAppManager::Message type
+   * @param message Incoming TSharedPtr<CSmartObject>
+   *
+   * @return AppMngrCore::Message for transfered message
+   */
+  virtual Message processOutMessage(const tSharedPtr message) = 0;
 
-    private:
-      DISALLOW_COPY_AND_ASSIGN(ApplicationCore);
-    };
-}  // namespace NsAppManager
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ApplicationCore);
+};
+}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPMGR_INCLUDE_APPMGR_APPLICATIONCORE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_CORE_H_

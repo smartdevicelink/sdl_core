@@ -43,10 +43,17 @@ namespace application_manager {
 typedef std::vector<unsigned char> BinaryData;
 
 enum MessageType {
-  Unknown = -1,
-  Request = 0,
-  Response = 1,
-  Notification = 2
+  kUnknownType = -1,
+  kRequest = 0,
+  kResponse = 1,
+  kNotification = 2
+};
+
+enum ApiVersion {
+  kUnknownProtocol = -1,
+  kHMI = 0,
+  kV1 = 1,
+  kV2 = 2
 };
 
 class Message {
@@ -62,6 +69,7 @@ class Message {
   int connection_key() const;
 
   MessageType type() const;
+  ProtocolVersion protocol_version() const;
 
   const std::string& json_message() const;
   const BinaryData* binary_data() const;
@@ -74,13 +82,15 @@ class Message {
   void set_message_type(MessageType type);
   void set_binary_data(BinaryData* data);
   void set_json_message(const std::string& json_message);
+  void set_protocol_version(ProtocolVersion version);
 
  private:
   int function_id_;  // @remark protocol V2.
   int correlation_id_;  // @remark protocol V2.
-  int connection_key_;
   MessageType type_;  // @remark protocol V2.
 
+  int connection_key_;
+  ProtocolVersion version_;
   std::string json_message_;
 
   // TODO(akandul): replace with shared_ptr
