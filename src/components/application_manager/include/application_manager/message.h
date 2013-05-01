@@ -49,7 +49,7 @@ enum MessageType {
   kNotification = 2
 };
 
-enum ApiVersion {
+enum ProtocolVersion {
   kUnknownProtocol = -1,
   kHMI = 0,
   kV1 = 1,
