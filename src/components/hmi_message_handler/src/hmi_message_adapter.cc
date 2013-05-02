@@ -30,52 +30,16 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
-
-#include "hmi_message_handler/hmi_message_handler.h"
+#include "hmi_message_handler/hmi_message_adapter.h"
 
 namespace hmi_message_handler {
-/**
- * \class HMIMessageAdapter
- * \brief Interface class describing methods neccessary for exchanging message
- * between ApplicationManager and HMI. Adapter for concrete transport connection
- * SDL with HMI has to implement this interface.
-*/
-class HMIMessageAdapter : public HMIMessageSender {
-public:
-	/**
-     * \brief Constructor
-     * \param handler Pointer to implementation of HMIMessageHandler abstract class
-     * to notify it about receiving message or error on sending message.
-    */
-	explicit HMIMessageAdapter(HMIMessageHandler* handler);
+HMIMessageAdapter::HMIMessageAdapter(HMIMessageHandler* handler)
+	:handler_(handler) {
 
-	/**
-     * \brief Destructor
-    */
-	virtual ~HMIMessageAdapter();
+}
 
-protected:
-	/**
-     * \brief Interface for subscriptions.
-     * Each class implementing interface should use it according to 
-     * standarts of transport for which it is to be an adapter.
-     * For example, Adapter for MessageBroker will use it to subscribe to notifications
-     * from HMI.
-     */
-	virtual void subscribeTo() = 0;
-    inline virtual HMIMessageHandler * handler() const {
-        return handler_;
-    }
+HMIMessageAdapter::~HMIMessageAdapter() {
+	handler_ = 0;
+}
 
-private:
-    /**
-      *\brief Pointer on handler to notify it about receiving message/error.
-    */
-	mutable HMIMessageHandler * handler_;
-};
-
-} // namespace hmi_handler
-
-#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
+} // namespace hmi_message_handler

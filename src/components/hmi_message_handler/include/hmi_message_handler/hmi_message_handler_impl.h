@@ -33,7 +33,9 @@
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL
  
+#include "hmi_message_handler/hmi_message_adapter.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include <set>
 
 namespace hmi_message_handler {
 	class HMIMessageHandlerImpl : public HMIMessageHandler {
@@ -44,9 +46,12 @@ namespace hmi_message_handler {
 		void sendMessageToHMI(application_manager::Message * message);
 		void setMessageObserver(HMIMessageObserver* observer);
 		void onErrorSending(application_manager::Message * message);
+		void addHMIMessageAdapter(HMIMessageAdapter * adapter) = 0;
+		void removeHMIMessageAdapter(HMIMessageAdapter * adapter) ;
 
 	private:
 		HMIMessageObserver * observer_;
+		std::set<HMIMessageAdapter* > message_adapters_;
 	};
 }
 

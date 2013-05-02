@@ -33,9 +33,12 @@
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER
 
-#include "hmi_message_handler/hmi_message_adapter.h"
+#include "hmi_message_handler/hmi_message_sender.h"
+#include "hmi_message_handler/hmi_message_observer.h"
 
 namespace hmi_message_handler {
+
+class HMIMessageAdapter;
 /**
  * \class HMIMessageHandler
  * \brief Abstract class for handling different HMI adapters; 
@@ -44,13 +47,11 @@ namespace hmi_message_handler {
 class HMIMessageHandler : public HMIMessageObserver,
 						  public HMIMessageSender {
 public:
-	virtual ~HMIMessageHandler() {}
-	virtual void addHMIMessageAdapter(HMIMessageAdapter * adapter);
-	virtual void removeHMIMessageAdapter(HMIMessageAdapter * adapter);
-
-private:
-	std::vector<HMIMessageAdapter *> message_adapters_;
+	virtual ~HMIMessageHandler() = 0;
+	virtual void addHMIMessageAdapter(HMIMessageAdapter * adapter) = 0;
+	virtual void removeHMIMessageAdapter(HMIMessageAdapter * adapter) = 0;
 };
-}
+
+} // namespace hmi_message_handler
 
 #endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER

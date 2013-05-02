@@ -27,3 +27,6 @@ add_subdirectory(./mobile_message_handler)
 
 # --- Application manager
 add_subdirectory(./application_manager)
+
+# --- HMI Message Handler
+add_subdirectory(./hmi_message_handler)

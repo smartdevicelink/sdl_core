@@ -30,52 +30,49 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
+#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MB_MESSAGE_ADAPTER
+#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MB_MESSAGE_ADAPTER
 
-#include "hmi_message_handler/hmi_message_handler.h"
+#include "mb_controller.hpp"
+#include "hmi_message_handler/hmi_message_adapter.h"
 
 namespace hmi_message_handler {
-/**
- * \class HMIMessageAdapter
- * \brief Interface class describing methods neccessary for exchanging message
- * between ApplicationManager and HMI. Adapter for concrete transport connection
- * SDL with HMI has to implement this interface.
-*/
-class HMIMessageAdapter : public HMIMessageSender {
-public:
-	/**
-     * \brief Constructor
-     * \param handler Pointer to implementation of HMIMessageHandler abstract class
-     * to notify it about receiving message or error on sending message.
-    */
-	explicit HMIMessageAdapter(HMIMessageHandler* handler);
+	class MessageBrokerAdapter : public HMIMessageAdapter,
+								 public NsMessageBroker::CMessageBrokerController
+	 {
+	public:
+		explicit MessageBrokerAdapter(HMIMessageHandler* handler);
+		~MessageBrokerAdapter();
+		void sendMessageToHMI(application_manager::Message * message);
 
-	/**
-     * \brief Destructor
-    */
-	virtual ~HMIMessageAdapter();
+		/*Methods from CMessageBrokerController*/
+	    /**
+	     * \brief Called on receiving response message from RPCBus.
+	     * \param method Name of corresponding request method that was sent previously to RPCBus.
+	     * \param root Received Json object.
+	     */
+	    void processResponse(std::string method, Json::Value& root);
 
-protected:
-	/**
-     * \brief Interface for subscriptions.
-     * Each class implementing interface should use it according to 
-     * standarts of transport for which it is to be an adapter.
-     * For example, Adapter for MessageBroker will use it to subscribe to notifications
-     * from HMI.
-     */
-	virtual void subscribeTo() = 0;
-    inline virtual HMIMessageHandler * handler() const {
-        return handler_;
-    }
+	    /**
+	     * \brief Called on receiving request message from RPCBus.
+	     * \param root Received Json object.
+	     */
+	    void processRequest(Json::Value& root);
 
-private:
-    /**
-      *\brief Pointer on handler to notify it about receiving message/error.
-    */
-	mutable HMIMessageHandler * handler_;
-};
+	    /**
+	     * \brief Called on receiving notification message from RPCBus.
+	     * \param root Received Json object.
+	     */
+	    void processNotification(Json::Value& root);
 
-} // namespace hmi_handler
+	protected:
+		void subscribeTo();
+	    void processRecievedfromMB(Json::Value& root);
 
-#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
+	private:
+		static const std::string ADDRESS;
+		static const uint16_t PORT;
+	};
+}
+
+#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MB_MESSAGE_ADAPTER	

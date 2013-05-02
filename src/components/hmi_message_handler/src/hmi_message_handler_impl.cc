@@ -30,19 +30,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hmi_message_handler/hmi_message_handler.h"
+#include "hmi_message_handler/hmi_message_handler_impl.h"
 
 namespace hmi_message_handler {
 
-HMIMessageHandler::~HMIMessageHandler() {
-}
-
-void HMIMessageHandler::addHMIMessageAdapter(HMIMessageAdapter * adapter) {
+HMIMessageHandlerImpl::HMIMessageHandlerImpl()
+	: observer_(NULL) {
 
 }
-		
-void HMIMessageHandler::removeHMIMessageAdapter(HMIMessageAdapter * adapter) {
 
+HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
+	observer_ = NULL;
+	message_adapters_.clear();
+}
+
+void HMIMessageHandlerImpl::onMessageReceived(
+			application_manager::Message * message) {
+
+	if (!observer_) {
+		//WARNING
+		return;
+	}
+	observer_->onMessageReceived(message);
+}
+
+void HMIMessageHandlerImpl::sendMessageToHMI(
+			application_manager::Message * message) {
+
+	for(std::set<HMIMessageAdapter* >::iterator it = message_adapters_.begin();
+			it != message_adapters_.end();
+			++ it) {
+		(*it)->sendMessageToHMI(message);
+	}
+}
+
+void HMIMessageHandlerImpl::setMessageObserver(HMIMessageObserver* observer) {
+	observer_ = observer;
+}
+
+void HMIMessageHandlerImpl::onErrorSending(
+			application_manager::Message * message) {
+
+	if (!observer_) {
+		//WARNING
+		return;
+	}
+	observer_->onErrorSending(message);
+}
+
+void HMIMessageHandlerImpl::addHMIMessageAdapter(HMIMessageAdapter * adapter) {
+	message_adapters_.insert(adapter);
+}
+
+void HMIMessageHandlerImpl::removeHMIMessageAdapter(HMIMessageAdapter * adapter) {
+	message_adapters_.erase(adapter);
 }
 
 } // namespace hmi_handler
