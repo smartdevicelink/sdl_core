@@ -31,24 +31,46 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATIONS
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATIONS
 
+namespace NsSmartDeviceLink{
+namespace NsSmartObjects {
+class CSmartObject;
+}
+}
+
 namespace application_manager {
 
-class Message;
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+typedef int ErrorCode;
+//class Command;
+
+enum APIVersion {
+	kUnknownAPI = -1,
+	kAPIV1 = 0,
+	kAPIV2 = 1
+};
 
 struct Version
 {
-	/* data */
+	APIVersion min_supported_api_version;
+	APIVersion max_supported_api_version;
+
+	Version()
+		: min_supported_api_version(APIVersion::kUnknownAPI)
+		, max_supported_api_version(APIVersion::kUnknownAPI) {}
 };
 
 class Application {
 public:
-	virtual void processMessage(Message * message) = 0;
-	virtual Message * activeMessage() const = 0;
+	virtual void processMessage(smart_objects::CSmartObject * message) = 0;
+	virtual void reportError(smart_objects::CSmartObject * message, ErrorCode error_code) = 0;
+	virtual const smart_objects::CSmartObject* activeMessage() const = 0;
+	virtual void clearActiveMessage() = 0;
 	virtual const Version& version() const = 0;
 	virtual int appId() const = 0;
 	virtual const std::string& name() const = 0;
 protected:
 	virtual ~Application() {}
+	//virtual Command commandFromMessage(smart_objects::CSmartObject * message) = 0;
 };
 
 } // namespace application_manager

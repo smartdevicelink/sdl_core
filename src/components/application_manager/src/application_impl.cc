@@ -33,13 +33,14 @@
 namespace application_manager {
 
 ApplicationImpl::ApplicationImpl(int app_id)
-	: hmi_level_(mobile_api::HMILevel::INVALID_ENUM)
-	, system_context_(mobile_api::SystemContext::INVALID_ENUM)
-	, language_(mobile_api::Language::INVALID_ENUM)
-	, ui_language_(mobile_api::Language::INVALID_ENUM)
+	: app_id_(app_id)
 	, active_message_(NULL)
 	, is_media_(false)
-	, app_id_(app_id) {
+	, app_types_(NULL)
+	, vr_synonyms_(NULL)
+	, ngn_media_screen_name_(NULL)
+	, mobile_app_id_(NULL)
+	, tts_name_(NULL) {
 
 }
 
@@ -49,14 +50,49 @@ ApplicationImpl::~ApplicationImpl() {
 		delete active_message_;
 		active_message_ = NULL;
 	}
+
+	if (app_types_) {
+		delete app_types_;
+		app_types_ = NULL;
+	}
+
+	if (vr_synonyms_) {
+		delete vr_synonyms_;
+		vr_synonyms_ = NULL;
+	}
+
+	if (ngn_media_screen_name_) {
+		delete ngn_media_screen_name_;
+		ngn_media_screen_name_ = NULL;
+	}
+
+	if (mobile_app_id_) {
+		delete mobile_app_id_;
+		mobile_app_id_ = NULL;
+	}
+
+	if (tts_name_) {
+		delete tts_name_;
+		tts_name_ = NULL;
+	}
 }
 	
-void ApplicationImpl::processMessage(Message * message) {
+void ApplicationImpl::processMessage(smart_objects::CSmartObject * message) {
+
+}
+
+void ApplicationImpl::reportError(smart_objects::CSmartObject * message, 
+				 ErrorCode error_code) {
 
 }
 	
-Message * ApplicationImpl::activeMessage() const {
+const smart_objects::CSmartObject * ApplicationImpl::activeMessage() const {
 	return active_message_;
+}
+
+void ApplicationImpl::clearActiveMessage() {
+	delete active_message_;
+	active_message_ = NULL;
 }
 	
 const Version& ApplicationImpl::version() const {
@@ -75,17 +111,41 @@ bool ApplicationImpl::is_media_application() const {
 	return is_media_;
 }
 	
-const std::vector<mobile_api::AppType::eType> &
-	ApplicationImpl::app_types() const {
+const smart_objects::CSmartObject* ApplicationImpl::app_types() const {
 	return app_types_;
 }
 
-const std::vector<std::string> & ApplicationImpl::vr_synonyms() const {
+const smart_objects::CSmartObject* ApplicationImpl::vr_synonyms() const {
 	return vr_synonyms_;
 }
 	
-const std::string & ApplicationImpl::mobile_app_id() const {
+const smart_objects::CSmartObject* ApplicationImpl::mobile_app_id() const {
 	return mobile_app_id_;
+}
+
+const smart_objects::CSmartObject* ApplicationImpl::tts_name() const {
+	return tts_name_;
+}
+
+const smart_objects::CSmartObject* 
+	ApplicationImpl::ngn_media_screen_name() const {
+		return ngn_media_screen_name_;
+}
+
+const smart_objects::CSmartObject& ApplicationImpl::hmi_level() const {
+	return hmi_level_;
+}
+
+const smart_objects::CSmartObject& ApplicationImpl::system_context() const {
+	return system_context_;
+}
+
+const smart_objects::CSmartObject& ApplicationImpl::language() const {
+	return language_;
+}
+
+const smart_objects::CSmartObject& ApplicationImpl::ui_language() const {
+	return ui_language_;
 }
 
 void ApplicationImpl::set_version(const Version& version) {
@@ -100,18 +160,59 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
 	is_media_ = is_media;
 }
 
+void ApplicationImpl::set_hmi_level(
+		const smart_objects::CSmartObject& hmi_level) {
+	hmi_level_ = hmi_level;
+}
+
+void ApplicationImpl::set_system_context(
+		const smart_objects::CSmartObject& system_context) {
+	system_context_ = system_context;
+}
+
+void ApplicationImpl::set_language(const smart_objects::CSmartObject& language) {
+	language_ = language;
+}
+
+void ApplicationImpl::set_ui_language(
+		const smart_objects::CSmartObject& ui_language) {
+	ui_language_ = ui_language;
+}
+
+void ApplicationImpl::set_tts_name(const smart_objects::CSmartObject& tts_name) {
+	if (tts_name_) {
+		delete tts_name_;
+	}
+		
+	tts_name_ = new smart_objects::CSmartObject(tts_name);
+}
+
+void ApplicationImpl::set_ngn_media_screen_name(
+		const smart_objects::CSmartObject& ngn_name) {
+	if(ngn_media_screen_name_)
+		delete ngn_media_screen_name_;
+
+	ngn_media_screen_name_ = new smart_objects::CSmartObject(ngn_name);
+}
+
 void ApplicationImpl::set_app_types(
-		const std::vector<mobile_api::AppType::eType> & app_types) {
-	app_types_ = app_types;
+		const smart_objects::CSmartObject& app_types) {
+	if(app_types_)
+		delete app_types_;
+
+	app_types_ = new smart_objects::CSmartObject(app_types);
 }
 	
 void ApplicationImpl::set_vr_synonyms(
-	const std::vector<std::string> & vr_synonyms) {
-	vr_synonyms_ = vr_synonyms;
+		const smart_objects::CSmartObject& vr_synonyms) {
+	if(vr_synonyms_)
+		delete vr_synonyms_;
+	vr_synonyms_ = new smart_objects::CSmartObject(vr_synonyms);
 }
 	
-void ApplicationImpl::set_mobile_app_id(const std::string & mobile_app_id) {
-	mobile_app_id_ = mobile_app_id;
+void ApplicationImpl::set_mobile_app_id(
+		const smart_objects::CSmartObject& mobile_app_id) {
+	mobile_app_id_ = new smart_objects::CSmartObject(mobile_app_id);
 }
 
 } // namespace application_manager

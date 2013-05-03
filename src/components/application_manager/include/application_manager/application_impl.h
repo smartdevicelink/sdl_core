@@ -32,6 +32,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL
 
 #include "application_manager/message.h"
+#include "SmartObjects/CSmartObject.hpp"
 #include "application_manager/application.h"
 #include "v4_protocol_v2_0_revT.h"
 
@@ -43,38 +44,56 @@ class ApplicationImpl : public Application {
 public:
 	explicit ApplicationImpl(int app_id);
 	~ApplicationImpl();
-	virtual void processMessage(Message * message);
-	virtual Message * activeMessage() const ;
+
+	void processMessage(smart_objects::CSmartObject* message);
+	void reportError(smart_objects::CSmartObject* message, ErrorCode error_code);
+	const smart_objects::CSmartObject* activeMessage() const;
+	void clearActiveMessage();
 	const Version& version() const;
 	int app_id() const;
 	const std::string& name() const;
+
 	bool is_media_application() const;
-	const std::vector<mobile_api::AppType::eType> & app_types() const;
-	const std::vector<std::string> & vr_synonyms() const;
-	const std::string & mobile_app_id() const;
+	const smart_objects::CSmartObject * app_types() const;
+	const smart_objects::CSmartObject * vr_synonyms() const;
+	const smart_objects::CSmartObject * mobile_app_id() const;
+	const smart_objects::CSmartObject * tts_name() const;
+	const smart_objects::CSmartObject * ngn_media_screen_name() const;
+	const smart_objects::CSmartObject & hmi_level() const;
+	const smart_objects::CSmartObject & system_context() const;
+	const smart_objects::CSmartObject & language() const;
+	const smart_objects::CSmartObject & ui_language() const;
+
 	void set_version(const Version& version);
-	void set_app_id(int app_id);
 	void set_name(const std::string& name);
 	void set_is_media_application(bool is_media);
-	void set_app_types(const std::vector<mobile_api::AppType::eType> & app_types);
-	void set_vr_synonyms(const std::vector<std::string> & vr_synonyms);
-	void set_mobile_app_id(const std::string & mobile_app_id);
+	void set_hmi_level(const smart_objects::CSmartObject & hmi_level);
+	void set_system_context(const smart_objects::CSmartObject & system_context);
+	void set_language(const smart_objects::CSmartObject & language);
+	void set_ui_language(const smart_objects::CSmartObject & ui_language);
+	void set_app_types(const smart_objects::CSmartObject & app_types);
+	void set_vr_synonyms(const smart_objects::CSmartObject & vr_synonyms);
+	void set_mobile_app_id(const smart_objects::CSmartObject & mobile_app_id);
+	void set_tts_name(const smart_objects::CSmartObject & tts_name);
+	void set_ngn_media_screen_name(const smart_objects::CSmartObject & ngn_name);
 
 private:
 	Version version_;
-	mobile_api::HMILevel::eType hmi_level_;
-	mobile_api::SystemContext::eType system_context_;
-	mobile_api::Language::eType language_;
-	mobile_api::Language::eType ui_language_;
-	std::vector<mobile_api::AppType::eType> app_types_;
-	std::vector<std::string> vr_synonyms_;
-	Message * active_message_;
-	bool is_media_;
+	smart_objects::CSmartObject * active_message_;
 	int app_id_;
 	std::string app_name_;
-	std::string ngn_media_screen_app_name_;
-	std::string mobile_app_id_;
-	//TTSChunks  - ?
+
+	bool is_media_;
+	smart_objects::CSmartObject hmi_level_;
+	smart_objects::CSmartObject system_context_;
+
+	smart_objects::CSmartObject language_;
+	smart_objects::CSmartObject ui_language_;
+	smart_objects::CSmartObject * app_types_;
+	smart_objects::CSmartObject * vr_synonyms_;	
+	smart_objects::CSmartObject * ngn_media_screen_name_;
+	smart_objects::CSmartObject * mobile_app_id_;
+	smart_objects::CSmartObject * tts_name_;
 };
 
 } // namespace application_manager
