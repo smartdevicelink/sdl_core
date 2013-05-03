@@ -31,17 +31,45 @@
  */
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "to_hmi_thread_impl.h"
+#include "from_hmi_thread_impl.h"
 
 namespace hmi_message_handler {
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()
-	: observer_(NULL) {
+	: observer_(NULL)
+	, to_hmi_thread_(NULL)
+	, from_hmi_thread_(NULL) {
 
+		to_hmi_thread_ = new threads::Thread(
+			"hmi_message_handler::ToHMIThreadImpl",
+			new ToHMIThreadImpl(this));
+		to_hmi_thread_->startWithOptions(
+      		threads::ThreadOptions(threads::Thread::kMinStackSize));
+
+		from_hmi_thread_ = new threads::Thread(
+			"hmi_message_handler::FromHMIThreadImpl",
+			new FromHMIThreadImpl(this));
+		from_hmi_thread_->startWithOptions(
+      		threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
 	observer_ = NULL;
 	message_adapters_.clear();
+
+	if (to_hmi_thread_) {
+		to_hmi_thread_->stop();
+		delete to_hmi_thread_;
+		to_hmi_thread_ = NULL;
+	}
+
+	if (from_hmi_thread_) {
+		from_hmi_thread_->stop();
+		delete from_hmi_thread_;
+		from_hmi_thread_ = NULL;
+	}
+	
 }
 
 void HMIMessageHandlerImpl::onMessageReceived(
@@ -51,17 +79,13 @@ void HMIMessageHandlerImpl::onMessageReceived(
 		//WARNING
 		return;
 	}
-	observer_->onMessageReceived(message);
+	message_from_hmi_.push(message);
 }
 
 void HMIMessageHandlerImpl::sendMessageToHMI(
 			application_manager::Message * message) {
 
-	for(std::set<HMIMessageAdapter* >::iterator it = message_adapters_.begin();
-			it != message_adapters_.end();
-			++ it) {
-		(*it)->sendMessageToHMI(message);
-	}
+	message_to_hmi_.push(message);	
 }
 
 void HMIMessageHandlerImpl::setMessageObserver(HMIMessageObserver* observer) {

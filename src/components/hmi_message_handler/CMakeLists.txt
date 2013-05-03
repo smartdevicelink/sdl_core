@@ -11,6 +11,8 @@ set (SOURCES
 ./src/hmi_message_handler_impl.cc
 ./src/messagebroker_adapter.cc
 ./src/hmi_message_adapter.cc
+./src/to_hmi_thread_impl.cc
+./src/from_hmi_thread_impl.cc
 )
 
 
