@@ -53,6 +53,8 @@ class SharedPtr {
    **/
   SharedPtr(ObjectType * Object);
 
+  SharedPtr();
+
   /**
    * @brief Copy constructor.
    *
@@ -134,6 +136,11 @@ class SharedPtr {
    **/
   ObjectType * operator->(void) const;
 
+  ObjectType& operator*() const;
+  explicit operator bool() const;
+  void reset();
+  void reset(ObjectType * other);
+  
  private:
   // TSharedPtr needs access to other TSharedPtr private members
   // for shared pointers type casts.
@@ -158,12 +165,17 @@ class SharedPtr {
    **/
   unsigned int * mReferenceCounter;
 };
-}  // namespace utils
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType * Object)
     : mObject(Object),
       mReferenceCounter(new unsigned int(1)) {
+}
+
+template<typename ObjectType>
+inline utils::SharedPtr<ObjectType>::SharedPtr()
+    : mObject(0),
+      mReferenceCounter(0) {
 }
 
 template<typename ObjectType>
@@ -216,8 +228,32 @@ utils::SharedPtr<ObjectType>::operator->(void) const {
   return mObject;
 }
 
+template<typename ObjectType> ObjectType& 
+utils::SharedPtr<ObjectType>::operator*() const {
+  // TODO (PV) : change when decided upon DCHECK
+  assert(mObject);
+  return *mObject;
+}
+
+template<typename ObjectType> 
+utils::SharedPtr<ObjectType>::operator bool() const {
+  return 0 != mObject;
+}
+
+template<typename ObjectType> void
+utils::SharedPtr<ObjectType>::reset() {
+  reset(0);
+}
+
+template<typename ObjectType> void
+utils::SharedPtr<ObjectType>::reset(ObjectType * other) {
+  dropReference();
+  mObject = other;
+  mReferenceCounter = new unsigned int(1);
+}
+
 template<typename ObjectType>
-inline void utils::SharedPtr<ObjectType>::dropReference(void) {
+inline void SharedPtr<ObjectType>::dropReference(void) {
   if (0 != mReferenceCounter) {
     if (0 == --*mReferenceCounter) {
       delete mObject;
@@ -228,5 +264,7 @@ inline void utils::SharedPtr<ObjectType>::dropReference(void) {
     }
   }
 }
+
+}  // namespace utils
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
