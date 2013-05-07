@@ -141,6 +141,39 @@ TEST(SharedPtrTest, PointerTypeCast)
     EXPECT_CALL(*object2, destructor()).Times(1);
 }
 
+TEST(SharedPtrTest, AddedOperators) {
+    test::components::utils::SharedPtrTest::CExtendedMockObject * object1 = new test::components::utils::SharedPtrTest::CExtendedMockObject(1);
+    test::components::utils::SharedPtrTest::CExtendedMockObject * object2 = new test::components::utils::SharedPtrTest::CExtendedMockObject(2);
+
+    EXPECT_CALL(*object1, destructor()).Times(0);
+    EXPECT_CALL(*object2, destructor()).Times(0);
+
+    tExtendedMockObjectPtr ep1(object1);
+    tMockObjectPtr p1(ep1);
+    tExtendedMockObjectPtr ep2(object2);
+    p1 = ep2;
+
+    ASSERT_EQ(2, p1->getId());
+    ASSERT_EQ(2, (*p1).getId());
+
+    ASSERT_FALSE(!p1);
+
+    utils::SharedPtr<int> p3(new int(10));
+    ASSERT_EQ(10, *p3);
+    ASSERT_FALSE(!p3);
+
+    utils::SharedPtr<int> p2;
+    ASSERT_TRUE(!p2);
+
+    p2.reset(new int);
+    ASSERT_FALSE(!p2);
+    *p2 = 3;
+    ASSERT_EQ(3, *p2);
+
+    EXPECT_CALL(*object1, destructor()).Times(1);
+    EXPECT_CALL(*object2, destructor()).Times(1);
+}
+
 TEST(SharedPtrTest, StressTest)
 {
     const size_t cNumIterations = 1024U * 1024U;

@@ -1,517 +1,538 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.controlButtons
- * 
+ * @name SDL.controlButtons
  * @desc Climate module visual representation
- * 
- * @category	View
- * @filesource	app/view/home/controlButtons.js
- * @version		2.0
- *
- * @author		Andriy Melnyk
+ * @category View
+ * @filesource app/view/home/controlButtons.js
+ * @version 1.0
  */
 
-MFT.ControlButtons = Em.ContainerView.create({
+SDL.ControlButtons = Em.ContainerView.create( {
 
-	elementId:		'app_controlButtons',
+    elementId: 'app_controlButtons',
 
-	childViews: [
-		'VRButton',
-		'buttonControls',
-		'driverDistractionControl',
-		'protocolVersion',
-		'infoTable',
-		'sendData',
-		'sendDataCheckBox',
-		'sendDataLabel',
-		'vehicleInfo',
-		'tbtClientState',
-		'UILanguages',
-		'TTSVRLanguages',
-		'UILanguagesLabel',
-		'TTSVRLanguagesLabel',
-		'appUILanguagesLabel',
-		'appTTSVRLanguagesLabel',
-		'appUILang',
-		'appTTSVRLang'
-	],
+    childViews:
+        [
+            'VRButton',
+            'buttonControls',
+            'driverDistractionControl',
+            'protocolVersion',
+            'infoTable',
+            'sendData',
+            'sendDataCheckBox',
+            'sendDataLabel',
+            'vehicleInfo',
+            'tbtClientState',
+            'UILanguages',
+            'TTSVRLanguages',
+            'UILanguagesLabel',
+            'TTSVRLanguagesLabel',
+            'appUILanguagesLabel',
+            'appTTSVRLanguagesLabel',
+            'appUILang',
+            'appTTSVRLang'
+        ],
 
-	/*
+    /*
      * Label with name of UILanguages select
      */
-     appUILang : MFT.Label.extend({
+    appUILang: SDL.Label.extend( {
 
-		elementId:			'appUILang',
+        elementId: 'appUILang',
 
-		classNames:			'appUILang',
+        classNames: 'appUILang',
 
-		contentBinding:		'MFT.SDLAppController.model.UILanguage'
-	}),
+        contentBinding: 'SDL.SDLAppController.model.UILanguage'
+    } ),
 
-	/*
+    /*
      * Label with name of TTSVRLanguages select
-     */ 
-	appTTSVRLang : MFT.Label.extend({
+     */
+    appTTSVRLang: SDL.Label.extend( {
 
-		elementId:			'appTTSVRLang',
+        elementId: 'appTTSVRLang',
 
-		classNames:			'appTTSVRLang',
+        classNames: 'appTTSVRLang',
 
-		contentBinding:		'MFT.SDLAppController.model.TTSVRLanguage'
-	}),	
+        contentBinding: 'SDL.SDLAppController.model.TTSVRLanguage'
+    } ),
 
-	/*
+    /*
      * Label with name of UILanguages select
-     */ 
-	appUILanguagesLabel : MFT.Label.extend({
+     */
+    appUILanguagesLabel: SDL.Label.extend( {
 
-		elementId:			'appUILanguagesLabel',
+        elementId: 'appUILanguagesLabel',
 
-		classNames:			'appUILanguagesLabel',
+        classNames: 'appUILanguagesLabel',
 
-		content:			'application UI Languages'
-	}),
+        content: 'application UI Languages'
+    } ),
 
-	/*
+    /*
      * Label with name of TTSVRLanguages select
-     */ 
-	appTTSVRLanguagesLabel : MFT.Label.extend({
+     */
+    appTTSVRLanguagesLabel: SDL.Label.extend( {
 
-		elementId:			'appTTSVRLanguagesLabel',
+        elementId: 'appTTSVRLanguagesLabel',
 
-		classNames:			'appTTSVRLanguagesLabel',
+        classNames: 'appTTSVRLanguagesLabel',
 
-		content:			'application (TTS + VR) Languages'
-	}),	
+        content: 'application (TTS + VR) Languages'
+    } ),
 
-	/*
+    /*
      * Label with name of UILanguages select
-     */ 
-	UILanguagesLabel : MFT.Label.extend({
+     */
+    UILanguagesLabel: SDL.Label.extend( {
 
-		elementId:			'UILanguagesLabel',
+        elementId: 'UILanguagesLabel',
 
-		classNames:			'UILanguagesLabel',
+        classNames: 'UILanguagesLabel',
 
-		content:			'UI Languages'
-	}),
+        content: 'UI Languages'
+    } ),
 
-	/*
+    /*
      * Label with name of TTSVRLanguages select
-     */ 
-	TTSVRLanguagesLabel : MFT.Label.extend({
+     */
+    TTSVRLanguagesLabel: SDL.Label.extend( {
 
-		elementId:			'TTSVRLanguagesLabel',
+        elementId: 'TTSVRLanguagesLabel',
 
-		classNames:			'TTSVRLanguagesLabel',
+        classNames: 'TTSVRLanguagesLabel',
 
-		content:			'TTS + VR Languages'
-	}),	
+        content: 'TTS + VR Languages'
+    } ),
 
-	/*
+    /*
      * HMI element Select with list of supported UI component languages
-     */ 
-    UILanguages : Em.Select.extend({
-
-        elementId:          'UILanguages',
-
-        classNames:         'languageSelect',
-
-        contentBinding:     'MFT.SDLModel.sdlLanguagesList',
-
-        valeuBinding:		'MFT.SDLModel.hmiUILanguage',
-
-        click: function(){
-
-    		MFT.SDLController.onLanguageChangeUI( this.selection );
-
-        }
-    }),
-
-	/*
-     * HMI element Select with list of supported TTS and VR component languages
-     */ 
-    TTSVRLanguages : Em.Select.extend({
-
-        elementId:          'TTSVRLanguages',
-
-        classNames:         'languageSelect',
-
-        contentBinding:     'MFT.SDLModel.sdlLanguagesList',
-
-        valeuBinding:		'MFT.SDLModel.hmiTTSVRLanguage',
-
-        click: function(){
-
-            MFT.SDLController.onLanguageChangeTTSVR( this.selection );
-
-        }
-    }),
-
-	/**
-	 * Sending data from HMI for processing in SDLCore
-	 */
-	sendData: MFT.Button.create({
-		elementId:	'sendData',
-		classNames:	'sendData btnNotPressed',
-		action:		function(){
-			FFW.BasicCommunication.SendData( null );
-		},
-		text:		'Send Data'
-	}),
-
-	/**
-	 * Select for extended param of SendData
-	 */
-	sendDataCheckBox: Em.Checkbox.extend({
-
-		elementId:			'sendDataCheckBox',
-
-		classNames:			'sendDataCheckBox',
-
-		onCheckBoxSelected:	function(){
-			MFT.SDLController.selectSendData(this.checked);
-		}.observes('this.checked')
-
-	}),
-
-	/*
-     * Label for sendDataCheckBox 
      */
-	sendDataLabel: MFT.Label.extend({
+    UILanguages: Em.Select.extend( {
 
-		elementId:			'sendDataLabel',
+        elementId: 'UILanguages',
 
-		classNames:			'sendDataLabel',
+        classNames: 'languageSelect',
 
-		content:			'Use URL'
-	}),	
+        contentBinding: 'SDL.SDLModel.sdlLanguagesList',
 
-	/**
-	 * VehicleInfo button
-	 */
-	vehicleInfo: MFT.Button.create({
-		elementId:	'vehicleInfoButton',
-		classNames:	'vehicleInfoButton btn',
-		text:		'Vehicle Info', 
-		action:		function(){
-			//this._super();
-			MFT.VehicleInfo.toggleActivity();
-		}
-	}),
+        valueBinding: 'SDL.SDLModel.hmiUILanguage'
+    } ),
 
-	/**
-	 * TBT Client State button
-	 */
-	tbtClientState: MFT.Button.create({
-		elementId:	'tbtClientStateButton',
-		classNames:	'tbtClientStateButton btn',
-		text:		'TBT Client State', 
-		action:		function(){
-			//this._super();
-			MFT.TBTClientStateView.toggleActivity();
-		}
-	}),
+    /*
+     * HMI element Select with list of supported TTS and VR component languages
+     */
+    TTSVRLanguages: Em.Select.extend( {
 
-	/**
-	 * Voice Recognition button
-	 */
-	VRButton: MFT.Button.create({
-		elementId:	'VRButton',
-		classNames:	'VRButton',
-		action:		function(){
-			//this._super();
-			MFT.VRPopUp.activateVRPopUp();
-		}
-	}),
+        elementId: 'TTSVRLanguages',
 
-	infoTable: Em.ContainerView.extend({
-		elementId:	'infoTable',
-		
-		classNames:	'infoTable',
+        classNames: 'languageSelect',
 
-		childViews: [
-			'globalPropertiesLabel',
-			'gpHelpData',
-			'gpTimeoutData'
-		],
+        contentBinding: 'SDL.SDLModel.sdlLanguagesList',
 
-		globalPropertiesLabel : MFT.Label.extend({
+        valueBinding: 'SDL.SDLModel.hmiTTSVRLanguage'
+    } ),
 
-			elementId:			'sdlGPLabel',
+    /**
+     * Sending data from HMI for processing in SDLCore
+     */
+    sendData: SDL.Button.create( {
+        elementId: 'sendData',
+        classNames: 'sendData btnNotPressed',
+        action: function() {
+            FFW.BasicCommunication.SendData( null );
+        },
+        text: 'Send Data',
+        templateName: 'text'
+    } ),
 
-			classNames:			'sdlGPLabel',
+    /**
+     * Select for extended param of SendData
+     */
+    sendDataCheckBox: Em.Checkbox.extend( {
 
-			content:			'HELP_PROMPT: TIMEOUT_PROMPT:'
-		}),		
+        elementId: 'sendDataCheckBox',
 
-		gpHelpData : MFT.Label.extend({
+        classNames: 'sendDataCheckBox',
 
-			elementId:			'sdlGPHData',
+        checkedBinding: 'SDL.SDLModel.sendDataExtend'
 
-			classNames:			'sdlGPData',
+    } ),
 
-			contentBinding:		'this.propertiesData',
-			
-			propertiesData: function(){
-				var str='';
-				if( MFT.SDLModel.globalProperties.helpPrompt ){
-					var i=0;
-					
-					for(i = 0; i < MFT.SDLModel.globalProperties.helpPrompt.length; i++){
-						str += MFT.SDLModel.globalProperties.helpPrompt[i].text + ' ';
-					}}
-				return str;
-			}.property( 'MFT.SDLModel.globalProperties.helpPrompt.@each.text' )
-		}),
+    /*
+     * Label for sendDataCheckBox
+     */
+    sendDataLabel: SDL.Label.extend( {
 
-		gpTimeoutData : MFT.Label.extend({
+        elementId: 'sendDataLabel',
 
-			elementId:			'sdlGPTData',
+        classNames: 'sendDataLabel',
 
-			classNames:			'sdlGPData',
+        content: 'Use URL'
+    } ),
 
-			contentBinding:		'this.propertiesData',
-			
-			propertiesData: function(){
-				var str='';
-				if( MFT.SDLModel.globalProperties.timeoutPrompt ){
-					var i=0;
-					for(i = 0; i < MFT.SDLModel.globalProperties.timeoutPrompt.length; i++){
-						str += MFT.SDLModel.globalProperties.timeoutPrompt[i].text + ' ';
-					}
-				}
-				
-				return str;
-			}.property( 'MFT.SDLModel.globalProperties.timeoutPrompt.@each.text' )
-		})
-	}),
+    /**
+     * VehicleInfo button
+     */
+    vehicleInfo: SDL.Button.create( {
+        elementId: 'vehicleInfoButton',
+        classNames: 'vehicleInfoButton btn',
+        text: 'Vehicle Info',
+        action: function() {
+            // this._super();
+            SDL.VehicleInfo.toggleActivity();
+        },
+        templateName: 'text'
+    } ),
 
-	driverDistractionControl: Em.ContainerView.extend({
-		elementId:	'driverDistractionControl',
-		
-		classNames:	'driverDistractionControl',
+    /**
+     * TBT Client State button
+     */
+    tbtClientState: SDL.Button.create( {
+        elementId: 'tbtClientStateButton',
+        classNames: 'tbtClientStateButton btn',
+        text: 'TBT Client State',
+        action: function() {
+            // this._super();
+            SDL.TBTClientStateView.toggleActivity();
+        },
+        templateName: 'text'
+    } ),
 
-		childViews: [
-			'driverDistractionLabel',
-			'driverDistractionCheckBox'
-		],
+    /**
+     * Voice Recognition button
+     */
+    VRButton: SDL.Button.create( {
+        elementId: 'VRButton',
+        classNames: 'VRButton',
+        action: 'activateVRPopUp',
+        target: 'SDL.SDLController'
+    } ),
 
-		driverDistractionLabel : MFT.Label.extend({
+    infoTable: Em.ContainerView.extend( {
+        elementId: 'infoTable',
 
-			elementId:			'driverDistractionControlLabel',
+        classNames: 'infoTable',
 
-			classNames:			'driverDistractionControlLabel',
+        childViews:
+            [
+                'globalPropertiesLabel',
+                'gpHelpData',
+                'gpTimeoutData'
+            ],
 
-			content:			'Driver Distraction'
-		}),		
+        globalPropertiesLabel: SDL.Label.extend( {
 
-		driverDistractionCheckBox : Em.Checkbox.extend({
+            elementId: 'sdlGPLabel',
 
-			elementId:			'driverDistractionControlCheckBox',
+            classNames: 'sdlGPLabel',
 
-			classNames:			'driverDistractionControlCheckBox',
+            content: 'HELP_PROMPT: TIMEOUT_PROMPT:'
+        } ),
 
-			onCheckBoxSelected:	function(){
-				MFT.SDLController.selectDriverDistraction(this.checked);
-			}.observes('this.checked')
+        gpHelpData: SDL.Label.extend( {
 
-		})
-	}),
+            elementId: 'sdlGPHData',
 
+            classNames: 'sdlGPData',
 
-	protocolVersion: Em.ContainerView.extend({
-		elementId:	'protocolVersion',
-		
-		classNames:	'protocolVersion',
+            contentBinding: 'this.propertiesData',
 
-		childViews: [
-			'protocolVersionLabel',
-			'protocolVersionCheckBox'
-		],
+            propertiesData: function() {
+                var str = '';
+                if( SDL.SDLModel.globalProperties.helpPrompt ){
+                    var i = 0;
 
-		protocolVersionLabel : MFT.Label.extend({
+                    for( i = 0; i < SDL.SDLModel.globalProperties.helpPrompt.length; i++ ){
+                        str += SDL.SDLModel.globalProperties.helpPrompt[i].text + ' ';
+                    }
+                }
+                return str;
+            }.property( 'SDL.SDLModel.globalProperties.helpPrompt.@each.text' )
+        } ),
 
-			elementId:			'protocolVersionLabel',
+        gpTimeoutData: SDL.Label.extend( {
 
-			classNames:			'protocolVersionLabel',
+            elementId: 'sdlGPTData',
 
-			content:			'Protocol version V2'
-		}),		
+            classNames: 'sdlGPData',
 
-		protocolVersionCheckBox : Em.Checkbox.extend({
+            contentBinding: 'this.propertiesData',
 
-			elementId:			'protocolVersionCheckBox',
+            propertiesData: function() {
+                var str = '';
+                if( SDL.SDLModel.globalProperties.timeoutPrompt ){
+                    var i = 0;
+                    for( i = 0; i < SDL.SDLModel.globalProperties.timeoutPrompt.length; i++ ){
+                        str += SDL.SDLModel.globalProperties.timeoutPrompt[i].text + ' ';
+                    }
+                }
 
-			classNames:			'protocolVersionCheckBox',
+                return str;
+            }.property( 'SDL.SDLModel.globalProperties.timeoutPrompt.@each.text' )
+        } )
+    } ),
 
-			onCheckBoxSelected:	function(){
-				MFT.SDLController.selectProtocolVersion(this.checked);
-			}.observes('this.checked')
+    driverDistractionControl: Em.ContainerView.extend( {
+        elementId: 'driverDistractionControl',
 
-		})
-	}),
+        classNames: 'driverDistractionControl',
 
-	buttonControls: Em.ContainerView.extend({
-		elementId:	'buttonControls',
-		
-		classNames:	'buttonControls',
+        childViews:
+            [
+                'driverDistractionLabel',
+                'driverDistractionCheckBox'
+            ],
 
-		childViews: [
-			'ContainerControlls',
-			'OneBtn',
-			'TwoBtn',
-			'ThreeBtn',
-			'FourBtn',
-			'FiveBtn',
-			'SixBtn',
-			'SevenBtn',
-			'EightBtn',
-			'NineBtn',
-			'ZiroBtn'
-		],
-		
-		ContainerControlls: Em.ContainerView.extend({
-			elementId:	'ContainerControlls',
-			
-			classNames:	'ContainerControlls',
+        driverDistractionLabel: SDL.Label.extend( {
 
-			childViews: [
-				'UpBtn',
-				'DownBtn',
-				'LeftBtn',
-				'RightBtn',
-				'OkBtn'
-			],
+            elementId: 'driverDistractionControlLabel',
 
-			/** Up button */
-			UpBtn: MFT.Button.create(MFT.PresetEvents, {
-				elementId:	'TUNEUP',
-				classNames:	'UpBtn',
-				time:		0,
-				presetName: 'TUNEUP'
-			}),
-			
-			/** Down button */
-			DownBtn: MFT.Button.create(MFT.PresetEvents, {
-				elementId:	'TUNEDOWN',
-				classNames:	'DownBtn',
-				time:		0,
-				presetName: 'TUNEDOWN'
-			}),
-			
-			/** Left button */
-			LeftBtn: MFT.Button.create(MFT.PresetEvents, {
-				elementId:	'SEEKLEFT',
-				classNames:	'LeftBtn',
-				time:		0,
-				presetName: 'SEEKLEFT'
-			}),
-			
-			/** Right button */
-			RightBtn: MFT.Button.create(MFT.PresetEvents, {
-				elementId:	'SEEKRIGHT',
-				classNames:	'RightBtn',
-				time:		0,
-				presetName: 'SEEKRIGHT'
-			}),
-			
-			/** Ok button */
-			OkBtn: MFT.Button.create(MFT.PresetEvents, {
-				elementId:	'OK',
-				classNames:	'OkBtn',
-				time:		0,
-				presetName: 'OK'
-			})
-		}),
-		
-		/** One button */
-		OneBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_1',
-			classNames:	'OneBtn btnNotPressed',
-			text:		'1',
-			time:		0,
-			presetName: 'PRESET_1'
-		}),
-		
-		/** Two button */
-		TwoBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_2',
-			classNames:	'TwoBtn btnNotPressed',
-			text:		'2',
-			time:		0,
-			presetName: 'PRESET_2'
-		}),
-		
-		/** Three button */
-		ThreeBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_3',
-			classNames:	'ThreeBtn btnNotPressed',
-			text:		'3',
-			time:		0,
-			presetName: 'PRESET_3'
-		}),
-		
-		/** Four button */
-		FourBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_4',
-			classNames:	'FourBtn btnNotPressed',
-			text:		'4',
-			time:		0,
-			presetName: 'PRESET_4'
-		}),
-		
-		/** Five button */
-		FiveBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_5',
-			classNames:	'FiveBtn btnNotPressed',
-			text:		'5',
-			time:		0,
-			presetName: 'PRESET_5'
-		}),
-		
-		/** One button */
-		SixBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_6',
-			classNames:	'SixBtn btnNotPressed',
-			text:		'6',
-			time:		0,
-			presetName: 'PRESET_6'
-		}),
-		
-		/** One button */
-		SevenBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_7',
-			classNames:	'SevenBtn btnNotPressed',
-			text:		'7',
-			time:		0,
-			presetName: 'PRESET_7'
-		}),
-		
-		/** One button */
-		EightBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_8',
-			classNames:	'EightBtn btnNotPressed',
-			text:		'8',
-			time:		0,
-			presetName: 'PRESET_8'
-		}),
-		
-		/** One button */
-		NineBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_9',
-			classNames:	'NineBtn btnNotPressed',
-			text:		'9',
-			time:		0,
-			presetName: 'PRESET_9'
-		}),
-		
-		/** One button */
-		ZiroBtn: MFT.Button.create(MFT.PresetEvents, {
-			elementId:	'PRESET_0',
-			classNames:	'ZiroBtn btnNotPressed',
-			text:		'0',
-			time:		0,
-			presetName: 'PRESET_0'
-		})
-	})
-});
+            classNames: 'driverDistractionControlLabel',
+
+            content: 'Driver Distraction'
+        } ),
+
+        driverDistractionCheckBox: Em.Checkbox.extend( {
+
+            elementId: 'driverDistractionControlCheckBox',
+
+            classNames: 'driverDistractionControlCheckBox',
+
+            checkedBinding: 'SDL.SDLModel.driverDistractionState'
+
+        } )
+    } ),
+
+    protocolVersion: Em.ContainerView.extend( {
+        elementId: 'protocolVersion',
+
+        classNames: 'protocolVersion',
+
+        childViews:
+            [
+                'protocolVersionLabel',
+                'protocolVersionCheckBox'
+            ],
+
+        protocolVersionLabel: SDL.Label.extend( {
+
+            elementId: 'protocolVersionLabel',
+
+            classNames: 'protocolVersionLabel',
+
+            content: 'Protocol version V2'
+        } ),
+
+        protocolVersionCheckBox: Em.Checkbox.extend( {
+
+            elementId: 'protocolVersionCheckBox',
+
+            classNames: 'protocolVersionCheckBox',
+
+            checkedBinding: 'SDL.SDLModel.protocolVersion2State'
+
+        } )
+    } ),
+
+    buttonControls: Em.ContainerView.extend( {
+        elementId: 'buttonControls',
+
+        classNames: 'buttonControls',
+
+        childViews:
+            [
+                'ContainerControlls',
+                'OneBtn',
+                'TwoBtn',
+                'ThreeBtn',
+                'FourBtn',
+                'FiveBtn',
+                'SixBtn',
+                'SevenBtn',
+                'EightBtn',
+                'NineBtn',
+                'ZiroBtn'
+            ],
+
+        ContainerControlls: Em.ContainerView.extend( {
+            elementId: 'ContainerControlls',
+
+            classNames: 'ContainerControlls',
+
+            childViews:
+                [
+                    'UpBtn',
+                    'DownBtn',
+                    'LeftBtn',
+                    'RightBtn',
+                    'OkBtn'
+                ],
+
+            /** Up button */
+            UpBtn: SDL.Button.create( SDL.PresetEvents, {
+                elementId: 'TUNEUP',
+                classNames: 'UpBtn',
+                time: 0,
+                presetName: 'TUNEUP'
+            } ),
+
+            /** Down button */
+            DownBtn: SDL.Button.create( SDL.PresetEvents, {
+                elementId: 'TUNEDOWN',
+                classNames: 'DownBtn',
+                time: 0,
+                presetName: 'TUNEDOWN'
+            } ),
+
+            /** Left button */
+            LeftBtn: SDL.Button.create( SDL.PresetEvents, {
+                elementId: 'SEEKLEFT',
+                classNames: 'LeftBtn',
+                time: 0,
+                presetName: 'SEEKLEFT'
+            } ),
+
+            /** Right button */
+            RightBtn: SDL.Button.create( SDL.PresetEvents, {
+                elementId: 'SEEKRIGHT',
+                classNames: 'RightBtn',
+                time: 0,
+                presetName: 'SEEKRIGHT'
+            } ),
+
+            /** Ok button */
+            OkBtn: SDL.Button.create( SDL.PresetEvents, {
+                elementId: 'OK',
+                classNames: 'OkBtn',
+                time: 0,
+                presetName: 'OK'
+            } )
+        } ),
+
+        /** One button */
+        OneBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_1',
+            classNames: 'OneBtn btnNotPressed',
+            text: '1',
+            time: 0,
+            presetName: 'PRESET_1',
+            templateName: 'text'
+        } ),
+
+        /** Two button */
+        TwoBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_2',
+            classNames: 'TwoBtn btnNotPressed',
+            text: '2',
+            time: 0,
+            presetName: 'PRESET_2',
+            templateName: 'text'
+        } ),
+
+        /** Three button */
+        ThreeBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_3',
+            classNames: 'ThreeBtn btnNotPressed',
+            text: '3',
+            time: 0,
+            presetName: 'PRESET_3',
+            templateName: 'text'
+        } ),
+
+        /** Four button */
+        FourBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_4',
+            classNames: 'FourBtn btnNotPressed',
+            text: '4',
+            time: 0,
+            presetName: 'PRESET_4',
+            templateName: 'text'
+        } ),
+
+        /** Five button */
+        FiveBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_5',
+            classNames: 'FiveBtn btnNotPressed',
+            text: '5',
+            time: 0,
+            presetName: 'PRESET_5',
+            templateName: 'text'
+        } ),
+
+        /** One button */
+        SixBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_6',
+            classNames: 'SixBtn btnNotPressed',
+            text: '6',
+            time: 0,
+            presetName: 'PRESET_6',
+            templateName: 'text'
+        } ),
+
+        /** One button */
+        SevenBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_7',
+            classNames: 'SevenBtn btnNotPressed',
+            text: '7',
+            time: 0,
+            presetName: 'PRESET_7',
+            templateName: 'text'
+        } ),
+
+        /** One button */
+        EightBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_8',
+            classNames: 'EightBtn btnNotPressed',
+            text: '8',
+            time: 0,
+            presetName: 'PRESET_8',
+            templateName: 'text'
+        } ),
+
+        /** One button */
+        NineBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_9',
+            classNames: 'NineBtn btnNotPressed',
+            text: '9',
+            time: 0,
+            presetName: 'PRESET_9',
+            templateName: 'text'
+        } ),
+
+        /** One button */
+        ZiroBtn: SDL.Button.create( SDL.PresetEvents, {
+            elementId: 'PRESET_0',
+            classNames: 'ZiroBtn btnNotPressed',
+            text: '0',
+            time: 0,
+            presetName: 'PRESET_0',
+            templateName: 'text'
+        } )
+    } )
+} );

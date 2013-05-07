@@ -83,7 +83,7 @@ class SmartSchema(object):
         guard = u"__CSMARTFACTORY_{0}_{1}_HPP__".format(
             class_name.upper(),
             unicode(uuid.uuid1().hex.capitalize()))
-        header_file_name = "".join("{0}.hpp".format(class_name))
+        header_file_name = "".join("{0}.h".format(class_name))
 
         with codecs.open(os.path.join(destination_dir, header_file_name),
                          encoding="utf-8",
@@ -123,8 +123,29 @@ class SmartSchema(object):
                     value=x.primary_name)
                  for x in message_type.elements.values()])
 
+        header_file_name = "".join("{0}_schema.h".format(class_name))
+        guard = u"__CSMARTFACTORY_{0}_{1}_HPP__".format(
+            class_name.upper(),
+            unicode(uuid.uuid1().hex.capitalize()))
+        with codecs.open(os.path.join(destination_dir, header_file_name),
+                         encoding="utf-8",
+                         mode="w") as f_h:
+            f_h.write(self._hpp_schema_file_tempalte.substitute(
+                class_name=class_name,
+                guard=guard,
+                header_file_name=unicode("".join("{0}.h".format(class_name))),
+                namespace_open=namespace_open,
+                enums_content=self._indent_code(self._gen_enums(
+                    interface.enums.values()), indent_level),
+                class_content=self._indent_code(self._gen_hpp_class(
+                    class_name,
+                    interface.params,
+                    interface.functions.values(),
+                    interface.structs.values()), indent_level),
+                namespace_close=namespace_close))
+
         with codecs.open(os.path.join(destination_dir,
-                                      "".join("{0}.cpp".format(class_name))),
+                                      "".join("{0}_schema.cc".format(class_name))),
                          encoding="utf-8", mode="w") as f_s:
             f_s.write(self._cpp_file_template.substitute(
                 header_file_name=unicode(header_file_name),
@@ -1100,13 +1121,78 @@ class SmartSchema(object):
         u'''#ifndef $guard\n'''
         u'''#define $guard\n'''
         u'''\n'''
+        u'''$namespace_open'''
+        u'''$enums_content'''
+        u'''$namespace_close'''
+        u'''#endif //$guard\n'''
+        u'''\n\n''')
+
+    _hpp_schema_file_tempalte = string.Template(
+        u'''/**\n'''
+        u''' * @file ${class_name}.hpp\n'''
+        u''' * @brief Generated class ${class_name} header file.\n'''
+        u''' *\n'''
+        u''' * This class is a part of SmartObjects solution. It provides\n'''
+        u''' * factory functionallity which allows client to use '''
+        u'''SmartSchemas\n'''
+        u''' * in accordance with definitions from ${class_name}.xml file\n'''
+        u''' */\n'''
+        u'''// Copyright (c) 2013, Ford Motor Company\n'''
+        u'''// All rights reserved.\n'''
+        u'''//\n'''
+        u'''// Redistribution and use in source and binary forms, '''
+        u'''with or without\n'''
+        u'''// modification, are permitted provided that the following '''
+        u'''conditions are met:\n'''
+        u'''//\n'''
+        u'''// Redistributions of source code must retain the above '''
+        u'''copyright notice, this\n'''
+        u'''// list of conditions and the following disclaimer.\n'''
+        u'''//\n'''
+        u'''// Redistributions in binary form must reproduce '''
+        u'''the above copyright notice,\n'''
+        u'''// this list of conditions and the following\n'''
+        u'''// disclaimer in the documentation and/or other materials '''
+        u'''provided with the\n'''
+        u'''// distribution.\n'''
+        u'''//\n'''
+        u'''// Neither the name of the Ford Motor Company nor the names '''
+        u'''of its contributors\n'''
+        u'''// may be used to endorse or promote products derived '''
+        u'''from this software\n'''
+        u'''// without specific prior written permission.\n'''
+        u'''//\n'''
+        u'''// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND '''
+        u'''CONTRIBUTORS "AS IS"\n'''
+        u'''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
+        u'''LIMITED TO, THE\n'''
+        u'''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
+        u''''A PARTICULAR PURPOSE\n'''
+        u'''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
+        u'''OR CONTRIBUTORS BE\n'''
+        u'''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
+        u'''EXEMPLARY, OR\n'''
+        u'''// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, '''
+        u'''PROCUREMENT OF\n'''
+        u'''// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; '''
+        u'''OR BUSINESS\n'''
+        u'''// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, '''
+        u'''WHETHER IN\n'''
+        u'''// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE '''
+        u'''OR OTHERWISE)\n'''
+        u'''// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF '''
+        u'''ADVISED OF THE\n'''
+        u'''// POSSIBILITY OF SUCH DAMAGE.\n\n'''
+        u'''#ifndef $guard\n'''
+        u'''#define $guard\n'''
+        u'''\n'''
         u'''#include "JSONHandler/CSmartFactory.hpp"\n'''
         u'''#include "SmartObjects/CSmartSchema.hpp"\n'''
         u'''#include "SmartObjects/ISchemaItem.hpp"\n'''
         u'''#include "Utils/shared_ptr.h"\n'''
+        u'''#include "$header_file_name"\n'''
         u'''\n'''
         u'''$namespace_open'''
-        u'''$enums_content'''
         u'''$class_content'''
         u'''$namespace_close'''
         u'''#endif //$guard\n'''

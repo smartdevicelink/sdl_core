@@ -8,7 +8,7 @@ add_subdirectory(./JSONHandler)
 add_subdirectory(./SmartObjects)
 
 # --- AppMgr
-add_subdirectory(./AppMgr)
+add_subdirectory(./application_manager)
 
 # --- ProtocolHandler
 add_subdirectory(./ProtocolHandler)

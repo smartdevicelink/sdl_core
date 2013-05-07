@@ -1,128 +1,56 @@
-/**
- * @name MFT.SettingsView
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
- * @desc Settings module visual representation
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  * 
- * @category	Settings
- * @filesource	app/view/SettingsView.js
- * @version		2.0
- *
- * @author		Gerashchenko Maksym
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
- 
- MFT.SettingsView = Em.ContainerView.create(MFT.LoadableView, {
- 	
- 	elementId:	'settings_view',
- 	 	
-	/** Bind class for visual representation */
-	classNameBindings: ['MFT.helpMode'],
-			
-	/** Settings components */
-	childViews: [
-		'menu'
-	],
-	
-	/** Left menu */
-	menu: Em.ContainerView.extend({
-		elementId:	'ctrl_settings_menu',
-		
-		classNameBindings:	['MFT.SettingsController.hiddenLeftMenu:hidden'],
-		
-		childViews: [
-			'border',
-			'items'
-		],
-		
-		border: Em.View.extend({
-			classNames:	'ls_border',
-			
-			template: Ember.Handlebars.compile('<img class="bg" src="images/common/ls_border.png">')
-		}),
-		
-		items: Em.ContainerView.extend({
-			classNames:	'ls-items',
-			
-			childViews: [
-				'clockButton',
-				'displayButton',
-				'soundButton',
-				'vehicleButton',
-				'settingsButton',
-				'helpButton'
-			],
-			
-			clockButton: MFT.Button.extend({
-				elementId:			'settings_menu_clockButton',
-				
-				goToState:   			 'clock',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	 ['MFT.States.settings.clock.active:settings_active'],
-				textBinding:	  	   'MFT.locale.label.view_settings_clock',
-				icon:				  'images/settings/ico_clock.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			displayButton: MFT.Button.extend({
-				elementId:			'settings_menu_displayButton',
-				
-				goToState:   			 'display',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	 ['MFT.States.settings.display.active:settings_active'],
-				textBinding:	  	   'MFT.locale.label.view_settings_display',
-				icon:				  'images/settings/ico_display.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			soundButton: MFT.Button.extend({
-				elementId:			'settings_menu_soundButton',
-				
-				goToState:   			 'sound',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	['MFT.States.settings.sound.active:settings_active'],
-				textBinding:	  	   'MFT.locale.label.view_settings_sound',
-				icon:				  'images/settings/ico_sound.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			vehicleButton: MFT.Button.extend({
-				elementId:			'settings_menu_vehicleButton',
-				
-				goToState:   			 'vehicle',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	['MFT.States.settings.vehicle.active:settings_active'],
-				textBinding:	  	   'MFT.locale.label.view_settings_vehicle',
-				icon:				  'images/settings/ico_vehicle.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			settingsButton: MFT.Button.extend({
-				elementId:			'settings_menu_settingsButton',
-				
-				goToState:   			 'settings',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	 ['MFT.States.settings.settings.active:settings_active'],
-				textBinding:	  	   'MFT.locale.label.view_settings_settings',
-				icon:				  'images/settings/ico_settings.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			helpButton: MFT.Button.extend({
-				elementId:			'settings_menu_helpButton',
-				
-				goToState:   			 'help',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	 ['MFT.States.settings.help.active:settings_active'],
-				textBinding:	  	   'MFT.locale.label.view_settings_help',
-				icon:				  'images/settings/ico_help.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			})
-		})
-	})
-});
+/**
+ * @name SDL.PlayerControllsView
+ * @desc Video player visual representation
+ * @category View
+ * @filesource app/view/player/PlayerView.js
+ * @version 1.0
+ */
+SDL.SettingsView = Em.ContainerView.create( {
+    /** View Id */
+    elementId: 'settingsView',
 
+    classNameBindings:
+        [
+             'SDL.States.settings.active:active_state:inactive_state'
+        ],
+
+    childViews:
+        [
+            'windowText'
+        ],
+
+
+    windowText: SDL.Label.extend( {
+    
+        classNames: 'windowText',
+    
+        content: 'Settings'
+    } )
+
+} );

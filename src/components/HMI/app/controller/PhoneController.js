@@ -1,140 +1,54 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.PhoneController
- * 
+ * @name SDL.PhoneController
  * @desc Phone module logic
- * 
- * @category	Controller
- * @filesource	app/controller/PhoneController.js
- * @version		2.0
- *
- * @author		Artem Petrosyan
+ * @category Controller
+ * @filesource app/controller/PhoneController.js
+ * @version 1.0
  */
 
-MFT.PhoneController = Em.Object.create({
-	
-	/** Model binding */
-	modelBinding: "MFT.PhoneModel",
-	
-	/** Initial substate */
-	activeState: 'phone.dialpad',
-	
-	subState: function(view) {		
-		/* Open help video */
-		if ( MFT.helpMode && view.videoPath ) {
-			MFT.VideoPlayerController.start(view.videoPath, 'phone.' + view.stateName);
-		} else {
-			MFT.States.goToState( 'phone.' + view.stateName);
-		}
-	},
-	
-	// flag for hiding left menu
-	hideMenu: false,
-	
-	/** DIALPAD SECTION */
-	
-	/** Dialpad key press handeler */
-	onKeyPress: function(event) {
-		this.model.setDialpadNumber(event.keyData);
-	},
-	
-	/** Dialpad delete key press handeler */
-	onDelete: function() {
-		this.model.deleteDialpadNumber();
-	},
-	
-	/** Dial call handeler */
-	onDialCall: function() {
-		this.model.dialCall();
-	},
-	
-	/** Dial call handeler */
-	onEndCall: function() {
-		this.model.endCall();
-		
-		// Show popup
-		$('#phone_endCallMessage').fadeIn();
-		
-		// Hide popup after timeout
-		setTimeout(function() {
-			$('#phone_endCallMessage').fadeOut();
-		},2000);
-	},
-	
-	/** Call Privacy toggle handler */
-	onPrivacy: function() {
-		
-		// Help mode video
-		if ( MFT.helpMode ) {
-			MFT.VideoPlayerController.start('phone_Privacy');
-			
-			return;
-		}
-		
-		this.model.togglePrivacy();
-	},
-	
-	/** Call Hold toggle handler */
-	onHold: function() {
-		this.model.toggleHold();
-	},
-	
-	/** Call Mute toggle handler */
-	onMute: function() {
-		this.model.toggleMute();
-	},
-	
-	/** DND toggle handler */
-	onDND: function() {
-		// Help mode video
-		if ( MFT.helpMode ) {
-			MFT.VideoPlayerController.start('phone_Do_not_disturb');			
-			return;
-		}
-		
-		this.model.toggleDND();
-	},
-	
-	/** Join toggle handler */
-	onJoin: function() {
-		// Help mode video
-		if ( MFT.helpMode ) {
-			MFT.VideoPlayerController.start('phone_Join_call');			
-		}
-	},
-	
-	/** Status label text */
-	phoneStatus: function() {
-		if( this.model.readyForCall ) {
-			return MFT.locale.label.view_wigetPhone_phone;
-		} else {
-			if ( this.model.statusModeText ) {
-				return this.model.statusModeText;
-			}
-			return 'Sarah 3:47&nbsp;&nbsp;&nbsp;' + this.model.get('phoneStatusNumber');
-		}
-	}.property('this.model.readyForCall', 'this.model.statusModeText', 'this.model.phoneStatusNumber'),
-	
-	onChildState: function(event){
-		//this.set('hideMenu', true);
-		MFT.States.goToState(MFT.States.currentState.get('path')+'.'+event.goToState);
-		
-		// return if state view loaded
-		if ( MFT.States.currentState.viewLoaded ) {
-			return;
-		}
-		
-		// add observer on active state to hide left menu
-		MFT.States.currentState.addObserver('active', function(){
-			if (this.active) {
-				MFT.PhoneController.set('hideMenu', true);
-			}
-		});
-	},
-	
-	onBackState: function(event){
-		MFT.States.back();
-		
-		// show left menu
-		this.set('hideMenu', false);
-	}
-});
+SDL.PhoneController = Em.Object.create( {
+
+    /** Model binding */
+    modelBinding: "SDL.PhoneModel",
+
+    /** Dialpad delete key press handeler */
+    onDelete: function() {
+        this.model.deleteDialpadNumber();
+    },
+
+    /** Dial call handeler */
+    onEndCall: function() {
+        this.model.endCall();
+    },
+
+    /** Dial call handeler */
+    onDialCall: function() {
+        this.model.dialCall();
+    }
+} );

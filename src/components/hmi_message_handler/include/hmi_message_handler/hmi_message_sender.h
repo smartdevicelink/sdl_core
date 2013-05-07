@@ -33,6 +33,8 @@
  #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_SENDER
  #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_SENDER
 
+#include "application_manager/message.h"
+
 namespace hmi_message_handler{
 class HMIMessageSender {
 public:

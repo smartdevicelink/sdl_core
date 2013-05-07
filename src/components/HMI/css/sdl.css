@@ -23,6 +23,11 @@
 
 .ffw_list_menu .ffw-button span {
 	margin-left: 20px;
+	height: 50px;
+	width: 120px;
+	position: absolute;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .ffw_list_menu .content {
@@ -54,13 +59,18 @@
 	margin-left: 8px;
 }
 
+#info_apps_deviceList_view .deviceListLabel,
 .sdl-window .caption-text {
 	top: 80px;
 	left: 75px;
 	width: 620px;
-	height: 20px;
 	background: #393939;
-	padding: 15px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 50px;
+	height: 50px;
+	padding-left: 15px;
+	padding-right: 15px;
 }
  
 #info_nonMedia {
@@ -138,10 +148,22 @@
 #sdl_options .list-content{
 	width: 590px;
 }
+
+.rightTextButton{
+	margin-left: 0px !important;
+	left: 50px;
+	position: absolute;
+}
+
+#VRPopUp span,
 #info_apps_deviceList_list .list-content span,
 #sdl_view_container .list-content span,
 #sdl_options .list-content span{
 	margin-left: 15px;
+	position: absolute;
+	text-overflow: ellipsis;
+	width: 527px;
+	overflow: hidden;
 }
 
 #sdl_options .list-content .ico {
@@ -276,18 +298,26 @@
 	top: 167px;
 	left: 145px;
 	width: 480px;
-	height: 20px;
 	background: #393939;
-	padding: 15px;
+	line-height: 50px;
+	height: 50px;
+	padding-left: 15px;
+	padding-right: 15px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .slider-footer {
 	top: 325px;
 	left: 145px;
 	width: 480px;
-	height: 20px;
 	background: #393939;
-	padding: 15px;
+	line-height: 50px;
+	height: 50px;
+	padding-left: 15px;
+	padding-right: 15px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 #slider_view .sliderControl {
@@ -597,6 +627,8 @@
 	float: left;
 	margin: 10px;
 	position: relative;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 #AlertManeuverPopUp .closeButton{
 	width: 170px;

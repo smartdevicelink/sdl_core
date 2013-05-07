@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
 
+#include "hmi_message_handler/hmi_message_handler.h"
+
 namespace hmi_message_handler {
 /**
  * \class HMIMessageAdapter
@@ -63,10 +65,17 @@ protected:
      * from HMI.
      */
 	virtual void subscribeTo() = 0;
+    inline virtual HMIMessageHandler * handler() const {
+        return handler_;
+    }
 
 private:
-	HMIMessageHandler * handler_;
+    /**
+      *\brief Pointer on handler to notify it about receiving message/error.
+    */
+	mutable HMIMessageHandler * handler_;
 };
+
 } // namespace hmi_handler
 
 #endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER

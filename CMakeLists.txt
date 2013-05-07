@@ -32,9 +32,12 @@ file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${PROJECT_SOURCE_DIR}/tools/
 macro (GenerateInterface arg_xml_name arg_namespace parser_type)
     string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" file_name ${arg_xml_name})     # TODO: make expression more robust
 
+    set(hpp_file
+      "${CMAKE_CURRENT_BINARY_DIR}/${file_name}.h"
+      "${CMAKE_CURRENT_BINARY_DIR}/${file_name}_schema.h"
+    )
 
-    set(hpp_file "${CMAKE_CURRENT_BINARY_DIR}/${file_name}.hpp")
-    set(cpp_file "${CMAKE_CURRENT_BINARY_DIR}/${file_name}.cpp")
+    set(cpp_file "${CMAKE_CURRENT_BINARY_DIR}/${file_name}_schema.cc")
     set(full_xml_name "${CMAKE_CURRENT_SOURCE_DIR}/${arg_xml_name}")
 
     add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
@@ -42,13 +45,14 @@ macro (GenerateInterface arg_xml_name arg_namespace parser_type)
                         DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${full_xml_name}
                         COMMENT "Generating files:\n   ${hpp_file}\n   ${cpp_file}\nfrom:\n   ${arg_xml_name} ..."
                         VERBATIM
-                      )
+                       )
 
     include_directories (
         ../../../src/components/SmartObjects/include
         ../../../src/components/JSONHandler/include/
         ${CMAKE_BINARY_DIR}
     )
+
     add_library("${file_name}" ${cpp_file})
 endmacro(GenerateInterface)
 

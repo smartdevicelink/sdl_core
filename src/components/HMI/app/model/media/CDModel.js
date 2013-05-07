@@ -1,157 +1,43 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.CDModel
- * 
+ * @name SDL.CDModel
  * @desc CD Media data model
- * 
- * @category	Model
- * @filesource	app/model/media/CDModel.js
- * @version		2.0
- *
- * @author		Igor Zhavoronkin
+ * @category Model
+ * @filesource app/model/media/CDModel.js
+ * @version 1.0
  */
 
-MFT.CDModel= Em.Object.create({
-	
-	active: false,
-	
-	/** CD Player*/
-	init: function(){
-		this._super();
-		this.set('player',MFT.MediaCDPlayer.create({data: this.PlayList}));
-	},
-	
-	PlayList: MFT.Playlist.create({
-		
-		selectedIndex: 					0,
-		
-		items: {
-			0:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track1 ),
-			1:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track2 ),
-			2:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track3 ),
-			3:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track4 ),
-			4:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track5 ),
-			5:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track6 ),
-			6:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track7 ),
-			7:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track8 ),
-			8:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track9 ),
-			9:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track10 ),
-		},
-		
-		homeWidgetIcon: 'images/media/cd-ico-home.png',
-		homeWidgetIcon_blur: 'images/media/help/cd-ico-home_blur.png',
-	}),
-	
-	browseData : Em.Object.create({
-				
-		titleBinding:	'MFT.locale.label.view_media_cd_browse_CDTrack',
-		
-		disableScrollbar: false,
-		
-		currentPage: 0,
-		
-		items: [
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.0.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.1.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.2.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.3.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.4.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.5.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.6.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.7.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.8.title',
-						disabled:	true
-					}
-				},
-				{
-					type:MFT.Button,
-					params:{
-						textBinding:'MFT.CDModel.PlayList.items.9.title',
-						disabled:	true
-					}
-				}
-		]
-	}),
-	
-	optionsData: Em.Object.create({
-				
-		view: 'cd',
-		
-		titleBinding: 'MFT.locale.label.view_media_cd_options_title',
-		
-		items:[
-				{
-					type:		MFT.Button,
-	
-					params:{
-						textBinding: 'MFT.locale.label.view_media_bt_options_soundSettings',
-						templateName:		  'arrow',
-						action: 'turnOnSoundSettings',
-						target: 'MFT.MediaController'
-					}							
-				},
-				
-				{
-					type:		MFT.LabelPlusToggleButton,
-					params:{
-						labelContentBinding:  'MFT.locale.label.view_media_cd_options_compression',
-						tButtonValue: 		 1,
-						tButtonRange:		 2,
-						tButtonLabelsBinding: 'MFT.locale.label.view_media_cd_options_onOff',
-						labelDisabled: 		 true,
-						tButtonDisabled:	   true
-					}		
-				}
-			]
-	})
-});
+SDL.CDModel = Em.Object.create( {
+    active: true,
+
+    statusBar: 'The Electric Broncos',
+
+    init: function() {
+        this.set( 'active', true );
+    }
+} );

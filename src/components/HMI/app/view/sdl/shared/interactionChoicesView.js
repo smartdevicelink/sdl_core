@@ -1,99 +1,120 @@
-/**
- * @name MFT.InteractionChoicesView
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
- * @desc Interaction Choices visual representation
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  * 
- * @category	View
- * @filesource	app/view/sdl/shared/interactionChoicesView.js
- * @version		1.0
- *
- * @author		Artem Petrosyan
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
- 
-MFT.InteractionChoicesView = MFT.SDLAbstractView.create({
-	
-	elementId: 'perform_interaction_view',
-	
-	childViews: [
-		'backButton',
-		'captionText',
-		'listOfChoices'
-	],
-    
-    listOfChoices: MFT.List.extend({
-    	elementId:	'perform_interaction_view_list',
-        itemsOnPage:5,
-        items:		[]
-    }),
+/**
+ * @name SDL.InteractionChoicesView
+ * @desc Interaction Choices visual representation
+ * @category View
+ * @filesource app/view/sdl/shared/interactionChoicesView.js
+ * @version 1.0
+ */
+
+SDL.InteractionChoicesView = SDL.SDLAbstractView.create( {
+
+    elementId: 'perform_interaction_view',
+
+    childViews:
+        [
+            'backButton',
+            'captionText',
+            'listOfChoices'
+        ],
+
+    listOfChoices: SDL.List.extend( {
+        elementId: 'perform_interaction_view_list',
+        itemsOnPage: 5,
+        items: []
+    } ),
+
+    timer: null,
 
     /**
      * Identifier of current request
      */
     performInteractionRequestId: null,
-    
+
     /**
      * Deactivate window
      */
-    deactivate: function() {
-        this.set('active',false);
+    deactivate: function( ABORTED ) {
+
+        clearTimeout( this.timer );
+        this.set( 'active', false );
+
+        if( ABORTED ){
+            SDL.SDLController.interactionChoiseCloseResponse( 'ABORTED', this.performInteractionRequestId );
+        }
     },
 
-    backButton: MFT.Button.extend({
-        classNames: [
-            'back-button'
-        ],
-        target:     'this.parentView',
-        action:     'deactivate',
-        icon:       'images/media/ico_back.png',
-        onDown:     false,
-        click: function(){
-            MFT.SDLController.interactionChoiseCloseResponse( 'ABORTED', this.get( 'parentView.performInteractionRequestId' ) );
-        }
-    }),
-    
     /**
      * Clean choices caption and list before new proform
      */
     clean: function() {
-    	this.set('captionText.content','Interaction Choices');
-    	this.listOfChoices.items = [];
-    	this.listOfChoices.list.refresh();
+        this.set( 'captionText.content', 'Interaction Choices' );
+        this.listOfChoices.items = [];
+        this.listOfChoices.list.refresh();
     },
-    
+
     /**
      * Update choises list with actual set id
-     *
+     * 
      * @param data: Array
      */
-    preformChoices: function( data, performInteractionRequestId ){
-		
-		if ( !data ) {
-			Em.Logger.error('No choices to preform')
-			return;
-		}
+    preformChoices: function( data, performInteractionRequestId, timeout ) {
+
+        if( !data ){
+            Em.Logger.error( 'No choices to preform' )
+            return;
+        }
 
         this.set( 'performInteractionRequestId', performInteractionRequestId );
-    	
-    	var i=0,
-    		length = data.length;
-    	
-    	// temp for testing
-    	for ( i=0; i < length; i++ ) {
-    		this.listOfChoices.items.push(
-    			{
-					type: MFT.Button,
-					params:{
-						text:			              data[i].menuName,
-						choiceId:		              data[i].choiceID,
-						action:			              'onChoiceInteraction',
-						target:                       'MFT.SDLAppController',
-                        performInteractionRequestId:  performInteractionRequestId,
-						templateName:	'text'
-					}
-				} 
-    		);
-    	}
-    	    	
-    	this.listOfChoices.list.refresh();
+
+        var i = 0, length = data.length, self = this;
+
+        // temp for testing
+        for( i = 0; i < length; i++ ){
+            this.listOfChoices.items.push( {
+                type: SDL.Button,
+                params: {
+                    text: data[i].menuName,
+                    choiceId: data[i].choiceID,
+                    action: 'onChoiceInteraction',
+                    onDown: false,
+                    target: 'SDL.SDLAppController',
+                    performInteractionRequestId: performInteractionRequestId,
+                    templateName: 'text'
+                }
+            } );
+        }
+
+        this.listOfChoices.list.refresh();
+
+        clearTimeout( this.timer );
+        this.timer = setTimeout( function() {
+            self.deactivate( true );
+        }, timeout );
     }
-});
+} );

@@ -1,98 +1,130 @@
-/**
- * @name MFT.DeviceListView
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
- * @desc Media App Options module visual representation
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  * 
- * @category    View
- * @filesource  app/view/media/devicelistView.js
- * @version     2.0
- *
- * @author      Andriy Melnik
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
- 
-MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
+/**
+ * @name SDL.DeviceListView
+ * @desc Media App Options module visual representation
+ * @category View
+ * @filesource app/view/media/devicelistView.js
+ * @version 1.0
+ */
 
-    classNames:        ['info_apps_deviceList_view'],
+SDL.DeviceListView = Em.ContainerView.create( {
 
-	/**
+    classNames:
+        [
+            'info_apps_deviceList_view'
+        ],
+
+    classNameBindings:
+        [
+            'SDL.States.info.devicelist.active:active_state:inactive_state'
+        ],
+
+    /**
      * View Id
-     */	
-    elementId:          'info_apps_deviceList_view',
+     */
+    elementId: 'info_apps_deviceList_view',
 
-	/**
+    /**
      * View Components
      */
-    childViews:         [
-                            'backButton',
-                            'listOfDevices',
-                            'deviceListLabel'
-                        ],
+    childViews:
+        [
+            'backButton',
+            'listOfDevices',
+            'deviceListLabel'
+        ],
 
-    /** 
+    /**
      * Button to return to previous view
      */
-    backButton: MFT.Button.extend({
-        classNames:        ['backButton','button'],     
-        action:            'turnChangeDeviceViewBack',
-        target:            'MFT.SDLController',  
-        icon:              'images/media/ico_back.png',   
-    }),
+    backButton: SDL.Button.extend( {
+        classNames:
+            [
+                'backButton',
+                'button'
+            ],
+        action: 'turnChangeDeviceViewBack',
+        target: 'SDL.SDLController',
+        icon: 'images/media/ico_back.png'
+    } ),
 
-    /** 
+    /**
      * Label in title
      */
-    deviceListLabel:    MFT.Label.extend({
+    deviceListLabel: SDL.Label.extend( {
 
-        elementId:          'deviceListLabel',
+        elementId: 'deviceListLabel',
 
-        classNames:         'deviceListLabel',
+        classNames: 'deviceListLabel',
 
-        content:            'Change Devices'
-    }),
+        content: 'Change Devices'
+    } ),
 
     /*
-     * Function calls when notification from RPC comes
-     * and creates buttons to choose devices
+     * Function calls when notification from RPC comes and creates buttons to
+     * choose devices
      */
-    ShowDeviceList: function( params ){
+    ShowDeviceList: function( params ) {
 
-        var i,
-            len = params.deviceList.length;
-        for(i = 0; i < len; i++){
-            this.get('listOfDevices.list.childViews').pushObject(
-                MFT.Button.create({
-                    deviceName:             params.deviceList[i],
-                    icon:                   params.icon,
-                    text:                   params.deviceList[i],
-                    classNames:             'ffw-button notpressed list-item',
-                    templateName:           params.icon ? 'rightIcon' : 'text',
-                    action:                 'onDeviceChoosed',
-                    target:                 'MFT.SDLController',
-                    onDown:                 false
-                })
-            );
+        var i, len = params.deviceList.length;
+        for( i = 0; i < len; i++ ){
+            this.get( 'listOfDevices.list.childViews' ).pushObject( SDL.Button.create( {
+                deviceName: params.deviceList[i],
+                icon: params.icon,
+                text: params.deviceList[i],
+                classNames: 'ffw-button notpressed list-item',
+                templateName: params.icon ? 'rightIcon' : 'text',
+                action: 'onDeviceChoosed',
+                target: 'SDL.SDLController',
+                onDown: false
+            } ) );
         }
     },
 
     /*
-     * Function calls each time when user enters Change Device menu
-     * and clear all old data about devices
+     * Function calls each time when user enters Change Device menu and clear
+     * all old data about devices
      */
-    clearDeviceList: function(){
-        this.get('listOfDevices.list').removeAllChildren();
+    clearDeviceList: function() {
+        this.get( 'listOfDevices.list' ).removeAllChildren();
         this.listOfDevices.rerender();
-    }.observes('this.stateObj.active'),
+    },
 
     /**
-      * List for option on DeviceListView screen
-      */
-    listOfDevices: MFT.List.extend({
+     * List for option on DeviceListView screen
+     */
+    listOfDevices: SDL.List.extend( {
 
-        elementId:      'info_apps_deviceList_list',
+        elementId: 'info_apps_deviceList_list',
 
-        itemsOnPage:    5,
-                
+        itemsOnPage: 5,
+
         /** Items array */
-        items:          []
-    })
-});
+        items: []
+    } )
+} );

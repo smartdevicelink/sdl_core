@@ -1,59 +1,85 @@
+/*
+ * Copyright (c) 2013, Ford Motor Company All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  · Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  · Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *  · Neither the name of the Ford Motor Company nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 /**
- * @name MFT.TurnByTurnView
- * 
+ * @name SDL.TurnByTurnView
  * @desc TurnByTurnView module visual representation
- * 
- * @category    View
- * @filesource  app/view/sdl/shared/turnByTurnView.js
- * @version     1.0
- *
- * @author      Andriy Melnik
+ * @category View
+ * @filesource app/view/sdl/shared/turnByTurnView.js
+ * @version 1.0
  */
 
-MFT.TurnByTurnView = MFT.SDLAbstractView.create({
+SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
 
-    elementId:          'TurnByTurnView',
+    elementId: 'TurnByTurnView',
 
-    classNames:         'TurnByTurnView',
+    classNames: 'TurnByTurnView',
 
-    classNameBindings:  ['active:active'],
+    classNameBindings:
+        [
+            'active:active'
+        ],
 
-    active:             false,
+    active: false,
 
-    childViews: [
-        'captionText',
-        'softButtons',
-        'totalDistanceLabel',
-        'etaLabel',
-        'turnList',
-        'homeScreen',
-        'navigationText2',
-        'turnIconImage'
-    ],
+    childViews:
+        [
+            'captionText',
+            'softButtons',
+            'totalDistanceLabel',
+            'etaLabel',
+            'turnList',
+            'homeScreen',
+            'navigationText2',
+            'turnIconImage'
+        ],
 
-    appId:                      -1,
-    navigationText2:            null,
-    eta:                        null,
-    totalDistance:              null,
-    turnIcon:                   null,
-    distanceToManeuver:         null,
-    distanceToManeuverScale:    null,
-    maneuverComplete:           null,
+    appId: -1,
+    navigationText2: null,
+    eta: null,
+    totalDistance: null,
+    turnIcon: null,
+    distanceToManeuver: null,
+    distanceToManeuverScale: null,
+    maneuverComplete: null,
 
-    activate: function( params ){
+    activate: function( params ) {
         if( params ){
             this.softButtons.addItems( params.softButtons );
-            this.set('captionText.content', params.navigationText1);
-            this.set('appId', params.appId);
-            this.set('navigationText2', params.navigationText2);
-            this.set('eta', params.eta);
-            this.set('totalDistance', params.totalDistance);
-            this.set('turnIcon', params.turnIcon);
-            this.set('distanceToManeuver', params.distanceToManeuver);
-            this.set('distanceToManeuverScale', params.distanceToManeuverScale);
-            this.set('maneuverComplete', params.maneuverComplete);
+            this.set( 'captionText.content', params.navigationText1 );
+            this.set( 'appId', params.appId );
+            this.set( 'navigationText2', params.navigationText2 );
+            this.set( 'eta', params.eta );
+            this.set( 'totalDistance', params.totalDistance );
+            this.set( 'turnIcon', params.turnIcon );
+            this.set( 'distanceToManeuver', params.distanceToManeuver );
+            this.set( 'distanceToManeuverScale', params.distanceToManeuverScale );
+            this.set( 'maneuverComplete', params.maneuverComplete );
 
-            this.set('active',true);
+            this.set( 'active', true );
         }
     },
 
@@ -61,68 +87,74 @@ MFT.TurnByTurnView = MFT.SDLAbstractView.create({
      * Deactivate View
      */
     deactivate: function() {
-        this.set('active',false);
+        this.set( 'active', false );
     },
 
-    totalDistanceLabel: MFT.Label.extend({
-        classNames:         'totalDistanceLabel',
-        contentBinding:     'parentView.totalDistance'
-    }),
+    totalDistanceLabel: SDL.Label.extend( {
+        classNames: 'totalDistanceLabel',
+        contentBinding: 'parentView.totalDistance'
+    } ),
 
-    etaLabel: MFT.Label.extend({
-        classNames:         'etaLabel',
-        contentBinding:     'parentView.eta'
-    }),
+    etaLabel: SDL.Label.extend( {
+        classNames: 'etaLabel',
+        contentBinding: 'parentView.eta'
+    } ),
 
-    turnList: MFT.Button.create({
-        elementId:          'turnList',
-        classNames:         'turnList btn',
-        text:               'Turn List',
-        action: function(){
-            MFT.SDLController.tbtTurnList( this._parentView.appId );
+    turnList: SDL.Button.create( {
+        elementId: 'turnList',
+        classNames: 'turnList btn',
+        text: 'Turn List',
+        action: function() {
+            SDL.SDLController.tbtTurnList( this._parentView.appId );
         },
-        target:             '',
-        onDown:             false,
-        templateName:       'arrow'
-    }),
+        target: '',
+        onDown: false,
+        templateName: 'arrow'
+    } ),
 
-    turnIconImage: Em.View.create({
-        classNames:         'turnIcon btn',
-        attributeBindings:  ['style'],
-        style: function(){
+    turnIconImage: Em.View.create( {
+        classNames: 'turnIcon btn',
+        attributeBindings:
+            [
+                'style'
+            ],
+        style: function() {
             if( this._parentView.turnIcon ){
                 return 'background-image: URL(' + this._parentView.turnIcon + ');';
             }else{
                 return '';
             }
-        }.property('this.parentView.turnIcon')
-    }),
+        }.property( 'this.parentView.turnIcon' )
+    } ),
 
-    navigationText2: MFT.Label.extend({
-        classNames:         'navigationText2',
-        contentBinding:     'parentView.navigationText2'
-    }),
+    navigationText2: SDL.Label.extend( {
+        classNames: 'navigationText2',
+        contentBinding: 'parentView.navigationText2'
+    } ),
 
-    homeScreen: MFT.Button.create({
-        elementId:      'homeScreen',
-        classNames:     'homeScreen btn',
-        text:           'Home Screen',
-        iconBinding:    'MFT.SDLAppController.model.appIcon',
-        target:         'this.parentView',
-        action:         'deactivate',
-        onDown:         false
-    }),
+    homeScreen: SDL.Button.create( {
+        elementId: 'homeScreen',
+        classNames: 'homeScreen btn',
+        text: 'Home Screen',
+        iconBinding: 'SDL.SDLAppController.model.appIcon',
+        target: 'this.parentView',
+        action: 'deactivate',
+        onDown: false
+    } ),
 
-    softButtons: MFT.MenuList.extend({
+    softButtons: SDL.MenuList.extend( {
 
-        itemsOnPage:    3,
+        itemsOnPage: 3,
 
-        groupName:      "TurnByTurnView",
+        groupName: "TurnByTurnView",
 
-        content: Em.ContainerView.extend({
+        content: Em.ContainerView.extend( {
 
-            classNames: ['content']
+            classNames:
+                [
+                    'content'
+                ]
 
-        })
-    })
-});
+        } )
+    } )
+} );
