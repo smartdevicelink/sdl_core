@@ -40,7 +40,7 @@
 #include <map>
 #include <vector>
 
-#include "Logger.hpp"
+#include "log4cxx_logger.h"
 #include "ConnectionHandler/device.h"
 
 /**
@@ -143,7 +143,7 @@ class Connection {
   /**
    * \brief For logging.
    */
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
 };
 
 /**

@@ -43,6 +43,9 @@
 #include "IHandleGenerator.hpp"
 #include "CDeviceAdapter.hpp"
 
+log4cxx::LoggerPtr NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "TransportManager"));
+
 NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SFrame::SFrame(int UserData, const uint8_t* Data, const size_t DataSize):
 mUserData(UserData),
 mData(0),
@@ -122,7 +125,6 @@ mConnectionHandle(ConnectionHandle)
 }
 
 NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::CDeviceAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapterListener& Listener, IHandleGenerator& HandleGenerator):
-mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager"))),
 mListener(Listener),
 mHandleGenerator(HandleGenerator),
 mDeviceScanRequested(false),
@@ -152,18 +154,18 @@ NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::~CDeviceAdapter(void)
 
 void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::run(void)
 {
-    LOG4CPLUS_INFO(mLogger, "Initializing device adapter");
+    LOG4CXX_INFO(logger_, "Initializing device adapter");
 
     int errorCode = pthread_create(&mMainThread, 0, &mainThreadStartRoutine, this);
 
     if (0 == errorCode)
     {
         mMainThreadStarted = true;
-        LOG4CPLUS_INFO(mLogger, "Device adapter main thread started");
+        LOG4CXX_INFO(logger_, "Device adapter main thread started");
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Device adapter main thread start failed, error code " << errorCode);
+        LOG4CXX_ERROR(logger_, "Device adapter main thread start failed, error code " << errorCode);
     }
 }
 
@@ -173,14 +175,14 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(vo
 
     if (false == mDeviceScanRequested)
     {
-        LOG4CPLUS_INFO(mLogger, "Requesting device scan");
+        LOG4CXX_INFO(logger_, "Requesting device scan");
 
         mDeviceScanRequested = true;
         pthread_cond_signal(&mDeviceScanRequestedCond);
     }
     else
     {
-        LOG4CPLUS_INFO(mLogger, "Device scan is currently in progress");
+        LOG4CXX_INFO(logger_, "Device scan is currently in progress");
     }
 
     pthread_mutex_unlock(&mDeviceScanRequestedMutex);
@@ -198,7 +200,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const 
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Device handle " << DeviceHandle << " is invalid");
+        LOG4CXX_ERROR(logger_, "Device handle " << DeviceHandle << " is invalid");
     }
 
     pthread_mutex_unlock(&mDevicesMutex);
@@ -210,7 +212,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const 
 
         if (false == connections.empty())
         {
-            LOG4CPLUS_INFO(mLogger, "Connecting device " << DeviceHandle);
+            LOG4CXX_INFO(logger_, "Connecting device " << DeviceHandle);
 
             for (std::vector<SConnection*>::iterator connectionIterator = connections.begin(); connectionIterator != connections.end(); ++connectionIterator)
             {
@@ -219,7 +221,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const 
         }
         else
         {
-            LOG4CPLUS_WARN(mLogger, "No connections to establish on device " << DeviceHandle);
+            LOG4CXX_WARN(logger_, "No connections to establish on device " << DeviceHandle);
         }
     }
 }
@@ -236,7 +238,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::disconnectDevice(con
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Device handle " << DeviceHandle << " is invalid");
+        LOG4CXX_ERROR(logger_, "Device handle " << DeviceHandle << " is invalid");
     }
 
     pthread_mutex_unlock(&mDevicesMutex);
@@ -260,7 +262,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::disconnectDevice(con
             }
             else
             {
-                LOG4CPLUS_ERROR(mLogger, "Connection " << connectionIterator->first << " is null");
+                LOG4CXX_ERROR(logger_, "Connection " << connectionIterator->first << " is null");
             }
         }
 
@@ -277,11 +279,11 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::sendFrame(NsSmartDev
 {
     if (0u == DataSize)
     {
-        LOG4CPLUS_WARN(mLogger, "DataSize=0");
+        LOG4CXX_WARN(logger_, "DataSize=0");
     }
     else if (0 == Data)
     {
-        LOG4CPLUS_WARN(mLogger, "Data is null");
+        LOG4CXX_WARN(logger_, "Data is null");
     }
     else
     {
@@ -291,7 +293,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::sendFrame(NsSmartDev
 
         if (mConnections.end() == connectionIterator)
         {
-            LOG4CPLUS_ERROR(mLogger, "Connection " << ConnectionHandle << " does not exist");
+            LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " does not exist");
         }
         else
         {
@@ -306,7 +308,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::sendFrame(NsSmartDev
                     uint8_t c = 0;
                     if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
                     {
-                        LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to wake up connection thread for connection " << connectionIterator->first);
+                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to wake up connection thread for connection " << connectionIterator->first);
                     }
                 }
             }
@@ -322,9 +324,9 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermin
 
     if (true == mMainThreadStarted)
     {
-        LOG4CPLUS_INFO(mLogger, "Waiting for device adapter main thread termination");
+        LOG4CXX_INFO(logger_, "Waiting for device adapter main thread termination");
         pthread_join(mMainThread, 0);
-        LOG4CPLUS_INFO(mLogger, "Device adapter main thread terminated");
+        LOG4CXX_INFO(logger_, "Device adapter main thread terminated");
     }
 
     std::vector<pthread_t> connectionThreads;
@@ -343,27 +345,27 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermin
                 uint8_t c = 0;
                 if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
                 {
-                    LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to wake up connection thread for connection " << connectionIterator->first);
+                    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to wake up connection thread for connection " << connectionIterator->first);
                 }
             }
             connectionThreads.push_back(connection->mConnectionThread);
         }
         else
         {
-            LOG4CPLUS_ERROR(mLogger, "Connection " << connectionIterator->first << " is null");
+            LOG4CXX_ERROR(logger_, "Connection " << connectionIterator->first << " is null");
         }
     }
 
     pthread_mutex_unlock(&mConnectionsMutex);
 
-    LOG4CPLUS_INFO(mLogger, "Waiting for connection threads termination");
+    LOG4CXX_INFO(logger_, "Waiting for connection threads termination");
 
     for (std::vector<pthread_t>::iterator connectionThreadIterator = connectionThreads.begin(); connectionThreadIterator != connectionThreads.end(); ++connectionThreadIterator)
     {
         pthread_join(*connectionThreadIterator, 0);
     }
 
-    LOG4CPLUS_INFO(mLogger, "Connection threads terminated");
+    LOG4CXX_INFO(logger_, "Connection threads terminated");
 }
 
 bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::startConnection(NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection * Connection)
@@ -387,14 +389,14 @@ bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::startConnection(NsSm
                 {
                     if (existingConnection->isSameAs(Connection))
                     {
-                        LOG4CPLUS_WARN(mLogger, "Connection is already opened (" << connectionIterator->first << ")");
+                        LOG4CXX_WARN(logger_, "Connection is already opened (" << connectionIterator->first << ")");
 
                         break;
                     }
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR(mLogger, "Connection " << connectionIterator->first << " is null");
+                    LOG4CXX_ERROR(logger_, "Connection " << connectionIterator->first << " is null");
                 }
             }
 
@@ -414,13 +416,13 @@ bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::startConnection(NsSm
 
                         if (0 == errorCode)
                         {
-                            LOG4CPLUS_INFO(mLogger, "Connection thread started for connection " << newConnectionHandle << " (device " << newConnection->mDeviceHandle << ")");
+                            LOG4CXX_INFO(logger_, "Connection thread started for connection " << newConnectionHandle << " (device " << newConnection->mDeviceHandle << ")");
 
                             isConnectionThreadStarted = true;
                         }
                         else
                         {
-                            LOG4CPLUS_ERROR(mLogger, "Connection thread start failed for connection " << newConnectionHandle << " (device " << newConnection->mDeviceHandle << ")");
+                            LOG4CXX_ERROR(logger_, "Connection thread start failed for connection " << newConnectionHandle << " (device " << newConnection->mDeviceHandle << ")");
 
                             delete connectionThreadParameters;
                             mConnections.erase(insertResult.first);
@@ -429,14 +431,14 @@ bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::startConnection(NsSm
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR(mLogger, "Failed to allocate connection " << newConnectionHandle);
+                        LOG4CXX_ERROR(logger_, "Failed to allocate connection " << newConnectionHandle);
 
                         mConnections.erase(newConnectionHandle);
                     }
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR(mLogger, "Connection handle " << newConnectionHandle << " already exists");
+                    LOG4CXX_ERROR(logger_, "Connection handle " << newConnectionHandle << " already exists");
                 }
             }
             else
@@ -449,7 +451,7 @@ bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::startConnection(NsSm
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Connection is null");
+        LOG4CXX_ERROR(logger_, "Connection is null");
     }
 
     return isConnectionThreadStarted;
@@ -475,25 +477,25 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::stopConnection(NsSma
                     uint8_t c = 0;
                     if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
                     {
-                        LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to wake up connection thread for connection " << connectionIterator->first);
+                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to wake up connection thread for connection " << connectionIterator->first);
                     }
                 }
 
-                LOG4CPLUS_INFO(mLogger, "Connection " << ConnectionHandle << "(device " << connection->mDeviceHandle << ") has been marked for termination");
+                LOG4CXX_INFO(logger_, "Connection " << ConnectionHandle << "(device " << connection->mDeviceHandle << ") has been marked for termination");
             }
             else
             {
-                LOG4CPLUS_WARN(mLogger, "Connection " << ConnectionHandle << " is already terminating");
+                LOG4CXX_WARN(logger_, "Connection " << ConnectionHandle << " is already terminating");
             }
         }
         else
         {
-            LOG4CPLUS_ERROR(mLogger, "Connection " << ConnectionHandle << " is null");
+            LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " is null");
         }
     }
     else
     {
-        LOG4CPLUS_WARN(mLogger, "Connection " << ConnectionHandle << " does not exist");
+        LOG4CXX_WARN(logger_, "Connection " << ConnectionHandle << " does not exist");
     }
 
     pthread_mutex_unlock(&mConnectionsMutex);
@@ -511,7 +513,7 @@ bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanReq
         {
             if (0 != pthread_cond_wait(&mDeviceScanRequestedCond, &mDeviceScanRequestedMutex))
             {
-                LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "pthread_cond_wait failed");
+                LOG4CXX_ERROR_WITH_ERRNO(logger_, "pthread_cond_wait failed");
             }
         }
         else
@@ -532,7 +534,7 @@ bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanReq
             }
             else
             {
-                LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "clock_gettime failed");
+                LOG4CXX_ERROR_WITH_ERRNO(logger_, "clock_gettime failed");
 
                 sleep(Timeout);
             }
@@ -601,12 +603,12 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR(mLogger, "Device " << deviceHandle << " is not valid");
+                        LOG4CXX_ERROR(logger_, "Device " << deviceHandle << " is not valid");
                     }
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR(mLogger, "Device " << deviceHandle << " does not exist");
+                    LOG4CXX_ERROR(logger_, "Device " << deviceHandle << " does not exist");
                 }
 
                 pthread_mutex_unlock(&mDevicesMutex);
@@ -617,7 +619,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                     {
                         if (0 == fcntl(notificationPipeReadFd, F_SETFL, fcntl(notificationPipeReadFd, F_GETFL) | O_NONBLOCK))
                         {
-                            LOG4CPLUS_INFO(mLogger, "Connection " << ConnectionHandle << " to remote device " << clientDeviceInfo.mUniqueDeviceId << " established");
+                            LOG4CXX_INFO(logger_, "Connection " << ConnectionHandle << " to remote device " << clientDeviceInfo.mUniqueDeviceId << " established");
 
                             mListener.onApplicationConnected(this, clientDeviceInfo, ConnectionHandle);
 
@@ -633,13 +635,13 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                                 {
                                     if (0 != (pollFds[0].revents & (POLLERR | POLLHUP | POLLNVAL)))
                                     {
-                                        LOG4CPLUS_INFO(mLogger, "Connection " << ConnectionHandle << " terminated");
+                                        LOG4CXX_INFO(logger_, "Connection " << ConnectionHandle << " terminated");
 
                                         connection->mTerminateFlag = true;
                                     }
                                     else if (0 != (pollFds[1].revents & (POLLERR | POLLHUP | POLLNVAL)))
                                     {
-                                        LOG4CPLUS_ERROR(mLogger, "Notification pipe for connection " << ConnectionHandle << " terminated");
+                                        LOG4CXX_ERROR(logger_, "Notification pipe for connection " << ConnectionHandle << " terminated");
 
                                         connection->mTerminateFlag = true;
                                     }
@@ -656,7 +658,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
 
                                                 if (bytesRead > 0)
                                                 {
-                                                    LOG4CPLUS_INFO(mLogger, "Received " << bytesRead << " bytes for connection " << ConnectionHandle);
+                                                    LOG4CXX_INFO(logger_, "Received " << bytesRead << " bytes for connection " << ConnectionHandle);
 
                                                     mListener.onFrameReceived(this, ConnectionHandle, buffer, static_cast<size_t>(bytesRead));
                                                 }
@@ -665,14 +667,14 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                                                     if ((EAGAIN != errno) &&
                                                         (EWOULDBLOCK != errno))
                                                     {
-                                                        LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "recv() failed for connection " << ConnectionHandle);
+                                                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "recv() failed for connection " << ConnectionHandle);
 
                                                         connection->mTerminateFlag = true;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    LOG4CPLUS_INFO(mLogger, "Connection " << ConnectionHandle << " closed by remote peer");
+                                                    LOG4CXX_INFO(logger_, "Connection " << ConnectionHandle << " closed by remote peer");
 
                                                     connection->mTerminateFlag = true;
                                                 }
@@ -690,7 +692,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                                             if ((bytesRead < 0) &&
                                                 (EAGAIN != errno))
                                             {
-                                                LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to clear notification pipe for connection " << ConnectionHandle);
+                                                LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe for connection " << ConnectionHandle);
 
                                                 connection->mTerminateFlag = true;
                                             }
@@ -721,11 +723,11 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                                                         {
                                                             if (bytesSent >= 0)
                                                             {
-                                                                LOG4CPLUS_ERROR(mLogger, "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle);
+                                                                LOG4CXX_ERROR(logger_, "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle);
                                                             }
                                                             else
                                                             {
-                                                                LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Send failed for connection " << ConnectionHandle);
+                                                                LOG4CXX_ERROR_WITH_ERRNO(logger_, "Send failed for connection " << ConnectionHandle);
                                                             }
 
                                                             frameSendStatus = SendStatusFailed;
@@ -733,7 +735,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                                                     }
                                                     else
                                                     {
-                                                        LOG4CPLUS_ERROR(mLogger, "Frame data is invalid for connection " << ConnectionHandle);
+                                                        LOG4CXX_ERROR(logger_, "Frame data is invalid for connection " << ConnectionHandle);
 
                                                         frameSendStatus = SendStatusInternalError;
                                                     }
@@ -742,7 +744,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                                                 }
                                                 else
                                                 {
-                                                    LOG4CPLUS_ERROR(mLogger, "Frame data is null for connection " << ConnectionHandle);
+                                                    LOG4CXX_ERROR(logger_, "Frame data is null for connection " << ConnectionHandle);
 
                                                     frameSendStatus = SendStatusInternalError;
                                                 }
@@ -754,7 +756,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                                 }
                                 else
                                 {
-                                    LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "poll() failed for connection " << ConnectionHandle);
+                                    LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll() failed for connection " << ConnectionHandle);
 
                                     connection->mTerminateFlag = true;
                                 }
@@ -764,29 +766,29 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                         }
                         else
                         {
-                            LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to set O_NONBLOCK for notification pipe for connection " << ConnectionHandle);
+                            LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to set O_NONBLOCK for notification pipe for connection " << ConnectionHandle);
                         }
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to create notification pipe for connection " << ConnectionHandle);
+                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create notification pipe for connection " << ConnectionHandle);
                     }
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR(mLogger, "Device for connection " << ConnectionHandle << " is invalid");
+                    LOG4CXX_ERROR(logger_, "Device for connection " << ConnectionHandle << " is invalid");
                 }
             }
             else
             {
-                LOG4CPLUS_ERROR(mLogger, "Device handle for connection " << ConnectionHandle << " is invalid");
+                LOG4CXX_ERROR(logger_, "Device handle for connection " << ConnectionHandle << " is invalid");
             }
 
             close(connectionSocket);
         }
         else
         {
-            LOG4CPLUS_ERROR(mLogger, "Socket is invalid for connection " << ConnectionHandle);
+            LOG4CXX_ERROR(logger_, "Socket is invalid for connection " << ConnectionHandle);
         }
 
         if (true == isPipeCreated)
@@ -803,13 +805,13 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Connection " << ConnectionHandle << " is not valid");
+        LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " is not valid");
     }
 }
 
 void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::updateClientDeviceList(void )
 {
-    LOG4CPLUS_INFO(mLogger, "Updating client device list");
+    LOG4CXX_INFO(logger_, "Updating client device list");
 
     tInternalDeviceList clientDeviceList;
 

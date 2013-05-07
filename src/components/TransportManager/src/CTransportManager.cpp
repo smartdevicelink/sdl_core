@@ -43,9 +43,12 @@
 
 using namespace NsSmartDeviceLink::NsTransportManager;
 
+log4cxx::LoggerPtr NsSmartDeviceLink::NsTransportManager::CTransportManager::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "TransportManager"));
+
+
 NsSmartDeviceLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
-mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager"))),
 mDataListenersMutex(),
 mDeviceListenersMutex(),
 mDeviceHandleGenerationMutex(),
@@ -71,26 +74,26 @@ mClientInterfaceMutex()
 
     pthread_cond_init(&mDeviceListenersConditionVar, NULL);
 
-    LOG4CPLUS_INFO(mLogger, "TransportManager constructed");
+    LOG4CXX_INFO(logger_, "TransportManager constructed");
 }
 
 NsSmartDeviceLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 {
-    LOG4CPLUS_INFO(mLogger, "TransportManager destructor");
+    LOG4CXX_INFO(logger_, "TransportManager destructor");
 
     mTerminateFlag = true;
 
     // Terminating all threads
     stopApplicationCallbacksThread();
-    LOG4CPLUS_INFO(mLogger, "Waiting for application callbacks thread termination");
+    LOG4CXX_INFO(logger_, "Waiting for application callbacks thread termination");
     pthread_join(mApplicationCallbacksThread, 0);
-    LOG4CPLUS_INFO(mLogger, "Application callbacks thread terminated");
+    LOG4CXX_INFO(logger_, "Application callbacks thread terminated");
 
     pthread_mutex_lock(&mDataListenersMutex);
     std::map<tConnectionHandle, pthread_t> dataThreads;
     for (tConnectionsMap::iterator ConnectionsIterator = mConnections.begin(); ConnectionsIterator != mConnections.end(); ++ConnectionsIterator)
     {
-        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionsIterator->first, "Stopping connection");
+        TM_CH_LOG4CXX_INFO(logger_, ConnectionsIterator->first, "Stopping connection");
         dataThreads[ConnectionsIterator->first] = ConnectionsIterator->second->mConnectionThread;
         stopConnection(ConnectionsIterator->second->mConnectionHandle);
     }
@@ -98,12 +101,12 @@ NsSmartDeviceLink::NsTransportManager::CTransportManager::~CTransportManager(voi
 
     for (std::map<tConnectionHandle, pthread_t>::iterator threadsIterator = dataThreads.begin(); threadsIterator != dataThreads.end(); ++threadsIterator)
     {
-        TM_CH_LOG4CPLUS_INFO(mLogger, threadsIterator->first, "Waiting for thread stoping");
+        TM_CH_LOG4CXX_INFO(logger_, threadsIterator->first, "Waiting for thread stoping");
         pthread_join(threadsIterator->second, 0);
-        TM_CH_LOG4CPLUS_INFO(mLogger, threadsIterator->first, "Thread terminated");
+        TM_CH_LOG4CXX_INFO(logger_, threadsIterator->first, "Thread terminated");
     }
 
-    LOG4CPLUS_INFO(mLogger, "All data callbacks threads terminated. Terminating device adapters");
+    LOG4CXX_INFO(logger_, "All data callbacks threads terminated. Terminating device adapters");
 
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
@@ -111,7 +114,7 @@ NsSmartDeviceLink::NsTransportManager::CTransportManager::~CTransportManager(voi
         delete (*di);
     }
 
-    LOG4CPLUS_INFO(mLogger, "All device adapters removed");
+    LOG4CXX_INFO(logger_, "All device adapters removed");
 
     pthread_mutex_destroy(&mDataListenersMutex);
     pthread_mutex_destroy(&mDeviceListenersMutex);
@@ -121,7 +124,7 @@ NsSmartDeviceLink::NsTransportManager::CTransportManager::~CTransportManager(voi
 
     pthread_cond_destroy(&mDeviceListenersConditionVar);
 
-    LOG4CPLUS_INFO(mLogger, "Component terminated");
+    LOG4CXX_INFO(logger_, "Component terminated");
 }
 
 void NsSmartDeviceLink::NsTransportManager::CTransportManager::run(void)
@@ -129,7 +132,7 @@ void NsSmartDeviceLink::NsTransportManager::CTransportManager::run(void)
     pthread_mutex_lock(&mClientInterfaceMutex);
     initializeDeviceAdapters();
 
-    LOG4CPLUS_INFO(mLogger, "Starting device adapters");
+    LOG4CXX_INFO(logger_, "Starting device adapters");
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
         (*di)->run();
@@ -142,14 +145,14 @@ void NsSmartDeviceLink::NsTransportManager::CTransportManager::run(void)
 void NsSmartDeviceLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
 {
     pthread_mutex_lock(&mClientInterfaceMutex);
-    LOG4CPLUS_INFO(mLogger, "Scanning new devices on all registered device adapters");
+    LOG4CXX_INFO(logger_, "Scanning new devices on all registered device adapters");
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
-        LOG4CPLUS_INFO(mLogger, "Initiating scanning of new devices on adapter: " <<(*di)->getDeviceType());
+        LOG4CXX_INFO(logger_, "Initiating scanning of new devices on adapter: " <<(*di)->getDeviceType());
         (*di)->scanForNewDevices();
-        LOG4CPLUS_INFO(mLogger, "Scanning of new devices initiated on adapter: " <<(*di)->getDeviceType());
+        LOG4CXX_INFO(logger_, "Scanning of new devices initiated on adapter: " <<(*di)->getDeviceType());
     }
-    LOG4CPLUS_INFO(mLogger, "Scanning of new devices initiated");
+    LOG4CXX_INFO(logger_, "Scanning of new devices initiated");
     pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
@@ -197,24 +200,24 @@ void NsSmartDeviceLink::NsTransportManager::CTransportManager::removeDeviceListe
 
 void NsSmartDeviceLink::NsTransportManager::CTransportManager::sendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, const int UserData)
 {
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "sendFrame called. DataSize: "<<DataSize);
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "sendFrame called. DataSize: "<<DataSize);
 
     if(InvalidConnectionHandle == ConnectionHandle)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "sendFrame received with invalid connection handle");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "sendFrame received with invalid connection handle");
         return;
     }
 
     bool bIncomingParamsValid = true;
     if(0 == Data)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "sendFrame with empty data");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "sendFrame with empty data");
         bIncomingParamsValid = false;
     }
 
     if(0 == DataSize)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "sendFrame with DataSize=0");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "sendFrame with DataSize=0");
         bIncomingParamsValid = false;
     }
 
@@ -223,7 +226,7 @@ void NsSmartDeviceLink::NsTransportManager::CTransportManager::sendFrame(tConnec
         SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, UserData, SendStatusInvalidParametersError);
 
         pthread_mutex_lock(&mDataListenersMutex);
-        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Sending callback");
+        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Sending callback");
         sendDataCallback(newCallback);
         pthread_mutex_unlock(&mDataListenersMutex);
         return;
@@ -236,12 +239,12 @@ void NsSmartDeviceLink::NsTransportManager::CTransportManager::sendFrame(tConnec
 
     if(0 != connectionInfo)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "Device adapter found (type: "<<connectionInfo->mpDeviceAdapter.getDeviceType()<<"). Sending frame to it");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "Device adapter found (type: "<<connectionInfo->mpDeviceAdapter.getDeviceType()<<"). Sending frame to it");
         connectionInfo->mpDeviceAdapter.sendFrame(ConnectionHandle, Data, DataSize, UserData);
     }
     else
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "Device adapter that handles Connection Handle was not found");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "Device adapter that handles Connection Handle was not found");
     }
 }
 
@@ -273,17 +276,17 @@ void CTransportManager::onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, cons
 {
     if(0 == DeviceAdapter)
     {
-        LOG4CPLUS_WARN(mLogger, "DeviceAdapter=0");
+        LOG4CXX_WARN(logger_, "DeviceAdapter=0");
     }
     else
     {
-        LOG4CPLUS_INFO(mLogger, "Device adapter type is: "<<DeviceAdapter->getDeviceType() << ", number of devices is: "<<DeviceList.size());
+        LOG4CXX_INFO(logger_, "Device adapter type is: "<<DeviceAdapter->getDeviceType() << ", number of devices is: "<<DeviceList.size());
         pthread_mutex_lock(&mDevicesByAdapterMutex);
 
         tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
         if(devicesIterator == mDevicesByAdapter.end())
         {
-            LOG4CPLUS_WARN(mLogger, "Invalid adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+            LOG4CXX_WARN(logger_, "Invalid adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
             pthread_mutex_unlock(&mDevicesByAdapterMutex);
         }
         else
@@ -293,7 +296,7 @@ void CTransportManager::onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, cons
             pDevices->clear();
             std::copy(DeviceList.begin(), DeviceList.end(), std::back_inserter(*pDevices));
 
-            LOG4CPLUS_INFO(mLogger, "Devices list for adapter is updated. Adapter type is: "<<DeviceAdapter->getDeviceType());
+            LOG4CXX_INFO(logger_, "Devices list for adapter is updated. Adapter type is: "<<DeviceAdapter->getDeviceType());
 
             pthread_mutex_unlock(&mDevicesByAdapterMutex);
 
@@ -305,40 +308,40 @@ void CTransportManager::onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, cons
 
 void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle)
 {
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "onApplicationConnected");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "onApplicationConnected");
 
     if(0 == DeviceAdapter)
     {
-        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "ApplicationConnected received from invalid device adapter");
+        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "ApplicationConnected received from invalid device adapter");
         return;
     }
 
     if(InvalidConnectionHandle == ConnectionHandle)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "ApplicationConnected received with invalid connection handle");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "ApplicationConnected received with invalid connection handle");
         return;
     }
 
     if(InvalidDeviceHandle == ConnectedDevice.mDeviceHandle)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "ApplicationConnected received with invalid device handle: "<<ConnectedDevice.mDeviceHandle);
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "ApplicationConnected received with invalid device handle: "<<ConnectedDevice.mDeviceHandle);
         return;
     }
 
     if(DeviceAdapter->getDeviceType() != ConnectedDevice.mDeviceType)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "ApplicationConnected received but connected device type("<<ConnectedDevice.mDeviceType<<") differs from device adapters type: "<<DeviceAdapter->getDeviceType());
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "ApplicationConnected received but connected device type("<<ConnectedDevice.mDeviceType<<") differs from device adapters type: "<<DeviceAdapter->getDeviceType());
         return;
     }
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Before mDevicesByAdapterMutex mutex lock");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Before mDevicesByAdapterMutex mutex lock");
 
     pthread_mutex_lock(&mDevicesByAdapterMutex);
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Right after mDevicesByAdapterMutex mutex lock");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Right after mDevicesByAdapterMutex mutex lock");
     tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
     if(devicesIterator == mDevicesByAdapter.end())
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
         pthread_mutex_unlock(&mDevicesByAdapterMutex);
         return;
     }
@@ -355,50 +358,50 @@ void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, c
 
     pthread_mutex_unlock(&mDevicesByAdapterMutex);
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "After mDevicesByAdapterMutex mutex unlock");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "After mDevicesByAdapterMutex mutex unlock");
 
     if(false == connectionHandleFound)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "Connected device handle ("<<ConnectedDevice.mDeviceHandle<<") was not found in devices list for adapter of type: "<<DeviceAdapter->getDeviceType());
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "Connected device handle ("<<ConnectedDevice.mDeviceHandle<<") was not found in devices list for adapter of type: "<<DeviceAdapter->getDeviceType());
         return;
     }
 
     startConnection(ConnectionHandle, *DeviceAdapter);
 
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "Sending callback");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "Sending callback");
 
     // Sending callback
     SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_ApplicationConnected, ConnectedDevice, ConnectionHandle);
     sendDeviceCallback(cb);
 
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "END of onApplicationConnected");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "END of onApplicationConnected");
 }
 
 void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter, const SDeviceInfo& DisconnectedDevice, const tConnectionHandle ConnectionHandle)
 {
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "onApplicationDisconnected");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "onApplicationDisconnected");
 
     if(0 == DeviceAdapter)
     {
-        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "ApplicationDisconnected received from invalid device adapter");
+        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "ApplicationDisconnected received from invalid device adapter");
         return;
     }
 
     if(InvalidConnectionHandle == ConnectionHandle)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "ApplicationDisconnected received with invalid connection handle");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "ApplicationDisconnected received with invalid connection handle");
         return;
     }
 
     if(InvalidDeviceHandle == DisconnectedDevice.mDeviceHandle)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "ApplicationDisconnected received with invalid device handle: "<<DisconnectedDevice.mDeviceHandle);
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "ApplicationDisconnected received with invalid device handle: "<<DisconnectedDevice.mDeviceHandle);
         return;
     }
 
     if(DeviceAdapter->getDeviceType() != DisconnectedDevice.mDeviceType)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "ApplicationDisconnected received but disconnected device type("<<DisconnectedDevice.mDeviceType<<") differs from device adapters type: "<<DeviceAdapter->getDeviceType());
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "ApplicationDisconnected received but disconnected device type("<<DisconnectedDevice.mDeviceType<<") differs from device adapters type: "<<DeviceAdapter->getDeviceType());
         return;
     }
 
@@ -406,7 +409,7 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
     tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
     if(devicesIterator == mDevicesByAdapter.end())
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
         pthread_mutex_unlock(&mDevicesByAdapterMutex);
         return;
     }
@@ -425,7 +428,7 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 
     if(false == connectionHandleFound)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "Disconnected device handle ("<<DisconnectedDevice.mDeviceHandle<<") was not found in devices list for adapter of type: "<<DeviceAdapter->getDeviceType());
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "Disconnected device handle ("<<DisconnectedDevice.mDeviceHandle<<") was not found in devices list for adapter of type: "<<DeviceAdapter->getDeviceType());
         return;
     }
 
@@ -435,14 +438,14 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 
     if(0 == pConnection)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "Thread for connection does not exist");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "Thread for connection does not exist");
         return;
     }
 
     pthread_mutex_lock(&mDataListenersMutex);
     if(true == pConnection->mTerminateFlag)
     {
-        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Connection is already in shutdown state.");
+        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Connection is already in shutdown state.");
         pthread_mutex_unlock(&mDataListenersMutex);
     }
     else
@@ -455,34 +458,34 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
         sendDeviceCallback(cb);
     }
 
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "END of onApplicationDisconnected");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "END of onApplicationDisconnected");
 }
 
 void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
 
     if(0 == DeviceAdapter)
     {
-        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "onFrameReceived received from invalid device adapter");
+        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "onFrameReceived received from invalid device adapter");
         return;
     }
 
     if(0 == Data)
     {
-        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "onFrameReceived with empty data");
+        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "onFrameReceived with empty data");
         return;
     }
 
     if(0 == DataSize)
     {
-        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "onFrameReceived with DataSize=0");
+        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "onFrameReceived with DataSize=0");
         return;
     }
 
     if(InvalidConnectionHandle == ConnectionHandle)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "onFrameReceived received with invalid connection handle");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "onFrameReceived received with invalid connection handle");
         return;
     }
 
@@ -490,7 +493,7 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
     tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
     if(devicesIterator == mDevicesByAdapter.end())
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "onFrameReceived. Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "onFrameReceived. Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
         pthread_mutex_unlock(&mDevicesByAdapterMutex);
         return;
     }
@@ -502,7 +505,7 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
 
     if(0 == connectionInfo)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "onFrameReceived. Connection information for connection does not exist");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "onFrameReceived. Connection information for connection does not exist");
         return;
     }
 
@@ -512,10 +515,10 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
     uint8_t *pFramePacketData = 0;
     size_t FramePacketSize = 0;
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Starting frame extraction");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Starting frame extraction");
     while(true == connectionInfo->mFrameData.extractFrame(pFramePacketData, FramePacketSize))
     {
-        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Frame extracted. Size is: "<< FramePacketSize);
+        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Frame extracted. Size is: "<< FramePacketSize);
         SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameReceived, ConnectionHandle, pFramePacketData, FramePacketSize);
         sendDataCallback(newCallback);
         delete pFramePacketData;
@@ -524,37 +527,37 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
 
     pthread_mutex_unlock(&mDataListenersMutex);
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "onFrameReceived processed");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "onFrameReceived processed");
 }
 
 void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus)
 {
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "onFrameSendCompleted called. DA: "<<DeviceAdapter<<", UserData: "<<UserData <<", SendStatus: " <<SendStatus);
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "onFrameSendCompleted called. DA: "<<DeviceAdapter<<", UserData: "<<UserData <<", SendStatus: " <<SendStatus);
 
     if(0 == DeviceAdapter)
     {
-        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "onFrameSendCompleted received from invalid device adapter");
+        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "onFrameSendCompleted received from invalid device adapter");
         return;
     }
 
     if(InvalidConnectionHandle == ConnectionHandle)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "onFrameSendCompleted received with invalid connection handle");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "onFrameSendCompleted received with invalid connection handle");
         return;
     }
 
     pthread_mutex_lock(&mDevicesByAdapterMutex);
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "searching for devices for adapter");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "searching for devices for adapter");
     tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
     if(devicesIterator == mDevicesByAdapter.end())
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "onFrameSendCompleted. Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "onFrameSendCompleted. Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
         pthread_mutex_unlock(&mDevicesByAdapterMutex);
         return;
     }
     pthread_mutex_unlock(&mDevicesByAdapterMutex);
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Checking connection information availability");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Checking connection information availability");
 
     pthread_mutex_lock(&mDataListenersMutex);
     bool bThreadExist = isConnectionAvailable(ConnectionHandle);
@@ -562,16 +565,16 @@ void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tCo
 
     if(false == bThreadExist)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "onFrameSendCompleted. Connection is not available");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "onFrameSendCompleted. Connection is not available");
         return;
     }
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Connection is available. Preparing callback");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Connection is available. Preparing callback");
 
     SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, UserData, SendStatus);
 
     pthread_mutex_lock(&mDataListenersMutex);
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Sending callback");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Sending callback");
     sendDataCallback(newCallback);
     pthread_mutex_unlock(&mDataListenersMutex);
 }
@@ -691,7 +694,7 @@ CTransportManager::SDataThreadStartupParams::SDataThreadStartupParams(CTransport
 
 void CTransportManager::applicationCallbacksThread()
 {
-    LOG4CPLUS_INFO(mLogger, "Started application callbacks thread");
+    LOG4CXX_INFO(logger_, "Started application callbacks thread");
 
     while(false == mTerminateFlag)
     {
@@ -699,19 +702,19 @@ void CTransportManager::applicationCallbacksThread()
 
         while(mDeviceListenersCallbacks.empty() && (false == mTerminateFlag))
         {
-            LOG4CPLUS_INFO(mLogger, "No callbacks to process. Waiting");
+            LOG4CXX_INFO(logger_, "No callbacks to process. Waiting");
             pthread_cond_wait(&mDeviceListenersConditionVar, &mDeviceListenersMutex);
-            LOG4CPLUS_INFO(mLogger, "Callbacks processing triggered");
+            LOG4CXX_INFO(logger_, "Callbacks processing triggered");
         }
 
         if(mTerminateFlag)
         {
-            LOG4CPLUS_INFO(mLogger, "Shutdown is on progress. Skipping callback processing.");
+            LOG4CXX_INFO(logger_, "Shutdown is on progress. Skipping callback processing.");
             pthread_mutex_unlock(&mDeviceListenersMutex);
             break;
         }
 
-        LOG4CPLUS_INFO(mLogger, "Copying callbacks and device listeners to process");
+        LOG4CXX_INFO(logger_, "Copying callbacks and device listeners to process");
 
         std::vector<SDeviceListenerCallback> callbacksToProcess(mDeviceListenersCallbacks);
         mDeviceListenersCallbacks.clear();
@@ -720,20 +723,20 @@ void CTransportManager::applicationCallbacksThread()
 
         pthread_mutex_unlock(&mDeviceListenersMutex);
 
-        LOG4CPLUS_INFO(mLogger, "Starting callbacks processing. Number of callbacks: " << callbacksToProcess.size());
+        LOG4CXX_INFO(logger_, "Starting callbacks processing. Number of callbacks: " << callbacksToProcess.size());
 
         std::vector<SDeviceListenerCallback>::const_iterator callbackIterator;
 
         for(callbackIterator = callbacksToProcess.begin(); callbackIterator != callbacksToProcess.end(); ++callbackIterator)
         {
-            LOG4CPLUS_INFO(mLogger, "Processing callback of type: " << (*callbackIterator).mCallbackType);
+            LOG4CXX_INFO(logger_, "Processing callback of type: " << (*callbackIterator).mCallbackType);
 
             std::vector<ITransportManagerDeviceListener*>::const_iterator deviceListenersIterator;
             int deviceListenerIndex = 0;
 
             for (deviceListenersIterator = deviceListenersToSend.begin(), deviceListenerIndex=0; deviceListenersIterator != deviceListenersToSend.end(); ++deviceListenersIterator, ++deviceListenerIndex)
             {
-                LOG4CPLUS_INFO(mLogger, "Calling callback on listener #" << deviceListenerIndex);
+                LOG4CXX_INFO(logger_, "Calling callback on listener #" << deviceListenerIndex);
 
                 switch((*callbackIterator).mCallbackType)
                 {
@@ -747,18 +750,18 @@ void CTransportManager::applicationCallbacksThread()
                         (*deviceListenersIterator)->onApplicationDisconnected((*callbackIterator).mDeviceInfo, (*callbackIterator).mConnectionHandle);
                         break;
                     default:
-                        LOG4CPLUS_ERROR(mLogger, "Unknown callback type: " << (*callbackIterator).mCallbackType);
+                        LOG4CXX_ERROR(logger_, "Unknown callback type: " << (*callbackIterator).mCallbackType);
                         break;
                 }
 
-                LOG4CPLUS_INFO(mLogger, "Callback on listener #" << deviceListenerIndex <<" called");
+                LOG4CXX_INFO(logger_, "Callback on listener #" << deviceListenerIndex <<" called");
             }
         }
 
-        LOG4CPLUS_INFO(mLogger, "All callbacks processed. Starting next callbacks processing iteration");
+        LOG4CXX_INFO(logger_, "All callbacks processed. Starting next callbacks processing iteration");
     }
 
-    LOG4CPLUS_INFO(mLogger, "ApplicationsCallback thread terminated");
+    LOG4CXX_INFO(logger_, "ApplicationsCallback thread terminated");
 }
 
 void* CTransportManager::applicationCallbacksThreadStartRoutine(void* Data)
@@ -773,7 +776,7 @@ void* CTransportManager::applicationCallbacksThreadStartRoutine(void* Data)
 
 void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHandle)
 {
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Started data callbacks thread");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Started data callbacks thread");
 
     pthread_mutex_lock(&mDataListenersMutex);
     SConnectionInfo* connectionInfo = getConnection(ConnectionHandle);
@@ -781,7 +784,7 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
 
     if(0 == connectionInfo)
     {
-        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "Connection information was not found");
+        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "Connection information was not found");
         return;
     }
 
@@ -791,19 +794,19 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
 
         while(connectionInfo->mDataCallbacksVector.empty() && (false == connectionInfo->mTerminateFlag))
         {
-            TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "No callbacks to process. Waiting");
+            TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "No callbacks to process. Waiting");
             pthread_cond_wait(&connectionInfo->mConditionVar, &mDataListenersMutex);
-            TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Callbacks processing triggered");
+            TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Callbacks processing triggered");
         }
 
         if(connectionInfo->mTerminateFlag)
         {
-            TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Shutdown is on progress. Skipping callback processing.");
+            TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Shutdown is on progress. Skipping callback processing.");
             pthread_mutex_unlock(&mDataListenersMutex);
             break;
         }
 
-        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Copying callbacks and device listeners to process");
+        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Copying callbacks and device listeners to process");
 
         tDataCallbacksVector callbacksToProcess(connectionInfo->mDataCallbacksVector);
         connectionInfo->mDataCallbacksVector.clear();
@@ -812,16 +815,16 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
 
         pthread_mutex_unlock(&mDataListenersMutex);
 
-        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Starting callbacks processing. Number of callbacks: " << callbacksToProcess.size());
+        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Starting callbacks processing. Number of callbacks: " << callbacksToProcess.size());
 
         tDataCallbacksVector::const_iterator callbackIterator;
         for(callbackIterator = callbacksToProcess.begin(); callbackIterator != callbacksToProcess.end(); ++callbackIterator)
         {
-            TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Processing callback of type: " << (*callbackIterator).mCallbackType);
+            TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Processing callback of type: " << (*callbackIterator).mCallbackType);
 
             if(ConnectionHandle != callbackIterator->mConnectionHandle)
             {
-                TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "Possible error. Thread connection handle ("<<ConnectionHandle<<") differs from callback connection handle ("<<callbackIterator->mConnectionHandle<<")");
+                TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "Possible error. Thread connection handle ("<<ConnectionHandle<<") differs from callback connection handle ("<<callbackIterator->mConnectionHandle<<")");
             }
 
             std::vector<ITransportManagerDataListener*>::const_iterator dataListenersIterator;
@@ -829,39 +832,39 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
 
             for (dataListenersIterator = dataListenersToSend.begin(), dataListenerIndex=0; dataListenersIterator != dataListenersToSend.end(); ++dataListenersIterator, ++dataListenerIndex)
             {
-                TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Calling callback on listener #" << dataListenerIndex);
+                TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Calling callback on listener #" << dataListenerIndex);
 
                 switch((*callbackIterator).mCallbackType)
                 {
                     case CTransportManager::DataListenerCallbackType_FrameReceived:
                         (*dataListenersIterator)->onFrameReceived(callbackIterator->mConnectionHandle, callbackIterator->mData, callbackIterator->mDataSize);
-                        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. DataSize: " << callbackIterator->mDataSize);
+                        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. DataSize: " << callbackIterator->mDataSize);
                         break;
                     case CTransportManager::DataListenerCallbackType_FrameSendCompleted:
                         (*dataListenersIterator)->onFrameSendCompleted(callbackIterator->mConnectionHandle, callbackIterator->mUserData, callbackIterator->mSendStatus);
-                        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. UserData: " << callbackIterator->mUserData<<", SendStatus: "<<callbackIterator->mSendStatus);
+                        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. UserData: " << callbackIterator->mUserData<<", SendStatus: "<<callbackIterator->mSendStatus);
                         break;
                     default:
-                        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "Unknown callback type: " << (*callbackIterator).mCallbackType);
+                        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "Unknown callback type: " << (*callbackIterator).mCallbackType);
                         break;
                 }
 
-                LOG4CPLUS_INFO(mLogger, "Callback on listener #" << dataListenerIndex <<" called"<<", ConnectionHandle: "<<ConnectionHandle);
+                LOG4CXX_INFO(logger_, "Callback on listener #" << dataListenerIndex <<" called"<<", ConnectionHandle: "<<ConnectionHandle);
             }
         }
 
-        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "All callbacks processed. Starting next callbacks processing iteration");
+        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "All callbacks processed. Starting next callbacks processing iteration");
     }
 
     pthread_mutex_lock(&mDataListenersMutex);
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Terminating connection thread");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Terminating connection thread");
 
     // Deleting data associated with connection handle
     delete connectionInfo;
     mConnections.erase(ConnectionHandle);
     pthread_mutex_unlock(&mDataListenersMutex);
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Connection thread terminated");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Connection thread terminated");
 }
 
 void* CTransportManager::dataCallbacksThreadStartRoutine(void* Data)
@@ -884,23 +887,23 @@ void* CTransportManager::dataCallbacksThreadStartRoutine(void* Data)
 
 void CTransportManager::startApplicationCallbacksThread()
 {
-    LOG4CPLUS_INFO(mLogger, "Starting device listeners thread");
+    LOG4CXX_INFO(logger_, "Starting device listeners thread");
 
     int errorCode = pthread_create(&mApplicationCallbacksThread, 0, &applicationCallbacksThreadStartRoutine, this);
 
     if (0 == errorCode)
     {
-        LOG4CPLUS_INFO(mLogger, "Device listeners thread started");
+        LOG4CXX_INFO(logger_, "Device listeners thread started");
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Device listeners thread cannot be started, error code " << errorCode);
+        LOG4CXX_ERROR(logger_, "Device listeners thread cannot be started, error code " << errorCode);
     }
 }
 
 void CTransportManager::stopApplicationCallbacksThread()
 {
-    LOG4CPLUS_TRACE(mLogger, "Stopping application-callbacks thread");
+    LOG4CXX_TRACE(logger_, "Stopping application-callbacks thread");
 
     pthread_mutex_lock(&mDeviceListenersMutex);
     pthread_cond_signal(&mDeviceListenersConditionVar);
@@ -909,13 +912,13 @@ void CTransportManager::stopApplicationCallbacksThread()
 
 void CTransportManager::startConnection(const tConnectionHandle ConnectionHandle, IDeviceAdapter & DeviceAdapter)
 {
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "Starting data-callbacks thread");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "Starting data-callbacks thread");
 
     pthread_mutex_lock(&mDataListenersMutex);
 
     if(isConnectionAvailable(ConnectionHandle))
     {
-        TM_CH_LOG4CPLUS_ERROR(mLogger, ConnectionHandle, "Connection with this handle already available. Possible error.");
+        TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "Connection with this handle already available. Possible error.");
     }
     else
     {
@@ -927,11 +930,11 @@ void CTransportManager::startConnection(const tConnectionHandle ConnectionHandle
         if (0 == errorCode)
         {
             mConnections[ConnectionHandle] = connection;
-            TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Connection started.");
+            TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Connection started.");
         }
         else
         {
-            LOG4CPLUS_ERROR(mLogger, "Thread start for connection handle (" << ConnectionHandle << ") failed, error code " << errorCode);
+            LOG4CXX_ERROR(logger_, "Thread start for connection handle (" << ConnectionHandle << ") failed, error code " << errorCode);
             delete connection;
             delete connectionThreadParams;
         }
@@ -942,7 +945,7 @@ void CTransportManager::startConnection(const tConnectionHandle ConnectionHandle
 
 void CTransportManager::stopConnection(const tConnectionHandle ConnectionHandle)
 {
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "Stopping data-callbacks thread");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "Stopping data-callbacks thread");
 
     SConnectionInfo* connectionInfo = getConnection(ConnectionHandle);
     if(0 == connectionInfo)
@@ -960,33 +963,33 @@ void CTransportManager::stopConnection(const tConnectionHandle ConnectionHandle)
 
 bool CTransportManager::isConnectionAvailable(const tConnectionHandle ConnectionHandle)
 {
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "Checking connection availability");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "Checking connection availability");
 
     bool bConnectionExist = (mConnections.find(ConnectionHandle) != mConnections.end());
 
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "Result of checking is: " << bConnectionExist);
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "Result of checking is: " << bConnectionExist);
 
     return bConnectionExist;
 }
 
 CTransportManager::SConnectionInfo* CTransportManager::getConnection(const tConnectionHandle ConnectionHandle)
 {
-    TM_CH_LOG4CPLUS_TRACE(mLogger, ConnectionHandle, "Checking connection availability");
+    TM_CH_LOG4CXX_TRACE(logger_, ConnectionHandle, "Checking connection availability");
 
     if(ConnectionHandle == InvalidConnectionHandle)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, ConnectionHandle, "Trying to get connection for invalid handle.");
+        TM_CH_LOG4CXX_WARN(logger_, ConnectionHandle, "Trying to get connection for invalid handle.");
         return 0;
     }
 
     tConnectionsMap::iterator ConnectionIterator = mConnections.find(ConnectionHandle);
     if(ConnectionIterator == mConnections.end())
     {
-        TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Connection info was not found");
+        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Connection info was not found");
         return 0;
     }
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Connection info was found");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Connection info was found");
     return ConnectionIterator->second;
 }
 
@@ -1011,12 +1014,12 @@ void CTransportManager::initializeDeviceAdapters()
 {
     addDeviceAdapter(new CBluetoothAdapter(*this, *this));
     addDeviceAdapter(new CTCPAdapter(*this, *this));
-    LOG4CPLUS_INFO(mLogger, "Device adapters initialized");
+    LOG4CXX_INFO(logger_, "Device adapters initialized");
 }
 
 void CTransportManager::sendDeviceListUpdatedCallback()
 {
-    LOG4CPLUS_INFO(mLogger, "Preparing complete device list from all adapters");
+    LOG4CXX_INFO(logger_, "Preparing complete device list from all adapters");
 
     // Preparing complete device list
     tDeviceList devices;
@@ -1030,7 +1033,7 @@ void CTransportManager::sendDeviceListUpdatedCallback()
         IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
         tInternalDeviceList *pDevices = deviceAdaptersIterator->second;
 
-        LOG4CPLUS_INFO(mLogger, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
+        LOG4CXX_INFO(logger_, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
 
         tInternalDeviceList::const_iterator devicesInAdapterIterator;
         for(devicesInAdapterIterator = pDevices->begin(); devicesInAdapterIterator != pDevices->end(); ++devicesInAdapterIterator)
@@ -1044,11 +1047,11 @@ void CTransportManager::sendDeviceListUpdatedCallback()
 
             devices.push_back(deviceInfo);
 
-            LOG4CPLUS_INFO(mLogger, "Processed device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", friendlyName: "<<devicesInAdapterIterator->mUserFriendlyName);
+            LOG4CXX_INFO(logger_, "Processed device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", friendlyName: "<<devicesInAdapterIterator->mUserFriendlyName);
         }
     }
 
-    LOG4CPLUS_INFO(mLogger, "Complete device list from all adapters was prepared. Preparing callback OnDeviceListUpdated for sending");
+    LOG4CXX_INFO(logger_, "Complete device list from all adapters was prepared. Preparing callback OnDeviceListUpdated for sending");
 
     pthread_mutex_unlock(&mDevicesByAdapterMutex);
 
@@ -1056,13 +1059,13 @@ void CTransportManager::sendDeviceListUpdatedCallback()
     SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_DeviceListUpdated, devices);
     sendDeviceCallback(cb);
 
-    LOG4CPLUS_INFO(mLogger, "Callback OnDeviceListUpdated was prepared for sending");
+    LOG4CXX_INFO(logger_, "Callback OnDeviceListUpdated was prepared for sending");
 }
 
 void CTransportManager::connectDisconnectDevice(const tDeviceHandle DeviceHandle, bool Connect)
 {
-    LOG4CPLUS_INFO(mLogger, "Performing "<<(Connect?"CONNECT":"DISCONNECT")<<" for device with handle: " << DeviceHandle);
-    LOG4CPLUS_INFO(mLogger, "Searching for device adapter for handling DeviceHandle: " << DeviceHandle);
+    LOG4CXX_INFO(logger_, "Performing "<<(Connect?"CONNECT":"DISCONNECT")<<" for device with handle: " << DeviceHandle);
+    LOG4CXX_INFO(logger_, "Searching for device adapter for handling DeviceHandle: " << DeviceHandle);
 
     tDevicesByAdapterMap::const_iterator deviceAdaptersIterator;
 
@@ -1075,15 +1078,15 @@ void CTransportManager::connectDisconnectDevice(const tDeviceHandle DeviceHandle
         IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
         tInternalDeviceList *pDevices = deviceAdaptersIterator->second;
 
-        LOG4CPLUS_INFO(mLogger, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
+        LOG4CXX_INFO(logger_, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
 
         tInternalDeviceList::const_iterator devicesInAdapterIterator;
         for(devicesInAdapterIterator = pDevices->begin(); devicesInAdapterIterator != pDevices->end(); ++devicesInAdapterIterator)
         {
-            LOG4CPLUS_INFO(mLogger, "Processing device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", DeviceHandle: "<<devicesInAdapterIterator->mDeviceHandle);
+            LOG4CXX_INFO(logger_, "Processing device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", DeviceHandle: "<<devicesInAdapterIterator->mDeviceHandle);
             if(devicesInAdapterIterator->mDeviceHandle == DeviceHandle)
             {
-                LOG4CPLUS_INFO(mLogger, "DeviceHandle relates to adapter: "<<pDeviceAdapter->getDeviceType());
+                LOG4CXX_INFO(logger_, "DeviceHandle relates to adapter: "<<pDeviceAdapter->getDeviceType());
                 pDeviceAdapterToCall = pDeviceAdapter;
             }
         }
@@ -1101,22 +1104,22 @@ void CTransportManager::connectDisconnectDevice(const tDeviceHandle DeviceHandle
         {
             pDeviceAdapterToCall->disconnectDevice(DeviceHandle);
         }
-        LOG4CPLUS_INFO(mLogger, (Connect?"CONNECT":"DISCONNECT")<<" operation performed on device with handle: " << DeviceHandle);
+        LOG4CXX_INFO(logger_, (Connect?"CONNECT":"DISCONNECT")<<" operation performed on device with handle: " << DeviceHandle);
     }
     else
     {
-        LOG4CPLUS_WARN(mLogger, (Connect?"CONNECT":"DISCONNECT")<<" operation was not performed. Device handle was not found on any device: " << DeviceHandle);
+        LOG4CXX_WARN(logger_, (Connect?"CONNECT":"DISCONNECT")<<" operation was not performed. Device handle was not found on any device: " << DeviceHandle);
     }
 }
 
 void CTransportManager::sendDataCallback(const CTransportManager::SDataListenerCallback& callback)
 {
-    TM_CH_LOG4CPLUS_INFO(mLogger, callback.mConnectionHandle, "Preparing callback of type: "<<callback.mCallbackType<<", to send");
+    TM_CH_LOG4CXX_INFO(logger_, callback.mConnectionHandle, "Preparing callback of type: "<<callback.mCallbackType<<", to send");
 
     SConnectionInfo* connectionInfo = getConnection(callback.mConnectionHandle);
     if(0 == connectionInfo)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, callback.mConnectionHandle, "Connection information was not found");
+        TM_CH_LOG4CXX_WARN(logger_, callback.mConnectionHandle, "Connection information was not found");
     }
     else
     {
@@ -1127,27 +1130,26 @@ void CTransportManager::sendDataCallback(const CTransportManager::SDataListenerC
 
 void CTransportManager::sendDeviceCallback(const CTransportManager::SDeviceListenerCallback& callback)
 {
-    LOG4CPLUS_INFO(mLogger, "Sending new device callback. Type: " << callback.mCallbackType);
+    LOG4CXX_INFO(logger_, "Sending new device callback. Type: " << callback.mCallbackType);
     pthread_mutex_lock(&mDeviceListenersMutex);
 
     mDeviceListenersCallbacks.push_back(callback);
-    LOG4CPLUS_INFO(mLogger, "Device callback was added to pool");
+    LOG4CXX_INFO(logger_, "Device callback was added to pool");
 
     pthread_cond_signal(&mDeviceListenersConditionVar);
 
     pthread_mutex_unlock(&mDeviceListenersMutex);
-    LOG4CPLUS_INFO(mLogger, "Triggering device callback processing");
+    LOG4CXX_INFO(logger_, "Triggering device callback processing");
 }
 
 CTransportManager::SFrameDataForConnection::SFrameDataForConnection(tConnectionHandle ConnectionHandle)
 : mDataSize(0)
 , mConnectionHandle(ConnectionHandle)
-, mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
 {
     mBufferSize = 1536;
     mpDataBuffer = new uint8_t[mBufferSize];
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, ConnectionHandle, "Initialized frame data for connection container");
+    TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Initialized frame data for connection container");
 }
 
 CTransportManager::SFrameDataForConnection::~SFrameDataForConnection()
@@ -1157,30 +1159,30 @@ CTransportManager::SFrameDataForConnection::~SFrameDataForConnection()
         delete mpDataBuffer;
         mpDataBuffer = 0;
     }
-    TM_CH_LOG4CPLUS_INFO(mLogger, mConnectionHandle, "Frame data for connection container destroyed");
+    TM_CH_LOG4CXX_INFO(logger_, mConnectionHandle, "Frame data for connection container destroyed");
 }
 
 void CTransportManager::SFrameDataForConnection::appendFrameData(const uint8_t* Data, size_t DataSize)
 {
-    TM_CH_LOG4CPLUS_INFO(mLogger, mConnectionHandle, "Appending data to container. DataSize: " << DataSize);
+    TM_CH_LOG4CXX_INFO(logger_, mConnectionHandle, "Appending data to container. DataSize: " << DataSize);
 
     // Checking that data can be added to existing buffer
     if( (mDataSize+DataSize) <= mBufferSize)
     {
-        TM_CH_LOG4CPLUS_INFO(mLogger, mConnectionHandle, "Data can be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
+        TM_CH_LOG4CXX_INFO(logger_, mConnectionHandle, "Data can be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
         memcpy(&mpDataBuffer[mDataSize], Data, DataSize);
         mDataSize += DataSize;
     }
     else
     {
-        TM_CH_LOG4CPLUS_INFO(mLogger, mConnectionHandle, "Data cannot be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
+        TM_CH_LOG4CXX_INFO(logger_, mConnectionHandle, "Data cannot be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
 
         // Currently memory for incoming data is allocated as sum of existing memory size and incoming data size.
         // In the future depending of type and sizes of incoming data this algorithm can be changed
         size_t newSize = mBufferSize + DataSize;
         uint8_t *newBuffer = new uint8_t[newSize];
 
-        TM_CH_LOG4CPLUS_INFO(mLogger, mConnectionHandle, "New buffer allocated. Buffer size: "<<newSize<<", was: "<<mBufferSize);
+        TM_CH_LOG4CXX_INFO(logger_, mConnectionHandle, "New buffer allocated. Buffer size: "<<newSize<<", was: "<<mBufferSize);
 
         memcpy(newBuffer, mpDataBuffer, mDataSize);
         memcpy(&newBuffer[mDataSize], Data, DataSize);
@@ -1192,14 +1194,14 @@ void CTransportManager::SFrameDataForConnection::appendFrameData(const uint8_t* 
         mBufferSize = newSize;
     }
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, mConnectionHandle, "Data appended. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize);
+    TM_CH_LOG4CXX_INFO(logger_, mConnectionHandle, "Data appended. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize);
 }
 
 bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t *& Data, size_t & DataSize)
 {
     if(mDataSize < PROTOCOL_HEADER_V1_SIZE)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, mConnectionHandle, "Not enough data for version in the buffer. No changes was made. mDataSize: "<<mDataSize);
+        TM_CH_LOG4CXX_WARN(logger_, mConnectionHandle, "Not enough data for version in the buffer. No changes was made. mDataSize: "<<mDataSize);
         return false;
     }
 
@@ -1225,13 +1227,13 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t *& Data, s
     }
     else
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, mConnectionHandle, "Unsupported version received: " << (int)version);
+        TM_CH_LOG4CXX_WARN(logger_, mConnectionHandle, "Unsupported version received: " << (int)version);
         return false;
     }
 
     if(mDataSize < requiredDataSize)
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, mConnectionHandle, "Frame canot be extracted. Its size: " << requiredDataSize << ", Available data size: "<<mDataSize);
+        TM_CH_LOG4CXX_WARN(logger_, mConnectionHandle, "Frame canot be extracted. Its size: " << requiredDataSize << ", Available data size: "<<mDataSize);
         return false;
     }
 
@@ -1252,12 +1254,11 @@ NsSmartDeviceLink::NsTransportManager::CTransportManager::SFrameDataForConnectio
 : mDataSize(other.mDataSize)
 , mBufferSize(other.mBufferSize)
 , mConnectionHandle(other.mConnectionHandle)
-, mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
 {
     mpDataBuffer = new uint8_t[other.mBufferSize];
     memcpy(mpDataBuffer, other.mpDataBuffer, other.mBufferSize);
 
-    TM_CH_LOG4CPLUS_INFO(mLogger, mConnectionHandle, "Initialized frame data for connection container");
+    TM_CH_LOG4CXX_INFO(logger_, mConnectionHandle, "Initialized frame data for connection container");
 }
 
 bool NsSmartDeviceLink::NsTransportManager::CTransportManager::SFrameDataForConnection::operator==( const SFrameDataForConnection& i_other ) const

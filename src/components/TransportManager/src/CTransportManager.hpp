@@ -38,7 +38,7 @@
 #include "TransportManager/ITransportManager.hpp"
 #include "IDeviceAdapterListener.hpp"
 #include "IHandleGenerator.hpp"
-#include "Logger.hpp"
+#include "log4cxx_logger.h"
 
 #include <pthread.h>
 #include <vector>
@@ -498,10 +498,6 @@ namespace NsSmartDeviceLink
                  **/
                 tConnectionHandle mConnectionHandle;
 
-                /**
-                 * @brief Logger
-                 **/
-                Logger mLogger;
             };
 
             /**
@@ -743,7 +739,7 @@ namespace NsSmartDeviceLink
             /**
              * @brief Logger.
              **/
-            const log4cplus::Logger mLogger;
+            static log4cxx::LoggerPtr logger_;
 
             /**
              * @brief Mutex restricting access to data listeners.

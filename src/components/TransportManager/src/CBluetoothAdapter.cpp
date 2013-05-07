@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <iomanip>
 #include <set>
+#include <algorithm>
 #include <unistd.h>
 
 #include <bluetooth/bluetooth.h>
@@ -102,7 +103,7 @@ NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::CBluetoothAdapter(NsSm
 CDeviceAdapter(Listener, HandleGenerator),
 mSmartDeviceLinkServiceUUID()
 {
-    LOG4CPLUS_INFO(mLogger, "BluetoothAdapter constructed");
+    LOG4CXX_INFO(logger_, "BluetoothAdapter constructed");
 
     uint8_t SmartDeviceLinkServiceUUIDData[] = {0x93, 0x6D, 0xA0, 0x1F, 0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8};
     sdp_uuid128_create(&mSmartDeviceLinkServiceUUID, SmartDeviceLinkServiceUUIDData);
@@ -110,7 +111,7 @@ mSmartDeviceLinkServiceUUID()
 
 NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::~CBluetoothAdapter(void)
 {
-    LOG4CPLUS_INFO(mLogger, "BluetoothAdapter destructor");
+    LOG4CXX_INFO(logger_, "BluetoothAdapter destructor");
 
     waitForThreadsTermination();
 }
@@ -144,12 +145,12 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::createConnections
         }
         else
         {
-            LOG4CPLUS_WARN(mLogger, "Device " << DeviceHandle << " is invalid");
+            LOG4CXX_WARN(logger_, "Device " << DeviceHandle << " is invalid");
         }
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Device handle " << DeviceHandle << " is invalid");
+        LOG4CXX_ERROR(logger_, "Device handle " << DeviceHandle << " is invalid");
     }
 
     pthread_mutex_unlock(&mDevicesMutex);
@@ -187,14 +188,14 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::createConnections
         }
         else
         {
-            LOG4CPLUS_WARN(mLogger, "SmartDeviceLink service was not discovered on device " << DeviceHandle);
+            LOG4CXX_WARN(logger_, "SmartDeviceLink service was not discovered on device " << DeviceHandle);
         }
     }
 }
 
 void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 {
-    LOG4CPLUS_INFO(mLogger, "Bluetooth adapter main thread initialized");
+    LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized");
 
     const size_t maxDevices = 256u;
     inquiry_info * inquiryInfoList = new inquiry_info[maxDevices];
@@ -218,13 +219,13 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                 {
                     const uint8_t inquiryTime = 8u; // Time unit is 1.28 seconds
 
-                    LOG4CPLUS_INFO(mLogger, "Starting hci_inquiry on device " << deviceID);
+                    LOG4CXX_INFO(logger_, "Starting hci_inquiry on device " << deviceID);
 
                     int numberOfDevices = hci_inquiry(deviceID, inquiryTime, maxDevices, 0, &inquiryInfoList, IREQ_CACHE_FLUSH);
 
                     if (numberOfDevices >= 0)
                     {
-                        LOG4CPLUS_INFO(mLogger, "hci_inquiry: found " << numberOfDevices << " devices");
+                        LOG4CXX_INFO(logger_, "hci_inquiry: found " << numberOfDevices << " devices");
 
                         for (int i = 0; i < numberOfDevices; ++i)
                         {
@@ -237,7 +238,7 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
                                 if (0 != hci_read_remote_name(deviceHandle, &inquiryInfoList[i].bdaddr, sizeof(deviceName) / sizeof(deviceName[0]), deviceName, 0))
                                 {
-                                    LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "hci_read_remote_name failed");
+                                    LOG4CXX_ERROR_WITH_ERRNO(logger_, "hci_read_remote_name failed");
                                     strncpy(deviceName, getUniqueDeviceId(inquiryInfoList[i].bdaddr).c_str(), sizeof(deviceName) / sizeof(deviceName[0]));
                                 }
 
@@ -247,7 +248,7 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR(mLogger, "hci_inquiry failed");
+                        LOG4CXX_ERROR(logger_, "hci_inquiry failed");
                     }
 
                     close(deviceHandle);
@@ -281,7 +282,7 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                     {
                         deviceHandle = mHandleGenerator.generateNewDeviceHandle();
 
-                        LOG4CPLUS_INFO(mLogger, "Adding new device " << deviceHandle << " (\"" << discoveredDevice->mName << "\")");
+                        LOG4CXX_INFO(logger_, "Adding new device " << deviceHandle << " (\"" << discoveredDevice->mName << "\")");
                     }
 
                     newDevices[deviceHandle] = discoveredDevice;
@@ -335,7 +336,7 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
             pthread_mutex_unlock(&mDevicesMutex);
 
-            LOG4CPLUS_INFO(mLogger, "Discovered " << newDevices.size() << " device" << ((1u == newDevices.size()) ? "" : "s") << " with SmartDeviceLink service. New devices map:");
+            LOG4CXX_INFO(logger_, "Discovered " << newDevices.size() << " device" << ((1u == newDevices.size()) ? "" : "s") << " with SmartDeviceLink service. New devices map:");
 
             for (tDeviceMap::iterator deviceIterator = newDevices.begin(); deviceIterator != newDevices.end(); ++deviceIterator)
             {
@@ -343,11 +344,11 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
                 if (0 != device)
                 {
-                    LOG4CPLUS_INFO(mLogger, std::setw(10) << deviceIterator->first << std::setw(0) << ": " << device->mUniqueDeviceId << ", " << device->mName.c_str());
+                    LOG4CXX_INFO(logger_, std::setw(10) << deviceIterator->first << std::setw(0) << ": " << device->mUniqueDeviceId << ", " << device->mName.c_str());
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR(mLogger, std::setw(10) << deviceIterator->first << std::setw(0) << ": Device is null");
+                    LOG4CXX_ERROR(logger_, std::setw(10) << deviceIterator->first << std::setw(0) << ": Device is null");
                 }
             }
 
@@ -359,12 +360,12 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
     delete [] inquiryInfoList;
 
-    LOG4CPLUS_INFO(mLogger, "Bluetooth adapter main thread finished");
+    LOG4CXX_INFO(logger_, "Bluetooth adapter main thread finished");
 }
 
 void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::connectionThread(const NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
-    LOG4CPLUS_INFO(mLogger, "Connection thread started for connection " << ConnectionHandle);
+    LOG4CXX_INFO(logger_, "Connection thread started for connection " << ConnectionHandle);
 
     tDeviceHandle deviceHandle = InvalidDeviceHandle;
     struct sockaddr_rc remoteSocketAddress = {0};
@@ -386,12 +387,12 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::connectionThread(
         }
         else
         {
-            LOG4CPLUS_ERROR(mLogger, "Connection " << ConnectionHandle << " is not valid");
+            LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " is not valid");
         }
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Connection " << ConnectionHandle << " does not exist");
+        LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " does not exist");
     }
 
     pthread_mutex_unlock(&mConnectionsMutex);
@@ -417,12 +418,12 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::connectionThread(
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR(mLogger, "Device " << deviceHandle << " is not valid");
+                    LOG4CXX_ERROR(logger_, "Device " << deviceHandle << " is not valid");
                 }
             }
             else
             {
-                LOG4CPLUS_ERROR(mLogger, "Device " << deviceHandle << " does not exist");
+                LOG4CXX_ERROR(logger_, "Device " << deviceHandle << " does not exist");
             }
 
             pthread_mutex_unlock(&mDevicesMutex);
@@ -440,26 +441,26 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::connectionThread(
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for connection " << ConnectionHandle);
+                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for connection " << ConnectionHandle);
                     }
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to create RFCOMM socket for connection " << ConnectionHandle);
+                    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create RFCOMM socket for connection " << ConnectionHandle);
                 }
             }
         }
         else
         {
-            LOG4CPLUS_ERROR(mLogger, "Device handle for connection " << ConnectionHandle << " is invalid");
+            LOG4CXX_ERROR(logger_, "Device handle for connection " << ConnectionHandle << " is invalid");
         }
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Connection " << ConnectionHandle << " is null");
+        LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " is null");
     }
 
-    LOG4CPLUS_INFO(mLogger, "Removing connection " << ConnectionHandle << " from connection map");
+    LOG4CXX_INFO(logger_, "Removing connection " << ConnectionHandle << " from connection map");
 
     pthread_mutex_lock(&mConnectionsMutex);
     mConnections.erase(ConnectionHandle);
@@ -467,7 +468,7 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::connectionThread(
 
     delete connection;
 
-    LOG4CPLUS_INFO(mLogger, "Connection thread finished for connection " << ConnectionHandle);
+    LOG4CXX_INFO(logger_, "Connection thread finished for connection " << ConnectionHandle);
 }
 
 std::string NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::getUniqueDeviceId(const bdaddr_t & DeviceAddress)
@@ -547,7 +548,7 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::discoverSmartDevi
     }
     else
     {
-        LOG4CPLUS_ERROR(mLogger, "Service discovery failed for " << getUniqueDeviceId(DeviceAddress));
+        LOG4CXX_ERROR(logger_, "Service discovery failed for " << getUniqueDeviceId(DeviceAddress));
     }
 
     if (false == SmartDeviceLinkRFCOMMChannels.empty())
@@ -564,10 +565,10 @@ void NsSmartDeviceLink::NsTransportManager::CBluetoothAdapter::discoverSmartDevi
             rfcommChannelsString << static_cast<uint32_t>(*channelIterator);
         }
 
-        LOG4CPLUS_INFO(mLogger, "SmartDeviceLink service was discovered on device " << getUniqueDeviceId(DeviceAddress) << " at channel(s): " << rfcommChannelsString.str().c_str());
+        LOG4CXX_INFO(logger_, "SmartDeviceLink service was discovered on device " << getUniqueDeviceId(DeviceAddress) << " at channel(s): " << rfcommChannelsString.str().c_str());
     }
     else
     {
-        LOG4CPLUS_INFO(mLogger, "SmartDeviceLink service was not discovered on device " << getUniqueDeviceId(DeviceAddress));
+        LOG4CXX_INFO(logger_, "SmartDeviceLink service was not discovered on device " << getUniqueDeviceId(DeviceAddress));
     }
 }

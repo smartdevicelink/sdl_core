@@ -40,7 +40,7 @@
 #include <string>
 #include <map>
 
-#include "Logger.hpp"
+#include "log4cxx_logger.h"
 
 /**
  * \namespace connection_handler
@@ -95,7 +95,7 @@ class Device {
   /**
    * \brief For logging.
    */
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
 };
 
 /**

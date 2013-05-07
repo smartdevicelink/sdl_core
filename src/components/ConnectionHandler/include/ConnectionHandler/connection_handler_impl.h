@@ -42,7 +42,7 @@
 #include <list>
 #include <string>
 
-#include "Logger.hpp"
+#include "log4cxx_logger.h"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
 
@@ -262,7 +262,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   /**
    *\brief For logging.
    */
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
 };
 }/* namespace connection_handler */
 

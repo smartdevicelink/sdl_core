@@ -35,8 +35,6 @@
 
 #include <algorithm>
 
-#include "Logger.hpp"
-
 #include "ConnectionHandler/connection.h"
 
 /**
@@ -45,8 +43,8 @@
  */
 namespace connection_handler {
 
-log4cplus::Logger Connection::logger_ = log4cplus::Logger::getInstance(
-    LOG4CPLUS_TEXT("ConnectionHandler"));
+log4cxx::LoggerPtr Connection::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ConnectionHandler"));
 
 Connection::Connection(ConnectionHandle connection_handle,
                          DeviceHandle connection_device_handle)
@@ -72,7 +70,7 @@ int Connection::RemoveSession(unsigned char session) {
   SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
                                      session);
   if (session_list_.end() == it) {
-    LOG4CPLUS_ERROR(logger_, "Session not found in this connection!");
+    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
   } else {
     session_list_.erase(it);
     result = session;

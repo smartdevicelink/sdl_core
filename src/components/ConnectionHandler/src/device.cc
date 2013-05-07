@@ -33,8 +33,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Logger.hpp"
-
 #include "ConnectionHandler/device.h"
 
 /**
@@ -43,8 +41,8 @@
  */
 namespace connection_handler {
 
-log4cplus::Logger Device::logger_ = log4cplus::Logger::getInstance(
-    LOG4CPLUS_TEXT("ConnectionHandler"));
+log4cxx::LoggerPtr Device::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ConnectionHandler"));
 
 Device::Device(DeviceHandle device_handle, std::string user_friendly_name)
     : device_handle_(device_handle),

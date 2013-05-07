@@ -39,8 +39,6 @@
 #include <bluetooth/sdp.h>
 #include <time.h>
 
-#include "Logger.hpp"
-
 #include "TransportManager/SDeviceInfo.hpp"
 
 #include "CDeviceAdapter.hpp"

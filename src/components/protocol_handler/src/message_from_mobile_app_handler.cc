@@ -40,7 +40,7 @@ log4cxx::LoggerPtr MessagesFromMobileAppHandler::logger_ =
 MessagesFromMobileAppHandler::MessagesFromMobileAppHandler(
     ProtocolHandlerImpl* handler)
     : handler_(handler) {
-  DCHECK(handler_);
+  CHECK(handler_);
 }
 
 MessagesFromMobileAppHandler::~MessagesFromMobileAppHandler() {

@@ -39,11 +39,9 @@
 #include <queue>
 #include <time.h>
 
-#include "Logger.hpp"
+#include "log4cxx_logger.h"
 
 #include "IDeviceAdapter.hpp"
-
-#define LOG4CPLUS_ERROR_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
 namespace NsSmartDeviceLink
 {
@@ -433,7 +431,7 @@ namespace NsSmartDeviceLink
             /**
              * @brief Logger.
              **/
-            const log4cplus::Logger mLogger;
+            static log4cxx::LoggerPtr logger_;
 
             /**
              * @brief Listener for device adapter notifications.

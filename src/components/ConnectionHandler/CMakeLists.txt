@@ -14,3 +14,4 @@ set (SOURCES
 )
 
 add_library("connectionHandler" ${SOURCES})
+target_link_libraries ("connectionHandler" log4cxx)

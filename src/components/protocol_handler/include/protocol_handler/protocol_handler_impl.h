@@ -37,7 +37,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 
 #include <map>
-#include "LOG4CXXLogger.hpp"
+#include "log4cxx_logger.h"
 #include "Utils/MessageQueue.h"
 
 #include "protocol_handler/protocol_handler.h"

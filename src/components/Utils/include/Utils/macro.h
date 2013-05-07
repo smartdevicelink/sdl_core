@@ -48,6 +48,12 @@
     assert(false); \
   }
 
+#define CHECK(condition) \
+  if (!condition) { \
+    LOG4CXX_ERROR_EXT(logger_, "Check failed: " #condition); \
+    assert(false); \
+  }
+
 // TODO(AK): add comment here.
 #define NOTREACHED() DCHECK(false)
 
