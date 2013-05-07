@@ -9,6 +9,7 @@ include_directories (
 set (SOURCES
 ./src/message.cc
 ./src/application_core.cc
+./src/api_version_converter.cc
 ./src/application_impl.cc
 )
 
