@@ -28,25 +28,33 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef WORKWITHSYSTEM_INCLUDE
-#define WORKWITHSYSTEM_INCLUDE
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
 
 #include <string.h>
+#include <string>
 #include <vector>
 
-namespace file_system
-{
-    unsigned long int getAvailableSpace();
-    std::string createDirectory(const std::string & directoryName);
-    bool checkIfDirectoryExists(const std::string & directoryName);
-    bool checkIfFileExists(const std::string & fileName);
-    bool createFileAndWrite(const std::string & fileName, const std::vector<unsigned char>& fileData);
-    std::string getFullPath(const std::string & fileName);
-    bool deleteFile(const std::string & fileName);
-    std::vector<std::string> listFilesInDirectory(const std::string & directoryName);
-    bool readFileAsBinary(const std::string& fileName, std::vector<unsigned char>& v);
-}
+namespace file_system {
+// TODO(AK): lint error: Use int16/int64/etc, rather than the C type long
+unsigned long int available_space();
+std::string create_directory(const std::string& name);
+bool is_directory_exists(const std::string& name);
+bool is_file_exist(const std::string& name);
 
-#endif // WORKWITHSYSTEM_INCLUDE
+/**
+ * @remark - create file if it doesn't exist
+ */
+bool write(const std::string& file_name,
+           const std::vector<unsigned char>& data);
+
+std::string full_path(const std::string& name);
+bool delete_file(const std::string& name);
+std::vector<std::string> list_files(const std::string& directory_name);
+bool read_binary_file(const std::string& name,
+                      std::vector<unsigned char>& result);
+}  // namespace file_system
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
