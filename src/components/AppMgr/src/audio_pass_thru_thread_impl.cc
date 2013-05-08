@@ -55,6 +55,7 @@
 #include "JSONHandler/JSONRPC2Handler.h"
 
 #include "Utils/WorkWithOS.h"
+#include "Utils/timer.h"
 
 namespace {
 #if defined(OS_POSIX) && defined(OS_LINUX)
@@ -79,7 +80,10 @@ AudioPassThruThreadImpl::AudioPassThruThreadImpl(
       max_duration_(max_duration),
       sampling_rate_(sampling_rate),
       bits_per_sample_(bits_per_sample),
-      audio_type_(audio_type) {
+      audio_type_(audio_type),
+      timer_(0) {
+
+        timer_ = new threads::Timer(&synchronisation_);
 }
 
 AudioPassThruThreadImpl::~AudioPassThruThreadImpl() {
@@ -231,14 +235,18 @@ void AudioPassThruThreadImpl::threadMain() {
   // Minimal timeout is 1 second now.
   for (int i = 0; i != seconds; i += kAudioPassThruTimeout) {
 #if defined(OS_POSIX) && defined(OS_LINUX)
-    struct itimerval tout_val;
+    /*struct itimerval tout_val;
     tout_val.it_interval.tv_sec = 0;
     tout_val.it_interval.tv_usec = 0;
     tout_val.it_value.tv_sec = kAudioPassThruTimeout;
     tout_val.it_value.tv_usec = 0;
     setitimer(ITIMER_REAL, &tout_val, 0);
     signal(SIGALRM, AudioPassThruThreadImpl::audioPassThruTimerProc);
-    pthread_cond_wait(&cv, &audioPassThruMutex);
+    pthread_cond_wait(&cv, &audioPassThruMutex);*/
+
+    LOG4CPLUS_INFO(logger_, "\n\t\t\t\t\tBefore timer; kAudioPassThruTimeout "
+        << kAudioPassThruTimeout << "; seconds " << seconds);
+    timer_->startWait(kAudioPassThruTimeout);
 
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif

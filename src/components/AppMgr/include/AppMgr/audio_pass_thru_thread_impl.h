@@ -41,6 +41,8 @@
 
 #include "Utils/macro.h"
 #include "Utils/threads/thread_delegate.h"
+#include "Utils/synchronisation_primitives.h"
+#include "Utils/timer.h"
 
 namespace rpc_commands {
 class AudioPassThruThreadImpl : public threads::IThreadDelegate {
@@ -71,6 +73,9 @@ class AudioPassThruThreadImpl : public threads::IThreadDelegate {
   unsigned int session_key_;
   unsigned int id_;
   unsigned int max_duration_;
+
+  threads::SynchronisationPrimitives synchronisation_;
+  threads::Timer * timer_;
 
   NsSmartDeviceLinkRPCV2::SamplingRate sampling_rate_;
   NsSmartDeviceLinkRPCV2::AudioCaptureQuality bits_per_sample_;
