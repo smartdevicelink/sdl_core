@@ -1,6 +1,6 @@
 include_directories (
   ./include/
-  ../Utils/include/
+  ../utils/include/
   ../JSONHandler/include/
   ../protocol_handler/include/
   ../SmartObjects/include/
@@ -9,7 +9,6 @@ include_directories (
 
 set (SOURCES
 ./src/message.cc
-./src/application_core.cc
 ./src/api_version_converter.cc
 ./src/api_version_converter_v1.cc
 ./src/application_impl.cc
