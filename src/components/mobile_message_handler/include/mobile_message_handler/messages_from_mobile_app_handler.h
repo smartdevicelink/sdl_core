@@ -37,7 +37,7 @@
 #include "utils/threads/thread_delegate.h"
 
 namespace mobile_message_handler {
-class MessagesFromMobileAppHandler : public threads::IThreadDelegate {
+class MessagesFromMobileAppHandler : public threads::ThreadDelegate {
  public:
   explicit MessagesFromMobileAppHandler();
   ~MessagesFromMobileAppHandler();

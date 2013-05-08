@@ -65,10 +65,10 @@ namespace threads {
 
 /**
  * Non platform specific thread abstraction that establishes a
- * threads::IThreadDelegate on a new thread.
+ * threads::ThreadDelegate on a new thread.
  *
- * IThreadDelegate example:
- * class TestThread : public threads::IThreadDelegate {
+ * ThreadDelegate example:
+ * class TestThread : public threads::ThreadDelegate {
  * public:
  *   void threadMain() {
  *     printf("Hello, thread!\n");
@@ -93,7 +93,7 @@ class Thread {
    * 'threads/thread_delegate.h' for details.
    * NOTE: delegate will be deleted by destructor.
    */
-  Thread(const char* name, IThreadDelegate* delegate);
+  Thread(const char* name, ThreadDelegate* delegate);
 
   /**
    * Dtor.
@@ -196,7 +196,7 @@ class Thread {
 
  protected:
   std::string name_;
-  IThreadDelegate* delegate_;
+  ThreadDelegate* delegate_;
   PlatformThreadHandle thread_handle_;
   PlatformThreadId thread_id_;
   ThreadOptions thread_options_;

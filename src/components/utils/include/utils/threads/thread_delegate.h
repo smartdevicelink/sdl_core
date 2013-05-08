@@ -42,12 +42,12 @@ namespace threads {
  * Thread procedure interface.
  * Look for "threads/thread.h" for example
  */
-class IThreadDelegate {
+class ThreadDelegate {
  public:
   /**
    * Dtor.
    */
-  virtual ~IThreadDelegate() {
+  virtual ~ThreadDelegate() {
   }
 
   /**

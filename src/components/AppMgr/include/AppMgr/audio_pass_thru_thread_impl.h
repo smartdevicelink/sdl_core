@@ -45,7 +45,7 @@
 #include "utils/timer.h"
 
 namespace rpc_commands {
-class AudioPassThruThreadImpl : public threads::IThreadDelegate {
+class AudioPassThruThreadImpl : public threads::ThreadDelegate {
  public:
   AudioPassThruThreadImpl(
       unsigned int session_key, unsigned int id, unsigned int max_duration,

@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MOBILE_MESSAGE_HANDLER_IMPL_H_
 
 #include "utils/macro.h"
-#include "utils/MessageQueue.h"
+#include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/shared_ptr.h"
 

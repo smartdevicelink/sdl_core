@@ -39,7 +39,7 @@
 #include "protocol_handler/protocol_handler_impl.h"
 
 namespace protocol_handler {
-class MessagesToMobileAppHandler : public threads::IThreadDelegate {
+class MessagesToMobileAppHandler : public threads::ThreadDelegate {
  public:
   explicit MessagesToMobileAppHandler(ProtocolHandlerImpl* handler);
   ~MessagesToMobileAppHandler();

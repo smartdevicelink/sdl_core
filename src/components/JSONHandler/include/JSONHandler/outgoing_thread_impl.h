@@ -38,7 +38,7 @@
 #include "JSONHandler/JSONHandler.h"
 
 namespace json_handler {
-class OutgoingThreadImpl : public threads::IThreadDelegate {
+class OutgoingThreadImpl : public threads::ThreadDelegate {
  public:
   explicit OutgoingThreadImpl(JSONHandler* handler);
   ~OutgoingThreadImpl();

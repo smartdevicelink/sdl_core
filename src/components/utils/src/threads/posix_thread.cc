@@ -43,8 +43,8 @@
 
 namespace {
 static void* threadFunc(void* closure) {
-  threads::IThreadDelegate* delegate =
-      static_cast<threads::IThreadDelegate*>(closure);
+  threads::ThreadDelegate* delegate =
+      static_cast<threads::ThreadDelegate*>(closure);
   delegate->threadMain();
   return NULL;
 }
@@ -55,7 +55,7 @@ size_t Thread::kMinStackSize = PTHREAD_STACK_MIN;
 log4cplus::Logger Thread::logger_ = log4cplus::Logger::getInstance(
     LOG4CPLUS_TEXT("threads::Thread"));
 
-Thread::Thread(const char* name, IThreadDelegate* delegate)
+Thread::Thread(const char* name, ThreadDelegate* delegate)
     : name_("undefined"),
       delegate_(delegate),
       thread_handle_(0),

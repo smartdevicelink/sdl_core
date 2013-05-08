@@ -35,7 +35,7 @@
 
 namespace hmi_message_handler {
 
-class ToHMIThreadImpl : public threads::IThreadDelegate {
+class ToHMIThreadImpl : public threads::ThreadDelegate {
 public:
 	explicit ToHMIThreadImpl(HMIMessageHandler * handler);
 	~ToHMIThreadImpl();
