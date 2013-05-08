@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MACRO_H_
 
 #include <assert.h>
+#include <stdio.h>
 
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
@@ -44,13 +45,13 @@
 // TODO(AK): add comment here.
 #define DCHECK(condition) \
   if (!condition) { \
-    LOG4CPLUS_ERROR_EXT(logger_, "Check failed: " #condition); \
+    printf("Check failed: " #condition); \
     assert(false); \
   }
 
 #define CHECK(condition) \
   if (!condition) { \
-    LOG4CXX_ERROR_EXT(logger_, "Check failed: " #condition); \
+    printf("Check failed: " #condition); \
     assert(false); \
   }
 
