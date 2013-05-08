@@ -39,7 +39,7 @@
 #include <map>
 #include "log4cxx_logger.h"
 
-#include "utils/MessageQueue.h"
+#include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 
 #include "protocol_handler/protocol_handler.h"

@@ -54,7 +54,7 @@
 
 #include "JSONHandler/JSONRPC2Handler.h"
 
-#include "utils/WorkWithOS.h"
+#include "utils/file_system.h"
 #include "utils/timer.h"
 
 namespace {
@@ -163,7 +163,7 @@ void AudioPassThruThreadImpl::threadMain() {
   }
 
   std::vector<unsigned char> binaryData;
-  if (!WorkWithOS::readFileAsBinary(filename, binaryData)) {
+  if (!file_system::readFileAsBinary(filename, binaryData)) {
 #if defined(OS_POSIX) && defined(OS_LINUX)
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif

@@ -49,7 +49,7 @@ const unsigned char RPC_NOTIFICATION = 0x2;
 const unsigned char RPC_UNKNOWN = 0xF;
 
 #include "utils/macro.h"
-#include "utils/MessageQueue.h"
+#include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 
 namespace json_handler {

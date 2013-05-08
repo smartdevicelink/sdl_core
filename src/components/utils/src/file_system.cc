@@ -1,5 +1,5 @@
 /**
-* \file WorkWithOS.cpp
+* \file file_system.cpp
 * \brief Implementation of general functions for work with OS.
 */
 
@@ -14,9 +14,9 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
-#include "utils/WorkWithOS.h"
+#include "utils/file_system.h"
 
-unsigned long int WorkWithOS::getAvailableSpace()
+unsigned long int file_system::getAvailableSpace()
 {
     char currentAppPath[256];
     memset((void*)currentAppPath, 0, 256);
@@ -28,7 +28,7 @@ unsigned long int WorkWithOS::getAvailableSpace()
     return fsInfo.f_bsize * fsInfo.f_bfree;
 }
 
-std::string WorkWithOS::getFullPath(const std::string & fileName)
+std::string file_system::getFullPath(const std::string & fileName)
 {
     char currentAppPath[FILENAME_MAX];
     memset(currentAppPath, 0, FILENAME_MAX);
@@ -41,7 +41,7 @@ std::string WorkWithOS::getFullPath(const std::string & fileName)
     return std::string(path);
 }
 
-std::string WorkWithOS::createDirectory(const std::string & directoryName)
+std::string file_system::createDirectory(const std::string & directoryName)
 {
     if (!checkIfDirectoryExists(directoryName))
     {
@@ -51,7 +51,7 @@ std::string WorkWithOS::createDirectory(const std::string & directoryName)
     return directoryName;
 }
 
-bool WorkWithOS::checkIfDirectoryExists(const std::string & directoryName)
+bool file_system::checkIfDirectoryExists(const std::string & directoryName)
 {
     struct stat status;
     memset(&status, 0, sizeof(status));
@@ -65,7 +65,7 @@ bool WorkWithOS::checkIfDirectoryExists(const std::string & directoryName)
     return true;
 }
 
-bool WorkWithOS::checkIfFileExists(const std::string & fileName)
+bool file_system::checkIfFileExists(const std::string & fileName)
 {
     struct stat status;
     memset(&status, 0, sizeof(status));
@@ -77,7 +77,7 @@ bool WorkWithOS::checkIfFileExists(const std::string & fileName)
     return true;
 }
 
-bool WorkWithOS::createFileAndWrite(const std::string & fileName,
+bool file_system::createFileAndWrite(const std::string & fileName,
         const std::vector<unsigned char>& fileData)
 {
     std::ofstream file(fileName.c_str(), std::ios_base::binary);
@@ -93,7 +93,7 @@ bool WorkWithOS::createFileAndWrite(const std::string & fileName,
     return false;
 }
 
-bool WorkWithOS::deleteFile(const std::string & fileName)
+bool file_system::deleteFile(const std::string & fileName)
 {
     if (checkIfFileExists(fileName))
     {
@@ -102,7 +102,7 @@ bool WorkWithOS::deleteFile(const std::string & fileName)
     return false;
 }
 
-std::vector<std::string> WorkWithOS::listFilesInDirectory(
+std::vector<std::string> file_system::listFilesInDirectory(
         const std::string & directoryName)
 {
     std::vector<std::string> listFiles;
@@ -131,7 +131,7 @@ std::vector<std::string> WorkWithOS::listFilesInDirectory(
     return listFiles;
 }
 
-bool WorkWithOS::readFileAsBinary(const std::string& fileName, std::vector<unsigned char>& v)
+bool file_system::readFileAsBinary(const std::string& fileName, std::vector<unsigned char>& v)
 {
     if (!checkIfFileExists(fileName))
         return false;

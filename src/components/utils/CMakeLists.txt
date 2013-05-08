@@ -6,7 +6,7 @@ include_directories (
 )
 
 set (SOURCES
-    ./src/WorkWithOS.cpp
+    ./src/file_system.cc
     ./src/threads/posix_thread.cc
     ./src/synchronisation_primitives_posix.cc
     ./src/timer.cc

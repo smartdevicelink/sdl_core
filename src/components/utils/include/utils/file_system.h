@@ -1,5 +1,5 @@
 /**
-* \file WorkWithOS.h
+* \file file_system.h
 * \brief class source file.
 */
 
@@ -9,7 +9,7 @@
 #include <string.h>
 #include <vector>
 
-namespace WorkWithOS
+namespace file_system
 {
     unsigned long int getAvailableSpace();
     std::string createDirectory(const std::string & directoryName);

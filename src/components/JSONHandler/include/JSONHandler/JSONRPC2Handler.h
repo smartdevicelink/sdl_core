@@ -41,7 +41,7 @@
 #include "mb_controller.hpp"
 #include "Logger.hpp"
 #include "utils/macro.h"
-#include "utils/MessageQueue.h"
+#include "utils/message_queue.h"
 #include "JSONHandler/IJSONRPC2Handler.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
 #include "JSONHandler/RPC2Command.h"

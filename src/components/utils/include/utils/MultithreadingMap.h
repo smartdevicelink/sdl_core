@@ -1,6 +1,8 @@
 #ifndef MULTITHREADED_MAP_CLASS
 #define MULTITHREADED_MAP_CLASS
 
+// TODO(AK): Are we use it?
+
 #include <map>
 
 template <typename T, typename K> class MultithreadingMap
@@ -23,7 +25,7 @@ private:
     /**
       *\brief Mutex for queue locking.
     */
-    mutable pthread_mutex_t mMutex;    
+    mutable pthread_mutex_t mMutex;
 
 };
 
