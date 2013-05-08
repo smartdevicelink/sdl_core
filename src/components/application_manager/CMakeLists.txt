@@ -3,7 +3,7 @@ include_directories (
   ../Utils/include/
   ../protocol_handler/include/
   ../SmartObjects/include/
-  ${CMAKE_BINARY_DIR}/src/components/Interfaces/
+  ${CMAKE_BINARY_DIR}/src/components/Interfaces
 )
 
 set (SOURCES
@@ -11,6 +11,7 @@ set (SOURCES
 ./src/application_core.cc
 ./src/api_version_converter.cc
 ./src/application_impl.cc
+./src/basic_command_factory.cc
 )
 
 
