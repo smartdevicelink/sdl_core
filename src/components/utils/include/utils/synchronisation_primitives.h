@@ -1,6 +1,6 @@
 /**
-* \file SynchronisationPrimitives.cc
-* \brief SynchronisationPrimitives class implementation.
+* \file SynchronisationPrimitives.h
+* \brief SynchronisationPrimitives class header.
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -32,51 +32,59 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Utils/macro.h"
-#include "Utils/synchronisation_primitives.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYNCHRONISATIONPRIMITIVESWRAPPER_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYNCHRONISATIONPRIMITIVESWRAPPER_H_
+
+#if defined(OS_WIN)
+#include <windows.h>
+typedef HANDLE PlatformMutex;
+typedef CONDITION_VARIABLE PlatformConditionalVar;
+#elif defined(OS_POSIX)
+#include <pthread.h>
+typedef pthread_mutex_t PlatformMutex;
+typedef pthread_cond_t PlatformConditionalVar;
+#if defined(OS_LINUX) || defined(OS_OPENBSD)
+#include <unistd.h>
+#elif defined(OS_BSD)
+#include <sys/types.h>
+#elif defined(OS_MACOSX)
+#include <mach/mach.h>
+#endif
+#endif
+#include "Logger.hpp"
+#include "utils/macro.h"
 
 namespace threads {
 
-log4cplus::Logger SynchronisationPrimitives::logger_ =
-  log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("threads"));
+class SynchronisationPrimitives {
+ public:
+  SynchronisationPrimitives();
+  virtual ~SynchronisationPrimitives();
 
-SynchronisationPrimitives::SynchronisationPrimitives()
-    : mutex_(PTHREAD_MUTEX_INITIALIZER),
-      cond_variable_(PTHREAD_COND_INITIALIZER) {
-  pthread_mutex_init(&mutex_, NULL);
-  pthread_cond_init(&cond_variable_, NULL);
-}
+  virtual void lock();
 
-SynchronisationPrimitives::~SynchronisationPrimitives() {
-  pthread_cond_destroy(&cond_variable_);
-  pthread_mutex_destroy(&mutex_);
-}
+  virtual void unlock();
 
-void SynchronisationPrimitives::lock() {
-  pthread_mutex_lock(&mutex_);
-}
+  virtual void wait();
 
-void SynchronisationPrimitives::unlock() {
-  pthread_mutex_unlock(&mutex_);
-}
+  virtual void signal();
 
-void SynchronisationPrimitives::wait() {
-  pthread_cond_wait(&cond_variable_,
-                    &mutex_);
-}
+  PlatformMutex & getMutex();
 
-void SynchronisationPrimitives::signal() {
-  pthread_cond_signal(&cond_variable_);
-}
+  PlatformConditionalVar & getConditionalVar();
 
-PlatformMutex & SynchronisationPrimitives::getMutex()
-{
-  return mutex_;
-}
+ private:
+  PlatformMutex mutex_;
+  PlatformConditionalVar cond_variable_;
 
-PlatformConditionalVar & SynchronisationPrimitives::getConditionalVar()
-{
-  return cond_variable_;
-}
+  /**
+      *\brief For logging.
+    */
+  static log4cplus::Logger logger_;
+
+  DISALLOW_COPY_AND_ASSIGN(SynchronisationPrimitives);
+};
 
 }  // namespace threads
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYNCHRONISATIONPRIMITIVESWRAPPER_H_

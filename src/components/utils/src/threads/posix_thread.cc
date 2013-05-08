@@ -38,8 +38,8 @@
 
 #include "LoggerHelper.hpp"
 
-#include "Utils/threads/thread.h"
-#include "Utils/macro.h"
+#include "utils/threads/thread.h"
+#include "utils/macro.h"
 
 namespace {
 static void* threadFunc(void* closure) {

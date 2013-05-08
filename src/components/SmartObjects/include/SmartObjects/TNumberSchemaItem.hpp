@@ -35,7 +35,7 @@
 #ifndef __SMARTOBJECT_TNUMBERSCHEMAITEM_HPP__
 #define __SMARTOBJECT_TNUMBERSCHEMAITEM_HPP__
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 
 #include "CSmartObject.hpp"
 #include "ISchemaItem.hpp"

@@ -38,7 +38,9 @@
 
 #include <map>
 #include "log4cxx_logger.h"
-#include "Utils/MessageQueue.h"
+
+#include "utils/MessageQueue.h"
+#include "utils/threads/thread.h"
 
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
@@ -46,8 +48,6 @@
 #include "protocol_handler/session_observer.h"
 
 #include "TransportManager/ITransportManagerDataListener.hpp"
-
-#include "Utils/threads/thread.h"
 
 using NsSmartDeviceLink::NsTransportManager::ITransportManager;
 using NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener;

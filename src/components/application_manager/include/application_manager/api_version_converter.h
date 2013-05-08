@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_API_VERSION_CONVERTER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_API_VERSION_CONVERTER_H_
 
-#include "Utils/macro.h"
+#include "utils/macro.h"
 #include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {

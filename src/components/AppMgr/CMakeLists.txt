@@ -4,7 +4,7 @@ include_directories (
     ../ConnectionHandler/include/
     ../protocol_handler/include/
     ../TransportManager/include/
-    ../Utils/include/
+    ../utils/include/
     ../../thirdPartyLibs/MessageBroker/include/
     ../../thirdPartyLibs/jsoncpp/include/
     ../../thirdPartyLibs/logger/include/

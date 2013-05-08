@@ -57,9 +57,9 @@ typedef mach_port_t PlatformThreadId;
 
 #include <string>
 
-#include "Utils/macro.h"
-#include "Utils/threads/thread_delegate.h"
-#include "Utils/threads/thread_options.h"
+#include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/threads/thread_options.h"
 
 namespace threads {
 

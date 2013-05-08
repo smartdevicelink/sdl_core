@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_CORE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_CORE_H_
 
-#include "Utils/macro.h"
-#include "Utils/shared_ptr.h"
+#include "utils/macro.h"
+#include "utils/shared_ptr.h"
 #include "SmartObjects/CSmartObject.hpp"
 #include "application_manager/message.h"
 

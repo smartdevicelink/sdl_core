@@ -1,6 +1,6 @@
 include_directories (
   ./include
-  ../Utils/include/
+  ../utils/include/
   ../TransportManager/include/
   ../../thirdPartyLibs/logger/include/
   ../../thirdPartyLibs/logger/log4cplus-1.1.0/include/

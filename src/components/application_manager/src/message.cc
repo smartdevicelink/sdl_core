@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/message.h"
-#include "Utils/macro.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 

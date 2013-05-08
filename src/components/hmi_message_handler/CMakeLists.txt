@@ -1,7 +1,7 @@
 include_directories (
   ./include/
   ../application_manager/include/
-  ../Utils/include/
+  ../utils/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
   ${CMAKE_BINARY_DIR}/src/components/Interfaces/

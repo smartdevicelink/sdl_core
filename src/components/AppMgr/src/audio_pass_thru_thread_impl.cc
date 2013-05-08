@@ -54,8 +54,8 @@
 
 #include "JSONHandler/JSONRPC2Handler.h"
 
-#include "Utils/WorkWithOS.h"
-#include "Utils/timer.h"
+#include "utils/WorkWithOS.h"
+#include "utils/timer.h"
 
 namespace {
 #if defined(OS_POSIX) && defined(OS_LINUX)

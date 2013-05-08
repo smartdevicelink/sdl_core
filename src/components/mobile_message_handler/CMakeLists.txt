@@ -1,6 +1,6 @@
 include_directories (
   ./include/
-  ../Utils/include/
+  ../utils/include/
   ../application_manager/include/
   ../protocol_handler/include/
   ../../thirdPartyLibs/logger/include

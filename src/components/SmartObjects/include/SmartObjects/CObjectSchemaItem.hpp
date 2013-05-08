@@ -38,7 +38,7 @@
 #include <map>
 #include <string>
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"

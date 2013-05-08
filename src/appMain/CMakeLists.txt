@@ -23,7 +23,7 @@ include_directories (
   ../components/JSONHandler/include
   ../components/AppMgr/include
   ../components/TransportManager/include
-  ../components/Utils/include/
+  ../components/utils/include/
   ../components/ConnectionHandler/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/logger/include

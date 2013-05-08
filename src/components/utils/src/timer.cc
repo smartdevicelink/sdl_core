@@ -32,8 +32,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 #include <time.h>
-#include "Utils/timer.h"
-#include "Utils/synchronisation_primitives.h"
+#include "utils/timer.h"
+#include "utils/synchronisation_primitives.h"
 
 namespace threads {
 
@@ -47,7 +47,7 @@ Timer::~Timer() {
 		sync_primitive_->unlock();
 		sync_primitive_ = 0;
 	}
-	
+
 }
 
 void Timer::startWait(int seconds) {

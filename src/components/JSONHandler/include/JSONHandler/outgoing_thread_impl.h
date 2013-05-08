@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_JSONHANDLER_INCLUDE_JSONHANDLER_OUTGOING_THREAD_IMPL_H_
 #define SRC_COMPONENTS_JSONHANDLER_INCLUDE_JSONHANDLER_OUTGOING_THREAD_IMPL_H_
 
-#include "Utils/macro.h"
-#include "Utils/threads/thread_delegate.h"
+#include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
 #include "JSONHandler/JSONHandler.h"
 
 namespace json_handler {

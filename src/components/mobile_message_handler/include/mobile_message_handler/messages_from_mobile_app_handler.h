@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGES_FROM_MOBILE_APP_HANDLER_H_
 #define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGES_FROM_MOBILE_APP_HANDLER_H_
 
-#include "Utils/macro.h"
-#include "Utils/threads/thread_delegate.h"
+#include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace mobile_message_handler {
 class MessagesFromMobileAppHandler : public threads::IThreadDelegate {

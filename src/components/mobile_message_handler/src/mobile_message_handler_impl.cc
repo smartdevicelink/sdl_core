@@ -32,7 +32,7 @@
 
 #include <stddef.h>
 
-#include "Utils/macro.h"
+#include "utils/macro.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 
 namespace {

@@ -39,7 +39,7 @@
 #include <set>
 #include <string>
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 
 #include "CSmartObject.hpp"
 #include "ISchemaItem.hpp"

@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MESSAGE_FROM_MOBILE_APP_HANDLER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MESSAGE_FROM_MOBILE_APP_HANDLER_H_
 
-#include "Utils/macro.h"
-#include "Utils/threads/thread_delegate.h"
+#include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
 
 #include "protocol_handler/protocol_handler_impl.h"
 

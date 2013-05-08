@@ -1,6 +1,6 @@
 include_directories (
   ./include/
-  ../Utils/include/
+  ../utils/include/
   ../protocol_handler/include/
   ../SmartObjects/include/
   ${CMAKE_BINARY_DIR}/src/components/Interfaces

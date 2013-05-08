@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MOBILE_MESSAGE_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MOBILE_MESSAGE_HANDLER_IMPL_H_
 
-#include "Utils/macro.h"
-#include "Utils/MessageQueue.h"
-#include "Utils/threads/thread.h"
-#include "Utils/shared_ptr.h"
+#include "utils/macro.h"
+#include "utils/MessageQueue.h"
+#include "utils/threads/thread.h"
+#include "utils/shared_ptr.h"
 
 #include "protocol_handler/raw_message.h"
 #include "protocol_handler/protocol_handler.h"

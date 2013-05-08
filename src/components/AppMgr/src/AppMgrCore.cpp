@@ -36,7 +36,7 @@
 #include <sys/time.h>
 
 #include "LoggerHelper.hpp"
-#include "Utils/WorkWithOS.h"
+#include "utils/WorkWithOS.h"
 #include "AppMgr/AppMgrCore.h"
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RegistryItem.h"

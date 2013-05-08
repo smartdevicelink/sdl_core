@@ -35,7 +35,7 @@
 #ifndef __SMARTOBJECT_CBOOLSCHEMAITEM_HPP__
 #define __SMARTOBJECT_CBOOLSCHEMAITEM_HPP__
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 
 #include "TSchemaItemParameter.hpp"
 #include "ISchemaItem.hpp"

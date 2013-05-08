@@ -51,7 +51,7 @@
 #include "AppMgr/MessageChaining.hpp"
 #include "AppMgr/DeviceStorage.hpp"
 
-#include "Utils/threads/thread.h"
+#include "utils/threads/thread.h"
 
 namespace NsSmartDeviceLinkRPC
 {

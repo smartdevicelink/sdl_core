@@ -42,7 +42,7 @@
 #include "protocol_handler/message_from_mobile_app_handler.h"
 #include "protocol_handler/messages_to_mobile_app_handler.h"
 
-#include "Utils/macro.h"
+#include "utils/macro.h"
 
 namespace protocol_handler {
 

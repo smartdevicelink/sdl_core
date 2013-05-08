@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 
 namespace application_manager {
 

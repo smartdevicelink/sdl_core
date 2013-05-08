@@ -35,7 +35,7 @@
 #ifndef __SMARTOBJECT_CALWAYSTRUEVALIDATOR_HPP__
 #define __SMARTOBJECT_CALWAYSTRUEVALIDATOR_HPP__
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 #include "ISchemaItem.hpp"
 
 namespace NsSmartDeviceLink

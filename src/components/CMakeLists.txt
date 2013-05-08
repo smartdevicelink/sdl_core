@@ -17,7 +17,7 @@ add_subdirectory(./protocol_handler)
 add_subdirectory(./ConnectionHandler)
 
 # --- Utils
-add_subdirectory(./Utils)
+add_subdirectory(./utils)
 
 # --- SmartObjects
 add_subdirectory(./SmartObjects)

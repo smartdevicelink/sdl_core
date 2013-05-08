@@ -39,10 +39,10 @@
 #include "JSONHandler/SDLRPCObjects/V2/AudioType.h"
 #include "JSONHandler/SDLRPCObjects/V2/AudioCaptureQuality.h"
 
-#include "Utils/macro.h"
-#include "Utils/threads/thread_delegate.h"
-#include "Utils/synchronisation_primitives.h"
-#include "Utils/timer.h"
+#include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/synchronisation_primitives.h"
+#include "utils/timer.h"
 
 namespace rpc_commands {
 class AudioPassThruThreadImpl : public threads::IThreadDelegate {

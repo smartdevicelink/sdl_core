@@ -37,7 +37,7 @@
 
 #include <stddef.h>
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 #include "ISchemaItem.hpp"
 #include "CAlwaysTrueSchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"

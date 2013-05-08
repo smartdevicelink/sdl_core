@@ -35,7 +35,7 @@
 #ifndef __CSMARTSCHEMA_HPP__
 #define __CSMARTSCHEMA_HPP__
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 #include "ISchemaItem.hpp"
 
 namespace NsSmartDeviceLink

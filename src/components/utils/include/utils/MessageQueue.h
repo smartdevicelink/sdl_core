@@ -4,10 +4,10 @@
  */
 
 #ifndef MESSAGE_QUEUE_CLASS
-#define MESSAGE_QUEUE_CLASS 
+#define MESSAGE_QUEUE_CLASS
 
 #include <queue>
-#include "Utils/synchronisation_primitives.h"
+#include "utils/synchronisation_primitives.h"
 
 /**
  * \class MessageQueue

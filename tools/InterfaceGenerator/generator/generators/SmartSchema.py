@@ -1189,7 +1189,7 @@ class SmartSchema(object):
         u'''#include "JSONHandler/CSmartFactory.hpp"\n'''
         u'''#include "SmartObjects/CSmartSchema.hpp"\n'''
         u'''#include "SmartObjects/ISchemaItem.hpp"\n'''
-        u'''#include "Utils/shared_ptr.h"\n'''
+        u'''#include "utils/shared_ptr.h"\n'''
         u'''#include "$header_file_name"\n'''
         u'''\n'''
         u'''$namespace_open'''

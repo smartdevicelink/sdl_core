@@ -34,7 +34,7 @@
 
 
 #ifndef JSONHANDLER_CLASS
-#define JSONHANDLER_CLASS 
+#define JSONHANDLER_CLASS
 
 #include "Logger.hpp"
 #include "JSONHandler/SDLRPCMessage.h"
@@ -48,9 +48,9 @@ const unsigned char RPC_RESPONSE = 0x1;
 const unsigned char RPC_NOTIFICATION = 0x2;
 const unsigned char RPC_UNKNOWN = 0xF;
 
-#include "Utils/macro.h"
-#include "Utils/MessageQueue.h"
-#include "Utils/threads/thread.h"
+#include "utils/macro.h"
+#include "utils/MessageQueue.h"
+#include "utils/threads/thread.h"
 
 namespace json_handler {
 class IncomingThreadImpl;
@@ -100,14 +100,14 @@ public:
     void setRPCMessagesObserver( IRPCMessagesObserver * messagesObserver );
 
     /**
-     * \brief Method for sending message to Mobile Application. 
+     * \brief Method for sending message to Mobile Application.
      * \param message Pointer to base class of SmartDeviceLink Json object
      * to be serialized to Json message and sent to mobile App.
      * \param sessionId ID of the session the message was received within.
      */
     void sendRPCMessage( const NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionKey );
     /*End of methods for IRPCMessagesObserver*/
-       
+
 protected:
     /**
      * \brief Helper method for clearing Json message from empty spaces
@@ -123,12 +123,12 @@ protected:
     NsSmartDeviceLinkRPC::SDLRPCMessage * handleIncomingMessageProtocolV2(
             const protocol_handler::RawMessage * message );
 
-    protocol_handler::RawMessage * handleOutgoingMessageProtocolV1( 
+    protocol_handler::RawMessage * handleOutgoingMessageProtocolV1(
             int connectionKey, const NsSmartDeviceLinkRPC::SDLRPCMessage *  message );
 
-    protocol_handler::RawMessage * handleOutgoingMessageProtocolV2( 
+    protocol_handler::RawMessage * handleOutgoingMessageProtocolV2(
             int connectionKey, const NsSmartDeviceLinkRPC::SDLRPCMessage *  message );
-    
+
 private:
     /**
       *\brief For logging.
