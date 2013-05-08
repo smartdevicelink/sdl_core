@@ -3,10 +3,10 @@ include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/components/application_manager/include
   ../../../src/components/SmartObjects/include
+  ../../../src/components/JSONHandler/include/
   ../../../src/components/Utils/include/
-  ../../../src/thirdPartyLibs/logger/include/
-  ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
-  ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
+  ../../../src//thirdPartyLibs/jsoncpp/include/
+    ${CMAKE_BINARY_DIR}/src/components/Interfaces/
 )
 
 set(LIBRARIES
@@ -22,3 +22,4 @@ set(LIBRARIES
 )
 
 create_test("test_AppMgr_ApplicationCoreTest" "./CApplicationCoreTest.cpp" "${LIBRARIES}")
+create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")

@@ -1,6 +1,7 @@
 include_directories (
   ./include/
-  ../utils/include/
+  ../Utils/include/
+  ../JSONHandler/include/
   ../protocol_handler/include/
   ../SmartObjects/include/
   ${CMAKE_BINARY_DIR}/src/components/Interfaces
@@ -10,6 +11,7 @@ set (SOURCES
 ./src/message.cc
 ./src/application_core.cc
 ./src/api_version_converter.cc
+./src/api_version_converter_v1.cc
 ./src/application_impl.cc
 ./src/basic_command_factory.cc
 )

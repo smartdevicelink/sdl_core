@@ -44,7 +44,7 @@ namespace application_manager {
 
     /**
      * @brief class APIVersionConverter is intended to provide interfaces
-     * for conversation application API from V1, RPC to API V2.
+     * for conversation application API from V1, RPC to internal representation which is API V2.
      */
     class APIVersionConverter {
     public:
@@ -73,6 +73,13 @@ namespace application_manager {
          * @return SharedPtr<CSmartObject> for transfered message converted to API V1 or RPC
          */
         virtual tSharedPtr convertFromV2(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& smartObj) = 0;
+
+        /**
+         * @brief Provides information if message is valid after conversion
+         *
+         * @return TRUE if message is valid, otherwise FALSE.
+         */
+        virtual bool isMessageValid() const = 0;
 
     private:
         DISALLOW_COPY_AND_ASSIGN(APIVersionConverter);
