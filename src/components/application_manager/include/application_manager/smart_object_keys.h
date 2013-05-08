@@ -30,52 +30,32 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_
 
-#include <memory>
+namespace application_manager {
 
-// #include "Utils/shared_ptr.h"
-#include "SmartObjects/CSmartObject.hpp"
-#include "application_manager/smart_object_keys.h"
+  namespace strings {
 
-namespace application_manager  {
+    const char msg_params[]  = "msg_params";
+    const char params[]      = "params";
+    const char function_id[] = "function_id";
+    const char app_id[]      = "appId";
 
-  /**
-    * @brief SmartObject type
-  **/
+    const char sync_msg_version[] = "syncMsgVersion";
+    const char major_version[]    = "majorVersion";
+    const char minor_version[]    = "minorVersion";
+    const char app_name[]         = "appName";
 
-  // typedef utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> SharedPtr;
-  typedef std::shared_ptr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> SharedPtr;
+    const char ngn_media_screen_app_name[] = "ngnMediaScreenAppName";
+    const char vr_synonyms[]               = "vrSynonyms";
+    const char uses_vehicle_data[]         = "usesVehicleData";
+    const char is_media_application[]      = "isMediaApplication";
+    const char language_desired[]          = "languageDesired";
+    const char auto_activated_id[]         = "autoActivateID";
 
-  namespace command  {
-
-    /**
-      * @brief Base command class
-    **/
-    class Command  {
-    public:
-      /**
-        * @brief Command initialization function
-        *
-        * @param
-      **/
-      virtual bool init() = 0;
-
-      /**
-        * @brief Execute command
-      **/
-      virtual void run() = 0;
-      // virtual void cleanUp() = 0;
-
-      /**
-        * \brief Command class destructor
-      **/
-      virtual ~Command() {}
-    };
-
-  }  // namespace command
+  }  // namespace strings
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_
