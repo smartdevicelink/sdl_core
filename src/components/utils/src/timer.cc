@@ -1,6 +1,4 @@
 /**
-* \file timer.cc
-* \brief Timer class source file.
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *

@@ -1,6 +1,4 @@
 /**
-* \file SynchronisationPrimitives.cc
-* \brief SynchronisationPrimitives class implementation.
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *

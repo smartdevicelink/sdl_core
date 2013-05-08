@@ -1,7 +1,4 @@
 /**
- * \file thread.h
- * \brief
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
