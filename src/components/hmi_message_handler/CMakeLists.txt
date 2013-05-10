@@ -16,6 +16,5 @@ set (SOURCES
 )
 
 
-add_library("HMIMessageHandler"
-  ${SOURCES}
-)
+add_library("HMIMessageHandler" ${SOURCES} )
+target_link_libraries ("HMIMessageHandler" log4cxx)

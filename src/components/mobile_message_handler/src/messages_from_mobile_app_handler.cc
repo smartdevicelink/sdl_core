@@ -33,7 +33,6 @@
 #include "mobile_message_handler/messages_from_mobile_app_handler.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "application_manager/message.h"
-#include "LoggerHelper.hpp"
 
 namespace mobile_message_handler {
 

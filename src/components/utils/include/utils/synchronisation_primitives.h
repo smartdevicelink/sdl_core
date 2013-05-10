@@ -51,8 +51,9 @@ typedef pthread_cond_t PlatformConditionalVar;
 #include <mach/mach.h>
 #endif
 #endif
-#include "Logger.hpp"
+
 #include "utils/macro.h"
+#include "utils/logger.h"
 
 namespace threads {
 
@@ -80,7 +81,7 @@ class SynchronisationPrimitives {
   /**
       *\brief For logging.
     */
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
 
   DISALLOW_COPY_AND_ASSIGN(SynchronisationPrimitives);
 };

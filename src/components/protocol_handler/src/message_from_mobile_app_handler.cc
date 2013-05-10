@@ -31,7 +31,6 @@
 */
 
 #include "protocol_handler/message_from_mobile_app_handler.h"
-#include "LoggerHelper.hpp"
 
 namespace protocol_handler {
 log4cxx::LoggerPtr MessagesFromMobileAppHandler::logger_ =

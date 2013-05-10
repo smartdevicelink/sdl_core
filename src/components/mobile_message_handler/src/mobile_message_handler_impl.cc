@@ -43,9 +43,6 @@ const unsigned char kUnknown = 0xF;
 }
 
 namespace mobile_message_handler {
-//! ----------------------------------------------------------------------------
-log4cplus::Logger MobileMessageHandlerImpl::logger_ =
-    log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("MobileMessageHandler"));
 
 MobileMessageHandlerImpl* MobileMessageHandlerImpl::self_ = NULL;
 //! ----------------------------------------------------------------------------

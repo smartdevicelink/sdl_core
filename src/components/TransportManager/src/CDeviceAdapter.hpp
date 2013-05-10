@@ -39,7 +39,7 @@
 #include <queue>
 #include <time.h>
 
-#include "log4cxx_logger.h"
+#include "utils/logger.h"
 
 #include "IDeviceAdapter.hpp"
 

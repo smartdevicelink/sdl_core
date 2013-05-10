@@ -32,7 +32,6 @@
 
 #include "protocol_handler/messages_to_mobile_app_handler.h"
 #include "protocol_handler/session_observer.h"
-#include "LoggerHelper.hpp"
 
 using NsSmartDeviceLink::NsTransportManager::tConnectionHandle;
 

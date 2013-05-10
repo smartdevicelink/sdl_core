@@ -58,6 +58,7 @@ typedef mach_port_t PlatformThreadId;
 #include <string>
 
 #include "utils/macro.h"
+#include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread_options.h"
 
@@ -201,7 +202,7 @@ class Thread {
   PlatformThreadId thread_id_;
   ThreadOptions thread_options_;
 
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Thread);

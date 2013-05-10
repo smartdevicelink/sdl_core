@@ -40,7 +40,7 @@
 #include <string>
 #include <map>
 
-#include "log4cxx_logger.h"
+#include "utils/logger.h"
 
 /**
  * \namespace connection_handler

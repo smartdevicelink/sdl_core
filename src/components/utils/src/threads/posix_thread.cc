@@ -33,7 +33,6 @@
 #include <limits.h>
 #include <stddef.h>
 
-#include "LoggerHelper.hpp"
 
 #include "utils/threads/thread.h"
 #include "utils/macro.h"
@@ -49,8 +48,8 @@ static void* threadFunc(void* closure) {
 
 namespace threads {
 size_t Thread::kMinStackSize = PTHREAD_STACK_MIN;
-log4cplus::Logger Thread::logger_ = log4cplus::Logger::getInstance(
-    LOG4CPLUS_TEXT("threads::Thread"));
+log4cxx::LoggerPtr Thread::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "threads::Thread"));
 
 Thread::Thread(const char* name, ThreadDelegate* delegate)
     : name_("undefined"),

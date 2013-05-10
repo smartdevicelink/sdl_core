@@ -35,8 +35,8 @@
 
 namespace threads {
 
-log4cplus::Logger SynchronisationPrimitives::logger_ =
-  log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("threads"));
+log4cxx::LoggerPtr SynchronisationPrimitives::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "threads"));
 
 SynchronisationPrimitives::SynchronisationPrimitives()
     : mutex_(PTHREAD_MUTEX_INITIALIZER),

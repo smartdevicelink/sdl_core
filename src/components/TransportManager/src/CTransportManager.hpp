@@ -38,7 +38,7 @@
 #include "TransportManager/ITransportManager.hpp"
 #include "IDeviceAdapterListener.hpp"
 #include "IHandleGenerator.hpp"
-#include "log4cxx_logger.h"
+#include "utils/logger.h"
 
 #include <pthread.h>
 #include <vector>
@@ -423,7 +423,7 @@ namespace NsSmartDeviceLink
 
             /**
              * @brief Incapsulates frame data for each connection
-             * 
+             *
              **/
             struct SFrameDataForConnection
             {
@@ -625,7 +625,7 @@ namespace NsSmartDeviceLink
 
             /**
              * @brief Starts thread for application-related callbacks
-             * 
+             *
              **/
             void startApplicationCallbacksThread();
 

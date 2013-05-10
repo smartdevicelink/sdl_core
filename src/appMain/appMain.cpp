@@ -63,7 +63,7 @@
 #include "system.h"
 
 #include "Logger.hpp"
-#include "log4cxx_logger.h"
+#include "utils/logger.h"
 
 #include "TransportManager/ITransportManager.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"

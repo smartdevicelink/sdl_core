@@ -19,6 +19,5 @@ set (SOURCES
 )
 
 
-add_library("ApplicationManager"
-  ${SOURCES}
-)
+add_library("ApplicationManager" ${SOURCES} )
+target_link_libraries ("ApplicationManager" log4cxx)

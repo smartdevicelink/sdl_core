@@ -76,7 +76,6 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
   friend class MessagesFromMobileAppHandler;
 
   static MobileMessageHandlerImpl* self_;
-  static log4cplus::Logger logger_;
 
   DISALLOW_COPY_AND_ASSIGN(MobileMessageHandlerImpl);
 };

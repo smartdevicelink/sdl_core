@@ -40,7 +40,7 @@
 #include <map>
 #include <vector>
 
-#include "log4cxx_logger.h"
+#include "utils/logger.h"
 #include "ConnectionHandler/device.h"
 
 /**

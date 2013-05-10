@@ -32,8 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LoggerHelper.hpp"
-
 #include "CTransportManager.hpp"
 #include "CBluetoothAdapter.hpp"
 #include "CTCPAdapter.hpp"

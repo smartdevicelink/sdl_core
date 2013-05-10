@@ -37,8 +37,6 @@
 #include <string>
 #include <list>
 
-#include "Logger.hpp"
-
 #include "ConnectionHandler/connection_handler_impl.h"
 
 /**

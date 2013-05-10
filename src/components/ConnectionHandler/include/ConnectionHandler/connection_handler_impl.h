@@ -42,7 +42,8 @@
 #include <list>
 #include <string>
 
-#include "log4cxx_logger.h"
+#include "utils/logger.h"
+
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
 
