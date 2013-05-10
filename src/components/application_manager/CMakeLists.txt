@@ -13,6 +13,9 @@ set (SOURCES
 ./src/api_version_converter_v1.cc
 ./src/application_impl.cc
 ./src/basic_command_factory.cc
+./src/command_impl.cc
+./src/get_device_list_command.cc
+./src/get_device_list_response_command.cc
 )
 
 
