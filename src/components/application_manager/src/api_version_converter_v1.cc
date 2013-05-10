@@ -31,7 +31,7 @@
 //
 
 #include "application_manager/api_version_converter_v1.h"
-#include "v4_protocol_v1_2_no_extra.hpp"
+#include "v4_protocol_v1_2_no_extra.h"
 #include "JSONHandler/CSmartFactory.hpp"
 
 namespace application_manager {

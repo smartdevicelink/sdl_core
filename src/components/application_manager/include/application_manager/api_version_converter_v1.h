@@ -39,8 +39,8 @@
 #include "utils/macro.h"
 #include "SmartObjects/CSmartObject.hpp"
 #include "application_manager/api_version_converter.h"
-#include "v4_protocol_v2_0_revT.hpp"
-#include "v4_protocol_v1_2_no_extra.hpp"
+#include "v4_protocol_v2_0_revT.h"
+#include "v4_protocol_v1_2_no_extra.h"
 
 namespace application_manager {
 
