@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
 
+#include <assert.h>
+
 namespace utils {
 /**
  * @brief Shared pointer.
