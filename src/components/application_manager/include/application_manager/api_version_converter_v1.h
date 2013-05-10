@@ -36,7 +36,7 @@
 #include <map>
 #include <string>
 
-#include "Utils/macro.h"
+#include "utils/macro.h"
 #include "SmartObjects/CSmartObject.hpp"
 #include "application_manager/api_version_converter.h"
 #include "v4_protocol_v2_0_revT.hpp"

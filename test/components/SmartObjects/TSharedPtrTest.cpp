@@ -34,7 +34,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "Utils/shared_ptr.h"
+#include "utils/shared_ptr.h"
 
 namespace test
 {

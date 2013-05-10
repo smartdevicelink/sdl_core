@@ -4,7 +4,7 @@ include_directories (
   ../../../src/components/application_manager/include
   ../../../src/components/SmartObjects/include
   ../../../src/components/JSONHandler/include/
-  ../../../src/components/Utils/include/
+  ../../../src/components/utils/include/
   ../../../src//thirdPartyLibs/jsoncpp/include/
     ${CMAKE_BINARY_DIR}/src/components/Interfaces/
 )
@@ -21,5 +21,4 @@ set(LIBRARIES
     jsoncpp
 )
 
-create_test("test_AppMgr_ApplicationCoreTest" "./CApplicationCoreTest.cpp" "${LIBRARIES}")
 create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")
