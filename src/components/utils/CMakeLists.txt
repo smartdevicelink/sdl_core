@@ -7,6 +7,7 @@ set (SOURCES
     ./src/threads/posix_thread.cc
     ./src/synchronisation_primitives_posix.cc
     ./src/timer.cc
+    ./src/date_time.cc
 )
 
 add_library("Utils" ${SOURCES})

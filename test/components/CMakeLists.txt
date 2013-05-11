@@ -13,3 +13,6 @@ add_subdirectory(./application_manager)
 # --- ProtocolHandler
 add_subdirectory(./ProtocolHandler)
 
+# --- RequestWatchdog
+#add_subdirectory(./request_watchdog)
+

@@ -28,5 +28,8 @@ add_subdirectory(./mobile_message_handler)
 # --- Application manager
 add_subdirectory(./application_manager)
 
+# --- Request watchdog
+add_subdirectory(./request_watchdog)
+
 # --- HMI Message Handler
 #add_subdirectory(./hmi_message_handler)
