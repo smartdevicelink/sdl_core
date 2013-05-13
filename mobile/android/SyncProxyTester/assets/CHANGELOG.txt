@@ -1,4 +1,5 @@
 [CW20]
++ The user can now send brand new MakeMeFeelGood request. Used to test that the response is GenericResponse.
 + ShowConstantTBT dialog (v2): add turn icon parameter.
 - SetMediaClockTimer dialog (v1): remove CLEAR update mode.
 * Speak dialog: set all TTS Chunks' types to TEXT by default.

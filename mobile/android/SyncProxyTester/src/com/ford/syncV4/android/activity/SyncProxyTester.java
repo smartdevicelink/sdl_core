@@ -88,6 +88,7 @@ import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
 import com.ford.syncV4.proxy.rpc.DialNumber;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
+import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
@@ -144,6 +145,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	private static final String ButtonSubscriptions = "ButtonSubscriptions";
 	private static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
+	/** Name of a fictional request. See {@link MakeMeFeelGoodRequest}. */
+	private static final String MakeMeFeelGood = "MakeMeFeelGood";
 
 	/**
 	 * The name of the file where all the data coming with
@@ -256,6 +259,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * during this app launch.
 	 */
 	private static boolean isFirstActivityRun = true;
+	
+	/**
+	 * A custom {@link RPCRequest} subclass that is not present in the
+	 * specification. Used to test that the response is {@link GenericResponse}.
+	 */
+	class MakeMeFeelGoodRequest extends RPCRequest {
+		public MakeMeFeelGoodRequest() {
+			super("MakeMeFeelGood");
+		}
+		
+		public MakeMeFeelGoodRequest(Hashtable hash) {
+			super(hash);
+		}
+	}
+	
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -979,6 +997,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				v1Functions.add(Names.UnsubscribeButton);
 				// it's the name of the menu item for the last two commands
 				v1Functions.add(ButtonSubscriptions);
+				v1Functions.add(MakeMeFeelGood);
 			}
 			
 			if (v1Functions.contains(functionName)) {
@@ -1028,6 +1047,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, protocolVersion, Names.AlertManeuver);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.UpdateTurnList);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.DialNumber);
+			addToFunctionsAdapter(adapter, protocolVersion, MakeMeFeelGood);
+			
 			adapter.sort(new Comparator<String>() {
 				@Override
 				public int compare(String lhs, String rhs) {
@@ -2084,6 +2105,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							sendUpdateTurnList();
 						} else if (adapter.getItem(which) == Names.DialNumber) {
 							sendDialNumber();
+						} else if (adapter.getItem(which) == MakeMeFeelGood) {
+							sendMakeMeFeelGood();
 						}
 						
 						String function = adapter.getItem(which);
@@ -3152,6 +3175,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						});
 						builder.setView(layout);
 						builder.create().show();
+					}
+					
+					/**
+					 * Sends a MakeMeFeelGoodRequest message.
+					 */
+					private void sendMakeMeFeelGood() {
+						MakeMeFeelGoodRequest msg = new MakeMeFeelGoodRequest();
+						msg.setCorrelationID(autoIncCorrId++);
+						_msgAdapter.logMessage(msg, true);
+						try {
+							ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+						} catch (SyncException e) {
+							_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+						}
 					}
 				})
 		       .setNegativeButton("Close", null)
