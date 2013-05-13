@@ -1170,14 +1170,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final Spinner spnSpeakType3 = (Spinner) layout.findViewById(R.id.spnSpeakType3);
 							final Spinner spnSpeakType4 = (Spinner) layout.findViewById(R.id.spnSpeakType4);
 							
-							ArrayAdapter<SpeechCapabilities> speechSpinnerAdapter = new ArrayAdapter<SpeechCapabilities>(adapter.getContext(), android.R.layout.simple_spinner_item, SpeechCapabilities.values()); 
+							ArrayAdapter<SpeechCapabilities> speechSpinnerAdapter = new ArrayAdapter<SpeechCapabilities>(
+									adapter.getContext(), android.R.layout.simple_spinner_item, SpeechCapabilities.values());
+							int textCapabilityPos = speechSpinnerAdapter.getPosition(SpeechCapabilities.TEXT);
 							spnSpeakType1.setAdapter(speechSpinnerAdapter);
+							spnSpeakType1.setSelection(textCapabilityPos);
 							spnSpeakType2.setAdapter(speechSpinnerAdapter);
-							spnSpeakType2.setSelection(3);
+							spnSpeakType2.setSelection(textCapabilityPos);
 							spnSpeakType3.setAdapter(speechSpinnerAdapter);
+							spnSpeakType3.setSelection(textCapabilityPos);
 							spnSpeakType4.setAdapter(speechSpinnerAdapter);
-							spnSpeakType4.setSelection(1);
-							spnSpeakType4.setEnabled(false);
+							spnSpeakType4.setSelection(textCapabilityPos);
 							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {

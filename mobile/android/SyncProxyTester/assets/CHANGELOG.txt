@@ -1,3 +1,6 @@
+[CW20]
+Speak dialog: set all TTS Chunks' types to TEXT by default.
+
 [CW17]
 * Alert dialog (v1): hide Line 3 and Soft Buttons fields.
 * AddCommand dialog (v1): hide icon-related fields.
