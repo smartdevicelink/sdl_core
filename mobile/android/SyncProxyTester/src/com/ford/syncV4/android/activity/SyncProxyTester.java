@@ -1995,95 +1995,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.ShowConstantTBT) {
-							//ShowConstantTBT
-							AlertDialog.Builder builder;
-							AlertDialog dlg;
-							
-							final Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.showconstanttbt, null);
-							
-							final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.txtNavigationText1);
-							final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.txtNavigationText2);
-							final EditText txtEta = (EditText) layout.findViewById(R.id.txtEta);
-							final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.txtTotalDistance);
-							
-							final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.txtDistanceToManeuver);
-							final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.txtDistanceToManeuverScale);
-							
-							final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.chkManeuverComplete);
-
-							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb1.setText("Reply");
-							sb1.setType(SoftButtonType.SBT_TEXT);
-							sb1.setIsHighlighted(false);
-							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb2.setText("Close");
-							sb2.setType(SoftButtonType.SBT_TEXT);
-							sb2.setIsHighlighted(false);
-							sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-							currentSoftButtons = new Vector<SoftButton>();
-							currentSoftButtons.add(sb1);
-							currentSoftButtons.add(sb2);
-
-							Button btnSoftButtons = (Button) layout.findViewById(R.id.showconstanttbt_btnSoftButtons);
-							btnSoftButtons.setOnClickListener(new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									IntentHelper.addObjectForKey(currentSoftButtons,
-											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
-									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
-											SHOWCONSTANTTBT_MAXSOFTBUTTONS);
-									startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
-								}
-							});
-							
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									Image turnIcon = new Image();
-									turnIcon.setValue("Value");
-									turnIcon.setImageType(ImageType.STATIC);
-									try {
-										ShowConstantTBT msg = new ShowConstantTBT();
-										msg.setNavigationText1(txtNavigationText1.getText().toString());
-										msg.setNavigationText2(txtNavigationText2.getText().toString());
-										msg.setEta(txtEta.getText().toString());
-										msg.setTotalDistance(txtTotalDistance.getText().toString());
-										msg.setTurnIcon(turnIcon);
-										msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
-										msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
-										msg.setManeuverComplete(chkManeuverComplete.isChecked());
-										msg.setCorrelationID(autoIncCorrId++);
-										if (currentSoftButtons != null) {
-											msg.setSoftButtons(currentSoftButtons);
-										} else {
-											msg.setSoftButtons(new Vector<SoftButton>());
-										}
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (NumberFormatException e) {
-										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-									currentSoftButtons = null;
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									currentSoftButtons = null;
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							dlg = builder.create();
-							dlg.show();
+							sendShowConstantTBT();
 						} else if (adapter.getItem(which) == Names.AlertManeuver) {
 							//AlertManeuver
 							AlertDialog.Builder builder;
@@ -2180,6 +2092,95 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+
+					/**
+					 * Opens the dialog for ShowConstantTBT message and sends it.
+					 */
+					private void sendShowConstantTBT() {
+						final Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.showconstanttbt,
+								(ViewGroup) findViewById(R.id.showconstanttbt_Root));
+						
+						final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText1);
+						final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText2);
+						final EditText txtEta = (EditText) layout.findViewById(R.id.showconstanttbt_txtEta);
+						final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.showconstanttbt_txtTotalDistance);
+						final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuver);
+						final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
+						final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
+
+						SoftButton sb1 = new SoftButton();
+						sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+						sb1.setText("Reply");
+						sb1.setType(SoftButtonType.SBT_TEXT);
+						sb1.setIsHighlighted(false);
+						sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+						SoftButton sb2 = new SoftButton();
+						sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+						sb2.setText("Close");
+						sb2.setType(SoftButtonType.SBT_TEXT);
+						sb2.setIsHighlighted(false);
+						sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+						currentSoftButtons = new Vector<SoftButton>();
+						currentSoftButtons.add(sb1);
+						currentSoftButtons.add(sb2);
+
+						Button btnSoftButtons = (Button) layout.findViewById(R.id.showconstanttbt_btnSoftButtons);
+						btnSoftButtons.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								IntentHelper.addObjectForKey(currentSoftButtons,
+										Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+								Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+								intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+										SHOWCONSTANTTBT_MAXSOFTBUTTONS);
+								startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+							}
+						});
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								Image turnIcon = new Image();
+								turnIcon.setValue("Value");
+								turnIcon.setImageType(ImageType.STATIC);
+								try {
+									ShowConstantTBT msg = new ShowConstantTBT();
+									msg.setNavigationText1(txtNavigationText1.getText().toString());
+									msg.setNavigationText2(txtNavigationText2.getText().toString());
+									msg.setEta(txtEta.getText().toString());
+									msg.setTotalDistance(txtTotalDistance.getText().toString());
+									msg.setTurnIcon(turnIcon);
+									msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
+									msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
+									msg.setManeuverComplete(chkManeuverComplete.isChecked());
+									msg.setCorrelationID(autoIncCorrId++);
+									if (currentSoftButtons != null) {
+										msg.setSoftButtons(currentSoftButtons);
+									} else {
+										msg.setSoftButtons(new Vector<SoftButton>());
+									}
+									_msgAdapter.logMessage(msg, true);
+									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+								} catch (NumberFormatException e) {
+									Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
+								} catch (SyncException e) {
+									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								}
+								currentSoftButtons = null;
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								currentSoftButtons = null;
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.show();
 					}
 
 					/**
