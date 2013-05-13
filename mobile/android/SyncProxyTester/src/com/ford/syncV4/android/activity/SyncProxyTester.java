@@ -2108,9 +2108,26 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText2);
 						final EditText txtEta = (EditText) layout.findViewById(R.id.showconstanttbt_txtEta);
 						final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.showconstanttbt_txtTotalDistance);
+						final CheckBox chkUseTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_turnIconCheck);
+						final Spinner spnTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_turnIconType);
+						final EditText txtTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_turnIconValue);
 						final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuver);
 						final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
 						final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
+						
+						final ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
+								mContext, android.R.layout.simple_spinner_item, ImageType.values());
+						imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+						
+						if (v2Features) {
+							spnTurnIconType.setAdapter(imageTypeAdapter);
+						} else {
+							int visibility = android.view.View.GONE;
+							View[] views = { chkUseTurnIcon, spnTurnIconType, txtTurnIconValue };
+							for (View view : views) {
+								view.setVisibility(visibility);
+							}
+						}
 
 						SoftButton sb1 = new SoftButton();
 						sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -2144,16 +2161,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								Image turnIcon = new Image();
-								turnIcon.setValue("Value");
-								turnIcon.setImageType(ImageType.STATIC);
 								try {
 									ShowConstantTBT msg = new ShowConstantTBT();
 									msg.setNavigationText1(txtNavigationText1.getText().toString());
 									msg.setNavigationText2(txtNavigationText2.getText().toString());
 									msg.setEta(txtEta.getText().toString());
 									msg.setTotalDistance(txtTotalDistance.getText().toString());
-									msg.setTurnIcon(turnIcon);
+									
+									if (v2Features && chkUseTurnIcon.isChecked()) {
+										Image image = new Image();
+										image.setImageType(imageTypeAdapter.getItem(
+												spnTurnIconType.getSelectedItemPosition()));
+										image.setValue(txtTurnIconValue.getText().toString());
+										msg.setTurnIcon(image);
+									}
+
 									msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
 									msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
 									msg.setManeuverComplete(chkManeuverComplete.isChecked());

@@ -82,6 +82,33 @@
             android:text="@string/showconstanttbt_totalDistanceDefault"
             android:visibility="visible" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <CheckBox
+                android:id="@+id/showconstanttbt_turnIconCheck"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:checked="true"
+                android:text="@string/showconstanttbt_turnIconCheck" />
+
+            <Spinner
+                android:id="@+id/showconstanttbt_turnIconType"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/showconstanttbt_turnIconValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:text="@string/showconstanttbt_turnIconValue" />
+
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

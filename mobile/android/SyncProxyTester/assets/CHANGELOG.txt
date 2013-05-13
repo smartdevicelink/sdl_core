@@ -1,6 +1,7 @@
 [CW20]
-* Speak dialog: set all TTS Chunks' types to TEXT by default.
++ ShowConstantTBT dialog (v2): add turn icon parameter.
 - SetMediaClockTimer dialog (v1): remove CLEAR update mode.
+* Speak dialog: set all TTS Chunks' types to TEXT by default.
 
 [CW17]
 * Alert dialog (v1): hide Line 3 and Soft Buttons fields.
