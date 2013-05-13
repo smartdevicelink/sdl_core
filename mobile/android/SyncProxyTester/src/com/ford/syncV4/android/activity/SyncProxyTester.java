@@ -1453,10 +1453,19 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtMinutes = (EditText) layout.findViewById(R.id.txtMinutes);
 							final EditText txtSeconds = (EditText) layout.findViewById(R.id.txtSeconds);
 							final Spinner spnUpdateMode = (Spinner) layout.findViewById(R.id.spnUpdateMode);
+							
+							List<UpdateMode> updateModes = Arrays.asList(UpdateMode.values());
+							if (!v2Features) {
+								// CLEAR UpdateMode appeared in protocol v2
+								updateModes = new ArrayList<UpdateMode>(updateModes);
+								updateModes.remove(UpdateMode.CLEAR);
+							}
+							
 							ArrayAdapter<UpdateMode> spinnerAdapter = new ArrayAdapter<UpdateMode>(adapter.getContext(),
-									android.R.layout.simple_spinner_item, UpdateMode.values());
+									android.R.layout.simple_spinner_item, updateModes);
 							spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 							spnUpdateMode.setAdapter(spinnerAdapter);
+							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
