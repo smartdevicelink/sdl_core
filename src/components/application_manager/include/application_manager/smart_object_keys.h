@@ -54,6 +54,10 @@ namespace application_manager {
     const char is_media_application[]      = "isMediaApplication";
     const char language_desired[]          = "languageDesired";
     const char auto_activated_id[]         = "autoActivateID";
+    const char app_type[]                  = "AppType";
+    const char tts_name[]                  = "ttsName";
+
+    const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 
   }  // namespace strings
 

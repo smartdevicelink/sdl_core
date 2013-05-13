@@ -32,20 +32,23 @@
 
 #include "application_manager/basic_command_factory.h"
 
-// #include "application_manager/commands/register_app_interface_request_command.h"
+#include "application_manager/commands/register_app_interface_command.h"
 
 #include "v4_protocol_v2_0_revT.h"
 
 namespace application_manager  {
 
-  commands::Command* BasicCommandFactory::CreateCommand(const Message& smart_object)  {
-    switch(static_cast<int>((*smart_object)[strings::params][strings::function_id])) {
+  CommandSharedPtr BasicCommandFactory::CreateCommand(const MessageSharedPtr& message)  {
+    CommandSharedPtr command(NULL);
+
+    switch(static_cast<int>((*message)[strings::params][strings::function_id])) {
       case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
-        // return new commands::RegisterAppInterfaceRequestCommand(smart_object);
+        command.reset(new commands::RegisterAppInterfaceCommand(message));
         break;
       }
     }
 
-    return NULL;
+    return command;
   }
+
 }  // namespace application_manager
