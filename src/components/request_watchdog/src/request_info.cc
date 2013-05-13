@@ -37,7 +37,8 @@
 
 namespace request_watchdog {
 
-RequestInfo::RequestInfo(int FunctionId, int ConnectionID, int CorrelationId, int CustomTimeout)
+RequestInfo::RequestInfo(int FunctionId, int ConnectionID
+                       , int CorrelationId, int CustomTimeout)
   : functionID_(FunctionId),
     connectionID_(ConnectionID),
     correlationID_(CorrelationId),
@@ -52,13 +53,11 @@ bool operator==(const RequestInfo& left, const RequestInfo& right) {
 }
 
 bool operator<(const RequestInfo& left, const RequestInfo& right) {
-
-  if(left.connectionID_ == right.connectionID_) {
+  if ( left.connectionID_ == right.connectionID_ ) {
     return left.correlationID_ < right.correlationID_;
-  }
-  else {
+  } else {
     return left.connectionID_ < right.connectionID_;
   }
 }
 
-}
+}  // namespace request_watchdog

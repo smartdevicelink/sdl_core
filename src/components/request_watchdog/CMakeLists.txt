@@ -1,5 +1,5 @@
 include_directories (
-./include
+  ./include
   ../utils/include/
   ../../thirdPartyLibs/logger/include/
   ../../thirdPartyLibs/logger/log4cplus-1.1.0/include/
@@ -13,4 +13,5 @@ set (SOURCES
 )
 
 add_library("RequestWatchdog" ${SOURCES})
+target_link_libraries ("RequestWatchdog" Utils)
 target_link_libraries ("RequestWatchdog" log4cxx)

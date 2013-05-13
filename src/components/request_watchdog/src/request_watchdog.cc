@@ -34,37 +34,38 @@
 */
 
 #include <iterator>
-#include "system.h"
 #include "request_watchdog/request_watchdog.h"
-
-using namespace std;
-using namespace date_time;
-using namespace System;
 
 namespace request_watchdog {
 
 const int RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
 
 log4cxx::LoggerPtr RequestWatchdog::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "RequestWatchdog"));
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
 
 RequestWatchdog* RequestWatchdog::sInstance_ = 0;
 
+std::list<WatchdogSubscriber*> RequestWatchdog::subscribers_;
+std::map<RequestInfo, struct timeval> RequestWatchdog::requests_;
+threads::SynchronisationPrimitives RequestWatchdog::instanceMutex_;
+threads::SynchronisationPrimitives RequestWatchdog::subscribersListMutex_;
+threads::SynchronisationPrimitives RequestWatchdog::requestsMapMutex_;
+
 Watchdog* RequestWatchdog::getRequestWatchdog() {
+  instanceMutex_.lock();
 
-  instanceMutex_.Lock();
-
-  if(0 == sInstance_) {
+  if ( 0 == sInstance_ ) {
     sInstance_ = new RequestWatchdog;
   }
 
-  instanceMutex_.Unlock();
+  instanceMutex_.unlock();
 
   return sInstance_;
 }
 
 RequestWatchdog::RequestWatchdog()
- : queueDispatcherThread("RequestQueueThread", new QueueDispatcherThreadDelegate()) {
+  : queueDispatcherThread("RequestQueueThread",
+                          new QueueDispatcherThreadDelegate()) {
 }
 
 RequestWatchdog::~RequestWatchdog() {
@@ -72,36 +73,35 @@ RequestWatchdog::~RequestWatchdog() {
 }
 
 void RequestWatchdog::addListener(WatchdogSubscriber* subscriber) {
-
   LOG4CXX_TRACE_ENTER(logger_);
 
-  subscribersListMutex_.Lock();
+  subscribersListMutex_.lock();
 
   subscribers_.push_back(subscriber);
   startDispatcherThreadIfNeeded();
 
-  subscribersListMutex_.Unlock();
+  subscribersListMutex_.unlock();
 }
 
 void RequestWatchdog::removeListener(WatchdogSubscriber* subscriber) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  subscribersListMutex_.Lock();
+  subscribersListMutex_.lock();
 
   subscribers_.remove(subscriber);
   stopDispatcherThreadIfNeeded();
 
-  subscribersListMutex_.Unlock();
+  subscribersListMutex_.unlock();
 }
 
 void RequestWatchdog::removeAllListeners() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  subscribersListMutex_.Lock();
+  subscribersListMutex_.lock();
 
   subscribers_.clear();
 
-  subscribersListMutex_.Unlock();
+  subscribersListMutex_.unlock();
 
   queueDispatcherThread.stop();
 }
@@ -109,51 +109,51 @@ void RequestWatchdog::removeAllListeners() {
 void RequestWatchdog::notifySubscribers(RequestInfo requestInfo) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  subscribersListMutex_.Lock();
+  subscribersListMutex_.lock();
 
-  list<WatchdogSubscriber*>::iterator i = subscribers_.begin();
+  std::list<WatchdogSubscriber*>::iterator i = subscribers_.begin();
 
-  while(i != subscribers_.end()) {
+  while ( i != subscribers_.end() ) {
     (*i)->onTimeoutExpired(requestInfo);
     i++;
   }
 
-  subscribersListMutex_.Unlock();
+  subscribersListMutex_.unlock();
 }
 
 void RequestWatchdog::addRequest(RequestInfo requestInfo) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  requestsMapMutex_.Lock();
+  requestsMapMutex_.lock();
 
-  requests_.insert(pair<RequestInfo, struct timeval>(requestInfo,
-                   DateTime::getCurrentTime()));
+  requests_.insert(std::pair<RequestInfo, struct timeval>(requestInfo,
+                   date_time::DateTime::getCurrentTime()));
 
   startDispatcherThreadIfNeeded();
 
-  requestsMapMutex_.Unlock();
+  requestsMapMutex_.unlock();
 }
 
 void RequestWatchdog::removeRequest(RequestInfo requestInfo) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  requestsMapMutex_.Lock();
+  requestsMapMutex_.lock();
 
   requests_.erase(requestInfo);
 
   stopDispatcherThreadIfNeeded();
 
-  requestsMapMutex_.Unlock();
+  requestsMapMutex_.unlock();
 }
 
 void RequestWatchdog::removeAllRequests() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  requestsMapMutex_.Lock();
+  requestsMapMutex_.lock();
 
   requests_.clear();
 
-  requestsMapMutex_.Unlock();
+  requestsMapMutex_.unlock();
 
   queueDispatcherThread.stop();
 }
@@ -161,11 +161,11 @@ void RequestWatchdog::removeAllRequests() {
 int RequestWatchdog::getRegesteredRequestsNumber() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  requestsMapMutex_.Lock();
+  requestsMapMutex_.lock();
 
   int ret = requests_.size();
 
-  requestsMapMutex_.Unlock();
+  requestsMapMutex_.unlock();
 
   return ret;
 }
@@ -173,7 +173,7 @@ int RequestWatchdog::getRegesteredRequestsNumber() {
 void RequestWatchdog::startDispatcherThreadIfNeeded() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if(!requests_.empty() && !subscribers_.empty()) {
+  if ( !requests_.empty() && !subscribers_.empty() ) {
     queueDispatcherThread.start();
   }
 }
@@ -181,10 +181,14 @@ void RequestWatchdog::startDispatcherThreadIfNeeded() {
 void RequestWatchdog::stopDispatcherThreadIfNeeded() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if(requests_.empty() || subscribers_.empty()) {
+  if ( requests_.empty() || subscribers_.empty() ) {
     queueDispatcherThread.stop();
   }
 }
+
+RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate()
+  : threads::ThreadDelegate()
+{}
 
 void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -194,36 +198,31 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   int cycleDuration;
   struct timeval cycleStartTime;
 
-  while(true) {
-
+  while ( true ) {
     usleep(cycleSleepInterval);
 
-    cycleStartTime = DateTime::getCurrentTime();
+    cycleStartTime = date_time::DateTime::getCurrentTime();
 
-    requestsMapMutex_.Lock();
+    requestsMapMutex_.lock();
 
     it = requests_.begin();
 
-    while(it != requests_.end()) {
-
-      if((*it).first.customTimeout_ <
-         DateTime::calculateTimeSpan((*it).second)) {
-
+    while ( it != requests_.end() ) {
+      if ( (*it).first.customTimeout_ <
+          date_time::DateTime::calculateTimeSpan((*it).second) ) {
       // Request is expired - notify all subscribers and remove request
       notifySubscribers((*it).first);
       RequestWatchdog::getRequestWatchdog()->removeRequest((*it).first);
     }
 
-    requestsMapMutex_.Unlock();
+    requestsMapMutex_.unlock();
 
-    cycleDuration = DateTime::calculateTimeSpan(cycleStartTime);
+    cycleDuration = date_time::DateTime::calculateTimeSpan(cycleStartTime);
 
     cycleSleepInterval += DEFAULT_CYCLE_TIMEOUT *
          (cycleDuration / DEFAULT_CYCLE_TIMEOUT + 1);
-
     }
-
   }
 }
 
-}
+}  //  namespace request_watchdog

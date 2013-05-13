@@ -38,8 +38,10 @@
 
 namespace date_time {
 
-struct timeval DateTime::getCurrentTime() {
+int const DateTime::MILLISECONDS_IN_SECOND;
+int const DateTime::MICROSECONDS_IN_MILLISECONDS;
 
+struct timeval DateTime::getCurrentTime() {
   struct timeval currentTime;
   struct timezone timeZone;
 
@@ -49,7 +51,6 @@ struct timeval DateTime::getCurrentTime() {
 }
 
 int DateTime::calculateTimeSpan(struct timeval sinceTime) {
-
   struct timeval currentTime, timeDifference;
   struct timezone timeZone;
 
@@ -59,12 +60,14 @@ int DateTime::calculateTimeSpan(struct timeval sinceTime) {
 
   timeDifference.tv_usec = currentTime.tv_usec - sinceTime.tv_usec;
 
-  if(timeDifference.tv_usec < 0 ) {
+  if ( timeDifference.tv_usec < 0 ) {
     timeDifference.tv_sec--;
-    timeDifference.tv_usec += 1000000;
+    timeDifference.tv_usec += MILLISECONDS_IN_SECOND
+                            * MICROSECONDS_IN_MILLISECONDS;
   }
 
-  return timeDifference.tv_sec * 1000 + timeDifference.tv_usec / 1000;
+  return timeDifference.tv_sec * MILLISECONDS_IN_SECOND
+       + timeDifference.tv_usec / MICROSECONDS_IN_MILLISECONDS;
 }
 
-}
+}  // namespace date_time

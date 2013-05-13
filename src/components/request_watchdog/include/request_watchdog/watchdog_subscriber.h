@@ -42,10 +42,12 @@ namespace request_watchdog {
 
 class WatchdogSubscriber {
  public:
-
   virtual void onTimeoutExpired(RequestInfo) = 0;
+
+  virtual ~WatchdogSubscriber() {
+  }
 };
 
-}
+}  //  namespace request_watchdog
 
-#endif // SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_WATCHDOG_SUBSCRIBER_H_
+#endif  // SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_WATCHDOG_SUBSCRIBER_H_

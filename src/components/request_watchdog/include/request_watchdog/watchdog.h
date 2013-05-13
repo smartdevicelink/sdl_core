@@ -43,17 +43,20 @@ namespace request_watchdog {
 
 class Watchdog {
  public:
-  virtual void addListener(WatchdogSubscriber*) = 0;
-  virtual void removeListener(WatchdogSubscriber*) = 0;
+  virtual void addListener(WatchdogSubscriber* subscriber) = 0;
+  virtual void removeListener(WatchdogSubscriber* listener) = 0;
   virtual void removeAllListeners() = 0;
 
-  virtual void addRequest(RequestInfo) = 0;
-  virtual void removeRequest(RequestInfo) = 0;
+  virtual void addRequest(RequestInfo requestInfo) = 0;
+  virtual void removeRequest(RequestInfo requestInfo) = 0;
   virtual void removeAllRequests() = 0;
 
   virtual int getRegesteredRequestsNumber() = 0;
+
+  virtual ~Watchdog() {
+  }
 };
 
-}
+}  //  namespace request_watchdog
 
-#endif // SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_WATCHDOG_H_
+#endif  // SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_WATCHDOG_H_

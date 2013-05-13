@@ -4,7 +4,6 @@ include_directories (
   ../../../src/components/request_watchdog/include
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src/components/utils/include/
-  ../../../src/thirdPartyLibs/MessageBroker/include/
 )
 
 set(LIBRARIES
@@ -13,6 +12,7 @@ set(LIBRARIES
     gmock
     gmock_main
     RequestWatchdog
+    Utils
 )
 
 create_test("test_RequestWatchdogTest" "./request_watchdog_test.cpp" "${LIBRARIES}")

@@ -36,27 +36,27 @@
 #ifndef SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_WATCHDOG_H_
 #define SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_WATCHDOG_H_
 
-#include "utils/logger.h"
-#include "request_watchdog/watchdog.h"
-
 #include <list>
+#include <map>
+#include "request_watchdog/watchdog.h"
+#include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/date_time.h"
+#include "utils/synchronisation_primitives.h"
 
 namespace request_watchdog {
 
 class RequestWatchdog : public Watchdog {
-
  public:
   static Watchdog* getRequestWatchdog();
 
-  virtual void addListener(WatchdogSubscriber*);
-  virtual void removeListener(WatchdogSubscriber*);
+  virtual void addListener(WatchdogSubscriber* subscriber);
+  virtual void removeListener(WatchdogSubscriber* subscriber);
   virtual void removeAllListeners();
 
-  virtual void addRequest(RequestInfo);
-  virtual void removeRequest(RequestInfo);
+  virtual void addRequest(RequestInfo requestInfo);
+  virtual void removeRequest(RequestInfo requestInfo);
   virtual void removeAllRequests();
 
   virtual int getRegesteredRequestsNumber();
@@ -70,7 +70,7 @@ class RequestWatchdog : public Watchdog {
   static log4cxx::LoggerPtr logger_;
 
   static RequestWatchdog* sInstance_;
-  static System::Mutex instanceMutex_;
+  static threads::SynchronisationPrimitives instanceMutex_;
 
   static void notifySubscribers(RequestInfo requestInfo);
 
@@ -78,19 +78,26 @@ class RequestWatchdog : public Watchdog {
   void stopDispatcherThreadIfNeeded();
 
   static std::list<WatchdogSubscriber*> subscribers_;
-  static System::Mutex subscribersListMutex_;
+  static threads::SynchronisationPrimitives subscribersListMutex_;
 
   static std::map<RequestInfo, struct timeval> requests_;
-  static System::Mutex requestsMapMutex_;
+  static threads::SynchronisationPrimitives requestsMapMutex_;
 
   class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {
    public:
+     QueueDispatcherThreadDelegate();
+
      void threadMain();
-   };
+
+   private:
+     DISALLOW_COPY_AND_ASSIGN(QueueDispatcherThreadDelegate);
+  };
 
   threads::Thread queueDispatcherThread;
+
+  DISALLOW_COPY_AND_ASSIGN(RequestWatchdog);
 };
 
-}
+}  //  namespace request_watchdog
 
-#endif // SRC_COMPONENTS_REQUEST_RESPONCE_WATCHDOG_INCLUDE__REQUEST_RESPONCE_WATCHDOG_REQUEST_RESPONCE_WATCHDOG_H_
+#endif  // SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_WATCHDOG_H_

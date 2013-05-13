@@ -39,8 +39,8 @@
 namespace request_watchdog {
 
 struct RequestInfo {
-
-  RequestInfo(int FunctionId, int ConnectionID, int CorrelationId, int CustomTimeout);
+  RequestInfo(int FunctionId, int ConnectionID
+            , int CorrelationId, int CustomTimeout);
 
   int functionID_;
   int connectionID_;
@@ -52,6 +52,6 @@ struct RequestInfo {
   friend bool operator<(const RequestInfo& left, const RequestInfo& right);
 };
 
-}
+}  //  namespace request_watchdog
 
-#endif // SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_INFO_H_
+#endif  // SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_INFO_H_
