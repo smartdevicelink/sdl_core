@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -31,50 +32,46 @@
 */
 
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_COMMAND_H_
 
-#include "utils/shared_ptr.h"
-#include "SmartObjects/CSmartObject.hpp"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/command_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager  {
-
-  /**
-    * @brief SmartObject type
-  **/
-  typedef utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> MessageSharedPtr;
 
   namespace commands  {
 
     /**
-      * @brief Base command class
+      * @brief Register app interface request  command class
     **/
-    class Command  {
+    class RegisterAppInterfaceCommand: public CommandImpl  {
     public:
       /**
-        * @brief Command initialization function
+        * \brief RegisterAppInterfaceCommandCommand class constructor
       **/
-      virtual bool Init() = 0;
+      explicit RegisterAppInterfaceCommand(const MessageSharedPtr& message)
+        : message_(message)  {}
+
+      /**
+        * \brief RegisterAppInterfaceCommandCommand class destructor
+      **/
+      virtual ~RegisterAppInterfaceCommand() {}
 
       /**
         * @brief Execute command
       **/
-      virtual void Run() = 0;
+      virtual void Run();
+      // virtual void cleanUp() = 0;
 
-      /**
-        * @brief Free resources
-      **/
-      virtual bool CleanUp() = 0;
+    private:
+      MessageSharedPtr message_;
 
-      /**
-        * \brief Command class destructor
-      **/
-      virtual ~Command() {}
+      DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceCommand);
     };
 
-  }  // namespace commands
+  }  // namespace command
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_COMMAND_H_

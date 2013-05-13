@@ -16,6 +16,7 @@ set (SOURCES
 ./src/command_impl.cc
 ./src/get_device_list_command.cc
 ./src/get_device_list_response_command.cc
+./src/commands/register_app_interface_command.cc
 )
 
 
