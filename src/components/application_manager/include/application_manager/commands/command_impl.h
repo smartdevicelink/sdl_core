@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_IMPL
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_IMPL
 
-#include "application_manager/command.h"
+#include "application_manager/commands/command.h"
 
 namespace application_manager {
  

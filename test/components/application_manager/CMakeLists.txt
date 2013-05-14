@@ -21,4 +21,4 @@ set(LIBRARIES
     jsoncpp
 )
 
-create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")
+# create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")

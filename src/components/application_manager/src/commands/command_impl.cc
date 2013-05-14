@@ -30,7 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "application_manager/command_impl.h"
+#include "application_manager/commands/command_impl.h"
 
 namespace application_manager {
  

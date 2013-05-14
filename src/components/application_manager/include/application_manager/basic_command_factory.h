@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_BASIC_COMMAND_FACTORY_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_BASIC_COMMAND_FACTORY_H_
 
-#include "application_manager/command.h"
+#include "application_manager/commands/command.h"
 
 namespace application_manager  {
 

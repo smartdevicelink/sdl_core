@@ -30,22 +30,30 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_GET_DEVICE_LIST_COMMAND
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_GET_DEVICE_LIST_COMMAND
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_GET_DEVICE_LIST_RESPONSE_COMMAND
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_GET_DEVICE_LIST_RESPONSE_COMMAND
 
-#include "application_manager/command_impl.h"
+#include "application_manager/commands/command_impl.h"
 
 namespace application_manager {
+
 namespace commands {
 
-class GetDeviceListCommand : public CommandImpl {
+class GetDeviceListResponseCommand : public CommandImpl {
 public:
-	~GetDeviceListCommand();
+	GetDeviceListResponseCommand(int result_code,
+								 std::vector<std::string> * device_list);
+	~GetDeviceListResponseCommand();
 	void run();
+
+private:
+	std::vector<std::string> * device_list_;
+	int result_code_;
 
 };
 
 } // namespace commands
+
 } // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_GET_DEVICE_LIST_COMMAND
+#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_GET_DEVICE_LIST_RESPONSE_COMMAND

@@ -29,43 +29,20 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-#include "get_device_list_response_command.h"
-#include "JSONHandler/CSmartFactory.hpp"
-#include "SmartObjects/CSmartObject.hpp"
+
+#include "application_manager/commands/get_device_list_command.h"
 
 namespace application_manager {
 namespace commands {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+GetDeviceListCommand::~GetDeviceListCommand() {
 
-GetDeviceListResponseCommand::GetDeviceListResponseCommand(
-		int result_code,
-		std::vector<std::string> * device_list)
-: device_list_(NULL)
-, result_code_(result_code) {
-	device_list_ = device_list;
 }
 
-GetDeviceListResponseCommand::~GetDeviceListResponseCommand() {
-	device_list_ = NULL;
-	result_code_ = -1;
+void GetDeviceListCommand::run() {
+	//application_manager::ApplicationManager.getInstance().getDeviceList();
 }
-	
-void GetDeviceListResponseCommand::run() {
-	smart_objects::CSmartObject response;
-	response[S_PARAMS][S_MESSAGE_TYPE] = "Response";
-	
-	if (device_list_) {
-		for(int i = 0; i < device_list_->size(); ++i) {
-			response[S_MSG_PARAMS]["deviceList"][i] = device_list_->at(i);
-		}
-	}
-	response[S_MSG_PARAMS]["code"] = result_code_;
-	//response.setSchema();
-	//if (response.isValid() == smart_objcets::Errors::OK) ApplicationManger->sendMessage();
-}
-
 
 } // namespace commands
 } // namespace application_manager
+
