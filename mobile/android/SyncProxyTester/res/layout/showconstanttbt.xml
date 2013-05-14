@@ -1,78 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scrollView1"
+    android:id="@+id/showconstanttbt_Root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
-    
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	    android:id="@+id/itemRoot"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_marginLeft="10dip"
-	    android:layout_marginRight="10dip"
-	    android:minWidth="300px"
-	    android:orientation="vertical"
-	    android:paddingLeft="20dip"
-	    android:paddingRight="20dip" >
-	    
-	    <TextView android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" android:layout_weight="1"
-	        android:textStyle="bold" android:text="Navigation Text 1">
-	    </TextView>
-	    <EditText android:text="Navigation Text 1" android:id="@+id/txtNavigationText1"
-	        android:layout_width="fill_parent" android:layout_height="wrap_content"
-	        android:visibility="visible" android:freezesText="true">
-	    </EditText>
-	    <TextView android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" android:layout_weight="1"
-	        android:textStyle="bold" android:text="Navigation Text 2">
-	    </TextView>
-	    <EditText android:text="Navigation Text 2" android:id="@+id/txtNavigationText2"
-	        android:layout_width="fill_parent" android:layout_height="wrap_content"
-	        android:visibility="visible" android:freezesText="true">
-	    </EditText>
-	    <TextView android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" android:layout_weight="1"
-	        android:textStyle="bold" android:text="ETA">
-	    </TextView>
-	    <EditText android:text="12:34" android:id="@+id/txtEta"
-	        android:layout_width="fill_parent" android:layout_height="wrap_content"
-	        android:visibility="visible" android:freezesText="true">
-	    </EditText>
-	    <TextView android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" android:layout_weight="1"
-	        android:textStyle="bold" android:text="Total Distance">
-	    </TextView>
-	    <EditText android:text="100 Miles" android:id="@+id/txtTotalDistance"
-	        android:layout_width="fill_parent" android:layout_height="wrap_content"
-	        android:visibility="visible" android:freezesText="true">
-	    </EditText>
-	    <TextView android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" android:layout_weight="1"
-	        android:textStyle="bold" android:text="Distance To Maneuver">
-	    </TextView>
-	    <EditText android:text="50" android:id="@+id/txtDistanceToManeuver"
-	        android:layout_width="fill_parent" android:layout_height="wrap_content"
-	        android:visibility="visible" android:freezesText="true">
-	    </EditText>
-	    <TextView android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" android:layout_weight="1"
-	        android:textStyle="bold" android:text="Distance To Maneuver Scale">
-	    </TextView>
-	    <EditText android:text="100" android:id="@+id/txtDistanceToManeuverScale"
-	        android:layout_width="fill_parent" android:layout_height="wrap_content"
-	        android:visibility="visible" android:freezesText="true">
-	    </EditText>
-	    <CheckBox android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" android:id="@+id/chkManeuverComplete"
-	        android:text="Maneuver Complete?" android:checked="false">
-	    </CheckBox>
 
-	    <Button
-	        android:id="@+id/showconstanttbt_btnSoftButtons"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:text="@string/softButtons" />
-	</LinearLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:minWidth="300dp"
+        android:orientation="vertical"
+        android:paddingLeft="20dip"
+        android:paddingRight="20dip" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/showconstanttbt_navText1"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/showconstanttbt_txtNavigationText1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="textCapWords"
+            android:maxLength="500"
+            android:text="@string/showconstanttbt_navText1Default"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/showconstanttbt_navText2"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/showconstanttbt_txtNavigationText2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="textCapWords"
+            android:maxLength="500"
+            android:text="@string/showconstanttbt_navText2Default"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/showconstanttbt_eta"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/showconstanttbt_txtEta"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="time"
+            android:maxLength="500"
+            android:text="@string/showconstanttbt_etaDefault"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/showconstanttbt_totalDistance"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/showconstanttbt_txtTotalDistance"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="textCapWords"
+            android:maxLength="500"
+            android:text="@string/showconstanttbt_totalDistanceDefault"
+            android:visibility="visible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <CheckBox
+                android:id="@+id/showconstanttbt_turnIconCheck"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:checked="true"
+                android:text="@string/showconstanttbt_turnIconCheck" />
+
+            <Spinner
+                android:id="@+id/showconstanttbt_turnIconType"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/showconstanttbt_turnIconValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:text="@string/showconstanttbt_turnIconValue" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/showconstanttbt_distanceToManeuver"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/showconstanttbt_txtDistanceToManeuver"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="numberDecimal"
+            android:maxLength="10"
+            android:text="@string/showconstanttbt_distanceToManeuverDefault"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/showconstanttbt_distanceToManeuverScale"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/showconstanttbt_txtDistanceToManeuverScale"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="numberDecimal"
+            android:maxLength="10"
+            android:text="@string/showconstanttbt_distanceToManeuverScaleDefault"
+            android:visibility="visible" />
+
+        <CheckBox
+            android:id="@+id/showconstanttbt_chkManeuverComplete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/showconstanttbt_isManeuverComplete" />
+
+        <Button
+            android:id="@+id/showconstanttbt_btnSoftButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/softButtons" />
+    </LinearLayout>
+
 </ScrollView>

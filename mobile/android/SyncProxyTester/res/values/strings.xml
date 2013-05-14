@@ -91,5 +91,20 @@
     <string name="createinteractionchoiceset_choice3Default">3rd item</string>
     <string name="createinteractionchoiceset_choice3VRDefault">Command three</string>
     <string name="createinteractionchoiceset_choice3ImageValue">turn_forward.png</string>
+    <string name="showconstanttbt_navText1">Navigation Text 1</string>
+    <string name="showconstanttbt_navText1Default">Navigation Text 1</string>
+    <string name="showconstanttbt_navText2">Navigation Text 2</string>
+    <string name="showconstanttbt_navText2Default">Navigation Text 2</string>
+    <string name="showconstanttbt_eta">ETA</string>
+    <string name="showconstanttbt_etaDefault">12:34</string>
+    <string name="showconstanttbt_totalDistance">Total Distance</string>
+    <string name="showconstanttbt_totalDistanceDefault">100 Miles</string>
+    <string name="showconstanttbt_turnIconCheck">Use Turn Icon</string>
+    <string name="showconstanttbt_turnIconValue">turn_right.png</string>
+    <string name="showconstanttbt_distanceToManeuver">Distance To Maneuver</string>
+    <string name="showconstanttbt_distanceToManeuverDefault">50</string>
+    <string name="showconstanttbt_distanceToManeuverScale">Distance To Maneuver Scale</string>
+    <string name="showconstanttbt_distanceToManeuverScaleDefault">100</string>
+    <string name="showconstanttbt_isManeuverComplete">Maneuver Complete?</string>
 
 </resources>

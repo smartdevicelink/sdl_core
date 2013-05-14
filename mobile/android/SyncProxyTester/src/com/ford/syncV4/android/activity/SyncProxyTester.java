@@ -88,6 +88,7 @@ import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
 import com.ford.syncV4.proxy.rpc.DialNumber;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
+import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
@@ -144,6 +145,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	private static final String ButtonSubscriptions = "ButtonSubscriptions";
 	private static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
+	/** Name of a fictional request. See {@link MakeMeFeelGoodRequest}. */
+	private static final String MakeMeFeelGood = "MakeMeFeelGood";
 
 	/**
 	 * The name of the file where all the data coming with
@@ -256,6 +259,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * during this app launch.
 	 */
 	private static boolean isFirstActivityRun = true;
+	
+	/**
+	 * A custom {@link RPCRequest} subclass that is not present in the
+	 * specification. Used to test that the response is {@link GenericResponse}.
+	 */
+	class MakeMeFeelGoodRequest extends RPCRequest {
+		public MakeMeFeelGoodRequest() {
+			super("MakeMeFeelGood");
+		}
+		
+		public MakeMeFeelGoodRequest(Hashtable hash) {
+			super(hash);
+		}
+	}
+	
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -979,6 +997,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				v1Functions.add(Names.UnsubscribeButton);
 				// it's the name of the menu item for the last two commands
 				v1Functions.add(ButtonSubscriptions);
+				v1Functions.add(MakeMeFeelGood);
 			}
 			
 			if (v1Functions.contains(functionName)) {
@@ -1028,6 +1047,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, protocolVersion, Names.AlertManeuver);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.UpdateTurnList);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.DialNumber);
+			addToFunctionsAdapter(adapter, protocolVersion, MakeMeFeelGood);
+			
 			adapter.sort(new Comparator<String>() {
 				@Override
 				public int compare(String lhs, String rhs) {
@@ -1170,14 +1191,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final Spinner spnSpeakType3 = (Spinner) layout.findViewById(R.id.spnSpeakType3);
 							final Spinner spnSpeakType4 = (Spinner) layout.findViewById(R.id.spnSpeakType4);
 							
-							ArrayAdapter<SpeechCapabilities> speechSpinnerAdapter = new ArrayAdapter<SpeechCapabilities>(adapter.getContext(), android.R.layout.simple_spinner_item, SpeechCapabilities.values()); 
+							ArrayAdapter<SpeechCapabilities> speechSpinnerAdapter = new ArrayAdapter<SpeechCapabilities>(
+									adapter.getContext(), android.R.layout.simple_spinner_item, SpeechCapabilities.values());
+							int textCapabilityPos = speechSpinnerAdapter.getPosition(SpeechCapabilities.TEXT);
 							spnSpeakType1.setAdapter(speechSpinnerAdapter);
+							spnSpeakType1.setSelection(textCapabilityPos);
 							spnSpeakType2.setAdapter(speechSpinnerAdapter);
-							spnSpeakType2.setSelection(3);
+							spnSpeakType2.setSelection(textCapabilityPos);
 							spnSpeakType3.setAdapter(speechSpinnerAdapter);
+							spnSpeakType3.setSelection(textCapabilityPos);
 							spnSpeakType4.setAdapter(speechSpinnerAdapter);
-							spnSpeakType4.setSelection(1);
-							spnSpeakType4.setEnabled(false);
+							spnSpeakType4.setSelection(textCapabilityPos);
 							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -1450,10 +1474,19 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtMinutes = (EditText) layout.findViewById(R.id.txtMinutes);
 							final EditText txtSeconds = (EditText) layout.findViewById(R.id.txtSeconds);
 							final Spinner spnUpdateMode = (Spinner) layout.findViewById(R.id.spnUpdateMode);
+							
+							List<UpdateMode> updateModes = Arrays.asList(UpdateMode.values());
+							if (!v2Features) {
+								// CLEAR UpdateMode appeared in protocol v2
+								updateModes = new ArrayList<UpdateMode>(updateModes);
+								updateModes.remove(UpdateMode.CLEAR);
+							}
+							
 							ArrayAdapter<UpdateMode> spinnerAdapter = new ArrayAdapter<UpdateMode>(adapter.getContext(),
-									android.R.layout.simple_spinner_item, UpdateMode.values());
+									android.R.layout.simple_spinner_item, updateModes);
 							spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 							spnUpdateMode.setAdapter(spinnerAdapter);
+							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
@@ -1983,95 +2016,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.ShowConstantTBT) {
-							//ShowConstantTBT
-							AlertDialog.Builder builder;
-							AlertDialog dlg;
-							
-							final Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.showconstanttbt, null);
-							
-							final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.txtNavigationText1);
-							final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.txtNavigationText2);
-							final EditText txtEta = (EditText) layout.findViewById(R.id.txtEta);
-							final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.txtTotalDistance);
-							
-							final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.txtDistanceToManeuver);
-							final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.txtDistanceToManeuverScale);
-							
-							final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.chkManeuverComplete);
-
-							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb1.setText("Reply");
-							sb1.setType(SoftButtonType.SBT_TEXT);
-							sb1.setIsHighlighted(false);
-							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb2.setText("Close");
-							sb2.setType(SoftButtonType.SBT_TEXT);
-							sb2.setIsHighlighted(false);
-							sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-							currentSoftButtons = new Vector<SoftButton>();
-							currentSoftButtons.add(sb1);
-							currentSoftButtons.add(sb2);
-
-							Button btnSoftButtons = (Button) layout.findViewById(R.id.showconstanttbt_btnSoftButtons);
-							btnSoftButtons.setOnClickListener(new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									IntentHelper.addObjectForKey(currentSoftButtons,
-											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
-									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
-											SHOWCONSTANTTBT_MAXSOFTBUTTONS);
-									startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
-								}
-							});
-							
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									Image turnIcon = new Image();
-									turnIcon.setValue("Value");
-									turnIcon.setImageType(ImageType.STATIC);
-									try {
-										ShowConstantTBT msg = new ShowConstantTBT();
-										msg.setNavigationText1(txtNavigationText1.getText().toString());
-										msg.setNavigationText2(txtNavigationText2.getText().toString());
-										msg.setEta(txtEta.getText().toString());
-										msg.setTotalDistance(txtTotalDistance.getText().toString());
-										msg.setTurnIcon(turnIcon);
-										msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
-										msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
-										msg.setManeuverComplete(chkManeuverComplete.isChecked());
-										msg.setCorrelationID(autoIncCorrId++);
-										if (currentSoftButtons != null) {
-											msg.setSoftButtons(currentSoftButtons);
-										} else {
-											msg.setSoftButtons(new Vector<SoftButton>());
-										}
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (NumberFormatException e) {
-										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-									currentSoftButtons = null;
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									currentSoftButtons = null;
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							dlg = builder.create();
-							dlg.show();
+							sendShowConstantTBT();
 						} else if (adapter.getItem(which) == Names.AlertManeuver) {
 							//AlertManeuver
 							AlertDialog.Builder builder;
@@ -2160,6 +2105,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							sendUpdateTurnList();
 						} else if (adapter.getItem(which) == Names.DialNumber) {
 							sendDialNumber();
+						} else if (adapter.getItem(which) == MakeMeFeelGood) {
+							sendMakeMeFeelGood();
 						}
 						
 						String function = adapter.getItem(which);
@@ -2168,6 +2115,117 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+
+					/**
+					 * Opens the dialog for ShowConstantTBT message and sends it.
+					 */
+					private void sendShowConstantTBT() {
+						final Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.showconstanttbt,
+								(ViewGroup) findViewById(R.id.showconstanttbt_Root));
+						
+						final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText1);
+						final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText2);
+						final EditText txtEta = (EditText) layout.findViewById(R.id.showconstanttbt_txtEta);
+						final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.showconstanttbt_txtTotalDistance);
+						final CheckBox chkUseTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_turnIconCheck);
+						final Spinner spnTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_turnIconType);
+						final EditText txtTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_turnIconValue);
+						final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuver);
+						final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
+						final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
+						
+						final ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
+								mContext, android.R.layout.simple_spinner_item, ImageType.values());
+						imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+						
+						if (v2Features) {
+							spnTurnIconType.setAdapter(imageTypeAdapter);
+						} else {
+							int visibility = android.view.View.GONE;
+							View[] views = { chkUseTurnIcon, spnTurnIconType, txtTurnIconValue };
+							for (View view : views) {
+								view.setVisibility(visibility);
+							}
+						}
+
+						SoftButton sb1 = new SoftButton();
+						sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+						sb1.setText("Reply");
+						sb1.setType(SoftButtonType.SBT_TEXT);
+						sb1.setIsHighlighted(false);
+						sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+						SoftButton sb2 = new SoftButton();
+						sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+						sb2.setText("Close");
+						sb2.setType(SoftButtonType.SBT_TEXT);
+						sb2.setIsHighlighted(false);
+						sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+						currentSoftButtons = new Vector<SoftButton>();
+						currentSoftButtons.add(sb1);
+						currentSoftButtons.add(sb2);
+
+						Button btnSoftButtons = (Button) layout.findViewById(R.id.showconstanttbt_btnSoftButtons);
+						btnSoftButtons.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								IntentHelper.addObjectForKey(currentSoftButtons,
+										Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+								Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+								intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+										SHOWCONSTANTTBT_MAXSOFTBUTTONS);
+								startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+							}
+						});
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								try {
+									ShowConstantTBT msg = new ShowConstantTBT();
+									msg.setNavigationText1(txtNavigationText1.getText().toString());
+									msg.setNavigationText2(txtNavigationText2.getText().toString());
+									msg.setEta(txtEta.getText().toString());
+									msg.setTotalDistance(txtTotalDistance.getText().toString());
+									
+									if (v2Features && chkUseTurnIcon.isChecked()) {
+										Image image = new Image();
+										image.setImageType(imageTypeAdapter.getItem(
+												spnTurnIconType.getSelectedItemPosition()));
+										image.setValue(txtTurnIconValue.getText().toString());
+										msg.setTurnIcon(image);
+									}
+
+									msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
+									msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
+									msg.setManeuverComplete(chkManeuverComplete.isChecked());
+									msg.setCorrelationID(autoIncCorrId++);
+									if (currentSoftButtons != null) {
+										msg.setSoftButtons(currentSoftButtons);
+									} else {
+										msg.setSoftButtons(new Vector<SoftButton>());
+									}
+									_msgAdapter.logMessage(msg, true);
+									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+								} catch (NumberFormatException e) {
+									Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
+								} catch (SyncException e) {
+									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								}
+								currentSoftButtons = null;
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								currentSoftButtons = null;
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.show();
 					}
 
 					/**
@@ -3117,6 +3175,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						});
 						builder.setView(layout);
 						builder.create().show();
+					}
+					
+					/**
+					 * Sends a MakeMeFeelGoodRequest message.
+					 */
+					private void sendMakeMeFeelGood() {
+						MakeMeFeelGoodRequest msg = new MakeMeFeelGoodRequest();
+						msg.setCorrelationID(autoIncCorrId++);
+						_msgAdapter.logMessage(msg, true);
+						try {
+							ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+						} catch (SyncException e) {
+							_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+						}
 					}
 				})
 		       .setNegativeButton("Close", null)
