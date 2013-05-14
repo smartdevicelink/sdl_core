@@ -200,7 +200,6 @@ std::vector<std::string> file_system::list_files(
       }
 
       listFiles.push_back(std::string(dirElement.d_name));
-      std::cout<<"dirElement.d_name";
     }
 
     closedir(directory);
