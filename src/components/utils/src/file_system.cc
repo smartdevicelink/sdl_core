@@ -45,13 +45,13 @@
 #include <sstream>
 #include "utils/file_system.h"
 
-unsigned long int file_system::available_space() {
-  char currentAppPath[256];
-  memset((void*) currentAppPath, 0, 256);
-  getcwd(currentAppPath, 255);
+uint64_t file_system::available_space() {
+  char currentAppPath[FILENAME_MAX];
+  memset(reinterpret_cast<void*>(currentAppPath), 0, FILENAME_MAX);
+  getcwd(currentAppPath, FILENAME_MAX - 1);
 
   struct statvfs fsInfo;
-  memset((void*) &fsInfo, 0, sizeof(fsInfo));
+  memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
   statvfs(currentAppPath, &fsInfo);
   return fsInfo.f_bsize * fsInfo.f_bfree;
 }
@@ -62,6 +62,17 @@ std::string file_system::create_directory(const std::string & name) {
   }
 
   return name;
+}
+
+bool file_system::is_directory(const std::string & name) {
+  struct stat status;
+  memset(&status, 0, sizeof(status));
+
+  if (-1 == stat(name.c_str(), &status)) {
+    return false;
+  }
+
+  return S_ISDIR(status.st_mode);
 }
 
 bool file_system::is_directory_exists(const std::string & name) {
@@ -116,6 +127,55 @@ bool file_system::delete_file(const std::string & name) {
   return false;
 }
 
+void remove_directory_content(const std::string& directory_name) {
+  int return_code;
+  DIR * directory = NULL;
+  struct dirent dirElement;
+  struct dirent *result = NULL;
+
+  directory = opendir(directory_name.c_str());
+
+  if (NULL != directory) {
+    return_code = readdir_r(directory, &dirElement, &result);
+
+    for (; NULL != result && 0 == return_code;
+         return_code = readdir_r(directory, &dirElement, &result)) {
+      if (0 == strcmp(dirElement.d_name, "..")
+          || 0 == strcmp(dirElement.d_name, ".")) {
+        continue;
+      }
+
+      std::string full_element_path = directory_name + "/" + dirElement.d_name;
+
+      if (file_system::is_directory(full_element_path)) {
+        remove_directory_content(full_element_path);
+        rmdir(full_element_path.c_str());
+      } else {
+        remove(full_element_path.c_str());
+      }
+    }
+  }
+
+  closedir(directory);
+}
+
+bool file_system::remove_directory(const std::string& directory_name,
+                                   bool is_recursively) {
+  if (is_directory_exists(directory_name)
+      && has_access(directory_name, W_OK)) {
+    if (is_recursively) {
+      remove_directory_content(directory_name);
+    }
+
+    return !rmdir(directory_name.c_str());
+  }
+  return false;
+}
+
+bool file_system::has_access(const std::string& name, int how) {
+  return !access(name.c_str(), how);
+}
+
 std::vector<std::string> file_system::list_files(
     const std::string & directory_name) {
   std::vector<std::string> listFiles;
@@ -123,17 +183,26 @@ std::vector<std::string> file_system::list_files(
     return listFiles;
   }
 
+  int return_code;
   DIR * directory = NULL;
-  struct dirent* dirElement = NULL;
+  struct dirent dirElement;
+  struct dirent *result = NULL;
+
   directory = opendir(directory_name.c_str());
   if (NULL != directory) {
-    while (dirElement = readdir(directory)) {
-      if (0 == strcmp(dirElement->d_name, "..")
-          || 0 == strcmp(dirElement->d_name, ".")) {
+    return_code = readdir_r(directory, &dirElement, &result);
+
+    for (; NULL != result && 0 == return_code;
+         return_code = readdir_r(directory, &dirElement, &result)) {
+      if (0 == strcmp(dirElement.d_name, "..")
+          || 0 == strcmp(dirElement.d_name, ".")) {
         continue;
       }
-      listFiles.push_back(std::string(dirElement->d_name));
+
+      listFiles.push_back(std::string(dirElement.d_name));
+      std::cout<<"dirElement.d_name";
     }
+
     closedir(directory);
   }
 

@@ -38,23 +38,26 @@
 #include <vector>
 
 namespace file_system {
-// TODO(AK): lint error: Use int16/int64/etc, rather than the C type long
-unsigned long int available_space();
-std::string create_directory(const std::string& name);
-bool is_directory_exists(const std::string& name);
-bool is_file_exist(const std::string& name);
+  uint64_t available_space();
+  std::string create_directory(const std::string& name);
+  bool is_directory(const std::string & name);
+  bool is_directory_exists(const std::string& name);
+  bool is_file_exist(const std::string& name);
 
-/**
- * @remark - create file if it doesn't exist
- */
-bool write(const std::string& file_name,
-           const std::vector<unsigned char>& data);
+  /**
+   * @remark - create file if it doesn't exist
+   */
+  bool write(const std::string& file_name,
+             const std::vector<unsigned char>& data);
 
-std::string full_path(const std::string& name);
-bool delete_file(const std::string& name);
-std::vector<std::string> list_files(const std::string& directory_name);
-bool read_binary_file(const std::string& name,
-                      std::vector<unsigned char>& result);
+  std::string full_path(const std::string& name);
+  bool delete_file(const std::string& name);
+  bool remove_directory(const std::string& directory_name,
+                        bool is_recursively = true);
+  bool has_access(const std::string& name, int how);
+  std::vector<std::string> list_files(const std::string& directory_name);
+  bool read_binary_file(const std::string& name,
+                        std::vector<unsigned char>& result);
 }  // namespace file_system
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
