@@ -38,24 +38,102 @@
 #include <vector>
 
 namespace file_system {
+  /**
+   * @brief Get available disc space.
+   *
+   * @return free disc space.
+   */
   uint64_t available_space();
+
+  /**
+    * @brief Creates directory
+    * @param name path to directory
+    * @return path to created directory.
+    */
   std::string create_directory(const std::string& name);
+
+  /**
+    * @brief Checks the file to see whether the file is a directory
+    * @param name path to file
+    * @return returns true if file is directory.
+    */
   bool is_directory(const std::string & name);
+
+  /**
+    * @brief Is directory exist
+    * @param name path to directory
+    * @return returns true if directory is exists.
+    */
   bool is_directory_exists(const std::string& name);
+
+  /**
+    * @brief Is file exist
+    * @param name path to file
+    * @return returns true if file is exists.
+    */
   bool is_file_exist(const std::string& name);
 
   /**
-   * @remark - create file if it doesn't exist
-   */
+    * @brief Writes to file
+    *
+    * @remark - create file if it doesn't exist
+    * @param name path to file
+    * @param data data to write
+    * @return returns true if the operation is successfully.
+    */
   bool write(const std::string& file_name,
              const std::vector<unsigned char>& data);
 
+  /**
+    * @brief Returns full file path
+    *
+    * @param name file name
+    * @return returns full file path.
+    */
   std::string full_path(const std::string& name);
+
+  /**
+    * @brief Removes file
+    *
+    * @param name path to file
+    * @return returns true if the file is successfully deleted.
+    */
   bool delete_file(const std::string& name);
+
+  /**
+   * @brief Removes directory.
+   *
+   * @param name path to directory.
+   * @param is_recursively true if you need delete directory recursively, otherwise false.
+   * @return returns true if the directory is successfully deleted.
+   */
   bool remove_directory(const std::string& directory_name,
                         bool is_recursively = true);
+
+  /**
+    * @brief Check access rights
+    *
+    * @param name path to file.
+    * @param how Read/write attribute.
+    * @return returns true if file has the given mode.
+    */
   bool has_access(const std::string& name, int how);
+
+  /**
+    * @brief Lists all files in given directory
+    *
+    * @param name path to directory.
+    * @return returns list of files.
+    */
   std::vector<std::string> list_files(const std::string& directory_name);
+
+  /**
+    * @brief Reads from file
+    *
+    * @param name path to file
+    * @param result read data
+    * @return returns true if the operation is successfully.
+    */
   bool read_binary_file(const std::string& name,
                         std::vector<unsigned char>& result);
 }  // namespace file_system
