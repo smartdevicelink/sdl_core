@@ -28,10 +28,12 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATIONS
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATIONS
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
 
-namespace NsSmartDeviceLink{
+#include <string>
+
+namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class CSmartObject;
 }
@@ -41,38 +43,40 @@ namespace application_manager {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 typedef int ErrorCode;
-//class Command;
+// class Command;
 
 enum APIVersion {
-	kUnknownAPI = -1,
-	kAPIV1 = 0,
-	kAPIV2 = 1
+  kUnknownAPI = -1,
+  kAPIV1 = 0,
+  kAPIV2 = 1
 };
 
-struct Version
-{
-	APIVersion min_supported_api_version;
-	APIVersion max_supported_api_version;
+struct Version {
+  APIVersion min_supported_api_version;
+  APIVersion max_supported_api_version;
 
-	Version()
-		: min_supported_api_version(APIVersion::kUnknownAPI)
-		, max_supported_api_version(APIVersion::kUnknownAPI) {}
+  Version()
+      : min_supported_api_version(APIVersion::kUnknownAPI),
+        max_supported_api_version(APIVersion::kUnknownAPI) {
+  }
 };
 
 class Application {
-public:
-	virtual void processMessage(smart_objects::CSmartObject * message) = 0;
-	virtual void reportError(smart_objects::CSmartObject * message, ErrorCode error_code) = 0;
-	virtual const smart_objects::CSmartObject* activeMessage() const = 0;
-	virtual void clearActiveMessage() = 0;
-	virtual const Version& version() const = 0;
-	virtual int app_id() const = 0;
-	virtual const std::string& name() const = 0;
-protected:
-	virtual ~Application() {}
-	//virtual Command commandFromMessage(smart_objects::CSmartObject * message) = 0;
+ public:
+  virtual void processMessage(smart_objects::CSmartObject * message) = 0;
+  virtual void reportError(smart_objects::CSmartObject * message,
+                           ErrorCode error_code) = 0;
+  virtual const smart_objects::CSmartObject* activeMessage() const = 0;
+  virtual void clearActiveMessage() = 0;
+  virtual const Version& version() const = 0;
+  virtual int app_id() const = 0;
+  virtual const std::string& name() const = 0;
+ protected:
+  virtual ~Application() {
+  }
+  // virtual Command commandFromMessage(smart_objects::CSmartObject * message) = 0;
 };
 
-} // namespace application_manager
+}  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATIONS
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_

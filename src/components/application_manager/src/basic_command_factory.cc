@@ -28,27 +28,28 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "application_manager/basic_command_factory.h"
-
 #include "application_manager/commands/register_app_interface_command.h"
 
+// TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
 
-namespace application_manager  {
+namespace application_manager {
 
-  CommandSharedPtr BasicCommandFactory::CreateCommand(const MessageSharedPtr& message)  {
-    CommandSharedPtr command(NULL);
+CommandSharedPtr BasicCommandFactory::CreateCommand(
+    const MessageSharedPtr& message) {
+  CommandSharedPtr command(NULL);
 
-    switch(static_cast<int>((*message)[strings::params][strings::function_id])) {
-      case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
-        command.reset(new commands::RegisterAppInterfaceCommand(message));
-        break;
-      }
+  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
+      command.reset(new commands::RegisterAppInterfaceCommand(message));
+      break;
     }
-
-    return command;
   }
+
+  return command;
+}
 
 }  // namespace application_manager

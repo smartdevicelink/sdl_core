@@ -28,28 +28,26 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "application_manager/commands/command_impl.h"
 
 namespace application_manager {
- 
+
 namespace commands {
 
 CommandImpl::~CommandImpl() {
+}
 
-}
-	
 bool CommandImpl::Init() {
-	return true;
+  return true;
 }
-	
+
 bool CommandImpl::CleanUp() {
-	return true;
+  return true;
 }
 
 void CommandImpl::Run() {
-	
 }
 
 }  // namespace commands

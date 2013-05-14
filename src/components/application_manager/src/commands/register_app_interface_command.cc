@@ -29,53 +29,60 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
-
+ */
 
 #include "application_manager/commands/register_app_interface_command.h"
 #include "application_manager/application_impl.h"
 
-namespace application_manager  {
+namespace application_manager {
 
-  namespace commands  {
+namespace commands {
 
-    void RegisterAppInterfaceCommand::Run()  {
-      ApplicationImpl* application_impl =
-        new ApplicationImpl((*message_)[strings::msg_params][strings::app_id]);
+void RegisterAppInterfaceCommand::Run() {
+  ApplicationImpl* application_impl = new ApplicationImpl(
+      (*message_)[strings::msg_params][strings::app_id]);
 
-      //application_impl->set_version((*message_)[strings::msg_params][strings::sync_msg_version]);
+  // application_impl->set_version((*message_)[strings::msg_params][strings::sync_msg_version]);
 
-      application_impl->set_name((*message_)[strings::msg_params][strings::app_name]);
+  application_impl->set_name(
+      (*message_)[strings::msg_params][strings::app_name]);
 
-      application_impl->set_is_media_application((*message_)[strings::msg_params][strings::is_media_application]);
+  application_impl->set_is_media_application(
+      (*message_)[strings::msg_params][strings::is_media_application]);
 
-      if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
-        application_impl->set_vr_synonyms((*message_)[strings::msg_params][strings::vr_synonyms]);
-      }
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
+    application_impl->set_vr_synonyms(
+        (*message_)[strings::msg_params][strings::vr_synonyms]);
+  }
 
-      if ((*message_)[strings::msg_params].keyExists(strings::ngn_media_screen_app_name)) {
-        application_impl->set_ngn_media_screen_name((*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
-      }
+  if ((*message_)[strings::msg_params].keyExists(
+      strings::ngn_media_screen_app_name)) {
+    application_impl->set_ngn_media_screen_name(
+        (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
+  }
 
-      application_impl->set_language((*message_)[strings::msg_params][strings::language_desired]);
-      application_impl->set_ui_language((*message_)[strings::msg_params][strings::hmi_display_language_desired]);
+  application_impl->set_language(
+      (*message_)[strings::msg_params][strings::language_desired]);
+  application_impl->set_ui_language(
+      (*message_)[strings::msg_params][strings::hmi_display_language_desired]);
 
-      //if ((*message_)[strings::msg_params].keyExists(strings::auto_activated_id)) {
-      //  application_impl->set_mobile_app_id((*message_)[strings::msg_params][strings::auto_activated_id]);
-      //}
+  // if ((*message_)[strings::msg_params].keyExists(strings::auto_activated_id)) {
+  //   application_impl->set_mobile_app_id((*message_)[strings::msg_params][strings::auto_activated_id]);
+  // }
 
-      if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
-        application_impl->set_tts_name((*message_)[strings::msg_params][strings::tts_name]);
-      }
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
+    application_impl->set_tts_name(
+        (*message_)[strings::msg_params][strings::tts_name]);
+  }
 
-      if ((*message_)[strings::msg_params].keyExists(strings::app_type)) {
-        application_impl->set_app_types((*message_)[strings::msg_params][strings::app_type]);
-      }
+  if ((*message_)[strings::msg_params].keyExists(strings::app_type)) {
+    application_impl->set_app_types(
+        (*message_)[strings::msg_params][strings::app_type]);
+  }
 
-     // RegisterApp(ApplicationImpl);
-    }
+  // RegisterApp(ApplicationImpl);
+}
 
-
-  }  // namespace command
+}  // namespace commands
 
 }  // namespace application_manager

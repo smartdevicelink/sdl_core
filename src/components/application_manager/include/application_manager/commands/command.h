@@ -28,53 +28,55 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 
 #include "utils/shared_ptr.h"
 #include "SmartObjects/CSmartObject.hpp"
 #include "application_manager/smart_object_keys.h"
 
-namespace application_manager  {
+namespace application_manager {
+
+/**
+ * @brief SmartObject type
+ **/
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+typedef utils::SharedPtr<smart_objects::CSmartObject> MessageSharedPtr;
+
+namespace commands {
+
+/**
+ * @brief Base command class
+ **/
+class Command {
+ public:
+  /**
+   * @brief Command initialization function
+   **/
+  virtual bool Init() = 0;
 
   /**
-    * @brief SmartObject type
-  **/
-  typedef utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CSmartObject> MessageSharedPtr;
+   * @brief Execute command
+   **/
+  virtual void Run() = 0;
 
-  namespace commands  {
+  /**
+   * @brief Free resources
+   **/
+  virtual bool CleanUp() = 0;
 
-    /**
-      * @brief Base command class
-    **/
-    class Command  {
-    public:
-      /**
-        * @brief Command initialization function
-      **/
-      virtual bool Init() = 0;
+  /**
+   * \brief Command class destructor
+   **/
+  virtual ~Command() {
+  }
+};
 
-      /**
-        * @brief Execute command
-      **/
-      virtual void Run() = 0;
-
-      /**
-        * @brief Free resources
-      **/
-      virtual bool CleanUp() = 0;
-
-      /**
-        * \brief Command class destructor
-      **/
-      virtual ~Command() {}
-    };
-
-  }  // namespace commands
+}  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_

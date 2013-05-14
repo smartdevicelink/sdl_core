@@ -28,31 +28,30 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
-
+ */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_BASIC_COMMAND_FACTORY_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_BASIC_COMMAND_FACTORY_H_
 
 #include "application_manager/commands/command.h"
 
-namespace application_manager  {
+namespace application_manager {
 
-  typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
+typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
 
+/**
+ * @brief Factory class for command creation
+ **/
+class BasicCommandFactory {
+ public:
   /**
-    * @brief Factory class for command creation
-  **/
-  class BasicCommandFactory  {
-  public:
-    /**
-      * @brief Create command object and return pointer to it
-      *
-      * @param  smartObject SmartObject shared pointer.
-      * @return Pointer to created command object.
-    **/
-    static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
-  };
+   * @brief Create command object and return pointer to it
+   *
+   * @param  smartObject SmartObject shared pointer.
+   * @return Pointer to created command object.
+   **/
+  static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
+};
 
 }  // namespace application_manager
 

@@ -28,38 +28,37 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
-
+ */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_
 
 namespace application_manager {
 
-  namespace strings {
+namespace strings {
 
-    const char msg_params[]  = "msg_params";
-    const char params[]      = "params";
-    const char function_id[] = "function_id";
-    const char app_id[]      = "appId";
+const char msg_params[] = "msg_params";
+const char params[] = "params";
+const char function_id[] = "function_id";
+const char app_id[] = "appId";
 
-    const char sync_msg_version[] = "syncMsgVersion";
-    const char major_version[]    = "majorVersion";
-    const char minor_version[]    = "minorVersion";
-    const char app_name[]         = "appName";
+const char sync_msg_version[] = "syncMsgVersion";
+const char major_version[] = "majorVersion";
+const char minor_version[] = "minorVersion";
+const char app_name[] = "appName";
 
-    const char ngn_media_screen_app_name[] = "ngnMediaScreenAppName";
-    const char vr_synonyms[]               = "vrSynonyms";
-    const char uses_vehicle_data[]         = "usesVehicleData";
-    const char is_media_application[]      = "isMediaApplication";
-    const char language_desired[]          = "languageDesired";
-    const char auto_activated_id[]         = "autoActivateID";
-    const char app_type[]                  = "AppType";
-    const char tts_name[]                  = "ttsName";
+const char ngn_media_screen_app_name[] = "ngnMediaScreenAppName";
+const char vr_synonyms[] = "vrSynonyms";
+const char uses_vehicle_data[] = "usesVehicleData";
+const char is_media_application[] = "isMediaApplication";
+const char language_desired[] = "languageDesired";
+const char auto_activated_id[] = "autoActivateID";
+const char app_type[] = "AppType";
+const char tts_name[] = "ttsName";
 
-    const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
+const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 
-  }  // namespace strings
+}  // namespace strings
 
 }  // namespace application_manager
 

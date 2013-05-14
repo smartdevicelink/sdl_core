@@ -28,27 +28,27 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_IMPL
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_IMPL
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_
 
 #include "application_manager/commands/command.h"
 
 namespace application_manager {
- 
+
 namespace commands {
 
 class CommandImpl : public Command {
-public:
-	virtual ~CommandImpl();
-	virtual bool Init();
-	virtual bool CleanUp();
-	virtual void Run();
+ public:
+  virtual ~CommandImpl();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
- #endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_IMPL
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_

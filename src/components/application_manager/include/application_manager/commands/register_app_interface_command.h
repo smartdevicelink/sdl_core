@@ -29,8 +29,7 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
-
+ */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_COMMAND_H_
@@ -38,39 +37,41 @@
 #include "application_manager/commands/command_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager  {
+namespace application_manager {
 
-  namespace commands  {
+namespace commands {
 
-    /**
-      * @brief Register app interface request  command class
-    **/
-    class RegisterAppInterfaceCommand: public CommandImpl  {
-    public:
-      /**
-        * \brief RegisterAppInterfaceCommandCommand class constructor
-      **/
-      explicit RegisterAppInterfaceCommand(const MessageSharedPtr& message)
-        : message_(message)  {}
+/**
+ * @brief Register app interface request  command class
+ **/
+class RegisterAppInterfaceCommand : public CommandImpl {
+ public:
+  /**
+   * \brief RegisterAppInterfaceCommandCommand class constructor
+   **/
+  explicit RegisterAppInterfaceCommand(const MessageSharedPtr& message)
+      : message_(message) {
+  }
 
-      /**
-        * \brief RegisterAppInterfaceCommandCommand class destructor
-      **/
-      virtual ~RegisterAppInterfaceCommand() {}
+  /**
+   * \brief RegisterAppInterfaceCommandCommand class destructor
+   **/
+  virtual ~RegisterAppInterfaceCommand() {
+  }
 
-      /**
-        * @brief Execute command
-      **/
-      virtual void Run();
-      // virtual void cleanUp() = 0;
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+  // virtual void cleanUp() = 0;
 
-    private:
-      MessageSharedPtr message_;
+ private:
+  MessageSharedPtr message_;
 
-      DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceCommand);
-    };
+  DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceCommand);
+};
 
-  }  // namespace command
+}  // namespace commands
 
 }  // namespace application_manager
 
