@@ -66,7 +66,7 @@ class RequestWatchdog : public Watchdog {
  private:
   RequestWatchdog();
 
-  static const int DEFAULT_CYCLE_TIMEOUT = 25000;
+  static const int DEFAULT_CYCLE_TIMEOUT = 250000;
   static log4cxx::LoggerPtr logger_;
 
   static RequestWatchdog* sInstance_;

@@ -45,6 +45,8 @@ namespace test {
 namespace components {
 namespace request_watchdog_test {
 
+log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("request_watchdog_test"));
+
 class RequestWatchdogTest : public ::testing::Test {
  protected:
     virtual void SetUp() {
@@ -91,39 +93,98 @@ class RequestWatchdogTest : public ::testing::Test {
   }
 };
 
-class RequestWatchdogSubscriberTest : public request_watchdog::
+class RequestWatchdogSubscriber : public request_watchdog::
   WatchdogSubscriber {
  public:
   /**
   * Default constructor
   */
-  RequestWatchdogSubscriberTest(): WatchdogSubscriber() {
+  RequestWatchdogSubscriber(): WatchdogSubscriber() {
   }
 
   virtual void onTimeoutExpired(request_watchdog::RequestInfo requestInfo) {
-    timeoutExpiredCallback(requestInfo);
+    LOG4CXX_TRACE_ENTER(logger);
+    LOG4CXX_INFO(logger, this << "::onTimeoutExpired\n"
+                 << "for the following  request: "
+                 << "\n ConnectionID : " << requestInfo.connectionID_
+                 << "\n CorrelationID : " << requestInfo.correlationID_
+                 << "\n FunctionID : " << requestInfo.functionID_
+                 << "\n CustomTimeOut : " << requestInfo.customTimeout_
+                 << "\n");
   }
 
   /**
   * Default destructor
   */
-  virtual ~RequestWatchdogSubscriberTest() {
+  virtual ~RequestWatchdogSubscriber() {
     destructor();
   }
 
   MOCK_METHOD0(destructor, void());
-  MOCK_METHOD1(timeoutExpiredCallback, void(request_watchdog::RequestInfo requestInfo));
 };
 
 TEST_F(RequestWatchdogTest, Constructor) {
   test::components::request_watchdog_test::
-    RequestWatchdogSubscriberTest* object1 =
+    RequestWatchdogSubscriber* object1 =
   new test::components::request_watchdog_test::
-    RequestWatchdogSubscriberTest();
+    RequestWatchdogSubscriber();
 
   EXPECT_CALL(*object1, destructor()).Times(0);
   EXPECT_CALL(*object1, destructor()).Times(1);
   delete object1;
+}
+
+TEST_F(RequestWatchdogTest, TimeoutExpiredCallbackTest) {
+  request_watchdog::WatchdogSubscriber* subscriber_one =
+      new RequestWatchdogSubscriber();
+  request_watchdog::WatchdogSubscriber* subscriber_two =
+      new RequestWatchdogSubscriber();
+
+  request_watchdog::RequestWatchdog::
+    getRequestWatchdog()->addListener(subscriber_one);
+
+  request_watchdog::RequestWatchdog::
+      getRequestWatchdog()->addListener(subscriber_two);
+
+  usleep(10000000);
+
+  request_watchdog::RequestInfo requestInfo = request_watchdog::RequestInfo(
+                                rand_r(&seed) % INT_MAX,
+                                rand_r(&seed) % INT_MAX,
+                                rand_r(&seed) % INT_MAX,
+                                5000);
+
+  request_watchdog::RequestWatchdog::
+      getRequestWatchdog()->addRequest(requestInfo);
+
+  request_watchdog::RequestWatchdog::
+        getRequestWatchdog()->addRequest(generateRequestInfo());
+
+  usleep(10000000);
+
+  ASSERT_EQ(1, request_watchdog::RequestWatchdog::
+          getRequestWatchdog()->getRegesteredRequestsNumber());
+
+  request_watchdog::RequestWatchdog::
+        getRequestWatchdog()->removeAllRequests();
+
+  usleep(10000000);
+
+  ASSERT_EQ(0, request_watchdog::RequestWatchdog::
+        getRequestWatchdog()->getRegesteredRequestsNumber());
+
+  usleep(10000000);
+
+  request_watchdog::RequestWatchdog::
+        getRequestWatchdog()->addRequest(generateRequestInfo());
+
+  usleep(10000000);
+
+  request_watchdog::RequestWatchdog::
+        getRequestWatchdog()->removeAllListeners();
+
+  delete subscriber_one;
+  delete subscriber_two;
 }
 
 TEST_F(RequestWatchdogTest, GetWachdogInsanceSingleThread) {
@@ -153,34 +214,23 @@ TEST_F(RequestWatchdogTest, SimpleAddRemoveRequest) {
   request_watchdog::RequestInfo requestOne = generateRequestInfo();
   request_watchdog::RequestInfo requestTwo = generateRequestInfo();
 
-  if ( requestOne == requestTwo ) {
-    watchdogInstance->addRequest(requestOne);
-    ASSERT_EQ(1, watchdogInstance->getRegesteredRequestsNumber());
+  watchdogInstance->addRequest(requestOne);
+  ASSERT_EQ(1, watchdogInstance->getRegesteredRequestsNumber());
 
-    watchdogInstance->addRequest(requestOne);
-    ASSERT_EQ(2, watchdogInstance->getRegesteredRequestsNumber());
+  watchdogInstance->addRequest(requestOne);
+  ASSERT_EQ(1, watchdogInstance->getRegesteredRequestsNumber());
 
-    watchdogInstance->removeRequest(requestTwo);
-    ASSERT_EQ(1, watchdogInstance->getRegesteredRequestsNumber());
+  watchdogInstance->addRequest(requestTwo);
+  ASSERT_EQ(2, watchdogInstance->getRegesteredRequestsNumber());
 
-    watchdogInstance->removeRequest(requestTwo);
-    ASSERT_EQ(0, watchdogInstance->getRegesteredRequestsNumber());
-  } else {
-    watchdogInstance->addRequest(requestOne);
-    ASSERT_EQ(1, watchdogInstance->getRegesteredRequestsNumber());
+  watchdogInstance->removeRequest(requestTwo);
+  ASSERT_EQ(1, watchdogInstance->getRegesteredRequestsNumber());
 
-    watchdogInstance->addRequest(requestOne);
-    ASSERT_EQ(2, watchdogInstance->getRegesteredRequestsNumber());
+  watchdogInstance->removeRequest(requestTwo);
+  ASSERT_EQ(1, watchdogInstance->getRegesteredRequestsNumber());
 
-    watchdogInstance->addRequest(requestTwo);
-    ASSERT_EQ(3, watchdogInstance->getRegesteredRequestsNumber());
-
-    watchdogInstance->removeRequest(requestTwo);
-    ASSERT_EQ(2, watchdogInstance->getRegesteredRequestsNumber());
-
-    watchdogInstance->removeRequest(requestTwo);
-    ASSERT_EQ(2, watchdogInstance->getRegesteredRequestsNumber());
-  }
+  watchdogInstance->removeRequest(requestOne);
+  ASSERT_EQ(0, watchdogInstance->getRegesteredRequestsNumber());
 }
 
 }  //  namespace request_watchdog_test
@@ -189,5 +239,8 @@ TEST_F(RequestWatchdogTest, SimpleAddRemoveRequest) {
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleMock(&argc, argv);
+
+  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+
   return RUN_ALL_TESTS();
 }

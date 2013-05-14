@@ -80,6 +80,8 @@ void RequestWatchdog::addListener(WatchdogSubscriber* subscriber) {
   subscribers_.push_back(subscriber);
   startDispatcherThreadIfNeeded();
 
+  LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was added." );
+
   subscribersListMutex_.unlock();
 }
 
@@ -90,6 +92,8 @@ void RequestWatchdog::removeListener(WatchdogSubscriber* subscriber) {
 
   subscribers_.remove(subscriber);
   stopDispatcherThreadIfNeeded();
+
+  LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was removed." );
 
   subscribersListMutex_.unlock();
 }
@@ -129,6 +133,13 @@ void RequestWatchdog::addRequest(RequestInfo requestInfo) {
   requests_.insert(std::pair<RequestInfo, struct timeval>(requestInfo,
                    date_time::DateTime::getCurrentTime()));
 
+  LOG4CXX_INFO(logger_, "Add request "
+                     << "\n ConnectionID : " << requestInfo.connectionID_
+                     << "\n CorrelationID : " << requestInfo.correlationID_
+                     << "\n FunctionID : " << requestInfo.functionID_
+                     << "\n CustomTimeOut : " << requestInfo.customTimeout_
+                     << "\n" );
+
   startDispatcherThreadIfNeeded();
 
   requestsMapMutex_.unlock();
@@ -140,6 +151,13 @@ void RequestWatchdog::removeRequest(RequestInfo requestInfo) {
   requestsMapMutex_.lock();
 
   requests_.erase(requestInfo);
+
+  LOG4CXX_INFO(logger_, "Delete request "
+                     << "\n ConnectionID : " << requestInfo.connectionID_
+                     << "\n CorrelationID : " << requestInfo.correlationID_
+                     << "\n FunctionID : " << requestInfo.functionID_
+                     << "\n CustomTimeOut : " << requestInfo.customTimeout_
+                     << "\n" );
 
   stopDispatcherThreadIfNeeded();
 
@@ -208,20 +226,39 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     it = requests_.begin();
 
     while ( it != requests_.end() ) {
+
+      LOG4CXX_INFO(logger_, "Checking timeout for the following request :"
+                         << "\n ConnectionID : " << (*it).first.connectionID_
+                         << "\n CorrelationID : " << (*it).first.correlationID_
+                         << "\n FunctionID : " << (*it).first.functionID_
+                         << "\n CustomTimeOut : " << (*it).first.customTimeout_
+                         << "\n" );
+
       if ( (*it).first.customTimeout_ <
           date_time::DateTime::calculateTimeSpan((*it).second) ) {
       // Request is expired - notify all subscribers and remove request
-      notifySubscribers((*it).first);
-      RequestWatchdog::getRequestWatchdog()->removeRequest((*it).first);
-    }
 
+        LOG4CXX_INFO(logger_, "Timeout had expired for the following request :"
+                           << "\n ConnectionID : " << (*it).first.connectionID_
+                           << "\n CorrelationID : " << (*it).first.correlationID_
+                           << "\n FunctionID : " << (*it).first.functionID_
+                           << "\n CustomTimeOut : " << (*it).first.customTimeout_
+                           << "\n" );
+
+        requestsMapMutex_.unlock();
+        notifySubscribers((*it).first);
+        RequestWatchdog::getRequestWatchdog()->removeRequest((*it).first);
+        break;
+      }
+
+      cycleDuration = date_time::DateTime::calculateTimeSpan(cycleStartTime);
+
+      cycleSleepInterval += DEFAULT_CYCLE_TIMEOUT *
+          (cycleDuration / DEFAULT_CYCLE_TIMEOUT + 1);
+
+      it++;
+    }
     requestsMapMutex_.unlock();
-
-    cycleDuration = date_time::DateTime::calculateTimeSpan(cycleStartTime);
-
-    cycleSleepInterval += DEFAULT_CYCLE_TIMEOUT *
-         (cycleDuration / DEFAULT_CYCLE_TIMEOUT + 1);
-    }
   }
 }
 
