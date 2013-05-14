@@ -57,7 +57,7 @@ uint64_t file_system::available_space() {
 }
 
 std::string file_system::create_directory(const std::string & name) {
-  if (!is_directory_exists(name)) {
+  if (!directory_exists(name)) {
     mkdir(name.c_str(), S_IRWXU);
   }
 
@@ -75,7 +75,7 @@ bool file_system::is_directory(const std::string & name) {
   return S_ISDIR(status.st_mode);
 }
 
-bool file_system::is_directory_exists(const std::string & name) {
+bool file_system::directory_exists(const std::string & name) {
   struct stat status;
   memset(&status, 0, sizeof(status));
 
@@ -86,7 +86,7 @@ bool file_system::is_directory_exists(const std::string & name) {
   return true;
 }
 
-bool file_system::is_file_exist(const std::string & name) {
+bool file_system::file_exists(const std::string & name) {
   struct stat status;
   memset(&status, 0, sizeof(status));
 
@@ -121,31 +121,31 @@ std::string file_system::full_path(const std::string & file) {
 }
 
 bool file_system::delete_file(const std::string & name) {
-  if (is_file_exist(name)) {
+  if (file_exists(name) && is_accessible(name, W_OK)) {
     return !remove(name.c_str());
   }
   return false;
 }
 
 void remove_directory_content(const std::string& directory_name) {
-  int return_code;
+  int return_code = 0;
   DIR * directory = NULL;
-  struct dirent dirElement;
+  struct dirent dir_element;
   struct dirent *result = NULL;
 
   directory = opendir(directory_name.c_str());
 
   if (NULL != directory) {
-    return_code = readdir_r(directory, &dirElement, &result);
+    return_code = readdir_r(directory, &dir_element, &result);
 
     for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, &dirElement, &result)) {
-      if (0 == strcmp(dirElement.d_name, "..")
-          || 0 == strcmp(dirElement.d_name, ".")) {
+         return_code = readdir_r(directory, &dir_element, &result)) {
+      if (0 == strcmp(dir_element.d_name, "..")
+          || 0 == strcmp(dir_element.d_name, ".")) {
         continue;
       }
 
-      std::string full_element_path = directory_name + "/" + dirElement.d_name;
+      std::string full_element_path = directory_name + "/" + dir_element.d_name;
 
       if (file_system::is_directory(full_element_path)) {
         remove_directory_content(full_element_path);
@@ -161,8 +161,8 @@ void remove_directory_content(const std::string& directory_name) {
 
 bool file_system::remove_directory(const std::string& directory_name,
                                    bool is_recursively) {
-  if (is_directory_exists(directory_name)
-      && has_access(directory_name, W_OK)) {
+  if (directory_exists(directory_name)
+      && is_accessible(directory_name, W_OK)) {
     if (is_recursively) {
       remove_directory_content(directory_name);
     }
@@ -172,34 +172,34 @@ bool file_system::remove_directory(const std::string& directory_name,
   return false;
 }
 
-bool file_system::has_access(const std::string& name, int how) {
+bool file_system::is_accessible(const std::string& name, int how) {
   return !access(name.c_str(), how);
 }
 
 std::vector<std::string> file_system::list_files(
     const std::string & directory_name) {
   std::vector<std::string> listFiles;
-  if (!is_directory_exists(directory_name)) {
+  if (!directory_exists(directory_name)) {
     return listFiles;
   }
 
-  int return_code;
+  int return_code = 0;
   DIR * directory = NULL;
-  struct dirent dirElement;
+  struct dirent dir_element;
   struct dirent *result = NULL;
 
   directory = opendir(directory_name.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, &dirElement, &result);
+    return_code = readdir_r(directory, &dir_element, &result);
 
     for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, &dirElement, &result)) {
-      if (0 == strcmp(dirElement.d_name, "..")
-          || 0 == strcmp(dirElement.d_name, ".")) {
+         return_code = readdir_r(directory, &dir_element, &result)) {
+      if (0 == strcmp(dir_element.d_name, "..")
+          || 0 == strcmp(dir_element.d_name, ".")) {
         continue;
       }
 
-      listFiles.push_back(std::string(dirElement.d_name));
+      listFiles.push_back(std::string(dir_element.d_name));
     }
 
     closedir(directory);
@@ -210,7 +210,7 @@ std::vector<std::string> file_system::list_files(
 
 bool file_system::read_binary_file(const std::string& name,
                                    std::vector<unsigned char>& result) {
-  if (!is_file_exist(name))
+  if (!file_exists(name) || !is_accessible(name, R_OK))
     return false;
 
   std::ifstream file(name.c_str(), std::ios_base::binary);

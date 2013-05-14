@@ -64,14 +64,14 @@ namespace file_system {
     * @param name path to directory
     * @return returns true if directory is exists.
     */
-  bool is_directory_exists(const std::string& name);
+  bool directory_exists(const std::string& name);
 
   /**
     * @brief Is file exist
     * @param name path to file
     * @return returns true if file is exists.
     */
-  bool is_file_exist(const std::string& name);
+  bool file_exists(const std::string& name);
 
   /**
     * @brief Writes to file
@@ -117,7 +117,7 @@ namespace file_system {
     * @param how Read/write attribute.
     * @return returns true if file has the given mode.
     */
-  bool has_access(const std::string& name, int how);
+  bool is_accessible(const std::string& name, int how);
 
   /**
     * @brief Lists all files in given directory

@@ -1761,7 +1761,7 @@ namespace NsAppManager
 
                             LOG4CPLUS_INFO(mLogger, "Full path to file " << fullFilePath);
 
-                            if (file_system::is_file_exist(fullFilePath))
+                            if (file_system::file_exists(fullFilePath))
                             {
                                 file_system::delete_file(fullFilePath);
                             }
@@ -1888,7 +1888,7 @@ namespace NsAppManager
 
                     bool successFlag = false;
 
-                    if ( file_system::is_directory_exists(app->getName()))
+                    if ( file_system::directory_exists(app->getName()))
                     {
                         const std::string & fullDirectoryPath = file_system::full_path(app->getName());
                         std::vector<std::string> listFiles = file_system::list_files( fullDirectoryPath );
@@ -3686,7 +3686,7 @@ namespace NsAppManager
                         relativeFilePath += i->get_turnIcon().get_value();
 
                         std::string fullFilePath = file_system::full_path( relativeFilePath );
-                        if (!file_system::is_file_exist(fullFilePath))
+                        if (!file_system::file_exists(fullFilePath))
                         {
                             LOG4CPLUS_ERROR_EXT(mLogger, "UpdateTurnList file doesn't exist");
                                 sendResponse<NsSmartDeviceLinkRPCV2::UpdateTurnList_response
@@ -6580,7 +6580,7 @@ namespace NsAppManager
         std::string fullPath = file_system::full_path(app->getName());
         std::string fullFilePath;
         LOG4CPLUS_INFO_EXT(mLogger, "Full path to app folder: " << fullPath);
-        if (file_system::is_directory_exists(fullPath))
+        if (file_system::directory_exists(fullPath))
         {
             std::vector<std::string> files = file_system::list_files(fullPath);
             std::vector<std::string>::const_iterator i = files.begin();
@@ -6595,7 +6595,7 @@ namespace NsAppManager
                 fullFilePath += "/";
                 fullFilePath += *i;
                 LOG4CPLUS_INFO_EXT(mLogger, "File to be removed: " << fullFilePath);
-                if (file_system::is_file_exist(fullFilePath))
+                if (file_system::file_exists(fullFilePath))
                 {
                     file_system::delete_file(fullFilePath);
                 }
