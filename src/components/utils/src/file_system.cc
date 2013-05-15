@@ -36,7 +36,7 @@
 
 #include <dirent.h>
 #include <unistd.h>
-
+// TODO(VS): lint error: Streams are highly discouraged.
 #include <iostream>
 #include <fstream>
 #include <cstddef>

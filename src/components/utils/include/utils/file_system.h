@@ -82,7 +82,7 @@ namespace file_system {
     * @return returns true if the operation is successfully.
     */
   bool write(const std::string& file_name,
-             const std::vector<unsigned char>& data);
+             const std::vector<unsigned char>& data); // TODO(VS): Add appen mode to write function
 
   /**
     * @brief Returns full file path

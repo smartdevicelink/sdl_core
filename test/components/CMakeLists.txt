@@ -15,3 +15,6 @@ add_subdirectory(./SmartObjects)
 
 # --- ProtocolHandler
 add_subdirectory(./ProtocolHandler)
+
+# --- Utils
+add_subdirectory(./utils)
