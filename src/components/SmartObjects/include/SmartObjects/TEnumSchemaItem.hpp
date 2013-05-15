@@ -105,6 +105,15 @@ namespace NsSmartDeviceLink
              **/
             virtual void unapplySchema(CSmartObject & Object);
 
+            /**
+             * @brief The method converts a string into the value of enum EnumType
+             *
+             * @param str String to convert
+             * @param value the resulting enum value
+             * @return true if the string is converted successfully
+             */
+            static bool stringToEnum(const std::string& str, EnumType &value);
+
         private:
             /**
              * @brief Constructor.
@@ -242,6 +251,26 @@ NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::TEnumSchemaItem(co
 mAllowedElements(AllowedElements),
 mDefaultValue(DefaultValue)
 {
+}
+
+template<typename EnumType>
+bool NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::stringToEnum(const std::string& str, EnumType &value)
+{
+    bool result = false;
+    std::map<EnumType, std::string> enumMap =
+            NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::getEnumElementsStringRepresentation();
+
+    for (typename std::map<EnumType, std::string>::const_iterator it = enumMap.begin(); it != enumMap.end(); ++it)
+    {
+        if (str == it->second)
+        {
+            value = it->first;
+            result = true;
+            break;
+        }
+    }
+
+    return result;
 }
 
 #endif

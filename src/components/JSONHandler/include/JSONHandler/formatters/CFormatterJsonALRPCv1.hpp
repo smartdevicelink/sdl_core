@@ -40,6 +40,10 @@
 
 #include "CFormatterJsonBase.hpp"
 
+#include "JSONHandler/CSmartFactory.hpp"
+#include "SmartObjects/TEnumSchemaItem.hpp"
+
+
 namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
 
@@ -90,6 +94,11 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
         static const std::string S_RESPONSE;
 
         /**
+         * @brief String constant for NOTIFICATION.
+         */
+        static const std::string S_NOTIFICATION;
+
+        /**
          * @brief String constant for PARAMETERS.
          */
         static const std::string S_PARAMETERS;
@@ -123,9 +132,53 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
          * @param out The resulting SmartObject
          * @return true if success, otherwise - false
          */
+        template<typename FunctionId, typename MessageType>
         static bool fromString(const std::string &str,
                 NsSmartDeviceLink::NsSmartObjects::CSmartObject &out);
+
     };
+
+    // ----------------------------------------------------------------------------
+
+    template<typename FunctionId, typename MessageType>
+    bool Formatters::CFormatterJsonALRPCv1::fromString(
+            const std::string& str,
+            NsSmartDeviceLink::NsSmartObjects::CSmartObject& out)
+    {
+        Json::Value root;
+        Json::Reader reader;
+        std::string type;
+
+        bool result = reader.parse(str, root);
+
+        if (true == result)
+        {
+            type = getMessageType(root);
+        }
+
+        result = result && (!type.empty());
+
+        FunctionId functionId;
+        MessageType messageType;
+
+        result = result && NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<MessageType>::stringToEnum(type, messageType);
+        result = result && NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionId>::stringToEnum(root[type][S_NAME].asString(), functionId);
+
+        namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
+
+        if (true == result)
+        {
+            jsonValueToObj(root[type][S_PARAMETERS], out[S::S_MSG_PARAMS]);
+
+            out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
+            out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
+            out[S::S_PARAMS][S::S_CORRELATION_ID] = root[type][S_CORRELATION_ID].asInt();
+            out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
+            out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 1;
+        }
+
+        return result;
+    }
 
 } } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 

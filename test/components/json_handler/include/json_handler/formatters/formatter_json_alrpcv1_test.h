@@ -44,6 +44,68 @@
 
 namespace test { namespace components { namespace json_handler { namespace formatters {
 
+    // The code below is cut and paste from the generated code just to provide necessary environment for string <-> enum conversion.
+    namespace FunctionID
+    {
+          /**
+           * @brief Enumeration FunctionID.
+           */
+          enum eType
+          {
+              /**
+               * @brief INVALID_ENUM.
+               */
+              INVALID_ENUM = -1,
+
+              /**
+               * @brief RegisterAppInterface.
+               */
+              RegisterAppInterface,
+
+              /**
+               * @brief UnregisterAppInterface.
+               */
+              UnregisterAppInterface,
+
+              /**
+               * @brief SetGlobalProperties.
+               */
+              SetGlobalProperties,
+
+              // ...
+          };
+      }
+
+      namespace messageType
+      {
+          /**
+           * @brief Enumeration messageType.
+           */
+          enum eType
+          {
+              /**
+               * @brief INVALID_ENUM.
+               */
+              INVALID_ENUM = -1,
+
+              /**
+               * @brief request.
+               */
+              request,
+
+              /**
+               * @brief response.
+               */
+              response,
+
+              /**
+               * @brief notification.
+               */
+              notification
+          };
+     }
+    // end of cut and pasted code
+
     using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
     TEST_F(CFormatterTestHelper, test_fromObjToALRPCv1AndBack)
@@ -56,6 +118,8 @@ namespace test { namespace components { namespace json_handler { namespace forma
         NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
 
         fillTestObject(srcObj);
+        srcObj[S_PARAMS][S_FUNCTION_ID] = "UnregisterAppInterface"; // a hack, it shouldn't be a string in the SmartObject
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";               // the same thing
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
 
         // SmartObjects --> JSON
@@ -64,8 +128,10 @@ namespace test { namespace components { namespace json_handler { namespace forma
         //std::cout << str << std::endl;
 
         // JSON --> SmartObjects
-        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, dstObj);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString<FunctionID::eType, messageType::eType>(str, dstObj);
 
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionID::UnregisterAppInterface;   // write the proper enum values
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = messageType::request;
 
         compareObjects(srcObj, dstObj);
     }
@@ -75,7 +141,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         std::string str = "\
         {\
             \"request\": {\
-                \"name\" : \"some name\",\
+                \"name\" : \"SetGlobalProperties\",\
                 \"correlationID\": 11,\
                 \"parameters\": {\
                     \"syncMsgVersion\": \"version\",\
@@ -92,11 +158,12 @@ namespace test { namespace components { namespace json_handler { namespace forma
         NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
         bool result;
 
-        result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, obj);
+        result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString<FunctionID::eType, messageType::eType>(str, obj);
 
         ASSERT_TRUE(result) << "Error parsing JSON string";
 
-        ASSERT_EQ("some name", (std::string)obj[S_PARAMS][S_FUNCTION_ID]);
+        ASSERT_EQ(FunctionID::SetGlobalProperties, (int)obj[S_PARAMS][S_FUNCTION_ID]);
+        ASSERT_EQ(messageType::request, (int)obj[S_PARAMS][S_MESSAGE_TYPE]);
         ASSERT_EQ(11, (int)obj[S_PARAMS][S_CORRELATION_ID]);
         ASSERT_EQ("version", (std::string)obj[S_MSG_PARAMS]["syncMsgVersion"]);
         ASSERT_EQ("some app name", (std::string)obj[S_MSG_PARAMS]["appName"]);
@@ -108,4 +175,49 @@ namespace test { namespace components { namespace json_handler { namespace forma
 
 }}}}
 
-#endif // TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_FORMATTERS_FORMATTER_JSON_ALRPCV1_TEST_H_
+namespace NsSmartDeviceLink { namespace NsSmartObjects {
+
+    template <>
+    const std::map<test::components::JSONHandler::formatters::FunctionID::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::formatters::FunctionID::eType>::getEnumElementsStringRepresentation(void)
+    {
+        static bool isInitialized = false;
+        static std::map<test::components::JSONHandler::formatters::FunctionID::eType, std::string> enumStringRepresentationMap;
+
+        if (false == isInitialized)
+        {
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::RegisterAppInterface, "RegisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::UnregisterAppInterface, "UnregisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::SetGlobalProperties, "SetGlobalProperties"));
+
+            isInitialized = true;
+        }
+
+        return enumStringRepresentationMap;
+    }
+
+    template <>
+    const std::map<test::components::JSONHandler::formatters::messageType::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::formatters::messageType::eType>::getEnumElementsStringRepresentation(void)
+    {
+        static bool isInitialized = false;
+        static std::map<test::components::JSONHandler::formatters::messageType::eType, std::string> enumStringRepresentationMap;
+
+        if (false == isInitialized)
+        {
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::request, "request"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::response, "response"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::notification, "notification"));
+
+            isInitialized = true;
+        }
+
+        return enumStringRepresentationMap;
+    }
+}}
+
+int main(int argc, char **argv)
+{
+  ::testing::InitGoogleMock(&argc, argv);
+  return RUN_ALL_TESTS();
+}
