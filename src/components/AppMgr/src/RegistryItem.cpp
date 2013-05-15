@@ -31,12 +31,12 @@
 //
 
 #include "AppMgr/RegistryItem.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 
-    log4cplus::Logger RegistryItem::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("RegistryItem"));
+    log4cxx::LoggerPtr RegistryItem::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RegistryItem"));
 
     /**
      * \brief Class constructor
@@ -47,10 +47,10 @@ namespace NsAppManager
     {
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "No application to register! Please specify a valid application instance!");
+            LOG4CXX_ERROR_EXT(logger_, "No application to register! Please specify a valid application instance!");
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " RegistryItem constructed for the application " << app->getName());
+        LOG4CXX_INFO_EXT(logger_, " RegistryItem constructed for the application " << app->getName());
     }
 
     /**
@@ -68,7 +68,7 @@ namespace NsAppManager
     {
         if(mApplication)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " Destroying RegistryItem for the application " << mApplication->getName()
+            LOG4CXX_INFO_EXT(logger_, " Destroying RegistryItem for the application " << mApplication->getName()
                 << " application id " << mApplication->getAppID() << " ...");
             delete mApplication;
             mApplication = 0;
@@ -83,7 +83,7 @@ namespace NsAppManager
         }
 
         mAppPolicies.clear();
-        LOG4CPLUS_INFO_EXT(mLogger, " Registry item was destroyed!");
+        LOG4CXX_INFO_EXT(logger_, " Registry item was destroyed!");
     }
 
     /**
@@ -103,7 +103,7 @@ namespace NsAppManager
      */
     const AppPolicy* RegistryItem::registerPolicy( const std::string& hash )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Registering a policy " << hash);
+        LOG4CXX_INFO_EXT(logger_, " Registering a policy " << hash);
         AppPolicy* policy = new AppPolicy(hash);
         mAppPolicies.insert(policy);
         return *mAppPolicies.find(policy);
@@ -117,10 +117,10 @@ namespace NsAppManager
     {
         if(!policy)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Trying to unregister null policy!");
+            LOG4CXX_ERROR_EXT(logger_, " Trying to unregister null policy!");
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " Unregistering a policy " << policy->getPolicyHash());
+        LOG4CXX_INFO_EXT(logger_, " Unregistering a policy " << policy->getPolicyHash());
         Policies::iterator policyIterator = mAppPolicies.find(policy);
         mAppPolicies.erase(policyIterator);
     }
@@ -133,7 +133,7 @@ namespace NsAppManager
     {
         if(!mApplication)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "About to return a null application: a null ptr exception may occur right after this line!");
+            LOG4CXX_ERROR_EXT(logger_, "About to return a null application: a null ptr exception may occur right after this line!");
         }
         return mApplication;
     }
@@ -147,7 +147,7 @@ namespace NsAppManager
     {
         if(!this->getApplication() || !item2.getApplication())
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Cannot perform registry items comparison, due to null application(s) assigned to (some of) them");
+            LOG4CXX_ERROR_EXT(logger_, "Cannot perform registry items comparison, due to null application(s) assigned to (some of) them");
             return false;
         }
         return this->getApplication()->getName() < item2.getApplication()->getName();
@@ -162,7 +162,7 @@ namespace NsAppManager
     {
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Trying to get policies of null application!");
+            LOG4CXX_ERROR_EXT(logger_, " Trying to get policies of null application!");
          //   return;
         }
         Policies policySet;

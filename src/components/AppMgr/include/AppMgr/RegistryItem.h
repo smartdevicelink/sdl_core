@@ -37,11 +37,7 @@
 #include "AppPolicy.h"
 #include <set>
 #include <string>
-
-namespace log4cplus
-{
-    class Logger;
-}
+#include "utils/logger.h"
 
 namespace NsAppManager
 {
@@ -121,7 +117,7 @@ namespace NsAppManager
 
         Policies mAppPolicies;
         Application* mApplication;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 } // namespace NsAppManager

@@ -32,12 +32,12 @@
 
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/RegistryItem.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 
-    log4cplus::Logger CommandMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CommandMapping"));
+    log4cxx::LoggerPtr CommandMapping::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("CommandMapping"));
 
     /**
      * \brief Default class constructor
@@ -62,7 +62,7 @@ namespace NsAppManager
      */
     void CommandMapping::addCommand(unsigned int commandId, const CommandType& type, CommandParams params)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() );
+        LOG4CXX_INFO_EXT(logger_, "Subscribed to a command " << commandId << " type " << type.getType() );
         mCommands.insert(Command(CommandBase( commandId, type ), params ));
     }
 
@@ -73,7 +73,7 @@ namespace NsAppManager
      */
     void CommandMapping::removeCommand(unsigned int commandId, const CommandType& type)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Deleting a command " << commandId << " type " << type.getType() );
+        LOG4CXX_INFO_EXT(logger_, "Deleting a command " << commandId << " type " << type.getType() );
         mCommands.erase(CommandBase(commandId, type));
     }
 
@@ -95,7 +95,7 @@ namespace NsAppManager
     Commands CommandMapping::findCommands(unsigned int commandId) const
     {
         Commands cmds;
-        LOG4CPLUS_INFO_EXT(mLogger, "Searching for commands by id " << commandId );
+        LOG4CXX_INFO_EXT(logger_, "Searching for commands by id " << commandId );
         for(Commands::const_iterator it = mCommands.begin(); it != mCommands.end(); it++)
         {
             const Command& cmd = *it;
@@ -104,7 +104,7 @@ namespace NsAppManager
             const CommandType& cmdType = std::get<1>(base);
             if(cmdId == commandId)
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Found a command " << cmdId << " type " << cmdType.getType() );
+                LOG4CXX_INFO_EXT(logger_, "Found a command " << cmdId << " type " << cmdType.getType() );
                 cmds.insert(cmd);
             }
         }
@@ -128,13 +128,13 @@ namespace NsAppManager
     CommandTypes CommandMapping::getTypes( unsigned int commandId ) const
     {
         CommandTypes types;
-        LOG4CPLUS_INFO_EXT(mLogger, "Searching for command types by command id " << commandId );
+        LOG4CXX_INFO_EXT(logger_, "Searching for command types by command id " << commandId );
         for(CommandType type = CommandType::FIRST; type != CommandType::LAST; type++)
         {
             Commands::const_iterator it = mCommands.find( CommandBase(commandId, type) );
             if ( it != mCommands.end() )
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Found a type " << type.getType() );
+                LOG4CXX_INFO_EXT(logger_, "Found a type " << type.getType() );
                 types.push_back(type);
             }
         }
@@ -157,14 +157,14 @@ namespace NsAppManager
      */
     unsigned int CommandMapping::getUnrespondedRequestCount(const unsigned int &cmdId) const
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Searching for unresponded requests for command " << cmdId );
+        LOG4CXX_INFO_EXT(logger_, "Searching for unresponded requests for command " << cmdId );
         RequestsAwaitingResponse::const_iterator it = mRequestsPerCommand.find(cmdId);
         if(it != mRequestsPerCommand.end())
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId << " is " << it->second );
+            LOG4CXX_INFO_EXT(logger_, "Unresponded requests for command " << cmdId << " is " << it->second );
             return it->second;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "No unresponded requests for command " << cmdId << " found! " );
+        LOG4CXX_INFO_EXT(logger_, "No unresponded requests for command " << cmdId << " found! " );
         return 0;
     }
 
@@ -175,17 +175,17 @@ namespace NsAppManager
      */
     unsigned int CommandMapping::incrementUnrespondedRequestCount(const unsigned int &cmdId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Incrementing for unresponded requests for command " << cmdId );
+        LOG4CXX_INFO_EXT(logger_, "Incrementing for unresponded requests for command " << cmdId );
         RequestsAwaitingResponse::iterator it = mRequestsPerCommand.find(cmdId);
         unsigned int reqsCount = it != mRequestsPerCommand.end() ? it->second : 0;
-        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId << " was " << reqsCount );
+        LOG4CXX_INFO_EXT(logger_, "Unresponded requests for command " << cmdId << " was " << reqsCount );
         reqsCount++;
         if(it != mRequestsPerCommand.end())
         {
             mRequestsPerCommand.erase(it);
         }
         mRequestsPerCommand.insert(RequestAwaitingResponse(cmdId, reqsCount));
-        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId << " became " << reqsCount );
+        LOG4CXX_INFO_EXT(logger_, "Unresponded requests for command " << cmdId << " became " << reqsCount );
         return reqsCount;
     }
 
@@ -196,23 +196,23 @@ namespace NsAppManager
      */
     unsigned int CommandMapping::decrementUnrespondedRequestCount(const unsigned int &cmdId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Decrementing for unresponded requests for command " << cmdId );
+        LOG4CXX_INFO_EXT(logger_, "Decrementing for unresponded requests for command " << cmdId );
         RequestsAwaitingResponse::iterator it = mRequestsPerCommand.find(cmdId);
         if(it != mRequestsPerCommand.end())
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId << " was " << it->second );
+            LOG4CXX_INFO_EXT(logger_, "Unresponded requests for command " << cmdId << " was " << it->second );
             if(it->second <= 0)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, "Trying to decrement already null value!" );
+                LOG4CXX_ERROR_EXT(logger_, "Trying to decrement already null value!" );
                 return 0;
             }
             unsigned int reqsCount = it->second - 1;
             mRequestsPerCommand.erase(it);
             mRequestsPerCommand.insert(RequestAwaitingResponse(cmdId, reqsCount));
-            LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId << " became " << reqsCount );
+            LOG4CXX_INFO_EXT(logger_, "Unresponded requests for command " << cmdId << " became " << reqsCount );
             return reqsCount;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "No unresponded requests for command " << cmdId << " found! " );
+        LOG4CXX_INFO_EXT(logger_, "No unresponded requests for command " << cmdId << " found! " );
         return 0;
     }
 

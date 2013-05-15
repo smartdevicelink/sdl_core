@@ -39,7 +39,7 @@
 
 #include <json/value.h>
 #include "mb_controller.hpp"
-#include "Logger.hpp"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "JSONHandler/IJSONRPC2Handler.h"
@@ -158,7 +158,7 @@ private:
     /**
       *\brief For logging.
     */
-    static log4cplus::Logger                              mLogger;
+    static log4cxx::LoggerPtr logger_;
 
     /**
      * \struct ResponseContainer

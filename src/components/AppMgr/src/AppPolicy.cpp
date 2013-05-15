@@ -31,11 +31,11 @@
 //
 
 #include "AppMgr/AppPolicy.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
-    log4cplus::Logger AppPolicy::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppPolicy"));
+    log4cxx::LoggerPtr AppPolicy::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppPolicy"));
 
     /**
      * \brief Class constructor
@@ -44,7 +44,7 @@ namespace NsAppManager
     AppPolicy::AppPolicy( const std::string& policy )
         : mPolicy(policy)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Created an app policy " << policy);
+        LOG4CXX_INFO_EXT(logger_, " Created an app policy " << policy);
     }
 
     /**
@@ -52,7 +52,7 @@ namespace NsAppManager
      */
     AppPolicy::~AppPolicy( )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Destroyed an app policy " << mPolicy);
+        LOG4CXX_INFO_EXT(logger_, " Destroyed an app policy " << mPolicy);
     }
 
     /**

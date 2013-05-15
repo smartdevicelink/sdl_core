@@ -32,12 +32,12 @@
 
 #include "AppMgr/MobileHandler.h"
 #include "JSONHandler/JSONHandler.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 
-    log4cplus::Logger MobileHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
+    log4cxx::LoggerPtr MobileHandler::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("MobileHandler"));
 
     /**
      * \brief Returning class instance
@@ -59,7 +59,7 @@ namespace NsAppManager
     {
         if(mJSONHandler)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " Sending a message " << message->getMethodId()
+            LOG4CXX_INFO_EXT(logger_, " Sending a message " << message->getMethodId()
                 << " of the type " << message->getMessageType()
                 << " with the application id " << appId
                 << " to a mobile side");
@@ -67,7 +67,7 @@ namespace NsAppManager
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " MobileHandler is null!");
+            LOG4CXX_ERROR_EXT(logger_, " MobileHandler is null!");
         }
     }
 
@@ -79,7 +79,7 @@ namespace NsAppManager
     {
         if(!handler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+            LOG4CXX_ERROR_EXT(logger_, "A null pointer is being assigned - is this the intent?");
             return;
         }
         mJSONHandler = handler;
@@ -93,7 +93,7 @@ namespace NsAppManager
     {
         if(!mJSONHandler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "JSON Mobile handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
+            LOG4CXX_ERROR_EXT(logger_, "JSON Mobile handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
         }
         return mJSONHandler;
     }

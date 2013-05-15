@@ -11,10 +11,8 @@ include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/components/SmartObjects/include
   ../../../src/thirdPartyLibs/logger/include/
-  ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
   ../../../src//thirdPartyLibs/jsoncpp/include/
   ../../../src/components/JSONHandler/include/
-  ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
   ${CMAKE_BINARY_DIR}
 )
 
@@ -25,7 +23,6 @@ set(LIBRARIES
     gmock_main
     test_JSONHandler_v4_protocol_v2_0_revP
     SmartObjects
-    log4cplus
     JSONHandler
     jsoncpp
   #v4_protocol_v2_0_revP

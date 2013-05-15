@@ -32,11 +32,11 @@
 
 #include "AppMgr/ConnectionHandler.h"
 #include "ConnectionHandler/devices_discovery_starter.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
-    log4cplus::Logger ConnectionHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ConnectionHandler"));
+    log4cxx::LoggerPtr ConnectionHandler::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ConnectionHandler"));
 
     /**
      * \brief Returning class instance
@@ -56,7 +56,7 @@ namespace NsAppManager
     {
         if(!handler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+            LOG4CXX_ERROR_EXT(logger_, "A null pointer is being assigned - is this the intent?");
             return;
         }
         mConnectionHandler = handler;
@@ -70,7 +70,7 @@ namespace NsAppManager
     {
         if(!mConnectionHandler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
+            LOG4CXX_ERROR_EXT(logger_, "Connection handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
         }
         return mConnectionHandler;
     }
@@ -82,7 +82,7 @@ namespace NsAppManager
     {
         if(!mConnectionHandler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
+            LOG4CXX_ERROR_EXT(logger_, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
             return;
         }
         mConnectionHandler->StartDevicesDiscovery();
@@ -96,7 +96,7 @@ namespace NsAppManager
     {
         if(!mConnectionHandler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
+            LOG4CXX_ERROR_EXT(logger_, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
             return;
         }
         mConnectionHandler->ConnectToDevice(deviceHandle);
@@ -106,7 +106,7 @@ namespace NsAppManager
     {
         if(!mConnectionHandler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
+            LOG4CXX_ERROR_EXT(logger_, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
             return;
         }
         mConnectionHandler->StartTransportManager();

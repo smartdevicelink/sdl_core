@@ -36,7 +36,7 @@
 #ifndef JSONHANDLER_CLASS
 #define JSONHANDLER_CLASS
 
-#include "Logger.hpp"
+#include "utils/logger.h"
 #include "JSONHandler/SDLRPCMessage.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IJsonHandler.h"
@@ -133,7 +133,7 @@ private:
     /**
       *\brief For logging.
     */
-    static log4cplus::Logger                     mLogger;
+    static log4cxx::LoggerPtr logger_;
 
     /**
       *\brief Points on instance of class implementing RPC handling (Application Manager).

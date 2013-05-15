@@ -32,11 +32,12 @@
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppMgrCore.h"
-#include "LoggerHelper.hpp"
+#include "utils/logger.h"
 
 namespace NsAppManager
 {
-    log4cplus::Logger AppMgr::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgr"));
+    log4cxx::LoggerPtr AppMgr::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppMgr"));
 
     /**
     * \brief Returning class instance
@@ -53,7 +54,7 @@ namespace NsAppManager
     */
     AppMgr::AppMgr()
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
+        LOG4CXX_INFO_EXT(logger_, " AppMgr constructed!");
     }
 
     /**
@@ -61,7 +62,7 @@ namespace NsAppManager
     */
     AppMgr::~AppMgr()
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " AppMgr destructed!");
+        LOG4CXX_INFO_EXT(logger_, " AppMgr destructed!");
     }
 
     /**
@@ -79,7 +80,7 @@ namespace NsAppManager
     {
         if(!handler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Setting null handler!");
+            LOG4CXX_ERROR_EXT(logger_, " Setting null handler!");
             return;
         }
         AppMgrCore::getInstance().setJsonHandler( handler );
@@ -93,7 +94,7 @@ namespace NsAppManager
     {
         if(!handler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Setting null handler!");
+            LOG4CXX_ERROR_EXT(logger_, " Setting null handler!");
             return;
         }
         AppMgrCore::getInstance().setJsonRPC2Handler( handler );
@@ -107,7 +108,7 @@ namespace NsAppManager
     {
         if(!handler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Setting null handler!");
+            LOG4CXX_ERROR_EXT(logger_, " Setting null handler!");
             return;
         }
         AppMgrCore::getInstance().setConnectionHandler( handler );
@@ -122,10 +123,10 @@ namespace NsAppManager
     {
         if(!message)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! connection key" << connectionKey);
+            LOG4CXX_ERROR_EXT(logger_, " Calling a function with null command! connection key" << connectionKey);
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " Message " << message->getMethodId() << " received from mobile side");
+        LOG4CXX_INFO_EXT(logger_, " Message " << message->getMethodId() << " received from mobile side");
         AppMgrCore::getInstance().pushMobileRPCMessage( message, connectionKey );
     }
 
@@ -137,10 +138,10 @@ namespace NsAppManager
     {
         if(!command)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command!");
+            LOG4CXX_ERROR_EXT(logger_, " Calling a function with null command!");
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " Message " << command->getMethod() << " received from HMI side");
+        LOG4CXX_INFO_EXT(logger_, " Message " << command->getMethod() << " received from HMI side");
         AppMgrCore::getInstance().pushRPC2CommunicationMessage(command);
     }
 
@@ -189,11 +190,11 @@ namespace NsAppManager
     */
     void AppMgr::executeThreads()
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
+        LOG4CXX_INFO_EXT(logger_, " Threads are being started!");
 
         AppMgrCore::getInstance().executeThreads();
 
-        LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
+        LOG4CXX_INFO_EXT(logger_, " Threads have been started!");
     }
 
 }

@@ -38,11 +38,8 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "utils/logger.h"
 
-namespace log4cplus
-{
-    class Logger;
-}
 
 namespace NsAppManager
 {
@@ -148,7 +145,7 @@ namespace NsAppManager
         AppChoiceSets(const AppChoiceSets&);
 
         ChoiceSetItems mChoiceSets;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

@@ -41,11 +41,6 @@ class JSONHandler;
 class SDLRPCMessage;
 class JSONRPC2Handler;
 
-namespace log4cplus
-{
-    class Logger;
-}
-
 namespace NsRPC2Communication
 {
     class RPC2Command;
@@ -173,7 +168,7 @@ namespace NsAppManager
          */
         AppMgr();
 
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 } // namespace NsAppManager

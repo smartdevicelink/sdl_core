@@ -2,9 +2,6 @@ include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/components/TransportManager/include
-  ../../../src/thirdPartyLibs/logger/include/
-  ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
-  ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
 # Sources are separated for each Transport Manager test
@@ -53,7 +50,6 @@ set (LIBRARIES
     gmock
     gmock_main
     TransportManager
-    log4cplus
     bluetooth
 )
 
@@ -68,7 +64,7 @@ add_test(test_TransportManagerHandleGenerators test_TransportManagerHandleGenera
 add_executable("test_TransportManagerTCPSimulator" ${SOURCES_TCP_SIMULATOR})
 # It doesn't require any additional libraries at the moment
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable("test_TransportManagerTestWithCorrectDeviceAdapter" ${SOURCES_TEST_WITH_CORRECT_DEVICE_ADAPTER})
 target_link_libraries("test_TransportManagerTestWithCorrectDeviceAdapter" ${LIBRARIES})
@@ -81,7 +77,6 @@ add_test(test_TransportManagerTestWithIncorrectDeviceAdapter test_TransportManag
 add_executable("test_TransportManagerTestWithMultipleDeviceAdapters" ${SOURCES_TEST_WITH_MULTIPLE_DEVICE_ADAPTERS})
 target_link_libraries("test_TransportManagerTestWithMultipleDeviceAdapters" ${LIBRARIES})
 add_test(test_TransportManagerTestWithMultipleDeviceAdapters test_TransportManagerTestWithMultipleDeviceAdapters)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus_disabled.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable("test_TransportManagerTestWithHighDataTransferRate" ${SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE})
 target_link_libraries("test_TransportManagerTestWithHighDataTransferRate" ${LIBRARIES})

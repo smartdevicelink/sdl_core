@@ -34,7 +34,8 @@
 
 namespace NsAppManager
 {
-    log4cplus::Logger DeviceList::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("DeviceList"));
+    log4cxx::LoggerPtr DeviceList::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("DeviceList"));
 
     /**
      * \brief Default class constructor
@@ -89,7 +90,7 @@ namespace NsAppManager
         {
             return &it->second;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Device " << handle << " not found in subscribed." );
+        LOG4CXX_INFO_EXT(logger_, "Device " << handle << " not found in subscribed." );
         return 0;
     }
 
@@ -108,7 +109,7 @@ namespace NsAppManager
                 return &device;
             }
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Device " << name << " not found in subscribed." );
+        LOG4CXX_INFO_EXT(logger_, "Device " << name << " not found in subscribed." );
         return 0;
     }
 

@@ -33,8 +33,7 @@
 #ifndef SRC_COMPONENTS_APPMGR_INCLUDE_APPMGR_AUDIO_PASS_THRU_H_
 #define SRC_COMPONENTS_APPMGR_INCLUDE_APPMGR_AUDIO_PASS_THRU_H_
 
-#include "LoggerHelper.hpp"
-
+#include "utils/logger.h"
 #include "JSONHandler/SDLRPCObjects/V2/SamplingRate.h"
 #include "JSONHandler/SDLRPCObjects/V2/AudioType.h"
 #include "JSONHandler/SDLRPCObjects/V2/AudioCaptureQuality.h"
@@ -81,7 +80,7 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
   NsSmartDeviceLinkRPCV2::AudioCaptureQuality bits_per_sample_;
   NsSmartDeviceLinkRPCV2::AudioType audio_type_;
 
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
 
   DISALLOW_COPY_AND_ASSIGN(AudioPassThruThreadImpl);
 };

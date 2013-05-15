@@ -52,7 +52,7 @@ public:
 	}
 
 	int main(int argc, char **argv) {
-    //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
+    //PropertyConfigurator::doConfigure(LOG4CXX_TEXT("log4cxx.properties"));
     ::testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }

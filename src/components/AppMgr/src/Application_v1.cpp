@@ -31,7 +31,7 @@
 //
 
 #include "AppMgr/Application_v1.h"
-#include "LoggerHelper.hpp"
+#include "utils/logger.h"
 
 namespace NsAppManager
 {
@@ -43,7 +43,7 @@ namespace NsAppManager
     Application_v1::Application_v1(const std::string& name, int appId)
         :Application(name, appId, 1)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name
+        LOG4CXX_INFO_EXT(logger_, " Created an application " << name
             << " for the application id " << appId);
     }
 
@@ -60,7 +60,7 @@ namespace NsAppManager
      */
     Application_v1::~Application_v1( )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application " << mName
+        LOG4CXX_INFO_EXT(logger_, " Deleted an application " << mName
             << " appId " << mAppID);
     }
 

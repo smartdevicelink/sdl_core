@@ -31,11 +31,11 @@
 //
 
 #include "AppMgr/AppChoiceSets.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
-    log4cplus::Logger AppChoiceSets::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppChoiceSets"));
+    log4cxx::LoggerPtr AppChoiceSets::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppChoiceSets"));
 
     /**
      * \brief Default class constructor
@@ -59,7 +59,7 @@ namespace NsAppManager
      */
     void AppChoiceSets::addItem(const unsigned int &choiceSetId, const ChoiceSetV1 &choiceSet)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Adding an interaction choice set item " << choiceSetId );
+        LOG4CXX_INFO_EXT(logger_, "Adding an interaction choice set item " << choiceSetId );
         ChoiceSetGeneric choiceSetGeneric;
         choiceSetGeneric.choiceSetV1 = choiceSet;
         mChoiceSets.insert(ChoiceSetItem(choiceSetId, choiceSetGeneric));
@@ -72,7 +72,7 @@ namespace NsAppManager
      */
     void AppChoiceSets::addItem(const unsigned int &choiceSetId, const ChoiceSetV2 &choiceSet)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Adding an interaction choice set item " << choiceSetId );
+        LOG4CXX_INFO_EXT(logger_, "Adding an interaction choice set item " << choiceSetId );
         ChoiceSetGeneric choiceSetGeneric;
         choiceSetGeneric.choiceSetV2 = choiceSet;
         mChoiceSets.insert(ChoiceSetItem(choiceSetId, choiceSetGeneric));
@@ -84,7 +84,7 @@ namespace NsAppManager
      */
     void AppChoiceSets::removeItem(const unsigned int &choiceSetId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Deleting an interaction choice set item " << choiceSetId );
+        LOG4CXX_INFO_EXT(logger_, "Deleting an interaction choice set item " << choiceSetId );
         mChoiceSets.erase(choiceSetId);
     }
 
@@ -95,18 +95,18 @@ namespace NsAppManager
      */
     const ChoiceSetGeneric* AppChoiceSets::findItem(const unsigned int &choiceSetId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Searching for an interaction choice set item with id " << choiceSetId );
+        LOG4CXX_INFO_EXT(logger_, "Searching for an interaction choice set item with id " << choiceSetId );
         ChoiceSetItems::iterator it = mChoiceSets.find(choiceSetId);
         if(it != mChoiceSets.end())
         {
             const ChoiceSetItem& item = *it;
             if(choiceSetId == item.first)
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Found an interaction choice set item with id " << choiceSetId );
+                LOG4CXX_INFO_EXT(logger_, "Found an interaction choice set item with id " << choiceSetId );
                 return &item.second;
             }
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Interaction choice set item for id " << choiceSetId << " not found!" );
+        LOG4CXX_INFO_EXT(logger_, "Interaction choice set item for id " << choiceSetId << " not found!" );
         return 0;
     }
 

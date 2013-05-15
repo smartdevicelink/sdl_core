@@ -32,12 +32,12 @@
 
 #include "AppMgr/HMIHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 
-    log4cplus::Logger HMIHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
+    log4cxx::LoggerPtr HMIHandler::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppMgrCore"));
 
     /**
      * \brief Returning class instance
@@ -61,7 +61,7 @@ namespace NsAppManager
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " HMIHandler is about to set ready, but is null!");
+            LOG4CXX_ERROR_EXT(logger_, " HMIHandler is about to set ready, but is null!");
         }
     }
 
@@ -75,13 +75,13 @@ namespace NsAppManager
         {
             if(mJSONRPC2Handler)
             {
-                LOG4CPLUS_INFO_EXT(mLogger, " Sending a notification " << command->getMethod());
+                LOG4CXX_INFO_EXT(logger_, " Sending a notification " << command->getMethod());
                 mJSONRPC2Handler->sendNotification(command);
             }
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " HMIHandler not ready yet!");
+            LOG4CXX_ERROR_EXT(logger_, " HMIHandler not ready yet!");
         }
     }
 
@@ -95,13 +95,13 @@ namespace NsAppManager
         {
             if(mJSONRPC2Handler)
             {
-                LOG4CPLUS_INFO_EXT(mLogger, " Sending a response " << command->getMethod());
+                LOG4CXX_INFO_EXT(logger_, " Sending a response " << command->getMethod());
                 mJSONRPC2Handler->sendResponse(command);
             }
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " HMIHandler not ready yet!");
+            LOG4CXX_ERROR_EXT(logger_, " HMIHandler not ready yet!");
         }
     }
 
@@ -115,13 +115,13 @@ namespace NsAppManager
         {
             if(mJSONRPC2Handler)
             {
-                LOG4CPLUS_INFO_EXT(mLogger, " Sending a request " << command->getMethod());
+                LOG4CXX_INFO_EXT(logger_, " Sending a request " << command->getMethod());
                 mJSONRPC2Handler->sendRequest(command);
             }
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " HMIHandler not ready yet!");
+            LOG4CXX_ERROR_EXT(logger_, " HMIHandler not ready yet!");
         }
     }
 
@@ -133,7 +133,7 @@ namespace NsAppManager
     {
         if(!handler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+            LOG4CXX_ERROR_EXT(logger_, "A null pointer is being assigned - is this the intent?");
             return;
         }
         mJSONRPC2Handler = handler;
@@ -147,7 +147,7 @@ namespace NsAppManager
     {
         if(!mJSONRPC2Handler)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "JSON RPC2 handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
+            LOG4CXX_ERROR_EXT(logger_, "JSON RPC2 handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
         }
         return mJSONRPC2Handler;
     }
@@ -159,7 +159,7 @@ namespace NsAppManager
         :mJSONRPC2Handler(0)
         ,m_bHMIReady(false)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " HMIHandler constructed!");
+        LOG4CXX_INFO_EXT(logger_, " HMIHandler constructed!");
     }
 
     /**

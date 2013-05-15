@@ -32,12 +32,12 @@
 
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/RegistryItem.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 
-    log4cplus::Logger ButtonMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ButtonMapping"));
+    log4cxx::LoggerPtr ButtonMapping::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ButtonMapping"));
 
     /**
      * \brief Default class constructor
@@ -63,10 +63,10 @@ namespace NsAppManager
     {
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Adding a button to a null registry item");
+            LOG4CXX_ERROR_EXT(logger_, " Adding a button to a null registry item");
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to button " << buttonName.get() << " in app " << app->getName() );
+        LOG4CXX_INFO_EXT(logger_, "Subscribed to button " << buttonName.get() << " in app " << app->getName() );
         mButtonsMapping.insert(ButtonMapItem(buttonName, app));
     }
 
@@ -97,7 +97,7 @@ namespace NsAppManager
     {
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove a null item");
+            LOG4CXX_ERROR_EXT(logger_, " Trying to remove a null item");
             return;
         }
         for(ButtonMap::iterator it = mButtonsMapping.begin(); 
@@ -130,14 +130,14 @@ namespace NsAppManager
         {
             if ( !it->second )
             {                
-                LOG4CPLUS_INFO_EXT(mLogger, "An application " <<
+                LOG4CXX_INFO_EXT(logger_, "An application " <<
                         it->second->getName() << " is subscribed to a button "
                         << btnName.get() );
                 
                 return it->second;
             }
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Button " << btnName.get() << " not found in subscribed." );
+        LOG4CXX_INFO_EXT(logger_, "Button " << btnName.get() << " not found in subscribed." );
         return 0;
     }
 

@@ -31,11 +31,10 @@
  */
 
 #include "JSONHandler/incoming_thread_impl.h"
-#include "LoggerHelper.hpp"
 
 namespace json_handler {
-log4cplus::Logger IncomingThreadImpl::logger_ = log4cplus::Logger::getInstance(
-    LOG4CPLUS_TEXT("JSONHandler"));
+log4cxx::LoggerPtr IncomingThreadImpl::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("JSONHandler"));
 
 IncomingThreadImpl::IncomingThreadImpl(JSONHandler* handler)
     : handler_(handler) {
@@ -48,13 +47,13 @@ IncomingThreadImpl::~IncomingThreadImpl() {
 void IncomingThreadImpl::threadMain() {
   while (1) {
     while (!handler_->mIncomingMessages.empty()) {
-      LOG4CPLUS_INFO(logger_, "Incoming mobile message received.");
+      LOG4CXX_INFO(logger_, "Incoming mobile message received.");
       const protocol_handler::RawMessage* message = handler_
           ->mIncomingMessages.pop();
 
       NsSmartDeviceLinkRPC::SDLRPCMessage* currentMessage = 0;
 
-      LOG4CPLUS_INFO_EXT(
+      LOG4CXX_INFO_EXT(
           logger_,
           "Message of protocol version " << message->protocol_version());
 
@@ -63,19 +62,19 @@ void IncomingThreadImpl::threadMain() {
       } else if (message->protocol_version() == 2) {
         currentMessage = handler_->handleIncomingMessageProtocolV2(message);
       } else {
-        LOG4CPLUS_WARN(logger_, "Message of wrong protocol version received.");
+        LOG4CXX_WARN(logger_, "Message of wrong protocol version received.");
         continue;
       }
 
       if (!currentMessage) {
-        LOG4CPLUS_ERROR(logger_, "Invalid mobile message received.");
+        LOG4CXX_ERROR(logger_, "Invalid mobile message received.");
         continue;
       }
 
       currentMessage->setProtocolVersion(message->protocol_version());
 
       if (!handler_->mMessagesObserver) {
-        LOG4CPLUS_ERROR(
+        LOG4CXX_ERROR(
             logger_,
             "Cannot handle mobile message: MessageObserver doesn't exist.");
         return;
@@ -84,7 +83,7 @@ void IncomingThreadImpl::threadMain() {
       handler_->mMessagesObserver->onMessageReceivedCallback(
           currentMessage, message->connection_key());
 
-      LOG4CPLUS_INFO(logger_, "Incoming mobile message handled.");
+      LOG4CXX_INFO(logger_, "Incoming mobile message handled.");
     }
     handler_->mIncomingMessages.wait();
   }

@@ -37,11 +37,7 @@
 #include <queue>
 #include <string>
 #include <map>
-
-namespace log4cplus
-{
-    class Logger;
-}
+#include "utils/logger.h"
 
 namespace NsRPC2Communication
 {
@@ -107,7 +103,7 @@ namespace NsAppManager
         System::BinarySemaphore mBinarySemaphore;
         System::Thread* mThread;
         HandlerCallback mCallbackFn;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

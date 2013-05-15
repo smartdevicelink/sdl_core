@@ -47,7 +47,7 @@ class OutgoingThreadImpl : public threads::ThreadDelegate {
 
  private:
   JSONHandler* handler_;
-  static log4cplus::Logger logger_;
+  static log4cxx::LoggerPtr logger_;
   DISALLOW_COPY_AND_ASSIGN(OutgoingThreadImpl);
 };
 }  // namespace json

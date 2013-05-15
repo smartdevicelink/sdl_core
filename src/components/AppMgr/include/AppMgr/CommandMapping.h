@@ -40,11 +40,8 @@
 #include <cstddef>
 #include "JSONHandler/SDLRPCObjects/V1/MenuParams.h"
 #include "JSONHandler/SDLRPCObjects/V2/MenuParams.h"
+#include "utils/logger.h"
 
-namespace log4cplus
-{
-    class Logger;
-}
 
 namespace NsAppManager
 {
@@ -310,7 +307,7 @@ namespace NsAppManager
         CommandMapping(const CommandMapping&);
         Commands mCommands;
         RequestsAwaitingResponse mRequestsPerCommand;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

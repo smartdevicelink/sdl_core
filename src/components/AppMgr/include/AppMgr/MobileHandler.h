@@ -33,12 +33,10 @@
 #ifndef MOBILEHANDLER_H
 #define MOBILEHANDLER_H
 
+#include "utils/logger.h"
+
 class JSONHandler;
 
-namespace log4cplus
-{
-    class Logger;
-}
 
 namespace NsSmartDeviceLinkRPC
 {
@@ -93,7 +91,7 @@ namespace NsAppManager
 
         JSONHandler* mJSONHandler;
 
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

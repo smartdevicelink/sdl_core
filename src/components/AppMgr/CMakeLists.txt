@@ -8,10 +8,8 @@ include_directories (
     ../../thirdPartyLibs/MessageBroker/include/
     ../../thirdPartyLibs/jsoncpp/include/
     ../../thirdPartyLibs/logger/include/
-    ../../thirdPartyLibs/logger/log4cplus-1.1.0/include/
     ../../thirdPartyLibs/encryption/include/
   ../../../src/components/SmartObjects/include
-    ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
 set (SOURCES

@@ -115,7 +115,7 @@ App_V2* getApplicationV2AndCheckHMIStatus(
       static_cast<App_V2*>(NsAppManager::AppMgrCore::getInstance()
           .getItem(sessionKey));
   if (!app) {
-    /*LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+    /*LOG4CXX_ERROR_EXT(mLogger, " session key " << sessionKey
      << " hasn't been associated with any application!");*/
 
     sendResponse<Response, NsSmartDeviceLinkRPCV2::Result::ResultInternal>(
@@ -127,7 +127,7 @@ App_V2* getApplicationV2AndCheckHMIStatus(
 
   if (NsSmartDeviceLinkRPCV2::HMILevel::HMI_NONE
       == app->getApplicationHMIStatusLevel()) {
-    // LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName()
+    // LOG4CXX_ERROR_EXT(mLogger, "An application " << app->getName()
     //                     << " with session key " << sessionKey
 
     sendResponse<Response, NsSmartDeviceLinkRPCV2::Result::ResultInternal>(

@@ -16,7 +16,6 @@ set(LIBRARIES
     gmock_main
     SmartObjects
     ApplicationManager
-    log4cplus
     JSONHandler
     jsoncpp
 )

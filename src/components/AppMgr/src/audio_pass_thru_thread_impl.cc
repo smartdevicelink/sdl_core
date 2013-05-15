@@ -67,8 +67,9 @@ pthread_mutex_t audioPassThruMutex = PTHREAD_MUTEX_INITIALIZER;
 namespace rpc_commands {
 
 const int AudioPassThruThreadImpl::kAudioPassThruTimeout = 1;
-log4cplus::Logger AudioPassThruThreadImpl::logger_ = log4cplus::Logger::getInstance(
-    LOG4CPLUS_TEXT("AppMgrCore"));
+
+log4cxx::LoggerPtr AudioPassThruThreadImpl::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppMgrCore"));
 
 AudioPassThruThreadImpl::AudioPassThruThreadImpl(
     unsigned int session_key, unsigned int id, unsigned int max_duration,
@@ -99,7 +100,7 @@ bool AudioPassThruThreadImpl::sendEndAudioPassThruToHMI() {
   NsRPC2Communication::UI::EndAudioPassThru* endAudioPassThru =
       new NsRPC2Communication::UI::EndAudioPassThru;
   if (!endAudioPassThru) {
-    LOG4CPLUS_ERROR_EXT(
+    LOG4CXX_ERROR_EXT(
         logger_,
         "OUT_OF_MEMORY: new NsRPC2Communication::UI::EndAudioPassThru.");
 
@@ -115,7 +116,7 @@ bool AudioPassThruThreadImpl::sendEndAudioPassThruToHMI() {
   NsAppManager::Application* app = NsAppManager::AppMgrCore::getInstance()
       .getItem(session_key_);
   if (!app) {
-    LOG4CPLUS_ERROR_EXT(logger_,
+    LOG4CXX_ERROR_EXT(logger_,
                         "No application associated with this registry item!");
     return false;
   }
@@ -168,7 +169,7 @@ void AudioPassThruThreadImpl::threadMain() {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif
 
-    LOG4CPLUS_ERROR_EXT(logger_, "Can't read from file.");
+    LOG4CXX_ERROR_EXT(logger_, "Can't read from file.");
 
     if (sendEndAudioPassThruToHMI()) {
       rpc_commands::helpers::sendResponse<
@@ -192,7 +193,7 @@ void AudioPassThruThreadImpl::threadMain() {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif
 
-    LOG4CPLUS_ERROR_EXT(logger_, "Binary data empty.");
+    LOG4CXX_ERROR_EXT(logger_, "Binary data empty.");
 
     if (sendEndAudioPassThruToHMI()) {
       rpc_commands::helpers::sendResponse<
@@ -244,7 +245,7 @@ void AudioPassThruThreadImpl::threadMain() {
     signal(SIGALRM, AudioPassThruThreadImpl::audioPassThruTimerProc);
     pthread_cond_wait(&cv, &audioPassThruMutex);*/
 
-    LOG4CPLUS_INFO(logger_, "\n\t\t\t\t\tBefore timer; kAudioPassThruTimeout "
+    LOG4CXX_INFO(logger_, "\n\t\t\t\t\tBefore timer; kAudioPassThruTimeout "
         << kAudioPassThruTimeout << "; seconds " << seconds);
     timer_->startWait(kAudioPassThruTimeout);
 
@@ -254,7 +255,7 @@ void AudioPassThruThreadImpl::threadMain() {
     NsSmartDeviceLinkRPCV2::OnAudioPassThru* onAudioPassThru =
         new NsSmartDeviceLinkRPCV2::OnAudioPassThru;
     if (!onAudioPassThru) {
-      LOG4CPLUS_ERROR_EXT(
+      LOG4CXX_ERROR_EXT(
           logger_,
           "OUT_OF_MEMORY: new NsSmartDeviceLinkRPCV2::OnAudioPassThru.");
 

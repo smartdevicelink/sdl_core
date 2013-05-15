@@ -33,7 +33,9 @@
 namespace NsAppManager
 {
 
-    log4cplus::Logger AutoActivateIdMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AutoActivateIdMapping"));
+    log4cxx::LoggerPtr AutoActivateIdMapping::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AutoActivateIdMapping"));
+
 
     /**
      * \brief Default class constructor
@@ -60,7 +62,7 @@ namespace NsAppManager
     {
         if(appName.empty())
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Trying to add a null-named application!" );
+            LOG4CXX_ERROR_EXT(logger_, "Trying to add a null-named application!" );
             return "";
         }
         std::stringstream st(std::stringstream::in | std::stringstream::out);
@@ -69,7 +71,7 @@ namespace NsAppManager
         st >> strAAId;
         addId(appName, strAAId);
         mLastAutoActivateId++;
-        LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << appName << " to auto-activate id " << strAAId );
+        LOG4CXX_INFO_EXT(logger_, "Added an application " << appName << " to auto-activate id " << strAAId );
         return strAAId;
     }
 
@@ -82,10 +84,10 @@ namespace NsAppManager
     {
         if(appName.empty() || id.empty())
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Trying to add a null-named application or to a null id value!" );
+            LOG4CXX_ERROR_EXT(logger_, "Trying to add a null-named application or to a null id value!" );
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << appName << " to auto-activate id " << id );
+        LOG4CXX_INFO_EXT(logger_, "Added an application " << appName << " to auto-activate id " << id );
         mAutoActivateIds.insert(AutoActivateID(appName, id));
     }
 
@@ -97,15 +99,15 @@ namespace NsAppManager
     {
         if(id.empty())
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Trying to add a null id!" );
+            LOG4CXX_ERROR_EXT(logger_, "Trying to add a null id!" );
             return;
         }
         if(mAutoActivateIds.empty())
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Nothing to remove: a map is empty!" );
+            LOG4CXX_INFO_EXT(logger_, "Nothing to remove: a map is empty!" );
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Removing an auto-activate id " << id );
+        LOG4CXX_INFO_EXT(logger_, "Removing an auto-activate id " << id );
         for(AutoActivateIDs::iterator it = mAutoActivateIds.begin(); it != mAutoActivateIds.end(); it++)
         {
             if(id == it->second)
@@ -123,15 +125,15 @@ namespace NsAppManager
     {
         if(appName.empty())
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Trying to remove a null-named application!" );
+            LOG4CXX_ERROR_EXT(logger_, "Trying to remove a null-named application!" );
             return;
         }
         if(mAutoActivateIds.empty())
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Nothing to remove: a map is empty!" );
+            LOG4CXX_INFO_EXT(logger_, "Nothing to remove: a map is empty!" );
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Removing an application " << appName );
+        LOG4CXX_INFO_EXT(logger_, "Removing an application " << appName );
         mAutoActivateIds.erase(appName);
     }
 
@@ -144,27 +146,27 @@ namespace NsAppManager
     {
         if(name.empty())
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Trying to search for a null-named application!" );
+            LOG4CXX_ERROR_EXT(logger_, "Trying to search for a null-named application!" );
             return "";
         }
         if(mAutoActivateIds.empty())
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Nothing to find: a map is empty!" );
+            LOG4CXX_INFO_EXT(logger_, "Nothing to find: a map is empty!" );
             return "";
         }
         else
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Found " << mAutoActivateIds.size() << " elements in autoactivateid map");
+            LOG4CXX_INFO_EXT(logger_, "Found " << mAutoActivateIds.size() << " elements in autoactivateid map");
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Searching for an auto-activate id for the application " << name );
+        LOG4CXX_INFO_EXT(logger_, "Searching for an auto-activate id for the application " << name );
         AutoActivateIDs::const_iterator it = mAutoActivateIds.find( name );
         if ( it != mAutoActivateIds.end() )
         {
             const std::string& aaId = it->second;
-            LOG4CPLUS_INFO_EXT(mLogger, "An application " << name << " has auto activate id " << aaId );
+            LOG4CXX_INFO_EXT(logger_, "An application " << name << " has auto activate id " << aaId );
             return aaId;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Application " << name << " not found in subscribed." );
+        LOG4CXX_INFO_EXT(logger_, "Application " << name << " not found in subscribed." );
         return "";
     }
 
@@ -173,7 +175,7 @@ namespace NsAppManager
      */
     void AutoActivateIdMapping::clear()
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Clearing a mapping" );
+        LOG4CXX_INFO_EXT(logger_, "Clearing a mapping" );
         mAutoActivateIds.clear();
     }
 

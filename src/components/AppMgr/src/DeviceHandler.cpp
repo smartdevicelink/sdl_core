@@ -31,11 +31,11 @@
 //
 
 #include "AppMgr/DeviceHandler.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
-    log4cplus::Logger DeviceHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("DeviceHandler"));
+    log4cxx::LoggerPtr DeviceHandler::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("DeviceHandler"));
 
     /**
      * \brief Default class constructor
@@ -59,7 +59,7 @@ namespace NsAppManager
      */
     void DeviceHandler::addDevice(const int &sessionKey, const connection_handler::DeviceHandle &device)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Adding a device " << device << " with a session " << sessionKey );
+        LOG4CXX_INFO_EXT(logger_, "Adding a device " << device << " with a session " << sessionKey );
         mDeviceMapping.insert(DeviceMapItem(sessionKey, device));
     }
 
@@ -69,7 +69,7 @@ namespace NsAppManager
      */
     void DeviceHandler::removeDevice(const int &sessionKey)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Removing a device  with a session " << sessionKey );
+        LOG4CXX_INFO_EXT(logger_, "Removing a device  with a session " << sessionKey );
         mDeviceMapping.erase(sessionKey);
     }
 
@@ -79,12 +79,12 @@ namespace NsAppManager
      */
     void DeviceHandler::removeSession(const connection_handler::DeviceHandle &device)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Removing all sessions associated with device " << device );
+        LOG4CXX_INFO_EXT(logger_, "Removing all sessions associated with device " << device );
         for(DeviceMap::iterator it = mDeviceMapping.begin(); it != mDeviceMapping.end(); it++)
         {
             if(it->second == device)
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Removing session " << it->first );
+                LOG4CXX_INFO_EXT(logger_, "Removing session " << it->first );
                 mDeviceMapping.erase(it->first);
             }
         }
@@ -102,7 +102,7 @@ namespace NsAppManager
         {
             return it->second;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Session " << sessionKey << " not found in subscribed." );
+        LOG4CXX_INFO_EXT(logger_, "Session " << sessionKey << " not found in subscribed." );
         return 0;
     }
 

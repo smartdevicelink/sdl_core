@@ -33,16 +33,13 @@
 #ifndef APPCONNECTIONHANDLER_H
 #define APPCONNECTIONHANDLER_H
 
+#include "utils/logger.h"
+
 
 namespace connection_handler
 {
     class DevicesDiscoveryStarter;
     typedef int DeviceHandle;
-}
-
-namespace log4cplus
-{
-    class Logger;
 }
 
 namespace NsAppManager
@@ -97,7 +94,7 @@ namespace NsAppManager
         ConnectionHandler(const ConnectionHandler&);
 
         connection_handler::DevicesDiscoveryStarter* mConnectionHandler;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

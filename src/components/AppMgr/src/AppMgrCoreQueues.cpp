@@ -31,7 +31,7 @@
 //
 
 #include "AppMgr/AppMgrCoreQueues.h"
-#include "LoggerHelper.hpp"
+#include "utils/logger.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/SDLRPCMessage.h"
 #include "AppMgr/AppMgrCore.h"
@@ -40,7 +40,8 @@ namespace NsAppManager
 {
 
     template< class QueueType >
-    log4cplus::Logger AppMgrCoreQueue<QueueType>::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
+      log4cxx::LoggerPtr AppMgrCoreQueue<QueueType>::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppMgrCore"));
 
     /**
      * \brief Class constructor
@@ -54,11 +55,11 @@ namespace NsAppManager
     {
         if(pThis && mThread && mCallbackFn)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCoreQueues constructed!");
+            LOG4CXX_INFO_EXT(logger_, " AppMgrCoreQueues constructed!");
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " AppMgrCoreQueues not constructed! Check if params are non-null!");
+            LOG4CXX_ERROR_EXT(logger_, " AppMgrCoreQueues not constructed! Check if params are non-null!");
         }
     }
 
@@ -87,17 +88,17 @@ namespace NsAppManager
 
         if( mQueue.size() > 0 )
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Emptying queue elements");
+            LOG4CXX_INFO_EXT(logger_, "Emptying queue elements");
             mMtx.Lock();
             while( mQueue.size() > 0 )
             {
                 mQueue.pop();
             }
             mMtx.Unlock();
-            LOG4CPLUS_INFO_EXT(mLogger, "Queue empty.");
+            LOG4CXX_INFO_EXT(logger_, "Queue empty.");
         }
 
-        LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCoreQueues detructed!");
+        LOG4CXX_INFO_EXT(logger_, " AppMgrCoreQueues detructed!");
     }
 
     /**
@@ -106,10 +107,10 @@ namespace NsAppManager
     template< class QueueType >
     void AppMgrCoreQueue<QueueType>::executeThreads()
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
+        LOG4CXX_INFO_EXT(logger_, " Threads are being started!");
         mThread->Start(false);
 
-        LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
+        LOG4CXX_INFO_EXT(logger_, " Threads have been started!");
     }
 
     /**
@@ -119,7 +120,7 @@ namespace NsAppManager
     template< class QueueType >
     void AppMgrCoreQueue<QueueType>::pushMessage( QueueType message )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Pushing a message...");
+        LOG4CXX_INFO_EXT(logger_, " Pushing a message...");
         mMtx.Lock();
 
         mQueue.push(message);
@@ -127,7 +128,7 @@ namespace NsAppManager
         mMtx.Unlock();
 
         mBinarySemaphore.Notify();
-        LOG4CPLUS_INFO_EXT(mLogger, " Pushed a message");
+        LOG4CXX_INFO_EXT(logger_, " Pushed a message");
     }
 
     /**
@@ -139,12 +140,12 @@ namespace NsAppManager
     {
         if(!pThis)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " pThis should be non-null!");
+            LOG4CXX_ERROR_EXT(logger_, " pThis should be non-null!");
             return 0;
         }
         if(!mCallbackFn)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " callback function pointer should be non-null!");
+            LOG4CXX_ERROR_EXT(logger_, " callback function pointer should be non-null!");
             return 0;
         }
         while(true)
@@ -152,14 +153,14 @@ namespace NsAppManager
             bool result = false;
             while ( mMtx.Lock(), result = !mQueue.empty(), mMtx.Unlock(), result )
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Handling message in queue.");
+                LOG4CXX_INFO_EXT(logger_, "Handling message in queue.");
                 mMtx.Lock();
                 QueueType msg = mQueue.front();
                 mQueue.pop();
                 mMtx.Unlock();
 
                 mCallbackFn( msg, pThis );
-                LOG4CPLUS_INFO_EXT(mLogger, "Message handled.");
+                LOG4CXX_INFO_EXT(logger_, "Message handled.");
             }
             mBinarySemaphore.Wait();
         }

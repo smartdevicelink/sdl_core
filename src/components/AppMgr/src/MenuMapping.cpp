@@ -31,12 +31,12 @@
 //
 
 #include "AppMgr/MenuMapping.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 
-    log4cplus::Logger MenuMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("MenuMapping"));
+    log4cxx::LoggerPtr MenuMapping::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("MenuMapping"));
 
     /**
      * \brief Default class constructor
@@ -60,7 +60,7 @@ namespace NsAppManager
      */
     void MenuMapping::addCommand(const unsigned int& commandId, const unsigned int& menuId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Inserting a command " << commandId << " into a menu " << menuId );
+        LOG4CXX_INFO_EXT(logger_, "Inserting a command " << commandId << " into a menu " << menuId );
         mMenuMapping.insert(MenuMapItem(commandId, menuId));
     }
 
@@ -70,7 +70,7 @@ namespace NsAppManager
      */
     void MenuMapping::removeCommand(const unsigned int &commandId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Removing a command " << commandId );
+        LOG4CXX_INFO_EXT(logger_, "Removing a command " << commandId );
         mMenuMapping.erase(commandId);
     }
 
@@ -89,7 +89,7 @@ namespace NsAppManager
      */
     void MenuMapping::removeMenu(const unsigned int& menuId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Removing a menu " << menuId );
+        LOG4CXX_INFO_EXT(logger_, "Removing a menu " << menuId );
         const MenuCommands& commands = findCommandsAssignedToMenu(menuId);
 
         for(MenuCommands::const_iterator it = commands.begin(); it != commands.end(); it++)
@@ -105,13 +105,13 @@ namespace NsAppManager
      */
     unsigned int MenuMapping::findMenuAssignedToCommand(const unsigned int& commandId) const
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Finding a menu associated with a command " << commandId );
+        LOG4CXX_INFO_EXT(logger_, "Finding a menu associated with a command " << commandId );
         MenuMap::const_iterator it = mMenuMapping.find(commandId);
         if(it != mMenuMapping.end())
         {
             return it->second;
         }
-        LOG4CPLUS_ERROR_EXT(mLogger, "Command " << commandId << " isn't associated with any menu" );
+        LOG4CXX_ERROR_EXT(logger_, "Command " << commandId << " isn't associated with any menu" );
         return -1;
     }
 
@@ -122,7 +122,7 @@ namespace NsAppManager
      */
     MenuCommands MenuMapping::findCommandsAssignedToMenu(const unsigned int& menuId) const
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Finding a command list associated with a menu " << menuId );
+        LOG4CXX_INFO_EXT(logger_, "Finding a command list associated with a menu " << menuId );
         MenuCommands commands;
         for(MenuMap::const_iterator it = mMenuMapping.begin(); it != mMenuMapping.end(); it++)
         {

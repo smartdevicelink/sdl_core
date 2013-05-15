@@ -31,11 +31,11 @@
 //
 
 #include "AppMgr/AppMenus.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
-    log4cplus::Logger AppMenus::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMenus"));
+    log4cxx::LoggerPtr AppMenus::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppMenus"));
 
     /**
      * \brief Default class constructor
@@ -60,7 +60,7 @@ namespace NsAppManager
      */
     void AppMenus::addItem(const unsigned int &menuId, const std::string &menuName, const unsigned int *position)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Adding a menu item " << menuId << " name " << menuName );
+        LOG4CXX_INFO_EXT(logger_, "Adding a menu item " << menuId << " name " << menuName );
         mMenuItems.insert(MenuItem(menuId, MenuValue(menuName, position)));
     }
 
@@ -70,7 +70,7 @@ namespace NsAppManager
      */
     void AppMenus::removeItem(const unsigned int &menuId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Deleting a menu item " << menuId );
+        LOG4CXX_INFO_EXT(logger_, "Deleting a menu item " << menuId );
         mMenuItems.erase(menuId);
     }
 
@@ -81,18 +81,18 @@ namespace NsAppManager
      */
     const MenuValue *AppMenus::findItem(const unsigned int &menuId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Searching for a menu item " << menuId );
+        LOG4CXX_INFO_EXT(logger_, "Searching for a menu item " << menuId );
         const MenuItems::const_iterator& it = mMenuItems.find(menuId);
         if(it != mMenuItems.end())
         {
             const MenuItem& item = *it;
             if(menuId == item.first)
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Found a menu item for id " << menuId << " !");
+                LOG4CXX_INFO_EXT(logger_, "Found a menu item for id " << menuId << " !");
                 return &item.second;
             }
         }
-        LOG4CPLUS_ERROR_EXT(mLogger, "A menu item " << menuId << " has not been found!");
+        LOG4CXX_ERROR_EXT(logger_, "A menu item " << menuId << " has not been found!");
         return 0;
     }
 

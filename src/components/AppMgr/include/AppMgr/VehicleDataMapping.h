@@ -36,11 +36,7 @@
 #include <map>
 #include <vector>
 #include "JSONHandler/SDLRPCObjects/V2/VehicleDataType.h"
-
-namespace log4cplus
-{
-    class Logger;
-}
+#include "utils/logger.h"
 
 namespace NsAppManager
 {
@@ -121,7 +117,7 @@ namespace NsAppManager
         VehicleDataMapping(const VehicleDataMapping&);
 
         VehicleDataMap    mVehicleDataMapping;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

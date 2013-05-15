@@ -35,12 +35,7 @@
 
 #include <vector>
 #include <string>
-#include "LoggerHelper.hpp"
-
-namespace log4cplus
-{
-    class Logger;
-}
+#include "utils/logger.h"
 
 namespace NsAppManager
 {
@@ -120,7 +115,7 @@ private:
     bool deserializeFromFile(const std::string &fileName, PData &value);
 
     PData mPData;
-    static log4cplus::Logger mLogger;
+    static log4cxx::LoggerPtr logger_;
 };
 
 }

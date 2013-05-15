@@ -30,13 +30,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <algorithm>
 #include "AppMgr/Application.h"
-#include "LoggerHelper.hpp"
+#include "utils/logger.h"
 
 namespace NsAppManager
 {
 
-    log4cplus::Logger Application::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Application"));
+    log4cxx::LoggerPtr Application::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Application"));
 
     /**
      * \brief Class constructor
@@ -52,7 +54,7 @@ namespace NsAppManager
         ,mAppID(appId)
     {
         addSessionKey(appId);
-        LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " application id " << appId);
+        LOG4CXX_INFO_EXT(logger_, " Created an application " << name << " application id " << appId);
     }
 
     /**
@@ -74,7 +76,7 @@ namespace NsAppManager
      */
     Application::~Application( )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application " << mName << " application id " << mAppID);
+        LOG4CXX_INFO_EXT(logger_, " Deleted an application " << mName << " application id " << mAppID);
     }
 
     /**

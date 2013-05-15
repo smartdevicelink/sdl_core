@@ -54,7 +54,7 @@ void MessageBrokerAdapter::sendMessageToHMI(
     Json::Value json_value;
     if (!reader.parse(message->json_message(), json_value, false))
     {
-        //LOG4CPLUS_ERROR(mLogger, "Received invalid json string.");
+        //LOG4CXX_ERROR(mLogger, "Received invalid json string.");
         return;
     }
 

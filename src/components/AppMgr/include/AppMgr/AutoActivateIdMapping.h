@@ -36,11 +36,6 @@
 #include <string>
 #include <map>
 
-namespace log4cplus
-{
-    class Logger;
-}
-
 namespace NsAppManager
 {
 
@@ -120,7 +115,7 @@ namespace NsAppManager
         AutoActivateIDs  mAutoActivateIds;
         unsigned long mLastAutoActivateId;
 
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

@@ -32,12 +32,12 @@
 
 #include "AppMgr/VehicleDataMapping.h"
 #include "AppMgr/RegistryItem.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 
-    log4cplus::Logger VehicleDataMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("VehicleDataMapping"));
+    log4cxx::LoggerPtr VehicleDataMapping::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("VehicleDataMapping"));
 
     VehicleDataMapping::VehicleDataMapping()
     {
@@ -54,7 +54,7 @@ namespace NsAppManager
         bool result = true;
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Adding a VehicleData to a null registry item");
+            LOG4CXX_ERROR_EXT(logger_, " Adding a VehicleData to a null registry item");
             return false;
         }
         std::pair<VehicleDataMapIterator, VehicleDataMapIterator> p =
@@ -65,7 +65,7 @@ namespace NsAppManager
             {
                 if (app->getAppID() == itr->second->getAppID())
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Already subscribed to VehicleData " 
+                    LOG4CXX_INFO_EXT(logger_, "Already subscribed to VehicleData "
                             << itr->first << " in app " 
                             << itr->second->getName() );
                     result = false;
@@ -75,7 +75,7 @@ namespace NsAppManager
         }
         if (result)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to VehicleData " 
+            LOG4CXX_INFO_EXT(logger_, "Subscribed to VehicleData "
                 << vehicleDataName.get() << " in app " 
                 << app->getName() );
 
@@ -89,7 +89,7 @@ namespace NsAppManager
         bool result =false;
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Removing VehicleData from a null registry item");
+            LOG4CXX_ERROR_EXT(logger_, " Removing VehicleData from a null registry item");
             return result;
         }
         std::pair<VehicleDataMapIterator, VehicleDataMapIterator> p = mVehicleDataMapping.equal_range(vehicleDataName.get());
@@ -99,7 +99,7 @@ namespace NsAppManager
             {
                 if (app->getAppID() == itr->second->getAppID())
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "UnSubscribed from VehicleData "
+                    LOG4CXX_INFO_EXT(logger_, "UnSubscribed from VehicleData "
                             << itr->first << " in app "
                             << itr->second->getName() );
 
@@ -116,14 +116,14 @@ namespace NsAppManager
     {
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove a null item");
+            LOG4CXX_ERROR_EXT(logger_, " Trying to remove a null item");
             return;
         }
         for(VehicleDataMap::iterator it = mVehicleDataMapping.begin(); it != mVehicleDataMapping.end(); it++)
         {
             if(it->second->getAppID() == app->getAppID())
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Removed from VehicleData " << it->first << " with app " << it->second->getName() );
+                LOG4CXX_INFO_EXT(logger_, "Removed from VehicleData " << it->first << " with app " << it->second->getName() );
                 mVehicleDataMapping.erase(it);
             }
         }
@@ -148,7 +148,7 @@ namespace NsAppManager
                 result.push_back(itr->second);
             }
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Found " << result.size() << " subscribers.");
+        LOG4CXX_INFO_EXT(logger_, "Found " << result.size() << " subscribers.");
         return result.size();
     }
 

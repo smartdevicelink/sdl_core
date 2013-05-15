@@ -42,17 +42,13 @@
 #include "JSONHandler/SDLRPCObjects/V1/AudioStreamingState.h"
 #include "JSONHandler/SDLRPCObjects/V1/SystemContext.h"
 #include "JSONHandler/SDLRPCObjects/V1/HMILevel.h"
+#include "utils/logger.h"
 #include <string>
 #include <vector>
 #include <tuple>
 #include <map>
 #include <list>
 #include <cstddef>
-
-namespace log4cplus
-{
-    class Logger;
-}
 
 namespace NsAppManager
 {
@@ -325,7 +321,7 @@ namespace NsAppManager
 
 
     protected:
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
 
         /**
          * \brief Copy constructor

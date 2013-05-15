@@ -31,13 +31,13 @@
 //
 
 #include "AppMgr/CapabilitesContainer.h"
-#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 
     template<class DeviceCapabilities>
-    log4cplus::Logger CapabilitiesContainer<DeviceCapabilities>::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ButtonCapabilities"));
+    log4cxx::LoggerPtr CapabilitiesContainer<DeviceCapabilities>::logger_ =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ButtonCapabilities"));
 
     /**
      * \brief Default class constructor
@@ -45,7 +45,7 @@ namespace NsAppManager
     template<class DeviceCapabilities>
     CapabilitiesContainer<DeviceCapabilities>::CapabilitiesContainer()
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " CapabilitiesContainer constructed!");
+        LOG4CXX_INFO_EXT(logger_, " CapabilitiesContainer constructed!");
     }
 
     /**
@@ -66,7 +66,7 @@ namespace NsAppManager
     {
         if(caps.empty())
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Trying to set empty capabilities set");
+            LOG4CXX_ERROR_EXT(logger_, " Trying to set empty capabilities set");
             return;
         }
 

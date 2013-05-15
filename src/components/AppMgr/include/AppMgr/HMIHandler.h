@@ -33,6 +33,8 @@
 #ifndef HMIHANDLER_H
 #define HMIHANDLER_H
 
+#include "utils/logger.h"
+
 class JSONRPC2Handler;
 
 namespace NsRPC2Communication
@@ -42,10 +44,6 @@ namespace NsRPC2Communication
     class RPC2Request;
 }
 
-namespace log4cplus
-{
-    class Logger;
-}
 
 namespace NsAppManager
 {
@@ -114,7 +112,7 @@ namespace NsAppManager
         bool             m_bHMIReady;
         JSONRPC2Handler* mJSONRPC2Handler;
 
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

@@ -35,10 +35,7 @@
 
 #include <vector>
 
-namespace log4cplus
-{
-    class Logger;
-}
+#include "utils/logger.h"
 
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetCapabilitiesResponse.h"
@@ -102,7 +99,7 @@ namespace NsAppManager
         CapabilitiesContainer(const CapabilitiesContainer&);
 
         Capabilities mCapabilities;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

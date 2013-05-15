@@ -34,11 +34,10 @@
 #include "JSONHandler/SDLRPCMessage.h"
 
 #include "protocol_handler/raw_message.h"
-#include "LoggerHelper.hpp"
 
 namespace json_handler {
-log4cplus::Logger OutgoingThreadImpl::logger_ = log4cplus::Logger::getInstance(
-    LOG4CPLUS_TEXT("JSONHandler"));
+log4cxx::LoggerPtr OutgoingThreadImpl::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("OutgoingThreadImpl"));
 
 OutgoingThreadImpl::OutgoingThreadImpl(JSONHandler* handler)
     : handler_(handler) {
@@ -54,7 +53,7 @@ void OutgoingThreadImpl::threadMain() {
       std::pair<int, const NsSmartDeviceLinkRPC::SDLRPCMessage*> messagePair =
           handler_->mOutgoingMessages.pop();
       const NsSmartDeviceLinkRPC::SDLRPCMessage* message = messagePair.second;
-      LOG4CPLUS_INFO(
+      LOG4CXX_INFO(
           logger_,
           "Outgoing mobile message " << message->getMethodId() << " received.");
 
@@ -63,7 +62,7 @@ void OutgoingThreadImpl::threadMain() {
         msgToProtocolHandler = handler_->handleOutgoingMessageProtocolV1(
             messagePair.first, message);
       } else if (message->getProtocolVersion() == 2) {
-        LOG4CPLUS_INFO_EXT(
+        LOG4CXX_INFO_EXT(
             logger_,
             "method id " << message->getMethodId()
               << "; message type " << message->getMessageType());
@@ -73,25 +72,25 @@ void OutgoingThreadImpl::threadMain() {
       }
 
       if (!msgToProtocolHandler) {
-        LOG4CPLUS_ERROR(logger_, "Failed to create message string.");
+        LOG4CXX_ERROR(logger_, "Failed to create message string.");
         continue;
       }
 
       if (!handler_->mProtocolHandler) {
-        LOG4CPLUS_ERROR(
+        LOG4CXX_ERROR(
             logger_,
             "Cannot handle mobile message: ProtocolHandler doesn't exist.");
         return;
       }
 
-      LOG4CPLUS_INFO_EXT(
+      LOG4CXX_INFO_EXT(
           logger_,
           "Sending to ProtocolHandler: " << msgToProtocolHandler->data()
             << " of size " << msgToProtocolHandler->data_size());
       handler_->mProtocolHandler->sendMessageToMobileApp(msgToProtocolHandler);
 
       delete message;
-      LOG4CPLUS_INFO(logger_, "Outgoing mobile message handled.");
+      LOG4CXX_INFO(logger_, "Outgoing mobile message handled.");
     }
     handler_->mOutgoingMessages.wait();
   }

@@ -62,7 +62,6 @@
 
 #include "system.h"
 
-#include "Logger.hpp"
 #include "utils/logger.h"
 
 #include "TransportManager/ITransportManager.hpp"
@@ -131,12 +130,11 @@ int main(int argc, char** argv)
     pid_t pid_hmi = 0;
     /*** Components instance section***/
     /**********************************/
-    Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("appMain"));
-    PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
-
+    log4cxx::LoggerPtr logger =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("appMain"));
     log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
-    LOG4CPLUS_INFO(logger, " Application started!");
+    LOG4CXX_INFO(logger, " Application started!");
 
     NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager = NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
     CTransportManagerListener tsl(transportManager);
@@ -170,38 +168,38 @@ int main(int argc, char** argv)
     NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
     if (!pMessageBroker)
     {
-        LOG4CPLUS_INFO(logger, " Wrong pMessageBroker pointer!");
+        LOG4CXX_INFO(logger, " Wrong pMessageBroker pointer!");
         return EXIT_SUCCESS;
     }
 
     NsMessageBroker::TcpServer *pJSONRPC20Server = new NsMessageBroker::TcpServer(std::string("0.0.0.0"), 8087, pMessageBroker);
     if (!pJSONRPC20Server)
     {
-        LOG4CPLUS_INFO(logger, " Wrong pJSONRPC20Server pointer!");
+        LOG4CXX_INFO(logger, " Wrong pJSONRPC20Server pointer!");
         return EXIT_SUCCESS;
     }
     pMessageBroker->startMessageBroker(pJSONRPC20Server);
     if(!networking::init())
     {
-      LOG4CPLUS_INFO(logger, " Networking initialization failed!");
+      LOG4CXX_INFO(logger, " Networking initialization failed!");
     }
 
     if(!pJSONRPC20Server->Bind())
     {
-      LOG4CPLUS_FATAL(logger, "Bind failed!");
+      LOG4CXX_FATAL(logger, "Bind failed!");
       exit(EXIT_FAILURE);
     } else
     {
-      LOG4CPLUS_INFO(logger, "Bind successful!");
+      LOG4CXX_INFO(logger, "Bind successful!");
     }
 
     if(!pJSONRPC20Server->Listen())
     {
-      LOG4CPLUS_FATAL(logger, "Listen failed!");
+      LOG4CXX_FATAL(logger, "Listen failed!");
       exit(EXIT_FAILURE);
     } else
     {
-      LOG4CPLUS_INFO(logger, " Listen successful!");
+      LOG4CXX_INFO(logger, " Listen successful!");
     }
 
     JSONRPC2Handler jsonRPC2Handler( std::string("127.0.0.1"), 8087 );
@@ -209,18 +207,18 @@ int main(int argc, char** argv)
     appMgr.setJsonRPC2Handler( &jsonRPC2Handler );
     if (!jsonRPC2Handler.Connect())
     {
-        LOG4CPLUS_INFO(logger, "Cannot connect to remote peer!");
+        LOG4CXX_INFO(logger, "Cannot connect to remote peer!");
     }
 
-    LOG4CPLUS_INFO(logger, "Start CMessageBroker thread!");
+    LOG4CXX_INFO(logger, "Start CMessageBroker thread!");
     System::Thread th1(new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(*pMessageBroker, &NsMessageBroker::CMessageBroker::MethodForThread, NULL));
     th1.Start(false);
 
-    LOG4CPLUS_INFO(logger, "Start MessageBroker TCP server thread!");
+    LOG4CXX_INFO(logger, "Start MessageBroker TCP server thread!");
     System::Thread th2(new System::ThreadArgImpl<NsMessageBroker::TcpServer>(*pJSONRPC20Server, &NsMessageBroker::TcpServer::MethodForThread, NULL));
     th2.Start(false);
 
-    LOG4CPLUS_INFO(logger, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
+    LOG4CXX_INFO(logger, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
     System::Thread th3(new System::ThreadArgImpl<JSONRPC2Handler>(jsonRPC2Handler, &JSONRPC2Handler::MethodForReceiverThread, NULL));
     th3.Start(false);
 
@@ -229,7 +227,7 @@ int main(int argc, char** argv)
 
     appMgr.setConnectionHandler(connectionHandler);
 
-    LOG4CPLUS_INFO(logger, "Start AppMgr threads!");
+    LOG4CXX_INFO(logger, "Start AppMgr threads!");
     appMgr.executeThreads();
 
     /**********************************/
@@ -237,7 +235,7 @@ int main(int argc, char** argv)
     struct stat sb;
     if (stat("hmi_link", &sb) == -1)
     {
-        LOG4CPLUS_INFO(logger, "File with HMI link doesn't exist!");
+        LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
     } else
     {
         std::ifstream file_str;
@@ -245,7 +243,7 @@ int main(int argc, char** argv)
 
         if (!file_str.is_open())
         {
-            LOG4CPLUS_INFO(logger, "File with HMI link was not opened!");
+            LOG4CXX_INFO(logger, "File with HMI link was not opened!");
         } else
         {
             file_str.seekg(0, std::ios::end);
@@ -256,11 +254,11 @@ int main(int argc, char** argv)
             file_str.getline(raw_data, length+1);
             std::string hmi_link = std::string(raw_data, strlen(raw_data));
             delete[] raw_data;
-            LOG4CPLUS_INFO(logger, "Input string:" << hmi_link << " length = " << hmi_link.size());
+            LOG4CXX_INFO(logger, "Input string:" << hmi_link << " length = " << hmi_link.size());
             file_str.close();
             if (stat(hmi_link.c_str(), &sb) == -1)
             {
-                LOG4CPLUS_INFO(logger, "HMI index.html doesn't exist!");
+                LOG4CXX_INFO(logger, "HMI index.html doesn't exist!");
             } else
             {
                 pid_hmi = fork(); /* Create a child process */
@@ -269,7 +267,7 @@ int main(int argc, char** argv)
                 {
                     case -1: /* Error */
                     {
-                        LOG4CPLUS_INFO(logger, "fork() failed!");
+                        LOG4CXX_INFO(logger, "fork() failed!");
                         break;
                     }
                     case 0: /* Child process */
@@ -277,7 +275,7 @@ int main(int argc, char** argv)
                         int fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
                         if (0 > fd_dev0)
                         {
-                            LOG4CPLUS_WARN(logger, "Open dev0 failed!");
+                            LOG4CXX_WARN(logger, "Open dev0 failed!");
                         } else
                         {
                             //close input/output file descriptors.
@@ -294,12 +292,12 @@ int main(int argc, char** argv)
                               "--auth-schemes=basic,digest,ntlm",
                               hmi_link.c_str(),
                               (char *) 0); /* Execute the program */
-                        LOG4CPLUS_WARN(logger, "execl() failed! Install chromium-browser!");
+                        LOG4CXX_WARN(logger, "execl() failed! Install chromium-browser!");
                         return EXIT_SUCCESS;
                     }
                     default: /* Parent process */
                     {
-                        LOG4CPLUS_INFO(logger, "Process created with pid " << pid_hmi);
+                        LOG4CXX_INFO(logger, "Process created with pid " << pid_hmi);
                     }
                 }
             }

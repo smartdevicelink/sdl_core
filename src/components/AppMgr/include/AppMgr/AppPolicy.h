@@ -34,11 +34,8 @@
 #define APPPOLICY_H_
 
 #include <string>
+#include "utils/logger.h"
 
-namespace log4cplus
-{
-    class Logger;
-}
 
 namespace NsAppManager
 {
@@ -81,7 +78,7 @@ namespace NsAppManager
         AppPolicy( const AppPolicy& );
 
         const std::string mPolicy;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 } // namespace NsAppManager

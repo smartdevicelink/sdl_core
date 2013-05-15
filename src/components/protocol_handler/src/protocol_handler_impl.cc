@@ -86,7 +86,7 @@ ProtocolHandlerImpl::~ProtocolHandlerImpl() {
 }
 
 void ProtocolHandlerImpl::set_protocol_observer(ProtocolObserver* observer) {
-  //LOG4CPLUS_TRACE_METHOD(logger_, __PRETTY_FUNCTION__);
+  //LOG4CXX_TRACE_METHOD(logger_, __PRETTY_FUNCTION__);
   if (!observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
     return;

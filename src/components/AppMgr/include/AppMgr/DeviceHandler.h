@@ -36,11 +36,7 @@
 #include "ConnectionHandler/device.h"
 
 #include <map>
-
-namespace log4cplus
-{
-    class Logger;
-}
+#include "utils/logger.h"
 
 namespace NsAppManager
 {
@@ -113,7 +109,7 @@ namespace NsAppManager
         DeviceHandler(const DeviceHandler&);
 
         DeviceMap    mDeviceMapping;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 
 }

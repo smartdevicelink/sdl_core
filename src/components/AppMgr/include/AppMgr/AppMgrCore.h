@@ -50,7 +50,7 @@
 #include "JSONHandler/SDLRPCObjects/V2/Language.h"
 #include "AppMgr/MessageChaining.hpp"
 #include "AppMgr/DeviceStorage.hpp"
-
+#include "utils/logger.h"
 #include "utils/threads/thread.h"
 
 namespace NsSmartDeviceLinkRPC
@@ -72,10 +72,6 @@ namespace NsRPC2Communication
     class RPC2Command;
 }
 
-namespace log4cplus
-{
-    class Logger;
-}
 
 namespace connection_handler
 {
@@ -372,7 +368,7 @@ namespace NsAppManager
 
         SyncPManager     mSyncPManager;
 
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
 
         std::map<int, Application*> mApplications;
         std::map<int, DeviceStorage> mDevices;

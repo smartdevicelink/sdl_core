@@ -33,13 +33,9 @@
 #ifndef DEVICELIST_H
 #define DEVICELIST_H
 
-#include "Logger.hpp"
+#include "utils/logger.h"
 #include "ConnectionHandler/device.h"
-
-namespace log4cplus
-{
-    class Logger;
-}
+#include "utils/logger.h"
 
 namespace NsAppManager
 {
@@ -100,7 +96,7 @@ namespace NsAppManager
         DeviceList(const DeviceList&);
 
         connection_handler::DeviceList mDeviceList;
-        static log4cplus::Logger mLogger;
+        static log4cxx::LoggerPtr logger_;
     };
 }
 

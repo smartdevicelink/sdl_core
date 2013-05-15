@@ -36,7 +36,8 @@
 #include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/RPC2Objects/Marshaller.h"
 
-log4cplus::Logger JSONRPC2Handler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONRPC2Handler"));
+log4cxx::LoggerPtr JSONRPC2Handler::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("JSONRPC2Handler"));
 
 JSONRPC2Handler::JSONRPC2Handler( const std::string& address, uint16_t port ) :
 NsMessageBroker::CMessageBrokerController( address, port, "BasicCommunication" )
@@ -55,7 +56,7 @@ JSONRPC2Handler::~JSONRPC2Handler()
 
 void JSONRPC2Handler::processResponse(std::string method, Json::Value& root)
 {
-    LOG4CPLUS_INFO_EXT( mLogger, "Received response from RPCBus" );
+    LOG4CXX_INFO_EXT( logger_, "Received response from RPCBus" );
     ResponseContainer response;
     response.methodName = method;
     response.response = root;
@@ -64,13 +65,13 @@ void JSONRPC2Handler::processResponse(std::string method, Json::Value& root)
     
 void JSONRPC2Handler::processRequest(Json::Value& root)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "Received request from RPCBus");
+    LOG4CXX_INFO_EXT(logger_, "Received request from RPCBus");
     mCommandsFromHMI.push( root );
 }
     
 void JSONRPC2Handler::processNotification(Json::Value& root)
 {
-    LOG4CPLUS_INFO_EXT( mLogger, "Received notification from RPCBus." );
+    LOG4CXX_INFO_EXT( logger_, "Received notification from RPCBus." );
     mCommandsFromHMI.push( root );
 }
 
@@ -121,25 +122,25 @@ void * JSONRPC2Handler::waitForCommandsFromHMI( void * params )
     {
         pthread_exit( 0 );
     }
-    LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI");
+    LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForCommandsFromHMI");
     while ( 1 )
     {
         while ( !handler -> mCommandsFromHMI.empty() )
         {
             Json::Value jsonMessage = handler -> mCommandsFromHMI.pop();
-            LOG4CPLUS_INFO_EXT(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: received command: " << jsonMessage);
+            LOG4CXX_INFO_EXT(logger_, "JSONRPC2Handler::waitForCommandsFromHMI: received command: " << jsonMessage);
             NsRPC2Communication::RPC2Command * currentCommand = NsRPC2Communication::Marshaller::fromJSON( jsonMessage );
             
             if ( !currentCommand )
             {
-                LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                LOG4CXX_ERROR( logger_, "Invalid RPCBus message received." );
                 continue;
             }
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: handle command" );
+            LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForCommandsFromHMI: handle command" );
 
             if ( !handler -> mCommandsObserver )
             {
-                LOG4CPLUS_ERROR( mLogger, "Cannot handle RPCBus message: CommandsObserver doesn't exist." );
+                LOG4CXX_ERROR( logger_, "Cannot handle RPCBus message: CommandsObserver doesn't exist." );
                 pthread_exit( 0 );
             }
             handler -> mCommandsObserver -> onCommandReceivedCallback( currentCommand );
@@ -157,24 +158,24 @@ void * JSONRPC2Handler::waitForResponsesFromHMI( void * params )
     {
         pthread_exit( 0 );
     }
-    LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI\n");
+    LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForResponsesFromHMI\n");
     while ( 1 )
     {
         while ( !handler -> mResponsesFromHMI.empty() )
         {            
             ResponseContainer response = handler -> mResponsesFromHMI.pop();
-            LOG4CPLUS_INFO_EXT(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: received response to a method " << response.methodName << std::endl << response.response );
+            LOG4CXX_INFO_EXT(logger_, "JSONRPC2Handler::waitForResponsesFromHMI: received response to a method " << response.methodName << "\n" << response.response );
             NsRPC2Communication::RPC2Command * currentCommand = NsRPC2Communication::Marshaller::fromJSON( response.response );
             
             if ( !currentCommand )
             {
-                LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                LOG4CXX_ERROR( logger_, "Invalid RPCBus message received." );
                 continue;
             }
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: handle response");
+            LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForResponsesFromHMI: handle response");
             if ( !handler -> mCommandsObserver )
             {
-                LOG4CPLUS_ERROR( mLogger, "Cannot handle RPCBus message: CommandsObserver doesn't exist." );
+                LOG4CXX_ERROR( logger_, "Cannot handle RPCBus message: CommandsObserver doesn't exist." );
                 pthread_exit( 0 );
             }
             handler -> mCommandsObserver -> onCommandReceivedCallback( currentCommand );
@@ -192,7 +193,7 @@ void * JSONRPC2Handler::waitForResponsesToHMI( void * params )
     {
         pthread_exit( 0 );
     }
-    LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesToHMI");
+    LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForResponsesToHMI");
     while ( 1 )
     {
         while ( !handler -> mResponsesToHMI.empty() )
@@ -200,14 +201,14 @@ void * JSONRPC2Handler::waitForResponsesToHMI( void * params )
             const NsRPC2Communication::RPC2Response * command = handler -> mResponsesToHMI.pop();
 
             Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( command );
-            LOG4CPLUS_INFO_EXT(mLogger, "JSONRPC2Handler::waitForResponsesToHMI: received response " << command->getId() << commandJson);
+            LOG4CXX_INFO_EXT(logger_, "JSONRPC2Handler::waitForResponsesToHMI: received response " << command->getId() << commandJson);
 
             if ( commandJson.isNull() )
             {
-                LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                LOG4CXX_ERROR( logger_, "Invalid RPCBus message received." );
                 continue;
             }
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesToHMI: processed command" );
+            LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForResponsesToHMI: processed command" );
 
             //handler -> prepareMessage( commandJson );
             handler -> sendJsonMessage( commandJson );
@@ -227,21 +228,21 @@ void * JSONRPC2Handler::waitForRequestsToHMI( void * params )
     {
         pthread_exit( 0 );
     }
-    LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForRequestsToHMI");
+    LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForRequestsToHMI");
     while ( 1 )
     {
         while ( !handler -> mRequestsToHMI.empty() )
         {
             const NsRPC2Communication::RPC2Command * command = handler -> mRequestsToHMI.pop();
             Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( command );
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForRequestsToHMI: received request " << commandJson);
+            LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForRequestsToHMI: received request " << commandJson);
 
             if ( commandJson.isNull() )
             {
-                LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                LOG4CXX_ERROR( logger_, "Invalid RPCBus message received." );
                 continue;
             }
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForRequestsToHMI: processed command" );
+            LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForRequestsToHMI: processed command" );
 
             //handler -> prepareMessage( commandJson );
             handler -> sendJsonMessage( commandJson );
@@ -261,21 +262,21 @@ void * JSONRPC2Handler::waitForNotificationsToHMI( void * params )
     {
         pthread_exit( 0 );
     }
-    LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForNotificationsToHMI");
+    LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForNotificationsToHMI");
     while ( 1 )
     {
         while ( !handler -> mNotificationsToHMI.empty() )
         {
             const NsRPC2Communication::RPC2Command * command = handler -> mNotificationsToHMI.pop();
             Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( command );
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForNotificationsToHMI: received notification " << commandJson);
+            LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForNotificationsToHMI: received notification " << commandJson);
 
             if ( commandJson.isNull() )
             {
-                LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                LOG4CXX_ERROR( logger_, "Invalid RPCBus message received." );
                 continue;
             }
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForNotificationsToHMI: processed command" );
+            LOG4CXX_INFO(logger_, "JSONRPC2Handler::waitForNotificationsToHMI: processed command" );
 
             handler -> sendJsonMessage( commandJson );
 

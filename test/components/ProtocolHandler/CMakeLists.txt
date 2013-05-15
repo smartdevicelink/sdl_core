@@ -5,9 +5,6 @@ include_directories (
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/ConnectionHandler/include
-  ../../../src/thirdPartyLibs/logger/include/
-  ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
-  ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
 set (LIBRARIES
@@ -20,7 +17,6 @@ set (LIBRARIES
     TransportManager
     Utils
     bluetooth    
-    log4cplus
 )
 
 create_test("interface_test" "./protocol_handler_tm_test.cpp" "${LIBRARIES}")
