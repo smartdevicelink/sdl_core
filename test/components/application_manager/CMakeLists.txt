@@ -14,14 +14,13 @@ set(LIBRARIES
     gtest_main
     gmock
     gmock_main
-    SmartObjects
-    ApplicationManager
+#    ApplicationManager
+    log4cplus
     JSONHandler
     jsoncpp
+    v4_protocol_v1_2_no_extra
+    v4_protocol_v2_0_revT
+    SmartObjects
 )
 
-set (SOURCES
-  ./api_converter_v1_test.cpp
-)
-
-#add_library("test_ApplicationManagerTest" "${SOURCES}")
+create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")
