@@ -101,7 +101,6 @@ void ConnectionHandlerImpl::onDeviceListUpdated(
   }
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
-    connection_handler_observer_->UpdateDeviceList(device_list_);
   }
 }
 

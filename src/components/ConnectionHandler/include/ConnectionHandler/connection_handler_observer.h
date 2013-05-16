@@ -62,16 +62,6 @@ class ConnectionHandlerObserver {
       const connection_handler::DeviceList & device_list) = 0;
 
   /**
-   * \brief Updates device list.
-   *
-   * Called when device list has been updated and new devices were added.
-   *
-   * \param DeviceList New list of available devices.
-   **/
-  virtual void UpdateDeviceList(
-      const connection_handler::DeviceList & device_list) = 0;
-
-  /**
    * \brief Removes device.
    *
    * Called when device has been removed from a list.

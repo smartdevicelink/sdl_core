@@ -30,55 +30,43 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
-#include <string>
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class CSmartObject;
-}
-}
+#include "hmi_message_handler/hmi_message_handler.h"
+#include "mobile_message_handler/mobile_message_handler.h"
+#include "ConnectionHandler/connection_handler.h"
+#include "request_watchdog/watchdog.h"
 
 namespace application_manager {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-typedef int ErrorCode;
-// class Command;
+class Application;
+class MessageChaining;
+class HMIMatrix;
+class PoliciesManager;
 
-enum APIVersion {
-  kUnknownAPI = -1,
-  kAPIV1 = 0,
-  kAPIV2 = 1
+class ApplicationManager {
+public:
+	virtual ~ApplicationManager() {}
+
+	virtual Application * application(int app_id) = 0;
+	virtual std::vector<Application *> applications() const = 0;
+	virtual Application * active_application() const = 0;
+	virtual void set_hmi_message_handler(
+			hmi_message_handler::HMIMessageHandler * handler) = 0;
+	virtual void set_mobile_message_handler(
+			mobile_message_handler::MobileMessageHandler * handler) = 0;
+	virtual void set_connection_handler(
+			connection_handler::ConnectionHandler * handler) = 0;
+	virtual void set_watchdog(
+			request_watchdog::Watchdog * watchdog) = 0;
+	/*TODO(PV): set or create?*/
+	virtual void set_hmi_matrix(HMIMatrix * matrix) = 0;
+	/*TODO(PV): set or create?*/
+	virtual void set_policies_manager(PoliciesManager * managaer) = 0;
+
 };
 
-struct Version {
-  APIVersion min_supported_api_version;
-  APIVersion max_supported_api_version;
+} // namespace application_manager
 
-  Version()
-      : min_supported_api_version(APIVersion::kUnknownAPI),
-        max_supported_api_version(APIVersion::kUnknownAPI) {
-  }
-};
-
-class Application {
- public:
-  virtual void processMessage(smart_objects::CSmartObject * message) = 0;
-  virtual void reportError(smart_objects::CSmartObject * message,
-                           ErrorCode error_code) = 0;
-  virtual const smart_objects::CSmartObject* activeMessage() const = 0;
-  virtual void clearActiveMessage() = 0;
-  virtual const Version& version() const = 0;
-  virtual int app_id() const = 0;
-  virtual const std::string& name() const = 0;
- protected:
-  virtual ~Application() {
-  }
-  // virtual Command commandFromMessage(smart_objects::CSmartObject * message) = 0;
-};
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
+#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_

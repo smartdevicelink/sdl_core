@@ -30,55 +30,47 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
-
-#include <string>
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class CSmartObject;
-}
-}
+#include "application_manager/application.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-typedef int ErrorCode;
-// class Command;
+ApplicationManagerImpl * ApplicationManagerImpl::self_ = NULL;
 
-enum APIVersion {
-  kUnknownAPI = -1,
-  kAPIV1 = 0,
-  kAPIV2 = 1
-};
+ApplicationManagerImpl::~ApplicationManagerImpl() {
 
-struct Version {
-  APIVersion min_supported_api_version;
-  APIVersion max_supported_api_version;
+}
 
-  Version()
-      : min_supported_api_version(APIVersion::kUnknownAPI),
-        max_supported_api_version(APIVersion::kUnknownAPI) {
-  }
-};
+ApplicationManager * ApplicationManagerImpl::GetInstance() {
+	if (NULL == self_) {
+		self_ = new ApplicationManagerImpl();
+	}
+	return self_;
+}
 
-class Application {
- public:
-  virtual void processMessage(smart_objects::CSmartObject * message) = 0;
-  virtual void reportError(smart_objects::CSmartObject * message,
-                           ErrorCode error_code) = 0;
-  virtual const smart_objects::CSmartObject* activeMessage() const = 0;
-  virtual void clearActiveMessage() = 0;
-  virtual const Version& version() const = 0;
-  virtual int app_id() const = 0;
-  virtual const std::string& name() const = 0;
- protected:
-  virtual ~Application() {
-  }
-  // virtual Command commandFromMessage(smart_objects::CSmartObject * message) = 0;
-};
+Application * ApplicationManagerImpl::application(int app_id) {
+	std::map<int, Application *>::iterator it = applications_.find(app_id);
+	if (applications_.end() != it) {
+		return it->second;
+	}
+	else {
+		return NULL;
+	}
+}
 
-}  // namespace application_manager
+std::vector<Application *>
+ApplicationManagerImpl::applications() const {
+	std::vector<Application*> result;
+	for(std::map<int, Application*>::const_iterator it = applications_.begin();
+		applications_.end() != it;
+		++it) {
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
+		if(it->second->app_id() == it->first) {
+			result.push_back(it->second);
+		}
+	}
+	return result;
+}
+
+
+} // namespace application_manager

@@ -293,7 +293,8 @@ Notifications:
 		{
 			"onScreenPresetsAvailable" : true
 		},
-		"code" : 0
+		"code" : 0,
+		"method" : "Buttons.GetCapabilities"
 	}
 }
 
@@ -304,6 +305,9 @@ Notifications:
 	"error" : 
 	{
 		"code" : 12,
-		"message" : "File with this name is not available"
+		"message" : "File with this name is not available",
+		"data" : {
+			"method" : "Buttons.GetCapabilities"
+		}
 	}
 }

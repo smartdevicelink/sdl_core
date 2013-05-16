@@ -4,10 +4,16 @@ include_directories (
   ../JSONHandler/include/
   ../protocol_handler/include/
   ../SmartObjects/include/
+  ../hmi_message_handler/include
+  ../mobile_message_handler/include
+  ../ConnectionHandler/include/
+  ../request_watchdog/include/
+  ../TransportManager/include/
   ${CMAKE_BINARY_DIR}/src/components/Interfaces
 )
 
 set (SOURCES
+./src/application_manager_impl.cc
 ./src/message.cc
 ./src/application_impl.cc
 ./src/basic_command_factory.cc
