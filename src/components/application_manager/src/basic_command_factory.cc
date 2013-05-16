@@ -32,6 +32,7 @@
 
 #include "application_manager/basic_command_factory.h"
 #include "application_manager/commands/register_app_interface_command.h"
+#include "application_manager/commands/generic_response_command.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -46,6 +47,9 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
       command.reset(new commands::RegisterAppInterfaceCommand(message));
       break;
+    }
+    default: {
+      command.reset(new commands::GenericResponseCommand(message));
     }
   }
 

@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,42 +31,40 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_
+#include "application_manager/commands/generic_response_command.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/message_conversion.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
 
 namespace application_manager {
 
-namespace strings {
+namespace commands {
 
-const char params[] = "params";
-const char message_type[] = "message_type";
-const char correlation_id[] = "correlation_id";
-const char function_id[] = "function_id";
-const char protocol_version[] = "protocol_version";
-const char connection_key[] = "connection_key";
+void GenericResponseCommand::Run() {
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
 
-const char msg_params[] = "msg_params";
-const char app_id[] = "appId";
-const char result_code[] = "resultCode";
-const char success[] = "success";
-const char sync_msg_version[] = "syncMsgVersion";
-const char major_version[] = "majorVersion";
-const char minor_version[] = "minorVersion";
-const char app_name[] = "appName";
-const char ngn_media_screen_app_name[] = "ngnMediaScreenAppName";
-const char vr_synonyms[] = "vrSynonyms";
-const char uses_vehicle_data[] = "usesVehicleData";
-const char is_media_application[] = "isMediaApplication";
-const char language_desired[] = "languageDesired";
-const char auto_activated_id[] = "autoActivateID";
-const char app_type[] = "AppType";
-const char tts_name[] = "ttsName";
-const char binary_data[] = "binary_data";
+  response[strings::params][strings::message_type] = MessageType::kResponse;
+  response[strings::params][strings::correlation_id] =
+      (*message_)[strings::params][strings::correlation_id];
+  response[strings::params][strings::protocol_version] =
+      (*message_)[strings::params][strings::protocol_version];
+  response[strings::params][strings::connection_key] =
+      (*message_)[strings::params][strings::connection_key];
 
-const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
+  if ((*message_)[strings::msg_params].keyExists(strings::binary_data))  {
+    response[strings::msg_params][strings::binary_data] =
+        (*message_)[strings::msg_params][strings::binary_data];
+  }
 
-}  // namespace strings
+  response[strings::msg_params][strings::success] = false;
+  response[strings::msg_params][strings::result_code] =
+      NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;
+
+  Message message = SmartObjectToMessage(&response);
+  mobile_message_handler::MobileMessageHandlerImpl::getInstance()->
+      sendMessageToMobileApp(&message);
+}
+
+}  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_

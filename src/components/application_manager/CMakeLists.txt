@@ -9,6 +9,7 @@ include_directories (
   ../ConnectionHandler/include/
   ../request_watchdog/include/
   ../TransportManager/include/
+  ../../thirdPartyLibs/jsoncpp/include/
   ${CMAKE_BINARY_DIR}/src/components/Interfaces
 )
 
@@ -21,6 +22,8 @@ set (SOURCES
 ./src/commands/get_device_list_command.cc
 ./src/commands/get_device_list_response_command.cc
 ./src/commands/register_app_interface_command.cc
+./src/commands/generic_response_command.cc
+./src/message_conversion.cc
 )
 
 
