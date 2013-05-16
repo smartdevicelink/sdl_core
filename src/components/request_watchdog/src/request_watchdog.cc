@@ -34,6 +34,9 @@
 */
 
 #include <iterator>
+#include <vector>
+#include <algorithm>
+#include <functional>
 #include "request_watchdog/request_watchdog.h"
 
 namespace request_watchdog {
@@ -80,7 +83,7 @@ void RequestWatchdog::addListener(WatchdogSubscriber* subscriber) {
   subscribers_.push_back(subscriber);
   startDispatcherThreadIfNeeded();
 
-  LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was added." );
+  LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was added.");
 
   subscribersListMutex_.unlock();
 }
@@ -93,7 +96,7 @@ void RequestWatchdog::removeListener(WatchdogSubscriber* subscriber) {
   subscribers_.remove(subscriber);
   stopDispatcherThreadIfNeeded();
 
-  LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was removed." );
+  LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was removed.");
 
   subscribersListMutex_.unlock();
 }
@@ -138,7 +141,7 @@ void RequestWatchdog::addRequest(RequestInfo requestInfo) {
                      << "\n CorrelationID : " << requestInfo.correlationID_
                      << "\n FunctionID : " << requestInfo.functionID_
                      << "\n CustomTimeOut : " << requestInfo.customTimeout_
-                     << "\n" );
+                     << "\n");
 
   startDispatcherThreadIfNeeded();
 
@@ -157,7 +160,7 @@ void RequestWatchdog::removeRequest(RequestInfo requestInfo) {
                      << "\n CorrelationID : " << requestInfo.correlationID_
                      << "\n FunctionID : " << requestInfo.functionID_
                      << "\n CustomTimeOut : " << requestInfo.customTimeout_
-                     << "\n" );
+                     << "\n");
 
   stopDispatcherThreadIfNeeded();
 
@@ -210,6 +213,7 @@ RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate()
 
 void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
+  std::vector<RequestInfo> expiredRequests = std::vector<RequestInfo>();
   std::map<RequestInfo, struct timeval>::iterator it;
 
   int cycleSleepInterval = DEFAULT_CYCLE_TIMEOUT;
@@ -226,39 +230,43 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     it = requests_.begin();
 
     while ( it != requests_.end() ) {
-
       LOG4CXX_INFO(logger_, "Checking timeout for the following request :"
                          << "\n ConnectionID : " << (*it).first.connectionID_
                          << "\n CorrelationID : " << (*it).first.correlationID_
                          << "\n FunctionID : " << (*it).first.functionID_
                          << "\n CustomTimeOut : " << (*it).first.customTimeout_
-                         << "\n" );
+                         << "\n");
 
       if ( (*it).first.customTimeout_ <
           date_time::DateTime::calculateTimeSpan((*it).second) ) {
-      // Request is expired - notify all subscribers and remove request
+          // Request is expired - notify all subscribers and remove request
 
         LOG4CXX_INFO(logger_, "Timeout had expired for the following request :"
-                           << "\n ConnectionID : " << (*it).first.connectionID_
-                           << "\n CorrelationID : " << (*it).first.correlationID_
-                           << "\n FunctionID : " << (*it).first.functionID_
-                           << "\n CustomTimeOut : " << (*it).first.customTimeout_
-                           << "\n" );
+                         << "\n ConnectionID : " << (*it).first.connectionID_
+                         << "\n CorrelationID : " << (*it).first.correlationID_
+                         << "\n FunctionID : " << (*it).first.functionID_
+                         << "\n CustomTimeOut : " << (*it).first.customTimeout_
+                         << "\n");
 
         requestsMapMutex_.unlock();
         notifySubscribers((*it).first);
-        RequestWatchdog::getRequestWatchdog()->removeRequest((*it).first);
-        break;
+        expiredRequests.push_back((*it).first);
+        requestsMapMutex_.lock();
       }
-
-      cycleDuration = date_time::DateTime::calculateTimeSpan(cycleStartTime);
-
-      cycleSleepInterval += DEFAULT_CYCLE_TIMEOUT *
-          (cycleDuration / DEFAULT_CYCLE_TIMEOUT + 1);
-
       it++;
     }
+
     requestsMapMutex_.unlock();
+
+    for_each(expiredRequests.begin(), expiredRequests.end(),
+             std::bind1st(std::mem_fun(&RequestWatchdog::removeRequest),
+             RequestWatchdog::getRequestWatchdog()));
+
+    expiredRequests.clear();
+
+    cycleDuration = date_time::DateTime::calculateTimeSpan(cycleStartTime);
+    cycleSleepInterval += DEFAULT_CYCLE_TIMEOUT *
+          (cycleDuration / DEFAULT_CYCLE_TIMEOUT + 1);
   }
 }
 
