@@ -81,4 +81,33 @@ Message SmartObjectToMessage
 
   return message;
 }
+
+NsSmartDeviceLink::NsSmartObjects::CSmartObject MessageToSmartObject
+(const Message& message)  {
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject smart_object;
+
+  namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+
+  if (ProtocolVersion::kV2 == message.protocol_version())  {
+    formatters::CFormatterJsonALRPCv2::fromString<int, MessageType>(
+        message.json_message(),
+        smart_object,
+        message.function_id(),
+        message.type(),
+        message.correlation_id());
+  } else if (ProtocolVersion::kV1 == message.protocol_version())  {
+    formatters::CFormatterJsonALRPCv1::fromString(message.json_message(),
+                                        smart_object);
+  }
+
+  smart_object[strings::params][strings::connection_key] =
+      message.connection_key();
+
+  if (message.has_binary_data())  {
+    smart_object[strings::msg_params][strings::binary_data] =
+        message.binary_data();
+  }
+
+  return smart_object;
+}
 }  // namespace application_manager

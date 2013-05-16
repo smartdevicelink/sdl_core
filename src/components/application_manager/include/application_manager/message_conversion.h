@@ -42,6 +42,9 @@ namespace application_manager {
 Message SmartObjectToMessage
 (NsSmartDeviceLink::NsSmartObjects::CSmartObject* smart_object);
 
+NsSmartDeviceLink::NsSmartObjects::CSmartObject MessageToSmartObject
+(const Message& message);
+
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CONVERSION_H_
