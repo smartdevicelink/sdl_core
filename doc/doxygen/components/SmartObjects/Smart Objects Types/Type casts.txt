@@ -128,11 +128,11 @@ simpleMap["count"] = 10;
 
 simpleMap["isValid"] = true;
 
-std::string name = std::string)obj["name"];
+std::string name = (std::string)obj["name"];
 
 int count =  (int)obj["count"];
 
-bool isValid = (bool)obj["isValid"]);
+bool isValid = (bool)obj["isValid"];
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject deepMap;
 
@@ -155,6 +155,49 @@ std::string responseName = (std::string)deepMap["response"]["name"];
 int responseId = (int)deepMap["response"]["id"];
 
 deepFlag = (bool)deepMap["we"]["need"]["to"]["go"]["deeper"];
+
+</pre>
+
+
+Example 9 (Removing elements from Map):
+
+<pre>
+
+NsSmartDeviceLink::NsSmartObjects::CSmartObject mapObj;
+
+mapObj["first"] = "first value";
+mapObj["second"] = "second value";
+mapObj["to delete"] = 1234;
+mapObj["third"] = "third value";
+
+bool result = mapObj.erase("to delete");
+
+</pre>
+
+
+Example 10 (Using alternative method of accessing SmartObject values)
+
+<pre>
+
+NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+
+obj = 1;                    //Assign int value
+int i = obj.asInt();        //Get int value
+
+obj = 100l;                 //Assign long value
+long l = obj.asLong();      //Get long value
+
+obj = 3.14;                 //Assign double value
+double d = obj.asDouble();  //Get double value
+
+obj = true;
+bool b = obj.asBool();      // Get bool value
+
+obj = 'c';
+char c = obj.asChar();      // Get char value
+
+obj = "some string";
+std::string str = obj.asString();       // Get string value
 
 </pre>
 
