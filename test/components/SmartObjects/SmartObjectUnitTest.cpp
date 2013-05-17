@@ -534,6 +534,62 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ("test string", static_cast<std::string>(dstObj));
     }
 
+    TEST(MapEraseTest, SmartObjectTest)
+    {
+        CSmartObject srcObj;
+
+        srcObj["one"] = 1;
+        srcObj["two"] = 2;
+        srcObj["three"] = 3;
+
+        ASSERT_EQ(3, srcObj.length());
+        ASSERT_EQ(2, srcObj["two"].asInt());
+
+        ASSERT_TRUE(srcObj.erase("two"));
+        ASSERT_FALSE(srcObj.erase("two"));
+
+        ASSERT_EQ(2, srcObj.length());
+        ASSERT_EQ(-1, srcObj["two"].asInt());
+        ASSERT_EQ(3, srcObj.length());      // the element "two" was accessed in the previous line so the element has been created
+
+        srcObj["two"] = 2;
+
+        ASSERT_EQ(1, srcObj["one"].asInt());
+        ASSERT_EQ(2, srcObj["two"].asInt());
+        ASSERT_EQ(3, srcObj["three"].asInt());
+
+        ASSERT_TRUE(srcObj.erase("one"));
+
+        ASSERT_EQ(2, srcObj.length());
+
+        ASSERT_TRUE(srcObj.erase("two"));
+
+        ASSERT_EQ(1, srcObj.length());
+
+        ASSERT_TRUE(srcObj.erase("three"));
+
+        ASSERT_EQ(0, srcObj.length());
+
+        srcObj["one"]["two"]["three"]["0"] = "1";
+        srcObj["one"]["two"]["three"]["1"] = "2";
+
+        ASSERT_EQ(1, srcObj.length());
+        ASSERT_EQ(1, srcObj["one"].length());
+        ASSERT_EQ(1, srcObj["one"]["two"].length());
+        ASSERT_EQ(2, srcObj["one"]["two"]["three"].length());
+
+        ASSERT_TRUE(srcObj["one"]["two"]["three"].erase("0"));
+        ASSERT_FALSE(srcObj["one"]["two"]["three"].erase("0"));
+
+        ASSERT_EQ(1, srcObj["one"]["two"]["three"].length());
+
+        ASSERT_TRUE(srcObj["one"].erase("two"));
+        ASSERT_EQ(0, srcObj["one"].length());
+
+        srcObj = 1234;       // not a map
+        ASSERT_FALSE(srcObj.erase("one"));
+    }
+
     // TODO: Add a test to check accessing an array at strange indexes.
 
 

@@ -961,6 +961,16 @@ bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::keyExists(const std::strin
     return m_data.map_value->count(Key);
 }
 
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::erase(const std::string & Key)
+{
+    if (m_type != SmartType_Map)
+    {
+        return false;
+    }
+
+    return (1 == m_data.map_value->erase(Key));
+}
+
 NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartObject::isValid()
 {
     return m_schema.validate(*this);

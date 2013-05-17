@@ -576,6 +576,15 @@ namespace NsSmartDeviceLink
              * @return bool
              **/
             bool keyExists(const std::string & Key) const;
+
+            /**
+             * @brief Removes element from the map.
+             *
+             * @param Key Key of the element.
+             *
+             * @return true if success, false if there is no such element in the map
+             */
+            bool erase(const std::string & Key);
             /** @} */
 
             /**
