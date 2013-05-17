@@ -32,6 +32,8 @@
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/basic_command_factory.h"
+#include "application_manager/message_conversion.h"
 
 namespace application_manager {
 
@@ -72,5 +74,13 @@ ApplicationManagerImpl::applications() const {
 	return result;
 }
 
+void ApplicationManagerImpl::onMessageReceived(application_manager::Message * message)
+{
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject smart_object = MessageToSmartObject(*message);
+  CommandSharedPtr command = BasicCommandFactory::CreateCommand(&smart_object);
+  command->Init();
+  command->Run();
+  command->CleanUp();
+}
 
 } // namespace application_manager
