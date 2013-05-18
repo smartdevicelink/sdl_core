@@ -1,21 +1,21 @@
-"""ALRPCV2 parser.
+"""SDLRPCV2 parser.
 
-Contains parser for ALRPCV2 XML format.
+Contains parser for SDLRPCV2 XML format.
 
 """
 
 import collections
 
 from generator import Model
-from generator.parsers import ALRPCBase
+from generator.parsers import RPCBase
 
 
-class Parser(ALRPCBase.Parser):
+class Parser(RPCBase.Parser):
 
-    """ALRPCV2 parser."""
+    """SDLRPCV2 parser."""
 
     def parse(self, filename):
-        """Parse XML in ALRPCV2 format.
+        """Parse XML in SDLRPCV2 format.
 
         Returns an instance of generator.Model.Interface containing parsed
         interface or raises ParseError if input XML contains errors
@@ -30,7 +30,7 @@ class Parser(ALRPCBase.Parser):
     def _initialize_enums(self):
         """Initialize enums.
 
-        This implementation returns empty OrderedDict because in ALRPCV2
+        This implementation returns empty OrderedDict because in SDLRPCV2
         all enums must be declared explicitly in the XML filename
 
         """
@@ -41,7 +41,7 @@ class Parser(ALRPCBase.Parser):
 
         This method is called to check whether the newly parsed enum's name
         conflicts with some predefined enum.
-        As ALRPCV2 has no predefined enums this implementation does nothing.
+        As SDLRPCV2 has no predefined enums this implementation does nothing.
 
         """
         pass
@@ -58,12 +58,12 @@ class Parser(ALRPCBase.Parser):
 
         """
         if "functionID" not in attrib:
-            raise ALRPCBase.ParseError(
+            raise RPCBase.ParseError(
                 "No functionID specified for function '" +
                 function_name + "'")
 
         if "messagetype" not in attrib:
-            raise ALRPCBase.ParseError(
+            raise RPCBase.ParseError(
                 "No messagetype specified for function '" +
                 function_name + "'")
 
@@ -83,18 +83,18 @@ class Parser(ALRPCBase.Parser):
 
         """
         if enum_name not in self._types:
-            raise ALRPCBase.ParseError(
+            raise RPCBase.ParseError(
                 "Enumeration '" + enum_name +
                 "' must be declared before any function")
 
         enum = self._types[enum_name]
 
         if type(enum) is not Model.Enum:
-            raise ALRPCBase.ParseError("'" + enum_name +
-                                       "' is not an enumeration")
+            raise RPCBase.ParseError("'" + enum_name +
+                                     "' is not an enumeration")
 
         if element_name not in enum.elements:
-            raise ALRPCBase.ParseError(
+            raise RPCBase.ParseError(
                 "'" + element_name +
                 "' is not a member of enum '" + enum_name + "'")
 

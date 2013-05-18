@@ -1,7 +1,7 @@
 """
 Generator application that generates c++ interfaces code from xml description
 
-usage: Generator.py [-h] --parser-type {alrpcv2}
+usage: Generator.py [-h] --parser-type {sdlrpcv2}
                     source-xml namespace output-dir
 
 SmartSchema interface generator
@@ -13,7 +13,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --parser-type {alrpcv2}
+  --parser-type {sdlrpcv2}
 """
 
 import os.path
@@ -21,15 +21,15 @@ import argparse
 import errno
 import sys
 
-import generator.parsers.ALRPCV1
-import generator.parsers.ALRPCV2
+import generator.parsers.SDLRPCV1
+import generator.parsers.SDLRPCV2
 import generator.Model
 import generator.generators.SmartSchema
-from generator.parsers.ALRPCBase import ParseError
+from generator.parsers.RPCBase import ParseError
 
 SUPPORTED_PARSERS = {
-    "alrpcv1": generator.parsers.ALRPCV1.Parser,
-    "alrpcv2": generator.parsers.ALRPCV2.Parser
+    "sdlrpcv1": generator.parsers.SDLRPCV1.Parser,
+    "sdlrpcv2": generator.parsers.SDLRPCV2.Parser
 }
 
 

@@ -1,3 +1,10 @@
+# Generating interface
+GenerateInterface("test_JSONHandler_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler2" "sdlrpcv2")
+GenerateInterface("test_JSONHandler_v4_protocol_v1_2_no_extra.xml" "Gen::test::components::JSONHandler1" "sdlrpcv1")
+
+# --- Formatters
+add_subdirectory(./formatters)
+
 include_directories (
   ../../../src/components/utils/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/include

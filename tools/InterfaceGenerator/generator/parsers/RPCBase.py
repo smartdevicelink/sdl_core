@@ -1,6 +1,6 @@
-"""ALRPC base parser.
+"""RPC XML base parser.
 
-Contains base parser for ALRPC v1 and v2 XML format.
+Contains base parser for SDLRPC v1/v2 and JSON RPC XML format.
 
 """
 
@@ -23,7 +23,7 @@ class ParseError(Exception):
 
 class Parser(object):
 
-    """ALRPC Parser base.
+    """RPC XML Parser base.
 
     This class must not be used directly. One of its subclasses must be used
     instead.

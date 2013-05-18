@@ -1,21 +1,21 @@
-"""ALRPCV1 parser.
+"""SDLRPCV1 parser.
 
-Contains parser for ALRPCV1 XML format.
+Contains parser for SDLRPCV1 XML format.
 
 """
 
 import collections
 
 from generator import Model
-from generator.parsers import ALRPCBase
+from generator.parsers import RPCBase
 
 
-class Parser(ALRPCBase.Parser):
+class Parser(RPCBase.Parser):
 
-    """ALRPCV1 parser."""
+    """SDLRPCV1 parser."""
 
     def parse(self, filename):
-        """Parse XML in ALRPCV1 format.
+        """Parse XML in SDLRPCV1 format.
 
         Returns an instance of generator.Model.Interface containing parsed
         interface or raises ParseError if input XML contains errors
@@ -31,7 +31,7 @@ class Parser(ALRPCBase.Parser):
         """Initialize enums.
 
         This implementation returns an OrderedDict with two empty enums:
-        "FunctionID" and "messageType". In ALRPCV1 these enums must be
+        "FunctionID" and "messageType". In SDLRPCV1 these enums must be
         generated automatically according to the declared in XML functions.
 
         These enums are filled during the parsing of the functions.
@@ -53,9 +53,9 @@ class Parser(ALRPCBase.Parser):
 
         """
         if enum.name in ["FunctionID", "messageType"]:
-            raise ALRPCBase.ParseError(
+            raise RPCBase.ParseError(
                 "Enum '" + enum.name +
-                "' is generated automatically in ALRPCV1 and"
+                "' is generated automatically in SDLRPCV1 and"
                 " must not be declared in xml file")
 
     def _parse_function_id_type(self, function_name, attrib):
@@ -70,7 +70,7 @@ class Parser(ALRPCBase.Parser):
 
         """
         if "messagetype" not in attrib:
-            raise ALRPCBase.ParseError(
+            raise RPCBase.ParseError(
                 "No messagetype specified for function '" +
                 function_name + "'")
 
@@ -93,13 +93,13 @@ class Parser(ALRPCBase.Parser):
 
         """
         if enum_name not in self._types:
-            raise ALRPCBase.ParseError("Enum '" + enum_name +
-                                       "' is not initialized")
+            raise RPCBase.ParseError("Enum '" + enum_name +
+                                     "' is not initialized")
 
         enum = self._types[enum_name]
 
         if not isinstance(enum, Model.Enum):
-            raise ALRPCBase.ParseError("'" + enum_name + "' is not an enum")
+            raise RPCBase.ParseError("'" + enum_name + "' is not an enum")
 
         if element_name not in enum.elements:
             enum.elements[element_name] = Model.EnumElement(name=element_name)

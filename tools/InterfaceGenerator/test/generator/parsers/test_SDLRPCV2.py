@@ -1,14 +1,14 @@
-"""ALRPCV2 XML parser unit test."""
+"""SDLRPCV2 XML parser unit test."""
 import os
 import unittest
 
 import generator.Model
-import generator.parsers.ALRPCV2
+import generator.parsers.SDLRPCV2
 
 
-class TestALRPCV2Parser(unittest.TestCase):
+class TestSDLRPCV2Parser(unittest.TestCase):
 
-    """Test for ALRPCV2 xml parser."""
+    """Test for SDLRPCV2 xml parser."""
 
     class _Issue:
         def __init__(self, creator, value):
@@ -21,8 +21,8 @@ class TestALRPCV2Parser(unittest.TestCase):
     def setUp(self):
         """Test initialization."""
         self.valid_xml_name = os.path.dirname(os.path.realpath(__file__)) + \
-            "/valid_ALRPCV2.xml"
-        self.parser = generator.parsers.ALRPCV2.Parser()
+            "/valid_SDLRPCV2.xml"
+        self.parser = generator.parsers.SDLRPCV2.Parser()
 
     def test_valid_xml(self):
         """Test parsing of valid xml."""
@@ -75,7 +75,7 @@ class TestALRPCV2Parser(unittest.TestCase):
             name="messageType",
             design_description=["messageType design description",
                                 "messageType design description 2"],
-            issues=[TestALRPCV2Parser._Issue(
+            issues=[TestSDLRPCV2Parser._Issue(
                 creator="messageType issue creator",
                 value="Issue text")])
         self.assertIsNone(enum.internal_scope)
@@ -87,7 +87,7 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(item=element,
                               name="request",
                               todos=["request todo 1", "request todo 2"],
-                              issues=[TestALRPCV2Parser._Issue(
+                              issues=[TestSDLRPCV2Parser._Issue(
                                   creator="issue creator",
                                   value="request issue")])
         self.assertIsNone(element.internal_name)
@@ -149,10 +149,10 @@ class TestALRPCV2Parser(unittest.TestCase):
             item=struct,
             name="struct1",
             description=["Struct description"],
-            issues=[TestALRPCV2Parser._Issue(creator="creator1",
-                                             value="Issue1"),
-                    TestALRPCV2Parser._Issue(creator="creator2",
-                                             value="Issue2")])
+            issues=[TestSDLRPCV2Parser._Issue(creator="creator1",
+                                              value="Issue1"),
+                    TestSDLRPCV2Parser._Issue(creator="creator2",
+                                              value="Issue2")])
 
         self.assertEqual(4, len(struct.members))
 
@@ -269,7 +269,7 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(
             item=param,
             name="param1",
-            issues=[TestALRPCV2Parser._Issue(creator="", value="")])
+            issues=[TestSDLRPCV2Parser._Issue(creator="", value="")])
         self.assertEqual(False, param.is_mandatory)
         self.assertIsInstance(param.param_type, generator.Model.String)
         self.assertIsNone(param.param_type.max_length)
@@ -308,8 +308,8 @@ class TestALRPCV2Parser(unittest.TestCase):
         self.verify_base_item(
             item=function,
             name="Function1",
-            issues=[TestALRPCV2Parser._Issue(creator="c1", value=""),
-                    TestALRPCV2Parser._Issue(creator="c2", value="")],
+            issues=[TestSDLRPCV2Parser._Issue(creator="c1", value=""),
+                    TestSDLRPCV2Parser._Issue(creator="c2", value="")],
             platform="")
         self.assertIs(function.function_id,
                       interface.enums["FunctionID"].elements["Function1_id"])

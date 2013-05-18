@@ -1,14 +1,14 @@
-"""ALRPCV1 XML parser unit test."""
+"""SDLRPCV1 XML parser unit test."""
 import os
 import unittest
 
 import generator.Model
-import generator.parsers.ALRPCV1
+import generator.parsers.SDLRPCV1
 
 
-class TestALRPCV1Parser(unittest.TestCase):
+class TestSDLRPCV1Parser(unittest.TestCase):
 
-    """Test for ALRPCV1 xml parser."""
+    """Test for SDLRPCV1 xml parser."""
 
     class _Issue:
         def __init__(self, creator, value):
@@ -21,8 +21,8 @@ class TestALRPCV1Parser(unittest.TestCase):
     def setUp(self):
         """Test initialization."""
         self.valid_xml_name = os.path.dirname(os.path.realpath(__file__)) + \
-            "/valid_ALRPCV1.xml"
-        self.parser = generator.parsers.ALRPCV1.Parser()
+            "/valid_SDLRPCV1.xml"
+        self.parser = generator.parsers.SDLRPCV1.Parser()
 
     def test_valid_xml(self):
         """Test parsing of valid xml."""
@@ -136,10 +136,10 @@ class TestALRPCV1Parser(unittest.TestCase):
             item=struct,
             name="struct1",
             description=["Struct description"],
-            issues=[TestALRPCV1Parser._Issue(creator="creator1",
-                                             value="Issue1"),
-                    TestALRPCV1Parser._Issue(creator="creator2",
-                                             value="Issue2")])
+            issues=[TestSDLRPCV1Parser._Issue(creator="creator1",
+                                              value="Issue1"),
+                    TestSDLRPCV1Parser._Issue(creator="creator2",
+                                              value="Issue2")])
 
         self.assertEqual(4, len(struct.members))
 
@@ -256,7 +256,7 @@ class TestALRPCV1Parser(unittest.TestCase):
         self.verify_base_item(
             item=param,
             name="param1",
-            issues=[TestALRPCV1Parser._Issue(creator="", value="")])
+            issues=[TestSDLRPCV1Parser._Issue(creator="", value="")])
         self.assertEqual(False, param.is_mandatory)
         self.assertIsInstance(param.param_type, generator.Model.String)
         self.assertIsNone(param.param_type.max_length)
@@ -295,8 +295,8 @@ class TestALRPCV1Parser(unittest.TestCase):
         self.verify_base_item(
             item=function,
             name="Function1",
-            issues=[TestALRPCV1Parser._Issue(creator="c1", value=""),
-                    TestALRPCV1Parser._Issue(creator="c2", value="")],
+            issues=[TestSDLRPCV1Parser._Issue(creator="c1", value=""),
+                    TestSDLRPCV1Parser._Issue(creator="c2", value="")],
             platform="")
         self.assertIs(function.function_id,
                       interface.enums["FunctionID"].elements["Function1"])
