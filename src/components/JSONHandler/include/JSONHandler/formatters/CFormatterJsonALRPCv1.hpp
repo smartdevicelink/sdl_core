@@ -176,8 +176,10 @@ int Formatters::CFormatterJsonALRPCv1::fromString(const std::string& str,
 
   if (kSuccess == result) {
     typedef NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionId> FunctionIdEnum;
-    if (false == FunctionIdEnum::stringToEnum(root[type][S_NAME].asString(), functionId))
+    if (false == FunctionIdEnum::stringToEnum(root[type][S_NAME].asString(), functionId)) {
       result = kFunctionIdNotFound;
+      functionId = FunctionId::INVALID_ENUM;
+    }
   }
 
   namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
@@ -187,8 +189,12 @@ int Formatters::CFormatterJsonALRPCv1::fromString(const std::string& str,
 
     out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
     out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
-    out[S::S_PARAMS][S::S_CORRELATION_ID] =
-        root[type][S_CORRELATION_ID].asInt();
+    if (true == root[type][S_CORRELATION_ID].empty()) {
+      result |= kCorrelationIdNotFound;
+      out[S::S_PARAMS][S::S_CORRELATION_ID] = -1;
+    } else {
+      out[S::S_PARAMS][S::S_CORRELATION_ID] = root[type][S_CORRELATION_ID].asInt();
+    }
     out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
     out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 1;
   }

@@ -174,6 +174,164 @@ namespace test { namespace components { namespace json_handler { namespace forma
         ASSERT_EQ("Synonym 2", (std::string)obj[S_MSG_PARAMS]["vrSynonyms"][1]);
     }
 
+  TEST_F(CFormatterTestHelper, test_ALRPCv1_ErrorParsing)
+  {
+    std::string str = "\
+    {\
+        \"request\": {\
+            \"name\" : \"SetGlobalProperties\",\
+            \"correlationID\": 11,\
+            \"parameters\": {\
+                \"appName\": \"some app name\
+            }\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+    int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str, obj);
+
+    ASSERT_TRUE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_TRUE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is not set";
+    ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
+    ASSERT_TRUE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is not set";
+  }
+
+  TEST_F(CFormatterTestHelper, test_ALRPCv1_MessageTypeError)
+  {
+    std::string str1 = "\
+    {\
+        \"information\": {\
+            \"name\" : \"SetGlobalProperties\",\
+            \"correlationID\": 11,\
+            \"parameters\": {\
+                \"appName\": \"some app name\"\
+            }\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
+
+    ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_TRUE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is not set";
+    ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
+    ASSERT_TRUE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is not set";
+
+    std::string str2 = "\
+    {\
+        \"name\" : \"SetGlobalProperties\",\
+        \"correlationID\": 11,\
+        \"parameters\": {\
+            \"appName\": \"some app name\"\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj2;
+    result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj2);
+
+    ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_TRUE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is not set";
+    ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
+    ASSERT_TRUE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is not set";
+  }
+
+  TEST_F(CFormatterTestHelper, test_ALRPCv1_FunctionID_Error)
+  {
+    std::string str1 = "\
+    {\
+        \"request\": {\
+            \"not a name\" : \"SetGlobalProperties\",\
+            \"correlationID\": 11,\
+            \"parameters\": {\
+                \"appName\": \"some app name\"\
+            }\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
+
+    ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
+    ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
+    ASSERT_FALSE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is set";
+    ASSERT_EQ(11, (int)obj1[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::INVALID_ENUM, (int)obj1[S_PARAMS][S_FUNCTION_ID]);
+    ASSERT_EQ(messageType::request, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
+
+    std::string str2 = "\
+    {\
+        \"request\": {\
+            \"name\" : \"UnknownName\",\
+            \"correlationID\": 12,\
+            \"parameters\": {\
+                \"appName\": \"some app name\"\
+            }\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj2;
+    result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str2, obj2);
+
+    ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is not set";
+    ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
+    ASSERT_FALSE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is set";
+    ASSERT_EQ(12, (int)obj2[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::INVALID_ENUM, (int)obj2[S_PARAMS][S_FUNCTION_ID]);
+    ASSERT_EQ(messageType::request, (int)obj2[S_PARAMS][S_MESSAGE_TYPE]);
+  }
+
+  TEST_F(CFormatterTestHelper, test_ALRPCv1_CorrelationID_Error)
+  {
+    std::string str1 = "\
+    {\
+        \"request\": {\
+            \"name\" : \"SetGlobalProperties\",\
+            \"NotACorrelationID\": 13,\
+            \"parameters\": {\
+                \"appName\": \"some app name\"\
+            }\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
+
+    ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
+    ASSERT_FALSE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is set";
+    ASSERT_TRUE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is not set";
+    ASSERT_EQ(-1, (int)obj1[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::SetGlobalProperties, (int)obj1[S_PARAMS][S_FUNCTION_ID]);
+    ASSERT_EQ(messageType::request, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
+  }
+
+  TEST_F(CFormatterTestHelper, test_ALRPCv1_CombinationError)
+  {
+    std::string str1 = "\
+    {\
+        \"response\": {\
+            \"name\" : \"UnKnownName\",\
+            \"NotACorrelationID\": 10,\
+            \"parameters\": {\
+                \"appName\": \"some app name\"\
+            }\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
+
+    ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
+    ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
+    ASSERT_TRUE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is not set";
+    ASSERT_EQ(-1, (int)obj1[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::INVALID_ENUM, (int)obj1[S_PARAMS][S_FUNCTION_ID]);
+    ASSERT_EQ(messageType::response, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
+  }
+
 }}}}
 
 namespace NsSmartDeviceLink { namespace NsSmartObjects {
