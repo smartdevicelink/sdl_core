@@ -107,6 +107,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     // end of cut and pasted code
 
     using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+    typedef NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1 FormatterV1;
 
     TEST_F(CFormatterTestHelper, test_fromObjToALRPCv1AndBack)
     {
@@ -123,12 +124,14 @@ namespace test { namespace components { namespace json_handler { namespace forma
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
 
         // SmartObjects --> JSON
-        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::toString(srcObj, str);
+        FormatterV1::toString(srcObj, str);
 
         //std::cout << str << std::endl;
 
         // JSON --> SmartObjects
-        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString<FunctionID::eType, messageType::eType>(str, dstObj);
+        int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str, dstObj);
+
+        ASSERT_EQ(FormatterV1::kSuccess, result) << "Error parsing JSON string";
 
         srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionID::UnregisterAppInterface;   // write the proper enum values
         srcObj[S_PARAMS][S_MESSAGE_TYPE] = messageType::request;
@@ -156,11 +159,9 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }";
 
         NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
-        bool result;
+        int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str, obj);
 
-        result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString<FunctionID::eType, messageType::eType>(str, obj);
-
-        ASSERT_TRUE(result) << "Error parsing JSON string";
+        ASSERT_EQ(FormatterV1::kSuccess, result) << "Error parsing JSON string";
 
         ASSERT_EQ(FunctionID::SetGlobalProperties, (int)obj[S_PARAMS][S_FUNCTION_ID]);
         ASSERT_EQ(messageType::request, (int)obj[S_PARAMS][S_MESSAGE_TYPE]);

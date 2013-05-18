@@ -47,6 +47,12 @@ const std::string Formatters::CFormatterJsonALRPCv1::S_PARAMETERS("parameters");
 const std::string Formatters::CFormatterJsonALRPCv1::S_NAME("name");
 const std::string Formatters::CFormatterJsonALRPCv1::S_CORRELATION_ID("correlationID");
 
+
+const int Formatters::CFormatterJsonALRPCv1::kSuccess = 0;
+const int Formatters::CFormatterJsonALRPCv1::kParsingError = 1 << 0;
+const int Formatters::CFormatterJsonALRPCv1::kFunctionIdNotFound = 1 << 1;
+const int Formatters::CFormatterJsonALRPCv1::kMessageTypeNotFound = 1 << 2;
+const int Formatters::CFormatterJsonALRPCv1::kCorrelationIdNotFound = 1 << 3;
 // ----------------------------------------------------------------------------
 
 const std::string Formatters::CFormatterJsonALRPCv1::getMessageType(
