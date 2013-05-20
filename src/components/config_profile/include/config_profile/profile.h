@@ -48,7 +48,7 @@ class Profile {
   /**
    * @brief Returns the singleton of class
    */
-  static Profile* getInstance();
+  static Profile* instance();
 
   /**
    * Destructor
@@ -61,27 +61,27 @@ class Profile {
   /**
    * @brief Returns the path to the config file
    */
-  inline const std::string& getConfigFileName() const;
+  const std::string& config_file_name() const;
 
   /**
    * @brief Sets the path to the config file
    */
-  void setConfigFileName(const std::string& fileName);
+  void config_file_name(const std::string& fileName);
 
   /**
    * @brief Returns server address
    */
-  const std::string& getServerAddress() const;
+  const std::string& server_address() const;
 
   /**
    * @brief Returns server port
    */
-  const uint16_t& getServerPort() const;
+  const uint16_t& server_port() const;
 
   /**
    * @brief Returns desirable thread stack size
    */
-  const uint64_t& getThreadStachSize() const;
+  const uint64_t& thread_min_stach_size() const;
 
   // Members section
 
@@ -104,7 +104,7 @@ class Profile {
   /*
    * @brief Updates all related values from ini file
    */
-  void updateValues();
+  void UpdateValues();
 
   /**
    * @brief Reads a boolean value from the profile
@@ -115,7 +115,7 @@ class Profile {
    *
    * @return FALSE if could not read the value out of the profile (then the value is not changed)
    */
-  bool readValue(bool* value,
+  bool ReadValue(bool* value,
                  const char* const pSection,
                  const char* const pKey) const;
 
@@ -128,15 +128,15 @@ class Profile {
    *
    * @return FALSE if could not read the value out of the profile (then the value is not changed)
    */
-  bool readValue(std::string* value,
+  bool ReadValue(std::string* value,
                  const char* const pSection,
                  const char* const pKey) const;
 
   // Members section
-  std::string  configFileName_;
-  std::string  serverAddress_;
-  uint16_t     serverport_;
-  uint64_t     minTreadStackSize_;
+  std::string  config_file_name_;
+  std::string  server_address_;
+  uint16_t     server_port_;
+  uint64_t     min_tread_stack_size_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

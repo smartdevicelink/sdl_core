@@ -90,7 +90,7 @@ char* ini_read_value(const char *fname,
           const char *chapter, const char *item, char *value) {
   FILE             *fp = 0;
   uint16_t         i;
-  char             chapter_found = FALSE;
+  bool             chapter_found = false;
   char             line[INI_LINE_LEN] = "";
   char             val[INI_LINE_LEN] = "";
   char             tag[INI_LINE_LEN] = "";
@@ -119,7 +119,7 @@ char* ini_read_value(const char *fname,
     result = ini_parse_line(line, tag, val);
     if (!chapter_found) {
       if (INI_RIGHT_CHAPTER == result) {
-        chapter_found = TRUE;
+        chapter_found = true;
 
         snprintf(tag, INI_LINE_LEN, "%s", item);
         for (i = 0; i < strlen(tag); i++)
@@ -149,8 +149,8 @@ char ini_write_value(const char *fname,
   FILE             *rd_fp, *wr_fp = 0;
   uint16_t         i, cr_count;
   int              wr_result;
-  char             chapter_found = FALSE;
-  char             value_written = FALSE;
+  bool             chapter_found = false;
+  bool             value_written = false;
   char             line[INI_LINE_LEN] = "";
   char             val[INI_LINE_LEN] = "";
   char             tag[INI_LINE_LEN] = "";
@@ -209,7 +209,7 @@ char ini_write_value(const char *fname,
     if (!value_written) {
       if (!chapter_found) {
         if (INI_RIGHT_CHAPTER == result) {
-          chapter_found = TRUE;
+          chapter_found = true;
           // coding style
           snprintf(tag, INI_LINE_LEN, "%s", item);
           for (i = 0; i < strlen (tag); i++)
@@ -223,13 +223,13 @@ char ini_write_value(const char *fname,
           /* The item must not update in an other chapter
              even it has the right name because only the
              first chapter is significant */
-          value_written = TRUE;
+          value_written = true;
         } else if (result == INI_RIGHT_ITEM) {
           for (i = 0; i < cr_count; i++)
             fprintf(wr_fp, "\n");
           cr_count = 0;
           wr_result = fprintf(wr_fp, "%s=%s\n", item, value);
-          value_written = TRUE;
+          value_written = true;
           continue;
         }
       }
@@ -249,7 +249,7 @@ char ini_write_value(const char *fname,
       if (!chapter_found)
         fprintf(wr_fp, "\n[%s]\n", chapter);
       fprintf(wr_fp, "%s=%s\n", item, value);
-      value_written = TRUE;
+      value_written = true;
     }
   }
   fprintf(wr_fp, "\n");
@@ -280,12 +280,12 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
   line_ptr = line;
   for (i = 0; i < strlen(line); i++) {
     if ((line[i] == ' ') ||
-        (line[i] ==   9) ||
-        (line[i] ==  10) ||
-        (line[i] ==  13)) {
+        (line[i] ==   9) ||  // TAB
+        (line[i] ==  10) ||  // LF
+        (line[i] ==  13)) {  // CR
       line_ptr++;
     } else {
-      break;
+        break;
     }
   }
   if ('\0' == *line_ptr) {
@@ -303,13 +303,13 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
     len = strlen(line_ptr);
     for (i = 0; i < len; i++) {
       if ((*line_ptr == ' ') ||
-          (*line_ptr ==   9) ||
-          (*line_ptr ==  10) ||
-          (*line_ptr ==  13)) {
+          (*line_ptr ==   9) ||  // TAB
+          (*line_ptr ==  10) ||  // LF
+          (*line_ptr ==  13)) {  // CR
         line_ptr++;
-    } else {
-        break;
-    }
+      } else {
+          break;
+      }
     }
     if (*line_ptr == '\0')
       return INI_NOTHING;
@@ -325,12 +325,12 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
     /* cut trailing stuff */
     for (i = strlen(temp_str) - 1; i > 0; i--) {
       if ((temp_str[i] == ' ') ||
-          (temp_str[i] ==   9) ||
-          (temp_str[i] ==  10) ||
-          (temp_str[i] ==  13)) {
+          (temp_str[i] ==   9) ||  // TAB
+          (temp_str[i] ==  10) ||  // LF
+          (temp_str[i] ==  13)) {  // CR
         temp_str[i] = '\0';
       } else {
-        break;
+          break;
       }
     }
 
@@ -342,7 +342,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
       return INI_RIGHT_CHAPTER;
     else
       return INI_WRONG_CHAPTER;
-  }   /* if (*line_ptr == '[')   chapter */
+  }
 
   if (NULL != strchr(line_ptr, '=')) {
     strncpy(temp_str, line_ptr, (strchr(line_ptr, '=') - line_ptr));
@@ -350,9 +350,9 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
     for (i = strlen(temp_str) - 1; i > 0; i--) {
       if ((temp_str[i] == '=') ||
           (temp_str[i] == ' ') ||
-          (temp_str[i] ==   9) ||
-          (temp_str[i] ==  10) ||
-          (temp_str[i] ==  13)) {
+          (temp_str[i] ==   9) ||  // TAB
+          (temp_str[i] ==  10) ||  // LF
+          (temp_str[i] ==  13)) {  // CR
         temp_str[i] = '\0';
       } else {
         break;
@@ -366,14 +366,16 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
     if (strcmp(temp_str, tag) == 0) {
       line_ptr = strchr(line_ptr, '=') + 1;
       len = strlen(line_ptr);
+      /* cut trailing stuff */
       for (i = 0; i < len; i++) {
         if ((*line_ptr == ' ') ||
-            (*line_ptr ==   9) ||
-            (*line_ptr ==  10) ||
-            (*line_ptr ==  13))
+            (*line_ptr ==   9) ||  // TAB
+            (*line_ptr ==  10) ||  // LF
+            (*line_ptr ==  13)) {  // CR
           line_ptr++;
-        else
+        } else {
           break;
+        }
       }
 
       snprintf(value, strlen(line_ptr), "%s", line_ptr);
@@ -383,12 +385,13 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
         for (i = strlen(value) - 1; i > 0; i--) {
           if ((value[i] == ' ') ||
               (value[i] == ';') ||
-              (value[i] ==   9) ||
-              (value[i] ==  10) ||
-              (value[i] ==  13))
+              (value[i] ==   9) ||  // TAB
+              (value[i] ==  10) ||  // LF
+              (value[i] ==  13)) {  // CR
             value[i] = '\0';
-          else
+          } else {
             break;
+          }
         }
       }
       return INI_RIGHT_ITEM;

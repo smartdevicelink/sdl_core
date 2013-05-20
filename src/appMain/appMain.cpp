@@ -203,9 +203,9 @@ int main(int argc, char** argv)
       LOG4CXX_INFO(logger, " Listen successful!");
     }
 
-    profile::Profile::getInstance()->setConfigFileName("smartDeviceLink.ini");
+    profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
-    JSONRPC2Handler jsonRPC2Handler(profile::Profile::getInstance()->getServerAddress(), profile::Profile::getInstance()->getServerPort());
+    JSONRPC2Handler jsonRPC2Handler(profile::Profile::instance()->server_address(), profile::Profile::instance()->server_port());
     jsonRPC2Handler.setRPC2CommandsObserver( &appMgr );
     appMgr.setJsonRPC2Handler( &jsonRPC2Handler );
     if (!jsonRPC2Handler.Connect())

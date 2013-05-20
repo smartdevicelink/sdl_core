@@ -40,81 +40,81 @@ log4cxx::LoggerPtr logger_ =
 
 namespace profile {
 Profile::Profile()
-: configFileName_("smartDeviceLink.ini")
-, serverAddress_("127.0.0.1")
-, serverport_(8087)
-, minTreadStackSize_(threads::Thread::kMinStackSize) {
-  updateValues();
+: config_file_name_("smartDeviceLink.ini")
+, server_address_("127.0.0.1")
+, server_port_(8087)
+, min_tread_stack_size_(threads::Thread::kMinStackSize) {
+  UpdateValues();
 }
 
 Profile::~Profile() {
 }
 
-Profile* Profile::getInstance() {
+Profile* Profile::instance() {
   static Profile instance;
   return &instance;
 }
 
-void Profile::setConfigFileName(const std::string& fileName) {
+void Profile::config_file_name(const std::string& fileName) {
   if (false == fileName.empty()) {
      LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);
-     configFileName_ = fileName;
-     updateValues();
+     config_file_name_ = fileName;
+     UpdateValues();
   }
 }
 
-const std::string& Profile::getConfigFileName() const {
-  return configFileName_;
+const std::string& Profile::config_file_name() const {
+  return config_file_name_;
 }
 
-const std::string& Profile::getServerAddress() const {
-  return serverAddress_;
+const std::string& Profile::server_address() const {
+  return server_address_;
 }
 
-const uint16_t& Profile::getServerPort() const {
-  return serverport_;
+const uint16_t& Profile::server_port() const {
+  return server_port_;
 }
 
-const uint64_t& Profile::getThreadStachSize() const {
-  return minTreadStackSize_;
+const uint64_t& Profile::thread_min_stach_size() const {
+  return min_tread_stack_size_;
 }
 
-void Profile::updateValues() {
-  LOG4CXX_INFO(logger_, "Profile::updateValues");
+void Profile::UpdateValues() {
+  LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
   char value[INI_LINE_LEN + 1];
   *value = '\0';
-  if ((0 != ini_read_value(configFileName_.c_str(),
+  if ((0 != ini_read_value(config_file_name_.c_str(),
                            "HMI", "ServerAddress", value))
       && ('\0' != *value)) {
-    serverAddress_ = value;
-    LOG4CXX_INFO(logger_, "Set server address to " << serverAddress_);
+    server_address_ = value;
+    LOG4CXX_INFO(logger_, "Set server address to " << server_address_);
   }
 
   *value = '\0';
-  if ((0 != ini_read_value(configFileName_.c_str(),
+  if ((0 != ini_read_value(config_file_name_.c_str(),
                            "HMI", "ServerPort", value))
       && ('\0' != *value)) {
-    serverport_ = atoi(value);
-    LOG4CXX_INFO(logger_, "Set server port to " << serverport_);
+    server_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set server port to " << server_port_);
   }
 
   *value = '\0';
-  if ((0 != ini_read_value(configFileName_.c_str(),
+  if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MAIN", "ThreadStackSize", value))
       && ('\0' != *value)) {
-    minTreadStackSize_ = atoi(value);
-    LOG4CXX_INFO(logger_, "Set threadStackMinSize " << minTreadStackSize_);
+    min_tread_stack_size_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set threadStackMinSize to " << min_tread_stack_size_);
   }
 }
 
-bool Profile::readValue(bool* value, const char* const pSection,
+bool Profile::ReadValue(bool* value, const char* const pSection,
                         const char* const pKey) const {
   bool ret = false;
 
   char buf[INI_LINE_LEN + 1];
   *buf = '\0';
-  if ((0 != ini_read_value(configFileName_.c_str(), pSection, pKey, buf))
+  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
       && ('\0' != *buf)) {
     const int tmpVal = atoi(buf);
     if (0 == tmpVal) {
@@ -129,14 +129,14 @@ bool Profile::readValue(bool* value, const char* const pSection,
   return ret;
 }
 
-bool Profile::readValue(std::string* value,
+bool Profile::ReadValue(std::string* value,
                         const char* const pSection,
                         const char* const pKey) const {
   bool ret = false;
 
   char buf[INI_LINE_LEN + 1];
   *buf = '\0';
-  if ((0 != ini_read_value(configFileName_.c_str(), pSection, pKey, buf))
+  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
       && ('\0' != *buf)) {
     *value = buf;
     ret = true;
