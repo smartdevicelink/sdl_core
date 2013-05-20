@@ -63,6 +63,7 @@
 #include "system.h"
 
 #include "utils/logger.h"
+#include "config_profile/profile.h"
 
 #include "TransportManager/ITransportManager.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
@@ -202,7 +203,9 @@ int main(int argc, char** argv)
       LOG4CXX_INFO(logger, " Listen successful!");
     }
 
-    JSONRPC2Handler jsonRPC2Handler( std::string("127.0.0.1"), 8087 );
+    profile::Profile::getInstance()->setConfigFileName("smartDeviceLink.ini");
+
+    JSONRPC2Handler jsonRPC2Handler(profile::Profile::getInstance()->getServerAddress(), profile::Profile::getInstance()->getServerPort());
     jsonRPC2Handler.setRPC2CommandsObserver( &appMgr );
     appMgr.setJsonRPC2Handler( &jsonRPC2Handler );
     if (!jsonRPC2Handler.Connect())

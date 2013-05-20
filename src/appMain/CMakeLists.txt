@@ -13,6 +13,7 @@ set(LIBRARIES
   bluetooth
   pthread
   rt
+  ConfigProfile
 )
 
 include_directories (
@@ -22,6 +23,7 @@ include_directories (
   ../components/JSONHandler/include
   ../components/AppMgr/include
   ../components/TransportManager/include
+  ../components/config_profile/include
   ../components/utils/include/
   ../components/ConnectionHandler/include/
   ../thirdPartyLibs/MessageBroker/include
@@ -42,6 +44,7 @@ target_link_libraries(${PROJECT} ${LIBRARIES})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
 
