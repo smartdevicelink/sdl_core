@@ -33,16 +33,17 @@ class Parser(object):
     def __init__(self):
         """Constructor."""
         self._types = {}
+        self._enums = collections.OrderedDict()
+        self._structs = collections.OrderedDict()
+        self._functions = collections.OrderedDict()
+        self._params = {}
 
-    def _do_parse(self, filename):
+    def parse(self, filename):
         """Parse XML.
 
         Returns an instance of generator.Model.Interface containing parsed
         interface or raises ParseError if input XML contains errors
         and can't be parsed.
-
-        This is the implementation of parsing. This method must be called
-        from parse() method of the subclasses to do actual parsing.
 
         Keyword arguments:
         filename -- name of input XML file.
@@ -52,35 +53,103 @@ class Parser(object):
         tree = xml.etree.ElementTree.parse(filename)
         root = tree.getroot()
 
-        if root.tag != "interface":
-            raise ParseError("Invalid root tag: " + root.tag)
+        self._enums = self._initialize_enums()
+        self._structs = collections.OrderedDict()
+        self._functions = collections.OrderedDict()
+        self._params = {}
 
-        enums = self._initialize_enums()
-        structs = collections.OrderedDict()
-        functions = collections.OrderedDict()
-        params = root.attrib
+        self._types = dict(self._enums.items())
 
-        self._types = dict(enums.items())
+        self._parse_root(root)
 
-        for element in root:
+        return Model.Interface(enums=self._enums, structs=self._structs,
+                               functions=self._functions, params=self._params)
+
+    def _initialize_enums(self):
+        """Initialize enums.
+
+        The default implementation returns an OrderedDict with two empty
+        enums: "FunctionID" and "messageType". Required for formats where
+        these enums must be generated automatically according to the declared
+        in the XML functions.
+
+        These enums are filled during the parsing of the functions.
+
+        """
+        return collections.OrderedDict(
+            [("FunctionID", Model.Enum(name="FunctionID")),
+             ("messageType", Model.Enum(name="messageType"))])
+
+    def _check_enum_name(self, enum):
+        """Check enum name.
+
+        This method is called to check whether the newly parsed enum's name
+        conflicts with some predefined enum.
+
+        This implementation raises an error if enum name is one of the
+        predefined enums "FunctionID" or "messageType" which must not be
+        declared explicitly in the XML.
+
+        """
+        if enum.name in ["FunctionID", "messageType"]:
+            raise ParseError(
+                "Enum '" + enum.name +
+                "' is generated automatically in SDLRPCV1 and"
+                " must not be declared in xml file")
+
+    def _parse_root(self, root):
+        """Parse root XML element.
+
+        Default implementation parses root as interface element without a
+        prefix.
+
+        Keyword arguments:
+        root -- root element.
+
+        """
+
+        self._parse_interface(root, "")
+
+    def _parse_interface(self, interface, prefix):
+        """Parse interface element.
+
+        Keyword arguments:
+        interface -- interface element.
+        prefix -- string prefix for all types of the interface.
+
+        """
+        if interface.tag != "interface":
+            raise ParseError("Invalid interface tag: " + interface.tag)
+
+        params, subelements, attrib = self._parse_base_item(interface, "")
+
+        for param in ["description", "design_description", "todos"]:
+            if 0 != len(params[param]):
+                attrib[param] = "\n".join(params[param])
+
+        if 0 != len(params["issues"]):
+            attrib["issues"] = "\n".join(i.value for i in params["issues"])
+
+        self._params = dict(
+            self._params.items() +
+            [(prefix + p[0], p[1]) for p in attrib.items()])
+
+        for element in subelements:
             if element.tag == "enum":
-                enum = self._parse_enum(element)
+                enum = self._parse_enum(element, prefix)
                 self._check_enum_name(enum)
-                self._add_item(enums, enum)
+                self._add_item(self._enums, enum)
                 self._add_type(enum)
             elif element.tag == "struct":
-                struct = self._parse_struct(element)
-                self._add_item(structs, struct)
+                struct = self._parse_struct(element, prefix)
+                self._add_item(self._structs, struct)
                 self._add_type(struct)
             elif element.tag == "function":
-                function = self._parse_function(element)
-                self._add_item(functions, function,
+                function = self._parse_function(element, prefix)
+                self._add_item(self._functions, function,
                                (function.function_id, function.message_type))
             else:
                 raise ParseError("Unexpected element: " + element.tag)
-
-        return Model.Interface(enums=enums, structs=structs,
-                               functions=functions, params=params)
 
     @staticmethod
     def _add_item(items, item, key=None):
@@ -111,13 +180,14 @@ class Parser(object):
 
         self._types[_type.name] = _type
 
-    def _parse_enum(self, element):
+    def _parse_enum(self, element, prefix):
         """Parse element as enumeration.
 
         Returns an instance of generator.Model.Enum
 
         """
-        params, subelements, attributes = self._parse_base_item(element)
+        params, subelements, attributes = \
+            self._parse_base_item(element, prefix)
 
         internal_scope = None
         for attribute in attributes:
@@ -141,13 +211,13 @@ class Parser(object):
         # pylint: disable=W0142
         return Model.Enum(**params)
 
-    def _parse_struct(self, element):
+    def _parse_struct(self, element, prefix):
         """Parse element as structure.
 
         Returns an instance of generator.Model.Struct
 
         """
-        params, subelements, attrib = self._parse_base_item(element)
+        params, subelements, attrib = self._parse_base_item(element, prefix)
 
         if len(attrib) != 0:
             raise ParseError("Unexpected attributes for struct")
@@ -155,7 +225,7 @@ class Parser(object):
         members = collections.OrderedDict()
         for subelement in subelements:
             if subelement.tag == "param":
-                self._add_item(members, self._parse_param(subelement))
+                self._add_item(members, self._parse_param(subelement, prefix))
             else:
                 raise ParseError("Unexpected subelement '" + subelement.name +
                                  "' in struct '" + params["name"] + "'")
@@ -165,13 +235,14 @@ class Parser(object):
         # pylint: disable=W0142
         return Model.Struct(**params)
 
-    def _parse_function(self, element):
+    def _parse_function(self, element, prefix):
         """Parse element as function.
 
         Returns an instance of generator.Model.Function
 
         """
-        params, subelements, attributes = self._parse_base_item(element)
+        params, subelements, attributes = \
+            self._parse_base_item(element, prefix)
 
         function_id, message_type = self._parse_function_id_type(
             params["name"],
@@ -187,7 +258,8 @@ class Parser(object):
         function_params = collections.OrderedDict()
         for subelement in subelements:
             if subelement.tag == "param":
-                function_param = self._parse_function_param(subelement)
+                function_param = self._parse_function_param(subelement,
+                                                            prefix)
                 if function_param.name in function_params:
                     raise ParseError("Parameter '" + function_param.name +
                                      "' is specified more than once" +
@@ -202,7 +274,54 @@ class Parser(object):
         # pylint: disable=W0142
         return Model.Function(**params)
 
-    def _parse_base_item(self, element):
+    def _parse_function_id_type(self, function_name, attrib):
+        """Parse function id and message type according to XML format.
+
+        This implementation takes function name as function id and extracts
+        attribute "messagetype" as message type and searches them in enums
+        "FunctionID" and "messageType" adding the missing elements if
+        necessary.
+
+        Returns function id and message type as an instances of EnumElement.
+
+        """
+        if "messagetype" not in attrib:
+            raise ParseError("No messagetype specified for function '" +
+                             function_name + "'")
+
+        function_id = self._provide_enum_element_for_function(
+            "FunctionID",
+            function_name)
+
+        message_type = self._provide_enum_element_for_function(
+            "messageType",
+            self._extract_attrib(attrib, "messagetype"))
+
+        return function_id, message_type
+
+    def _provide_enum_element_for_function(self, enum_name, element_name):
+        """Provide enum element for functions.
+
+        Search an element in an enum and add it if it is missing.
+
+        Returns EnumElement.
+
+        """
+        if enum_name not in self._types:
+            raise ParseError("Enum '" + enum_name +
+                             "' is not initialized")
+
+        enum = self._types[enum_name]
+
+        if not isinstance(enum, Model.Enum):
+            raise ParseError("'" + enum_name + "' is not an enum")
+
+        if element_name not in enum.elements:
+            enum.elements[element_name] = Model.EnumElement(name=element_name)
+
+        return enum.elements[element_name]
+
+    def _parse_base_item(self, element, prefix):
         """Parse element as base item.
 
         Returns an params, sub-elements and attributes of the element
@@ -219,7 +338,7 @@ class Parser(object):
         if "name" not in element.attrib:
             raise ParseError("Name is not specified for " + element.tag)
 
-        params["name"] = element.attrib["name"]
+        params["name"] = prefix + element.attrib["name"]
         attrib = dict(element.attrib.items())
         del attrib["name"]
 
@@ -288,7 +407,7 @@ class Parser(object):
         Returns an instance of generator.Model.EnumElement
 
         """
-        params, subelements, attributes = self._parse_base_item(element)
+        params, subelements, attributes = self._parse_base_item(element, "")
 
         if len(subelements) != 0:
             raise ParseError("Unexpected subelements in enum element")
@@ -314,13 +433,14 @@ class Parser(object):
         # pylint: disable=W0142
         return Model.EnumElement(**params)
 
-    def _parse_param(self, element):
+    def _parse_param(self, element, prefix):
         """Parse element as structure parameter.
 
         Returns an instance of generator.Model.Param
 
         """
-        params, subelements, attrib = self._parse_param_base_item(element)
+        params, subelements, attrib = \
+            self._parse_param_base_item(element, prefix)
 
         if len(attrib) != 0:
             raise ParseError("Unknown attributes in param '" +
@@ -334,13 +454,14 @@ class Parser(object):
         # pylint: disable=W0142
         return Model.Param(**params)
 
-    def _parse_function_param(self, element):
+    def _parse_function_param(self, element, prefix):
         """Parse element as function parameter.
 
         Returns an instance of generator.Model.FunctionParam
 
         """
-        params, subelements, attrib = self._parse_param_base_item(element)
+        params, subelements, attrib = \
+            self._parse_param_base_item(element, prefix)
 
         default_value = None
         default_value_string = self._extract_attrib(attrib, "defvalue")
@@ -393,13 +514,13 @@ class Parser(object):
         # pylint: disable=W0142
         return Model.FunctionParam(**params)
 
-    def _parse_param_base_item(self, element):
+    def _parse_param_base_item(self, element, prefix):
         """Parse base param items.
 
         Returns params, other subelements and attributes.
 
         """
-        params, subelements, attrib = self._parse_base_item(element)
+        params, subelements, attrib = self._parse_base_item(element, "")
 
         params["is_mandatory"] = self._extract_optional_bool_attrib(
             attrib, "mandatory", True)
@@ -427,8 +548,13 @@ class Parser(object):
                 attrib, "maxlength")
             param_type = Model.String(max_length=max_length)
         else:
-            if type_name in self._types:
-                param_type = self._types[type_name]
+            if 1 == type_name.count("."):
+                custom_type_name = type_name.replace(".", "_")
+            else:
+                custom_type_name = prefix + type_name
+
+            if custom_type_name in self._types:
+                param_type = self._types[custom_type_name]
             else:
                 raise ParseError("Unknown type '" + type_name + "'")
 

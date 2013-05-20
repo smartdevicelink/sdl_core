@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<interface attribute1="value1" attribute2="value2">
+<interface name="test_interface" attribute1="value1" attribute2="value2">
     <enum name="FunctionID">
         <description>Description string 1</description>
         <element name="Function1_id" value="10">

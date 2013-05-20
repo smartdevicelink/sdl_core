@@ -14,24 +14,11 @@ class Parser(RPCBase.Parser):
 
     """SDLRPCV2 parser."""
 
-    def parse(self, filename):
-        """Parse XML in SDLRPCV2 format.
-
-        Returns an instance of generator.Model.Interface containing parsed
-        interface or raises ParseError if input XML contains errors
-        and can't be parsed.
-
-        Keyword arguments:
-        filename -- name of input XML file.
-
-        """
-        return self._do_parse(filename)
-
     def _initialize_enums(self):
         """Initialize enums.
 
         This implementation returns empty OrderedDict because in SDLRPCV2
-        all enums must be declared explicitly in the XML filename
+        all enums must be declared explicitly in the XML file.
 
         """
         return collections.OrderedDict()

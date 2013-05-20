@@ -23,13 +23,15 @@ import sys
 
 import generator.parsers.SDLRPCV1
 import generator.parsers.SDLRPCV2
+import generator.parsers.JSONRPC
 import generator.Model
 import generator.generators.SmartSchema
 from generator.parsers.RPCBase import ParseError
 
 SUPPORTED_PARSERS = {
     "sdlrpcv1": generator.parsers.SDLRPCV1.Parser,
-    "sdlrpcv2": generator.parsers.SDLRPCV2.Parser
+    "sdlrpcv2": generator.parsers.SDLRPCV2.Parser,
+    "jsonrpc": generator.parsers.JSONRPC.Parser
 }
 
 
@@ -85,7 +87,6 @@ Generating interface source code with following parameters:
         print(error.message)
         print
         sys.exit(errno.EINVAL)
-
 
     print("Done.")
 
