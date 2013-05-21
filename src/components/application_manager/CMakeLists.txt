@@ -23,6 +23,7 @@ set (SOURCES
 ./src/commands/get_device_list_response_command.cc
 ./src/commands/register_app_interface_command.cc
 ./src/commands/generic_response_command.cc
+./src/commands/unregister_app_interface_command.cc
 ./src/message_conversion.cc
 )
 

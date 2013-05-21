@@ -31,48 +31,19 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_COMMAND_H_
-
-#include "application_manager/commands/command_impl.h"
-#include "utils/macro.h"
+#include "application_manager/commands/unregister_app_interface_command.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief Register app interface request  command class
- **/
-class RegisterAppInterfaceCommand : public CommandImpl {
- public:
-  /**
-   * \brief RegisterAppInterfaceCommand class constructor
-   **/
-  explicit RegisterAppInterfaceCommand(const MessageSharedPtr& message)
-      : message_(message) {
-  }
-
-  /**
-   * \brief RegisterAppInterfaceCommand class destructor
-   **/
-  virtual ~RegisterAppInterfaceCommand() {
-  }
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-  // virtual void cleanUp() = 0;
-
- private:
-  MessageSharedPtr message_;
-
-  DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceCommand);
-};
+void UnregisterAppInterfaceCommand::Run() {
+  ApplicationManagerImpl::GetInstance()->UnregisterApplication(
+    ApplicationManagerImpl::GetInstance()->
+      application((*message_)[strings::msg_params][strings::app_id]));
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_COMMAND_H_

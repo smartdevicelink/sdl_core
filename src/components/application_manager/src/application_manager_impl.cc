@@ -43,7 +43,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
 }
 
-ApplicationManager * ApplicationManagerImpl::GetInstance() {
+ApplicationManagerImpl * ApplicationManagerImpl::GetInstance() {
 	if (NULL == self_) {
 		self_ = new ApplicationManagerImpl();
 	}
@@ -58,6 +58,17 @@ Application * ApplicationManagerImpl::application(int app_id) {
 	else {
 		return NULL;
 	}
+}
+
+bool ApplicationManagerImpl::RegisterApplication(Application * application)
+{
+  return true;
+}
+
+bool ApplicationManagerImpl::UnregisterApplication(Application * application)
+{
+
+  return true;
 }
 
 std::vector<Application *>

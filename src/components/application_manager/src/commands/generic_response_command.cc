@@ -51,11 +51,6 @@ void GenericResponseCommand::Run() {
   response[strings::params][strings::connection_key] =
       (*message_)[strings::params][strings::connection_key];
 
-  if ((*message_)[strings::msg_params].keyExists(strings::binary_data))  {
-    response[strings::msg_params][strings::binary_data] =
-        (*message_)[strings::msg_params][strings::binary_data];
-  }
-
   response[strings::msg_params][strings::success] = false;
   response[strings::msg_params][strings::result_code] =
       NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;

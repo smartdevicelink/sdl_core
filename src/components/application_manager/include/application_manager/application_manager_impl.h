@@ -50,7 +50,7 @@ class ApplicationManagerImpl : public ApplicationManager
 							 , public request_watchdog::WatchdogSubscriber {
 public:
 	~ApplicationManagerImpl();
-	static ApplicationManager * GetInstance();
+	static ApplicationManagerImpl * GetInstance();
 
 	/////////////////////////////////////////////////////
 

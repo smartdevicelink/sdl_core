@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/register_app_interface_command.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -66,10 +67,6 @@ void RegisterAppInterfaceCommand::Run() {
   application_impl->set_ui_language(
       (*message_)[strings::msg_params][strings::hmi_display_language_desired]);
 
-  // if ((*message_)[strings::msg_params].keyExists(strings::auto_activated_id)) {
-  //   application_impl->set_mobile_app_id((*message_)[strings::msg_params][strings::auto_activated_id]);
-  // }
-
   if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
     application_impl->set_tts_name(
         (*message_)[strings::msg_params][strings::tts_name]);
@@ -80,7 +77,9 @@ void RegisterAppInterfaceCommand::Run() {
         (*message_)[strings::msg_params][strings::app_type]);
   }
 
-  // RegisterApp(ApplicationImpl);
+  bool registerApplictionResult =
+      ApplicationManagerImpl::GetInstance()->
+      RegisterApplication(application_impl);
 }
 
 }  // namespace commands
