@@ -104,7 +104,16 @@ namespace NsSmartDeviceLink
              * @param Object Object to unapply schema.
              **/
             virtual void unapplySchema(CSmartObject & Object);
-
+            
+            /**
+             * @brief Build smart object by smart schema
+             * 
+             * Fill smart object with default values
+             * 
+             * @param object Object to build
+             **/
+            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & object);
+            
             /**
              * @brief The method converts a string into the value of enum EnumType
              *
@@ -114,7 +123,8 @@ namespace NsSmartDeviceLink
              */
             static bool stringToEnum(const std::string& str, EnumType &value);
 
-        private:
+        private:            
+            
             /**
              * @brief Constructor.
              *
@@ -243,6 +253,15 @@ void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema
             Object = i->second;
         }
     }
+}
+
+template <typename EnumType>
+void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::BuildObjectBySchema(
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+  bool result = setDefaultValue(object);
+  if (false ==result) {
+    object = static_cast<int>(-1);
+  }
 }
 
 template <typename EnumType>

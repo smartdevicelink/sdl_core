@@ -82,6 +82,14 @@ bool NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsSma
     return result;
 }
 
+void NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::BuildObjectBySchema(
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+  bool result = setDefaultValue(object);
+  if (false ==result) {
+    object = std::string("");
+  }
+}
+
 NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::CStringSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
                                                                 const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue):
 mMaxLength(MaxLength),

@@ -84,8 +84,16 @@ namespace NsSmartDeviceLink
              * @return true if default value was successfully set, false otherwise.
              **/
             virtual bool setDefaultValue(CSmartObject & Object);
+            
+            /**
+             * @brief Build smart object by smart schema
+             * 
+             * @param Object Object to build
+             **/
+            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & object);
 
-        private:
+        private:            
+            
             /**
              * @brief Constructor.
              *
@@ -147,6 +155,14 @@ namespace NsSmartDeviceLink
          **/
         template <>
         SmartType TNumberSchemaItem<int>::getSmartType(void);
+
+        /**
+         * @brief Specialization of getSmartType for long.
+         *
+         * @return SmartType_Integer.
+         **/
+        template <>
+        SmartType TNumberSchemaItem<long>::getSmartType(void);
 
         /**
          * @brief Specialization of getSmartType for double.
@@ -217,6 +233,20 @@ bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaul
     return result;
 }
 
+
+template <typename NumberType>
+void NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::BuildObjectBySchema(
+          NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+  bool result = setDefaultValue(object);
+  if (false == result)  {
+    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Double == getSmartType()) {
+      object = static_cast<double>(0.0);
+    } else {
+      object = static_cast<NumberType>(0);
+    }
+  }
+}
+
 template <typename NumberType>
 NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::TNumberSchemaItem(const TSchemaItemParameter<NumberType> & MinValue,
                                                                             const TSchemaItemParameter<NumberType> & MaxValue,
@@ -229,6 +259,12 @@ mDefaultValue(DefaultValue)
 
 template <>
 NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::getSmartType(void)
+{
+    return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
+}
+
+template <>
+NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<long>::getSmartType(void)
 {
     return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
 }

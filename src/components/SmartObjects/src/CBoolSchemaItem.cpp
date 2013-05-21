@@ -59,7 +59,17 @@ bool NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsSmart
     return result;
 }
 
+
+void NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::BuildObjectBySchema(
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+  bool result = setDefaultValue(object);
+  if (false == result) {
+    object = static_cast<bool>(false);
+  }
+}
+
 NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::CBoolSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue):
 mDefaultValue(DefaultValue)
 {
 }
+

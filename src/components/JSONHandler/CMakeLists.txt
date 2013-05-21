@@ -609,11 +609,12 @@ set (SOURCES
     ./src/outgoing_thread_impl.cc
 )
 
-set (FORMATTER_SOURCES
+set (FORMATTER_SOURCES  
     ./src/formatters/CFormatterJsonBase.cpp
     ./src/formatters/CFormatterJsonALRPCv1.cpp
     ./src/formatters/CFormatterJsonALRPCv2.cpp
     ./src/formatters/CFormatterJsonRPC2.cpp
+    ./src/formatters/meta_formatter.cc
 )
 
 add_library("JSONHandler" ${SOURCES}

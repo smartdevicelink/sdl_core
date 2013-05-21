@@ -117,6 +117,15 @@ namespace NsSmartDeviceLink
              **/
             virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
 
+            /**
+             * @brief Build smart object by smart schema
+             *
+             * Fill smart object with default values
+             *
+             * @param object Object to build
+             **/
+            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & object);
+
         private:
             /**
              * @brief Constructor.

@@ -131,6 +131,17 @@ void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsSmart
     }
 }
 
+void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::BuildObjectBySchema(
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+  for (std::map<std::string,
+      NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember>::
+          const_iterator i = mMembers.begin();
+      i != mMembers.end(); ++i) {
+    
+        i->second.mSchemaItem->BuildObjectBySchema(object[i->first]);
+      }
+}
+
 NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::CObjectSchemaItem(const std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members):
 mMembers(Members)
 {

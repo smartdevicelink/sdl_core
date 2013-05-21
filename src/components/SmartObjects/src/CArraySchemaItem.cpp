@@ -111,6 +111,13 @@ void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsSmartD
     }
 }
 
+void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::BuildObjectBySchema(
+          NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+// empty array
+  object = NsSmartDeviceLink::NsSmartObjects::CSmartObject(
+      NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
+}
+
 NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::CArraySchemaItem(const utils::SharedPtr<ISchemaItem> & ElementSchemaItem,
                                                               const TSchemaItemParameter<size_t> & MinSize,
                                                               const TSchemaItemParameter<size_t> & MaxSize):
