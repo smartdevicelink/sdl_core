@@ -70,6 +70,10 @@ class ApplicationImpl : public Application {
   const smart_objects::CSmartObject & system_context() const;
   const smart_objects::CSmartObject & language() const;
   const smart_objects::CSmartObject & ui_language() const;
+  const smart_objects::CSmartObject * help_promt() const;
+  const smart_objects::CSmartObject * timeout_promt() const;
+  const smart_objects::CSmartObject * vr_help_title() const;
+  const smart_objects::CSmartObject * vr_help() const;
 
   void set_version(const Version& version);
   void set_name(const std::string& name);
@@ -83,6 +87,10 @@ class ApplicationImpl : public Application {
   void set_mobile_app_id(const smart_objects::CSmartObject & mobile_app_id);
   void set_tts_name(const smart_objects::CSmartObject & tts_name);
   void set_ngn_media_screen_name(const smart_objects::CSmartObject & ngn_name);
+  void set_help_prompt(const smart_objects::CSmartObject & help_promt);
+  void set_timeout_prompt(const smart_objects::CSmartObject & timeout_promt);
+  void set_vr_help_title(const smart_objects::CSmartObject & vr_help_title);
+  void set_vr_help(const smart_objects::CSmartObject & vr_help);
 
  private:
   Version version_;
@@ -101,6 +109,10 @@ class ApplicationImpl : public Application {
   smart_objects::CSmartObject * ngn_media_screen_name_;
   smart_objects::CSmartObject * mobile_app_id_;
   smart_objects::CSmartObject * tts_name_;
+  smart_objects::CSmartObject * help_promt_;
+  smart_objects::CSmartObject * timeout_promt_;
+  smart_objects::CSmartObject * vr_help_title_;
+  smart_objects::CSmartObject * vr_help_;
 };
 
 }  // namespace application_manager

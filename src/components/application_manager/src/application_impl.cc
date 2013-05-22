@@ -42,7 +42,11 @@ ApplicationImpl::ApplicationImpl(int app_id)
       vr_synonyms_(NULL),
       ngn_media_screen_name_(NULL),
       mobile_app_id_(NULL),
-      tts_name_(NULL) {
+      tts_name_(NULL),
+      help_promt_(NULL),
+      timeout_promt_(NULL),
+      vr_help_title_(NULL),
+      vr_help_(NULL) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -75,6 +79,26 @@ ApplicationImpl::~ApplicationImpl() {
   if (tts_name_) {
     delete tts_name_;
     tts_name_ = NULL;
+  }
+
+  if (help_promt_) {
+    delete help_promt_;
+    help_promt_ = NULL;
+  }
+
+  if (timeout_promt_) {
+    delete timeout_promt_;
+    timeout_promt_ = NULL;
+  }
+
+  if (vr_help_title_) {
+    delete vr_help_title_;
+    vr_help_title_ = NULL;
+  }
+
+  if (vr_help_) {
+    delete vr_help_;
+    vr_help_ = NULL;
   }
 }
 
@@ -147,6 +171,22 @@ const smart_objects::CSmartObject& ApplicationImpl::ui_language() const {
   return ui_language_;
 }
 
+const smart_objects::CSmartObject* ApplicationImpl::help_promt() const {
+  return help_promt_;
+}
+
+const smart_objects::CSmartObject* ApplicationImpl::timeout_promt() const {
+  return timeout_promt_;
+}
+
+const smart_objects::CSmartObject* ApplicationImpl::vr_help_title() const {
+  return vr_help_title_;
+}
+
+const smart_objects::CSmartObject* ApplicationImpl::vr_help() const {
+  return vr_help_;
+}
+
 void ApplicationImpl::set_version(const Version& version) {
   version_ = version;
 }
@@ -214,6 +254,34 @@ void ApplicationImpl::set_vr_synonyms(
 void ApplicationImpl::set_mobile_app_id(
     const smart_objects::CSmartObject& mobile_app_id) {
   mobile_app_id_ = new smart_objects::CSmartObject(mobile_app_id);
+}
+
+void ApplicationImpl::set_help_prompt(
+    const smart_objects::CSmartObject & help_promt) {
+  if (help_promt_)
+    delete help_promt_;
+  help_promt_ = new smart_objects::CSmartObject(help_promt);
+}
+
+void ApplicationImpl::set_timeout_prompt(
+    const smart_objects::CSmartObject & timeout_promt) {
+  if (timeout_promt_)
+    delete timeout_promt_;
+  timeout_promt_ = new smart_objects::CSmartObject(timeout_promt);
+}
+
+void ApplicationImpl::set_vr_help_title(
+    const smart_objects::CSmartObject & vr_help_title) {
+  if (vr_help_title_)
+    delete vr_help_title_;
+  vr_help_title_ = new smart_objects::CSmartObject(vr_help_title);
+}
+
+void ApplicationImpl::set_vr_help(
+    const smart_objects::CSmartObject & vr_help) {
+  if (vr_help_)
+    delete vr_help_;
+  vr_help_ = new smart_objects::CSmartObject(vr_help);
 }
 
 }  // namespace application_manager

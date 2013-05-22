@@ -80,7 +80,7 @@ void CommandRequestImpl::SendResponse(const bool success, const NsSmartDeviceLin
   command->Init();
   command->Run();
   command->CleanUp();
-  }
+}
 
 }  // namespace commands
 
