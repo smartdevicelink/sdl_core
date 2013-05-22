@@ -65,6 +65,7 @@ const char help_promt[] = "helpPrompt";
 const char timeout_promt[] = "timeoutPrompt";
 const char vr_help_title[] = "vrHelpTitle";
 const char vr_help[] = "vrHelp";
+const char properties[] = "properties";
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 
