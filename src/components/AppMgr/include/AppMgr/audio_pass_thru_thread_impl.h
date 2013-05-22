@@ -53,6 +53,8 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
       const NsSmartDeviceLinkRPCV2::AudioType& audio_type);
   ~AudioPassThruThreadImpl();
 
+  void Init();
+
   void threadMain();
 
   unsigned int session_key() const;
@@ -73,8 +75,8 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
   unsigned int id_;
   unsigned int max_duration_;
 
-  threads::SynchronisationPrimitives synchronisation_;
-  threads::Timer * timer_;
+  sync_primitives::SynchronisationPrimitives synchronisation_;
+  sync_primitives::Timer * timer_;
 
   NsSmartDeviceLinkRPCV2::SamplingRate sampling_rate_;
   NsSmartDeviceLinkRPCV2::AudioCaptureQuality bits_per_sample_;

@@ -29,35 +29,36 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
+
 #include <time.h>
 #include "utils/timer.h"
 #include "utils/synchronisation_primitives.h"
 
-namespace threads {
+namespace sync_primitives {
 
 Timer::Timer(SynchronisationPrimitives* sync_primitive)
-	: sync_primitive_(sync_primitive) {
-
+  : sync_primitive_(sync_primitive) {
 }
 
 Timer::~Timer() {
-	if (sync_primitive_) {
-		sync_primitive_->unlock();
-		sync_primitive_ = 0;
-	}
-
+  DCHECK(sync_primitive_);
+  if (sync_primitive_) {
+    sync_primitive_->unlock();
+    sync_primitive_ = NULL;
+  }
 }
 
-void Timer::startWait(int seconds) {
-	if (!sync_primitive_) {
-		return;
-	}
-	timespec time_spec;
-	clock_gettime(CLOCK_REALTIME, &time_spec);
-	time_spec.tv_sec += seconds;
-	pthread_cond_timedwait(&sync_primitive_->getConditionalVar(),
-						   &sync_primitive_->getMutex(),
-						   &time_spec);
+void Timer::StartWait(unsigned int seconds) {
+  DCHECK(sync_primitive_);
+  if (!sync_primitive_) {
+    return;
+  }
+  timespec time_spec;
+  clock_gettime(CLOCK_REALTIME, &time_spec);
+  time_spec.tv_sec += seconds;
+  pthread_cond_timedwait(&sync_primitive_->conditional_var(),
+                         &sync_primitive_->mutex(),
+                         &time_spec);
 }
 
-} // namespace threads
+}  // namespace sync_primitives

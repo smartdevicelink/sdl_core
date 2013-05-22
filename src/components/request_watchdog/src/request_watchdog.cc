@@ -37,6 +37,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <map>
 #include "request_watchdog/request_watchdog.h"
 
 namespace request_watchdog {
@@ -44,24 +45,37 @@ namespace request_watchdog {
 const int RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
 
 log4cxx::LoggerPtr RequestWatchdog::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
 
 RequestWatchdog* RequestWatchdog::sInstance_ = 0;
 
 std::list<WatchdogSubscriber*> RequestWatchdog::subscribers_;
 std::map<RequestInfo, struct timeval> RequestWatchdog::requests_;
-threads::SynchronisationPrimitives RequestWatchdog::instanceMutex_;
-threads::SynchronisationPrimitives RequestWatchdog::subscribersListMutex_;
-threads::SynchronisationPrimitives RequestWatchdog::requestsMapMutex_;
+sync_primitives::SynchronisationPrimitives RequestWatchdog::instanceMutex_;
+sync_primitives::SynchronisationPrimitives
+RequestWatchdog::subscribersListMutex_;
+sync_primitives::SynchronisationPrimitives RequestWatchdog::requestsMapMutex_;
 
 Watchdog* RequestWatchdog::getRequestWatchdog() {
-  instanceMutex_.lock();
+  static bool flag = true;
 
-  if ( 0 == sInstance_ ) {
+  if (flag) {
+    instanceMutex_.init();
+    subscribersListMutex_.init();
+    requestsMapMutex_.init();
+    instanceMutex_.lock();
+  }
+
+
+
+  if (0 == sInstance_) {
     sInstance_ = new RequestWatchdog;
   }
 
-  instanceMutex_.unlock();
+  if (flag) {
+    flag = false;
+    instanceMutex_.unlock();
+  }
 
   return sInstance_;
 }
@@ -120,7 +134,7 @@ void RequestWatchdog::notifySubscribers(RequestInfo requestInfo) {
 
   std::list<WatchdogSubscriber*>::iterator i = subscribers_.begin();
 
-  while ( i != subscribers_.end() ) {
+  while (i != subscribers_.end()) {
     (*i)->onTimeoutExpired(requestInfo);
     i++;
   }
@@ -194,7 +208,7 @@ int RequestWatchdog::getRegesteredRequestsNumber() {
 void RequestWatchdog::startDispatcherThreadIfNeeded() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if ( !requests_.empty() && !subscribers_.empty() ) {
+  if (!requests_.empty() && !subscribers_.empty()) {
     queueDispatcherThread.start();
   }
 }
@@ -202,7 +216,7 @@ void RequestWatchdog::startDispatcherThreadIfNeeded() {
 void RequestWatchdog::stopDispatcherThreadIfNeeded() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if ( requests_.empty() || subscribers_.empty() ) {
+  if (requests_.empty() || subscribers_.empty()) {
     queueDispatcherThread.stop();
   }
 }
@@ -220,7 +234,7 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   int cycleDuration;
   struct timeval cycleStartTime;
 
-  while ( true ) {
+  while (true) {
     usleep(cycleSleepInterval);
 
     cycleStartTime = date_time::DateTime::getCurrentTime();
@@ -229,7 +243,7 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
 
     it = requests_.begin();
 
-    while ( it != requests_.end() ) {
+    while (it != requests_.end()) {
       LOG4CXX_INFO(logger_, "Checking timeout for the following request :"
                          << "\n ConnectionID : " << (*it).first.connectionID_
                          << "\n CorrelationID : " << (*it).first.correlationID_
@@ -237,9 +251,9 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
                          << "\n CustomTimeOut : " << (*it).first.customTimeout_
                          << "\n");
 
-      if ( (*it).first.customTimeout_ <
-          date_time::DateTime::calculateTimeSpan((*it).second) ) {
-          // Request is expired - notify all subscribers and remove request
+      if ((*it).first.customTimeout_ <
+          date_time::DateTime::calculateTimeSpan((*it).second)) {
+        // Request is expired - notify all subscribers and remove request
 
         LOG4CXX_INFO(logger_, "Timeout had expired for the following request :"
                          << "\n ConnectionID : " << (*it).first.connectionID_
