@@ -80,14 +80,14 @@ void ResetGlobalPropertiesCommand::Run() {
   const int connectionKey =
       (*message_)[strings::params][strings::connection_key];
 
-  ApplicationManagerImpl::GetInstance()->AddMessageChain(
+  ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, corellationId),
       connectionKey, corellationId);
 
     /*(*message_)[strings::msg_params][strings::properties] =
         *app->help_promt();*/
 
-  ApplicationManagerImpl::GetInstance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }
 
 }  // namespace commands

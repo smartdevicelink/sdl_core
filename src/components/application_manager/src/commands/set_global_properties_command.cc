@@ -80,7 +80,7 @@ void SetGlobalPropertiesCommand::Run() {
   const int connectionKey =
       (*message_)[strings::params][strings::connection_key];
 
-  ApplicationManagerImpl::GetInstance()->AddMessageChain(
+  ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, corellationId),
       connectionKey, corellationId);
 
