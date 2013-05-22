@@ -32,6 +32,8 @@ set (SOURCES
 ./src/commands/speak_response_command.cc
 ./src/commands/set_global_properties_command.cc
 ./src/commands/set_global_properties_response_command.cc
+./src/commands/reset_global_properties_command.cc
+./src/commands/reset_global_properties_response_command.cc
 ./src/message_conversion.cc
 )
 

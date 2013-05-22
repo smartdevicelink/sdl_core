@@ -33,6 +33,10 @@
 #include "application_manager/basic_command_factory.h"
 #include "application_manager/commands/register_app_interface_command.h"
 #include "application_manager/commands/generic_response_command.h"
+#include "application_manager/commands/set_global_properties_command.h"
+#include "application_manager/commands/set_global_properties_response_command.h"
+#include "application_manager/commands/reset_global_properties_command.h"
+#include "application_manager/commands/reset_global_properties_response_command.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -50,9 +54,17 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetGlobalPropertiesID: {
       if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-        //command.reset(new commands::SetGlobalPropertiesResponseCommand(message));
+        command.reset(new commands::SetGlobalPropertiesResponseCommand(message));
       } else {
-        //command.reset(new commands::SetGlobalPropertiesCommand(message));
+        command.reset(new commands::SetGlobalPropertiesCommand(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ResetGlobalPropertiesID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::ResetGlobalPropertiesResponseCommand(message));
+      } else {
+        command.reset(new commands::ResetGlobalPropertiesCommand(message));
       }
       break;
     }
