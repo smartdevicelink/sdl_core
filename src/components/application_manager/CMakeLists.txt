@@ -20,13 +20,14 @@ set (SOURCES
 ./src/basic_command_factory.cc
 ./src/commands/command_impl.cc
 ./src/commands/command_request_impl.cc
+./src/commands/command_response_impl.cc
 ./src/commands/get_device_list_command.cc
 #./src/commands/get_device_list_response_command.cc
 ./src/commands/register_app_interface_command.cc
 ./src/commands/generic_response_command.cc
 ./src/commands/unregister_app_interface_command.cc
 ./src/commands/set_global_properties_command.cc
-#./src/commands/set_global_properties_response_command.cc
+./src/commands/set_global_properties_response_command.cc
 ./src/message_conversion.cc
 )
 

@@ -55,9 +55,7 @@ void GenericResponseCommand::Run() {
   response[strings::msg_params][strings::result_code] =
       NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;
 
-  Message message = SmartObjectToMessage(&response);
-  mobile_message_handler::MobileMessageHandlerImpl::getInstance()->
-      sendMessageToMobileApp(&message);
+  SendResponse();
 }
 
 }  // namespace commands

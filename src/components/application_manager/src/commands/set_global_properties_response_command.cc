@@ -32,8 +32,6 @@
  */
 
 #include "application_manager/commands/set_global_properties_response_command.h"
-#include "mobile_message_handler/mobile_message_handler_impl.h"
-#include "application_manager/message_conversion.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -44,7 +42,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 SetGlobalPropertiesResponseCommand::SetGlobalPropertiesResponseCommand(
-    const MessageSharedPtr& message): CommandImpl(message) {
+    const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 SetGlobalPropertiesResponseCommand::~SetGlobalPropertiesResponseCommand() {
@@ -53,9 +51,7 @@ SetGlobalPropertiesResponseCommand::~SetGlobalPropertiesResponseCommand() {
 void SetGlobalPropertiesResponseCommand::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesResponseCommand::Run ");
 
-  Message message = SmartObjectToMessage(*message_);
-  mobile_message_handler::MobileMessageHandlerImpl::getInstance()->
-      sendMessageToMobileApp(&message);
+  SendResponse();
 }
 
 }  // namespace commands

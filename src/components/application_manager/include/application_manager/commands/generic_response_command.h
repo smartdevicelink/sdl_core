@@ -33,20 +33,20 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GENERIC_RESPONSE_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GENERIC_RESPONSE_COMMAND_H_
 
-#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_response_impl.h"
 #include "application_manager/message.h"
 #include "utils/macro.h"
 
 namespace application_manager {
 namespace commands {
 
-class GenericResponseCommand : public CommandImpl {
+class GenericResponseCommand : public CommandResponseImpl {
  public:
   /**
    * \brief GenericResponseCommand class constructor
    **/
   explicit GenericResponseCommand(const MessageSharedPtr& message)
-  : CommandImpl(message) {
+  : CommandResponseImpl(message) {
   }
 
   /**
@@ -61,7 +61,6 @@ class GenericResponseCommand : public CommandImpl {
   virtual void Run();
 
  private:
-  MessageSharedPtr message_;
 
   DISALLOW_COPY_AND_ASSIGN(GenericResponseCommand);
 };

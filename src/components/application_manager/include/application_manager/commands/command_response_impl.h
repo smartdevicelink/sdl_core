@@ -30,59 +30,33 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/command_request_impl.h"
-#include "application_manager/basic_command_factory.h"
-#include "SmartObjects/CSmartObject.hpp"
-#include "application_manager/message.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_RESPONSE_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_RESPONSE_IMPL_H_
+
+#include "application_manager/commands/command_impl.h"
+
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class CSmartObject;
+}
+}
 
 namespace application_manager {
 
 namespace commands {
 
-CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
-: CommandImpl(message) {
-}
-
-CommandRequestImpl::~CommandRequestImpl() {
-}
-
-bool CommandRequestImpl::Init() {
-  return true;
-}
-
-bool CommandRequestImpl::CleanUp() {
-  return true;
-}
-
-void CommandRequestImpl::Run() {
-}
-
-void CommandRequestImpl::SendResponse(const bool success,
-    const NsSmartDeviceLinkRPC::V2::Result::eType& errorCode) {
-
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
-
-  response[strings::params][strings::message_type] = MessageType::kResponse;
-  response[strings::params][strings::correlation_id] =
-      (*message_)[strings::params][strings::correlation_id];
-  response[strings::params][strings::protocol_version] =
-      (*message_)[strings::params][strings::protocol_version];
-  response[strings::params][strings::connection_key] =
-      (*message_)[strings::params][strings::connection_key];
-  response[strings::params][strings::function_id] =
-      (*message_)[strings::params][strings::function_id];
-
-  response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] =
-      errorCode;
-
-
-  CommandSharedPtr command = BasicCommandFactory::CreateCommand(&response);
-  command->Init();
-  command->Run();
-  command->CleanUp();
-}
+class CommandResponseImpl : public CommandImpl {
+ public:
+  explicit CommandResponseImpl(const MessageSharedPtr& message);
+  virtual ~CommandResponseImpl();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void SendResponse();
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_RESPONSE_IMPL_H_

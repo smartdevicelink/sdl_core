@@ -30,8 +30,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/command_request_impl.h"
-#include "application_manager/basic_command_factory.h"
+#include "application_manager/commands/command_response_impl.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "application_manager/message_conversion.h"
 #include "SmartObjects/CSmartObject.hpp"
 #include "application_manager/message.h"
 
@@ -39,48 +40,28 @@ namespace application_manager {
 
 namespace commands {
 
-CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
+CommandResponseImpl::CommandResponseImpl(const MessageSharedPtr& message)
 : CommandImpl(message) {
 }
 
-CommandRequestImpl::~CommandRequestImpl() {
+CommandResponseImpl::~CommandResponseImpl() {
 }
 
-bool CommandRequestImpl::Init() {
+bool CommandResponseImpl::Init() {
   return true;
 }
 
-bool CommandRequestImpl::CleanUp() {
+bool CommandResponseImpl::CleanUp() {
   return true;
 }
 
-void CommandRequestImpl::Run() {
+void CommandResponseImpl::Run() {
 }
 
-void CommandRequestImpl::SendResponse(const bool success,
-    const NsSmartDeviceLinkRPC::V2::Result::eType& errorCode) {
-
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
-
-  response[strings::params][strings::message_type] = MessageType::kResponse;
-  response[strings::params][strings::correlation_id] =
-      (*message_)[strings::params][strings::correlation_id];
-  response[strings::params][strings::protocol_version] =
-      (*message_)[strings::params][strings::protocol_version];
-  response[strings::params][strings::connection_key] =
-      (*message_)[strings::params][strings::connection_key];
-  response[strings::params][strings::function_id] =
-      (*message_)[strings::params][strings::function_id];
-
-  response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] =
-      errorCode;
-
-
-  CommandSharedPtr command = BasicCommandFactory::CreateCommand(&response);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+void CommandResponseImpl::SendResponse() {
+  Message message = SmartObjectToMessage(&(*message_));
+  mobile_message_handler::MobileMessageHandlerImpl::getInstance()->
+      sendMessageToMobileApp(&message);
 }
 
 }  // namespace commands
