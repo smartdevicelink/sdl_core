@@ -75,7 +75,6 @@ class ApplicationImpl : public Application {
   const smart_objects::CSmartObject * timeout_promt() const;
   const smart_objects::CSmartObject * vr_help_title() const;
   const smart_objects::CSmartObject * vr_help() const;
-  const smart_objects::CSmartObject * sync_msg_version() const;
 
   void set_version(const Version& version);
   void set_name(const std::string& name);
@@ -99,8 +98,6 @@ class ApplicationImpl : public Application {
   void set_status_bar(const smart_objects::CSmartObject & vr_help);
   void set_media_clock(const smart_objects::CSmartObject & vr_help);
   void set_media_track(const smart_objects::CSmartObject & vr_help);
-  void set_sync_msg_version(const smart_objects::CSmartObject & sync_msg_version);
-
 
   private:
     Version version_;
@@ -129,7 +126,6 @@ class ApplicationImpl : public Application {
   smart_objects::CSmartObject * status_bar_;
   smart_objects::CSmartObject * media_clock_;
   smart_objects::CSmartObject * media_track_;
-  smart_objects::CSmartObject * sync_msg_version_;
 };
 
 }  // namespace application_manager

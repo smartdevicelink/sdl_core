@@ -33,12 +33,8 @@
 
 #include "application_manager/commands/register_app_interface_command.h"
 
-#include "application_manager/commands/register_app_interface_response_command.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_conversion.h"
-
-#include "mobile_message_handler/mobile_message_handler_impl.h"
 
 
 namespace application_manager {
@@ -46,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 void RegisterAppInterfaceCommand::Run() {
-  if (ApplicationManagerImpl::GetInstance()->
+  if (ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id])) {
     SendResponse(false,
              NsSmartDeviceLinkRPC::V2::Result::APPLICATION_REGISTERED_ALREADY);
@@ -54,8 +50,8 @@ void RegisterAppInterfaceCommand::Run() {
     ApplicationImpl* application_impl = new ApplicationImpl(
         (*message_)[strings::msg_params][strings::app_id]);
 
-    application_impl->set_sync_msg_version(
-        (*message_)[strings::msg_params][strings::sync_msg_version]);
+    //application_impl->set_version(
+    //    (*message_)[strings::msg_params][strings::sync_msg_version]);
 
     application_impl->set_name(
         (*message_)[strings::msg_params][strings::app_name]);
@@ -90,7 +86,7 @@ void RegisterAppInterfaceCommand::Run() {
     }
 
     bool register_application_result =
-        ApplicationManagerImpl::GetInstance()->
+        ApplicationManagerImpl::instance()->
         RegisterApplication(application_impl);
 
     if (!register_application_result) {

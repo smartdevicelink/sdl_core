@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/unregister_app_interface_command.h"
-#include "application_manager/commands/unregister_app_interface_response_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "v4_protocol_v2_0_revT.h"
 
@@ -41,13 +40,8 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceCommand::Run() {
-<<<<<<< HEAD
-  ApplicationManagerImpl::instance()->UnregisterApplication(
-    ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id]));
-=======
   ApplicationManagerImpl* application_manager_impl =
-      ApplicationManagerImpl::GetInstance();
+      ApplicationManagerImpl::instance();
   if (!application_manager_impl->
       application((*message_)[strings::msg_params][strings::app_id])) {
     SendResponse(false,
@@ -63,7 +57,6 @@ void UnregisterAppInterfaceCommand::Run() {
   }
 
   SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
->>>>>>> APPLINK-1213 APPLINK-1214 UnregisterAppInterace command
 }
 
 }  // namespace commands

@@ -33,8 +33,6 @@
 
 
 #include "application_manager/commands/unregister_app_interface_response_command.h"
-#include "application_manager/message_conversion.h"
-#include "mobile_message_handler/mobile_message_handler_impl.h"
 
 namespace application_manager  {
 
