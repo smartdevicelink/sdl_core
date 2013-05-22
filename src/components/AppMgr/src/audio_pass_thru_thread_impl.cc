@@ -69,25 +69,28 @@ namespace rpc_commands {
 const int AudioPassThruThreadImpl::kAudioPassThruTimeout = 1;
 
 log4cxx::LoggerPtr AudioPassThruThreadImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppMgrCore"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AppMgrCore"));
 
 AudioPassThruThreadImpl::AudioPassThruThreadImpl(
-    unsigned int session_key, unsigned int id, unsigned int max_duration,
-    const NsSmartDeviceLinkRPCV2::SamplingRate& sampling_rate,
-    const NsSmartDeviceLinkRPCV2::AudioCaptureQuality& bits_per_sample,
-    const NsSmartDeviceLinkRPCV2::AudioType& audio_type)
-    : session_key_(session_key),
-      id_(id),
-      max_duration_(max_duration),
-      sampling_rate_(sampling_rate),
-      bits_per_sample_(bits_per_sample),
-      audio_type_(audio_type),
-      timer_(0) {
-
-        timer_ = new threads::Timer(&synchronisation_);
+  unsigned int session_key, unsigned int id, unsigned int max_duration,
+  const NsSmartDeviceLinkRPCV2::SamplingRate& sampling_rate,
+  const NsSmartDeviceLinkRPCV2::AudioCaptureQuality& bits_per_sample,
+  const NsSmartDeviceLinkRPCV2::AudioType& audio_type)
+  : session_key_(session_key),
+    id_(id),
+    max_duration_(max_duration),
+    sampling_rate_(sampling_rate),
+    bits_per_sample_(bits_per_sample),
+    audio_type_(audio_type),
+    timer_(NULL) {
 }
 
 AudioPassThruThreadImpl::~AudioPassThruThreadImpl() {
+}
+
+void AudioPassThruThreadImpl::Init() {
+  synchronisation_.init();
+  timer_ = new sync_primitives::Timer(&synchronisation_);
 }
 
 void AudioPassThruThreadImpl::audioPassThruTimerProc(int i) {
@@ -98,38 +101,39 @@ void AudioPassThruThreadImpl::audioPassThruTimerProc(int i) {
 
 bool AudioPassThruThreadImpl::sendEndAudioPassThruToHMI() {
   NsRPC2Communication::UI::EndAudioPassThru* endAudioPassThru =
-      new NsRPC2Communication::UI::EndAudioPassThru;
+    new NsRPC2Communication::UI::EndAudioPassThru;
   if (!endAudioPassThru) {
     LOG4CXX_ERROR_EXT(
-        logger_,
-        "OUT_OF_MEMORY: new NsRPC2Communication::UI::EndAudioPassThru.");
+      logger_,
+      "OUT_OF_MEMORY: new NsRPC2Communication::UI::EndAudioPassThru.");
 
-    rpc_commands::helpers::sendResponse<
-        NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
-        NsSmartDeviceLinkRPCV2::Result::ResultInternal>(
-        NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
-        NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY, id_, false,
-        session_key_);
+    rpc_commands::helpers::sendResponse <
+    NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
+                           NsSmartDeviceLinkRPCV2::Result::ResultInternal > (
+                             NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
+                             NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY, id_, false,
+                             session_key_);
     return false;
   }
 
   NsAppManager::Application* app = NsAppManager::AppMgrCore::getInstance()
-      .getItem(session_key_);
+                                   .getItem(session_key_);
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_,
-                        "No application associated with this registry item!");
+                      "No application associated with this registry item!");
     return false;
   }
 
   endAudioPassThru->setId(
-      NsAppManager::HMIHandler::getInstance().getJsonRPC2Handler()
-          ->getNextMessageId());
+    NsAppManager::HMIHandler::getInstance().getJsonRPC2Handler()
+    ->getNextMessageId());
   endAudioPassThru->set_appId(app->getAppID());
   NsAppManager::HMIHandler::getInstance().sendRequest(endAudioPassThru);
   return true;
 }
 
 void AudioPassThruThreadImpl::threadMain() {
+  Init();
   unsigned int audioLength = 0;
   std::string filename;
   if (bits_per_sample_.get()
@@ -137,7 +141,7 @@ void AudioPassThruThreadImpl::threadMain() {
     filename = "audio.8bit.wav";
     audioLength = 5000;
   } else if (bits_per_sample_.get()
-      == NsSmartDeviceLinkRPCV2::AudioCaptureQuality::FIX_16_BIT) {
+             == NsSmartDeviceLinkRPCV2::AudioCaptureQuality::FIX_16_BIT) {
     filename = "";  // TODO(AK): Add file name here.
     // 3 minute audio.
     audioLength = static_cast<unsigned int>(1000 * 60 * 2.7);
@@ -147,12 +151,12 @@ void AudioPassThruThreadImpl::threadMain() {
 #endif
 
     if (sendEndAudioPassThruToHMI()) {
-      rpc_commands::helpers::sendResponse<
-          NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
-          NsSmartDeviceLinkRPCV2::Result::ResultInternal>(
-          NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
-          NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR, id_, false,
-          session_key_);
+      rpc_commands::helpers::sendResponse <
+      NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
+                             NsSmartDeviceLinkRPCV2::Result::ResultInternal > (
+                               NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
+                               NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR, id_, false,
+                               session_key_);
     }
 
     NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
@@ -172,12 +176,12 @@ void AudioPassThruThreadImpl::threadMain() {
     LOG4CXX_ERROR_EXT(logger_, "Can't read from file.");
 
     if (sendEndAudioPassThruToHMI()) {
-      rpc_commands::helpers::sendResponse<
-          NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
-          NsSmartDeviceLinkRPCV2::Result::ResultInternal>(
-          NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
-          NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR, id_, false,
-          session_key_);
+      rpc_commands::helpers::sendResponse <
+      NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
+                             NsSmartDeviceLinkRPCV2::Result::ResultInternal > (
+                               NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
+                               NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR, id_, false,
+                               session_key_);
     }
 
     NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
@@ -196,12 +200,12 @@ void AudioPassThruThreadImpl::threadMain() {
     LOG4CXX_ERROR_EXT(logger_, "Binary data empty.");
 
     if (sendEndAudioPassThruToHMI()) {
-      rpc_commands::helpers::sendResponse<
-          NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
-          NsSmartDeviceLinkRPCV2::Result::ResultInternal>(
-          NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
-          NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR, id_, false,
-          session_key_);
+      rpc_commands::helpers::sendResponse <
+      NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
+                             NsSmartDeviceLinkRPCV2::Result::ResultInternal > (
+                               NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
+                               NsSmartDeviceLinkRPCV2::Result::GENERIC_ERROR, id_, false,
+                               session_key_);
     }
 
     NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
@@ -236,36 +240,28 @@ void AudioPassThruThreadImpl::threadMain() {
   // Minimal timeout is 1 second now.
   for (int i = 0; i != seconds; i += kAudioPassThruTimeout) {
 #if defined(OS_POSIX) && defined(OS_LINUX)
-    /*struct itimerval tout_val;
-    tout_val.it_interval.tv_sec = 0;
-    tout_val.it_interval.tv_usec = 0;
-    tout_val.it_value.tv_sec = kAudioPassThruTimeout;
-    tout_val.it_value.tv_usec = 0;
-    setitimer(ITIMER_REAL, &tout_val, 0);
-    signal(SIGALRM, AudioPassThruThreadImpl::audioPassThruTimerProc);
-    pthread_cond_wait(&cv, &audioPassThruMutex);*/
 
     LOG4CXX_INFO(logger_, "\n\t\t\t\t\tBefore timer; kAudioPassThruTimeout "
-        << kAudioPassThruTimeout << "; seconds " << seconds);
-    timer_->startWait(kAudioPassThruTimeout);
+                 << kAudioPassThruTimeout << "; seconds " << seconds);
+    timer_->StartWait(kAudioPassThruTimeout);
 
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif
 
     NsSmartDeviceLinkRPCV2::OnAudioPassThru* onAudioPassThru =
-        new NsSmartDeviceLinkRPCV2::OnAudioPassThru;
+      new NsSmartDeviceLinkRPCV2::OnAudioPassThru;
     if (!onAudioPassThru) {
       LOG4CXX_ERROR_EXT(
-          logger_,
-          "OUT_OF_MEMORY: new NsSmartDeviceLinkRPCV2::OnAudioPassThru.");
+        logger_,
+        "OUT_OF_MEMORY: new NsSmartDeviceLinkRPCV2::OnAudioPassThru.");
 
       if (sendEndAudioPassThruToHMI()) {
-        rpc_commands::helpers::sendResponse<
-            NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
-            NsSmartDeviceLinkRPCV2::Result::ResultInternal>(
-            NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
-            NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY, id_, false,
-            session_key_);
+        rpc_commands::helpers::sendResponse <
+        NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response,
+                               NsSmartDeviceLinkRPCV2::Result::ResultInternal > (
+                                 NsSmartDeviceLinkRPCV2::FunctionID::PerformAudioPassThruID,
+                                 NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY, id_, false,
+                                 session_key_);
       }
 
       delete onAudioPassThru;
@@ -278,12 +274,12 @@ void AudioPassThruThreadImpl::threadMain() {
 
     onAudioPassThru->setBinaryData(std::vector<unsigned char>(from, to));
     onAudioPassThru->setMethodId(
-        NsSmartDeviceLinkRPCV2::FunctionID::OnAudioPassThruID);
+      NsSmartDeviceLinkRPCV2::FunctionID::OnAudioPassThruID);
     onAudioPassThru->setMessageType(
-        NsSmartDeviceLinkRPC::SDLRPCMessage::NOTIFICATION);
+      NsSmartDeviceLinkRPC::SDLRPCMessage::NOTIFICATION);
 
     NsAppManager::MobileHandler::getInstance().sendRPCMessage(onAudioPassThru,
-                                                              session_key_);
+        session_key_);
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);

@@ -55,37 +55,34 @@ typedef pthread_cond_t PlatformConditionalVar;
 #include "utils/macro.h"
 #include "utils/logger.h"
 
-namespace threads {
+namespace sync_primitives {
 
 class SynchronisationPrimitives {
- public:
-  SynchronisationPrimitives();
-  virtual ~SynchronisationPrimitives();
+  public:
+    SynchronisationPrimitives();
+    virtual ~SynchronisationPrimitives();
 
-  virtual void lock();
+    virtual void init();
 
-  virtual void unlock();
+    virtual void lock();
 
-  virtual void wait();
+    virtual void unlock();
 
-  virtual void signal();
+    virtual void wait();
 
-  PlatformMutex & getMutex();
+    virtual void signal();
 
-  PlatformConditionalVar & getConditionalVar();
+    PlatformMutex& mutex();
 
- private:
-  PlatformMutex mutex_;
-  PlatformConditionalVar cond_variable_;
+    PlatformConditionalVar& conditional_var();
 
-  /**
-      *\brief For logging.
-    */
-  static log4cxx::LoggerPtr logger_;
+  private:
+    PlatformMutex mutex_;
+    PlatformConditionalVar cond_variable_;
 
-  DISALLOW_COPY_AND_ASSIGN(SynchronisationPrimitives);
+    DISALLOW_COPY_AND_ASSIGN(SynchronisationPrimitives);
 };
 
-}  // namespace threads
+}  // namespace sync_primitives
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYNCHRONISATIONPRIMITIVESWRAPPER_H_

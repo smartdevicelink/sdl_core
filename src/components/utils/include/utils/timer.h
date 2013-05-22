@@ -33,20 +33,22 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER
 
-namespace threads {
+#include "utils/macro.h"
+
+namespace sync_primitives {
 class SynchronisationPrimitives;
 
 class Timer {
-public:
-	Timer(SynchronisationPrimitives* sync_primitive);
-	virtual ~Timer();
-	virtual void startWait(int seconds);
+  public:
+    explicit Timer(SynchronisationPrimitives* sync_primitive);
+    virtual ~Timer();
+    virtual void StartWait(unsigned int seconds);
 
-private:
-	SynchronisationPrimitives * sync_primitive_;
-
+  private:
+    SynchronisationPrimitives* sync_primitive_;
+    DISALLOW_COPY_AND_ASSIGN(Timer);
 };
 
-} // namespace threads
+}  // namespace sync_primitives
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER

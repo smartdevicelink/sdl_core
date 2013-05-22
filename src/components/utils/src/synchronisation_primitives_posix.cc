@@ -33,21 +33,21 @@
 #include "utils/macro.h"
 #include "utils/synchronisation_primitives.h"
 
-namespace threads {
-
-log4cxx::LoggerPtr SynchronisationPrimitives::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "threads"));
+namespace sync_primitives {
 
 SynchronisationPrimitives::SynchronisationPrimitives()
-    : mutex_(PTHREAD_MUTEX_INITIALIZER),
-      cond_variable_(PTHREAD_COND_INITIALIZER) {
-  pthread_mutex_init(&mutex_, NULL);
-  pthread_cond_init(&cond_variable_, NULL);
+  : mutex_(PTHREAD_MUTEX_INITIALIZER),
+    cond_variable_(PTHREAD_COND_INITIALIZER) {
 }
 
 SynchronisationPrimitives::~SynchronisationPrimitives() {
   pthread_cond_destroy(&cond_variable_);
   pthread_mutex_destroy(&mutex_);
+}
+
+void SynchronisationPrimitives::init() {
+  pthread_mutex_init(&mutex_, NULL);
+  pthread_cond_init(&cond_variable_, NULL);
 }
 
 void SynchronisationPrimitives::lock() {
@@ -67,14 +67,12 @@ void SynchronisationPrimitives::signal() {
   pthread_cond_signal(&cond_variable_);
 }
 
-PlatformMutex & SynchronisationPrimitives::getMutex()
-{
+PlatformMutex& SynchronisationPrimitives::mutex() {
   return mutex_;
 }
 
-PlatformConditionalVar & SynchronisationPrimitives::getConditionalVar()
-{
+PlatformConditionalVar& SynchronisationPrimitives::conditional_var() {
   return cond_variable_;
 }
 
-}  // namespace threads
+}  // namespace sync_primitives

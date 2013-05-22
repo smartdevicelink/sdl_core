@@ -70,7 +70,7 @@ class RequestWatchdog : public Watchdog {
   static log4cxx::LoggerPtr logger_;
 
   static RequestWatchdog* sInstance_;
-  static threads::SynchronisationPrimitives instanceMutex_;
+  static sync_primitives::SynchronisationPrimitives instanceMutex_;
 
   static void notifySubscribers(RequestInfo requestInfo);
 
@@ -78,10 +78,10 @@ class RequestWatchdog : public Watchdog {
   void stopDispatcherThreadIfNeeded();
 
   static std::list<WatchdogSubscriber*> subscribers_;
-  static threads::SynchronisationPrimitives subscribersListMutex_;
+  static sync_primitives::SynchronisationPrimitives subscribersListMutex_;
 
   static std::map<RequestInfo, struct timeval> requests_;
-  static threads::SynchronisationPrimitives requestsMapMutex_;
+  static sync_primitives::SynchronisationPrimitives requestsMapMutex_;
 
   class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {
    public:
