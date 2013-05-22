@@ -34,6 +34,7 @@
 #include "application_manager/commands/set_global_properties_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -44,7 +45,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 SetGlobalPropertiesCommand::SetGlobalPropertiesCommand(
-    const MessageSharedPtr& message): message_(message) {
+    const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 SetGlobalPropertiesCommand::~SetGlobalPropertiesCommand() {
@@ -54,36 +55,48 @@ void SetGlobalPropertiesCommand::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesCommand::Run ");
 
   NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
-  response[S_PARAMS][S_MESSAGE_TYPE] = "response";
+  response[strings::params][strings::message_type] = MessageType::kResponse;
+  response[strings::params][strings::correlation_id] =
+      (*message_)[strings::params][strings::correlation_id];
+  response[strings::params][strings::protocol_version] =
+      (*message_)[strings::params][strings::protocol_version];
+  response[strings::params][strings::connection_key] =
+      (*message_)[strings::params][strings::connection_key];
 
-  do
+  response[strings::msg_params][strings::success] = false;
+  response[strings::msg_params][strings::result_code] =
+      NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED;
+
+
+  response[strings::params][strings::message_type] = MessageType::kResponse;
+
+  ApplicationImpl* app = static_cast<ApplicationImpl*>(ApplicationManagerImpl::GetInstance()->application((*message_)[strings::params][strings::app_id]));
+  if (0 != app) {
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with the registry item with session key ");
+    response[strings::params]["resultCode"] = "APPLICATION_NOT_REGISTERED";
+    response[strings::params]["success"] = "false";
+
+    return;
+  }
+
+  //response
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject obj = app->hmi_level();
+  if(NsSmartDeviceLinkRPCV2::HMILevel::HMI_NONE == obj.asInt())
   {
-    const ApplicationImpl* app = ApplicationManagerImpl::GetInstance()->application((*message_)[strings::params][strings::app_id]);
-    if (0 != app) {
-      LOG4CXX_ERROR_EXT(logger_, "No application associated with the registry item with session key " << sessionKey );
-      response[S_MSG_PARAMS]["resultCode"] = "APPLICATION_NOT_REGISTERED";
-      response[S_MSG_PARAMS]["success"] = "false";
-      break;
-    }
+      LOG4CXX_WARN(logger_, "An application " << app->name() << " has not been activated yet!" );
+      response[strings::params]["resultCode"] = "REJECTED";
+      response[strings::params]["success"] = "false";
+      return;
+  }
 
-    //response
-    if(NsSmartDeviceLinkRPCV2::HMILevel::HMI_NONE == app->hmi_level().asInt())
-    {
-        LOG4CXX_WARN(logger_, "An application " << app->getName() << " has not been activated yet!" );
-        response[S_MSG_PARAMS]["resultCode"] = "REJECTED";
-        response[S_MSG_PARAMS]["success"] = "false";
-        break;
-    }
-
-    const int corellationId = (*message_)[strings::params][strings::correlation_id];
-    const int connectionKey = (*message_)[strings::params][strings::connection_key];
-    ApplicationManagerImpl::GetInstance()->AddMessageChain(new MessageChaining(connectionKey, corellationId), connectionKey, corellationId);
+  const int corellationId = (*message_)[strings::params][strings::correlation_id];
+  const int connectionKey = (*message_)[strings::params][strings::connection_key];
+  //ApplicationManagerImpl::GetInstance()->AddMessageChain(new MessageChaining(connectionKey, corellationId), connectionKey, corellationId);
 
 
-    //senMestoHMI
+  //senMestoHMI
 
 
-  } while(0);
 
 
   //ApplicationManagerImpl::GetInstance()->SendMessageToHMI((*message_));

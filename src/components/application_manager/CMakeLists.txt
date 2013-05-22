@@ -25,7 +25,7 @@ set (SOURCES
 ./src/commands/register_app_interface_command.cc
 ./src/commands/generic_response_command.cc
 ./src/commands/unregister_app_interface_command.cc
-#./src/commands/set_global_properties_command.cc
+./src/commands/set_global_properties_command.cc
 #./src/commands/set_global_properties_response_command.cc
 ./src/message_conversion.cc
 )

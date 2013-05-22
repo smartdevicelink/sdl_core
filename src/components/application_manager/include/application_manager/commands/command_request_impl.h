@@ -35,6 +35,7 @@
 
 #include "application_manager/commands/command_impl.h"
 #include "SmartObjects/CSmartObject.hpp"
+#include "v4_protocol_v2_0_revT.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -53,7 +54,7 @@ class CommandRequestImpl : public CommandImpl {
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
-  void sendErrorResponse(smart_objects::CSmartObject* message);
+  void SendResponse(const bool success, const NsSmartDeviceLinkRPC::V2::Result::eType& errorCode);
 };
 
 }  // namespace commands
