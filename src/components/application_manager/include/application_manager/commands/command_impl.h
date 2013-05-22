@@ -41,10 +41,15 @@ namespace commands {
 
 class CommandImpl : public Command {
  public:
+  explicit CommandImpl(const MessageSharedPtr& message)
+  : message_(message) {
+  }
   virtual ~CommandImpl();
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
+ protected:
+  MessageSharedPtr message_;
 };
 
 }  // namespace commands

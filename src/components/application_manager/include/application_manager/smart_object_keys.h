@@ -61,6 +61,10 @@ const char auto_activated_id[] = "autoActivateID";
 const char app_type[] = "AppType";
 const char tts_name[] = "ttsName";
 const char binary_data[] = "binary_data";
+const char help_promt[] = "helpPrompt";
+const char timeout_promt[] = "timeoutPrompt";
+const char vr_help_title[] = "vrHelpTitle";
+const char vr_help[] = "vrHelp";
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 

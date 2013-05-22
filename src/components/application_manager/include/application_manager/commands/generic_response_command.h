@@ -46,7 +46,7 @@ class GenericResponseCommand : public CommandImpl {
    * \brief GenericResponseCommand class constructor
    **/
   explicit GenericResponseCommand(const MessageSharedPtr& message)
-  : message_(message) {
+  : CommandImpl(message) {
   }
 
   /**

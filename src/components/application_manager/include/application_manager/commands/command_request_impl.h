@@ -30,38 +30,34 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/basic_command_factory.h"
-#include "application_manager/commands/register_app_interface_command.h"
-#include "application_manager/commands/generic_response_command.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
-// TODO(AK): Include the directory when naming .h files
-#include "v4_protocol_v2_0_revT.h"
+#include "application_manager/commands/command_impl.h"
+#include "SmartObjects/CSmartObject.hpp"
+
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class CSmartObject;
+}
+}
 
 namespace application_manager {
 
-CommandSharedPtr BasicCommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+namespace commands {
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
-      command.reset(new commands::RegisterAppInterfaceCommand(message));
-      break;
-    }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetGlobalPropertiesID: {
-      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-        //command.reset(new commands::SetGlobalPropertiesResponseCommand(message));
-      } else {
-        //command.reset(new commands::SetGlobalPropertiesCommand(message));
-      }
-      break;
-    }
-    default: {
-      command.reset(new commands::GenericResponseCommand(message));
-    }
-  }
+class CommandRequestImpl : public CommandImpl {
+ public:
+  explicit CommandRequestImpl(const MessageSharedPtr& message);
+  virtual ~CommandRequestImpl();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void sendErrorResponse(smart_objects::CSmartObject* message);
+};
 
-  return command;
-}
+}  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_

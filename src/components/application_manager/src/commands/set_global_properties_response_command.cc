@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,38 +31,33 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/basic_command_factory.h"
-#include "application_manager/commands/register_app_interface_command.h"
-#include "application_manager/commands/generic_response_command.h"
-
-// TODO(AK): Include the directory when naming .h files
-#include "v4_protocol_v2_0_revT.h"
+#include "application_manager/commands/set_global_properties_response_command.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "application_manager/message_conversion.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
-CommandSharedPtr BasicCommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+namespace commands {
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
-      command.reset(new commands::RegisterAppInterfaceCommand(message));
-      break;
-    }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetGlobalPropertiesID: {
-      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-        //command.reset(new commands::SetGlobalPropertiesResponseCommand(message));
-      } else {
-        //command.reset(new commands::SetGlobalPropertiesCommand(message));
-      }
-      break;
-    }
-    default: {
-      command.reset(new commands::GenericResponseCommand(message));
-    }
-  }
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-  return command;
+SetGlobalPropertiesResponseCommand::SetGlobalPropertiesResponseCommand(
+    const MessageSharedPtr& message): CommandImpl(message) {
 }
+
+SetGlobalPropertiesResponseCommand::~SetGlobalPropertiesResponseCommand() {
+}
+
+void SetGlobalPropertiesResponseCommand::Run() {
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesResponseCommand::Run ");
+
+  Message message = SmartObjectToMessage(*message_);
+  mobile_message_handler::MobileMessageHandlerImpl::getInstance()->
+      sendMessageToMobileApp(&message);
+}
+
+}  // namespace commands
 
 }  // namespace application_manager

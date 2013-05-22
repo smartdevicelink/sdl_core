@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_DEVICE_LIST_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_DEVICE_LIST_COMMAND_H_
 
-#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 
 namespace application_manager {
 namespace commands {
 
-class GetDeviceListCommand : public CommandImpl {
+class GetDeviceListCommand : public CommandRequestImpl {
  public:
   ~GetDeviceListCommand();
   void run();

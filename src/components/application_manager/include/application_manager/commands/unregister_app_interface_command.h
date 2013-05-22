@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNREGISTER_APP_INTERFACE_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNREGISTER_APP_INTERFACE_COMMAND_H_
 
-#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -44,13 +44,13 @@ namespace commands {
 /**
  * @brief Unregister app interface request  command class
  **/
-class UnregisterAppInterfaceCommand : public CommandImpl {
+class UnregisterAppInterfaceCommand : public CommandRequestImpl {
  public:
   /**
    * \brief UnregisterAppInterfaceCommand class constructor
    **/
   explicit UnregisterAppInterfaceCommand(const MessageSharedPtr& message)
-      : message_(message) {
+      : CommandRequestImpl(message) {
   }
 
   /**
@@ -66,7 +66,6 @@ class UnregisterAppInterfaceCommand : public CommandImpl {
   // virtual void cleanUp() = 0;
 
  private:
-  MessageSharedPtr message_;
 
   DISALLOW_COPY_AND_ASSIGN(UnregisterAppInterfaceCommand);
 };

@@ -30,38 +30,39 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/basic_command_factory.h"
-#include "application_manager/commands/register_app_interface_command.h"
-#include "application_manager/commands/generic_response_command.h"
-
-// TODO(AK): Include the directory when naming .h files
-#include "v4_protocol_v2_0_revT.h"
+#include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
 
-CommandSharedPtr BasicCommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+namespace commands {
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
-      command.reset(new commands::RegisterAppInterfaceCommand(message));
-      break;
-    }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetGlobalPropertiesID: {
-      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-        //command.reset(new commands::SetGlobalPropertiesResponseCommand(message));
-      } else {
-        //command.reset(new commands::SetGlobalPropertiesCommand(message));
-      }
-      break;
-    }
-    default: {
-      command.reset(new commands::GenericResponseCommand(message));
-    }
-  }
-
-  return command;
+CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
+: CommandImpl(message) {
 }
+
+CommandRequestImpl::~CommandRequestImpl() {
+}
+
+bool CommandRequestImpl::Init() {
+  return true;
+}
+
+bool CommandRequestImpl::CleanUp() {
+  return true;
+}
+
+void CommandRequestImpl::Run() {
+}
+
+void CommandRequestImpl::sendErrorResponse(smart_objects::CSmartObject* message) {
+  CommandSharedPtr command = BasicCommandFactory::CreateCommand(message);
+  command->Init();
+  command->Run();
+  command->CleanUp();
+}
+
+}  // namespace commands
 
 }  // namespace application_manager

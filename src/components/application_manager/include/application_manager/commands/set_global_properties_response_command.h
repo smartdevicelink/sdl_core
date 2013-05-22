@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,38 +31,44 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/basic_command_factory.h"
-#include "application_manager/commands/register_app_interface_command.h"
-#include "application_manager/commands/generic_response_command.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SET_GLOBAL_PROPERTIES_RESPONSE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SET_GLOBAL_PROPERTIES_RESPONSE_COMMAND_H_
 
-// TODO(AK): Include the directory when naming .h files
-#include "v4_protocol_v2_0_revT.h"
+#include "application_manager/commands/command_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
-CommandSharedPtr BasicCommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+namespace commands {
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
-      command.reset(new commands::RegisterAppInterfaceCommand(message));
-      break;
-    }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetGlobalPropertiesID: {
-      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-        //command.reset(new commands::SetGlobalPropertiesResponseCommand(message));
-      } else {
-        //command.reset(new commands::SetGlobalPropertiesCommand(message));
-      }
-      break;
-    }
-    default: {
-      command.reset(new commands::GenericResponseCommand(message));
-    }
-  }
+/**
+ * @brief Register app interface request  command class
+ **/
+class SetGlobalPropertiesResponseCommand : public CommandImpl {
+ public:
+  /**
+   * @brief SetGlobalPropertiesResponseCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit SetGlobalPropertiesResponseCommand(const MessageSharedPtr& message);
 
-  return command;
-}
+  /**
+   * @brief SetGlobalPropertiesResponseCommand class destructor
+   **/
+  virtual ~SetGlobalPropertiesResponseCommand();
 
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+
+  DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesResponseCommand);
+};
+
+}  // namespace commands
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SET_GLOBAL_PROPERTIES_RESPONSE_COMMAND_H_
