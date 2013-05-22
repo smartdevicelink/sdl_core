@@ -56,7 +56,7 @@ void ResetGlobalPropertiesCommand::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesCommand::Run ");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::GetInstance()->
+      ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::app_id]));
 
   if (NULL != app) {

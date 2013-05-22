@@ -41,7 +41,7 @@ namespace commands {
 
 void ShowCommand::Run() {
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::GetInstance()->
+      (application_manager::ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id]));
 
   if (NULL == application_impl) {
@@ -84,7 +84,7 @@ void ShowCommand::Run() {
         new MessageChaining(connectionKey, corellationId),
         connectionKey, corellationId);*/
 
-  ApplicationManagerImpl::GetInstance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }
 
 void ShowCommand::cleanUp() {

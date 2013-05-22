@@ -39,7 +39,7 @@ namespace application_manager {
 namespace commands {
 
 void SpeakCommand::Run() {
-  if (NULL == application_manager::ApplicationManagerImpl::GetInstance()->
+  if (NULL == application_manager::ApplicationManagerImpl::instance()->
         application((*message_)[strings::msg_params][strings::app_id])) {
     SendResponse(false, NsSmartDeviceLinkRPC::V2::
                  Result::APPLICATION_NOT_REGISTERED);
