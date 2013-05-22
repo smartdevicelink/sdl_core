@@ -1,6 +1,6 @@
 /**
- * @file CFormatterJsonALRPCv1.cpp
- * @brief CFormatterJsonALRPCv1 source file.
+ * @file CFormatterJsonSDLRPCv1.cpp
+ * @brief CFormatterJsonSDLRPCv1 source file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,7 +32,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
 
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace SmartObjects = NsSmartDeviceLink::NsSmartObjects;
@@ -40,22 +40,22 @@ namespace Strings = NsSmartDeviceLink::NsJSONHandler::strings;
 
 // ----------------------------------------------------------------------------
 
-const std::string Formatters::CFormatterJsonALRPCv1::S_REQUEST("request");
-const std::string Formatters::CFormatterJsonALRPCv1::S_RESPONSE("response");
-const std::string Formatters::CFormatterJsonALRPCv1::S_NOTIFICATION("notification");
-const std::string Formatters::CFormatterJsonALRPCv1::S_PARAMETERS("parameters");
-const std::string Formatters::CFormatterJsonALRPCv1::S_NAME("name");
-const std::string Formatters::CFormatterJsonALRPCv1::S_CORRELATION_ID("correlationID");
+const std::string Formatters::CFormatterJsonSDLRPCv1::S_REQUEST("request");
+const std::string Formatters::CFormatterJsonSDLRPCv1::S_RESPONSE("response");
+const std::string Formatters::CFormatterJsonSDLRPCv1::S_NOTIFICATION("notification");
+const std::string Formatters::CFormatterJsonSDLRPCv1::S_PARAMETERS("parameters");
+const std::string Formatters::CFormatterJsonSDLRPCv1::S_NAME("name");
+const std::string Formatters::CFormatterJsonSDLRPCv1::S_CORRELATION_ID("correlationID");
 
 
-const int Formatters::CFormatterJsonALRPCv1::kSuccess = 0;
-const int Formatters::CFormatterJsonALRPCv1::kParsingError = 1 << 0;
-const int Formatters::CFormatterJsonALRPCv1::kFunctionIdNotFound = 1 << 1;
-const int Formatters::CFormatterJsonALRPCv1::kMessageTypeNotFound = 1 << 2;
-const int Formatters::CFormatterJsonALRPCv1::kCorrelationIdNotFound = 1 << 3;
+const int Formatters::CFormatterJsonSDLRPCv1::kSuccess = 0;
+const int Formatters::CFormatterJsonSDLRPCv1::kParsingError = 1 << 0;
+const int Formatters::CFormatterJsonSDLRPCv1::kFunctionIdNotFound = 1 << 1;
+const int Formatters::CFormatterJsonSDLRPCv1::kMessageTypeNotFound = 1 << 2;
+const int Formatters::CFormatterJsonSDLRPCv1::kCorrelationIdNotFound = 1 << 3;
 // ----------------------------------------------------------------------------
 
-const std::string Formatters::CFormatterJsonALRPCv1::getMessageType(
+const std::string Formatters::CFormatterJsonSDLRPCv1::getMessageType(
         const SmartObjects::CSmartObject& obj)
 {
     return obj.getElement(Strings::S_PARAMS).getElement(Strings::S_MESSAGE_TYPE);
@@ -63,7 +63,7 @@ const std::string Formatters::CFormatterJsonALRPCv1::getMessageType(
 
 // ----------------------------------------------------------------------------
 
-const std::string Formatters::CFormatterJsonALRPCv1::getMessageType(
+const std::string Formatters::CFormatterJsonSDLRPCv1::getMessageType(
         const Json::Value& root)
 {
     std::string type;
@@ -88,7 +88,7 @@ const std::string Formatters::CFormatterJsonALRPCv1::getMessageType(
 
 // ----------------------------------------------------------------------------
 
-bool Formatters::CFormatterJsonALRPCv1::toString(
+bool Formatters::CFormatterJsonSDLRPCv1::toString(
         const SmartObjects::CSmartObject& obj,
         std::string& outStr)
 {

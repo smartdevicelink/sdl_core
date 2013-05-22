@@ -611,8 +611,8 @@ set (SOURCES
 
 set (FORMATTER_SOURCES  
     ./src/formatters/CFormatterJsonBase.cpp
-    ./src/formatters/CFormatterJsonALRPCv1.cpp
-    ./src/formatters/CFormatterJsonALRPCv2.cpp
+    ./src/formatters/CFormatterJsonSDLRPCv1.cpp
+    ./src/formatters/CFormatterJsonSDLRPCv2.cpp
     ./src/formatters/CFormatterJsonRPC2.cpp
     ./src/formatters/meta_formatter.cc
 )

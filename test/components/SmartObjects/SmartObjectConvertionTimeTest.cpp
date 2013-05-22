@@ -36,8 +36,8 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CSmartSchema.hpp"
 #include "SmartObjects/ISchemaItem.hpp"
-#include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
-#include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
 #include "SmartObjects/CArraySchemaItem.hpp"
 #include "SmartObjects/CBoolSchemaItem.hpp"
 #include "SmartObjects/CObjectSchemaItem.hpp"
@@ -99,7 +99,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
             // SmartObjects --> JSON
-            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(srcObj, jsonString);
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toString(srcObj, jsonString);
 
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
 
@@ -119,7 +119,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
             // JSON --> SmartObjects
-            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
                 fromString<eFunctionIdTest, eMessageTypeTest>(jsonString, dstObj, RegisterAppInterface, request, 13);
 
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
@@ -140,7 +140,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
             // SmartObjects --> JSON
-            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::toString(srcObj, jsonString);
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv1::toString(srcObj, jsonString);
 
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
 
@@ -160,7 +160,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
             // JSON --> SmartObjects
-            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString<eFunctionIdTest, eMessageTypeTest>(jsonString, dstObj);
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv1::fromString<eFunctionIdTest, eMessageTypeTest>(jsonString, dstObj);
 
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
 

@@ -1,6 +1,6 @@
 /**
- * @file CFormatterJsonALRPCv2.hpp
- * @brief CFormatterJsonALRPCv2 header file.
+ * @file CFormatterJsonSDLRPCv2.hpp
+ * @brief CFormatterJsonSDLRPCv2 header file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,8 +32,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __CFORMATTERJSONALRPCV2_HPP__
-#define __CFORMATTERJSONALRPCV2_HPP__
+#ifndef __CFORMATTERJSONSDLRPCV2_HPP__
+#define __CFORMATTERJSONSDLRPCV2_HPP__
 
 #include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
@@ -47,9 +47,9 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
     /**
      * @brief Class is used to convert SmartObjects to JSON string and vice versa.
      *
-     * JSON strings is in ALPCv2 format.
+     * JSON strings is in SDLRPCv2 format.
      */
-    class CFormatterJsonALRPCv2 : public CFormatterJsonBase
+    class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase
     {
     private:
 
@@ -58,14 +58,14 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
          *
          * The class contains only static methods. Should not be instantiated.
          */
-        CFormatterJsonALRPCv2();
+        CFormatterJsonSDLRPCv2();
 
         /**
          * @brief Hidden copy constructor.
          *
          * The class contains only static methods. Should not be instantiated.
          */
-        CFormatterJsonALRPCv2(const CFormatterJsonALRPCv2&);
+        CFormatterJsonSDLRPCv2(const CFormatterJsonSDLRPCv2&);
 
     public:
 
@@ -83,7 +83,7 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
         /**
          * @brief Creates a SmartObject from a JSON string.
          *
-         * @param str Input JSON string in ALRPCv2 format
+         * @param str Input JSON string in SDLRPCv2 format
          * @param out Output SmartObject
          * @param functionId The corresponding field in SmartObject is filled with this param.
          * @param messageType The corresponding field in SmartObject is filled with this param.
@@ -103,7 +103,7 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
 
 template<typename FunctionId, typename MessageType>
-inline bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromString(
+inline bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::fromString(
         const std::string& str,
         NsSmartDeviceLink::NsSmartObjects::CSmartObject& out,
         FunctionId functionId,
@@ -131,4 +131,4 @@ inline bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2:
     return parsingSuccessful;
 }
 
-#endif // __CFORMATTERJSONALRPCV2_HPP__
+#endif // __CFORMATTERJSONSDLRPCV2_HPP__

@@ -35,8 +35,8 @@
 
 #include "JSONHandler/formatters/meta_formatter.h"
 #include "JSONHandler/CSmartFactory.hpp"
-#include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
-#include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 
 namespace formatter_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
@@ -85,9 +85,9 @@ formatter_ns::meta_formatter_error_code::tMetaFormatterErrorCode
 
   // call respective formatter->toString()
   if (e_formatter_version::FORMATTER_SDLRPCv1 == formatter_version) {
-    formatter_ns::CFormatterJsonALRPCv1::toString(tmp_object, result_string);
+    formatter_ns::CFormatterJsonSDLRPCv1::toString(tmp_object, result_string);
   } else if (e_formatter_version::FORMATTER_SDLRPCv2 == formatter_version) {
-    formatter_ns::CFormatterJsonALRPCv2::toString(tmp_object, result_string);
+    formatter_ns::CFormatterJsonSDLRPCv2::toString(tmp_object, result_string);
   }
   
   return result_code;

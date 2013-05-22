@@ -32,7 +32,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 
 #include "json/json.h"
 

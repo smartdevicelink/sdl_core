@@ -1,6 +1,6 @@
 /**
- * @file CFormatterJsonALRPCv2.cpp
- * @brief CFormatterJsonALRPCv2 source file.
+ * @file CFormatterJsonSDLRPCv2.cpp
+ * @brief CFormatterJsonSDLRPCv2 source file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,10 +32,10 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 
 
-bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(
+bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toString(
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
         std::string& outStr)
 {

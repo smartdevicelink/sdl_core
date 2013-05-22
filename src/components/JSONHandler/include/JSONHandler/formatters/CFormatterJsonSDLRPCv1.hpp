@@ -1,6 +1,6 @@
 /**
- * @file CFormatterJsonALRPCv1.hpp
- * @brief CFormatterJsonALRPCv1 header file.
+ * @file CFormatterJsonSDLRPCv1.hpp
+ * @brief CFormatterJsonSDLRPCv1 header file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -31,8 +31,8 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-#ifndef __CFORMATTERJSONALRPCV1_HPP__
-#define __CFORMATTERJSONALRPCV1_HPP__
+#ifndef __CFORMATTERJSONSDLRPCV1_HPP__
+#define __CFORMATTERJSONSDLRPCV1_HPP__
 
 #include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
@@ -47,23 +47,23 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 /**
  * @brief Class is used to convert SmartObjects to JSON string and vice versa.
  *
- * JSON strings is in ALPCv1 format.
+ * JSON strings is in SDLRPCv1 format.
  */
-class CFormatterJsonALRPCv1: public CFormatterJsonBase {
+class CFormatterJsonSDLRPCv1: public CFormatterJsonBase {
 private:
   /**
    * @brief Hidden constructor.
    *
    * The class contains only static methods. Should not be instantiated.
    */
-  CFormatterJsonALRPCv1();
+  CFormatterJsonSDLRPCv1();
 
   /**
    * @brief Hidden copy constructor.
    *
    * The class contains only static methods. Should not be instantiated.
    */
-  CFormatterJsonALRPCv1(const CFormatterJsonALRPCv1&);
+  CFormatterJsonSDLRPCv1(const CFormatterJsonSDLRPCv1&);
 
   /**
    * @brief Extracts a message type from the SmartObject
@@ -78,7 +78,7 @@ private:
    */
   static const std::string getMessageType(const Json::Value& root);
 
-  // ALRPCv1 string consts
+  // SDLRPCv1 string consts
 
   /**
    * @brief String constant for REQUEST.
@@ -145,7 +145,7 @@ public:
 // ----------------------------------------------------------------------------
 
 template<typename FunctionId, typename MessageType>
-int Formatters::CFormatterJsonALRPCv1::fromString(const std::string& str,
+int Formatters::CFormatterJsonSDLRPCv1::fromString(const std::string& str,
     NsSmartDeviceLink::NsSmartObjects::CSmartObject& out) {
   Json::Value root;
   Json::Reader reader;
@@ -207,4 +207,4 @@ int Formatters::CFormatterJsonALRPCv1::fromString(const std::string& str,
 
 } } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif // __CFORMATTERJSONALRPCV1_HPP__
+#endif // __CFORMATTERJSONSDLRPCV1_HPP__

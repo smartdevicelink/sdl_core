@@ -36,7 +36,7 @@
 
 #include <string>
 #include <iostream>
-#include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "test/components/json_handler/test_JSONHandler_v4_protocol_v2_0_revP_schema.h"
 
 using namespace Gen::test::components::JSONHandler2;
@@ -74,7 +74,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
         ";
 
         CSmartObject obj;
-        bResult = CFormatterJsonALRPCv2::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj, FunctionID::RegisterAppInterfaceID, messageType::request, 1);
+        bResult = CFormatterJsonSDLRPCv2::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj, FunctionID::RegisterAppInterfaceID, messageType::request, 1);
         ASSERT_TRUE(bResult);
 
         ASSERT_EQ(FunctionID::RegisterAppInterfaceID, (int)obj[S_PARAMS][S_FUNCTION_ID]);
@@ -119,7 +119,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
         // STEP 6. Converting object to json string
 
         std::string outputJsonString;
-        bResult = CFormatterJsonALRPCv2::toString(obj, outputJsonString);
+        bResult = CFormatterJsonSDLRPCv2::toString(obj, outputJsonString);
         ASSERT_TRUE(bResult);
 
         std::string expectedOutputJsonString = "{\
@@ -327,4 +327,8 @@ namespace test { namespace components { namespace json_handler { namespace smart
     }
 }}}}
 
-#endif  // TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_SMART_SCHEMA_DRAFT_TEST_H_
+int main(int argc, char **argv) {
+    //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
+    ::testing::InitGoogleMock(&argc, argv);
+    return RUN_ALL_TESTS();
+}
