@@ -36,8 +36,8 @@
 #include "gmock/gmock.h"
 //#include "application_manager/api_version_converter_v1.h"
 
-#include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
-#include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "v4_protocol_v2_0_revT.h"
 #include "v4_protocol_v1_2_no_extra.h"
 #include "JSONHandler/CSmartFactory.hpp"
@@ -111,7 +111,7 @@ TEST(CAPIVersionConverterV1Test, convertJSON) {
 
   CSmartObject obj;
   bool result;
-  result = CFormatterJsonALRPCv1::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj);
+  result = CFormatterJsonSDLRPCv1::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj);
 
   if (false == result)
   {

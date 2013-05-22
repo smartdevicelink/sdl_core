@@ -54,39 +54,46 @@
 
 namespace test { namespace components { namespace SmartObjects { namespace SmartObjectConvertionTimeTest {
 
-    using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+
+namespace TestType{
+enum eType {
+  INVALID_ENUM = -1,
+  APPLICATION_NOT_REGISTERED = 0,
+  SUCCESS,
+  TOO_MANY_PENDING_REQUESTS,
+  REJECTED,
+  INVALID_DATA,
+  OUT_OF_MEMORY,
+  ABORTED,
+  USER_DISALLOWED,
+  GENERIC_ERROR,
+  DISALLOWED
+};
+}
+
+namespace FunctionIdTest{
+enum eType
+{
+  INVALID_ENUM = -1,
+  RegisterAppInterface,
+  UnregisterAppInterface,
+  SetGlobalProperties,
+};
+}
+
+namespace MessageTypeTest{
+enum eType
+{
+  INVALID_ENUM = -1,
+  request,
+  response,
+  notification
+};
+}
 
     class SmartObjectConvertionTimeTest : public ::testing::Test
     {
-
-    public:
-        enum eTestType {
-                APPLICATION_NOT_REGISTERED = 0,
-                SUCCESS,
-                TOO_MANY_PENDING_REQUESTS,
-                REJECTED,
-                INVALID_DATA,
-                OUT_OF_MEMORY,
-                ABORTED,
-                USER_DISALLOWED,
-                GENERIC_ERROR,
-                DISALLOWED
-            };
-
-        enum eFunctionIdTest
-        {
-            RegisterAppInterface,
-            UnregisterAppInterface,
-            SetGlobalProperties,
-        };
-
-        enum eMessageTypeTest
-        {
-            request,
-            response,
-            notification
-        };
-
     protected:
 
         double getConvertionTimeToJsonV2Format(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & srcObj
@@ -120,7 +127,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
             // JSON --> SmartObjects
             NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
-                fromString<eFunctionIdTest, eMessageTypeTest>(jsonString, dstObj, RegisterAppInterface, request, 13);
+                fromString<FunctionIdTest::eType, MessageTypeTest::eType>(jsonString, dstObj, FunctionIdTest::RegisterAppInterface, MessageTypeTest::request, 13);
 
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
 
@@ -160,7 +167,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
             // JSON --> SmartObjects
-            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv1::fromString<eFunctionIdTest, eMessageTypeTest>(jsonString, dstObj);
+            NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv1::fromString<FunctionIdTest::eType, MessageTypeTest::eType>(jsonString, dstObj);
 
             clock_gettime(CLOCK_REALTIME, &convertionEndTime);
 
@@ -236,21 +243,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         // The basic Schema just for enum conversion (FunctionId and MessageType)
         NsSmartDeviceLink::NsSmartObjects::CSmartSchema initBasicObjectSchema(void)
         {
-            std::set<eFunctionIdTest> functionId_allowedEnumSubsetValues;
-            functionId_allowedEnumSubsetValues.insert(RegisterAppInterface);
-            functionId_allowedEnumSubsetValues.insert(UnregisterAppInterface);
-            functionId_allowedEnumSubsetValues.insert(SetGlobalProperties);
+            std::set<FunctionIdTest::eType> functionId_allowedEnumSubsetValues;
+            functionId_allowedEnumSubsetValues.insert(FunctionIdTest::RegisterAppInterface);
+            functionId_allowedEnumSubsetValues.insert(FunctionIdTest::UnregisterAppInterface);
+            functionId_allowedEnumSubsetValues.insert(FunctionIdTest::SetGlobalProperties);
 
-            std::set<eMessageTypeTest> messageType_allowedEnumSubsetValues;
-            messageType_allowedEnumSubsetValues.insert(request);
-            messageType_allowedEnumSubsetValues.insert(response);
-            messageType_allowedEnumSubsetValues.insert(notification);
+            std::set<MessageTypeTest::eType> messageType_allowedEnumSubsetValues;
+            messageType_allowedEnumSubsetValues.insert(MessageTypeTest::request);
+            messageType_allowedEnumSubsetValues.insert(MessageTypeTest::response);
+            messageType_allowedEnumSubsetValues.insert(MessageTypeTest::notification);
 
             NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> functionId_SchemaItem =
-                    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eFunctionIdTest>::create(functionId_allowedEnumSubsetValues);
+                    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionIdTest::eType>::create(functionId_allowedEnumSubsetValues);
 
             NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> messageType_SchemaItem =
-                    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eMessageTypeTest>::create(messageType_allowedEnumSubsetValues);
+                    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<MessageTypeTest::eType>::create(messageType_allowedEnumSubsetValues);
 
             std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> paramsMembersMap;
             paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(functionId_SchemaItem, true);
@@ -265,34 +272,34 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         //Create SmartObjectSchema for test object
         NsSmartDeviceLink::NsSmartObjects::CSmartSchema initObjectSchema(void)
         {
-            std::set<eTestType> resultCode_allowedEnumSubsetValues;
-            resultCode_allowedEnumSubsetValues.insert(APPLICATION_NOT_REGISTERED);
-            resultCode_allowedEnumSubsetValues.insert(SUCCESS);
-            resultCode_allowedEnumSubsetValues.insert(TOO_MANY_PENDING_REQUESTS);
-            resultCode_allowedEnumSubsetValues.insert(REJECTED);
-            resultCode_allowedEnumSubsetValues.insert(INVALID_DATA);
-            resultCode_allowedEnumSubsetValues.insert(OUT_OF_MEMORY);
-            resultCode_allowedEnumSubsetValues.insert(ABORTED);
-            resultCode_allowedEnumSubsetValues.insert(USER_DISALLOWED);
-            resultCode_allowedEnumSubsetValues.insert(GENERIC_ERROR);
-            resultCode_allowedEnumSubsetValues.insert(DISALLOWED);
+            std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
+            resultCode_allowedEnumSubsetValues.insert(TestType::APPLICATION_NOT_REGISTERED);
+            resultCode_allowedEnumSubsetValues.insert(TestType::SUCCESS);
+            resultCode_allowedEnumSubsetValues.insert(TestType::TOO_MANY_PENDING_REQUESTS);
+            resultCode_allowedEnumSubsetValues.insert(TestType::REJECTED);
+            resultCode_allowedEnumSubsetValues.insert(TestType::INVALID_DATA);
+            resultCode_allowedEnumSubsetValues.insert(TestType::OUT_OF_MEMORY);
+            resultCode_allowedEnumSubsetValues.insert(TestType::ABORTED);
+            resultCode_allowedEnumSubsetValues.insert(TestType::USER_DISALLOWED);
+            resultCode_allowedEnumSubsetValues.insert(TestType::GENERIC_ERROR);
+            resultCode_allowedEnumSubsetValues.insert(TestType::DISALLOWED);
 
-            std::set<eFunctionIdTest> functionId_allowedEnumSubsetValues;
-            functionId_allowedEnumSubsetValues.insert(RegisterAppInterface);
-            functionId_allowedEnumSubsetValues.insert(UnregisterAppInterface);
-            functionId_allowedEnumSubsetValues.insert(SetGlobalProperties);
+            std::set<FunctionIdTest::eType> functionId_allowedEnumSubsetValues;
+            functionId_allowedEnumSubsetValues.insert(FunctionIdTest::RegisterAppInterface);
+            functionId_allowedEnumSubsetValues.insert(FunctionIdTest::UnregisterAppInterface);
+            functionId_allowedEnumSubsetValues.insert(FunctionIdTest::SetGlobalProperties);
 
-            std::set<eMessageTypeTest> messageType_allowedEnumSubsetValues;
-            messageType_allowedEnumSubsetValues.insert(request);
-            messageType_allowedEnumSubsetValues.insert(response);
-            messageType_allowedEnumSubsetValues.insert(notification);
+            std::set<MessageTypeTest::eType> messageType_allowedEnumSubsetValues;
+            messageType_allowedEnumSubsetValues.insert(MessageTypeTest::request);
+            messageType_allowedEnumSubsetValues.insert(MessageTypeTest::response);
+            messageType_allowedEnumSubsetValues.insert(MessageTypeTest::notification);
 
             NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> success_SchemaItem =
                 NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>());
 
             utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem =
-                NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues
-                    , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<eTestType>());
+                NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues
+                    , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<TestType::eType>());
 
             utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
                 NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(1000)
@@ -311,8 +318,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             schemaMembersMap["tryAgainTime"] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(tryAgainTime_SchemaItem, true);
 
             std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> paramsMembersMap;
-            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eFunctionIdTest>::create(functionId_allowedEnumSubsetValues), true);
-            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<eMessageTypeTest>::create(messageType_allowedEnumSubsetValues), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionIdTest::eType>::create(functionId_allowedEnumSubsetValues), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<MessageTypeTest::eType>::create(messageType_allowedEnumSubsetValues), true);
             paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(), true);
             paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(1, 2), true);
             paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember(NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(), true);
@@ -333,8 +340,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj.setSchema(schema);
         dstObj.setSchema(schema);
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
@@ -352,8 +359,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj.setSchema(schema);
         dstObj.setSchema(schema);
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -375,8 +382,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj.setSchema(schema);
         dstObj.setSchema(schema);
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -416,8 +423,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         mapObj["response"]["id"] = 456;
         mapObj["we"]["need"]["to"]["go"]["deeper"] = true;
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -472,8 +479,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             arrayObj[i] = rand();
         }
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -490,8 +497,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             arrayObj[i] = innerObj;
         }
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -508,8 +515,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             arrayObj[i] = innerObj;
         }
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -526,8 +533,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             arrayObj[i] = innerObj;
         }
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -544,8 +551,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             arrayObj[i] = innerObj;
         }
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -563,8 +570,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj.setSchema(schema);
         dstObj.setSchema(schema);
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -586,8 +593,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj.setSchema(schema);
         dstObj.setSchema(schema);
 
-        srcObj[S_PARAMS][S_MESSAGE_TYPE] = request;
-        srcObj[S_PARAMS][S_FUNCTION_ID] = RegisterAppInterface;
+        srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+        srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
         srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
         srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -604,25 +611,25 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
 namespace NsSmartDeviceLink { namespace NsSmartObjects {
     template<>
-    const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType
-        ,std::string> & TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType
+        ,std::string> & TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType
+        static std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType
             ,std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::SUCCESS, "SUCCESS"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::REJECTED, "REJECTED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::INVALID_DATA, "INVALID_DATA"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::ABORTED, "ABORTED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::USER_DISALLOWED, "USER_DISALLOWED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::GENERIC_ERROR, "GENERIC_ERROR"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eTestType::DISALLOWED, "DISALLOWED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::SUCCESS, "SUCCESS"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::REJECTED, "REJECTED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::INVALID_DATA, "INVALID_DATA"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::ABORTED, "ABORTED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::USER_DISALLOWED, "USER_DISALLOWED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::GENERIC_ERROR, "GENERIC_ERROR"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::DISALLOWED, "DISALLOWED"));
 
             isInitialized = true;
         }
@@ -630,17 +637,17 @@ namespace NsSmartDeviceLink { namespace NsSmartObjects {
     }
 
     template <>
-    const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eFunctionIdTest, std::string> &
-    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eFunctionIdTest>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eFunctionIdTest, std::string> enumStringRepresentationMap;
+        static std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType, std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::RegisterAppInterface, "RegisterAppInterface"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::UnregisterAppInterface, "UnregisterAppInterface"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::SetGlobalProperties, "SetGlobalProperties"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::RegisterAppInterface, "RegisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::UnregisterAppInterface, "UnregisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::SetGlobalProperties, "SetGlobalProperties"));
 
             isInitialized = true;
         }
@@ -649,17 +656,17 @@ namespace NsSmartDeviceLink { namespace NsSmartObjects {
     }
 
     template <>
-    const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eMessageTypeTest, std::string> &
-    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eMessageTypeTest>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::eMessageTypeTest, std::string> enumStringRepresentationMap;
+        static std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType, std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::request, "request"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::response, "response"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::SmartObjectConvertionTimeTest::notification, "notification"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::request, "request"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::response, "response"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::notification, "notification"));
 
             isInitialized = true;
         }
