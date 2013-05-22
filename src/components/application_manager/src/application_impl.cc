@@ -100,6 +100,36 @@ ApplicationImpl::~ApplicationImpl() {
     delete vr_help_;
     vr_help_ = NULL;
   }
+
+  if (main_field_1_) {
+    delete main_field_1_;
+    main_field_1_ = NULL;
+  }
+
+  if (main_field_2_) {
+    delete main_field_2_;
+    main_field_2_ = NULL;
+  }
+
+  if (alignment_) {
+    delete alignment_;
+    alignment_ = NULL;
+  }
+
+  if (status_bar_) {
+    delete status_bar_;
+    status_bar_ = NULL;
+  }
+
+  if (media_clock_) {
+    delete media_clock_;
+    media_clock_ = NULL;
+  }
+
+  if (media_track_) {
+    delete media_track_;
+    media_track_ = NULL;
+  }
 }
 
 void ApplicationImpl::processMessage(smart_objects::CSmartObject * message) {
@@ -282,6 +312,48 @@ void ApplicationImpl::set_vr_help(
   if (vr_help_)
     delete vr_help_;
   vr_help_ = new smart_objects::CSmartObject(vr_help);
+}
+
+void ApplicationImpl::set_main_field_1(
+    const smart_objects::CSmartObject & main_field_1) {
+  if (main_field_1_)
+    delete main_field_1_;
+  main_field_1_ = new smart_objects::CSmartObject(main_field_1);
+}
+
+void ApplicationImpl::set_main_field_2(
+    const smart_objects::CSmartObject & main_field_2) {
+  if (main_field_2_)
+      delete main_field_2_;
+  main_field_2_ = new smart_objects::CSmartObject(main_field_2);
+}
+
+void ApplicationImpl::set_alignment(
+    const smart_objects::CSmartObject & alignment) {
+  if (alignment_)
+      delete alignment_;
+  alignment_ = new smart_objects::CSmartObject(alignment);
+}
+
+void ApplicationImpl::set_status_bar(
+    const smart_objects::CSmartObject & status_bar) {
+  if (status_bar_)
+    delete status_bar_;
+  status_bar_ = new smart_objects::CSmartObject(status_bar);
+}
+
+void ApplicationImpl::set_media_clock(
+    const smart_objects::CSmartObject & media_clock) {
+  if (media_clock_)
+    delete media_clock_;
+  media_clock_ = new smart_objects::CSmartObject(media_clock);
+}
+
+void ApplicationImpl::set_media_track(
+    const smart_objects::CSmartObject & media_track) {
+  if (media_track_)
+    delete media_track_;
+  media_track_ = new smart_objects::CSmartObject(media_track);
 }
 
 }  // namespace application_manager

@@ -65,6 +65,12 @@ const char help_promt[] = "helpPrompt";
 const char timeout_promt[] = "timeoutPrompt";
 const char vr_help_title[] = "vrHelpTitle";
 const char vr_help[] = "vrHelp";
+const char main_field_1[] = "mainField1";
+const char main_field_2[] = "mainField2";
+const char alignment[] = "alignment";
+const char status_bar[] = "statusBar";
+const char media_clock[] = "media_clock";
+const char media_track[] = "media_track";
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 
