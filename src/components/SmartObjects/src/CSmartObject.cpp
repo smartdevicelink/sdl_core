@@ -74,6 +74,14 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(SmartType Type)
         case SmartType_String :
             set_value_string("");
             break;
+        case SmartType_Map :
+          m_data.map_value = new SmartMap();
+          m_type = SmartType_Map;
+          break;
+        case SmartType_Array:
+          m_data.array_value = new SmartArray();
+          m_type = SmartType_Array;
+          break;
         case SmartType_Binary :
             set_value_binary(SmartBinary());
             break;

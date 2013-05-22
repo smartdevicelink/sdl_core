@@ -41,6 +41,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_simple_type_can_be_set_in_constructor, test_SmartObjectInvalidTest)
     {
+      CSmartObject objMap(SmartType_Map);
+      ASSERT_EQ(SmartType_Map, objMap.getType());
+
+      CSmartObject objArray(SmartType_Array);
+      ASSERT_EQ(SmartType_Array, objArray.getType());
+        
         CSmartObject objInt(SmartType_Integer);
         ASSERT_EQ(SmartType_Integer, objInt.getType());
 
@@ -67,15 +73,6 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         CSmartObject objNullDefault;
         ASSERT_EQ(SmartType_Null, objNullDefault.getType());
-    }
-
-    TEST(test_some_types_cannot_be_set_in_constructor, test_SmartObjectInvalidTest)
-    {
-        CSmartObject objMap(SmartType_Map);
-        ASSERT_EQ(SmartType_Null, objMap.getType());
-
-        CSmartObject objArray(SmartType_Array);
-        ASSERT_EQ(SmartType_Null, objArray.getType());
     }
 
     TEST(test_invalid_object_remains_invalid, test_SmartObjectInvalidTest)

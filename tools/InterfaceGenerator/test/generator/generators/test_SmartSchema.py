@@ -63,73 +63,69 @@ name1 = 1,
  */
 internal_name2"""
 
-expected_result_enum1 = u"""namespace Enum1
-{
+expected_result_enum1 = u"""namespace Enum1 {
+  /**
+   * @brief Enumeration Enum1.
+   *
+   * @todo Do1
+   * @todo Do2
+   */
+  enum eType {
     /**
-     * @brief Enumeration Enum1.
+     * @brief INVALID_ENUM.
+     */
+    INVALID_ENUM = -1,
+
+    /**
+     * @brief name1.
+     *
+     * Design Line1
      *
      * @todo Do1
      * @todo Do2
      */
-    enum eType
-    {
-        /**
-         * @brief INVALID_ENUM.
-         */
-        INVALID_ENUM = -1,
+    name1 = 1,
 
-        /**
-         * @brief name1.
-         *
-         * Design Line1
-         *
-         * @todo Do1
-         * @todo Do2
-         */
-        name1 = 1,
-
-        /**
-         * @brief internal_name2.
-         *
-         * Description Line1
-         * Description Line2
-         *
-         * @note Issue1
-         * @note Issue2
-         * @note Issue3
-         */
-        internal_name2
-    };
+    /**
+     * @brief internal_name2.
+     *
+     * Description Line1
+     * Description Line2
+     *
+     * @note Issue1
+     * @note Issue2
+     * @note Issue3
+     */
+    internal_name2
+  };
 }
 """
 
-expected_result_enum2 = u"""namespace E2
-{
+expected_result_enum2 = u"""namespace E2 {
+  /**
+   * @brief Enumeration E2.
+   */
+  enum eType {
     /**
-     * @brief Enumeration E2.
+     * @brief INVALID_ENUM.
      */
-    enum eType
-    {
-        /**
-         * @brief INVALID_ENUM.
-         */
-        INVALID_ENUM = -1,
+    INVALID_ENUM = -1,
 
-        /**
-         * @brief val_1.
-         */
-        val_1,
+    /**
+     * @brief val_1.
+     */
+    val_1,
 
-        /**
-         * @brief val_2.
-         */
-        val_2 = 100,
+    /**
+     * @brief val_2.
+     */
+    val_2 = 100,
 
-        /**
-         * @brief val_3.
-         */
-        val_3
-    };
+    /**
+     * @brief val_3.
+     */
+    val_3
+  };
 }
 """
 
@@ -163,8 +159,7 @@ class TestSmartSchema(unittest.TestCase):
         enum_element1 = Model.EnumElement(name=u"Element1",
                                           internal_name=u"InternalName",
                                           value=u"10")
-        print expected_result_enum_element1
-        print generator._gen_enum_element(enum_element1)
+
         self.assertEqual(generator._gen_enum_element(enum_element1),
                          expected_result_enum_element1,
                          "Short commented enum element with internal name is invalid")
@@ -225,7 +220,8 @@ class TestSmartSchema(unittest.TestCase):
                          expected_result_enum2,
                          "Long enum is invalid")
 
-        self.assertEqual(generator._gen_enums([enum1, enum2]),
+        print generator._gen_enums([enum1, enum2], collections.OrderedDict())
+        self.assertEqual(generator._gen_enums([enum1, enum2], collections.OrderedDict()),
                          u"{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
                          , "Generated enums are invalid")
 
@@ -371,10 +367,10 @@ class TestSmartSchema(unittest.TestCase):
                                     params={"param1" : "value1",
                                             "param2" : "value2"})
 
-        # generator.generate(interface=interface,
-        #                    filename="Test.xml",
-        #                    namespace="XXX::YYY::ZZZ",
-        #                    destination_dir="/home/eftin/gen_test")
+        generator.generate(interface=interface,
+                            filename="Test.xml",
+                            namespace="XXX::YYY::ZZZ",
+                            destination_dir="/home/eftin/gen_test")
 
 if __name__ == '__main__':
     unittest.main()

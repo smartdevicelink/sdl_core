@@ -148,6 +148,183 @@ namespace test { namespace components { namespace json_handler { namespace smart
 
         std::cout<<outputJsonString<<std::endl;
     }
+
+    TEST(test_general, test_AttachSchema) {
+      CSmartObject object(SmartType_Map);
+      test_JSONHandler_v4_protocol_v2_0_revP factory;
+
+      ASSERT_FALSE(factory.AttachSchema(StructIdentifiers::INVALID_ENUM,
+                                       object));
+      
+      ASSERT_TRUE(factory.AttachSchema(StructIdentifiers::TextField,
+                                       object));
+
+      // Valid TextField object
+      object["name"] = TextFieldName::mainField1;
+      object["characterSet"] = CharacterSet::TYPE2SET;
+      object["width"] = 100;
+      object["rows"] = 2;
+
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
+                object.isValid());
+
+      // Invalid value range for TextField
+      object["rows"] = 20;
+
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
+                object.isValid());
+
+      object["rows"] = 2;
+      // Add unexpected field
+      object["xxx"] = 1234;
+
+      ASSERT_EQ(
+          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
+          object.isValid());
+    }
+    
+    TEST(test_general, test_SmartObjectCreation) {
+      test_JSONHandler_v4_protocol_v2_0_revP factory;
+
+      CSmartObject object = factory.CreateSmartObject(
+          StructIdentifiers::INVALID_ENUM);
+
+      ASSERT_EQ(SmartType_Null, object.getType());
+
+      object = factory.CreateSmartObject(
+          FunctionID::INVALID_ENUM,
+          messageType::INVALID_ENUM);
+
+      ASSERT_EQ(SmartType_Null, object.getType());
+
+      object = factory.CreateSmartObject(
+          FunctionID::RegisterAppInterfaceID,
+          messageType::INVALID_ENUM);
+
+      ASSERT_EQ(SmartType_Null, object.getType());
+      
+      object = factory.CreateSmartObject(
+          FunctionID::INVALID_ENUM,
+          messageType::response);
+
+      ASSERT_EQ(SmartType_Null, object.getType());
+
+      object = factory.CreateSmartObject(StructIdentifiers::Image);
+
+      ASSERT_EQ(SmartType_Map, object.getType());
+
+      object["value"] = "xxx";
+      object["imageType"] = ImageType::STATIC;
+
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
+                object.isValid());
+
+      object["zzz"] = "yyy";
+
+      ASSERT_EQ(
+          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
+          object.isValid());
+
+      object = factory.CreateSmartObject(FunctionID::AddSubMenuID,
+                                         messageType::request);
+
+      object[S_PARAMS][S_FUNCTION_ID] = FunctionID::AddSubMenuID;
+      object[S_PARAMS][S_MESSAGE_TYPE] = messageType::request;
+      object[S_PARAMS][S_CORRELATION_ID] = 0;
+      object[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+      object[S_PARAMS][S_PROTOCOL_TYPE] = 111;
+      object[S_MSG_PARAMS]["menuID"] = 10;
+      object[S_MSG_PARAMS]["position"] = 20;
+      object[S_MSG_PARAMS]["menuName"] = "MenuItem";
+      
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
+                object.isValid());
+
+      object[S_PARAMS][S_PROTOCOL_VERSION] = 200;
+
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
+          object.isValid());
+
+      object[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+      object[S_MSG_PARAMS]["Noise"] = "Bzzzzzz!!!";      
+      
+      ASSERT_EQ(
+          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
+          object.isValid());
+    }
+
+    TEST(test_general, test_GetSmartSchema) {
+      test_JSONHandler_v4_protocol_v2_0_revP factory;
+
+      CSmartSchema schema;
+      ASSERT_FALSE(factory.GetSchema(StructIdentifiers::INVALID_ENUM,
+                                    schema));
+
+      ASSERT_FALSE(factory.GetSchema(FunctionID::INVALID_ENUM,
+                                    messageType::INVALID_ENUM,
+                                    schema));
+
+      ASSERT_FALSE(factory.GetSchema(FunctionID::RegisterAppInterfaceID,
+                                    messageType::INVALID_ENUM,
+                                    schema));
+
+      ASSERT_FALSE(factory.GetSchema(FunctionID::INVALID_ENUM,
+                                    messageType::response,
+                                    schema));
+
+      ASSERT_TRUE(factory.GetSchema(StructIdentifiers::SyncMsgVersion,
+                                    schema));
+      
+      CSmartObject object(SmartType_Map);      
+      object.setSchema(schema);
+
+      object["majorVersion"] = 1;
+      object["minorVersion"] = 2;
+
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
+                object.isValid());
+
+      object["majorVersion"] = 1000;
+
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
+                object.isValid());
+
+      object["majorVersion"] = 1;
+      object["zzzz"] = 200;
+
+      ASSERT_EQ(
+          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
+          object.isValid());
+
+      ASSERT_TRUE(factory.GetSchema(FunctionID::UnregisterAppInterfaceID,
+                                    messageType::request,
+                                    schema));
+
+      object = CSmartObject(SmartType_Map);
+      object.setSchema(schema);
+
+      object[S_PARAMS][S_FUNCTION_ID] = FunctionID::UnregisterAppInterfaceID;
+      object[S_PARAMS][S_MESSAGE_TYPE] = messageType::request;
+      object[S_PARAMS][S_CORRELATION_ID] = 22;
+      object[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+      object[S_PARAMS][S_PROTOCOL_TYPE] = 1;
+      object[S_MSG_PARAMS] = CSmartObject(SmartType_Map);
+
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
+                object.isValid());
+
+      object[S_PARAMS][S_PROTOCOL_VERSION] = 100;
+      
+      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
+          object.isValid());
+
+      object[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+      object[S_PARAMS]["blah-blah"] = "YouShallNotPass!";
+
+      ASSERT_EQ(
+          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
+          object.isValid());
+    }
 }}}}
 
 #endif  // TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_SMART_SCHEMA_DRAFT_TEST_H_

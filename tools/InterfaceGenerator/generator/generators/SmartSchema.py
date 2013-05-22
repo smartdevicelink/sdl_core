@@ -5,10 +5,11 @@ Generator for SmartObjects schema source code.
 """
 # pylint: disable=W0402
 # pylint: disable=C0302
+import codecs
+import collections
 import os
 import string
 import uuid
-import codecs
 
 from generator import Model
 
@@ -92,8 +93,11 @@ class SmartSchema(object):
                 class_name=class_name,
                 guard=guard,
                 namespace_open=namespace_open,
-                enums_content=self._indent_code(self._gen_enums(
-                    interface.enums.values()), indent_level),
+                enums_content=self._indent_code(
+                    self._gen_enums(
+                        interface.enums.values(),
+                        interface.structs.values()),
+                    indent_level),
                 class_content=self._indent_code(self._gen_hpp_class(
                     class_name,
                     interface.params,
@@ -259,7 +263,7 @@ class SmartSchema(object):
             raise GenerateError("Structs is None")
 
         return u"\n".join([self._indent_code(
-            self._gen_struct_decl(x), 1) for x in structs])
+            self._gen_struct_decl(x), 2) for x in structs])
 
     def _gen_struct_decl(self, struct):
         """Generate method prototype for struct for header file.
@@ -297,7 +301,7 @@ class SmartSchema(object):
             raise GenerateError("Functions is None")
 
         return u"\n".join([self._indent_code(
-            self._gen_function_decl(x), 1) for x in functions])
+            self._gen_function_decl(x), 2) for x in functions])
 
     def _gen_function_decl(self, function):
         """Generate method prototype for function for header file.
@@ -356,7 +360,7 @@ class SmartSchema(object):
         for member in struct.members.values():
             self._process_struct_member(member)
 
-        self._structs_add_code = u"".join(
+        self._structs_add_code = u"\n".join(
             [self._structs_add_code, self._indent_code(
                 self._gen_struct_schema_item(struct), 1)])
         self._generated_structs.append(struct.name)
@@ -849,7 +853,7 @@ class SmartSchema(object):
                         function.params.values())),
                 1))
 
-    def _gen_enums(self, enums):
+    def _gen_enums(self, enums, structs):
         """Generate enums for header file.
 
         Generates declaration of enumerations for the header file.
@@ -864,6 +868,20 @@ class SmartSchema(object):
 
         if enums is None:
             raise GenerateError("Enums is None")
+
+        if structs is None:
+            raise GenerateError("Structs is None")
+
+        if structs:
+            struct_id_enum_elements = collections.OrderedDict()
+            for struct in structs:
+                struct_id_enum_elements[struct.name] = Model.EnumElement(
+                    name=struct.name)
+            return u"\n".join(
+                [self._gen_enum(
+                    Model.Enum(name="StructIdentifiers",
+                               elements=struct_id_enum_elements)),
+                 u"\n".join([self._gen_enum(x) for x in enums])])
 
         return u"\n".join([self._gen_enum(x) for x in enums])
 
@@ -952,7 +970,7 @@ class SmartSchema(object):
 
         return self._class_comment_template.substitute(
             class_name=class_name,
-            class_params="".join(
+            class_params=u"".join(
                 [u" *     {0} - {1}\n".format(x[0],
                  x[1]) for x in params.items()])
             if params else u" *    none\n")
@@ -1199,8 +1217,7 @@ class SmartSchema(object):
         u'''\n\n''')
 
     _namespace_open_template = string.Template(
-        u'''namespace $name\n'''
-        u'''{''')
+        u'''namespace $name {''')
 
     _cpp_file_template = string.Template(
         u'''/**\n'''
@@ -1275,67 +1292,61 @@ class SmartSchema(object):
         u'''using namespace NsSmartDeviceLink::NsSmartObjects;\n'''
         u'''\n'''
         u'''$namespace::$class_name::$class_name()\n'''
-        u''' : CSmartFactory<FunctionID::eType, messageType::eType>()\n'''
-        u'''{\n'''
-        u'''    TStructsSchemaItems structsSchemaItems;\n'''
-        u'''    initStructSchemaItems(structsSchemaItems);\n'''
+        u''' : CSmartFactory<FunctionID::eType, '''
+        u'''messageType::eType, StructIdentifiers::eType>() {\n'''
+        u'''  TStructsSchemaItems struct_schema_items;\n'''
+        u'''  InitStructSchemes(struct_schema_items);\n'''
         u'''\n'''
-        u'''    std::set<FunctionID::eType> FunctionIDItems;\n'''
+        u'''  std::set<FunctionID::eType> FunctionIDItems;\n'''
         u'''${function_id_items}'''
         u'''\n'''
-        u'''    std::set<messageType::eType> MessageTypeItems;\n'''
+        u'''  std::set<messageType::eType> MessageTypeItems;\n'''
         u'''${message_type_items}'''
         u'''\n'''
-        u'''    initSchemas(structsSchemaItems, '''
-        u'''FunctionIDItems, MessageTypeItems);\n'''
+        u'''  InitFunctionSchemes(struct_schema_items, FunctionIDItems, '''
+        u'''MessageTypeItems);\n'''
         u'''}\n'''
         u'''\n'''
         u'''utils::SharedPtr<ISchemaItem> $namespace::$class_name::'''
-        u'''provideObjectSchemaItemForStruct('''
-        u'''const TStructsSchemaItems & StructsSchemaItems, '''
-        u'''const std::string & StructName)\n'''
-        u'''{\n'''
-        u'''    const TStructsSchemaItems::const_iterator it = '''
-        u'''StructsSchemaItems.find(StructName);\n'''
-        u'''    if (it != StructsSchemaItems.end())\n'''
-        u'''    {\n'''
-        u'''        return it->second;\n'''
-        u'''    }\n'''
+        u'''ProvideObjectSchemaItemForStruct('''
+        u'''const TStructsSchemaItems & struct_schema_items, '''
+        u'''const StructIdentifiers::eType struct_id) {\n'''
+        u'''  const TStructsSchemaItems::const_iterator it = '''
+        u'''struct_schema_items.find(struct_id);\n'''
+        u'''  if (it != struct_schema_items.end()) {\n'''
+        u'''    return it->second;\n'''
+        u'''  }\n'''
         u'''\n'''
-        u'''    return NsSmartDeviceLink::NsSmartObjects::'''
+        u'''  return NsSmartDeviceLink::NsSmartObjects::'''
         u'''CAlwaysFalseSchemaItem::create();\n'''
         u'''}\n'''
         u'''\n'''
-        u'''void $namespace::$class_name::initStructSchemaItems('''
-        u'''TStructsSchemaItems & StructsSchemaItems)\n'''
-        u'''{\n'''
+        u'''void $namespace::$class_name::InitStructSchemes('''
+        u'''TStructsSchemaItems & struct_schema_items) {'''
         u'''$struct_schema_items'''
         u'''}\n'''
         u'''\n'''
-        u'''void $namespace::$class_name::initSchemas(TStructsSchemaItems & '''
-        u'''StructsSchemaItems, '''
+        u'''void $namespace::$class_name::InitFunctionSchemes('''
+        u'''const TStructsSchemaItems & struct_schema_items, '''
         u'''const std::set<FunctionID::eType> & FunctionIDItems, '''
-        u'''const std::set<messageType::eType> & MessageTypeItems)\n'''
-        u'''{\n'''
+        u'''const std::set<messageType::eType> & MessageTypeItems) {\n'''
         u'''$function_schemas'''
         u'''}\n'''
         u'''\n'''
-        u'''//------------- Functions schema initialization --------------\n'''
+        u'''//------------- Functions schemes initialization -------------\n'''
         u'''\n'''
         u'''$init_function_impls'''
         u'''\n'''
-        u'''//---------- Structs schema items initialization -------------\n'''
+        u'''//----------- Structs schema items initialization ------------\n'''
         u'''\n'''
         u'''$init_structs_impls'''
         u'''\n'''
-        u'''//---------- Structs schema items initialization -------------\n'''
+        u'''//-------------- String to value enum mapping ----------------\n'''
         u'''\n'''
-        u'''namespace NsSmartDeviceLink\n'''
-        u'''{\n'''
-        u'''    namespace NsSmartObjects\n'''
-        u'''    {\n'''
+        u'''namespace NsSmartDeviceLink {\n'''
+        u'''  namespace NsSmartObjects {\n'''
         u'''$enum_string_coversions'''
-        u'''    }\n'''
+        u'''  }\n'''
         u'''}\n'''
         u'''\n''')
 
@@ -1364,23 +1375,26 @@ class SmartSchema(object):
         u'''${enum_name}::${enum_value}, "${string}"));''')
 
     _struct_schema_item_template = string.Template(
-        u'''StructsSchemaItems.insert(std::make_pair("${name}", '''
-        u'''initStructSchemaItem_${name}('''
-        u'''StructsSchemaItems)));''')
+        u'''TSharedPtr<ISchemaItem> struct_schema_item_${name} = '''
+        u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
+        u'''struct_schema_items.insert(std::make_pair('''
+        u'''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
+        u'''structs_schemes_.insert(std::make_pair('''
+        u'''StructIdentifiers::${name}, CSmartSchema('''
+        u'''struct_schema_item_${name})));''')
 
     _function_schema_template = string.Template(
-        u'''mSchemas.insert(std::make_pair(NsSmartDeviceLink::'''
+        u'''functions_schemes_.insert(std::make_pair(NsSmartDeviceLink::'''
         u'''NsJSONHandler::'''
         u'''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
         u'''(FunctionID::$function_id, messageType::$message_type), '''
-        u'''initFunction_${function_id}_${message_type}('''
-        u'''StructsSchemaItems, FunctionIDItems, MessageTypeItems)));''')
+        u'''InitFunction_${function_id}_${message_type}('''
+        u'''struct_schema_items, FunctionIDItems, MessageTypeItems)));''')
 
     _struct_impl_template = string.Template(
         u'''utils::SharedPtr<ISchemaItem> $namespace::$class_name::'''
-        u'''initStructSchemaItem_${struct_name}('''
-        u'''TStructsSchemaItems & StructsSchemaItems)\n'''
-        u'''{\n'''
+        u'''InitStructSchemaItem_${struct_name}('''
+        u'''const TStructsSchemaItems & struct_schema_items) {\n'''
         u'''$code'''
         u'''}\n''')
 
@@ -1415,8 +1429,8 @@ class SmartSchema(object):
         u'''CArraySchemaItem::create(${params})''')
 
     _impl_code_struct_item_template = string.Template(
-        u'''provideObjectSchemaItemForStruct('''
-        u'''StructsSchemaItems, "${name}")''')
+        u'''ProvideObjectSchemaItemForStruct(struct_schema_items, '''
+        u'''StructIdentifiers::${name})''')
 
     _impl_code_enum_item_template = string.Template(
         u'''TEnumSchemaItem<${type}::eType>::create(${params})''')
@@ -1430,11 +1444,10 @@ class SmartSchema(object):
 
     _function_impl_template = string.Template(
         u'''CSmartSchema $namespace::$class_name::'''
-        u'''initFunction_${function_id}_${message_type}('''
-        u'''const TStructsSchemaItems & StructsSchemaItems, '''
+        u'''InitFunction_${function_id}_${message_type}('''
+        u'''const TStructsSchemaItems & struct_schema_items, '''
         u'''const std::set<FunctionID::eType> & FunctionIDItems, '''
-        u'''const std::set<messageType::eType> & MessageTypeItems)\n'''
-        u'''{\n'''
+        u'''const std::set<messageType::eType> & MessageTypeItems) {\n'''
         u'''$code'''
         u'''}\n''')
 
@@ -1479,56 +1492,55 @@ class SmartSchema(object):
     _class_hpp_template = string.Template(
         u'''$comment\n'''
         u'''class $class_name : public NsSmartDeviceLink::NsJSONHandler::'''
-        u'''CSmartFactory<FunctionID::eType, messageType::eType>\n'''
-        u'''{\n'''
-        u'''public:\n'''
-        u'''\n'''
+        u'''CSmartFactory<FunctionID::eType, messageType::eType, '''
+        u'''StructIdentifiers::eType> {\n'''
+        u'''  public:\n'''
         u'''    /**\n'''
         u'''     * @brief Constructor.\n'''
         u'''     */\n'''
         u'''    $class_name(void);\n'''
         u'''\n'''
-        u'''protected:\n'''
-        u'''\n'''
+        u'''  protected:\n'''
         u'''    /**\n'''
-        u'''     * @brief Type that maps of struct names to schema items.\n'''
+        u'''     * @brief Type that maps of struct IDs to schema items.\n'''
         u'''     */\n'''
-        u'''    typedef std::map<std::string, '''
+        u'''    typedef std::map<const StructIdentifiers::eType,'''
         u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::'''
         u'''ISchemaItem> > TStructsSchemaItems;\n'''
         u'''\n'''
         u'''    /**\n'''
         u'''     * @brief Helper that allows to make reference to struct\n'''
         u'''     *\n'''
-        u'''     * @param StructName Name of structure to provide.\n'''
+        u'''     * @param struct_schema_items Struct schema items.\n'''
+        u'''     * @param struct_id ID of structure to provide.\n'''
         u'''     *\n'''
         u'''     * @return utils::SharedPtr of strucute\n'''
         u'''     */\n'''
         u'''    static '''
         u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
-        u'''provideObjectSchemaItemForStruct(const TStructsSchemaItems & '''
-        u'''StructsSchemaItems, const std::string & StructName);\n'''
+        u'''ProvideObjectSchemaItemForStruct('''
+        u'''const TStructsSchemaItems & struct_schema_items, '''
+        u'''const StructIdentifiers::eType struct_id);\n'''
         u'''\n'''
         u'''    /**\n'''
-        u'''     * @brief Initializes all struct schema items.\n'''
-        u'''     *\n'''
-        u'''     * @param StructsSchemaItems Map of struct schema items.\n'''
+        u'''     * @brief Initializes all struct schemes.\n'''
         u'''     */\n'''
-        u'''    void initStructSchemaItems(TStructsSchemaItems & '''
-        u'''StructsSchemaItems);\n'''
+        u'''    void InitStructSchemes('''
+        u'''TStructsSchemaItems & struct_schema_items);\n'''
         u'''\n'''
         u'''    /**\n'''
-        u'''     * @brief Initializes all schemas.\n'''
+        u'''     * @brief Initializes all function schemes.\n'''
         u'''     *\n'''
-        u'''     * @param StructsSchemaItems Map of struct schema items.\n'''
-        u'''     * @param FunctionIDItems Set of all elements '''
+        u'''     * @param struct_schema_items Struct schema items.\n'''
+        u'''     * @param function_id_items Set of all elements '''
         u'''of FunctionID enum.\n'''
-        u'''     * @param MessageTypeItems Set of all elements '''
+        u'''     * @param message_type_items Set of all elements '''
         u'''of messageType enum.\n'''
         u'''     */\n'''
-        u'''    void initSchemas(TStructsSchemaItems & StructsSchemaItems, '''
-        u'''const std::set<FunctionID::eType> & FunctionIDItems, '''
-        u'''const std::set<messageType::eType> & MessageTypeItems);\n'''
+        u'''    void InitFunctionSchemes('''
+        u'''const TStructsSchemaItems & struct_schema_items, '''
+        u'''const std::set<FunctionID::eType> & function_id_items, '''
+        u'''const std::set<messageType::eType> & message_type_items);\n'''
         u'''\n'''
         u'''$init_function_decls'''
         u'''\n'''
@@ -1541,8 +1553,8 @@ class SmartSchema(object):
     _function_decl_template = string.Template(
         u'''$comment\n'''
         u'''static NsSmartDeviceLink::NsSmartObjects::CSmartSchema '''
-        u'''initFunction_${function_id}_${message_type}('''
-        u'''const TStructsSchemaItems & StructsSchemaItems, '''
+        u'''InitFunction_${function_id}_${message_type}('''
+        u'''const TStructsSchemaItems & struct_schema_items, '''
         u'''const std::set<FunctionID::eType> & FunctionIDItems, '''
         u'''const std::set<messageType::eType> & MessageTypeItems);''')
 
@@ -1550,8 +1562,8 @@ class SmartSchema(object):
         u'''$comment\n'''
         u'''static '''
         u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
-        u'''initStructSchemaItem_${struct_name}('''
-        u'''TStructsSchemaItems & StructsSchemaItems);''')
+        u'''InitStructSchemaItem_${struct_name}('''
+        u'''const TStructsSchemaItems & struct_schema_items);''')
 
     _class_comment_template = string.Template(
         u'''/**\n'''
@@ -1579,12 +1591,10 @@ class SmartSchema(object):
         u'''$returns''')
 
     _enum_template = string.Template(
-        u'''namespace $name\n'''
-        u'''{\n'''
+        u'''namespace $name {\n'''
         u'''$comment'''
-        u'''    enum eType\n'''
-        u'''    {\n'''
-        u'''$enum_items    };\n'''
+        u'''  enum eType {\n'''
+        u'''$enum_items  };\n'''
         u'''}\n''')
 
     _enum_element_with_value_template = string.Template(
@@ -1595,4 +1605,4 @@ class SmartSchema(object):
         u'''$comment\n'''
         u'''$name''')
 
-    _indent_template = u"    "
+    _indent_template = u"  "
