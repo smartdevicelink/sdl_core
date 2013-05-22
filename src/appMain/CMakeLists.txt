@@ -25,7 +25,7 @@ include_directories (
   ../components/TransportManager/include
   ../components/config_profile/include
   ../components/utils/include/
-  ../components/ConnectionHandler/include/
+  ../components/connection_handler/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
 )

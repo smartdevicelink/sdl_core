@@ -1,7 +1,7 @@
 include_directories (
     ./include/
     ../JSONHandler/include/
-    ../ConnectionHandler/include/
+    ../connection_handler/include/
     ../protocol_handler/include/
     ../TransportManager/include/
     ../utils/include/

@@ -48,17 +48,18 @@ namespace application_manager {
 namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 
 class ApplicationImpl : public Application {
- public:
-  explicit ApplicationImpl(int app_id);
-  ~ApplicationImpl();
+  public:
+    explicit ApplicationImpl(int app_id);
+    ~ApplicationImpl();
 
-  void processMessage(smart_objects::CSmartObject* message);
-  void reportError(smart_objects::CSmartObject* message, ErrorCode error_code);
-  const smart_objects::CSmartObject* activeMessage() const;
-  void clearActiveMessage();
-  const Version& version() const;
-  int app_id() const;
-  const std::string& name() const;
+    void ProcessMessage(smart_objects::CSmartObject* message);
+    void ReportError(smart_objects::CSmartObject* message,
+                     ErrorCode error_code);
+    const smart_objects::CSmartObject* active_message() const;
+    void CloseActiveMessage();
+    const Version& version() const;
+    int app_id() const;
+    const std::string& name() const;
 
   bool is_media_application() const;
   const smart_objects::CSmartObject * app_types() const;
@@ -74,6 +75,7 @@ class ApplicationImpl : public Application {
   const smart_objects::CSmartObject * timeout_promt() const;
   const smart_objects::CSmartObject * vr_help_title() const;
   const smart_objects::CSmartObject * vr_help() const;
+  const smart_objects::CSmartObject * sync_msg_version() const;
 
   void set_version(const Version& version);
   void set_name(const std::string& name);
@@ -97,17 +99,18 @@ class ApplicationImpl : public Application {
   void set_status_bar(const smart_objects::CSmartObject & vr_help);
   void set_media_clock(const smart_objects::CSmartObject & vr_help);
   void set_media_track(const smart_objects::CSmartObject & vr_help);
+  void set_sync_msg_version(const smart_objects::CSmartObject & sync_msg_version);
 
 
- private:
-  Version version_;
-  smart_objects::CSmartObject * active_message_;
-  int app_id_;
-  std::string app_name_;
+  private:
+    Version version_;
+    smart_objects::CSmartObject* active_message_;
+    int app_id_;
+    std::string app_name_;
 
-  bool is_media_;
-  smart_objects::CSmartObject hmi_level_;
-  smart_objects::CSmartObject system_context_;
+    bool is_media_;
+    smart_objects::CSmartObject hmi_level_;
+    smart_objects::CSmartObject system_context_;
 
   smart_objects::CSmartObject language_;
   smart_objects::CSmartObject ui_language_;
@@ -126,6 +129,7 @@ class ApplicationImpl : public Application {
   smart_objects::CSmartObject * status_bar_;
   smart_objects::CSmartObject * media_clock_;
   smart_objects::CSmartObject * media_track_;
+  smart_objects::CSmartObject * sync_msg_version_;
 };
 
 }  // namespace application_manager

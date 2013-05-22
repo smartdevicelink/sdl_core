@@ -29,43 +29,20 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#include "application_manager/commands/unregister_app_interface_command.h"
-#include "application_manager/commands/unregister_app_interface_response_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "v4_protocol_v2_0_revT.h"
 
-namespace application_manager {
+#include "application_manager/commands/register_app_interface_response_command.h"
+#include "application_manager/message_conversion.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
 
-namespace commands {
+namespace application_manager  {
 
-void UnregisterAppInterfaceCommand::Run() {
-<<<<<<< HEAD
-  ApplicationManagerImpl::instance()->UnregisterApplication(
-    ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id]));
-=======
-  ApplicationManagerImpl* application_manager_impl =
-      ApplicationManagerImpl::GetInstance();
-  if (!application_manager_impl->
-      application((*message_)[strings::msg_params][strings::app_id])) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
+namespace commands  {
 
-  if (!application_manager_impl->
-      UnregisterApplication(application_manager_impl->
-      application((*message_)[strings::msg_params][strings::app_id]))) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
-    return;
-  }
-
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
->>>>>>> APPLINK-1213 APPLINK-1214 UnregisterAppInterace command
+void RegisterAppInterfaceResponseCommand::Run()  {
+  SendResponse();
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

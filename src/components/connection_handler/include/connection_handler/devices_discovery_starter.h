@@ -36,11 +36,11 @@
 #ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICES_DISCOVERY_STARTER_H_
 #define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICES_DISCOVERY_STARTER_H_
 
-#include "ConnectionHandler/device.h"
+#include "connection_handler/device.h"
 
 /**
  * \namespace connection_handler
- * \brief SmartDeviceLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
 /**

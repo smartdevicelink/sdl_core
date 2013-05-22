@@ -29,43 +29,44 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#include "application_manager/commands/unregister_app_interface_command.h"
-#include "application_manager/commands/unregister_app_interface_response_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "v4_protocol_v2_0_revT.h"
 
-namespace application_manager {
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNREGISTER_APP_INTERFACE_RESPONSE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNREGISTER_APP_INTERFACE_RESPONSE_COMMAND_H_
 
-namespace commands {
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
-void UnregisterAppInterfaceCommand::Run() {
-<<<<<<< HEAD
-  ApplicationManagerImpl::instance()->UnregisterApplication(
-    ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id]));
-=======
-  ApplicationManagerImpl* application_manager_impl =
-      ApplicationManagerImpl::GetInstance();
-  if (!application_manager_impl->
-      application((*message_)[strings::msg_params][strings::app_id])) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
+namespace application_manager  {
+namespace commands  {
+/**
+  * @brief Unregister app interface request  command class
+**/
+class UnregisterAppInterfaceResponseCommand: public CommandResponseImpl  {
+ public:
+  /**
+   * \brief UnregisterAppInterfaceResponseCommand class constructor
+  **/
+  explicit UnregisterAppInterfaceResponseCommand(const MessageSharedPtr& response)
+    : CommandResponseImpl(response)  {}
 
-  if (!application_manager_impl->
-      UnregisterApplication(application_manager_impl->
-      application((*message_)[strings::msg_params][strings::app_id]))) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
-    return;
-  }
+  /**
+    * \brief UnregisterAppInterfaceResponseCommand class destructor
+  **/
+  virtual ~UnregisterAppInterfaceResponseCommand() {}
 
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
->>>>>>> APPLINK-1213 APPLINK-1214 UnregisterAppInterace command
-}
+  /**
+    * @brief Execute command
+  **/
+  virtual void Run();
+
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UnregisterAppInterfaceResponseCommand);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNREGISTER_APP_INTERFACE_RESPONSE_COMMAND_H_

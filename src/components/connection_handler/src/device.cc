@@ -1,7 +1,6 @@
 /**
- * \file Device.hpp
- * \brief Device class.
- * Stores device information
+ * \file Device.cpp
+ * \brief Device class implementation.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -34,13 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
-
-#include <string>
-#include <map>
-
-#include "utils/logger.h"
+#include "connection_handler/device.h"
 
 /**
  * \namespace connection_handler
@@ -48,67 +41,22 @@
  */
 namespace connection_handler {
 
-/**
- * \brief Type for DeviceHandle
- */
-typedef int DeviceHandle;
+log4cxx::LoggerPtr Device::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ConnectionHandler"));
 
-/**
- * \class Device
- * \brief Connection class
- */
-class Device {
- public:
-  /**
-   * \brief Class constructor
-   */
-  Device(DeviceHandle device_handle, std::string user_friendly_name);
+Device::Device(DeviceHandle device_handle, std::string user_friendly_name)
+    : device_handle_(device_handle),
+      user_friendly_name_(user_friendly_name) {
+}
 
-  /**
-   * \brief Destructor
-   */
-  ~Device();
+Device::~Device() {
+}
 
-  /**
-   * \brief Returns device handle
-   * \return DeviceHandle
-   */
-  DeviceHandle device_handle() const;
+DeviceHandle Device::device_handle() const {
+  return device_handle_;
+}
 
-  /**
-   * \brief Returns user frendly device name
-   * \return UserFriendlyName
-   */
-  std::string user_friendly_name() const;
-
- private:
-  /**
-   * \brief Uniq device handle.
-   */
-  DeviceHandle device_handle_;
-
-  /**
-   * \brief User-friendly device name.
-   */
-  std::string user_friendly_name_;
-
-  /**
-   * \brief For logging.
-   */
-  static log4cxx::LoggerPtr logger_;
-};
-
-/**
- * \brief Type for Devices map
- */
-typedef std::map<int, Device> DeviceList;
-
-/**
- * \brief Type for Devices map iterator
- * Key is DeviceHandle which is uniq
- */
-typedef std::map<int, Device>::iterator DeviceListIterator;
-
+std::string Device::user_friendly_name() const {
+  return user_friendly_name_;
+}
 }/* namespace connection_handler */
-
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_

@@ -41,11 +41,11 @@
 #include <vector>
 
 #include "utils/logger.h"
-#include "ConnectionHandler/device.h"
+#include "connection_handler/device.h"
 
 /**
  * \namespace connection_handler
- * \brief SmartDeviceLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
 

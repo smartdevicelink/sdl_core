@@ -1,6 +1,7 @@
 /**
- * \file ConnectionHandler.hpp
- * \brief Connection handler interface class.
+ * \file Device.hpp
+ * \brief Device class.
+ * Stores device information
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,51 +34,81 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
 
-#include "TransportManager/ITransportManagerDeviceListener.hpp"
-#include "TransportManager/SDeviceInfo.hpp"
-#include "protocol_handler/session_observer.h"
-#include "ConnectionHandler/connection_handler_observer.h"
-#include "ConnectionHandler/device.h"
-#include "ConnectionHandler/connection.h"
-#include "ConnectionHandler/devices_discovery_starter.h"
+#include <string>
+#include <map>
+
+#include "utils/logger.h"
 
 /**
  * \namespace connection_handler
- * \brief SmartDeviceLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
+
 /**
- * \class ConnectionHandler
- * \brief SmartDeviceLink ConnectionHandler interface class
+ * \brief Type for DeviceHandle
  */
-class ConnectionHandler {
+typedef int DeviceHandle;
+
+/**
+ * \class Device
+ * \brief Connection class
+ */
+class Device {
  public:
   /**
-   * \brief Sets observer pointer for ConnectionHandler.
-   * \param observer Pointer to observer object.
-   **/
-  virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver * observer)=0;
+   * \brief Class constructor
+   */
+  Device(DeviceHandle device_handle, std::string user_friendly_name);
 
-  /**
-   * \brief Sets pointer to TransportManager.
-   * \param transportManager Pointer to TransportManager object.
-   **/
-  virtual void set_transport_manager(
-      NsSmartDeviceLink::NsTransportManager::ITransportManager * transport_manager)=0;
-
-  virtual void StartTransportManager() = 0;
-
- protected:
   /**
    * \brief Destructor
    */
-  virtual ~ConnectionHandler() {
-  }
+  ~Device();
+
+  /**
+   * \brief Returns device handle
+   * \return DeviceHandle
+   */
+  DeviceHandle device_handle() const;
+
+  /**
+   * \brief Returns user frendly device name
+   * \return UserFriendlyName
+   */
+  std::string user_friendly_name() const;
+
+ private:
+  /**
+   * \brief Uniq device handle.
+   */
+  DeviceHandle device_handle_;
+
+  /**
+   * \brief User-friendly device name.
+   */
+  std::string user_friendly_name_;
+
+  /**
+   * \brief For logging.
+   */
+  static log4cxx::LoggerPtr logger_;
 };
+
+/**
+ * \brief Type for Devices map
+ */
+typedef std::map<int, Device> DeviceList;
+
+/**
+ * \brief Type for Devices map iterator
+ * Key is DeviceHandle which is uniq
+ */
+typedef std::map<int, Device>::iterator DeviceListIterator;
+
 }/* namespace connection_handler */
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_

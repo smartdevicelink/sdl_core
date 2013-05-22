@@ -41,17 +41,17 @@ namespace hmi_message_handler {
 class HMIMessageAdapter;
 /**
  * \class HMIMessageHandler
- * \brief Abstract class for handling different HMI adapters; 
+ * \brief Abstract class for handling different HMI adapters;
  * establishing interface for message exchange between SDL core and HMI.
 */
 class HMIMessageHandler : public HMIMessageObserver,
-						  public HMIMessageSender {
-public:
-	virtual ~HMIMessageHandler() = 0;
-	virtual void addHMIMessageAdapter(HMIMessageAdapter * adapter) = 0;
-	virtual void removeHMIMessageAdapter(HMIMessageAdapter * adapter) = 0;
+  public HMIMessageSender {
+  public:
+    virtual ~HMIMessageHandler() = 0;
+    virtual void addHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
+    virtual void removeHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
 };
 
-} // namespace hmi_message_handler
+}  // namespace hmi_message_handler
 
 #endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER

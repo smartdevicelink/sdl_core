@@ -1,6 +1,6 @@
 /**
- * \file ConnectionHandlerObserver.hpp
- * \brief ConnectionHandlerObserver class.
+ * \file connection_handlerObserver.hpp
+ * \brief connection_handlerObserver class.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -36,12 +36,12 @@
 #ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_OBSERVER_H_
 #define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_OBSERVER_H_
 
-#include "ConnectionHandler/device.h"
-#include "ConnectionHandler/connection.h"
+#include "connection_handler/device.h"
+#include "connection_handler/connection.h"
 
 /**
  * \namespace connection_handler
- * \brief SmartDeviceLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
 /**
@@ -72,7 +72,7 @@ class ConnectionHandlerObserver {
       const connection_handler::DeviceHandle device_handle) = 0;
 
   /**
-   * \brief Callback function used by ConnectionHandler
+   * \brief Callback function used by connection_handler
    * when Mobile Application initiates start of new session.
    * \param deviceHandle Device identifier within which session has to be started.
    * \param sessionKey Key of started session.
@@ -83,7 +83,7 @@ class ConnectionHandlerObserver {
       int first_session_key) = 0;
 
   /**
-   * \brief Callback function used by ConnectionHandler
+   * \brief Callback function used by connection_handler
    * when Mobile Application initiates session ending.
    * \param sessionKey Key of session which should be ended
    * \param firstSessionKey Session key of first session in this connection

@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER
 
-namespace hmi_message_handler{
+namespace hmi_message_handler {
 
 class HMIMessageObserver {
-public:
-	virtual void onMessageReceived(application_manager::Message * message) = 0;
-	virtual void onErrorSending(application_manager::Message * message) = 0;
+  public:
+    virtual void onMessageReceived(application_manager::Message* message) = 0;
+    virtual void onErrorSending(application_manager::Message* message) = 0;
 };
 }
 

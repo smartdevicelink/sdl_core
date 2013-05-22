@@ -88,7 +88,7 @@ class RawMessage {
  private:
   /**
    * \brief Connection Identifier
-   * Obtained from \saCConnectionHandler
+   * Obtained from \saCconnection_handler
    */
   int connection_key_;
 

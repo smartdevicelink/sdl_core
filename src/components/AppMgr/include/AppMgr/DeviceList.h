@@ -34,7 +34,7 @@
 #define DEVICELIST_H
 
 #include "utils/logger.h"
-#include "ConnectionHandler/device.h"
+#include "connection_handler/device.h"
 #include "utils/logger.h"
 
 namespace NsAppManager

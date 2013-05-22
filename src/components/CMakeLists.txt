@@ -14,7 +14,7 @@ add_subdirectory(./JSONHandler)
 add_subdirectory(./protocol_handler)
 
 # --- ConnectionHandler
-add_subdirectory(./ConnectionHandler)
+add_subdirectory(./connection_handler)
 
 # --- Utils
 add_subdirectory(./utils)
