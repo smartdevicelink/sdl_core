@@ -16,6 +16,7 @@ include_directories (
 set (SOURCES
 ./src/application_manager_impl.cc
 ./src/message.cc
+./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/basic_command_factory.cc
 ./src/commands/command_impl.cc

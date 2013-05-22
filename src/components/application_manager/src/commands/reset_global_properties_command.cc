@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/reset_global_properties_command.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
 #include "utils/logger.h"
@@ -79,10 +80,9 @@ void ResetGlobalPropertiesCommand::Run() {
   const int connectionKey =
       (*message_)[strings::params][strings::connection_key];
 
-  // TODO (DK)
-  /*ApplicationManagerImpl::GetInstance()->AddMessageChain(
+  ApplicationManagerImpl::GetInstance()->AddMessageChain(
       new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId);*/
+      connectionKey, corellationId);
 
     /*(*message_)[strings::msg_params][strings::properties] =
         *app->help_promt();*/

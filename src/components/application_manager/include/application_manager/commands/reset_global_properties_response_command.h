@@ -54,7 +54,7 @@ class ResetGlobalPropertiesResponseCommand : public CommandResponseImpl {
   explicit ResetGlobalPropertiesResponseCommand(const MessageSharedPtr& message);
 
   /**
-   * @brief SetGlobalPropertiesResponseCommand class destructor
+   * @brief ResetGlobalPropertiesResponseCommand class destructor
    **/
   virtual ~ResetGlobalPropertiesResponseCommand();
 
