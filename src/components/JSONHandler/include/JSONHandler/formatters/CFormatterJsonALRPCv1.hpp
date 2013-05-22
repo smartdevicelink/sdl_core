@@ -159,8 +159,9 @@ int Formatters::CFormatterJsonALRPCv1::fromString(const std::string& str,
 
   if (kSuccess == result) {
     type = getMessageType(root);
-    if (true == type.empty())
+    if (true == type.empty()) {
       result = kMessageTypeNotFound | kFunctionIdNotFound | kCorrelationIdNotFound;
+    }
   }
 
   FunctionId functionId;
@@ -190,8 +191,10 @@ int Formatters::CFormatterJsonALRPCv1::fromString(const std::string& str,
     out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
     out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
     if (true == root[type][S_CORRELATION_ID].empty()) {
-      result |= kCorrelationIdNotFound;
-      out[S::S_PARAMS][S::S_CORRELATION_ID] = -1;
+      if (type != S_NOTIFICATION) {   // Notification may not have CorrelationId
+        result |= kCorrelationIdNotFound;
+        out[S::S_PARAMS][S::S_CORRELATION_ID] = -1;
+      }
     } else {
       out[S::S_PARAMS][S::S_CORRELATION_ID] = root[type][S_CORRELATION_ID].asInt();
     }

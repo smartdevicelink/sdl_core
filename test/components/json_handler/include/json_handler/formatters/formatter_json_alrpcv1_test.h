@@ -332,6 +332,52 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_EQ(messageType::response, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
   }
 
+  TEST_F(CFormatterTestHelper, test_ALRPCv1_NotificationCorrelationId)
+  {
+    std::string str1 = "\
+    {\
+        \"notification\": {\
+            \"name\" : \"SetGlobalProperties\",\
+            \"NotACorrelationID\": 10,\
+            \"parameters\": {\
+                \"appName\": \"some app name\"\
+            }\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
+
+    ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
+    ASSERT_FALSE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is set";
+    ASSERT_FALSE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is set";
+    ASSERT_EQ(-1, (int)obj1[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::SetGlobalProperties, (int)obj1[S_PARAMS][S_FUNCTION_ID]);
+    ASSERT_EQ(messageType::notification, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
+
+    std::string str2 = "\
+    {\
+        \"notification\": {\
+            \"name\" : \"UnknownNotification\",\
+            \"parameters\": {\
+                \"appName\": \"some app name\"\
+            }\
+        }\
+    }";
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj2;
+    result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str2, obj2);
+
+    ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
+    ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
+    ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
+    ASSERT_FALSE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is set";
+    ASSERT_EQ(-1, (int)obj2[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::INVALID_ENUM, (int)obj2[S_PARAMS][S_FUNCTION_ID]);
+    ASSERT_EQ(messageType::notification, (int)obj2[S_PARAMS][S_MESSAGE_TYPE]);
+  }
+
 }}}}
 
 namespace NsSmartDeviceLink { namespace NsSmartObjects {
