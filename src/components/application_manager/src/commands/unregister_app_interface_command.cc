@@ -39,8 +39,8 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceCommand::Run() {
-  ApplicationManagerImpl::GetInstance()->UnregisterApplication(
-    ApplicationManagerImpl::GetInstance()->
+  ApplicationManagerImpl::instance()->UnregisterApplication(
+    ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id]));
 }
 

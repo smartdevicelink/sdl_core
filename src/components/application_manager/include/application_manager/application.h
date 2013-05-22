@@ -58,25 +58,46 @@ struct Version {
   APIVersion max_supported_api_version;
 
   Version()
-      : min_supported_api_version(APIVersion::kUnknownAPI),
-        max_supported_api_version(APIVersion::kUnknownAPI) {
+    : min_supported_api_version(APIVersion::kUnknownAPI),
+      max_supported_api_version(APIVersion::kUnknownAPI) {
   }
 };
 
 class Application {
- public:
-  virtual void processMessage(smart_objects::CSmartObject * message) = 0;
-  virtual void reportError(smart_objects::CSmartObject * message,
-                           ErrorCode error_code) = 0;
-  virtual const smart_objects::CSmartObject* activeMessage() const = 0;
-  virtual void clearActiveMessage() = 0;
-  virtual const Version& version() const = 0;
-  virtual int app_id() const = 0;
-  virtual const std::string& name() const = 0;
- protected:
-  virtual ~Application() {
-  }
-  // virtual Command commandFromMessage(smart_objects::CSmartObject * message) = 0;
+  public:
+    /**
+     * @brief Processes received pre-validated message: creates
+     * appropriate command, if required adds to/removes from watchod
+     * and sends to HMI/Mobile side.
+     * @param message Points to message to be processed by Application
+     */
+    virtual void ProcessMessage(smart_objects::CSmartObject* message) = 0;
+
+    /**
+     * @brief Called when on some stage of message processing outside
+     * application error occured to generate command using factory.
+     * @param message Message to be responded with error.
+     * @param error_code Id of error occured.
+     * TODO(PV): should we pass error_code along with possible error_string
+     * in smartObject? If not need to add error_string
+     */
+    virtual void ReportError(smart_objects::CSmartObject* message,
+                             ErrorCode error_code) = 0;
+
+    /**
+     * @brief Returns message belonging to the application
+     * that is currently executed (i.e. on HMI).
+     * @return smart_objects::CSmartObject * Active message
+     */
+    virtual const smart_objects::CSmartObject* active_message() const = 0;
+    virtual void CloseActiveMessage() = 0;
+    virtual const Version& version() const = 0;
+    virtual int app_id() const = 0;
+    virtual const std::string& name() const = 0;
+
+  protected:
+    virtual ~Application() {
+    }
 };
 
 }  // namespace application_manager

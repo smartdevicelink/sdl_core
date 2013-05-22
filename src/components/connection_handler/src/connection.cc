@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-#include "ConnectionHandler/connection.h"
+#include "connection_handler/connection.h"
 
 /**
  * \namespace connection_handler
@@ -44,13 +44,13 @@
 namespace connection_handler {
 
 log4cxx::LoggerPtr Connection::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ConnectionHandler"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ConnectionHandler"));
 
 Connection::Connection(ConnectionHandle connection_handle,
-                         DeviceHandle connection_device_handle)
-    : connection_handle_(connection_handle),
-      connection_device_handle_(connection_device_handle),
-      session_id_counter_(1) {
+                       DeviceHandle connection_device_handle)
+  : connection_handle_(connection_handle),
+    connection_device_handle_(connection_device_handle),
+    session_id_counter_(1) {
 }
 
 Connection::~Connection() {
@@ -95,7 +95,7 @@ DeviceHandle Connection::connection_device_handle() {
   return connection_device_handle_;
 }
 
-void Connection::GetSessionList(SessionList & session_list) {
+void Connection::GetSessionList(SessionList& session_list) {
   session_list = session_list_;
 }
 }/* namespace connection_handler */

@@ -141,6 +141,8 @@ Notifications:
 		This member is REQUIRED.
 		It MUST be the same as the value of the id member in the Request Object.
 		If there was an error in detecting the id in the Request object (e.g. Parse error/Invalid Request), it MUST be Null.
+	* Additions:
+		result MUST contain 'method' which has to be the same as in 'request'.
 
 
 ****/
@@ -163,6 +165,7 @@ Notifications:
 
 	* Additions:
 		result along with error MUST contain 'code' which is value from Result enum provided in HMI_API.xml
+		error MUST contain 'method' which is the same as 'method' in request for this error in field 'data'.
 ****/
 
 //Response with no params in it (code and method are necessary)
@@ -171,7 +174,8 @@ Notifications:
 	"jsonrpc" : "2.0",
 	"result" : 
 	{
-		"code" : 0
+		"code" : 0,
+		"method": "UI.Alert"
 	}
 }
 

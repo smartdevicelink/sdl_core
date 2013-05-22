@@ -63,7 +63,7 @@
 #include "JSONHandler/SDLRPCObjects/V2/AppType.h"
 #include "JSONHandler/SDLRPCObjects/V2/VehicleDataType.h"
 
-#include "ConnectionHandler/connection_handler_impl.h"
+#include "connection_handler/connection_handler_impl.h"
 
 #include "AppMgr/rpc_helper.h"
 #include "AppMgr/audio_pass_thru_thread_impl.h"
@@ -2999,14 +2999,18 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(performAudioPassThru);
                     LOG4CXX_INFO_EXT(logger_, "Request PerformAudioPassThru sent to HMI ...");
 
+                    rpc_commands::AudioPassThruThreadImpl* thread_impl =
+                      new rpc_commands::AudioPassThruThreadImpl(sessionKey,
+                      request->getCorrelationID(),
+                      maxDuration,
+                      samplingRate,
+                      bitsPerSample,
+                      audioType);
+                    thread_impl->Init();
                     core->perform_audio_thread_ = new threads::Thread(
                         "AudioPassThru thread",
-                        new rpc_commands::AudioPassThruThreadImpl(sessionKey,
-                                                        request->getCorrelationID(),
-                                                        maxDuration,
-                                                        samplingRate,
-                                                        bitsPerSample,
-                                                        audioType));
+                        thread_impl
+                      );
                     core->perform_audio_thread_->startWithOptions(
                         threads::ThreadOptions(threads::Thread::kMinStackSize));
 

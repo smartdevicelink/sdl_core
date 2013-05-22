@@ -33,9 +33,10 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
+#include <vector>
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "mobile_message_handler/mobile_message_handler.h"
-#include "ConnectionHandler/connection_handler.h"
+#include "connection_handler/connection_handler.h"
 #include "request_watchdog/watchdog.h"
 
 namespace application_manager {
@@ -46,27 +47,26 @@ class HMIMatrix;
 class PoliciesManager;
 
 class ApplicationManager {
-public:
-	virtual ~ApplicationManager() {}
+  public:
+    virtual ~ApplicationManager() {}
 
-	virtual Application * application(int app_id) = 0;
-	virtual std::vector<Application *> applications() const = 0;
-	virtual Application * active_application() const = 0;
-	virtual void set_hmi_message_handler(
-			hmi_message_handler::HMIMessageHandler * handler) = 0;
-	virtual void set_mobile_message_handler(
-			mobile_message_handler::MobileMessageHandler * handler) = 0;
-	virtual void set_connection_handler(
-			connection_handler::ConnectionHandler * handler) = 0;
-	virtual void set_watchdog(
-			request_watchdog::Watchdog * watchdog) = 0;
-	/*TODO(PV): set or create?*/
-	virtual void set_hmi_matrix(HMIMatrix * matrix) = 0;
-	/*TODO(PV): set or create?*/
-	virtual void set_policies_manager(PoliciesManager * managaer) = 0;
-
+    virtual Application* application(int app_id) = 0;
+    virtual std::vector<Application*> applications() const = 0;
+    virtual Application* active_application() const = 0;
+    virtual void set_hmi_message_handler(
+      hmi_message_handler::HMIMessageHandler* handler) = 0;
+    virtual void set_mobile_message_handler(
+      mobile_message_handler::MobileMessageHandler* handler) = 0;
+    virtual void set_connection_handler(
+      connection_handler::ConnectionHandler* handler) = 0;
+    virtual void set_watchdog(
+      request_watchdog::Watchdog* watchdog) = 0;
+    /*TODO(PV): set or create?*/
+    virtual void set_hmi_matrix(HMIMatrix* matrix) = 0;
+    /*TODO(PV): set or create?*/
+    virtual void set_policies_manager(PoliciesManager* managaer) = 0;
 };
 
-} // namespace application_manager
+}  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_

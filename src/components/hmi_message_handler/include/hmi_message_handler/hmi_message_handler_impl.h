@@ -32,7 +32,7 @@
 
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL
- 
+
 #include <set>
 #include "hmi_message_handler/hmi_message_adapter.h"
 #include "hmi_message_handler/hmi_message_handler.h"
@@ -46,31 +46,31 @@ class ToHMIThreadImpl;
 class FromHMIThreadImpl;
 
 class HMIMessageHandlerImpl : public HMIMessageHandler {
-public:
-	HMIMessageHandlerImpl();
-	~HMIMessageHandlerImpl();
-	void onMessageReceived(application_manager::Message * message);
-	void sendMessageToHMI(application_manager::Message * message);
-	void setMessageObserver(HMIMessageObserver* observer);
-	void onErrorSending(application_manager::Message * message);
-	void addHMIMessageAdapter(HMIMessageAdapter * adapter) = 0;
-	void removeHMIMessageAdapter(HMIMessageAdapter * adapter) ;
+  public:
+    HMIMessageHandlerImpl();
+    ~HMIMessageHandlerImpl();
+    void onMessageReceived(application_manager::Message* message);
+    void sendMessageToHMI(application_manager::Message* message);
+    void setMessageObserver(HMIMessageObserver* observer);
+    void onErrorSending(application_manager::Message* message);
+    void addHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
+    void removeHMIMessageAdapter(HMIMessageAdapter* adapter);
 
-private:
-	DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
+  private:
+    HMIMessageObserver* observer_;
+    std::set<HMIMessageAdapter* > message_adapters_;
 
-	HMIMessageObserver * observer_;
-	std::set<HMIMessageAdapter* > message_adapters_;
+    threads::Thread* to_hmi_thread_;
+    friend class ToHMIThreadImpl;
 
-	threads::Thread * to_hmi_thread_;
-	friend class ToHMIThreadImpl;
+    threads::Thread* from_hmi_thread_;
+    friend class FromHMIThreadImpl;
 
-	threads::Thread * from_hmi_thread_;
-	friend class FromHMIThreadImpl;
+    MessageQueue<application_manager::Message*> message_to_hmi_;
+    MessageQueue<application_manager::Message*> message_from_hmi_;
 
-	MessageQueue<application_manager::Message *> message_to_hmi_;
-	MessageQueue<application_manager::Message *> message_from_hmi_;
+    DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
 };
-}
+}  // namespace hmi_message_handler
 
 #endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL

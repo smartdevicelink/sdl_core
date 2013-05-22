@@ -35,141 +35,137 @@
 
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
-#include "ConnectionHandler/connection_handler_observer.h"
+#include "connection_handler/connection_handler_observer.h"
 
 class JSONHandler;
 class SDLRPCMessage;
 class JSONRPC2Handler;
 
-namespace NsRPC2Communication
-{
-    class RPC2Command;
+namespace NsRPC2Communication {
+class RPC2Command;
 }
 
-namespace connection_handler
-{
-    class DevicesDiscoveryStarter;
+namespace connection_handler {
+class DevicesDiscoveryStarter;
 }
 
-namespace NsAppManager
-{
-    class AppMgrRegistry;
-    class AppMgrCore;
-    class AppFactory;
+namespace NsAppManager {
+class AppMgrRegistry;
+class AppMgrCore;
+class AppFactory;
+
+/**
+* \brief a main app manager class which acts like container for other classes
+*/
+class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public connection_handler::ConnectionHandlerObserver {
+  public:
 
     /**
-    * \brief a main app manager class which acts like container for other classes
-    */
-    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public connection_handler::ConnectionHandlerObserver
-    {
-    public:
+     * \brief Returning class instance
+     * \return class instance
+     */
+    static AppMgr& getInstance();
 
-        /**
-         * \brief Returning class instance
-         * \return class instance
-         */
-        static AppMgr& getInstance();
+    /**
+     * \brief callback to proceed received mobile message
+     * \param message the received message
+     * \param connectionKey key of a connection associated with application that sent the message
+     */
+    virtual void onMessageReceivedCallback(NsSmartDeviceLinkRPC::SDLRPCMessage* message, int connectionKey);
 
-        /**
-         * \brief callback to proceed received mobile message
-         * \param message the received message
-         * \param connectionKey key of a connection associated with application that sent the message
-         */
-        virtual void onMessageReceivedCallback( NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionKey );
+    /**
+     * \brief callback to proceed received RPC2 command
+     * \param command the received command
+     */
+    virtual void onCommandReceivedCallback(NsRPC2Communication::RPC2Command* command);
 
-        /**
-         * \brief callback to proceed received RPC2 command
-         * \param command the received command
-         */
-        virtual void onCommandReceivedCallback( NsRPC2Communication::RPC2Command * command );
+    /**
+     * \brief Available devices list updated.
+     *
+     * Called when device scanning initiated with scanForNewDevices
+     * is completed.
+     *
+     * \param deviceList New list of available devices.
+     **/
+    virtual void OnDeviceListUpdated(const connection_handler::DeviceList& deviceList);
 
-        /**
-         * \brief Available devices list updated.
-         *
-         * Called when device scanning initiated with scanForNewDevices
-         * is completed.
-         *
-         * \param deviceList New list of available devices.
-         **/
-        virtual void OnDeviceListUpdated(const connection_handler::DeviceList & deviceList);
+    /**
+     * \brief Updates device list.
+     *
+     * Called when device list has been updated and new devices were added.
+     *
+     * \param DeviceList New list of available devices.
+     **/
+    virtual void UpdateDeviceList(const connection_handler::DeviceList& DeviceList);
 
-        /**
-         * \brief Updates device list.
-         *
-         * Called when device list has been updated and new devices were added.
-         *
-         * \param DeviceList New list of available devices.
-         **/
-        virtual void UpdateDeviceList(const connection_handler::DeviceList & DeviceList);
+    /**
+     * \brief Removes device.
+     *
+     * Called when device has been removed from a list.
+     *
+     * \param DeviceHandle Handle of removed device.
+     **/
+    virtual void RemoveDevice(const connection_handler::DeviceHandle DeviceHandle);
 
-        /**
-         * \brief Removes device.
-         *
-         * Called when device has been removed from a list.
-         *
-         * \param DeviceHandle Handle of removed device.
-         **/
-        virtual void RemoveDevice(const connection_handler::DeviceHandle DeviceHandle);
+    /**
+     * \brief Callback function used by connection_handler
+     * when Mobile Application initiates start of new session.
+     * \param deviceHandle Device identifier within which session has to be started.
+     * \param sessionKey Key of started session.
+     * \param firstSessionKey Session key of first session in this connection.
+     */
+    virtual void OnSessionStartedCallback(connection_handler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
 
-        /**
-         * \brief Callback function used by ConnectionHandler
-         * when Mobile Application initiates start of new session.
-         * \param deviceHandle Device identifier within which session has to be started.
-         * \param sessionKey Key of started session.
-         * \param firstSessionKey Session key of first session in this connection.
-         */
-        virtual void OnSessionStartedCallback(connection_handler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
+    /**
+     * \brief Callback function used by connection_handler
+     * when Mobile Application initiates session ending.
+     * \param sessionKey Key of session which should be ended
+     * \param firstSessionKey Session key of first session in this connection
+     */
+    virtual void OnSessionEndedCallback(int sessionKey, int firstSessionKey);
 
-        /**
-         * \brief Callback function used by ConnectionHandler
-         * when Mobile Application initiates session ending.
-         * \param sessionKey Key of session which should be ended
-         * \param firstSessionKey Session key of first session in this connection
-         */
-        virtual void OnSessionEndedCallback(int sessionKey, int firstSessionKey);
+    /**
+     * \brief Sets Json mobile handler instance
+     * \param handler Json mobile handler
+     */
+    void setJsonHandler(JSONHandler* handler);
 
-        /**
-         * \brief Sets Json mobile handler instance
-         * \param handler Json mobile handler
-         */
-        void setJsonHandler(JSONHandler* handler);
+    /**
+     * \brief Sets Json RPC2 handler instance
+     * \param handler Json RPC2 handler
+     */
+    void setJsonRPC2Handler(JSONRPC2Handler* handler);
 
-        /**
-         * \brief Sets Json RPC2 handler instance
-         * \param handler Json RPC2 handler
-         */
-        void setJsonRPC2Handler(JSONRPC2Handler* handler);
+    /**
+     * \brief Sets connection handler instance
+     * \param handler connection handler
+     */
+    void setConnectionHandler(connection_handler::DevicesDiscoveryStarter* handler);
 
-        /**
-         * \brief Sets connection handler instance
-         * \param handler connection handler
-         */
-        void setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler);
+    /**
+     * \brief method to execute threads.
+     */
+    void executeThreads();
 
-        /**
-         * \brief method to execute threads.
-         */
-        void executeThreads();
+  private:
 
-    private:
+    /**
+     * \brief Default class destructor
+     */
+    virtual ~AppMgr();
 
-        /**
-         * \brief Default class destructor
-         */
-        virtual ~AppMgr();
+    /**
+     * \brief Copy constructor
+     */
+    AppMgr(const AppMgr&);
 
-        /**
-         * \brief Copy constructor
-         */
-        AppMgr(const AppMgr&);
+    /**
+     * \brief Default class constructor
+     */
+    AppMgr();
 
-        /**
-         * \brief Default class constructor
-         */
-        AppMgr();
-
-        static log4cxx::LoggerPtr logger_;
-    };
+    static log4cxx::LoggerPtr logger_;
+};
 
 } // namespace NsAppManager
 

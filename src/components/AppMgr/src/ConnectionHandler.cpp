@@ -31,7 +31,7 @@
 //
 
 #include "AppMgr/ConnectionHandler.h"
-#include "ConnectionHandler/devices_discovery_starter.h"
+#include "connection_handler/devices_discovery_starter.h"
 
 namespace NsAppManager
 {

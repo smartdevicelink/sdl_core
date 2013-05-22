@@ -36,66 +36,63 @@
 #include "utils/logger.h"
 
 
-namespace connection_handler
-{
-    class DevicesDiscoveryStarter;
-    typedef int DeviceHandle;
+namespace connection_handler {
+class DevicesDiscoveryStarter;
+typedef int DeviceHandle;
 }
 
-namespace NsAppManager
-{
+namespace NsAppManager {
+/**
+ * \brief ConnectionHandler acts as wrapper for connection handler
+ */
+class ConnectionHandler {
+  public:
     /**
-     * \brief ConnectionHandler acts as wrapper for connection handler
+     * \brief Returning class instance
+     * \return class instance
      */
-    class ConnectionHandler
-    {
-    public:
-        /**
-         * \brief Returning class instance
-         * \return class instance
-         */
-        static ConnectionHandler &getInstance();
+    static ConnectionHandler& getInstance();
 
-        /**
-         * \brief Sets connection handler instance
-         * \param handler connection handler
-         */
-        void setConnectionHandler(connection_handler::DevicesDiscoveryStarter *handler);
+    /**
+     * \brief Sets connection handler instance
+     * \param handler connection handler
+     */
+    void setConnectionHandler(connection_handler::DevicesDiscoveryStarter* handler);
 
-        /**
-         * \brief Gets connection handler instance
-         * \return connection handler
-         */
-        connection_handler::DevicesDiscoveryStarter *getConnectionHandler( ) const;
+    /**
+     * \brief Gets connection handler instance
+     * \return connection handler
+     */
+    connection_handler::DevicesDiscoveryStarter* getConnectionHandler() const;
 
-        /**
-         * \brief Start device discovery
-         */
-        void StartDevicesDiscovery();
+    /**
+     * \brief Start device discovery
+     */
+    void StartDevicesDiscovery();
 
-        /**
-         * \brief Connect to device specified in params
-         * \param deviceHandle device handle
-         */
-        void ConnectToDevice( connection_handler::DeviceHandle deviceHandle );
+    /**
+     * \brief Connect to device specified in params
+     * \param deviceHandle device handle
+     */
+    void ConnectToDevice(connection_handler::DeviceHandle deviceHandle);
 
-        void StartTransportManager();
+    void StartTransportManager();
 
-    private:
+  private:
 
-        /**
-         * \brief Default class constructor
-         */
-        ConnectionHandler();
+    /**
+     * \brief Default class constructor
+     */
+    ConnectionHandler();
 
-        /**
-         * \brief Copy constructor
-         */
-        ConnectionHandler(const ConnectionHandler&);
+    /**
+     * \brief Copy constructor
+     */
+    ConnectionHandler(const ConnectionHandler&);
 
-        connection_handler::DevicesDiscoveryStarter* mConnectionHandler;
-        static log4cxx::LoggerPtr logger_;
-    };
+    connection_handler::DevicesDiscoveryStarter* mConnectionHandler;
+    static log4cxx::LoggerPtr logger_;
+};
 
 }
 

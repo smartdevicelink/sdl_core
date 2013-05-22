@@ -30,6 +30,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <vector>
+#include <map>
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/basic_command_factory.h"
@@ -37,61 +39,52 @@
 
 namespace application_manager {
 
-ApplicationManagerImpl * ApplicationManagerImpl::self_ = NULL;
-
 ApplicationManagerImpl::~ApplicationManagerImpl() {
-
 }
 
-ApplicationManagerImpl * ApplicationManagerImpl::GetInstance() {
-	if (NULL == self_) {
-		self_ = new ApplicationManagerImpl();
-	}
-	return self_;
+ApplicationManagerImpl* ApplicationManagerImpl::instance() {
+  static ApplicationManagerImpl instance;
+  return &instance;
 }
 
-Application * ApplicationManagerImpl::application(int app_id) {
-	std::map<int, Application *>::iterator it = applications_.find(app_id);
-	if (applications_.end() != it) {
-		return it->second;
-	}
-	else {
-		return NULL;
-	}
+Application* ApplicationManagerImpl::application(int app_id) {
+  std::map<int, Application*>::iterator it = applications_.find(app_id);
+  if (applications_.end() != it) {
+    return it->second;
+  } else {
+    return NULL;
+  }
 }
 
-bool ApplicationManagerImpl::RegisterApplication(Application * application)
-{
+bool ApplicationManagerImpl::RegisterApplication(Application* application) {
   return true;
 }
 
-bool ApplicationManagerImpl::UnregisterApplication(Application * application)
-{
-
+bool ApplicationManagerImpl::UnregisterApplication(Application* application) {
   return true;
 }
 
-std::vector<Application *>
+std::vector<Application*>
 ApplicationManagerImpl::applications() const {
-	std::vector<Application*> result;
-	for(std::map<int, Application*>::const_iterator it = applications_.begin();
-		applications_.end() != it;
-		++it) {
-
-		if(it->second->app_id() == it->first) {
-			result.push_back(it->second);
-		}
-	}
-	return result;
+  std::vector<Application*> result;
+  for (std::map<int, Application*>::const_iterator it = applications_.begin();
+       applications_.end() != it;
+       ++it) {
+    if (it->second->app_id() == it->first) {
+      result.push_back(it->second);
+    }
+  }
+  return result;
 }
 
-void ApplicationManagerImpl::onMessageReceived(application_manager::Message * message)
-{
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject smart_object = MessageToSmartObject(*message);
+void ApplicationManagerImpl::onMessageReceived(
+  application_manager::Message* message) {
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject smart_object =
+    MessageToSmartObject(*message);
   CommandSharedPtr command = BasicCommandFactory::CreateCommand(&smart_object);
   command->Init();
   command->Run();
   command->CleanUp();
 }
 
-} // namespace application_manager
+}  // namespace application_manager

@@ -34,110 +34,113 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 
 #include <vector>
+#include <map>
 #include "application_manager/application_manager.h"
 #include "application_manager/message.h"
 #include "application_manager/application.h"
 #include "hmi_message_handler/hmi_message_observer.h"
-#include "ConnectionHandler/connection_handler_observer.h"
+#include "connection_handler/connection_handler_observer.h"
 #include "request_watchdog/watchdog_subscriber.h"
 #include "utils/macro.h"
+#include "utils/shared_ptr.h"
 
 namespace application_manager {
 
 class ApplicationManagerImpl : public ApplicationManager
-							 , public hmi_message_handler::HMIMessageObserver
-							 , public connection_handler::ConnectionHandlerObserver
-							 , public request_watchdog::WatchdogSubscriber {
-public:
-	~ApplicationManagerImpl();
-	static ApplicationManagerImpl * GetInstance();
+  , public hmi_message_handler::HMIMessageObserver
+  , public connection_handler::ConnectionHandlerObserver
+    , public request_watchdog::WatchdogSubscriber {
+  public:
+    ~ApplicationManagerImpl();
+    static ApplicationManagerImpl* instance();
 
-	/////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
 
-	Application * application(int app_id);
-	std::vector<Application *> applications() const;
-	Application * active_application() const;
+    Application* application(int app_id);
+    std::vector<Application*> applications() const;
+    Application* active_application() const;
 
-	/////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
 
-	bool RegisterApplication(Application * application);
-	bool UnregisterApplication(Application * application);
-	bool UnregisterAllApplications();
-	bool RemoveAppDataFromHMI(Application * application);
-	bool LoadAppDataToHMI(Application * application);
-	bool ActivateApplication(Application * application);
-	MessageChaining * AddMessageChain(MessageChaining * chain, int connection_key,
-			unsigned int correlation_id);
-	bool DecreaseMessageChain(const MessageChaining * chain);
+    bool RegisterApplication(Application* application);
+    bool UnregisterApplication(Application* application);
+    bool UnregisterAllApplications();
+    bool RemoveAppDataFromHMI(Application* application);
+    bool LoadAppDataToHMI(Application* application);
+    bool ActivateApplication(Application* application);
+    MessageChaining* AddMessageChain(MessageChaining* chain,
+                                     unsigned int connection_key,
+                                     unsigned int correlation_id);
+    bool DecreaseMessageChain(const MessageChaining* chain);
 
-	/////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
 
-	void set_hmi_message_handler(
-			hmi_message_handler::HMIMessageHandler * handler);
-	void set_mobile_message_handler(
-			mobile_message_handler::MobileMessageHandler * handler);
-	void set_connection_handler(
-			connection_handler::ConnectionHandler * handler);
-	void set_watchdog(request_watchdog::Watchdog * watchdog);
+    void set_hmi_message_handler(
+      hmi_message_handler::HMIMessageHandler* handler);
+    void set_mobile_message_handler(
+      mobile_message_handler::MobileMessageHandler* handler);
+    void set_connection_handler(
+      connection_handler::ConnectionHandler* handler);
+    void set_watchdog(request_watchdog::Watchdog* watchdog);
 
-	/*TODO(PV): set or create?*/
-	void set_hmi_matrix(HMIMatrix * matrix);
-	/*TODO(PV): set or create?*/
-	void set_policies_manager(PoliciesManager * managaer);
+    /*TODO(PV): set or create?*/
+    void set_hmi_matrix(HMIMatrix* matrix);
+    /*TODO(PV): set or create?*/
+    void set_policies_manager(PoliciesManager* managaer);
 
-	///////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////
 
-	void SendMessageToMobile(smart_objects::CSmartObject * message);
-	void SendMessageToHMI(smart_objects::CSmartObject * message);
+    void SendMessageToMobile(
+      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+    void SendMessageToHMI(
+      const utils::SharedPtr<smart_objects::CSmartObject>& message);
 
-	/////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
 
-	void onMessageReceived(application_manager::Message * message);
-	void onErrorSending(application_manager::Message * message);
+    void onMessageReceived(application_manager::Message* message);
+    void onErrorSending(application_manager::Message* message);
 
-	void OnDeviceListUpdated(
-      const connection_handler::DeviceList & device_list);
-	void RemoveDevice(
+    void OnDeviceListUpdated(
+      const connection_handler::DeviceList& device_list);
+    void RemoveDevice(
       const connection_handler::DeviceHandle device_handle);
-	void OnSessionStartedCallback(
+    void OnSessionStartedCallback(
       connection_handler::DeviceHandle device_handle, int session_key,
       int first_session_key);
-	void OnSessionEndedCallback(int session_key,
-                                      int first_session_key);
+    void OnSessionEndedCallback(int session_key,
+                                int first_session_key);
 
-	void onTimeoutExpired(request_watchdog::RequestInfo);
+    void onTimeoutExpired(request_watchdog::RequestInfo);
 
-private:
-	ApplicationManagerImpl();
-	/**
-     * \brief Performs check using PoliciesManager of availability 
-     * of the message for the application. If error occured it is sent 
-     * as response to initiator of request.
-     * \param message Message received for application
-     * \param application Application that recieved message to be checked by policies
-     * \return bool Indicates whether message is allowed for application
-     */
-	bool CheckPolicies(smart_objects::CSmartObject * message,
-					   Application * application);
+  private:
+    ApplicationManagerImpl();
+    /**
+       * \brief Performs check using PoliciesManager of availability
+       * of the message for the application. If error occured it is sent
+       * as response to initiator of request.
+       * \param message Message received for application
+       * \param application Application that recieved message to be checked by policies
+       * \return bool Indicates whether message is allowed for application
+       */
+    bool CheckPolicies(smart_objects::CSmartObject* message,
+                       Application* application);
 
-	/**
-     * \brief Using HMIMatrix checks which messages sent to HMI are of higher priority
-     * and acts accordingly (closes message with lower priority,
-     * rejects message in case message with higher priority is operating on HMI).
-     * If error occured it is sent as response to initiator of request.
-     * \param message Message received for application
-     * \return bool Indicates whether message is allowed for application
-     */
-	bool CheckHMIMatrix(smart_objects::CSmartObject * message);
+    /**
+       * \brief Using HMIMatrix checks which messages sent to HMI are of higher priority
+       * and acts accordingly (closes message with lower priority,
+       * rejects message in case message with higher priority is operating on HMI).
+       * If error occured it is sent as response to initiator of request.
+       * \param message Message received for application
+       * \return bool Indicates whether message is allowed for application
+       */
+    bool CheckHMIMatrix(smart_objects::CSmartObject* message);
 
-	static ApplicationManagerImpl * self_;
-	std::map<int, Application *> applications_;
-	bool hmi_deletes_commands_;
+    std::map<int, Application*> applications_;
+    bool hmi_deletes_commands_;
 
-	DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
-
+    DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
 
-} // namespace application_manager
+}  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_

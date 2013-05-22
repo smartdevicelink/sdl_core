@@ -6,7 +6,7 @@ include_directories (
   ../SmartObjects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
-  ../ConnectionHandler/include/
+  ../connection_handler/include/
   ../request_watchdog/include/
   ../TransportManager/include/
   ../../thirdPartyLibs/jsoncpp/include/

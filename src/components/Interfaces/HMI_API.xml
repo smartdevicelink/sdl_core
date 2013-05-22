@@ -924,12 +924,12 @@
       <description>If no response received SDL suggest that mixing audio is not supported</description>
       <param name="attenuatedSupported" type="Boolean" mandatory="true"/>
     </function>
-    <function name="SupportsMemoryManagement" "messageType"="request">
+    <function name="SupportsMemoryManagement" messageType="request">
       <description>Request from SDL to HMI to find out whether HMI is going to clean all data connected with SDL system (application menus, settings, commands etc) or SDL should send clearing commands explicitely. Used for optimization.</description>
     </function>
     <function name="SupportsMemoryManagement" messagetype="response">
       <param name="deletingSupported" type="Boolean" mandatory="true"/>
-    </funcion>
+    </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">

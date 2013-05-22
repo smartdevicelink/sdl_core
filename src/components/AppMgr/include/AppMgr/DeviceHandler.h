@@ -33,7 +33,7 @@
 #ifndef DEVICEHANDLER_H
 #define DEVICEHANDLER_H
 
-#include "ConnectionHandler/device.h"
+#include "connection_handler/device.h"
 
 #include <map>
 #include "utils/logger.h"

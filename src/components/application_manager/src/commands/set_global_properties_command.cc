@@ -55,7 +55,7 @@ void SetGlobalPropertiesCommand::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesCommand::Run ");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::GetInstance()->
+      ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::app_id]));
 
   if (NULL != app) {
@@ -92,7 +92,7 @@ void SetGlobalPropertiesCommand::Run() {
     (*message_)[strings::msg_params][strings::vr_help] =
         *app->vr_help();
 
-  ApplicationManagerImpl::GetInstance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }
 
 }  // namespace commands

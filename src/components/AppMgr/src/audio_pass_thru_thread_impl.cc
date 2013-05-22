@@ -133,7 +133,6 @@ bool AudioPassThruThreadImpl::sendEndAudioPassThruToHMI() {
 }
 
 void AudioPassThruThreadImpl::threadMain() {
-  Init();
   unsigned int audioLength = 0;
   std::string filename;
   if (bits_per_sample_.get()

@@ -78,7 +78,7 @@ void RegisterAppInterfaceCommand::Run() {
   }
 
   bool registerApplictionResult =
-      ApplicationManagerImpl::GetInstance()->
+      ApplicationManagerImpl::instance()->
       RegisterApplication(application_impl);
 }
 

@@ -43,39 +43,39 @@ namespace hmi_message_handler {
  * SDL with HMI has to implement this interface.
 */
 class HMIMessageAdapter : public HMIMessageSender {
-public:
-	/**
-     * \brief Constructor
-     * \param handler Pointer to implementation of HMIMessageHandler abstract class
-     * to notify it about receiving message or error on sending message.
-    */
-	explicit HMIMessageAdapter(HMIMessageHandler* handler);
+  public:
+    /**
+       * \brief Constructor
+       * \param handler Pointer to implementation of HMIMessageHandler abstract class
+       * to notify it about receiving message or error on sending message.
+      */
+    explicit HMIMessageAdapter(HMIMessageHandler* handler);
 
-	/**
-     * \brief Destructor
-    */
-	virtual ~HMIMessageAdapter();
+    /**
+       * \brief Destructor
+      */
+    virtual ~HMIMessageAdapter();
 
-protected:
-	/**
-     * \brief Interface for subscriptions.
-     * Each class implementing interface should use it according to 
-     * standarts of transport for which it is to be an adapter.
-     * For example, Adapter for MessageBroker will use it to subscribe to notifications
-     * from HMI.
-     */
-	virtual void subscribeTo() = 0;
-    inline virtual HMIMessageHandler * handler() const {
-        return handler_;
+  protected:
+    /**
+       * \brief Interface for subscriptions.
+       * Each class implementing interface should use it according to
+       * standarts of transport for which it is to be an adapter.
+       * For example, Adapter for MessageBroker will use it to subscribe to notifications
+       * from HMI.
+       */
+    virtual void subscribeTo() = 0;
+    inline virtual HMIMessageHandler* handler() const {
+      return handler_;
     }
 
-private:
+  private:
     /**
       *\brief Pointer on handler to notify it about receiving message/error.
     */
-	mutable HMIMessageHandler * handler_;
+    mutable HMIMessageHandler* handler_;
 };
 
-} // namespace hmi_handler
+}  // namespace hmi_message_handler
 
 #endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMICONNECTIONHANDLER
