@@ -220,7 +220,6 @@ class TestSmartSchema(unittest.TestCase):
                          expected_result_enum2,
                          "Long enum is invalid")
 
-        print generator._gen_enums([enum1, enum2], collections.OrderedDict())
         self.assertEqual(generator._gen_enums([enum1, enum2], collections.OrderedDict()),
                          u"{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
                          , "Generated enums are invalid")
@@ -366,11 +365,12 @@ class TestSmartSchema(unittest.TestCase):
                                     functions=functions,
                                     params={"param1" : "value1",
                                             "param2" : "value2"})
-
-        generator.generate(interface=interface,
-                            filename="Test.xml",
-                            namespace="XXX::YYY::ZZZ",
-                            destination_dir="/home/eftin/gen_test")
+        # Use this code to create test source code until this test is
+        # not fully functional.
+        # generator.generate(interface=interface,
+        #                    filename="Test.xml",
+        #                    namespace="XXX::YYY::ZZZ",
+        #                    destination_dir="/home/eftin/gen_test")
 
 if __name__ == '__main__':
     unittest.main()

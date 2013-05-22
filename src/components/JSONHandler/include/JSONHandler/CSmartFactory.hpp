@@ -40,7 +40,6 @@
 #include <map>
 #include <string>
 
-class A;
 namespace NsSmartDeviceLink
 {
     namespace NsJSONHandler
@@ -153,7 +152,7 @@ namespace NsSmartDeviceLink
            * @return True if operation was successful of false otherwise.
            */ 
           bool AttachSchema(const StructIdEnum struct_id,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject & object);
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject &object);
 
 
           /**
@@ -193,34 +192,37 @@ namespace NsSmartDeviceLink
            *
            * @param function_id FunctionID of the function.
            * @param message_type messageType of the function.
-           * @param result[out] This value will be copy of the desired
+           * @param[out] result This value will be copy of the desired
            *                    function SmartSchema if it found (this
            *                    function returns true) or unmodified if
            *                    SmartSchema is not found (this function
            *                    returns false).
            *
-           * @return True if function for specified input parameters is found
-           *         or false otherwise. 
+           * @return True if function schema for specified input parameters
+           *         is found or false otherwise.
            */          
            bool GetSchema(
               const FunctionIdEnum function_id,
               const MessageTypeEnum message_type,
-              NsSmartDeviceLink::NsSmartObjects::CSmartSchema & result);
+              NsSmartDeviceLink::NsSmartObjects::CSmartSchema &result);
 
           /**
            * @brief Get SmartSchema for specific struct.
            *
            * @param struct_id Identifier of the struct.
            *
-           * @return If function succeeded it returns SmartSchema for the
-           *         struct defined by the input parameter. Otherwise
-           *         (if SmartSchema for specified struct is not found)
-           *         this functions returns new SmartSchema with singe
-           *         AlwaysFalseSchemaItem set as root.
+           * @param[out] result This value will be copy of the desired
+           *                    struct SmartSchema if it found (this
+           *                    function returns true) or unmodified if
+           *                    SmartSchema is not found (this function
+           *                    returns false).
+           *
+           * @return True if struct schema for specified input parameter is
+           *         found or false otherwise.
            */          
           bool GetSchema(
               const StructIdEnum struct_id,
-              NsSmartDeviceLink::NsSmartObjects::CSmartSchema & result);
+              NsSmartDeviceLink::NsSmartObjects::CSmartSchema &result);
 
         protected:
 
@@ -257,12 +259,13 @@ namespace NsSmartDeviceLink
 
         template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
         CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CSmartFactory(void)
-        : functions_schemes_()
+        : functions_schemes_(),
+          structs_schemes_()
         {
         }
 
         template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
-        bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object)
+        bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject &object)
         {
             if(false == object.keyExists(strings::S_PARAMS)) return false;
             if(false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE)) return false;
@@ -293,7 +296,7 @@ namespace NsSmartDeviceLink
       bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
           AttachSchema(
               const StructIdEnum struct_id,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject &object) {
         typename StructsSchemesMap::iterator structs_iterator =
             structs_schemes_.find(struct_id);
 
@@ -353,7 +356,7 @@ namespace NsSmartDeviceLink
       bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
       GetSchema(const FunctionIdEnum function_id,
                 const MessageTypeEnum message_type,
-                NsSmartDeviceLink::NsSmartObjects::CSmartSchema & result) {
+                NsSmartDeviceLink::NsSmartObjects::CSmartSchema &result) {
         SmartSchemaKey<FunctionIdEnum, MessageTypeEnum> key(function_id,
                                                             message_type);
 
@@ -373,7 +376,7 @@ namespace NsSmartDeviceLink
           class StructIdEnum>
       bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
       GetSchema(const StructIdEnum struct_id,
-                NsSmartDeviceLink::NsSmartObjects::CSmartSchema & result) {
+                NsSmartDeviceLink::NsSmartObjects::CSmartSchema &result) {
         typename StructsSchemesMap::iterator structs_iterator =
             structs_schemes_.find(struct_id);
 
