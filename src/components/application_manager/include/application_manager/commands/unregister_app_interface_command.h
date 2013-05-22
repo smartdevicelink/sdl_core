@@ -66,7 +66,6 @@ class UnregisterAppInterfaceCommand : public CommandRequestImpl {
   // virtual void cleanUp() = 0;
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(UnregisterAppInterfaceCommand);
 };
 

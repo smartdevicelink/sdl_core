@@ -32,6 +32,9 @@
 
 #include "application_manager/basic_command_factory.h"
 #include "application_manager/commands/register_app_interface_command.h"
+#include "application_manager/commands/unregister_app_interface_command.h"
+#include "application_manager/commands/register_app_interface_response_command.h"
+#include "application_manager/commands/unregister_app_interface_response_command.h"
 #include "application_manager/commands/generic_response_command.h"
 #include "application_manager/commands/set_global_properties_command.h"
 #include "application_manager/commands/set_global_properties_response_command.h"
@@ -49,7 +52,21 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
 
   switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
-      command.reset(new commands::RegisterAppInterfaceCommand(message));
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kRequest)
+        command.reset(new commands::RegisterAppInterfaceCommand(message));
+      else
+        command.reset(
+            new commands::RegisterAppInterfaceResponseCommand(message));
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::UnregisterAppInterfaceID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kRequest)
+        command.reset(new commands::UnregisterAppInterfaceCommand(message));
+      else
+        command.reset(
+            new commands::UnregisterAppInterfaceResponseCommand(message));
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetGlobalPropertiesID: {

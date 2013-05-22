@@ -36,6 +36,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/basic_command_factory.h"
 #include "application_manager/message_conversion.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
