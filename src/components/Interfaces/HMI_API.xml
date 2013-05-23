@@ -359,6 +359,19 @@
   </element>
 </enum>
 
+<enum name="TextAlignment">
+  <description>The list of possible alignments, left, right, or centered</description>
+  <element name="LEFT_ALIGNED" />
+  <element name="RIGHT_ALIGNED" />
+  <element name="CENTERED" />
+</enum>
+
+<enum name="DriverDistractionState">
+  <description>Enumeration that describes possible states of driver distraction.</description>
+  <element name="DD_ON" />
+  <element name="DD_OFF" />
+</enum>
+
 <enum name="MediaClockFormat">
   <element name="CLOCK1">
     <description>
@@ -594,17 +607,17 @@
   </param>
 </struct>
 
+<struct name="TextFieldStruct">
+  <param name="fieldName" type="TextFieldName" mandatory="true"/>
+  <param name="fieldText" type="String" maxlength="500" mandatory="true"/>
+</struct>
+
 <struct name="Turn">
   <param name="navigationText" type="TextFieldStruct" mandatory="false">
     <description>Uses navigationText from TextFieldStruct.</description>
   </param>
   <param name="turnIcon" type="Common.Image" mandatory="false">
   </param>
-</struct>
-
-<struct name="TextFieldStruct">
-  <param name="fieldName" type="TextFieldName" mandatory="true"/>
-  <param name="fieldText" type="String" maxlength="500" mandatory="true"/>
 </struct>
 
 </interface>
@@ -736,7 +749,7 @@
     <param name="cmdId" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
       <description>Id of command to used in OnCommand notification.</description>
     </param>
-    <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="100">
+    <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="100" array="true">
       <description>List of strings to be used as VR commands.</description>
     </param>
     <param name="appId" type="Integer" mandatory="true">
@@ -767,7 +780,7 @@
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language for app.</description>
-    <param name="language" type="Language" mandatory="true">
+    <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
     </param>
     <param name="appId" type="Integer" mandatory="true">
@@ -858,14 +871,14 @@
   </function>
   <function name="SetGlobalProperties" messagetype="request">
       <description>Sets some properties for the application initiated request.</description>
-      <param name="helpPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+      <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
         <description>
           The help prompt.
           An array of text chunks of type TTSChunk. See TTSChunk.
           The array must have at least one item.
         </description>
       </param>
-      <param name="timeoutPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+      <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
         <description>
           Help text for a wait timeout.
           An array of text chunks of type TTSChunk. See TTSChunk.
@@ -985,7 +998,7 @@
       <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
         <description>Unique ID used for this interaction choice set.</description>
       </param>
-      <param name="choiceSet" type="Choice" minsize="1" maxsize="100" array="true" />
+      <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" />
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of application that requested this RPC.</description>
       </param>
