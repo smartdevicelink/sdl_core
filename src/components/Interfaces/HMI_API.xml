@@ -38,30 +38,28 @@
 
 <enum name="Result">
 	<element name="SUCCESS" value="0"/>
-    <element name="UNSUPPORTED_VERSION" value="1"/>
-    <element name="UNSUPPORTED_REQUEST" value="2"/>
-    <element name="UNSUPPORTED_RESOURCE" value="3"/>
-    <element name="DISALLOWED" value="4"/>
-    <element name="REJECTED" value="5"/>
-    <element name="ABORTED" value="6"/>
-    <element name="IGNORED" value="7"/>
-    <element name="RETRY" value="8"/>
-    <element name="IN_USE"  value="9"/>
-    <element name="DATA_NOT_AVAILABLE" value="10"/>
-    <element name="TIMED_OUT" value="11"/>
-    <element name="INVALID_DATA" value="12"/>
-    <element name="CHAR_LIMIT_EXCEEDED" value="13"/>
-    <element name="INVALID_ID" value="14"/>
-    <element name="DUPLICATE_NAME" value="15"/>
-    <element name="SUBSCRIBED_ALREADY" value="16"/>
-    <element name="APPLICATION_NOT_REGISTERED" value="17"/>
-    <element name="WRONG_LANGUAGE" value="18"/>
-    <element name="OUT_OF_MEMORY" value="19"/>
-    <element name="TOO_MANY_PENDING_REQUESTS" value="20"/>
-    <element name="NO_APPS_REGISTERED" value="21"/>
-    <element name="NO_DEVICES_CONNECTED" value="22"/>
-    <element name="WARNINGS" value="23"/>
-    <element name="GENERIC_ERROR" value="24"/>
+    <element name="UNSUPPORTED_REQUEST" value="1"/>
+    <element name="UNSUPPORTED_RESOURCE" value="2"/>
+    <element name="DISALLOWED" value="3"/>
+    <element name="REJECTED" value="4"/>
+    <element name="ABORTED" value="5"/>
+    <element name="IGNORED" value="6"/>
+    <element name="RETRY" value="7"/>
+    <element name="IN_USE"  value="8"/>
+    <element name="DATA_NOT_AVAILABLE" value="9"/>
+    <element name="TIMED_OUT" value="10"/>
+    <element name="INVALID_DATA" value="11"/>
+    <element name="CHAR_LIMIT_EXCEEDED" value="12"/>
+    <element name="INVALID_ID" value="13"/>
+    <element name="DUPLICATE_NAME" value="14"/>
+    <element name="APPLICATION_NOT_REGISTERED" value="15"/>
+    <element name="WRONG_LANGUAGE" value="16"/>
+    <element name="OUT_OF_MEMORY" value="17"/>
+    <element name="TOO_MANY_PENDING_REQUESTS" value="18"/>
+    <element name="NO_APPS_REGISTERED" value="19"/>
+    <element name="NO_DEVICES_CONNECTED" value="20"/>
+    <element name="WARNINGS" value="21"/>
+    <element name="GENERIC_ERROR" value="22"/>
 </enum>
 
 <enum name="ButtonName">
@@ -112,55 +110,55 @@
       <description>Canadian French</description>
     </element>
     <element name="DE-EU" internal_name="DE">
-      <description>EU German</description>     
+      <description>EU German</description>
     </element>
      <element name="ES-EU" internal_name="ES">
-      <description>EU Spanish</description>     
+      <description>EU Spanish</description>
     </element>
     <element name="EN-EU" internal_name="EN_GB">
-      <description>UK English</description>     
+      <description>UK English</description>
     </element>
      <element name="RU-RU" internal_name="RU">
-      <description>Russian</description>     
+      <description>Russian</description>
     </element>
      <element name="TR-TR" internal_name="TR">
-      <description>Turkish</description>     
+      <description>Turkish</description>
     </element>
      <element name="PL-EU" internal_name="PL_EU">
-      <description>EU Polish</description>     
+      <description>EU Polish</description>
     </element>
      <element name="FR-EU" internal_name="FR">
-      <description>French</description>     
+      <description>French</description>
     </element>
      <element name="IT-EU" internal_name="IT">
-      <description>Italian</description>     
+      <description>Italian</description>
     </element>
      <element name="SV-EU" internal_name="SV_EU">
-      <description>Swedish</description>     
+      <description>Swedish</description>
     </element>
      <element name="PT-EU" internal_name="PT">
-      <description>Portuguese</description>     
+      <description>Portuguese</description>
     </element>
      <element name="NL-EU" internal_name="NL">
-      <description>Dutch (Standard)</description>     
+      <description>Dutch (Standard)</description>
     </element>
      <element name="EN-AU" internal_name="EN_AU">
-      <description>Australian English</description>     
+      <description>Australian English</description>
     </element>
      <element name="ZH-CN" internal_name="ZH_CN">
-      <description>Chinese (Mandarin)</description>     
+      <description>Chinese (Mandarin)</description>
     </element>
      <element name="ZH-TW" internal_name="ZH_TW">
-      <description>Taiwanese (Mandarin)</description>     
+      <description>Taiwanese (Mandarin)</description>
     </element>
      <element name="JA-JP" internal_name="JA">
-      <description>Japanese</description>     
+      <description>Japanese</description>
     </element>
      <element name="AR-SA" internal_name="AR_SA">
-      <description>Arabic</description>     
+      <description>Arabic</description>
     </element>
      <element name="KO-KR" internal_name="KO">
-      <description>Korean</description>     
+      <description>Korean</description>
     </element>
 </enum>
 
@@ -184,7 +182,7 @@
   </element>
 </enum>
 
-<enum name="AppType">
+<enum name="AppHMIType">
   <description>Enumeration listing possible app types.</description>
   <element name="DEFAULT" />
   <element name="COMMUNICATION" />
@@ -231,7 +229,7 @@
   <element name="RESUME" />
   <description>Resume the media clock timer</description>
   <element name="CLEAR" />
-  <description>Clears the media clock timer (previously done through Show->mediaClock)</description>   
+  <description>Clears the media clock timer (previously done through Show->mediaClock)</description>
 </enum>
 
 <enum name="SystemContext">
@@ -275,91 +273,6 @@
   <element name="ROUTE_UPDATE_REQUEST_TIMEOUT" />
 </enum>
 
-<enum name="VehicleDataEventStatus">
-  <description>Reflects the status of a vehicle data event; e.g. a seat belt event status.</description>
-  <element name="NO_EVENT" internal_name="VDES_NO_EVENT">
-  </element>
-  <element name="NO" internal_name="VDES_NO">
-  </element>
-  <element name="YES" internal_name="VDES_YES">
-  </element>
-  <element name="NOT_SUPPORTED" internal_name="VDES_NOT_SUPPORTED">
-  </element>
-  <element name="FAULT" internal_name="VDES_FAULT">
-  </element>
-</enum>
-
-<enum name="VehicleDataStatus">
-  <description>Reflects the status of a binary vehicle data item.</description>
-  <element name="NO_DATA_EXISTS" internal_name="VDS_NO_DATA_EXISTS">
-  </element>
-  <element name="OFF" internal_name="VDS_OFF">
-  </element>
-  <element name="ON" internal_name="VDS_ON">
-  </element>
-</enum>
-
-<enum name="PRNDL">
-  <description>The selected gear.</description>
-  <element name="PARK">
-    <description>Parking</description>
-  </element>
-  <element name="REVERSE">
-    <description>Reverse gear</description>
-  </element>
-  <element name="NEUTRAL">
-    <description>No gear</description>
-  </element>
-  <element name="DRIVE">
-  </element>
-  <element name="SPORT">
-    <description>Drive Sport mode</description>
-  </element>
-  <element name="LOWGEAR">
-    <description>1st gear hold</description>
-  </element>
-  <element name="FIRST">
-  </element>
-  <element name="SECOND">
-  </element>
-  <element name="THIRD">
-  </element>
-  <element name="FOURTH">
-  </element>
-  <element name="FIFTH">
-  </element>
-  <element name="SIXTH">
-  </element>
-</enum>
-
-<enum name="ComponentVolumeStatus">
-  <description>The volume status of a vehicle component.</description>
-  <element name="UNKNOWN" internal_name="CVS_UNKNOWN">
-  </element>
-  <element name="NORMAL" internal_name="CVS_NORMAL">
-  </element>
-  <element name="LOW" internal_name="CVS_LOW">
-  </element>
-  <element name="FAULT" internal_name="CVS_FAULT">
-  </element>
-  <element name="ALERT"  internal_name="CVS_ALERT">
-  </element>    
-  <element name="NOT_SUPPORTED" internal_name="CVS_NOT_SUPPORTED">
-  </element>
-</enum>
-
-<enum name="VehicleDataResultCode">
-  <description>Enumeration that describes possible result codes of a vehicle data entry request.</description>
-  <element name="SUCCESS" internal_name="VDRC_SUCCESS"/>
-  <element name="DISALLOWED" internal_name="VDRC_DISALLOWED"/>
-  <element name="USER_DISALLOWED" internal_name="VDRC_USER_DISALLOWED"/>
-  <element name="INVALID_ID" internal_name="VDRC_INVALID_ID"/>
-  <element name="VEHICLE_DATA_NOT_AVAILABLE" internal_name="VDRC_DATA_NOT_AVAILABLE"/>
-  <element name="DATA_ALREADY_SUBSCRIBED" internal_name="VDRC_DATA_ALREADY_SUBSCRIBED"/>
-  <element name="DATA_NOT_SUBSCRIBED" internal_name="VDRC_DATA_NOT_SUBSCRIBED"/>
-  <element name="IGNORED" internal_name="VDRC_IGNORED"/>    
-</enum>
-
 <enum name="ApplicationsCloseReason">
   <description>Describes reason for exiting application.</description>
   <element name="IGNITION_OFF" />
@@ -367,9 +280,149 @@
   <element name="FACTORY_DEFAULTS" />
 </enum>
 
+<enum name="DisplayType">
+    <description>See DAES for further infos regarding the displays</description>
+    <element name="CID"/>
+    <element name="TYPE2" />
+    <element name="TYPE5" />
+    <element name="NGN" />
+    <element name="GEN2_8_DMA" />
+    <element name="GEN2_6_DMA" />
+    <element name="MFD3" />
+    <element name="MFD4" />
+    <element name="MFD5" />
+  </enum>
+
+<enum name="TextFieldName">
+  <element name="mainField1">
+    <description>The first line of first set of main fields of the persistent display; applies to "Show"</description>
+  </element>
+  <element name="mainField2">
+    <description>The second line of first set of main fields of the persistent display; applies to "Show"</description>
+  </element>
+  <element name="mainField3">
+    <description>The first line of second set of main fields of persistent display; applies to "Show"</description>
+  </element>
+  <element name="mainField4">
+    <description>The second line of second set of main fields of the persistent display; applies to "Show"</description>
+  </element>
+  <element name="statusBar">
+    <description>The status bar on Nav; applies to "Show"</description>
+  </element>
+  <element name="mediaClock">
+    <description>Text value for MediaClock field; applies to "Show"</description>
+  </element>
+  <element name="mediaTrack">
+    <description>The track field of NGN type ACMs. This field is only available for media applications; applies to "Show"</description>
+  </element>
+  <element name="alertText1">
+    <description>The first line of the alert text field; applies to "Alert"</description>
+  </element>
+  <element name="alertText2">
+    <description>The second line of the alert text field; applies to "Alert"</description>
+  </element>
+  <element name="alertText3">
+    <description>The third line of the alert text field; applies to "Alert"</description>
+  </element>
+  <element name="scrollableMessageBody">
+    <description>Long form body of text that can include newlines and tabs; applies to "ScrollableMessage"</description>
+  </element>
+  <element name="initialInteractionText">
+    <description> First line suggestion for a user response (in the case of VR enabled interaction</description>
+  </element>
+  <element name="navigationText1">
+    <description> First line of navigation text</description>
+  </element>
+  <element name="navigationText2">
+    <description> Second line of navigation text</description>
+  </element>
+  <element name="ETA">
+    <description> Estimated Time of Arrival time for navigation</description>
+  </element>
+  <element name="totalDistance">
+    <description> Total distance to destination for navigation</description>
+  </element>
+  <element name="navigationText">
+    <description>Navigation text for UpdateTurnList.</description>
+  </element>
+  <element name="audioPassThruDisplayText1">
+    <description> First line of text for audio pass thru</description>
+  </element>
+  <element name="audioPassThruDisplayText2">
+    <description> Second line of text for audio pass thru</description>
+  </element>
+  <element name="sliderHeader">
+    <description> Header text for slider</description>
+  </element>
+  <element name="sliderFooter">
+    <description> Footer text for slider</description>
+  </element>
+</enum>
+
+<enum name="MediaClockFormat">
+  <element name="CLOCK1">
+    <description>
+      minutesFieldWidth = 2;minutesFieldMax = 19;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 19;maxMinutes = 59;maxSeconds = 59;
+      used for Type II and CID headunits
+    </description>
+  </element>
+  <element name="CLOCK2">
+    <description>
+      minutesFieldWidth = 3;minutesFieldMax = 199;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 59;maxMinutes = 59;maxSeconds = 59;
+    used for Type V headunit
+  </description>
+  </element>
+  <element name="CLOCK3">
+    <description>
+      minutesFieldWidth = 2;minutesFieldMax = 59;secondsFieldWidth = 2;secondsFieldMax = 59;maxHours = 9;maxMinutes = 59;maxSeconds = 59;
+    used for GEN1.1 MFD3/4/5 headunits
+  </description>
+  </element>
+  <element name="CLOCKTEXT1">
+    <description>
+      5 characters possible
+      Format:      1|sp   c   :|sp   c   c
+      1|sp : digit "1" or space
+      c    : character out of following character set: sp|0-9|[letters, see TypeII column in XLS. See [@TODO: create file ref]]
+      :|sp : colon or space
+    used for Type II headunit
+  </description>
+  </element>
+  <element name="CLOCKTEXT2">
+    <description>
+      5 chars possible
+      Format:      1|sp   c   :|sp   c   c
+      1|sp : digit "1" or space
+      c    : character out of following character set: sp|0-9|[letters, see CID column in XLS. See [@TODO: create file ref]]
+      :|sp : colon or space
+    used for CID headunit
+    NOTE: difference between CLOCKTEXT1 and CLOCKTEXT2 is the supported character set
+  </description>
+  </element>
+  <element name="CLOCKTEXT3">
+    <description>
+      6 chars possible
+      Format:      1|sp   c   c   :|sp   c   c
+      1|sp : digit "1" or space
+      c    : character out of following character set: sp|0-9|[letters, see Type 5 column in XLS]. See [@TODO: create file ref]
+      :|sp : colon or space
+    used for Type V headunit
+  </description>
+  </element>
+  <element name="CLOCKTEXT4">
+    <description>
+      6 chars possible
+      Format:      c   :|sp   c   c   :   c   c
+      :|sp : colon or space
+      c    : character out of following character set: sp|0-9|[letters].
+    used for GEN1.1 MFD3/4/5 headunits
+  </description>
+  </element>
+</enum>
+
 <struct name="ButtonCapabilities">
     <description>Contains information about a button's capabilities.</description>
-    <param name="name" type="ButtonName" mandatory="true"/>
+    <param name="name" type="Common.ButtonName" mandatory="true"/>
     <param name="shortPressAvailable" type="Boolean" mandatory="true">
         <description>The button supports a short press. Whenever the button is pressed short, onButtonPressed(SHORT) will be invoked.</description>
     </param>
@@ -388,14 +441,20 @@
     </param>
 </struct>
 
+<struct name="Image">
+  <param name="path" maxlength="65535" type="String" mandatory="true">
+    <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
+  </param>
+</struct>
+
 <struct name="SoftButton">
-    <param name="type" type="SoftButtonType" mandatory="true">
+    <param name="type" type="Common.SoftButtonType" mandatory="true">
       <description>Describes, whether it is text, highlighted text, icon, or dynamic image. See softButtonType</description>
     </param>
     <param name="text" maxlength="500" type="String" mandatory="false">
       <description>Optional text to display (if defined as TEXT or BOTH)</description>
     </param>
-    <param name="image" type="Image" mandatory="false">
+    <param name="image" type="Common.Image" mandatory="false">
       <description>Optional image struct for SoftButton (if defined as IMAGE or BOTH)</description>
     </param>
     <param name="isHighlighted" type="Boolean" mandatory="false">
@@ -405,16 +464,10 @@
     <param name="softButtonID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Value which is returned via OnButtonPress / OnButtonEvent</description>
     </param>
-    <param name="systemAction" type="SystemAction" mandatory="false">
+    <param name="systemAction" type="Common.SystemAction" mandatory="false">
       <description>Parameter indicating whether selecting a SoftButton shall call a specific system action.  This is intended to allow Notifications to bring the callee into full / focus; or in the case of persistent overlays, the overlay can persist when a SoftButton is pressed.</description>
     </param>
  </struct>
-
-<struct name="Image">
-  <param name="path" maxlength="65535" type="String" mandatory="true">
-    <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
-  </param>
-</struct>
 
 <struct name="TTSChunk">
     <description>A TTS chunk, that consists of the text/phonemes to speak</description>
@@ -441,14 +494,14 @@
     <param name="appId" type="Integer" mandatory="true">
       <description>Unique(during ignition cycle) id of application. To be used in all commands sent by application for identification.</description>
     </param>
-    <param name="hmiDisplayLanguageDesired" type="Language" mandatory="true">
+    <param name="hmiDisplayLanguageDesired" type="Common.Language" mandatory="true">
       <description>Current app’s expected display language</description>
     </param>
     <param name="isMediaApplication" type="Boolean" mandatory="true">
       <description>Indicates if the application is a media or a non-media application.</description>
       <description>Only media applications will be able to stream audio to Sync that is audible outside of the BT media source.</description>
     </param>
-    <param name="appType" type="AppType" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="appType" type="Common.AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>List of all applicable app types stating which classifications to be given to the app.</description>
       <description>e.g. for platforms like GEN2, this will determine which "corner(s)" the app can populate.</description>
     </param>
@@ -475,18 +528,18 @@
   <description>A choice is an option given to the user which can be selected either by menu, or through voice recognition system.</description>
   <param name="choiceID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true"/>
   <param name="menuName" type="String" maxlength="500" mandatory="false"/>
-  <param name="image" type="Image" mandatory="false"/>
+  <param name="image" type="Common.Image" mandatory="false"/>
 </struct>
 
 <struct name="VrHelpItem">
   <param name="text" maxlength="500" type="String">
     <description>Text to display for VR Help item</description>
   </param>
-  <param name="image" type="Image">
+  <param name="image" type="Common.Image">
     <description>Image struct for VR Help item</description>
   </param>
-  <param name="position" type="Integer" minvalue="1" maxvalue="8"> 
-    <description>Position to display item in VR Help list</description>    
+  <param name="position" type="Integer" minvalue="1" maxvalue="8">
+    <description>Position to display item in VR Help list</description>
   </param>
 </struct>
 
@@ -499,17 +552,26 @@
   <param name="seconds" type="Integer" minvalue="0" maxvalue="59" />
 </struct>
 
+<struct name="TextField">
+  <param name="name" type="TextFieldName">
+    <description>The name that identifies the field. See TextFieldName.</description>
+  </param>
+</struct>
+
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
-  <param name="displayType" type="DisplayType">
+  <param name="displayType" type="Common.DisplayType">
     <description>The type of the display. See DisplayType</description>
   </param>
-  <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true">
+  <param name="textFields" type="Common.TextField" minsize="1" maxsize="100" array="true">
     <description>A set of all fields that support text data. See TextField</description>
   </param>
-  <param name="mediaClockFormats" type="MediaClockFormat" minsize="1" maxsize="100" array="true">
+  <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
+  <param name="graphicSupported" type="Boolean">
+      <description>The display's persistent screen supports referencing image.</description>
+    </param>
 </struct>
 
 <struct name="SoftButtonCapabilities">
@@ -533,294 +595,16 @@
 </struct>
 
 <struct name="Turn">
-  <param name="navigationText" type="String" maxlength="500" mandatory="false">
+  <param name="navigationText" type="TextFieldStruct" mandatory="false">
+    <description>Uses navigationText from TextFieldStruct.</description>
   </param>
-  <param name="turnIcon" type="Image" mandatory="false">
-  </param>
-</struct>
-
-<struct name="VehicleType">
-  <param name="make" type="String" maxlength="500" mandatory="false">
-    <description>Make of the vehicle</description>
-    <description>e.g. Ford</description>
-  </param>
-  <param name="model" type="String" maxlength="500" mandatory="false">
-    <description>Model of the vehicle</description>
-    <description>e.g. Fiesta</description>
-  </param>
-  <param name="modelYear" type="String" maxlength="500" mandatory="false">
-    <description>Model Year of the vehicle</description>
-    <description>e.g. 2013</description>
-  </param>
-  <param name="trim" type="String" maxlength="500" mandatory="false">
-    <description>Trim of the vehicle</description>
-    <description>e.g. SE</description>
+  <param name="turnIcon" type="Common.Image" mandatory="false">
   </param>
 </struct>
 
-<struct name="MyKey">
-  <param name="e911Override" type="VehicleDataStatus" mandatory="true">
-    <description>Indicates whether e911 override is on.  References signal "MyKey_e911Override_St". See VehicleDataStatus.</description>
-  </param>
-</struct>
-
-<struct name="ClusterModeStatus">
-  <param name="powerModeActive" type="Boolean">
-    <description>References signal "PowerMode_UB".</description>
-  </param>
-  <param name="powerModeQualificationStatus" type="PowerModeQualificationStatus">
-    <description>References signal "PowerModeQF". See PowerModeQualificationStatus.</description>
-  </param>    
-  <param name="carModeStatus" type="CarModeStatus">
-    <description>References signal "CarMode". See CarMode.</description>
-  </param>
-  <param name="powerModeStatus" type="PowerModeStatus">
-    <description>References signal "PowerMode". See PowerMode.</description>
-  </param>    
-</struct>
-
-<struct name="EmergencyEvent">
-  <param name="emergencyEventType" type="EmergencyEventType">
-    <description>References signal "VedsEvntType_D_Ltchd". See EmergencyEventType.</description>
-  </param>
-  <param name="fuelCutoffStatus" type="FuelCutoffStatus">
-    <description>References signal "RCM_FuelCutoff". See FuelCutoffStatus.</description>
-  </param>    
-  <param name="rolloverEvent" type="VehicleDataEventStatus">
-    <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="maximumChangeVelocity" type="VehicleDataEventStatus">
-    <description>References signal "VedsMaxDeltaV_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="multipleEvents" type="VehicleDataEventStatus">
-    <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-</struct>
-
-<struct name="AirbagStatus">
-  <param name="driverAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="driverSideAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsDrvSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="driverCurtainAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsDrvCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="passengerAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsPasBag_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="passengerCurtainAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsPasCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="driverKneeAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsKneeDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="passengerSideAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsPasSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>    
-  <param name="passengerKneeAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsKneePasBag_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-</struct>
-
-<struct name="ECallInfo">
-  <param name="eCallNotificationStatus" type="VehicleDataNotificationStatus">
-    <description>References signal "eCallNotification_4A". See VehicleDataNotificationStatus.</description>
-  </param>    
-  <param name="auxECallNotificationStatus" type="VehicleDataNotificationStatus">
-    <description>References signal "eCallNotification". See VehicleDataNotificationStatus.</description>
-  </param>    
-  <param name="eCallConfirmationStatus" type="ECallConfirmationStatus">
-    <description>References signal "eCallConfirmation". See ECallConfirmationStatus.</description>
-  </param>    
-</struct>
-
-<struct name="DeviceStatus">
-  <param name="voiceRecOn" type="Boolean">
-    <description>References signal "CPM_VoiceRec_STAT".</description>
-  </param>    
-  <param name="btIconOn" type="Boolean">
-    <description>References signal "BT_ICON".</description>
-  </param>    
-  <param name="callActive" type="Boolean">
-    <description>References signal "CPM_Call_Active_STAT".</description>
-  </param>    
-  <param name="phoneRoaming" type="Boolean">
-    <description>References signal "CPM_Phone_Roaming_STAT".</description>
-  </param>    
-  <param name="textMsgAvailable" type="Boolean">
-    <description>References signal "CPM_TextMsg_AVAL".</description>
-  </param>    
-  <param name="battLevelStatus" type="DeviceLevelStatus">
-    <description>Device battery level status.  References signal "CPM_Batt_Level_STAT". See DeviceLevelStatus.</description>
-  </param>    
-  <param name="stereoAudioOutputMuted" type="Boolean">
-    <description>References signal "CPM_Stereo_Audio_Output".</description>
-  </param>    
-  <param name="monoAudioOutputMuted" type="Boolean">
-    <description>References signal "CPM_Mono_Audio_Output".</description>
-  </param>    
-  <param name="signalLevelStatus" type="DeviceLevelStatus">
-    <description>Device signal level status.  References signal "CPM_Signal_Strength_STAT". See DeviceLevelStatus.</description>
-  </param>    
-  <param name="primaryAudioSource" type="PrimaryAudioSource">
-    <description>References signal "CPM_Stereo_PAS_Source". See PrimaryAudioSource.</description>
-  </param>
-  <param name="eCallEventActive" type="Boolean">
-    <description>References signal "eCall_Event".</description>
-  </param>          
-</struct>
-
-<struct name="BodyInformation">
-  <param name="parkBrakeActive" type="Boolean">
-    <description>References signal "PrkBrkActv_B_Actl".</description>
-  </param>    
-  <param name="ignitionStableStatus" type="IgnitionStableStatus">
-    <description>References signal "Ignition_Switch_Stable". See IgnitionStableStatus.</description>
-  </param>    
-  <param name="ignitionStatus" type="IgnitionStatus">
-    <description>References signal "Ignition_status". See IgnitionStatus.</description>
-  </param>    
-</struct>
-
-<struct name="BeltStatus">
-  <param name="driverBeltDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsDrvBelt_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="passengerBeltDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsPasBelt_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="passengerBuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw1PasBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="driverBuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw1DrvBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="leftRow2BuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw2lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="passengerChildDetected" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw1PasChld_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="rightRow2BuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw2rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="middleRow2BuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw2mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="middleRow3BuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw3mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="leftRow3BuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw3lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="rightRow3BuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw3rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="leftRearInflatableBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw2lRib_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="rightRearInflatableBelted" type="VehicleDataEventStatus">  
-    <description>References signal "VedsRw2rRib_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="middleRow1BeltDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw1mBelt_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-  <param name="middleRow1BuckleBelted" type="VehicleDataEventStatus">
-    <description>References signal "VedsRw1mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-  </param>
-</struct>
-
-<struct name="TireStatus">
-  <description>The status and pressure of the tires.</description>
-  <param name="pressureTelltale" type="WarningLightStatus">
-    <description>Status of the Tire Pressure Telltale. See WarningLightStatus.</description>
-  </param>
-  <param name="leftFront" type="SingleTireStatus">
-    <description>The status of the left front tire.</description>
-  </param>
-  <param name="rightFront" type="SingleTireStatus">
-    <description>The status of the right front tire.</description>
-  </param>
-  <param name="leftRear" type="SingleTireStatus">
-    <description>The status of the left rear tire.</description>
-  </param>
-  <param name="rightRear" type="SingleTireStatus">
-    <description>The status of the right rear tire.</description>
-  </param>
-  <param name="innerLeftRear" type="SingleTireStatus">
-    <description>The status of the inner left rear.</description>
-  </param>
-  <param name="innerRightRear" type="SingleTireStatus">
-    <description>The status of the inner right rear.</description>
-  </param>
-</struct>
-
-<struct name="GPSData">
-  <description>Struct with the GPS data.</description>
-  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180">
-  </param>
-  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90">
-  </param>
-  <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100">
-    <description>The current UTC year.</description>
-  </param>
-  <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12">
-    <description>The current UTC month.</description>
-  </param>
-  <param name="utcDay" type="Integer" minvalue="1" maxvalue="31">
-    <description>The current UTC day.</description>
-  </param>
-  <param name="utcHours" type="Integer" minvalue="0" maxvalue="23">
-    <description>The current UTC hour.</description>
-  </param>
-  <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59">
-    <description>The current UTC minute.</description>
-  </param>
-  <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59">
-    <description>The current UTC second.</description>
-  </param>
-  <param name="compassDirection" type="CompassDirection">
-    <description>See CompassDirection.</description>
-  </param>
-  <param name="pdop" type="Integer" minvalue="0" maxvalue="31">
-    <description>PDOP.</description>
-  </param>
-  <param name="hdop" type="Integer" minvalue="0" maxvalue="31">
-    <description>HDOP.</description>
-  </param>
-  <param name="vdop" type="Integer" minvalue="0" maxvalue="31">
-    <description>VDOP.</description>
-  </param>
-  <param name="actual" type="Boolean">
-    <description>True, if actual.</description>
-    <description>False, if infered.</description>
-  </param>
-  <param name="satellites" type="Integer" minvalue="0" maxvalue="31">
-    <description>Number of satellites in view</description>
-  </param>
-  <param name="dimension" type="Dimension">
-    <description>See Dimension</description>
-  </param>
-  <param name="altitude" type="Integer" minvalue="-10000" maxvalue="10000">
-    <description>Altitude in meters</description>
-  </param>
-  <param name="heading" type="Float" minvalue="0" maxvalue="359.99">
-    <description>The heading. North is 0. Resolution is 0.01</description>
-  </param>
-  <param name="speed" type="Integer" minvalue="0" maxvalue="400">
-    <description>The speed in KPH</description>
-  </param>
-</struct>
-
-<struct name="DTC">
-  <param name="identifier" type="String" maxlength="500">
-    <description>String containing hexadecimal identifier as well as other common names.</description>
-  </param>
-  <param name="statusByte" type="String" maxlength="500">
-    <description>Hexadecimal byte string.</description>
-  </param>
+<struct name="TextFieldStruct">
+  <param name="fieldName" type="TextFieldName" mandatory="true"/>
+  <param name="fieldText" type="String" maxlength="500" mandatory="true"/>
 </struct>
 
 </interface>
@@ -859,6 +643,9 @@
 </interface>
 
 <interface name="BasicCommunication" version="1.0" date="2013-04-12">
+    <function name="OnReady" messagetype="notification">
+      <description>HMI notifies SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
+    </function>
     <function name="GetDeviceList" messagetype="request">
         <description>Request from HMI to SmartDeviceLink to get the list of devices</description>
     </function>
@@ -873,7 +660,7 @@
         <description>This methos is usually invoked by HMI to get list of registered apps.</description>
     </function>
     <function name="GetAppList" messagetype="response">
-        <param name="appList" type="HMIApplication" mandatory="false" array="true" minsize="1"/>
+        <param name="appList" type="Common.HMIApplication" mandatory="false" array="true" minsize="1"/>
     </function>
     <function name="ActivateApp" messagetype="request">
       <description>Invoked by UI component when user clicks on app in the list of registered apps. Application is shown on recieving successful response.</description>
@@ -888,13 +675,13 @@
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of deactivated application.</description>
       </param>
-      <param name="reason" type="DeactivateReason" mandatory="true">
+      <param name="reason" type="Common.DeactivateReason" mandatory="true">
         <description>Specifies the functionality user switched to.</description>
       </param>
     </function>
     <function name="OnAppRegistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about new application registered.</description>
-      <param name="application" type="HMIApplication" mandatory="true"/>
+      <param name="application" type="Common.HMIApplication" mandatory="true"/>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
@@ -911,7 +698,7 @@
     </function>
     <function name="ExitAllApplications" messagetype="request">
       <description>Sent by HMI to SDL to close all registered applications.</description>
-      <param name="reason" type="ApplicationsCloseReason" mandatory="true">
+      <param name="reason" type="Common.ApplicationsCloseReason" mandatory="true">
         <description>Specifies reason for exiting all apllications.</description>
       </param>
     </function>
@@ -924,11 +711,8 @@
       <description>If no response received SDL suggest that mixing audio is not supported</description>
       <param name="attenuatedSupported" type="Boolean" mandatory="true"/>
     </function>
-    <function name="SupportsMemoryManagement" messageType="request">
-      <description>Request from SDL to HMI to find out whether HMI is going to clean all data connected with SDL system (application menus, settings, commands etc) or SDL should send clearing commands explicitely. Used for optimization.</description>
-    </function>
-    <function name="SupportsMemoryManagement" messagetype="response">
-      <param name="deletingSupported" type="Boolean" mandatory="true"/>
+    <function name="PlayTone" messagetype="notification">
+      <description>Sent by SDL to HMI to notify that the tone should be played.</description>
     </function>
 </interface>
 
@@ -994,7 +778,7 @@
   </function>
   <function name="OnLanguageChange" messagetype="notification">
     <description>Notification from HMI to SmartDeviceLink about change of  language.</description>
-    <param name="language" type="Language" mandatory="true">
+    <param name="language" type="Common.Language" mandatory="true">
       <description>Language VR switched to.</description>
     </param>
   </function>
@@ -1002,7 +786,7 @@
     <description>Method should be invoked at system startup. Response provides information about VR supported languages.</description>
   </function>
   <function name="GetSupportedLanguages" messagetype="response">
-    <param name="languages" type="Language" mandatory="true" array="true" minsize="1" maxsize="100">
+    <param name="languages" type="Common.Language" mandatory="true" array="true" minsize="1" maxsize="100">
       <description>List of languages supported in VR.</description>
     </param>
   </function>
@@ -1010,7 +794,7 @@
     <description>Request from SmartDeviceLink to HMI to get currently active  VR language</description>
   </function>
   <function name="GetLanguage" messagetype="response">
-    <param name="language" type="Language" mandatory="true"/>
+    <param name="language" type="Common.Language" mandatory="true"/>
   </function>
 </interface>
 
@@ -1026,7 +810,7 @@
   </function>
   <function name="Speak" messagetype="request">
     <description>RPC from SDL to TTS to record text.</description>
-    <param name="ttsChunks" type="TTSChunk" mandatory="true" array="true" minsize="1" maxsize="100">
+    <param name="ttsChunks" type="Common.TTSChunk" mandatory="true" array="true" minsize="1" maxsize="100">
       <description>List of strings to be recorded.</description>
     </param>
     <param name="appId" type="Integer" mandatory="true">
@@ -1043,7 +827,7 @@
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language for app.</description>
-    <param name="language" type="Language" mandatory="true">
+    <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
     </param>
     <param name="appId" type="Integer" mandatory="true">
@@ -1054,7 +838,7 @@
   </function>
   <function name="OnLanguageChange" messagetype="notification">
     <description>Notification from HMI to SmartDeviceLink about change of  language.</description>
-    <param name="language" type="Language" mandatory="true">
+    <param name="language" type="Common.Language" mandatory="true">
       <description>Language TTS switched to.</description>
     </param>
   </function>
@@ -1062,7 +846,7 @@
     <description>Method should be invoked at system startup. Response provides information about TTS supported languages.</description>
   </function>
   <function name="GetSupportedLanguages" messagetype="response">
-    <param name="languages" type="Language" mandatory="true" array="true" minsize="1" maxsize="100">
+    <param name="languages" type="Common.Language" mandatory="true" array="true" minsize="1" maxsize="100">
       <description>List of languages supported in TTS.</description>
     </param>
   </function>
@@ -1070,32 +854,37 @@
     <description>Request from SmartDeviceLink to HMI to get currently active  TTS language</description>
   </function>
   <function name="GetLanguage" messagetype="response">
-    <param name="language" type="Language" mandatory="true"/>
+    <param name="language" type="Common.Language" mandatory="true"/>
   </function>
+  <function name="SetGlobalProperties" messagetype="request">
+      <description>Sets some properties for the application initiated request.</description>
+      <param name="helpPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+        <description>
+          The help prompt.
+          An array of text chunks of type TTSChunk. See TTSChunk.
+          The array must have at least one item.
+        </description>
+      </param>
+      <param name="timeoutPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+        <description>
+          Help text for a wait timeout.
+          An array of text chunks of type TTSChunk. See TTSChunk.
+          The array must have at least one item.
+        </description>
+      </param>
+    </function>
 </interface>
 
 <interface name="UI" version="1.0" date="2013-04-16">
     <function name="Alert" messagetype="request">
         <description>Shows an alert which typically consists of text-to-speech message and text on the display. At least either alertText1, alertText2 or TTSChunks need to be provided.</description>
-        <param name="alertText1" type="String" mandatory="false" maxlength="500">
-          <description>The first line of the alert text field</description>
-        </param>
-        <param name="alertText2" type="String" mandatory="false" maxlength="500">
-          <description>The second line of the alert text field</description>
-        </param>
-        <param name="alertText3" type="String" mandatory="false" maxlength="500">
-          <description>The third line of the alert text field</description>
-        </param>
-        <param name="ttsChunks" type="TTSChunk" mandatory="false" minsize="1" maxsize="100" array="true">
-          <description>An array of text chunks of type TTSChunk. See TTSChunk</description>
+        <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
+          <description>Array of lines of alert text fields. See TextFieldStruct. Uses alertText1, alertText2, alertText3.</description>
         </param>
         <param name="duration" type="Integer" mandatory="false" minvalue="3000" maxvalue="10000" defvalue="5000">
           <description>Timeout in milliseconds. Typical timeouts are 3-5 seconds. If omitted, timeout is set to 5s.</description>
         </param>
-        <param name="playTone" type="Boolean" mandatory="false">
-          <description>Defines if tone should be played. Tone is played before TTS. If omitted, no tone is played.</description>
-        </param>
-        <param name="softButtons" type="SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
+        <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
           <description>App defined SoftButtons</description>
         </param>
         <param name="appId" type="Integer" mandatory="true">
@@ -1108,50 +897,28 @@
       </param>
     </function>
     <function name="Show" messagetype="request">
-      <param name="mainField1" type="String" mandatory="false" maxlength="500">
-        <description>The text that should be displayed in a single or upper display line.</description>
-        <description>If this text is not set, the text of mainField1 stays unchanged.</description>
-        <description>If this text is empty "", the field will be cleared.</description>
+      <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="7">
+        <description>Array of lines of show text fields. See TextFieldStruct. Uses mainField1, mainField2, mainField3, mainField4. If some field is not set, the corresponding text stays unchanged. If field's text is empty "", the field will be cleared.
+          mainField1: The text that should be displayed in a single or upper display line.
+          mainField2: The text that should be displayed on the second display line.
+          mainField3: The text that should be displayed on the second "page" first display line.
+          mainField4: The text that should be displayed on the second "page" second display line.
+          statusBar: statusBar.
+          mediaClock: Text value for MediaClock field. Has to be properly formatted by Mobile App according to Sync capabilities.
+          mediaTrack: The text that should be displayed in the track field. This field is only valid for media applications on NGN type ACMs.
+        </description>
       </param>
-      <param name="mainField2" type="String" maxlength="500" mandatory="false">
-        <description>The text that should be displayed on the second display line.</description>
-        <description>If this text is not set, the text of mainField2 stays unchanged.</description>
-        <description>If this text is empty "", the field will be cleared.</description>
-      </param>
-      <param name="mainField3" type="String" maxlength="500" mandatory="false">
-        <description>The text that should be displayed on the second "page" first display line.</description>
-        <description>If this text is not set, the text of mainField3 stays unchanged.</description>
-        <description>If this text is empty "", the field will be cleared.</description>
-      </param>
-      <param name="mainField4" type="String" maxlength="500" mandatory="false">
-        <description>The text that should be displayed on the second "page" second display line.</description>
-        <description>If this text is not set, the text of mainField4 stays unchanged.</description>
-        <description>If this text is empty "", the field will be cleared.</description>
-      </param>
-      <param name="alignment" type="TextAlignment" mandatory="false">
+      <param name="alignment" type="Common.TextAlignment" mandatory="false">
         <description>Specifies how mainField1 and mainField2 texts should be aligned on display.</description>
         <description>If omitted, texts will be centered</description>
       </param>
-      <param name="statusBar" type="String" maxlength="500" mandatory="false">
-        <description>Requires investigation regarding the nav display capabilities. Potentially lower lowerStatusBar, upperStatusBar, titleBar, etc.</description>
-      </param>
-      <param name="mediaClock" type="String" maxlength="500" mandatory="false">
-        <description>Text value for MediaClock field. Has to be properly formatted by Mobile App according to Sync capabilities.</description>
-        <description>If media clock was set previously resets it.</description>
-      </param>
-      <param name="mediaTrack" type="String" maxlength="500" mandatory="false">
-        <description>The text that should be displayed in the track field.</description>
-        <description>This field is only valid for media applications on NGN type ACMs.</description>
-        <description>If this text is not set, the text of mediaTrack stays unchanged.</description>
-        <description>If this text is empty "", the field will be cleared.</description>
-      </param>
-      <param name="graphic" type="Image" mandatory="false">
+      <param name="graphic" type="Common.Image" mandatory="false">
         <description>Path to optional image. If omitted on supported displays, the displayed graphic shall not change.</description>
       </param>
-      <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
+      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
         <description>App defined SoftButtons.</description>
         <description>If omitted on supported displays, the currently displayed SoftButton values will not change.</description>
-      </param>      
+      </param>
       <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="6" array="true" mandatory="false">
         <description>App labeled on-screen presets (i.e. GEN2).</description>
         <description>If omitted on supported displays, the presets will be shown as not defined.</description>
@@ -1164,10 +931,10 @@
       <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
         <description>ID of the command to add.</description>
       </param>
-      <param name="menuParams" type="MenuParams" mandatory="false">
+      <param name="menuParams" type="Common.MenuParams" mandatory="false">
         <description>Optional sub value containing menu parameters</description>
       </param>
-      <param name="cmdIcon" type="Image" mandatory="false">
+      <param name="cmdIcon" type="Common.Image" mandatory="false">
          <description>Image struct determining whether static or dynamic icon.</description>
          <description>If omitted on supported displays, no (or the default if applicable) icon shall be displayed.</description>
       </param>
@@ -1193,16 +960,8 @@
       <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
         <description>ID of the sub menu to add. Unique for the application.</description>
       </param>
-      <param name="position" type="Integer" minvalue="0" maxvalue="1000" defvalue="1000" mandatory="false">
-        <description>Position within the items that are are at top level of the in application menu.</description>
-        <description>0 will insert at the front.</description>
-        <description>1 will insert at the second position.</description>
-        <description>If position is greater or equal than the number of items on top level, the sub menu will be appended to the end.</description>
-        <description>Position of any submenu will always be located before the return and exit options</description>
-        <description>If this param was omitted the entry will be added at the end.</description>
-      </param>
-      <param name="menuName" maxlength="500" type="String" mandatory="true">
-        <description>Text to show in the menu for this sub menu.</description>
+      <param name="menuParams" type="Common.MenuParams" mandatory="true">
+        <description>Position and name of the added menu.'parent' field is ommited for this API. </description>
       </param>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of application that requested this RPC.</description>
@@ -1247,8 +1006,8 @@
     </function>
     <function name="PerformInteraction" messagetype="request">
       <description>Triggers an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
-      <param name="initialText" type="String" maxlength="500" mandatory="true">
-        <description>Text to be displayed first.</description>
+      <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
+        <description>Uses initialInteractionText. See TextFieldStruct.</description>
       </param>
       <param name="interactionChoiceSetIDList" type="Integer" minsize="1" maxsize="100" minvalue="0" maxvalue="2000000000" array="true" mandatory="true">
         <description>List of interaction choice set IDs to use with an interaction.</description>
@@ -1256,10 +1015,6 @@
       <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="false">
         <description>Timeout in milliseconds.</description>
         <description>If omitted a standard value of 10000 milliseconds is used.</description>
-      </param>
-      <param name="vrHelp" type="VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
-        <description>Ability to send suggested VR Help Items to display on-screen during Perform Interaction.</description>
-        <description>If omitted on supported displays, the default SYNC generated list of suggested choices shall be displayed.</description>
       </param>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of application that requested this RPC.</description>
@@ -1272,11 +1027,11 @@
     </function>
     <function name="SetMediaClockTimer" messagetype="request">
       <description>Sets the initial media clock value and automatic update method.</description>
-      <param name="startTime" type="TimeFormat" mandatory="false">
+      <param name="startTime" type="Common.TimeFormat" mandatory="false">
         <description>startTime must be provided for "COUNTUP" and "COUNTDOWN"</description>
         <description>startTime will be ignored for "PAUSE", "RESUME", and "CLEAR"</description>
       </param>
-      <param name="updateMode" type="UpdateMode" mandatory="true">
+      <param name="updateMode" type="Common.UpdateMode" mandatory="true">
         <description>Enumeration to control the media clock.</description>
         <description>In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.</description>
       </param>
@@ -1292,7 +1047,7 @@
         <description>VR Help Title text.</description>
         <description>If omitted on supported displays, the default SYNC help title shall be used.</description>
       </param>
-      <param name="vrHelp" type="VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
+      <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>If omitted on supported displays, the default SYNC generated help items shall be used.</description>
         <description>If the list of VR Help Items contains nonsequential positions (e.g. [1,2,4]), the RPC shall be rejected.</description>
       </param>
@@ -1302,7 +1057,7 @@
     </function>
     <function name="SetGlobalProperties" messagetype="response">
     </function>
-    <function name="OnCommand" messagetype="">
+    <function name="OnCommand" messagetype="notification">
       <description>Notification is initiated by HMI on user choosing menu item.</description>
       <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
         <description>Command ID, which is related to a specific menu entry.</description>
@@ -1313,21 +1068,21 @@
     </function>
     <function name="OnSystemContext" messagetype="notification">
       <description>Notification initiated by HMI when user changes context: goes to menu (in-application menu or system menu); switches to VR; pop-up appears on screen etc.</description>
-      <param name="systemContext" type="SystemContext" mandatory="true"></param>
+      <param name="systemContext" type="Common.SystemContext" mandatory="true"></param>
     </function>
     <function name="GetCapabilities" messagetype="request">
       <description>Method is invoked at system startup by SDL to request information about UI capabilities of HMI.</description>
     </function>
     <function name="GetCapabilities" messagetype="response">
-      <param name="displayCapabilities" type="DisplayCapabilities" mandatory="true"/>
-      <param name="hmiZoneCapabilities" type="HmiZoneCapabilities" mandatory="true"/>
-      <param name="softButtonCapabilities" type="SoftButtonCapabilities" mandatory="false">
+      <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="true"/>
+      <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
+      <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
         <description>If returned, the platform supports on-screen SoftButtons.</description>
       </param>
     </function>
     <function name="ChangeRegistration" messagetype="request">
       <description>Request from SmartDeviceLink to HMI to change language for app.</description>
-      <param name="language" type="Language" mandatory="true">
+      <param name="language" type="Common.Language" mandatory="true">
         <description>The language application wants to switch to.</description>
       </param>
       <param name="appId" type="Integer" mandatory="true">
@@ -1338,7 +1093,7 @@
     </function>
     <function name="OnLanguageChange" messagetype="notification">
       <description>Notification from HMI to SmartDeviceLink about change of  language.</description>
-      <param name="language" type="Language" mandatory="true">
+      <param name="language" type="Common.Language" mandatory="true">
         <description>Language UI switched to.</description>
       </param>
     </function>
@@ -1346,7 +1101,7 @@
       <description>Method should be invoked at system startup. Response provides information about UI supported languages.</description>
     </function>
     <function name="GetSupportedLanguages" messagetype="response">
-      <param name="languages" type="Language" mandatory="true" array="true" minsize="1" maxsize="100">
+      <param name="languages" type="Common.Language" mandatory="true" array="true" minsize="1" maxsize="100">
         <description>List of languages supported in UI.</description>
       </param>
     </function>
@@ -1354,15 +1109,15 @@
       <description>Request from SmartDeviceLink to HMI to get currently active  UI language</description>
     </function>
     <function name="GetLanguage" messagetype="response">
-      <param name="language" type="Language" mandatory="true"/>
+      <param name="language" type="Common.Language" mandatory="true"/>
     </function>
     <function name="OnDriverDistraction" messagetype="">
       <description>Notification is sent from HMI to SDL when interaction with head unit can badly reflect on drivers attention.</description>
-      <param name="state" type="DriverDistractionState" mandatory="true"/>
+      <param name="state" type="Common.DriverDistractionState" mandatory="true"/>
     </function>
     <function name="SetAppIcon" messagetype="request">
       <description>Used to set existing local file on SYNC as the app's icon.</description>
-      <param name="syncFileName" type="Image" mandatory="true"/>
+      <param name="syncFileName" type="Common.Image" mandatory="true"/>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of application that requested this RPC.</description>
       </param>
@@ -1407,13 +1162,13 @@
     </function>
     <function name="ScrollableMessage" messagetype="request">
       <description>Creates a full screen overlay containing a large block of formatted text that can be scrolled with up to 8 SoftButtons defined</description>
-      <param name="scrollableMessageBody" type="String" maxlength="500" mandatory="true">
-        <description>Body of text that can include newlines and tabs.</description>
+      <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
+        <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="false">
         <description>App defined timeout.</description>
       </param>
-      <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
+      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
         <description>App defined SoftButtons.</description>
         <description>If omitted on supported displays, only the system defined "Close" SoftButton will be displayed.</description>
       </param>
@@ -1424,13 +1179,12 @@
     <function name="ScrollableMessage" messagetype="response">
     </function>
     <function name="PerformAudioPassThru" messagetype="request">
-      <param name="audioPassThruDisplayText1" type="String" mandatory="false" maxlength="500">
-        <description>First line of text displayed during audio capture.</description>
+      <param name="audioPassThruDisplayTexts" type="Common.TextFieldStruct" mandatory="true" minsize="0" maxsize="2" array="true">
+        <description>Uses
+            audioPassThruDisplayText1: First line of text displayed during audio capture.
+            audioPassThruDisplayText2: Second line of text displayed during audio capture.</description>
       </param>
-      <param name="audioPassThruDisplayText2" type="String" mandatory="false" maxlength="500">
-        <description>Second line of text displayed during audio capture.</description>
-      </param>
-      <param name="maxDuration" type="Integer" minvalue="0" maxvalue="1000000" mandatory="false">
+      <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="false">
         <description>The maximum duration of audio recording in milliseconds. </description>
       </param>
     </function>
@@ -1441,17 +1195,33 @@
     </function>
     <function name="EndAudioPassThru" messagetype="response">
     </function>
+    <function name="IsReady" messagetype="request">
+      <description>Method should be invoked at system startup. Response provides information about presence of UI module and its readiness to cooperate with SDL.</description>
+    </function>
+    <function name="IsReady" messagetype="response">
+      <param name="availabe" type="Boolean" mandatory="true">
+        <description>If true then UI is present and ready to communicate with SDL.</description>
+      </param>
+    </function>
+    <function name="ClosePopUp" messagetype="request">
+      <description>Initiated by SDL to close currently active pop-up on HMI.</description>
+    </function>
+    <function name="ClosePopUp" messagetype="response">
+      <description>Provides result of operation.</description>
+    </function>
+</interface>
+
+<interface name="Navigation" version="1.0" date="2013-05-22">
     <function name="ShowConstantTBT" messagetype="request">
       <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
-      <param name="navigationText1" type="String" maxlength="500" mandatory="false">
+      <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="4">
+        <description>See TextFieldStruct. Uses:
+          navigationText1
+          navigationText2
+          ETA
+          totalDistance.</description>
       </param>
-      <param name="navigationText2" type="String" maxlength="500" mandatory="false">
-      </param>
-      <param name="eta" type="String" maxlength="500" mandatory="false">
-      </param>
-      <param name="totalDistance" type="String" maxlength="500" mandatory="false">
-      </param>
-      <param name="turnIcon" type="Image">
+      <param name="turnIcon" type="Common.Image">
       </param>
       <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
         <description>Distance till next maneuver (starting from) from previous maneuver.</description>
@@ -1465,7 +1235,7 @@
         <description>If and when a maneuver has completed while an AlertManeuver is active, the app must send this value set to TRUE in order to clear the AlertManeuver overlay.</description>
         <description>If omitted the value will be assumed as FALSE.</description>
       </param>
-      <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
+      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
         <description>Three dynamic SoftButtons available (second SoftButton is fixed to "Turns").</description>
         <description>If omitted on supported displays, the currently displayed SoftButton values will not change.</description>
       </param>
@@ -1477,7 +1247,7 @@
     </function>
     <function name="AlertManeuver" messagetype="request">
       <description>Request from SmartDeviceLinkCore to HMI to announce navigation maneuver</description>
-      <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
+      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
         <description>If omitted on supported displays, only the system defined "Close" SoftButton shall be displayed.</description>
       </param>
     </function>
@@ -1485,283 +1255,20 @@
     </function>
     <function name="UpdateTurnList" messagetype="request">
       <description>Request from SmartDeviceLinkCore to HMI to update turn list.</description>
-      <param name="turnList" type="Turn" minsize="1" maxsize="100" array="true" mandatory="true">
+      <param name="turnList" type="Common.Turn" minsize="1" maxsize="100" array="true" mandatory="true">
       </param>
-      <param name="softButtons" type="SoftButton" minsize="0" maxsize="1" array="true" mandatory="false">
+      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="1" array="true" mandatory="false">
         <description>If omitted on supported displays, app-defined SoftButton will be left blank.</description>
       </param>
     </function>
     <function name="UpdateTurnList" messagetype="response">
     </function>
     <function name="OnTBTClientState" messagetype="notification">
-      <description>Provides applications with notifications specific to the current TBT client status on the module</description>
-      <param name="state" type="TBTState">
+      <description>Provides applications with notifications specific to the current Turn-By-Turn client status on the module</description>
+      <param name="state" type="Common.TBTState">
         <description>Current State of TBT client</description>
       </param>
     </function>
-    <function name="OnReady" messagetype="notification">
-      <description>HMI notifies SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
-    </function>
-    <function name="ClosePopUp" messagetype="request">
-      <description>Initiated by SDL to close currently active pop-up on HMI.</description>
-    </function>
-    <function name="ClosePopUp" messagetype="response">
-      <description>Provides result of operation.</description>
-    </function>
-</interface>
-
-<interface name="VehicleInfo" version="1.0" date="2013-04-21">
-  <function name="GetVehicleType" messagetype="request">
-    <description>Request from SmartDeviceLinkCore to HMI to get info about the vehicle.</description>
-  </function>
-  <function name="GetVehicleType" messagetype="response">
-    <param name="vehicleType" type="VehicleType" mandatory="true"/>
-  </function>
-  <function name="GetVehicleData" messagetype="request">
-    <description>Request from SmartDeviceLinkCore to HMI for non periodic vehicle data.</description>
-    <param name="gps" type="Boolean" mandatory="false">
-      <description>See GPSData</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="speed" type="Boolean" mandatory="false">    
-      <description>The vehicle speed in kilometers per hour</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="rpm" type="Boolean" mandatory="false">        
-      <description>The number of revolutions per minute of the engine</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="fuelLevel" type="Boolean" mandatory="false">            
-      <description>The fuel level in the tank (percentage)</description>
-    </param>
-    <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
-    </param>
-    <param name="instantFuelConsumption" type="Boolean" mandatory="false">                
-      <description>The instantaneous fuel consumption in microlitres</description>
-    </param>
-    <param name="externalTemperature" type="Boolean" mandatory="false">                        
-      <description>The external temperature in degrees celsius.</description>
-    </param>
-    <param name="vin" type="Boolean" mandatory="false">                               
-      <description>Vehicle identification number.</description>
-    </param>
-    <param name="prndl" type="Boolean" mandatory="false">                                   
-      <description>See PRNDL.</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="tirePressure" type="Boolean" mandatory="false">                                       
-      <description>See TireStatus.</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="odometer" type="Boolean" mandatory="false">                                                       
-      <description>Odometer in km</description>
-    </param>
-    <param name="beltStatus" type="Boolean" mandatory="false">                                                           
-      <description>The status of the seat belts.</description>
-    </param>
-    <param name="bodyInformation" type="Boolean" mandatory="false">                                                           
-      <description>The body information including ignition status and internal temp.</description>
-    </param>
-    <param name="deviceStatus" type="Boolean" mandatory="false">                                                           
-      <description>The device status including signal and battery strength.</description>
-    </param>  
-    <param name="eCallInfo" type="Boolean" mandatory="false">                                                           
-      <description>Emergency Call notification and confirmation data.</description>
-    </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false">                                                           
-      <description>The status of the air bags.</description>
-    </param>
-    <param name="emergencyEvent" type="Boolean" mandatory="false">                                                           
-      <description>Information related to an emergency event (and if it occurred).</description>
-    </param>
-    <param name="clusterModeStatus" type="Boolean" mandatory="false">
-      <description>The status modes of the cluster.</description>
-    </param>
-    <param name="myKey" type="Boolean" mandatory="false">                                                           
-      <description>Information related to the MyKey feature.</description>
-    </param>   
-    <param name="driverBraking" type="Boolean" mandatory="false">                                                           
-      <description>The status of the brake pedal.</description>
-    </param>
-  </function>
-  <function name="GetVehicleData" messagetype="response">
-    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-      <description>Provides additional human readable info regarding the result.</description>
-    </param>
-    <param name="gps" type="GPSData" mandatory="false">
-      <description>See GPSData</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="false">
-      <description>The vehicle speed in kilometers per hour</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
-      <description>The number of revolutions per minute of the engine</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
-    </param>
-    <param name="fuelLevel_State" type="ComponentVolumeStatus" mandatory="false">
-      <description>The fuel level state</description>
-    </param>    
-    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
-      <description>The instantaneous fuel consumption in microlitres</description>
-    </param>
-    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
-      <description>The external temperature in degrees celsius.</description>
-    </param>
-    <param name="vin" type="String" maxlength="17" mandatory="false">
-      <description>Vehicle identification number.</description>
-    </param>
-    <param name="prndl" type="PRNDL" mandatory="false">
-      <description>See PRNDL.</description>
-      <description>Subscribable</description>
-      <issue creator="rs">Is this a good name? Wouldn't be selectedGear better?</issue>
-    </param>
-    <param name="tirePressure" type="TireStatus" mandatory="false">
-      <description>See TireStatus.</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="false">
-      <description>Odometer in km</description>
-    </param>
-    <param name="beltStatus" type="BeltStatus" mandatory="false">                                                           
-      <description>The status of the seat belts.</description>
-    </param>
-    <param name="bodyInformation" type="BodyInformation" mandatory="false">
-      <description>The body information including power modes.</description>
-    </param>
-    <param name="deviceStatus" type="DeviceStatus" mandatory="false">
-      <description>The device status including signal and battery strength.</description>
-    </param>  
-    <param name="eCallInfo" type="ECallInfo" mandatory="false">                                                           
-      <description>Emergency Call notification and confirmation data.</description>
-    </param>
-    <param name="airbagStatus" type="AirbagStatus" mandatory="false">
-      <description>The status of the air bags.</description>
-    </param>
-    <param name="emergencyEvent" type="EmergencyEvent" mandatory="false">
-      <description>Information related to an emergency event (and if it occurred).</description>
-    </param>
-    <param name="clusterModeStatus" type="ClusterModeStatus" mandatory="false">
-      <description>The status modes of the cluster.</description>
-    </param>
-    <param name="myKey" type="MyKey" mandatory="false">                                                           
-      <description>Information related to the MyKey feature.</description>
-    </param>     
-    <param name="driverBraking" type="VehicleDataEventStatus" mandatory="false">
-      <description>The status of the brake pedal.</description>
-    </param>     
-  </function>
-  <function name="OnVehicleData" messagetype="notification">
-    <description>Notification from HMI to SmartDeviceLink. Callback for the periodic and non periodic vehicle data read function.</description>
-    <param name="gps" type="GPSData" mandatory="false">
-      <description>See GPSData</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="speed" type="Float" minvalue="-100" maxvalue="500" mandatory="false">
-      <description>The vehicle speed in kilometers per hour</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
-      <description>The number of revolutions per minute of the engine</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
-    </param>
-    <param name="fuelLevel_State" type="ComponentVolumeStatus" mandatory="false">
-      <description>The fuel level state</description>
-    </param>    
-    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
-      <description>The instantaneous fuel consumption in microlitres</description>
-    </param>
-    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
-      <description>The external temperature in degrees celsius.</description>
-    </param>
-    <param name="vin" type="String" maxlength="17" mandatory="false">
-      <description>Vehicle identification number.</description>
-    </param>
-    <param name="prndl" type="PRNDL" mandatory="false">
-      <description>See PRNDL.</description>
-      <description>Subscribable</description>
-      <issue creator="rs">Is this a good name? Wouldn't be selectedGear better?</issue>
-    </param>
-    <param name="tirePressure" type="TireStatus" mandatory="false">
-      <description>See TireStatus.</description>
-      <description>Subscribable</description>
-    </param>
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="false">
-      <description>Odometer in km</description>
-    </param>
-    <param name="beltStatus" type="BeltStatus" mandatory="false">                                                           
-      <description>The status of the seat belts.</description>
-    </param>
-    <param name="bodyInformation" type="BodyInformation" mandatory="false">
-      <description>The body information including power modes.</description>
-    </param>
-    <param name="deviceStatus" type="DeviceStatus" mandatory="false">
-      <description>The device status including signal and battery strength.</description>
-    </param>  
-    <param name="eCallInfo" type="ECallInfo" mandatory="false">                                                     
-      <description>Emergency Call notification and confirmation data.</description>
-    </param>
-    <param name="airbagStatus" type="AirbagStatus" mandatory="false">
-      <description>The status of the air bags.</description>
-    </param>
-    <param name="emergencyEvent" type="EmergencyEvent" mandatory="false">
-      <description>Information related to an emergency event (and if it occurred).</description>
-    </param>
-    <param name="clusterModeStatus" type="ClusterModeStatus" mandatory="false">
-      <description>The status modes of the cluster.</description>
-    </param>
-    <param name="myKey" type="MyKey" mandatory="false">                                                           
-      <description>Information related to the MyKey feature.</description>
-    </param>
-    <param name="driverBraking" type="VehicleDataEventStatus" mandatory="false">
-      <description>The status of the brake pedal.</description>
-    </param>    
-  </function>
-  <function name="ReadDID" messagetype="request">
-    <description>Non periodic vehicle data read request.</description>
-    <param name="ecuName" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
-      <description>Name of ECU.</description>
-    </param>
-    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="0" maxsize="1000" array="true" mandatory="true">
-      <description>Get raw data from vehicle data DID location(s).</description>
-    </param>
-    <param name="didLength" type="Integer" minvalue="0" maxvalue="65535" minsize="0" maxsize="1000" array="true" mandatory="true">
-      <description>Length of raw data from vehicle data DID location(s).</description>
-    </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
-    </param>
-  </function>
-  <function name="ReadDID" messagetype="response">
-    <param name="dataResult" type="VehicleDataResultCode" minsize="0" maxsize="1000" array="true" mandatory="false">
-      <description>Permission status of data element.</description>
-    </param>
-    <param name="data" type="String" maxlength="5000" minsize="0" maxsize="1000" array="true" mandatory="false">
-      <description>Raw DID-based data returned for requested element.</description>
-    </param>
-  </function>
-  <function name="GetDTCs" messagetype="request">
-    <description>Vehicle module diagnostic trouble code request.</description>
-    <param name="ecuName" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
-      <description>Name of ECU.</description>
-    </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
-      </param>
-  </function>
-  <function name="GetDTCs" messagetype="response">
-    <param name="dtcList" type="DTC" mandatory="false" array="true" minsize="1" maxsize="100">
-      <description>Array of all reported DTCs on module.</description>
-    </param>
-  </function>
 </interface>
 
 </interfaces>
