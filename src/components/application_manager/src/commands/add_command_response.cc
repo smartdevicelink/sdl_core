@@ -51,7 +51,6 @@ AddCommandResponse::~AddCommandResponse() {
 void AddCommandResponse::Run() {
   LOG4CXX_INFO(logger_, "AddCommandResponse::Run ");
 
-  SendResponse();
 }
 
 }  // namespace commands

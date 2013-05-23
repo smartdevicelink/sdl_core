@@ -84,6 +84,10 @@ void AddCommandRequest::Run() {
       new MessageChaining(connectionKey, corellationId),
       connectionKey, corellationId);
 
+  ApplicationManagerImpl::instance()->AddMessageChain(
+      new MessageChaining(connectionKey, corellationId),
+      connectionKey, corellationId);
+
     /*(*message_)[strings::msg_params][strings::properties] =
         *app->help_promt();*/
 

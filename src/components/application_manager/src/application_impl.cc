@@ -131,6 +131,8 @@ ApplicationImpl::~ApplicationImpl() {
     delete media_track_;
     media_track_ = NULL;
   }
+
+  commands_.clear();
 }
 
 void ApplicationImpl::ProcessMessage(smart_objects::CSmartObject* message) {
@@ -362,6 +364,17 @@ void ApplicationImpl::set_media_track(
   if (media_track_)
     delete media_track_;
   media_track_ = new smart_objects::CSmartObject(media_track);
+}
+
+bool ApplicationImpl::addCommand(unsigned int cmd_Id) {
+  std::pair<std::set<unsigned int>::iterator,bool> ret;
+  ret = commands_.insert(cmd_Id);
+
+  return ret.second;
+}
+
+bool ApplicationImpl::removeCommand(unsigned int cmd_Id) {
+  return commands_.erase(cmd_Id);
 }
 
 }  // namespace application_manager

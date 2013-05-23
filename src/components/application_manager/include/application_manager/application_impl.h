@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 
 #include <string>
+#include <set>
 
 #include "SmartObjects/CSmartObject.hpp"
 
@@ -46,6 +47,11 @@
 namespace application_manager {
 
 namespace mobile_api = NsSmartDeviceLinkRPC::V2;
+
+/*
+ * @brief Typedef for supported commands in application menu
+ */
+typedef std::set<unsigned int> CommandsSet;
 
 class ApplicationImpl : public Application {
   public:
@@ -99,6 +105,16 @@ class ApplicationImpl : public Application {
   void set_media_clock(const smart_objects::CSmartObject & vr_help);
   void set_media_track(const smart_objects::CSmartObject & vr_help);
 
+  /*
+   * @brief Adds a command to the in application menu
+   */
+  bool addCommand(unsigned int cmd_Id);
+
+  /*
+   * @brief Deletes all commands from the in-application menu with the specified command id
+   */
+  bool removeCommand(unsigned int cmd_Id);
+
   private:
     Version version_;
     smart_objects::CSmartObject* active_message_;
@@ -126,6 +142,7 @@ class ApplicationImpl : public Application {
   smart_objects::CSmartObject * status_bar_;
   smart_objects::CSmartObject * media_clock_;
   smart_objects::CSmartObject * media_track_;
+  CommandsSet                   commands_;
 };
 
 }  // namespace application_manager
