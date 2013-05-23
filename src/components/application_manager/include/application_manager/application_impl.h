@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 
 #include <string>
-#include <set>
+#include <map>
 
 #include "SmartObjects/CSmartObject.hpp"
 
@@ -52,7 +52,7 @@ namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 /*
  * @brief Typedef for supported commands in application menu
  */
-typedef std::set<unsigned int> CommandsSet;
+typedef std::map<unsigned int, smart_objects::CSmartObject*> CommandsMap;
 
 class ApplicationImpl : public Application {
   public:
@@ -103,12 +103,18 @@ class ApplicationImpl : public Application {
   /*
    * @brief Adds a command to the in application menu
    */
-  bool addCommand(unsigned int cmd_Id);
+  void AddCommand(unsigned int cmd_id,
+                  const smart_objects::CSmartObject& command);
 
   /*
-   * @brief Deletes all commands from the in-application menu with the specified command id
+   * @brief Deletes all commands from the application menu with the specified command id
    */
-  bool removeCommand(unsigned int cmd_Id);
+  void RemoveCommand(unsigned int cmd_id);
+
+  /*
+   * @brief Finds command with the specified command id
+   */
+  smart_objects::CSmartObject*  FindCommand(unsigned int cmd_id);
 
   private:
     Version version_;
@@ -131,7 +137,7 @@ class ApplicationImpl : public Application {
   smart_objects::CSmartObject * timeout_promt_;
   smart_objects::CSmartObject * vr_help_title_;
   smart_objects::CSmartObject * vr_help_;
-  CommandsSet                   commands_;
+  CommandsMap                   commands_;
 };
 
 }  // namespace application_manager

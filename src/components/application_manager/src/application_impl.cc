@@ -102,6 +102,12 @@ ApplicationImpl::~ApplicationImpl() {
     vr_help_ = NULL;
   }
 
+  CommandsMap::iterator it = commands_.begin();
+
+  for (;commands_.end() != it; ++it) {
+    delete it->second;
+  }
+
   commands_.clear();
 }
 
@@ -294,15 +300,30 @@ void ApplicationImpl::set_vr_help(
   vr_help_ = new smart_objects::CSmartObject(vr_help);
 }
 
-bool ApplicationImpl::addCommand(unsigned int cmd_Id) {
-  std::pair<std::set<unsigned int>::iterator,bool> ret;
-  ret = commands_.insert(cmd_Id);
-
-  return ret.second;
+void ApplicationImpl::AddCommand(unsigned int cmd_id,
+                                 const smart_objects::CSmartObject& command) {
+  commands_[cmd_id] = new smart_objects::CSmartObject(command);
 }
 
-bool ApplicationImpl::removeCommand(unsigned int cmd_Id) {
-  return commands_.erase(cmd_Id);
+void ApplicationImpl::RemoveCommand(unsigned int cmd_id) {
+  CommandsMap::iterator it = commands_.find(cmd_id);
+
+  if (commands_.end() != it) {
+    delete it->second;
+    commands_.erase(cmd_id);
+  }
 }
+
+smart_objects::CSmartObject*  ApplicationImpl::FindCommand(unsigned int cmd_id)
+{
+  CommandsMap::const_iterator it = commands_.find(cmd_id);
+  if(it != commands_.end())
+  {
+      return it->second;
+  }
+
+  return NULL;
+}
+
 
 }  // namespace application_manager
