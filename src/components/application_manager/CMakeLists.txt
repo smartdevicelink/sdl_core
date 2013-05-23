@@ -23,6 +23,8 @@ set (SOURCES
 ./src/commands/command_request_impl.cc
 ./src/commands/command_response_impl.cc
 ./src/commands/get_device_list_command.cc
+./src/commands/add_command_request.cc
+./src/commands/add_command_response.cc
 #./src/commands/get_device_list_response_command.cc
 ./src/commands/register_app_interface_command.cc
 ./src/commands/register_app_interface_response_command.cc

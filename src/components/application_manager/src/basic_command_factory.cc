@@ -40,6 +40,8 @@
 #include "application_manager/commands/set_global_properties_response_command.h"
 #include "application_manager/commands/reset_global_properties_command.h"
 #include "application_manager/commands/reset_global_properties_response_command.h"
+#include "application_manager/commands/add_command_request.h"
+#include "application_manager/commands/add_command_response.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -82,6 +84,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         command.reset(new commands::ResetGlobalPropertiesResponseCommand(message));
       } else {
         command.reset(new commands::ResetGlobalPropertiesCommand(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::AddCommandID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::AddCommandRequest(message));
+      } else {
+        command.reset(new commands::AddCommandResponse(message));
       }
       break;
     }
