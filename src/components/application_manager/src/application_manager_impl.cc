@@ -42,6 +42,7 @@
 namespace application_manager {
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
+  message_chaining_.clear();
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
