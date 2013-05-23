@@ -83,7 +83,7 @@ bool NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsSma
 }
 
 void NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::BuildObjectBySchema(
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) const {
   bool result = setDefaultValue(object);
   if (false ==result) {
     object = std::string("");

@@ -112,8 +112,8 @@ void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsSmartD
 }
 
 void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::BuildObjectBySchema(
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
-// empty array
+          NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) const {
+  // empty array
   object = NsSmartDeviceLink::NsSmartObjects::CSmartObject(
       NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
 }

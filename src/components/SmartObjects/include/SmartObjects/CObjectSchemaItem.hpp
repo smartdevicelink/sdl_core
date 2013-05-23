@@ -124,7 +124,7 @@ namespace NsSmartDeviceLink
              *
              * @param object Object to build
              **/
-            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & object);
+            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) const;
 
         private:
             /**

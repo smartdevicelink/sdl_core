@@ -33,33 +33,13 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __JSONHANDLER_CMETAFORMATTER_HPP__
-#define __JSONHANDLER_CMETAFORMATTER_HPP__
+#ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
+#define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
 
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CSmartSchema.hpp"
 
 namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
-    
-  namespace e_formatter_version {
-
-    /**
-     * @brief Type (version) of formatter
-     */
-    enum Type {
-
-      /**
-       * @brief Formatter of version SDLRPCv1
-       */
-      FORMATTER_SDLRPCv1 = 0,
-
-      /**
-       * @brief Formatter of version SDLRPCv2
-       */
-      FORMATTER_SDLRPCv2
-    };
-  }
-
 
   namespace meta_formatter_error_code {
     /**
@@ -81,6 +61,14 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
       * @brief smart shema describes object which is not function
       */
     static const tMetaFormatterErrorCode ERROR_SCHEMA_IS_NOT_FUNCTION = 0x02;
+
+    /**
+      * @brief result smart object has invalid type (SmartType_Invalid)
+      *        before passing to MetaFormatter, i.e. result object can not
+      *        be changed, i.e. result object can not be built
+      *        
+      */
+    static const tMetaFormatterErrorCode ERROR_INVALID_TYPE_RESULT_OBJECT = 0x04;
   }
 
   /**
@@ -95,22 +83,22 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
   class CMetaFormatter
   {
   public:
-    
-    /**
-     * @brief Converts to string the smart object against given schema for given formatter version
-     *
-     * @param object Original smart object
-     * @param schema Smart schema which describes 'fake' smart object to be formatted
-     * @param formatter_version Version of formatter
-     * @param result_string The resulting formatted string
-     * @return formatting error code
-     */
-    static meta_formatter_error_code::tMetaFormatterErrorCode FormatToString(
-            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-            NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
-            const e_formatter_version::Type formatter_version,
-            std::string& result_string);
 
+    /**
+     * @brief Creates smart object by the given schema having copied
+     *        matched tree elements from original object.
+     *
+     * @param object Original smart object which macthed tree elements
+     *        will be copied from
+     * @param schema Smart schema which describes result smart object     
+     * @param result_object createdsmart object
+     * @return error code
+     */
+    static meta_formatter_error_code::tMetaFormatterErrorCode createObjectByPattern(
+            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+            NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+    
   private:
 
     /**
@@ -137,4 +125,4 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
     
 } } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif // __JSONHANDLER_CMETAFORMATTER_HPP__
+#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__

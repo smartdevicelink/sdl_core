@@ -90,7 +90,7 @@ namespace NsSmartDeviceLink
              * 
              * @param Object Object to build
              **/
-            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & object);
+            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) const;
 
         private:            
             
@@ -236,13 +236,13 @@ bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaul
 
 template <typename NumberType>
 void NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::BuildObjectBySchema(
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) {
+          NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
   bool result = setDefaultValue(object);
   if (false == result)  {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Double == getSmartType()) {
       object = static_cast<double>(0.0);
     } else {
-      object = static_cast<NumberType>(0);
+      object = 0;
     }
   }
 }

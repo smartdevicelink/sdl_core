@@ -32,14 +32,15 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __CFORMATTERJSONSDLRPCV2_HPP__
-#define __CFORMATTERJSONSDLRPCV2_HPP__
+#ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
+#define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
 
 #include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
 
 #include "CFormatterJsonBase.hpp"
 #include "JSONHandler/CSmartFactory.hpp"
+#include "JSONHandler/formatters/meta_formatter.h"
 
 namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
@@ -69,6 +70,9 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
     public:
 
+        typedef NsSmartDeviceLink::NsJSONHandler::Formatters::
+        meta_formatter_error_code::tMetaFormatterErrorCode tMetaFormatterErrorCode;
+
         /**
          * @brief Creates a JSON string from a SmartObject.
          *
@@ -97,6 +101,19 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
                 FunctionId functionId,
                 MessageType messageType,
                 int correlationId);
+
+      /**
+        * @brief Converts to string the smart object against the given schema
+        *
+        * @param object Original smart object
+        * @param schema Smart schema which describes 'fake' smart object to be formatted
+        * @param outStr Resulting JSON string
+        * @return formatting error code
+        */
+      static tMetaFormatterErrorCode MetaFormatToString(
+                const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+                NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+                std::string& outStr);
     };
 
 } } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
@@ -131,4 +148,4 @@ inline bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2
     return parsingSuccessful;
 }
 
-#endif // __CFORMATTERJSONSDLRPCV2_HPP__
+#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__

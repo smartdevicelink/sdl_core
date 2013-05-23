@@ -115,4 +115,20 @@ bool Formatters::CFormatterJsonSDLRPCv1::toString(
     return true;
 }
 
+// ----------------------------------------------------------------------------
 
+Formatters::CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode
+  Formatters::CFormatterJsonSDLRPCv1::MetaFormatToString(
+            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+            NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+            std::string& outStr) {
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject tmp_object;
+    
+    tMetaFormatterErrorCode resultCode =
+        CMetaFormatter::createObjectByPattern(object, schema, tmp_object);
+    
+    CFormatterJsonSDLRPCv1::toString(tmp_object, outStr);
+
+    return resultCode;
+}

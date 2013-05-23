@@ -34,6 +34,9 @@
 
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 
+namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+
+// ----------------------------------------------------------------------------
 
 bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toString(
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
@@ -51,3 +54,20 @@ bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toStr
     return true;
 }
 
+// ----------------------------------------------------------------------------
+
+Formatters::CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode
+  Formatters::CFormatterJsonSDLRPCv2::MetaFormatToString(
+            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+            NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+            std::string& outStr) {
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject tmp_object;
+
+    tMetaFormatterErrorCode resultCode =
+        CMetaFormatter::createObjectByPattern(object, schema, tmp_object);
+
+    CFormatterJsonSDLRPCv2::toString(tmp_object, outStr);
+
+    return resultCode;
+}

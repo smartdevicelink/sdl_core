@@ -33,6 +33,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.auto
 
+#include <set>
+#include <string>
+
 #include "JSONHandler/formatters/meta_formatter.h"
 #include "JSONHandler/CSmartFactory.hpp"
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
@@ -43,57 +46,58 @@ namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 
 //---------------------------------------------------------------
+
 formatter_ns::meta_formatter_error_code::tMetaFormatterErrorCode
-  formatter_ns::CMetaFormatter::FormatToString(
-                const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-                NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
-                const e_formatter_version::Type formatter_version,
-                std::string& result_string) {
+  formatter_ns::CMetaFormatter::createObjectByPattern(
+            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+            NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
   meta_formatter_error_code::tMetaFormatterErrorCode result_code
                                     = meta_formatter_error_code::ERROR_OK;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject tmp_object(
-                                            smart_objects_ns::SmartType_Map);
+
+  if (smart_objects_ns::SmartType_Invalid == result_object.getType()) {
+    result_code |= meta_formatter_error_code::ERROR_INVALID_TYPE_RESULT_OBJECT;
+    return result_code;
+  }
 
   // build temporary object by schema filled with default values
-  schema.BuildObjectBySchema(tmp_object);
+  schema.BuildObjectBySchema(result_object);
 
-  // copy parameters from source object to tmp object
+  // determine whether smart objects are functions
+  // (in terms of SDLRPC communication)
   bool is_root_schema = (
-    (tmp_object.getType() == smart_objects_ns::SmartType_Map)
-      && tmp_object.keyExists(jsonhandler_ns::strings::S_PARAMS)
-      && tmp_object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
+    (result_object.getType() == smart_objects_ns::SmartType_Map)
+      && result_object.keyExists(jsonhandler_ns::strings::S_PARAMS)
+      && result_object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
 
   bool is_root_object = (
     (object.getType() == smart_objects_ns::SmartType_Map)
       && object.keyExists(jsonhandler_ns::strings::S_PARAMS)
       && object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
 
+  // copy parameters from source object to result object
   if (true == is_root_schema && true == is_root_object) {
-    CMetaFormatter::CopyServiceParams(object, tmp_object);
-    
-    CMetaFormatter::FillOutputObject(
-                      object.getElement(jsonhandler_ns::strings::S_MSG_PARAMS),
-                      tmp_object[jsonhandler_ns::strings::S_MSG_PARAMS]);
-  } else {
-    if (false == is_root_object) {
-      result_code |= meta_formatter_error_code::ERROR_OBJECT_IS_NOT_FUNCTION;
-    }
-    if (false == is_root_schema) {
-      result_code |= meta_formatter_error_code::ERROR_SCHEMA_IS_NOT_FUNCTION;
-    }
-  }
+    CMetaFormatter::CopyServiceParams(object, result_object);
 
-  // call respective formatter->toString()
-  if (e_formatter_version::FORMATTER_SDLRPCv1 == formatter_version) {
-    formatter_ns::CFormatterJsonSDLRPCv1::toString(tmp_object, result_string);
-  } else if (e_formatter_version::FORMATTER_SDLRPCv2 == formatter_version) {
-    formatter_ns::CFormatterJsonSDLRPCv2::toString(tmp_object, result_string);
+    CMetaFormatter::FillOutputObject(
+                  object.getElement(jsonhandler_ns::strings::S_MSG_PARAMS),
+                  result_object[jsonhandler_ns::strings::S_MSG_PARAMS]);
+  } else if (false == is_root_schema && false == is_root_object) {
+    CMetaFormatter::FillOutputObject(object, result_object);
   }
   
+  if (false == is_root_object) {
+    result_code |= meta_formatter_error_code::ERROR_OBJECT_IS_NOT_FUNCTION;
+  }
+  if (false == is_root_schema) {
+    result_code |= meta_formatter_error_code::ERROR_SCHEMA_IS_NOT_FUNCTION;
+  }  
+
   return result_code;
 }
 
 //---------------------------------------------------------------
+
 void formatter_ns::CMetaFormatter::CopyServiceParams(
         NsSmartDeviceLink::NsSmartObjects::CSmartObject in_object,
         NsSmartDeviceLink::NsSmartObjects::CSmartObject& out_object) {
@@ -127,6 +131,7 @@ void formatter_ns::CMetaFormatter::CopyServiceParams(
 }
 
 //---------------------------------------------------------------
+
 void formatter_ns::CMetaFormatter::FillOutputObject(
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& in_object,
         NsSmartDeviceLink::NsSmartObjects::CSmartObject& out_object) {
@@ -153,7 +158,6 @@ void formatter_ns::CMetaFormatter::FillOutputObject(
       CMetaFormatter::FillOutputObject(in_object.getElement(i), out_object[i]);      
     }    
   } else {
-
     out_object = in_object;
   }
 }  
