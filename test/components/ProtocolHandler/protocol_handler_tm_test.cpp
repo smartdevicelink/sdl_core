@@ -4,7 +4,7 @@
 #include "TransportManager/SDeviceInfo.hpp"
 #include "TransportManager/ITransportManager.hpp"
 #include "protocol_handler/protocol_handler_impl.h"
-#include "ConnectionHandler/connection_handler_impl.h"
+#include "connection_handler/connection_handler_impl.h"
 
 namespace protocol_handler_test {
 
