@@ -19,4 +19,4 @@ set (LIBRARIES
     bluetooth    
 )
 
-create_test("interface_test" "./protocol_handler_tm_test.cpp" "${LIBRARIES}")
+#create_test("interface_test" "./protocol_handler_tm_test.cpp" "${LIBRARIES}")

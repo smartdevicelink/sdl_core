@@ -80,13 +80,15 @@ void AddCommandRequest::Run() {
   const int connectionKey =
       (*message_)[strings::params][strings::connection_key];
 
+  unsigned int ui_cmd_id = 1;
   ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId);
+      connectionKey, corellationId, ui_cmd_id);
 
+  unsigned int vr_cmd_id = 2;
   ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId);
+      connectionKey, corellationId, vr_cmd_id);
 
     /*(*message_)[strings::msg_params][strings::properties] =
         *app->help_promt();*/

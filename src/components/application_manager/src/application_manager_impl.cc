@@ -81,7 +81,8 @@ ApplicationManagerImpl::applications() const {
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
                                  unsigned int connection_key,
-                                 unsigned int correlation_id) {
+                                 unsigned int correlation_id,
+                                 unsigned int function_id) {
   if (!chain)
   {
       chain = new MessageChaining(
@@ -93,20 +94,20 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
       chain->counter++;
   }
 
-  message_chaining_[correlation_id] = chain;
+  MessageChainPtr ptr(chain);
+  message_chaining_[function_id] = ptr;
   return chain;
 }
 
-bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int correlation_id) {
-  MessageChains::iterator it = message_chaining_.find(correlation_id);
+bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
+  MessageChains::iterator it = message_chaining_.find(function_id);
 
   if (message_chaining_.end() != it) {
-    MessageChaining * currentChain = it->second;
-    currentChain->counter--;
+    MessageChaining* current_chain = &(*it->second);
+    current_chain->counter--;
     message_chaining_.erase(it);
-    if (!currentChain->counter)
+    if (!current_chain->counter)
     {
-        delete currentChain;
         return true;
     }
   }

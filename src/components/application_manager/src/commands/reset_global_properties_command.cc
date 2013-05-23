@@ -80,9 +80,11 @@ void ResetGlobalPropertiesCommand::Run() {
   const int connectionKey =
       (*message_)[strings::params][strings::connection_key];
 
+  const unsigned int cmd_id = 4;
+
   ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId);
+      connectionKey, corellationId, cmd_id);
 
     /*(*message_)[strings::msg_params][strings::properties] =
         *app->help_promt();*/

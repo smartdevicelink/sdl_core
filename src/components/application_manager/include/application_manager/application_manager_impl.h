@@ -47,9 +47,15 @@
 namespace application_manager {
 
 /**
-  *\brief Map of messages between mobile app and hmi
+  *@brief Typedef for shared pointer
 */
-typedef std::map<unsigned int, MessageChaining*> MessageChains;
+typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
+
+/**
+  *@brief Map of messages between mobile app and hmi
+*/
+typedef std::map<unsigned int, MessageChainPtr> MessageChains;
+
 
 class ApplicationManagerImpl : public ApplicationManager
   , public hmi_message_handler::HMIMessageObserver
@@ -84,21 +90,25 @@ class ApplicationManagerImpl : public ApplicationManager
      * otherwise counter of MessageChaining for
      * corresponding correlation ID is increased
      *
+     * @param connection_key of connection for Mobile side
+     * @param correlation_id Correlation id for response for Mobile side
+     * @param function_id Id of HMI request/response
      * @return pointer to MessageChaining
      */
     MessageChaining* AddMessageChain(MessageChaining* chain,
                                      unsigned int connection_key,
-                                     unsigned int correlation_id);
+                                     unsigned int correlation_id,
+                                     unsigned int function_id);
 
     /*
      * @brief Decrease chain for correlation ID
      * after response from hmi was received.
      *
-     * @param correlation_id Correlation ID of HMI response
+     * @param function_id HMI response/request ID
      *
      * @return true if there is no other pending responses
      */
-    bool DecreaseMessageChain(unsigned int correlation_id);
+    bool DecreaseMessageChain(unsigned int function_id);
 
     /////////////////////////////////////////////////////
 
