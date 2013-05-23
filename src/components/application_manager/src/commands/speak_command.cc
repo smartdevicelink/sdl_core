@@ -33,20 +33,32 @@
 
 #include "application_manager/commands/speak_command.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
+SpeakCommand::SpeakCommand(const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
+ }
+
 void SpeakCommand::Run() {
-  if (NULL == application_manager::ApplicationManagerImpl::instance()->
-        application((*message_)[strings::msg_params][strings::app_id])) {
+  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
+        (application_manager::ApplicationManagerImpl::instance()->
+        application((*message_)[strings::msg_params][strings::app_id]));
+
+  if (NULL == application_impl) {
     SendResponse(false, NsSmartDeviceLinkRPC::V2::
                  Result::APPLICATION_NOT_REGISTERED);
+    return;
   }
-}
 
-void SpeakCommand::cleanUp() {
+    /*ApplicationManagerImpl::GetInstance()->AddMessageChain(
+  -        new MessageChaining(connectionKey, corellationId),
+  -        connectionKey, corellationId);*/
+
+    ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }
 
 }  // namespace commands

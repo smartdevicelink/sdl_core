@@ -40,6 +40,10 @@ namespace application_manager {
 
 namespace commands {
 
+ShowResponseCommand::ShowResponseCommand(const MessageSharedPtr& message)
+  : CommandResponseImpl(message) {
+}
+
 void ShowResponseCommand::Run() {
 }
 

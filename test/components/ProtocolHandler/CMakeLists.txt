@@ -4,7 +4,7 @@ include_directories (
   ../../../src/components/TransportManager/include
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
-  ../../../src/components/ConnectionHandler/include
+  ../../../src/components/connection_handler/include
 )
 
 set (LIBRARIES

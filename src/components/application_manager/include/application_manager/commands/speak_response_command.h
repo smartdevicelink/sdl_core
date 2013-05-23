@@ -45,9 +45,7 @@ class SpeakResponseCommand : public CommandResponseImpl {
   /**
    * \brief SpeakResponseCommand class constructor
    **/
-  explicit SpeakResponseCommand(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
-  }
+  explicit SpeakResponseCommand(const MessageSharedPtr& message);
 
   /**
    * \brief SpeakResponseCommand class destructor

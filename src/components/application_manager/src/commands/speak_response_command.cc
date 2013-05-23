@@ -40,6 +40,10 @@ namespace application_manager {
 
 namespace commands {
 
+SpeakResponseCommand::SpeakResponseCommand(const MessageSharedPtr& message)
+  : CommandResponseImpl(message) {
+}
+
 void SpeakResponseCommand::Run() {
 }
 
