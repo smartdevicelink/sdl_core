@@ -36,6 +36,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/basic_command_factory.h"
 #include "application_manager/message_conversion.h"
+#include "application_manager/message_chaining.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -76,6 +77,40 @@ ApplicationManagerImpl::applications() const {
     }
   }
   return result;
+}
+
+MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
+                                 unsigned int connection_key,
+                                 unsigned int correlation_id) {
+  if (!chain)
+  {
+      chain = new MessageChaining(
+          connection_key,
+          correlation_id);
+  }
+  else
+  {
+      chain->counter++;
+  }
+
+  message_chaining_[correlation_id] = chain;
+  return chain;
+}
+
+bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int correlation_id) {
+  MessageChains::iterator it = message_chaining_.find(correlation_id);
+
+  if (message_chaining_.end() != it) {
+    MessageChaining * currentChain = it->second;
+    currentChain->counter--;
+    message_chaining_.erase(it);
+    if (!currentChain->counter)
+    {
+        delete currentChain;
+        return true;
+    }
+  }
+  return false;
 }
 
 void ApplicationManagerImpl::onMessageReceived(

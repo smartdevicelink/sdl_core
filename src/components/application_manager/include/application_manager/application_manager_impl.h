@@ -46,6 +46,11 @@
 
 namespace application_manager {
 
+/**
+  *\brief Map of messages between mobile app and hmi
+*/
+typedef std::map<unsigned int, MessageChaining*> MessageChains;
+
 class ApplicationManagerImpl : public ApplicationManager
   , public hmi_message_handler::HMIMessageObserver
   , public connection_handler::ConnectionHandlerObserver
@@ -68,10 +73,32 @@ class ApplicationManagerImpl : public ApplicationManager
     bool RemoveAppDataFromHMI(Application* application);
     bool LoadAppDataToHMI(Application* application);
     bool ActivateApplication(Application* application);
+
+    /*
+     * @brief Add to the chain amount of requests sent to hmi
+     * from mobile request, to ensure that response to mobile
+     * will be sent only after all hmi response were received.
+     *
+     * @param chain Pointer to MessageChaining class.
+     * If parameter is empty new instance is created,
+     * otherwise counter of MessageChaining for
+     * corresponding correlation ID is increased
+     *
+     * @return pointer to MessageChaining
+     */
     MessageChaining* AddMessageChain(MessageChaining* chain,
                                      unsigned int connection_key,
                                      unsigned int correlation_id);
-    bool DecreaseMessageChain(const MessageChaining* chain);
+
+    /*
+     * @brief Decrease chain for correlation ID
+     * after response from hmi was received.
+     *
+     * @param correlation_id Correlation ID of HMI response
+     *
+     * @return true if there is no other pending responses
+     */
+    bool DecreaseMessageChain(unsigned int correlation_id);
 
     /////////////////////////////////////////////////////
 
@@ -136,7 +163,8 @@ class ApplicationManagerImpl : public ApplicationManager
     bool CheckHMIMatrix(smart_objects::CSmartObject* message);
 
     std::map<int, Application*> applications_;
-    bool hmi_deletes_commands_;
+    MessageChains               message_chaining_;
+    bool                        hmi_deletes_commands_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
