@@ -50,44 +50,11 @@ void ShowCommand::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
-      application_impl->set_main_field_1(
-          (*message_)[strings::msg_params][strings::main_field_1]);
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
-      application_impl->set_main_field_2(
-          (*message_)[strings::msg_params][strings::main_field_2]);
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::alignment)) {
-      application_impl->set_alignment(
-          (*message_)[strings::msg_params][strings::alignment]);
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
-     application_impl->set_status_bar(
-         (*message_)[strings::msg_params][strings::status_bar]);
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
-     application_impl->set_media_clock(
-         (*message_)[strings::msg_params][strings::media_clock]);
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
-       application_impl->set_media_track(
-         (*message_)[strings::msg_params][strings::media_track]);
-  }
-
   /*ApplicationManagerImpl::GetInstance()->AddMessageChain(
-        new MessageChaining(connectionKey, corellationId),
-        connectionKey, corellationId);*/
+-        new MessageChaining(connectionKey, corellationId),
+-        connectionKey, corellationId);*/
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
-}
-
-void ShowCommand::cleanUp() {
 }
 
 }  // namespace commands

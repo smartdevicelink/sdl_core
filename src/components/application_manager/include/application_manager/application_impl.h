@@ -40,6 +40,7 @@
 
 #include "application_manager/message.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/command.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -98,12 +99,6 @@ class ApplicationImpl : public Application {
   void set_timeout_prompt(const smart_objects::CSmartObject & timeout_promt);
   void set_vr_help_title(const smart_objects::CSmartObject & vr_help_title);
   void set_vr_help(const smart_objects::CSmartObject & vr_help);
-  void set_main_field_1(const smart_objects::CSmartObject & vr_help);
-  void set_main_field_2(const smart_objects::CSmartObject & vr_help);
-  void set_alignment(const smart_objects::CSmartObject & vr_help);
-  void set_status_bar(const smart_objects::CSmartObject & vr_help);
-  void set_media_clock(const smart_objects::CSmartObject & vr_help);
-  void set_media_track(const smart_objects::CSmartObject & vr_help);
 
   /*
    * @brief Adds a command to the in application menu
@@ -136,12 +131,6 @@ class ApplicationImpl : public Application {
   smart_objects::CSmartObject * timeout_promt_;
   smart_objects::CSmartObject * vr_help_title_;
   smart_objects::CSmartObject * vr_help_;
-  smart_objects::CSmartObject * main_field_1_;
-  smart_objects::CSmartObject * main_field_2_;
-  smart_objects::CSmartObject * alignment_;
-  smart_objects::CSmartObject * status_bar_;
-  smart_objects::CSmartObject * media_clock_;
-  smart_objects::CSmartObject * media_track_;
   CommandsSet                   commands_;
 };
 

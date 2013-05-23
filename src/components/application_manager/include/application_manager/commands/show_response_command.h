@@ -45,9 +45,7 @@ class ShowResponseCommand : public CommandResponseImpl {
   /**
    * \brief GenericResponseCommand class constructor
    **/
-  explicit ShowResponseCommand(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
-  }
+  explicit ShowResponseCommand(const MessageSharedPtr& message);
 
   /**
    * \brief GenericResponseCommand class destructor

@@ -49,9 +49,7 @@ class ShowCommand : public CommandRequestImpl {
   /**
    * \brief ShowCommand class constructor
    **/
-  explicit ShowCommand(const MessageSharedPtr& message)
-      : CommandRequestImpl(message) {
-  }
+  explicit ShowCommand(const MessageSharedPtr& message);
 
   /**
    * \brief ShowCommand class destructor
@@ -63,11 +61,6 @@ class ShowCommand : public CommandRequestImpl {
    * @brief Execute command
    **/
   virtual void Run();
-
-  /**
-   * @brief CleanUp command
-   **/
-  virtual void cleanUp();
 
  private:
   MessageSharedPtr message_;

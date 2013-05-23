@@ -42,16 +42,14 @@ namespace application_manager {
 namespace commands {
 
  /**
-  * @brief show request command class
+  * @brief speak request command class
  **/
 class SpeakCommand : public CommandRequestImpl {
  public:
   /**
    * \brief SpeakCommand class constructor
   **/
-  explicit SpeakCommand(const MessageSharedPtr& message)
-      : CommandRequestImpl(message) {
-  }
+  explicit SpeakCommand(const MessageSharedPtr& message);
 
   /**
    * \brief SpeakCommand class destructor
@@ -63,11 +61,6 @@ class SpeakCommand : public CommandRequestImpl {
    * @brief Execute command
    **/
   virtual void Run();
-
-  /**
-   * @brief CleanUp command
-   **/
-  virtual void cleanUp();
 
  private:
   MessageSharedPtr message_;
