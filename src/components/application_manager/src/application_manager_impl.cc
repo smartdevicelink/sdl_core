@@ -105,10 +105,10 @@ bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
   if (message_chaining_.end() != it) {
     MessageChaining* current_chain = &(*it->second);
     current_chain->counter--;
-    message_chaining_.erase(it);
     if (!current_chain->counter)
     {
-        return true;
+      message_chaining_.erase(it);
+      return true;
     }
   }
   return false;
