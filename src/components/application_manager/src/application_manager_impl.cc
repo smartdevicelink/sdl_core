@@ -89,30 +89,37 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
       chain = new MessageChaining(
           connection_key,
           correlation_id);
+      MessageChainPtr ptr(chain);
+      message_chaining_[function_id] = ptr;
+      return chain;
   }
   else
   {
       chain->counter++;
+      MessageChains::const_iterator iter;
+      for (iter = message_chaining_.begin(); iter != message_chaining_.end(); ++iter) {
+        if ((*iter->second) == *chain) {
+          message_chaining_[function_id] = iter->second;
+          break;
+        }
+      }
+      return chain;
   }
 
-  MessageChainPtr ptr(chain);
-  message_chaining_[function_id] = ptr;
-  return chain;
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
+  bool result = false;
   MessageChains::iterator it = message_chaining_.find(function_id);
 
   if (message_chaining_.end() != it) {
-    MessageChaining* current_chain = &(*it->second);
-    current_chain->counter--;
-    if (!current_chain->counter)
-    {
-      message_chaining_.erase(it);
-      return true;
+    (*it->second).counter--;
+    if (!(*it->second).counter) {
+      result = true;
     }
+    message_chaining_.erase(it);
   }
-  return false;
+  return result;
 }
 
 void ApplicationManagerImpl::onMessageReceived(

@@ -52,6 +52,14 @@ class MessageChaining
    */
   ~MessageChaining();
 
+  /**
+   * @brief Comparison operator.
+   *
+   * @param other Reference to the object to be compared with
+   * @return bool
+   **/
+  bool operator==(const MessageChaining& other) const;
+
   unsigned int correlationID;
   int connectionKey;
   bool success;

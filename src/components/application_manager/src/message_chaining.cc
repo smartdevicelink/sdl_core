@@ -45,4 +45,9 @@ MessageChaining::MessageChaining(int connectionKey,
 MessageChaining::~MessageChaining() {
 }
 
+bool MessageChaining::operator==(const MessageChaining& other) const
+{
+    return ((correlationID == other.correlationID) &&
+            (connectionKey == other.connectionKey));
+}
 }  // namespace application_manager

@@ -32,6 +32,8 @@
  */
 
 #include "application_manager/commands/add_command_response.h"
+#include "application_manager/application_manager_impl.h"
+#include "v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -50,6 +52,15 @@ AddCommandResponse::~AddCommandResponse() {
 
 void AddCommandResponse::Run() {
   LOG4CXX_INFO(logger_, "AddCommandResponse::Run ");
+
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      (*message_)[strings::params]["function_id"].asInt())) {
+
+    (*message_)[strings::msg_params][strings::success] = true;
+    (*message_)[strings::msg_params][strings::result_code] =
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    SendResponse();
+  }
 
 }
 
