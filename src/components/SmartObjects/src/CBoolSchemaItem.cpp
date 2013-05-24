@@ -61,7 +61,7 @@ bool NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsSmart
 
 
 void NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::BuildObjectBySchema(
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) const {
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
   bool result = setDefaultValue(object);
   if (false == result) {
     object = false;

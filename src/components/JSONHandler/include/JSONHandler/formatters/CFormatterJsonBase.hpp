@@ -38,7 +38,39 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
 
-namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
+namespace NsSmartDeviceLink {
+namespace NsJSONHandler {
+namespace Formatters {
+
+namespace meta_formatter_error_code {
+  /**
+    * @brief Error codes of MetaFormatter represented as bitmask
+    **/
+  typedef long tMetaFormatterErrorCode ;
+
+  /**
+    * @brief OK, no error
+    */
+  static const tMetaFormatterErrorCode kErrorOk = 0x0;
+
+  /**
+    * @brief origin smart object is not function
+    */
+  static const tMetaFormatterErrorCode kErrorObjectIsNotFunction = 0x01;
+
+  /**
+    * @brief smart shema describes object which is not function
+    */
+  static const tMetaFormatterErrorCode kErrorSchemaIsNotFunction = 0x02;
+
+  /**
+    * @brief result smart object has invalid type (SmartType_Invalid)
+    *        before passing to MetaFormatter, i.e. result object can not
+    *        be changed, i.e. result object can not be built
+    *
+    */
+  static const tMetaFormatterErrorCode kErrorFailedCreateObjectBySchema = 0x04;
+}
 
     /**
      * @brief The base class for all JSON based formatters.
@@ -81,6 +113,8 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
     };
 
 
-} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  
+}  
+} // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 #endif // __CFORMATTERJSONBASE_HPP__

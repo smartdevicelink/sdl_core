@@ -112,7 +112,7 @@ namespace NsSmartDeviceLink
              * 
              * @param object Object to build
              **/
-            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & object) const;
+            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & object);
             
             /**
              * @brief The method converts a string into the value of enum EnumType
@@ -257,10 +257,10 @@ void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema
 
 template <typename EnumType>
 void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::BuildObjectBySchema(
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) const {
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
   bool result = setDefaultValue(object);
   if (false ==result) {
-    object = static_cast<EnumType>(EnumType::INVALID_ENUM);
+    object = static_cast<EnumType>(-1);
   }
 }
 

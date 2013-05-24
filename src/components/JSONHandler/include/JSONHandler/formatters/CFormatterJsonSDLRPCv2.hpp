@@ -40,7 +40,6 @@
 
 #include "CFormatterJsonBase.hpp"
 #include "JSONHandler/CSmartFactory.hpp"
-#include "JSONHandler/formatters/meta_formatter.h"
 
 namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 

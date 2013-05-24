@@ -47,87 +47,22 @@ namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 
 //---------------------------------------------------------------
 
-formatter_ns::meta_formatter_error_code::tMetaFormatterErrorCode
-  formatter_ns::CMetaFormatter::createObjectByPattern(
+bool formatter_ns::CMetaFormatter::createObjectByPattern(
             const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
             NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
-  meta_formatter_error_code::tMetaFormatterErrorCode result_code
-                                    = meta_formatter_error_code::ERROR_OK;
 
   if (smart_objects_ns::SmartType_Invalid == result_object.getType()) {
-    result_code |= meta_formatter_error_code::ERROR_INVALID_TYPE_RESULT_OBJECT;
-    return result_code;
+    return false;
   }
 
   // build temporary object by schema filled with default values
   schema.BuildObjectBySchema(result_object);
 
-  // determine whether smart objects are functions
-  // (in terms of SDLRPC communication)
-  bool is_root_schema = (
-    (result_object.getType() == smart_objects_ns::SmartType_Map)
-      && result_object.keyExists(jsonhandler_ns::strings::S_PARAMS)
-      && result_object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
+  // fill output object
+  CMetaFormatter::FillOutputObject(object, result_object);
 
-  bool is_root_object = (
-    (object.getType() == smart_objects_ns::SmartType_Map)
-      && object.keyExists(jsonhandler_ns::strings::S_PARAMS)
-      && object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
-
-  // copy parameters from source object to result object
-  if (true == is_root_schema && true == is_root_object) {
-    CMetaFormatter::CopyServiceParams(object, result_object);
-
-    CMetaFormatter::FillOutputObject(
-                  object.getElement(jsonhandler_ns::strings::S_MSG_PARAMS),
-                  result_object[jsonhandler_ns::strings::S_MSG_PARAMS]);
-  } else if (false == is_root_schema && false == is_root_object) {
-    CMetaFormatter::FillOutputObject(object, result_object);
-  }
-  
-  if (false == is_root_object) {
-    result_code |= meta_formatter_error_code::ERROR_OBJECT_IS_NOT_FUNCTION;
-  }
-  if (false == is_root_schema) {
-    result_code |= meta_formatter_error_code::ERROR_SCHEMA_IS_NOT_FUNCTION;
-  }  
-
-  return result_code;
-}
-
-//---------------------------------------------------------------
-
-void formatter_ns::CMetaFormatter::CopyServiceParams(
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject in_object,
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& out_object) {
-  
-  if (true == in_object.keyExists(jsonhandler_ns::strings::S_PARAMS)) {
-    out_object[jsonhandler_ns::strings::S_PARAMS]
-                [jsonhandler_ns::strings::S_FUNCTION_ID] =
-    in_object[jsonhandler_ns::strings::S_PARAMS]
-               [jsonhandler_ns::strings::S_FUNCTION_ID];
-
-    out_object[jsonhandler_ns::strings::S_PARAMS]
-                [jsonhandler_ns::strings::S_MESSAGE_TYPE] =
-    in_object[jsonhandler_ns::strings::S_PARAMS]
-               [jsonhandler_ns::strings::S_MESSAGE_TYPE];
-
-    out_object[jsonhandler_ns::strings::S_PARAMS]
-                [jsonhandler_ns::strings::S_CORRELATION_ID] =
-    in_object[jsonhandler_ns::strings::S_PARAMS]
-               [jsonhandler_ns::strings::S_CORRELATION_ID];
-
-    out_object[jsonhandler_ns::strings::S_PARAMS]
-                [jsonhandler_ns::strings::S_PROTOCOL_TYPE] =
-    in_object[jsonhandler_ns::strings::S_PARAMS]
-               [jsonhandler_ns::strings::S_PROTOCOL_TYPE];
-
-    out_object[jsonhandler_ns::strings::S_PARAMS]
-                [jsonhandler_ns::strings::S_PROTOCOL_VERSION] =
-    in_object[jsonhandler_ns::strings::S_PARAMS]
-               [jsonhandler_ns::strings::S_PROTOCOL_VERSION];
-  }  
+  return true;
 }
 
 //---------------------------------------------------------------
@@ -147,7 +82,7 @@ void formatter_ns::CMetaFormatter::FillOutputObject(
     const std::set<std::string> in_object_keys = in_object.enumerate();
     for(std::set<std::string>::const_iterator i = in_object_keys.begin();
         i != in_object_keys.end(); ++i) {
-      if (out_object.keyExists(*i)) {
+      if (true == out_object.keyExists(*i)) {
         CMetaFormatter::FillOutputObject(in_object.getElement(*i),
                                           out_object[*i]);
       }      

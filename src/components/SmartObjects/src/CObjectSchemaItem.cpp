@@ -132,7 +132,7 @@ void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsSmart
 }
 
 void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::BuildObjectBySchema(
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) const {
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
   for (std::map<std::string,
       NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember>::
           const_iterator i = mMembers.begin();

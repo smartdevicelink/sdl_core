@@ -33,8 +33,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "JSONHandler/formatters/meta_formatter.h"
 
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 
 // ----------------------------------------------------------------------------
 
@@ -62,12 +65,36 @@ Formatters::CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode
             NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
             std::string& outStr) {
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject tmp_object;
+  meta_formatter_error_code::tMetaFormatterErrorCode result_code
+                                    = meta_formatter_error_code::kErrorOk;
 
-    tMetaFormatterErrorCode resultCode =
-        CMetaFormatter::createObjectByPattern(object, schema, tmp_object);
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject tmp_object;
 
-    CFormatterJsonSDLRPCv2::toString(tmp_object, outStr);
+  if (false == CMetaFormatter::createObjectByPattern(object, schema, tmp_object)) {
+      result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
+      return result_code;
+  }
 
-    return resultCode;
+  // determine whether smart objects are functions
+  // (in terms of SDLRPC communication)
+  bool is_root_schema = (
+    (tmp_object.getType() == smart_objects_ns::SmartType_Map)
+      && tmp_object.keyExists(jsonhandler_ns::strings::S_PARAMS)
+      && tmp_object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
+
+  bool is_root_object = (
+    (object.getType() == smart_objects_ns::SmartType_Map)
+      && object.keyExists(jsonhandler_ns::strings::S_PARAMS)
+      && object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
+
+  if (false == is_root_object) {
+    result_code |= meta_formatter_error_code::kErrorObjectIsNotFunction;
+  }
+  if (false == is_root_schema) {
+    result_code |= meta_formatter_error_code::kErrorSchemaIsNotFunction;
+  }
+
+  CFormatterJsonSDLRPCv2::toString(tmp_object, outStr);
+
+  return result_code;
 }

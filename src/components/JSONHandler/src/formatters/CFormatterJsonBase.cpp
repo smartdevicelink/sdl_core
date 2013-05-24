@@ -32,10 +32,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
-
 #include "json/json.h"
 
+#include "JSONHandler/formatters/CFormatterJsonBase.hpp"
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValueToObj(
         const Json::Value& value, NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj)

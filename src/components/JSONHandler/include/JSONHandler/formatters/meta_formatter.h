@@ -39,37 +39,9 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CSmartSchema.hpp"
 
-namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
-
-  namespace meta_formatter_error_code {
-    /**
-      * @brief Error codes of MetaFormatter represented as bitmask
-      **/
-    typedef long tMetaFormatterErrorCode ;
-
-    /**
-      * @brief OK, no error
-      */
-    static const tMetaFormatterErrorCode ERROR_OK = 0x0;
-
-    /**
-      * @brief origin smart object is not function
-      */
-    static const tMetaFormatterErrorCode ERROR_OBJECT_IS_NOT_FUNCTION = 0x01;
-
-    /**
-      * @brief smart shema describes object which is not function
-      */
-    static const tMetaFormatterErrorCode ERROR_SCHEMA_IS_NOT_FUNCTION = 0x02;
-
-    /**
-      * @brief result smart object has invalid type (SmartType_Invalid)
-      *        before passing to MetaFormatter, i.e. result object can not
-      *        be changed, i.e. result object can not be built
-      *        
-      */
-    static const tMetaFormatterErrorCode ERROR_INVALID_TYPE_RESULT_OBJECT = 0x04;
-  }
+namespace NsSmartDeviceLink {
+namespace NsJSONHandler {
+namespace Formatters {
 
   /**
    * @brief Formats to string the smart object against given schema for given formatter
@@ -90,26 +62,16 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
      *
      * @param object Original smart object which macthed tree elements
      *        will be copied from
-     * @param schema Smart schema which describes result smart object     
+     * @param schema Smart schema which describes result smart object
      * @param result_object createdsmart object
-     * @return error code
+     * @return true if successful, false - otherwise
      */
-    static meta_formatter_error_code::tMetaFormatterErrorCode createObjectByPattern(
+    static bool createObjectByPattern(
             const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
             NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
     
   private:
-
-    /**
-     * @brief Copy service parameters, i.e. parameters of smartObject["params"]
-     *
-     * @param in_object Smart object which service parameters be copied from
-     * @param out_object Smart object which service parameters be copied to
-     */
-    static void CopyServiceParams(
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject in_object,
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& out_object);
 
      /**
      * @brief Fill out_object with values from in_object, if tree elements of both objects matched
@@ -122,7 +84,8 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
         NsSmartDeviceLink::NsSmartObjects::CSmartObject& out_object);
 
   };
-    
-} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  
+}
+}// namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 #endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
