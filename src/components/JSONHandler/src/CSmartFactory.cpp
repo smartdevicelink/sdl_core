@@ -41,3 +41,5 @@ const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE("mes
 const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION("protocol_version");
 const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE("protocol_type");
 const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID("correlation_id");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::kCode("code");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::kMethod("method");

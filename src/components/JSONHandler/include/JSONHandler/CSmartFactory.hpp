@@ -83,6 +83,16 @@ namespace NsSmartDeviceLink
              * @brief String constant for CORRELATION_ID.
              */
             extern const std::string S_CORRELATION_ID;
+
+          /**
+           * @brief String constant for "code" param name.
+           */
+          extern const std::string kCode;
+
+          /**
+           * @brief String constant for "method" param name.
+           */          
+          extern const std::string kMethod;
         }
 
         /**
