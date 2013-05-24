@@ -218,7 +218,7 @@
   </element>
 </enum>
 
-<enum name="UpdateMode">
+<enum name="ClockUpdateMode">
   <description>Describes how the media clock timer should behave on the platform</description>
   <element name="COUNTUP" />
   <description>Starts the media clock timer counting upwards, as in time elapsed.</description>
@@ -260,7 +260,7 @@
 </enum>
 
 <enum name="TBTState">
-  <description>Enumeration that describes possible states of turn-by-turn client or AppLink app.</description>
+  <description>Enumeration that describes possible states of turn-by-turn client or SmartDeviceLink app.</description>
   <element name="ROUTE_UPDATE_REQUEST" />
   <element name="ROUTE_ACCEPTED" />
   <element name="ROUTE_REFUSED" />
@@ -1044,7 +1044,7 @@
         <description>startTime must be provided for "COUNTUP" and "COUNTDOWN"</description>
         <description>startTime will be ignored for "PAUSE", "RESUME", and "CLEAR"</description>
       </param>
-      <param name="updateMode" type="Common.UpdateMode" mandatory="true">
+      <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
         <description>Enumeration to control the media clock.</description>
         <description>In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.</description>
       </param>
