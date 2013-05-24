@@ -35,28 +35,15 @@
 
 namespace application_manager {
 
-ApplicationImpl::ApplicationImpl(int app_id)
-  : app_id_(app_id),
-    active_message_(NULL),
-    is_media_(false),
-    app_types_(NULL),
+InitialApplicationData::InitialApplicationData()
+  : app_types_(NULL),
     vr_synonyms_(NULL),
     ngn_media_screen_name_(NULL),
     mobile_app_id_(NULL),
-    tts_name_(NULL),
-    help_promt_(NULL),
-    timeout_promt_(NULL),
-    vr_help_title_(NULL),
-    vr_help_(NULL) {
+    tts_name_(NULL) {
 }
 
-ApplicationImpl::~ApplicationImpl() {
-  // TODO(AK): check if this is correct assimption
-  if (active_message_) {
-    delete active_message_;
-    active_message_ = NULL;
-  }
-
+InitialApplicationData::~InitialApplicationData() {
   if (app_types_) {
     delete app_types_;
     app_types_ = NULL;
@@ -81,6 +68,24 @@ ApplicationImpl::~ApplicationImpl() {
     delete tts_name_;
     tts_name_ = NULL;
   }
+}
+
+ApplicationImpl::ApplicationImpl(int app_id)
+  : app_id_(app_id),
+    active_message_(NULL),
+    is_media_(false),
+    help_promt_(NULL),
+    timeout_promt_(NULL),
+    vr_help_title_(NULL),
+    vr_help_(NULL) {
+}
+
+ApplicationImpl::~ApplicationImpl() {
+  // TODO(AK): check if this is correct assimption
+  if (active_message_) {
+    delete active_message_;
+    active_message_ = NULL;
+  }
 
   if (help_promt_) {
     delete help_promt_;
@@ -102,12 +107,10 @@ ApplicationImpl::~ApplicationImpl() {
     vr_help_ = NULL;
   }
 
-  CommandsMap::iterator it = commands_.begin();
-
-  for (;commands_.end() != it; ++it) {
+  for (CommandsMap::iterator it = commands_.begin();
+       commands_.end() != it; ++it) {
     delete it->second;
   }
-
   commands_.clear();
 }
 
@@ -144,24 +147,24 @@ bool ApplicationImpl::is_media_application() const {
 }
 
 const smart_objects::CSmartObject* ApplicationImpl::app_types() const {
-  return app_types_;
+  return initial_app_data_.app_types_;
 }
 
 const smart_objects::CSmartObject* ApplicationImpl::vr_synonyms() const {
-  return vr_synonyms_;
+  return initial_app_data_.vr_synonyms_;
 }
 
 const smart_objects::CSmartObject* ApplicationImpl::mobile_app_id() const {
-  return mobile_app_id_;
+  return initial_app_data_.mobile_app_id_;
 }
 
 const smart_objects::CSmartObject* ApplicationImpl::tts_name() const {
-  return tts_name_;
+  return initial_app_data_.tts_name_;
 }
 
 const smart_objects::CSmartObject*
 ApplicationImpl::ngn_media_screen_name() const {
-  return ngn_media_screen_name_;
+  return initial_app_data_.ngn_media_screen_name_;
 }
 
 const smart_objects::CSmartObject& ApplicationImpl::hmi_level() const {
@@ -173,11 +176,11 @@ const smart_objects::CSmartObject& ApplicationImpl::system_context() const {
 }
 
 const smart_objects::CSmartObject& ApplicationImpl::language() const {
-  return language_;
+  return initial_app_data_.language_;
 }
 
 const smart_objects::CSmartObject& ApplicationImpl::ui_language() const {
-  return ui_language_;
+  return initial_app_data_.ui_language_;
 }
 
 const smart_objects::CSmartObject* ApplicationImpl::help_promt() const {
@@ -220,52 +223,60 @@ void ApplicationImpl::set_system_context(
 
 void ApplicationImpl::set_language(
   const smart_objects::CSmartObject& language) {
-  language_ = language;
+  initial_app_data_.language_ = language;
 }
 
 void ApplicationImpl::set_ui_language(
   const smart_objects::CSmartObject& ui_language) {
-  ui_language_ = ui_language;
+  initial_app_data_.ui_language_ = ui_language;
 }
 
 void ApplicationImpl::set_tts_name(
   const smart_objects::CSmartObject& tts_name) {
-  if (tts_name_) {
-    delete tts_name_;
+  if (initial_app_data_.tts_name_) {
+    delete initial_app_data_.tts_name_;
   }
 
-  tts_name_ = new smart_objects::CSmartObject(tts_name);
+  initial_app_data_.tts_name_ =
+    new smart_objects::CSmartObject(tts_name);
 }
 
 void ApplicationImpl::set_ngn_media_screen_name(
   const smart_objects::CSmartObject& ngn_name) {
-  if (ngn_media_screen_name_) {
-    delete ngn_media_screen_name_;
+  if (initial_app_data_.ngn_media_screen_name_) {
+    delete initial_app_data_.ngn_media_screen_name_;
   }
 
-  ngn_media_screen_name_ = new smart_objects::CSmartObject(ngn_name);
+  initial_app_data_.ngn_media_screen_name_ =
+    new smart_objects::CSmartObject(ngn_name);
 }
 
 void ApplicationImpl::set_app_types(
   const smart_objects::CSmartObject& app_types) {
-  if (app_types_) {
-    delete app_types_;
+  if (initial_app_data_.app_types_) {
+    delete initial_app_data_.app_types_;
   }
 
-  app_types_ = new smart_objects::CSmartObject(app_types);
+  initial_app_data_.app_types_ =
+    new smart_objects::CSmartObject(app_types);
 }
 
 void ApplicationImpl::set_vr_synonyms(
   const smart_objects::CSmartObject& vr_synonyms) {
-  if (vr_synonyms_) {
-    delete vr_synonyms_;
+  if (initial_app_data_.vr_synonyms_) {
+    delete initial_app_data_.vr_synonyms_;
   }
-  vr_synonyms_ = new smart_objects::CSmartObject(vr_synonyms);
+  initial_app_data_.vr_synonyms_ =
+    new smart_objects::CSmartObject(vr_synonyms);
 }
 
 void ApplicationImpl::set_mobile_app_id(
   const smart_objects::CSmartObject& mobile_app_id) {
-  mobile_app_id_ = new smart_objects::CSmartObject(mobile_app_id);
+  if (initial_app_data_.mobile_app_id_) {
+    delete initial_app_data_.mobile_app_id_;
+  }
+  initial_app_data_.mobile_app_id_ =
+    new smart_objects::CSmartObject(mobile_app_id);
 }
 
 void ApplicationImpl::set_help_prompt(
@@ -314,12 +325,11 @@ void ApplicationImpl::RemoveCommand(unsigned int cmd_id) {
   }
 }
 
-smart_objects::CSmartObject*  ApplicationImpl::FindCommand(unsigned int cmd_id)
-{
+smart_objects::CSmartObject*  ApplicationImpl::FindCommand(
+  unsigned int cmd_id) {
   CommandsMap::const_iterator it = commands_.find(cmd_id);
-  if(it != commands_.end())
-  {
-      return it->second;
+  if (it != commands_.end()) {
+    return it->second;
   }
 
   return NULL;

@@ -49,6 +49,19 @@ namespace application_manager {
 
 namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 
+struct InitialApplicationData {
+  InitialApplicationData();
+  ~InitialApplicationData();
+
+  smart_objects::CSmartObject language_;
+  smart_objects::CSmartObject ui_language_;
+  smart_objects::CSmartObject* app_types_;
+  smart_objects::CSmartObject* vr_synonyms_;
+  smart_objects::CSmartObject* ngn_media_screen_name_;
+  smart_objects::CSmartObject* mobile_app_id_;
+  smart_objects::CSmartObject* tts_name_;
+};
+
 /*
  * @brief Typedef for supported commands in application menu
  */
@@ -68,76 +81,71 @@ class ApplicationImpl : public Application {
     int app_id() const;
     const std::string& name() const;
 
-  bool is_media_application() const;
-  const smart_objects::CSmartObject * app_types() const;
-  const smart_objects::CSmartObject * vr_synonyms() const;
-  const smart_objects::CSmartObject * mobile_app_id() const;
-  const smart_objects::CSmartObject * tts_name() const;
-  const smart_objects::CSmartObject * ngn_media_screen_name() const;
-  const smart_objects::CSmartObject & hmi_level() const;
-  const smart_objects::CSmartObject & system_context() const;
-  const smart_objects::CSmartObject & language() const;
-  const smart_objects::CSmartObject & ui_language() const;
-  const smart_objects::CSmartObject * help_promt() const;
-  const smart_objects::CSmartObject * timeout_promt() const;
-  const smart_objects::CSmartObject * vr_help_title() const;
-  const smart_objects::CSmartObject * vr_help() const;
+    bool is_media_application() const;
+    const smart_objects::CSmartObject* app_types() const;
+    const smart_objects::CSmartObject* vr_synonyms() const;
+    const smart_objects::CSmartObject* mobile_app_id() const;
+    const smart_objects::CSmartObject* tts_name() const;
+    const smart_objects::CSmartObject* ngn_media_screen_name() const;
+    const smart_objects::CSmartObject& hmi_level() const;
+    const smart_objects::CSmartObject& system_context() const;
+    const smart_objects::CSmartObject& language() const;
+    const smart_objects::CSmartObject& ui_language() const;
+    const smart_objects::CSmartObject* help_promt() const;
+    const smart_objects::CSmartObject* timeout_promt() const;
+    const smart_objects::CSmartObject* vr_help_title() const;
+    const smart_objects::CSmartObject* vr_help() const;
 
-  void set_version(const Version& version);
-  void set_name(const std::string& name);
-  void set_is_media_application(bool is_media);
-  void set_hmi_level(const smart_objects::CSmartObject & hmi_level);
-  void set_system_context(const smart_objects::CSmartObject & system_context);
-  void set_language(const smart_objects::CSmartObject & language);
-  void set_ui_language(const smart_objects::CSmartObject & ui_language);
-  void set_app_types(const smart_objects::CSmartObject & app_types);
-  void set_vr_synonyms(const smart_objects::CSmartObject & vr_synonyms);
-  void set_mobile_app_id(const smart_objects::CSmartObject & mobile_app_id);
-  void set_tts_name(const smart_objects::CSmartObject & tts_name);
-  void set_ngn_media_screen_name(const smart_objects::CSmartObject & ngn_name);
-  void set_help_prompt(const smart_objects::CSmartObject & help_promt);
-  void set_timeout_prompt(const smart_objects::CSmartObject & timeout_promt);
-  void set_vr_help_title(const smart_objects::CSmartObject & vr_help_title);
-  void set_vr_help(const smart_objects::CSmartObject & vr_help);
+    void set_version(const Version& version);
+    void set_name(const std::string& name);
+    void set_is_media_application(bool is_media);
+    void set_hmi_level(const smart_objects::CSmartObject& hmi_level);
+    void set_system_context(const smart_objects::CSmartObject& system_context);
+    void set_language(const smart_objects::CSmartObject& language);
+    void set_ui_language(const smart_objects::CSmartObject& ui_language);
+    void set_app_types(const smart_objects::CSmartObject& app_types);
+    void set_vr_synonyms(const smart_objects::CSmartObject& vr_synonyms);
+    void set_mobile_app_id(const smart_objects::CSmartObject& mobile_app_id);
+    void set_tts_name(const smart_objects::CSmartObject& tts_name);
+    void set_ngn_media_screen_name(const smart_objects::CSmartObject& ngn_name);
+    void set_help_prompt(const smart_objects::CSmartObject& help_promt);
+    void set_timeout_prompt(const smart_objects::CSmartObject& timeout_promt);
+    void set_vr_help_title(const smart_objects::CSmartObject& vr_help_title);
+    void set_vr_help(const smart_objects::CSmartObject& vr_help);
 
-  /*
-   * @brief Adds a command to the in application menu
-   */
-  void AddCommand(unsigned int cmd_id,
-                  const smart_objects::CSmartObject& command);
+    /*
+     * @brief Adds a command to the in application menu
+     */
+    void AddCommand(unsigned int cmd_id,
+                    const smart_objects::CSmartObject& command);
 
-  /*
-   * @brief Deletes all commands from the application menu with the specified command id
-   */
-  void RemoveCommand(unsigned int cmd_id);
+    /*
+     * @brief Deletes all commands from the application menu with the specified command id
+     */
+    void RemoveCommand(unsigned int cmd_id);
 
-  /*
-   * @brief Finds command with the specified command id
-   */
-  smart_objects::CSmartObject*  FindCommand(unsigned int cmd_id);
+    /*
+     * @brief Finds command with the specified command id
+     */
+    smart_objects::CSmartObject*  FindCommand(unsigned int cmd_id);
 
   private:
     Version version_;
-    smart_objects::CSmartObject* active_message_;
     int app_id_;
     std::string app_name_;
+
+    smart_objects::CSmartObject* active_message_;
+    InitialApplicationData initial_app_data_;
 
     bool is_media_;
     smart_objects::CSmartObject hmi_level_;
     smart_objects::CSmartObject system_context_;
 
-  smart_objects::CSmartObject language_;
-  smart_objects::CSmartObject ui_language_;
-  smart_objects::CSmartObject * app_types_;
-  smart_objects::CSmartObject * vr_synonyms_;
-  smart_objects::CSmartObject * ngn_media_screen_name_;
-  smart_objects::CSmartObject * mobile_app_id_;
-  smart_objects::CSmartObject * tts_name_;
-  smart_objects::CSmartObject * help_promt_;
-  smart_objects::CSmartObject * timeout_promt_;
-  smart_objects::CSmartObject * vr_help_title_;
-  smart_objects::CSmartObject * vr_help_;
-  CommandsMap                   commands_;
+    smart_objects::CSmartObject* help_promt_;
+    smart_objects::CSmartObject* timeout_promt_;
+    smart_objects::CSmartObject* vr_help_title_;
+    smart_objects::CSmartObject* vr_help_;
+    CommandsMap commands_;
 };
 
 }  // namespace application_manager
