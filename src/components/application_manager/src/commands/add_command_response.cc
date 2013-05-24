@@ -33,6 +33,8 @@
 
 #include "application_manager/commands/add_command_response.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
 #include "v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
@@ -44,7 +46,9 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 AddCommandResponse::AddCommandResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message): CommandResponseImpl(message),
+ result_ui(false),
+ result_vr(false) {
 }
 
 AddCommandResponse::~AddCommandResponse() {
@@ -53,13 +57,63 @@ AddCommandResponse::~AddCommandResponse() {
 void AddCommandResponse::Run() {
   LOG4CXX_INFO(logger_, "AddCommandResponse::Run ");
 
+  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
+  //TODO(DK) HMI Request Id
+  const int function_id =
+      (*message_)[strings::params]["function_id"].asInt();
+
+  //TODO(DK) HMI code Id
+  const int code =
+      (*message_)[strings::msg_params][hmi_response::code].asInt();
+
+  //TODO(DK) HMI Request Id
+  const int ui_cmd_id = 1;
+  const int vr_cmd_id = 2;
+
+  const MessageChaining* msg_chain =
+  ApplicationManagerImpl::instance()->GetMessageChain(function_id);
+  smart_objects::CSmartObject data =
+      msg_chain->data();
+
+  if (function_id == ui_cmd_id) {
+    if (true == code) {
+      result_ui = true;
+    }
+  } else if (function_id == vr_cmd_id) {
+    if (true == code) {
+      result_vr = true;
+    }
+  }
+
+  //sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       (*message_)[strings::params]["function_id"].asInt())) {
 
-    (*message_)[strings::msg_params][strings::success] = true;
-    (*message_)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-    SendResponse();
+    // add comand to application
+    //TODO(DK) integrate SmartObject delete key
+    if (false == result_ui) {
+      data[strings::msg_params][strings::menu_params] = "";
+    } else if (false == result_vr) {
+      data[strings::msg_params][strings::vr_commands] = "";
+    }
+
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(
+          ApplicationManagerImpl::instance()->
+          application((*message_)[strings::params][strings::connection_key]));
+
+    app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),
+                    data[strings::msg_params]);
+
+    if ((true == result_ui) && (true == result_vr)) {
+
+      (*message_)[strings::msg_params][strings::success] = true;
+      (*message_)[strings::msg_params][strings::result_code] =
+          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+      SendResponse();
+    } else {
+      //TODO(DK) check ui and vr response code
+    }
   }
 
 }

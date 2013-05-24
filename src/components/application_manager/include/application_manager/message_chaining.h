@@ -33,20 +33,24 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CHAINING_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CHAINING_IMPL_H_
 
+#include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
 
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
 /**
- * @brief Message chaining class
+ * @brief Messagechaining class is intended to
  **/
-class MessageChaining
-{
+class MessageChaining {
  public:
   /*
    * @brief MessageChaining class constructor
+   *
+   * @param connection_key of connection for Mobile side
+   * @param correlation_id Correlation id for response for Mobile side
    */
-  MessageChaining(int connectionKey,
-        unsigned int correlationID);
+  MessageChaining(int connection_key, unsigned int correlation_id);
   /*
    * @brief MessageChaining class destructor
    */
@@ -60,10 +64,61 @@ class MessageChaining
    **/
   bool operator==(const MessageChaining& other) const;
 
-  unsigned int correlationID;
-  int connectionKey;
-  bool success;
-  int counter;
+  /**
+   * @brief Retrieves correlation ID
+   *
+   * @return correlation_id
+   **/
+  const unsigned int correlation_id() const;
+
+  /**
+   * @brief Retrieves connection key
+   *
+   * @return connection_key
+   **/
+  int connection_key() const;
+
+  /**
+   * @brief Increments counter that represent
+   * amount of pending HMI responses
+   *
+   **/
+  void increment_counter();
+
+  /**
+   * @brief Decrements counter representing that
+   * corresponding HMI response received
+   *
+   **/
+  void decrement_counter();
+
+  /**
+   * @brief Retrieves connection key
+   *
+   * @return connection_key
+   **/
+  int counter() const;
+
+  /**
+   * @brief Sets SmartObject data
+   *
+   * @return reference to SmartObject data
+   **/
+  void set_data(const smart_objects::CSmartObject& data);
+
+  /**
+   * @brief Retrieves SmartObject data
+   *
+   * @return reference to SmartObject data
+   **/
+  const smart_objects::CSmartObject& data() const;
+
+ private:
+  unsigned int correlation_id_;
+  int connection_key_;
+  bool success_;
+  int counter_;                        // amount of pending HMI responses
+  smart_objects::CSmartObject data_;   // temporal data
 };
 
 }  // namespace application_manager

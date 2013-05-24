@@ -44,6 +44,12 @@
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class CSmartObject;
+}
+}
+
 namespace application_manager {
 
 /**
@@ -96,9 +102,10 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return pointer to MessageChaining
      */
     MessageChaining* AddMessageChain(MessageChaining* chain,
-                                     unsigned int connection_key,
-                                     unsigned int correlation_id,
-                                     unsigned int function_id);
+        unsigned int connection_key,
+        unsigned int correlation_id,
+        unsigned int function_id,
+        const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
      * @brief Decrease chain for correlation ID
@@ -109,6 +116,15 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return true if there is no other pending responses
      */
     bool DecreaseMessageChain(unsigned int function_id);
+
+    /*
+     * @brief Retriev MessageChaining object from chain
+     *
+     * @param function_id HMI function ID to be search
+     *
+     * @return MessageChaining on success, otherwise NULL
+     */
+    const MessageChaining* GetMessageChain(unsigned int function_id) const;
 
     /////////////////////////////////////////////////////
 

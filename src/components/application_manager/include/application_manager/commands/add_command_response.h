@@ -65,6 +65,9 @@ class AddCommandResponse : public CommandResponseImpl {
 
  private:
 
+  bool result_ui;
+  bool result_vr;
+
   DISALLOW_COPY_AND_ASSIGN(AddCommandResponse);
 };
 

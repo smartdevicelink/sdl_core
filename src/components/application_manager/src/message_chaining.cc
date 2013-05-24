@@ -34,20 +34,50 @@
 
 namespace application_manager {
 
-MessageChaining::MessageChaining(int connectionKey,
-      unsigned int correlationID):
-  correlationID(correlationID),
-  connectionKey(connectionKey),
-  success(true),
-  counter(1) {
+MessageChaining::MessageChaining(int connection_key,
+                                 unsigned int correlation_id):
+  correlation_id_(correlation_id),
+  connection_key_(connection_key),
+  success_(true),
+  counter_(1),
+  data_() {
 }
 
 MessageChaining::~MessageChaining() {
 }
 
-bool MessageChaining::operator==(const MessageChaining& other) const
-{
-    return ((correlationID == other.correlationID) &&
-            (connectionKey == other.connectionKey));
+bool MessageChaining::operator==(const MessageChaining& other) const {
+    return ((correlation_id_ == other.correlation_id_) &&
+            (connection_key_ == other.connection_key_) &&
+            (data_ == other.data_));
 }
+
+const unsigned int MessageChaining::correlation_id() const {
+  return correlation_id_;
+}
+
+int MessageChaining::connection_key() const {
+  return connection_key_;
+}
+
+void MessageChaining::increment_counter() {
+  ++counter_;
+}
+
+void MessageChaining::decrement_counter() {
+  --counter_;
+}
+
+int MessageChaining::counter() const {
+  return counter_;
+}
+
+void MessageChaining::set_data(const smart_objects::CSmartObject& data) {
+  data_ = data;
+}
+
+const smart_objects::CSmartObject& MessageChaining::data() const {
+  return data_;
+}
+
 }  // namespace application_manager

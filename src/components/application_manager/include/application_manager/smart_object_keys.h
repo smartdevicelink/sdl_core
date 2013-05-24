@@ -80,6 +80,11 @@ const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 
 }  // namespace strings
 
+namespace hmi_response {
+  const char code[] = "code";
+  const char method[] = "method";
+}
+
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SMART_OBJECT_KEYS_H_

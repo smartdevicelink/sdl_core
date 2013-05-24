@@ -81,21 +81,26 @@ ApplicationManagerImpl::applications() const {
 }
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
-                                 unsigned int connection_key,
-                                 unsigned int correlation_id,
-                                 unsigned int function_id) {
+    unsigned int connection_key,
+    unsigned int correlation_id,
+    unsigned int function_id,
+    const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data) {
   if (!chain)
   {
       chain = new MessageChaining(
           connection_key,
           correlation_id);
+      if (data) {
+        chain->set_data(*data);
+      }
+
       MessageChainPtr ptr(chain);
       message_chaining_[function_id] = ptr;
       return chain;
   }
   else
   {
-      chain->counter++;
+      chain->increment_counter();
       MessageChains::const_iterator iter;
       for (iter = message_chaining_.begin(); iter != message_chaining_.end(); ++iter) {
         if ((*iter->second) == *chain) {
@@ -113,13 +118,22 @@ bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
   MessageChains::iterator it = message_chaining_.find(function_id);
 
   if (message_chaining_.end() != it) {
-    (*it->second).counter--;
-    if (!(*it->second).counter) {
+    (*it->second).decrement_counter();
+    if (!(*it->second).counter()) {
       result = true;
     }
     message_chaining_.erase(it);
   }
   return result;
+}
+
+const MessageChaining* ApplicationManagerImpl::GetMessageChain(unsigned int function_id) const {
+  MessageChains::const_iterator it = message_chaining_.find(function_id);
+  if (message_chaining_.end() != it) {
+    return &(*it->second);
+  }
+
+  return NULL;
 }
 
 void ApplicationManagerImpl::onMessageReceived(

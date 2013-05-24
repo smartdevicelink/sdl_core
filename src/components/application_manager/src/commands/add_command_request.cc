@@ -66,7 +66,7 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  if (!app->
+  if (app->
       FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt())) {
     SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
     return;
@@ -82,7 +82,7 @@ void AddCommandRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
-    //TODO HMI Request Id
+    //TODO(DK) HMI Request Id
     const int ui_cmd_id = 1;
     (*p_smrt_ui)[strings::params][strings::function_id] =
         ui_cmd_id;
@@ -100,7 +100,7 @@ void AddCommandRequest::Run() {
         app->app_id();
 
     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, corellation_id, ui_cmd_id);
+        connection_key, corellation_id, ui_cmd_id, &(*message_));
 
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
   }
@@ -109,7 +109,7 @@ void AddCommandRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
     smart_objects::CSmartObject* p_smrt_vr  = new smart_objects::CSmartObject();
 
-    //TODO HMI Request Id
+    //TODO(DK) HMI Request Id
     const int vr_cmd_id = 2;
     (*p_smrt_vr)[strings::params][strings::function_id] =
         vr_cmd_id;
@@ -127,7 +127,7 @@ void AddCommandRequest::Run() {
         app->app_id();
 
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, corellation_id, vr_cmd_id);
+        connection_key, corellation_id, vr_cmd_id, &(*message_));
 
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
   }
