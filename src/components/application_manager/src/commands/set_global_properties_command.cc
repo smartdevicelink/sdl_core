@@ -57,21 +57,12 @@ void SetGlobalPropertiesCommand::Run() {
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::app_id]));
+      application((*message_)[strings::params][strings::connection_key]));
 
-  if (NULL != app) {
+  if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject obj = app->hmi_level();
-  if(NsSmartDeviceLinkRPCV2::HMILevel::HMI_NONE == obj.asInt())
-  {
-    LOG4CXX_WARN(logger_, "An application " << app->name()
-                 << " has not been activated yet!" );
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::REJECTED);
     return;
   }
 

@@ -57,43 +57,81 @@ void AddCommandRequest::Run() {
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::app_id]));
+      application((*message_)[strings::params][strings::connection_key]));
 
-  if (NULL != app) {
+  if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject obj = app->hmi_level();
-  if(NsSmartDeviceLinkRPCV2::HMILevel::HMI_NONE == obj.asInt())
-  {
-    LOG4CXX_WARN(logger_, "An application " << app->name()
-                 << " has not been activated yet!" );
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+  if (!app->
+      FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt())) {
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
     return;
   }
 
-  const int corellationId =
+  const int corellation_id =
       (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
+  const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  unsigned int ui_cmd_id = 1;
-  ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId, ui_cmd_id);
+  MessageChaining * chain = NULL;
+  // check menu params
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
+    smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
-  unsigned int vr_cmd_id = 2;
-  ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId, vr_cmd_id);
+    //TODO HMI Request Id
+    const int ui_cmd_id = 1;
+    (*p_smrt_ui)[strings::params][strings::function_id] =
+        ui_cmd_id;
 
-    /*(*message_)[strings::msg_params][strings::properties] =
-        *app->help_promt();*/
+    (*p_smrt_ui)[strings::params][strings::message_type] =
+        MessageType::kRequest;
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
+        (*message_)[strings::msg_params][strings::cmd_id];
+
+    (*p_smrt_ui)[strings::msg_params][strings::menu_params] =
+        (*message_)[strings::msg_params][strings::menu_params];
+
+    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
+        app->app_id();
+
+    chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
+        connection_key, corellation_id, ui_cmd_id);
+
+    ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+  }
+
+  // check vr params
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
+    smart_objects::CSmartObject* p_smrt_vr  = new smart_objects::CSmartObject();
+
+    //TODO HMI Request Id
+    const int vr_cmd_id = 2;
+    (*p_smrt_vr)[strings::params][strings::function_id] =
+        vr_cmd_id;
+
+    (*p_smrt_vr)[strings::params][strings::message_type] =
+        MessageType::kRequest;
+
+    (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
+        (*message_)[strings::msg_params][strings::cmd_id];
+
+    (*p_smrt_vr)[strings::msg_params][strings::vr_commands] =
+        (*message_)[strings::msg_params][strings::vr_commands];
+
+    (*p_smrt_vr)[strings::msg_params][strings::app_id] =
+        app->app_id();
+
+    ApplicationManagerImpl::instance()->AddMessageChain(chain,
+        connection_key, corellation_id, vr_cmd_id);
+
+    ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
+  }
+
 }
 
 }  // namespace commands

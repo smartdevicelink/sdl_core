@@ -72,6 +72,9 @@ const char status_bar[] = "statusBar";
 const char media_clock[] = "media_clock";
 const char media_track[] = "media_track";
 const char properties[] = "properties";
+const char cmd_id[] = "cmdID";
+const char menu_params[] = "menuParams";
+const char vr_commands[] = "vrCommands";
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 
