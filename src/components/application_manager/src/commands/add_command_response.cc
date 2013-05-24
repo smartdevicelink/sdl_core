@@ -93,9 +93,9 @@ void AddCommandResponse::Run() {
     // add comand to application
     //TODO(DK) integrate SmartObject delete key
     if (false == result_ui) {
-      data[strings::msg_params][strings::menu_params] = "";
+      data[strings::msg_params].erase(strings::menu_params);
     } else if (false == result_vr) {
-      data[strings::msg_params][strings::vr_commands] = "";
+      data[strings::msg_params].erase(strings::vr_commands);
     }
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
