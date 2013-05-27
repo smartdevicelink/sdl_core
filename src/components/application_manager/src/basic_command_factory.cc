@@ -42,6 +42,10 @@
 #include "application_manager/commands/reset_global_properties_response_command.h"
 #include "application_manager/commands/add_command_request.h"
 #include "application_manager/commands/add_command_response.h"
+#include "application_manager/commands/delete_sub_menu_command.h"
+#include "application_manager/commands/delete_sub_menu_response_command.h"
+#include "application_manager/commands/add_sub_menu_command.h"
+#include "application_manager/commands/add_sub_menu_command_response.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -89,9 +93,25 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::AddCommandID: {
       if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-        command.reset(new commands::AddCommandRequest(message));
-      } else {
         command.reset(new commands::AddCommandResponse(message));
+      } else {
+        command.reset(new commands::AddCommandRequest(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::AddSubMenuID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::AddSubMenuResponseCommand(message));
+      } else {
+        command.reset(new commands::AddSubMenuCommand(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::DeleteSubMenuID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::DeleteSubMenuResponseCommand(message));
+      } else {
+        command.reset(new commands::DeleteSubMenuCommand(message));
       }
       break;
     }

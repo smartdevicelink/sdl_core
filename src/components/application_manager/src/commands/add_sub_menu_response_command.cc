@@ -31,32 +31,41 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/unregister_app_interface_command.h"
+#include "application_manager/commands/add_sub_menu_response_command.h"
 #include "application_manager/application_manager_impl.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
 
 namespace application_manager {
 
 namespace commands {
 
-void UnregisterAppInterfaceCommand::Run() {
-  ApplicationManagerImpl* application_manager_impl =
-      ApplicationManagerImpl::instance();
-  if (!application_manager_impl->
-      application((*message_)[strings::params][strings::connection_key])) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
+AddSubMenuResponseCommand::AddSubMenuResponseCommand(
+    const MessageSharedPtr& message): CommandResponseImpl(message) {
+}
 
-  if (!application_manager_impl->
-      UnregisterApplication(application_manager_impl->
-      application((*message_)[strings::msg_params][strings::app_id]))) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
-    return;
-  }
+AddSubMenuResponseCommand::~AddSubMenuResponseCommand() {
+}
 
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+void AddSubMenuResponseCommand::Run() {
+  const int hmi_request_id = 1;
+
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
+    smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
+      GetMessageChain(hmi_request_id)->data();
+
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(
+        ApplicationManagerImpl::instance()->
+          application(data[strings::params][strings::connection_key]));
+
+    app->AddSubMenu(data[strings::msg_params][strings::menu_id].asInt(),
+                   (*message_)[strings::msg_params]);
+
+    (*message_)[strings::params][strings::success] = true;
+    (*message_)[strings::params][strings::result_code] =
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    SendResponse();
+  }
 }
 
 }  // namespace commands

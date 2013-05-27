@@ -43,18 +43,29 @@ namespace commands {
 
 void RegisterAppInterfaceCommand::Run() {
   if (ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id])) {
+      application((*message_)[strings::params][strings::connection_key])) {
     SendResponse(false,
              NsSmartDeviceLinkRPC::V2::Result::APPLICATION_REGISTERED_ALREADY);
   } else {
     ApplicationImpl* application_impl = new ApplicationImpl(
-        (*message_)[strings::msg_params][strings::app_id]);
+        (*message_)[strings::params][strings::connection_key]);
 
-    //application_impl->set_version(
-    //    (*message_)[strings::msg_params][strings::sync_msg_version]);
+    Version version;
+    version.min_supported_api_version =
+        static_cast<APIVersion>((*message_)[strings::msg_params]
+                    [strings::sync_msg_version]
+                     [strings::minor_version].asInt());
+    version.max_supported_api_version =
+        static_cast<APIVersion>((*message_)[strings::msg_params]
+                    [strings::sync_msg_version]
+                     [strings::major_version].asInt());
+    application_impl->set_version(version);
 
     application_impl->set_name(
         (*message_)[strings::msg_params][strings::app_name]);
+
+    application_impl->set_mobile_app_id(
+           (*message_)[strings::msg_params][strings::app_id]);
 
     application_impl->set_is_media_application(
         (*message_)[strings::msg_params][strings::is_media_application]);

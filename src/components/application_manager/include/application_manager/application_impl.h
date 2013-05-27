@@ -66,6 +66,7 @@ struct InitialApplicationData {
  * @brief Typedef for supported commands in application menu
  */
 typedef std::map<unsigned int, smart_objects::CSmartObject*> CommandsMap;
+typedef std::map<unsigned int, smart_objects::CSmartObject*> SubMenuMap;
 
 class ApplicationImpl : public Application {
   public:
@@ -129,6 +130,22 @@ class ApplicationImpl : public Application {
      */
     smart_objects::CSmartObject*  FindCommand(unsigned int cmd_id);
 
+  /*
+   * @brief Adds a menu to the application
+   */
+  void AddSubMenu(unsigned int menu_id,
+                  const smart_objects::CSmartObject& menu);
+
+  /*
+   * @brief Deletes menu from the application menu
+   */
+  void RemoveSubMenu(unsigned int menu_id);
+
+  /*
+   * @brief Finds menu with the specified id
+   */
+  smart_objects::CSmartObject*  FindSubMenu(unsigned int menu_id);
+
   private:
     Version version_;
     int app_id_;
@@ -145,7 +162,10 @@ class ApplicationImpl : public Application {
     smart_objects::CSmartObject* timeout_promt_;
     smart_objects::CSmartObject* vr_help_title_;
     smart_objects::CSmartObject* vr_help_;
+
     CommandsMap commands_;
+    SubMenuMap sub_menu_;
+
 };
 
 }  // namespace application_manager

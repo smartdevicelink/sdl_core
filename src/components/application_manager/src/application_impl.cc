@@ -107,11 +107,19 @@ ApplicationImpl::~ApplicationImpl() {
     vr_help_ = NULL;
   }
 
-  for (CommandsMap::iterator it = commands_.begin();
-       commands_.end() != it; ++it) {
-    delete it->second;
+  for (CommandsMap::iterator command_it = commands_.begin();
+       commands_.end() != command_it; ++command_it) {
+    delete command_it->second;
   }
+
   commands_.clear();
+
+  for (SubMenuMap::iterator sub_menu_it = sub_menu_.begin();
+       sub_menu_.end() != sub_menu_it; ++sub_menu_it) {
+    delete sub_menu_it->second;
+  }
+
+  sub_menu_.clear();
 }
 
 void ApplicationImpl::ProcessMessage(smart_objects::CSmartObject* message) {
@@ -330,6 +338,32 @@ smart_objects::CSmartObject*  ApplicationImpl::FindCommand(
   CommandsMap::const_iterator it = commands_.find(cmd_id);
   if (it != commands_.end()) {
     return it->second;
+  }
+
+  return NULL;
+}
+
+// TODO(VS): Create common functions for processing collections
+void ApplicationImpl::AddSubMenu(unsigned int menu_id,
+                                 const smart_objects::CSmartObject& menu) {
+  sub_menu_[menu_id] = new smart_objects::CSmartObject(menu);
+}
+
+void ApplicationImpl::RemoveSubMenu(unsigned int menu_id) {
+  SubMenuMap::iterator it = sub_menu_.find(menu_id);
+
+  if (sub_menu_.end() != it) {
+    delete it->second;
+    sub_menu_.erase(menu_id);
+  }
+}
+
+smart_objects::CSmartObject*  ApplicationImpl::FindSubMenu(unsigned int menu_id)
+{
+  SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
+  if(it != sub_menu_.end())
+  {
+      return it->second;
   }
 
   return NULL;

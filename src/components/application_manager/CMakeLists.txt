@@ -40,6 +40,12 @@ set (SOURCES
 ./src/commands/reset_global_properties_response_command.cc
 ./src/commands/unregister_app_interface_response_command.cc
 ./src/message_conversion.cc
+./src/commands/delete_sub_menu_command.cc
+./src/commands/delete_sub_menu_response_command.cc
+./src/commands/add_sub_menu_command.cc
+./src/commands/add_sub_menu_command_response.cc
+#./src/commands/delete_command_request.cc
+#./src/commands/delete_command_response.cc
 )
 
 
