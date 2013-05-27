@@ -43,7 +43,7 @@ set (SOURCES
 ./src/commands/delete_sub_menu_command.cc
 ./src/commands/delete_sub_menu_response_command.cc
 ./src/commands/add_sub_menu_command.cc
-./src/commands/add_sub_menu_command_response.cc
+./src/commands/add_sub_menu_response_command.cc
 #./src/commands/delete_command_request.cc
 #./src/commands/delete_command_response.cc
 )
