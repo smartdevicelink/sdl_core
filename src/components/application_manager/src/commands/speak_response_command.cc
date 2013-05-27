@@ -45,6 +45,7 @@ SpeakResponseCommand::SpeakResponseCommand(const MessageSharedPtr& message)
 }
 
 void SpeakResponseCommand::Run() {
+  SendResponse();
 }
 
 }  // namespace commands

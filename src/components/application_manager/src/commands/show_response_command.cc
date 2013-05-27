@@ -45,6 +45,7 @@ ShowResponseCommand::ShowResponseCommand(const MessageSharedPtr& message)
 }
 
 void ShowResponseCommand::Run() {
+  SendResponse();
 }
 
 }  // namespace commands
