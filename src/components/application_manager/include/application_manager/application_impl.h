@@ -146,6 +146,11 @@ class ApplicationImpl : public Application {
    */
   smart_objects::CSmartObject*  FindSubMenu(unsigned int menu_id);
 
+  /*
+   * @brief Retrieve application commands
+   */
+  inline const CommandsMap& commands_map() const;
+
   private:
     Version version_;
     int app_id_;
@@ -167,6 +172,10 @@ class ApplicationImpl : public Application {
     SubMenuMap sub_menu_;
 
 };
+
+const CommandsMap& ApplicationImpl::commands_map() const {
+  return commands_;
+}
 
 }  // namespace application_manager
 

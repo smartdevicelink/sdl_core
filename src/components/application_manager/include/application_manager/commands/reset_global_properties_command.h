@@ -39,7 +39,20 @@
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
+
+//TODO(DK): Include GlobalProperty header
+/*
+ * @brief Names of all global properties that should be unset.
+ */
+enum GlobalProperty {
+  HELPPROMT = 0,
+  TIMEOUTPROMT = 1,
+  VRHELPTITLE = 2,
+  VRHELPITEMS = 3
+};
 
 /**
  * @brief ResetGlobalPropertiesCommand command class
@@ -64,6 +77,40 @@ class ResetGlobalPropertiesCommand : public CommandRequestImpl {
   virtual void Run();
 
  private:
+
+  /*
+   * @brief Sets default value of the HELPPROMT global property
+   * to the first vrCommand of each Command Menu registered in application
+   *
+   * @param app Registered application
+   * @param is_timeout_promp Flag indicating that timeout prompt
+   * should be reset
+   */
+  void reset_help_promt(ApplicationImpl* const app, bool is_timeout_promp = false);
+
+  /*
+   * @brief  Sets default value of the TIMEOUTPROMT global property
+   * to the first vrCommand of each Command Menu registered in application
+   *
+   * @param app Registered application
+   */
+  void reset_timeout_prompt(ApplicationImpl* const app);
+
+  /*
+   * @brief Sets default value of the VRHELPTITLE global property
+   * to the application name
+   *
+   * @param app Registered application
+   */
+  void reset_vr_help_title(ApplicationImpl* const app);
+
+  /*
+   * @brief Sets default value of the VRHELPITEMS global property
+   * to value equal to registered command -1(default command “Help / Cancel”.)
+   *
+   * @param app Registered application
+   */
+  void reset_vr_help_items(ApplicationImpl* const app);
 
   DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesCommand);
 };

@@ -66,26 +66,47 @@ void SetGlobalPropertiesCommand::Run() {
     return;
   }
 
-  const int corellationId =
+  app->set_help_prompt(
+      (*message_)[strings::msg_params][strings::help_promt]);
+  app->set_timeout_prompt(
+      (*message_)[strings::msg_params][strings::timeout_promt]);
+  app->set_vr_help_title(
+      (*message_)[strings::msg_params][strings::vr_help_title]);
+  app->set_vr_help(
+      (*message_)[strings::msg_params][strings::vr_help]);
+
+  const int corellation_id =
       (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
+  const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  const unsigned int cmd_id = 4;
+  const unsigned int cmd_id = 14;
   ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId, cmd_id);
+      new MessageChaining(connection_key, corellation_id),
+      connection_key, corellation_id, cmd_id);
 
-    (*message_)[strings::msg_params][strings::help_promt] =
-        *app->help_promt();
-    (*message_)[strings::msg_params][strings::timeout_promt] =
-        *app->timeout_promt();
-    (*message_)[strings::msg_params][strings::vr_help_title] =
-        *app->vr_help_title();
-    (*message_)[strings::msg_params][strings::vr_help] =
-        *app->vr_help();
+  smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+  //TODO(DK) HMI Request Id
+  const int ui_cmd_id = 1;
+  (*p_smrt_ui)[strings::params][strings::function_id] =
+      ui_cmd_id;
+
+  (*p_smrt_ui)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+
+  (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+
+  (*p_smrt_ui)[strings::msg_params][strings::vr_help_title] =
+      app->vr_help_title();
+
+  (*p_smrt_ui)[strings::msg_params][strings::vr_help] =
+      app->vr_help();
+
+  (*p_smrt_ui)[strings::msg_params][strings::app_id] =
+      app->app_id();
+  ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
 }
 
 }  // namespace commands
