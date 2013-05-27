@@ -11,6 +11,11 @@ class Parser(RPCBase.Parser):
 
     """JSON RPC parser."""
 
+    def __init__(self):
+        """Constructor."""
+        super(Parser, self).__init__()
+        self._interface_name = None
+
     def _parse_root(self, root):
         """Parse root XML element.
 
@@ -23,6 +28,7 @@ class Parser(RPCBase.Parser):
         """
 
         self._params = root.attrib
+        self._interface_name = None
 
         for element in root:
             if element.tag != "interface":
@@ -33,4 +39,38 @@ class Parser(RPCBase.Parser):
                 raise RPCBase.ParseError(
                     "Name is not specified for interface")
 
-            self._parse_interface(element, element.attrib["name"] + "_")
+            self._interface_name = element.attrib["name"]
+            self._parse_interface(element, self._interface_name + "_")
+
+    def _provide_enum_element_for_function(self, enum_name, element_name):
+        """Provide enum element for functions.
+
+        This implementation replaces the underscore separating interface and
+        function name with dot and sets it as name of enum element leaving
+        the name with underscore as internal_name. For enums other than
+        FunctionID the base implementation is called.
+
+        Returns EnumElement.
+
+        """
+
+        name = element_name
+        internal_name = None
+
+        if "FunctionID" == enum_name:
+            prefix_length = len(self._interface_name) + 1
+            if element_name[:prefix_length] != self._interface_name + '_':
+                raise RPCBase.ParseError(
+                    "Unexpected prefix for function id '" +
+                    element_name + "'")
+            name = self._interface_name + "." + element_name[prefix_length:]
+            internal_name = element_name
+
+        element = super(Parser, self)._provide_enum_element_for_function(
+            enum_name,
+            name)
+
+        if internal_name is not None:
+            element.internal_name = internal_name
+
+        return element

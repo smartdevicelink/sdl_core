@@ -55,28 +55,28 @@ class TestJSONRPCVParser(unittest.TestCase):
 
         self.assertEqual(3, len(enum.elements))
 
-        self.assertIn("interface1_Function1", enum.elements)
-        element = enum.elements["interface1_Function1"]
+        self.assertIn("interface1.Function1", enum.elements)
+        element = enum.elements["interface1.Function1"]
         self.verify_base_item(
             item=element,
-            name="interface1_Function1")
-        self.assertIsNone(element.internal_name)
+            name="interface1.Function1")
+        self.assertEqual("interface1_Function1", element.internal_name)
         self.assertIsNone(element.value)
 
-        self.assertIn("interface1_Function2", enum.elements)
-        element = enum.elements["interface1_Function2"]
+        self.assertIn("interface1.Function2", enum.elements)
+        element = enum.elements["interface1.Function2"]
         self.verify_base_item(
             item=element,
-            name="interface1_Function2")
-        self.assertIsNone(element.internal_name)
+            name="interface1.Function2")
+        self.assertEqual("interface1_Function2", element.internal_name)
         self.assertIsNone(element.value)
 
-        self.assertIn("interface2_Function1", enum.elements)
-        element = enum.elements["interface2_Function1"]
+        self.assertIn("interface2.Function1", enum.elements)
+        element = enum.elements["interface2.Function1"]
         self.verify_base_item(
             item=element,
-            name="interface2_Function1")
-        self.assertIsNone(element.internal_name)
+            name="interface2.Function1")
+        self.assertEqual("interface2_Function1", element.internal_name)
         self.assertIsNone(element.value)
 
         # Enumeration "messageType"
@@ -331,11 +331,11 @@ class TestJSONRPCVParser(unittest.TestCase):
         # Function request "interface1_Function1"
 
         self.assertIn(
-            (interface.enums["FunctionID"].elements["interface1_Function1"],
+            (interface.enums["FunctionID"].elements["interface1.Function1"],
              interface.enums["messageType"].elements["request"]),
             interface.functions)
         function = interface.functions[
-            (interface.enums["FunctionID"].elements["interface1_Function1"],
+            (interface.enums["FunctionID"].elements["interface1.Function1"],
              interface.enums["messageType"].elements["request"])]
         self.verify_base_item(
             item=function,
@@ -344,7 +344,7 @@ class TestJSONRPCVParser(unittest.TestCase):
             todos=["Function1 request todo"])
         self.assertIs(
             function.function_id,
-            interface.enums["FunctionID"].elements["interface1_Function1"])
+            interface.enums["FunctionID"].elements["interface1.Function1"])
         self.assertIs(function.message_type,
                       interface.enums["messageType"].elements["request"])
 
@@ -386,11 +386,11 @@ class TestJSONRPCVParser(unittest.TestCase):
         # Function response "interface1_Function1"
 
         self.assertIn(
-            (interface.enums["FunctionID"].elements["interface1_Function1"],
+            (interface.enums["FunctionID"].elements["interface1.Function1"],
              interface.enums["messageType"].elements["response"]),
             interface.functions)
         function = interface.functions[
-            (interface.enums["FunctionID"].elements["interface1_Function1"],
+            (interface.enums["FunctionID"].elements["interface1.Function1"],
              interface.enums["messageType"].elements["response"])]
         self.verify_base_item(
             item=function,
@@ -400,7 +400,7 @@ class TestJSONRPCVParser(unittest.TestCase):
             platform="")
         self.assertIs(
             function.function_id,
-            interface.enums["FunctionID"].elements["interface1_Function1"])
+            interface.enums["FunctionID"].elements["interface1.Function1"])
         self.assertIs(function.message_type,
                       interface.enums["messageType"].elements["response"])
 
@@ -432,11 +432,11 @@ class TestJSONRPCVParser(unittest.TestCase):
         # Function notification "interface1_Function2"
 
         self.assertIn(
-            (interface.enums["FunctionID"].elements["interface1_Function2"],
+            (interface.enums["FunctionID"].elements["interface1.Function2"],
              interface.enums["messageType"].elements["notification"]),
             interface.functions)
         function = interface.functions[
-            (interface.enums["FunctionID"].elements["interface1_Function2"],
+            (interface.enums["FunctionID"].elements["interface1.Function2"],
              interface.enums["messageType"].elements["notification"])]
         self.verify_base_item(item=function,
                               name="interface1_Function2",
@@ -444,7 +444,7 @@ class TestJSONRPCVParser(unittest.TestCase):
                               platform="function2 platform")
         self.assertIs(
             function.function_id,
-            interface.enums["FunctionID"].elements["interface1_Function2"])
+            interface.enums["FunctionID"].elements["interface1.Function2"])
         self.assertIs(function.message_type,
                       interface.enums["messageType"].elements["notification"])
 
@@ -495,16 +495,16 @@ class TestJSONRPCVParser(unittest.TestCase):
         # Function request "interface2_Function1"
 
         self.assertIn(
-            (interface.enums["FunctionID"].elements["interface2_Function1"],
+            (interface.enums["FunctionID"].elements["interface2.Function1"],
              interface.enums["messageType"].elements["request"]),
             interface.functions)
         function = interface.functions[
-            (interface.enums["FunctionID"].elements["interface2_Function1"],
+            (interface.enums["FunctionID"].elements["interface2.Function1"],
              interface.enums["messageType"].elements["request"])]
         self.verify_base_item(item=function, name="interface2_Function1")
         self.assertIs(
             function.function_id,
-            interface.enums["FunctionID"].elements["interface2_Function1"])
+            interface.enums["FunctionID"].elements["interface2.Function1"])
         self.assertIs(function.message_type,
                       interface.enums["messageType"].elements["request"])
 
@@ -531,11 +531,11 @@ class TestJSONRPCVParser(unittest.TestCase):
         # Function notification "interface2_Function1"
 
         self.assertIn(
-            (interface.enums["FunctionID"].elements["interface2_Function1"],
+            (interface.enums["FunctionID"].elements["interface2.Function1"],
              interface.enums["messageType"].elements["notification"]),
             interface.functions)
         function = interface.functions[
-            (interface.enums["FunctionID"].elements["interface2_Function1"],
+            (interface.enums["FunctionID"].elements["interface2.Function1"],
              interface.enums["messageType"].elements["notification"])]
         self.verify_base_item(
             item=function,
@@ -545,7 +545,7 @@ class TestJSONRPCVParser(unittest.TestCase):
             platform="platform")
         self.assertIs(
             function.function_id,
-            interface.enums["FunctionID"].elements["interface2_Function1"])
+            interface.enums["FunctionID"].elements["interface2.Function1"])
         self.assertIs(function.message_type,
                       interface.enums["messageType"].elements["notification"])
 
