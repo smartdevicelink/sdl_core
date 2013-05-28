@@ -54,7 +54,7 @@ namespace Formatters {
    */
   class CMetaFormatter
   {
-  public:
+   public:
 
     /**
      * @brief Creates smart object by the given schema having copied
@@ -66,12 +66,12 @@ namespace Formatters {
      * @param result_object createdsmart object
      * @return true if successful, false - otherwise
      */
-    static bool createObjectByPattern(
+    static bool CreateObjectByPattern(
             const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
             const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
             NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
     
-  private:
+   private:
 
      /**
      * @brief Fill out_object with values from in_object, if tree elements of both objects matched

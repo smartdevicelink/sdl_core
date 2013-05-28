@@ -47,7 +47,7 @@ namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 
 //---------------------------------------------------------------
 
-bool formatter_ns::CMetaFormatter::createObjectByPattern(
+bool formatter_ns::CMetaFormatter::CreateObjectByPattern(
             const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
             const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
             NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {

@@ -123,21 +123,21 @@ bool Formatters::CFormatterJsonSDLRPCv1::toString(
 Formatters::CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode
   Formatters::CFormatterJsonSDLRPCv1::MetaFormatToString(
             const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-            NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
             std::string& outStr) {
   meta_formatter_error_code::tMetaFormatterErrorCode result_code
                                     = meta_formatter_error_code::kErrorOk;
 
   NsSmartDeviceLink::NsSmartObjects::CSmartObject tmp_object;
     
-  if (false == CMetaFormatter::createObjectByPattern(object, schema, tmp_object)) {
+  if (false == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
       result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
       return result_code;
   }
 
   // determine whether smart objects are functions
   // (in terms of SDLRPC communication)
-  bool is_root_schema = (
+  bool is_root_object_created_by_schema = (
     (tmp_object.getType() == smart_objects_ns::SmartType_Map)
       && tmp_object.keyExists(jsonhandler_ns::strings::S_PARAMS)
       && tmp_object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
@@ -150,7 +150,7 @@ Formatters::CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode
   if (false == is_root_object) {
     result_code |= meta_formatter_error_code::kErrorObjectIsNotFunction;
   }
-  if (false == is_root_schema) {
+  if (false == is_root_object_created_by_schema) {
     result_code |= meta_formatter_error_code::kErrorSchemaIsNotFunction;
   }  
     

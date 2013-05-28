@@ -111,7 +111,7 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
         */
       static tMetaFormatterErrorCode MetaFormatToString(
                 const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-                NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema,
+                const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
                 std::string& outStr);
     };
 
