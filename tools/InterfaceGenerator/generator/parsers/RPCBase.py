@@ -97,6 +97,18 @@ class Parser(object):
                 "' is generated automatically in SDLRPCV1 and"
                 " must not be declared in xml file")
 
+    def _check_function_param_name(self, function_param_name):
+        """Check function param name.
+
+        This method is called to check whether the newly parsed function
+        parameter name conflicts with some predefined name.
+
+        This implementation doesn't check anything because there is no
+        predefined names in base RPC XML.
+        """
+
+        pass
+
     def _parse_root(self, root):
         """Parse root XML element.
 
@@ -260,6 +272,7 @@ class Parser(object):
             if subelement.tag == "param":
                 function_param = self._parse_function_param(subelement,
                                                             prefix)
+                self._check_function_param_name(function_param.name)
                 if function_param.name in function_params:
                     raise ParseError("Parameter '" + function_param.name +
                                      "' is specified more than once" +

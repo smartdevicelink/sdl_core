@@ -74,3 +74,16 @@ class Parser(RPCBase.Parser):
             element.internal_name = internal_name
 
         return element
+
+    def _check_function_param_name(self, function_param_name):
+        """Check function param name.
+
+        This method is called to check whether the newly parsed function
+        parameter name conflicts with some predefined name.
+        """
+
+        if function_param_name in ['method', 'code']:
+            raise RPCBase.ParseError(
+                "'" + function_param_name +
+                "' is a predefined name and can't be used" +
+                " as a function parameter name")
