@@ -147,7 +147,7 @@ void AlertCommandRequest::send_speek_request() const {
       (*tts_speak)[strings::params][strings::message_type] =
           MessageType::kRequest;
       (*tts_speak)[strings::msg_params][hmi_request::tts_chunks] =
-          MessageType::kRequest;
+         (*message_)[strings::msg_params][strings::tts_chunks];
       ApplicationManagerImpl::instance()->SendMessageToHMI(tts_speak);
     }
   }
