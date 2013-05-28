@@ -79,15 +79,33 @@ const char menu_id[] = "menuID";
 const char menu_name[] = "menuName";
 const char interaction_choice_set_id[] = "interactionChoiceSetID";
 const char choice_set[] = "choiceSet";
+const char alert_text1[] = "alertText1";
+const char alert_text2[] = "alertText2";
+const char alert_text3[] = "alertText3";
+const char tts_chunks[] = "ttsChunks";
+const char duration[] = "duration";
+const char play_tone[] = "playTone";
+const char soft_buttons[] = "softButtons";
+
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 
 }  // namespace strings
 
+namespace hmi_request {
+  const char field_name[] = "fieldName";
+  const char field_text[] = "fieldText";
+  const char alert_strings[] = "alertStrings";
+  const char duration[] = "duration";
+  const char soft_buttons[] = "softButtons";
+  const char tts_chunks[] = "ttsChunks";
+}  // namespace hmi_request
+
 namespace hmi_response {
   const char code[] = "code";
   const char method[] = "method";
-}
+  const char try_again_time[] = "tryAgainTime";
+}  // namespace hmi_response
 
 }  // namespace application_manager
 

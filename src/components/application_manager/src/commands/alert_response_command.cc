@@ -63,6 +63,20 @@ void AlertCommandResponse::Run() {
     return;
   }
 
+  // TODO(DK): HMI code Id
+  const int code =
+      (*message_)[strings::msg_params][hmi_response::code].asInt();
+
+  if (code) {
+    (*message_)[strings::msg_params][strings::success] = true;
+    (*message_)[strings::msg_params][strings::result_code] =
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+  } else {
+    (*message_)[strings::msg_params][strings::success] = false;
+    (*message_)[strings::msg_params][strings::result_code] =
+        NsSmartDeviceLinkRPC::V2::Result::IGNORED;
+  }
+  SendResponse();
 }
 
 }  // namespace commands

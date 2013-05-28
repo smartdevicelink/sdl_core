@@ -41,6 +41,32 @@ namespace application_manager {
 
 namespace commands {
 
+/*
+ * @brief Enum for HMI TextFieldName type
+ */
+enum TextFieldName {
+  MAIN_FILED1              = 0,
+  MAIN_FILED2              = 1,
+  MAIN_FILED3              = 2,
+  MAIN_FILED4              = 3,
+  STATUS_BAR               = 4,
+  MEDIA_CLOCK              = 5,
+  MEDIA_TRACK              = 6,
+  ALERT_TEXT1              = 7,
+  ALERT_TEXT2              = 8,
+  ALERT_TEXT3              = 9,
+  SCROLLABLE_MSG_BODY      = 10,
+  INITIAL_INTERACTION_TEXT = 11,
+  NAVI_TEXT1               = 12,
+  NAVI_TEXT2               = 13,
+  ETA                      = 14,
+  TOTAL_DISTANCE           = 15,
+  NAVI_TEXT                = 16,
+  AUDIO_DISPLAY_TEXT1      = 17,
+  AUDIO_DISPLAY_TEXT2      = 18,
+  SLIDER_HADER             = 19,
+  SLIDER_FOOTEER           = 20
+};
 /**
  * @brief AlertCommandRequest command class
  **/
@@ -64,6 +90,21 @@ class AlertCommandRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+
+  /*
+   * @brief Sends UI Alert request
+   */
+  void send_alert_request() const;
+
+  /*
+   * @brief Sends TTS Speak request
+   */
+  void send_speek_request() const;
+
+  /*
+   * @brief Sends Basic communication playtone request
+   */
+  void send_play_tone_request() const;
 
   DISALLOW_COPY_AND_ASSIGN(AlertCommandRequest);
 };
