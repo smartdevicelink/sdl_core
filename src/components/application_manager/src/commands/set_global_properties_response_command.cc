@@ -32,6 +32,7 @@
  */
 
 #include "application_manager/commands/set_global_properties_response_command.h"
+#include "v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -51,6 +52,15 @@ SetGlobalPropertiesResponseCommand::~SetGlobalPropertiesResponseCommand() {
 void SetGlobalPropertiesResponseCommand::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesResponseCommand::Run ");
 
+  // check if response false
+  if ((*message_)[strings::msg_params][strings::success] == false) {
+    SendResponse();
+    return;
+  }
+
+  (*message_)[strings::msg_params][strings::success] = true;
+  (*message_)[strings::msg_params][strings::result_code] =
+      NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
   SendResponse();
 }
 

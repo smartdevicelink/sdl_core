@@ -55,6 +55,11 @@ DeleteInteractionChoiseSetResponse::~DeleteInteractionChoiseSetResponse() {
 void DeleteInteractionChoiseSetResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiseSetResponse::Run ");
 
+  // check if response false
+  if (false == (*message_)[strings::msg_params][strings::success]) {
+    SendResponse();
+    return;
+  }
 
   (*message_)[strings::msg_params][strings::success] = true;
   (*message_)[strings::msg_params][strings::result_code] =

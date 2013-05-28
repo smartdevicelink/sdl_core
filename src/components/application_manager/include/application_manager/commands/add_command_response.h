@@ -64,9 +64,8 @@ class AddCommandResponse : public CommandResponseImpl {
   virtual void Run();
 
  private:
-
-  bool result_ui;
-  bool result_vr;
+  static bool result_ui;  // flag for ui HMI response
+  static bool result_vr;  // flag for vr HMI response
 
   DISALLOW_COPY_AND_ASSIGN(AddCommandResponse);
 };
