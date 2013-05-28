@@ -46,8 +46,8 @@ set (SOURCES
 ./src/commands/add_sub_menu_response_command.cc
 ./src/commands/delete_interaction_choisce_set_command.cc
 ./src/commands/delete_interaction_choice_set_response_command.cc
-#./src/commands/delete_command_request.cc
-#./src/commands/delete_command_response.cc
+./src/commands/delete_command_request.cc
+./src/commands/delete_command_response.cc
 )
 
 

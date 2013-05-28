@@ -48,7 +48,12 @@ DeleteSubMenuResponseCommand::~DeleteSubMenuResponseCommand() {
 }
 
 void DeleteSubMenuResponseCommand::Run() {
-  const int hmi_request_id = 1;
+  if ((*message_)[strings::params][strings::success] == false)
+  {
+    SendResponse();
+  }
+
+  const int hmi_request_id = 201;
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
     smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->

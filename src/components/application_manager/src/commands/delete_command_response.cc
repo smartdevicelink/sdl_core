@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/add_sub_menu_response_command.h"
+#include "application_manager/commands/delete_command_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
@@ -40,39 +40,83 @@ namespace application_manager {
 
 namespace commands {
 
-AddSubMenuResponseCommand::AddSubMenuResponseCommand(
+DeleteCommandResponse::DeleteCommandResponse(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-AddSubMenuResponseCommand::~AddSubMenuResponseCommand() {
+DeleteCommandResponse::~DeleteCommandResponse() {
 }
 
-void AddSubMenuResponseCommand::Run() {
+void DeleteCommandResponse::Run() {
   if ((*message_)[strings::params][strings::success] == false)
   {
     SendResponse();
   }
 
-  const int hmi_request_id = 200;
+  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
-    smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
-      GetMessageChain(hmi_request_id)->data();
+  // TODO(DK) HMI Request Id
+  const int function_id =
+      (*message_)[strings::params][strings::function_id].asInt();
 
+  // TODO(VS) HMI code Id
+  const int code =
+      (*message_)[strings::msg_params][hmi_response::code].asInt();
+
+  // TODO(VS) HMI Request Id
+  const int ui_cmd_id = 202;
+  const int vr_cmd_id = 203;
+
+  smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
+    GetMessageChain(function_id)->data();
+
+  ApplicationManagerImpl::instance()->GetMessageChain(function_id);
+
+  bool result_ui = false;
+  bool result_vr = false;
+
+  if (function_id == ui_cmd_id) {
+    if (true == code) {
+      result_ui = true;
+    }
+  } else if (function_id == vr_cmd_id) {
+    if (true == code) {
+      result_vr = true;
+    }
+  }
+
+  // sending response
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      (*message_)[strings::params][strings::function_id].asInt())) {
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->
+          ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::connection_key]));
 
-    app->AddSubMenu(data[strings::msg_params][strings::menu_id].asInt(),
-                   (*message_)[strings::msg_params]);
+    smart_objects::CSmartObject* command =
+        app->FindCommand(
+            data[strings::msg_params][strings::cmd_id].asInt());
 
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-    SendResponse();
+    if (command)  {
+      if (true == result_ui) {
+        (*command).erase(strings::menu_params);
+      }
+
+      if (true == result_vr) {
+        (*command).erase(strings::vr_commands);
+      }
+
+      if (!(*command).keyExists(strings::menu_params) &&
+          !(*command).keyExists(strings::vr_commands)) {
+        app->RemoveCommand(
+            data[strings::msg_params][strings::cmd_id].asInt());
+        (*message_)[strings::msg_params][strings::success] = true;
+        (*message_)[strings::msg_params][strings::result_code] =
+            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        SendResponse();
+      }
+    }
   }
 }
-
 }  // namespace commands
 
 }  // namespace application_manager
