@@ -31,52 +31,44 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/delete_sub_menu_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
 
+#include "application_manager/commands/command_request_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuCommand::DeleteSubMenuCommand(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
-}
+/**
+ * @brief DeleteCommandRequest command class
+ **/
+class DeleteCommandRequest : public CommandRequestImpl {
+ public:
+  /**
+   * @brief DeleteCommandRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit DeleteCommandRequest(const MessageSharedPtr& message);
 
-DeleteSubMenuCommand::~DeleteSubMenuCommand() {
-}
+  /**
+   * @brief DeleteCommandRequest class destructor
+   **/
+  virtual ~DeleteCommandRequest();
 
-void DeleteSubMenuCommand::Run() {
-  ApplicationImpl* application =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  if (!application) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
+ private:
 
-  if (!application->FindSubMenu(
-      (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
-    return;
-  }
-
-  const int corellation_id =
-        (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-        (*message_)[strings::params][strings::connection_key];
-  // TODO(VS): HMI Request Id
-  const int hmi_request_id = 201;
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, corellation_id, hmi_request_id, &(*message_));
-
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
-}
+  DISALLOW_COPY_AND_ASSIGN(DeleteCommandRequest);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
