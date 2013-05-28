@@ -31,42 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/delete_interaction_choise_set_response_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
-#include "v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_COMMAND_H_
+
+#include "application_manager/commands/command_request_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+/**
+ * @brief DeleteInteractionChoiceSetCommand command class
+ **/
+class DeleteInteractionChoiceSetCommand : public CommandRequestImpl {
+ public:
+  /**
+   * @brief DeleteInteractionChoiceSetCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit DeleteInteractionChoiceSetCommand(const MessageSharedPtr& message);
 
-DeleteInteractionChoiseSetResponse::DeleteInteractionChoiseSetResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
-}
+  /**
+   * @brief DeleteInteractionChoiceSetCommand class destructor
+   **/
+  virtual ~DeleteInteractionChoiceSetCommand();
 
-DeleteInteractionChoiseSetResponse::~DeleteInteractionChoiseSetResponse() {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-void DeleteInteractionChoiseSetResponse::Run() {
-  LOG4CXX_INFO(logger_, "DeleteInteractionChoiseSetResponse::Run ");
-
-  // check if response false
-  if (false == (*message_)[strings::msg_params][strings::success]) {
-    SendResponse();
-    return;
-  }
-
-  (*message_)[strings::msg_params][strings::success] = true;
-  (*message_)[strings::msg_params][strings::result_code] =
-      NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-  SendResponse();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(DeleteInteractionChoiceSetCommand);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_COMMAND_H_

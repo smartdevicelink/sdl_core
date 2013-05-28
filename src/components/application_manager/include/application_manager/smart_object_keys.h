@@ -77,6 +77,8 @@ const char menu_params[] = "menuParams";
 const char vr_commands[] = "vrCommands";
 const char menu_id[] = "menuID";
 const char menu_name[] = "menuName";
+const char interaction_choice_set_id[] = "interactionChoiceSetID";
+const char choice_set[] = "choiceSet";
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 

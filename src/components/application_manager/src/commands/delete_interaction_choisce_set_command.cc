@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/delete_interaction_choise_set_command.h"
+#include "application_manager/commands/delete_interaction_choice_set_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
@@ -45,15 +45,15 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-DeleteInteractionChoiseSetCommand::DeleteInteractionChoiseSetCommand(
+DeleteInteractionChoiceSetCommand::DeleteInteractionChoiceSetCommand(
     const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
-DeleteInteractionChoiseSetCommand::~DeleteInteractionChoiseSetCommand() {
+DeleteInteractionChoiceSetCommand::~DeleteInteractionChoiceSetCommand() {
 }
 
-void DeleteInteractionChoiseSetCommand::Run() {
-  LOG4CXX_INFO(logger_, "DeleteInteractionChoiseSetCommand::Run ");
+void DeleteInteractionChoiceSetCommand::Run() {
+  LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetCommand::Run ");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
@@ -66,13 +66,42 @@ void DeleteInteractionChoiseSetCommand::Run() {
     return;
   }
 
+  const int choise_set_id =
+  (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
+
+  if (app->find_choice_set(choise_set_id)) {
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    return;
+  }
+
   const int corellation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
+  MessageChaining * chain = NULL;
+
   // create HMI request
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
+  // TODO(DK): HMI Request Id
+  const int ui_cmd_id = 21;
+  (*p_smrt_ui)[strings::params][strings::function_id] =
+      ui_cmd_id;
+
+  (*p_smrt_ui)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+
+  (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+
+  (*p_smrt_ui)[strings::msg_params][strings::interaction_choice_set_id] =
+      choise_set_id;
+
+  (*p_smrt_ui)[strings::msg_params][strings::app_id] =
+      app->app_id();
+
+  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
+      connection_key, corellation_id, ui_cmd_id, p_smrt_ui);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
 }

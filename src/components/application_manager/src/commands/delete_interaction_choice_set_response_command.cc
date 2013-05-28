@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/add_command_response.h"
+#include "application_manager/commands/delete_interaction_choice_set_response_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
@@ -45,20 +45,15 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-bool AddCommandResponse::result_ui = false;
-bool AddCommandResponse::result_vr = false;
-
-AddCommandResponse::AddCommandResponse(
+DeleteInteractionChoiceSetResponse::DeleteInteractionChoiceSetResponse(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-AddCommandResponse::~AddCommandResponse() {
+DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {
 }
 
-void AddCommandResponse::Run() {
-  LOG4CXX_INFO(logger_, "AddCommandResponse::Run ");
-
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+void DeleteInteractionChoiceSetResponse::Run() {
+  LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetResponse::Run ");
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
@@ -74,10 +69,6 @@ void AddCommandResponse::Run() {
   const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
 
-  // TODO(DK): HMI Request Id
-  const int ui_cmd_id = 1;
-  const int vr_cmd_id = 2;
-
   const MessageChaining* msg_chain =
   ApplicationManagerImpl::instance()->GetMessageChain(function_id);
 
@@ -88,42 +79,21 @@ void AddCommandResponse::Run() {
   smart_objects::CSmartObject data =
       msg_chain->data();
 
-  if (function_id == ui_cmd_id) {
-    if (true == code) {
-      result_ui = true;
-    }
-  } else if (function_id == vr_cmd_id) {
-    if (true == code) {
-      result_vr = true;
-    }
-  }
-
-  // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       (*message_)[strings::params]["function_id"].asInt())) {
-    // add comand to application
-    // TODO(DK): integrate SmartObject delete key
-    if (false == result_ui) {
-      data[strings::msg_params].erase(strings::menu_params);
-    } else if (false == result_vr) {
-      data[strings::msg_params].erase(strings::vr_commands);
-    }
+    if (true == code) {
+      ApplicationImpl* app = static_cast<ApplicationImpl*>(
+            ApplicationManagerImpl::instance()->
+            application((*message_)[strings::params][strings::connection_key]));
 
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-          ApplicationManagerImpl::instance()->
-          application((*message_)[strings::params][strings::connection_key]));
+      app->remove_choice_set(
+        data[strings::msg_params][strings::interaction_choice_set_id].asInt());
 
-    app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),
-                    data[strings::msg_params]);
-
-    if ((true == result_ui) && (true == result_vr)) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
           NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-      SendResponse();
-    } else {
-      // TODO(DK): check ui and vr response code
     }
+    SendResponse();
   }
 }
 

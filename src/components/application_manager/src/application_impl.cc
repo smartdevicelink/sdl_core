@@ -369,5 +369,29 @@ smart_objects::CSmartObject*  ApplicationImpl::FindSubMenu(unsigned int menu_id)
   return NULL;
 }
 
+void ApplicationImpl::add_choice_set(unsigned int choice_set_id,
+                                 const smart_objects::CSmartObject& choice_set) {
+  choice_set_map_[choice_set_id] = new smart_objects::CSmartObject(choice_set);
+}
+
+void ApplicationImpl::remove_choice_set(unsigned int choice_set_id) {
+  ChoiceSetMap::iterator it = choice_set_map_.find(choice_set_id);
+
+  if (choice_set_map_.end() != it) {
+    delete it->second;
+    choice_set_map_.erase(choice_set_id);
+  }
+}
+
+smart_objects::CSmartObject*  ApplicationImpl::find_choice_set(unsigned int choice_set_id)
+{
+  ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
+  if(it != choice_set_map_.end())
+  {
+      return it->second;
+  }
+
+  return NULL;
+}
 
 }  // namespace application_manager

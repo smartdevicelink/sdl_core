@@ -82,7 +82,7 @@ void AddCommandRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
-    //TODO(DK) HMI Request Id
+    // TODO(DK): HMI Request Id
     const int ui_cmd_id = 1;
     (*p_smrt_ui)[strings::params][strings::function_id] =
         ui_cmd_id;
@@ -109,7 +109,7 @@ void AddCommandRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
     smart_objects::CSmartObject* p_smrt_vr  = new smart_objects::CSmartObject();
 
-    //TODO(DK) HMI Request Id
+    // TODO(DK): HMI Request Id
     const int vr_cmd_id = 2;
     (*p_smrt_vr)[strings::params][strings::function_id] =
         vr_cmd_id;
@@ -131,7 +131,6 @@ void AddCommandRequest::Run() {
 
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
   }
-
 }
 
 }  // namespace commands
