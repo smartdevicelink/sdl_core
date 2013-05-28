@@ -48,6 +48,8 @@
 #include "application_manager/commands/add_sub_menu_response_command.h"
 #include "application_manager/commands/delete_interaction_choice_set_command.h"
 #include "application_manager/commands/delete_interaction_choice_set_response_command.h"
+#include "application_manager/commands/alert_command.h"
+#include "application_manager/commands/alert_response_command.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -122,6 +124,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         command.reset(new commands::DeleteInteractionChoiceSetResponse(message));
       } else {
         command.reset(new commands::DeleteInteractionChoiceSetCommand(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::AlertID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::AlertCommandResponse(message));
+      } else {
+        command.reset(new commands::AlertCommandRequest(message));
       }
       break;
     }

@@ -48,6 +48,8 @@ set (SOURCES
 ./src/commands/delete_interaction_choice_set_response_command.cc
 ./src/commands/delete_command_request.cc
 ./src/commands/delete_command_response.cc
+./src/commands/alert_command.cc
+./src/commands/alert_response_command.cc
 )
 
 
