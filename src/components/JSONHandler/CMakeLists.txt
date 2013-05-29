@@ -609,11 +609,11 @@ set (SOURCES
     ./src/outgoing_thread_impl.cc
 )
 
-set (FORMATTER_SOURCES  
+set (FORMATTER_SOURCES
     ./src/formatters/CFormatterJsonBase.cpp
     ./src/formatters/CFormatterJsonSDLRPCv1.cpp
     ./src/formatters/CFormatterJsonSDLRPCv2.cpp
-    ./src/formatters/CFormatterJsonRPC2.cpp
+    ./src/formatters/formatter_json_rpc.cc
     ./src/formatters/meta_formatter.cc
 )
 
