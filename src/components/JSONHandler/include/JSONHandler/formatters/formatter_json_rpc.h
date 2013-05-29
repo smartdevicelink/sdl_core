@@ -52,73 +52,72 @@ namespace Formatters {
 /**
  * @brief Formatter for JSON RPC format.
  */
-class FormatterJsonRpc: public CFormatterJsonBase
-{
+class FormatterJsonRpc: public CFormatterJsonBase {
  public:
-   /**
-    * @brief No errors occured during the parsing of the input JSON string.
-    */
-   static const int kSuccess = 0;
+  /**
+   * @brief No errors occured during the parsing of the input JSON string.
+   */
+  static const int kSuccess = 0;
 
-   /**
-    * @brief Input JSON string cannot be parsed.
-    */
-   static const int kParsingError = 1;
+  /**
+   * @brief Input JSON string cannot be parsed.
+   */
+  static const int kParsingError = 1;
 
-   /**
-    * @brief Input JSON string has invalid format.
-    */
-   static const int kInvalidFormat = 2;
+  /**
+   * @brief Input JSON string has invalid format.
+   */
+  static const int kInvalidFormat = 2;
 
-   /**
-    * @brief Method in input JSON string is not
-    *        specified or specified incorrectly.
-    */
-   static const int kMethodNotSpecified = 4;
+  /**
+   * @brief Method in input JSON string is not
+   *        specified or specified incorrectly.
+   */
+  static const int kMethodNotSpecified = 4;
 
-   /**
-    * @brief Method is unknown.
-    */
-   static const int kUnknownMethod = 8;
+  /**
+   * @brief Method is unknown.
+   */
+  static const int kUnknownMethod = 8;
 
-   /**
-    * @brief Message type is unknown.
-    */
-   static const int kUnknownMessageType = 16;
+  /**
+   * @brief Message type is unknown.
+   */
+  static const int kUnknownMessageType = 16;
 
-   /**
-    * @brief Id of request or response is invalid.
-    */
-   static const int kInvalidId = 32;
+  /**
+   * @brief Id of request or response is invalid.
+   */
+  static const int kInvalidId = 32;
 
-   /**
-    * @brief Response code is not available.
-    */
-   static const int kResponseCodeNotAvailable = 64;
+  /**
+   * @brief Response code is not available.
+   */
+  static const int kResponseCodeNotAvailable = 64;
 
-   /**
-    * @brief Creates a JSON string from a SmartObject.
-    *
-    * @param obj Input SmartObject.
-    * @param out_str Resulting JSON string.
-    *
-    * @return true if success, false otherwise.
-    */
+  /**
+   * @brief Creates a JSON string from a SmartObject.
+   *
+   * @param obj Input SmartObject.
+   * @param out_str Resulting JSON string.
+   *
+   * @return true if success, false otherwise.
+   */
   static bool ToString(const NsSmartObjects::CSmartObject &obj,
                        std::string &out_str);
 
   /**
-    * @brief Creates a SmartObject from a JSON string.
-    *
-    * @tparam FunctionId Type of function id enumeration.
-    * @tparam MessageType Type of message type enumeration.
-    *
-    * @param str input JSON string.
-    * @param out The resulting SmartObject.
-    *
-    * @return An integer that is a bitwise-or of all error codes occured
-    *         during the parsing of the input string. 0 if no errors occured.
-    */
+   * @brief Creates a SmartObject from a JSON string.
+   *
+   * @tparam FunctionId Type of function id enumeration.
+   * @tparam MessageType Type of message type enumeration.
+   *
+   * @param str input JSON string.
+   * @param out The resulting SmartObject.
+   *
+   * @return An integer that is a bitwise-or of all error codes occured
+   *         during the parsing of the input string. 0 if no errors occured.
+   */
   template <typename FunctionId, typename MessageType>
   static int FromString(const std::string &str,
                         NsSmartObjects::CSmartObject &out);
@@ -247,7 +246,7 @@ int FormatterJsonRpc::FromString(const std::string &str,
   if (false == reader.parse(str, root)) {
     result = kParsingError;
   } else {
-    if (false == root.isMember(kJsonRpc)){
+    if (false == root.isMember(kJsonRpc)) {
       result |= kInvalidFormat;
     } else {
       const Json::Value &jsonRpcValue = root[kJsonRpc];
