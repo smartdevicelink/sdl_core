@@ -40,17 +40,17 @@
 namespace application_manager {
 namespace commands {
 
-class ShowResponseCommand : public CommandResponseImpl {
+class EncodedSyncPDataResponseCommand : public CommandResponseImpl {
  public:
   /**
-   * \brief ShowResponseCommand class constructor
+   * \brief EncodedSyncPDataResponseCommand class constructor
    **/
-  explicit ShowResponseCommand(const MessageSharedPtr& message);
+  explicit EncodedSyncPDataResponseCommand(const MessageSharedPtr& message);
 
   /**
-   * \brief ShowResponseCommand class destructor
+   * \brief EncodedSyncPDataResponseCommand class destructor
    **/
-  virtual ~ShowResponseCommand() {
+  virtual ~EncodedSyncPDataResponseCommand() {
   }
 
   /**
@@ -61,7 +61,7 @@ class ShowResponseCommand : public CommandResponseImpl {
  private:
   MessageSharedPtr message_;
 
-  DISALLOW_COPY_AND_ASSIGN(ShowResponseCommand);
+  DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataResponseCommand);
 };
 
 }  // namespace commands

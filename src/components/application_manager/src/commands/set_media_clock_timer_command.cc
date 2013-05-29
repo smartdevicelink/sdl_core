@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/set_media_clock_timer_command.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
@@ -50,9 +51,15 @@ void SetMediaClockCommand::Run() {
     return;
   }
 
-  /*ApplicationManagerImpl::GetInstance()->AddMessageChain(
--        new MessageChaining(connectionKey, corellationId),
--        connectionKey, corellationId);*/
+  const int corellationId =
+    (*message_)[strings::params][strings::correlation_id];
+  const int connectionKey =
+    (*message_)[strings::params][strings::connection_key];
+
+  const unsigned int cmd_id = 103;
+    ApplicationManagerImpl::instance()->AddMessageChain(
+      new MessageChaining(connectionKey, corellationId),
+      connectionKey, corellationId, cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }

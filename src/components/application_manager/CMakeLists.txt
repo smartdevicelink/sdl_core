@@ -37,6 +37,10 @@ set (SOURCES
 ./src/commands/set_global_properties_command.cc
 ./src/commands/set_global_properties_response_command.cc
 ./src/commands/set_media_clock_timer_command.cc
+./src/commands/set_media_clock_timer_response_command.cc
+./src/commands/encoded_sync_pdata_command.cc
+./src/commands/encoded_sync_pdata_response_command.cc
+./src/commands/dial_number_command.cc
 ./src/commands/reset_global_properties_command.cc
 ./src/commands/reset_global_properties_response_command.cc
 ./src/commands/unregister_app_interface_response_command.cc

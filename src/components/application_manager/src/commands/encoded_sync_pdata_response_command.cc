@@ -31,41 +31,21 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/speak_command.h"
-#include "application_manager/message_chaining.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/commands/encoded_sync_pdata_response_command.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_conversion.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SpeakCommand::SpeakCommand(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+EncodedSyncPDataResponseCommand::EncodedSyncPDataResponseCommand(const MessageSharedPtr& message)
+  : CommandResponseImpl(message) {
 }
 
-void SpeakCommand::Run() {
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
-        (application_manager::ApplicationManagerImpl::instance()->
-        application((*message_)[strings::msg_params][strings::app_id]));
-
-  if (NULL == application_impl) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::
-                 Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  const int corellationId =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
-    (*message_)[strings::params][strings::connection_key];
-
-  const unsigned int cmd_id = 102;
-    ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId, cmd_id);
-
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+void EncodedSyncPDataResponseCommand::Run() {
+  SendResponse();
 }
 
 }  // namespace commands

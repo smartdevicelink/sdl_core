@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SHOW_RESPONSE_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SHOW_RESPONSE_COMMAND_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SET_MEDIA_CLOCK_TIMER_RESPONSE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SET_MEDIA_CLOCK_TIMER_RESPONSE_COMMAND_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/message.h"
@@ -40,17 +40,17 @@
 namespace application_manager {
 namespace commands {
 
-class ShowResponseCommand : public CommandResponseImpl {
+class SetMediaClockTimerResponseCommand : public CommandResponseImpl {
  public:
   /**
-   * \brief ShowResponseCommand class constructor
+   * \brief SetMediaClockTimerResponseCommand class constructor
    **/
-  explicit ShowResponseCommand(const MessageSharedPtr& message);
+  explicit SetMediaClockTimerResponseCommand(const MessageSharedPtr& message);
 
   /**
-   * \brief ShowResponseCommand class destructor
+   * \brief SetMediaClockTimerResponseCommand class destructor
    **/
-  virtual ~ShowResponseCommand() {
+  virtual ~SetMediaClockTimerResponseCommand() {
   }
 
   /**
@@ -61,10 +61,10 @@ class ShowResponseCommand : public CommandResponseImpl {
  private:
   MessageSharedPtr message_;
 
-  DISALLOW_COPY_AND_ASSIGN(ShowResponseCommand);
+  DISALLOW_COPY_AND_ASSIGN(SetMediaClockTimerResponseCommand);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SHOW_RESPONSE_COMMAND_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SET_MEDIA_CLOCK_TIMER_RESPONSE_COMMAND_H_

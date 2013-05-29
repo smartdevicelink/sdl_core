@@ -31,43 +31,45 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/speak_command.h"
-#include "application_manager/message_chaining.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
+
+#include "application_manager/commands/command_request_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SpeakCommand::SpeakCommand(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
-}
+/**
+ * @brief DialNumber request command class
+ **/
+class EncodedSyncPDataCommand : public CommandRequestImpl {
+ public:
+  /**
+   * \brief EncodedSyncPDataCommand class constructor
+   **/
+  explicit EncodedSyncPDataCommand(const MessageSharedPtr& message);
 
-void SpeakCommand::Run() {
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
-        (application_manager::ApplicationManagerImpl::instance()->
-        application((*message_)[strings::msg_params][strings::app_id]));
-
-  if (NULL == application_impl) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::
-                 Result::APPLICATION_NOT_REGISTERED);
-    return;
+  /**
+   * \brief EncodedSyncPDataCommand class destructor
+   **/
+  virtual ~EncodedSyncPDataCommand() {
   }
 
-  const int corellationId =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
-    (*message_)[strings::params][strings::connection_key];
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  const unsigned int cmd_id = 102;
-    ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId, cmd_id);
+ private:
+  MessageSharedPtr message_;
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
-}
+  DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataCommand);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
