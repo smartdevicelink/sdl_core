@@ -378,6 +378,37 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_EQ(messageType::notification, (int)obj2[S_PARAMS][S_MESSAGE_TYPE]);
   }
 
+  TEST_F(CFormatterTestHelper, test_SDLRPCv1_EmptyMapArrayTest) {
+    using namespace NsSmartDeviceLink::NsSmartObjects;
+
+    CSmartObject srcObj, dstObj;
+    std::string str;
+
+    fillTestObject(srcObj);
+    srcObj[S_PARAMS][S_FUNCTION_ID] = "UnregisterAppInterface"; // a hack, it shouldn't be a string in the SmartObject
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";               // the same thing
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+    srcObj[S_MSG_PARAMS]["EmptyArray"] = CSmartObject(SmartType_Array);
+    srcObj[S_MSG_PARAMS]["EmptyMap"] = CSmartObject(SmartType_Map);
+    srcObj[S_MSG_PARAMS]["AnotherEmptyArray"] = srcObj[S_MSG_PARAMS]["EmptyArray"];
+    srcObj[S_MSG_PARAMS]["AnotherEmptyMap"]  =  srcObj[S_MSG_PARAMS]["EmptyMap"];
+
+    // SmartObjects --> JSON
+    FormatterV1::toString(srcObj, str);
+
+    std::cout << str << std::endl;
+
+    // JSON --> SmartObjects
+    int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str, dstObj);
+
+    ASSERT_EQ(FormatterV1::kSuccess, result) << "Error parsing JSON string";
+
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionID::UnregisterAppInterface;   // write the proper enum values
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = messageType::request;
+
+    compareObjects(srcObj, dstObj);
+  }
+
 }}}}
 
 namespace NsSmartDeviceLink { namespace NsSmartObjects {

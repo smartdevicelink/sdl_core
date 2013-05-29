@@ -44,6 +44,8 @@ namespace test { namespace components { namespace JSONHandler { namespace format
 
     using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
+    typedef NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2 FormatterV2;
+
     TEST_F(CFormatterTestHelper, test_fromObjToSDLRPCv2AndBack)
     {
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
@@ -104,6 +106,33 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         ASSERT_EQ(10, (int)obj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"]);
         ASSERT_EQ("TEXT", (std::string)obj[S_MSG_PARAMS]["ttsName"][0]["type"]);
         ASSERT_EQ("Synonym 2", (std::string)obj[S_MSG_PARAMS]["vrSynonyms"][1]);
+    }
+
+    TEST_F(CFormatterTestHelper, test_SDLRPCv2_EmptyMapArrayTest) {
+      using namespace NsSmartDeviceLink::NsSmartObjects;
+
+      CSmartObject srcObj, dstObj;
+      std::string str;
+
+      fillTestObject(srcObj);
+      srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+      srcObj[S_PARAMS][S_MESSAGE_TYPE] = 0;
+      srcObj[S_PARAMS][S_CORRELATION_ID] = 0;
+      srcObj[S_PARAMS][S_FUNCTION_ID] = 0;
+      srcObj[S_MSG_PARAMS]["EmptyArray"] = CSmartObject(SmartType_Array);
+      srcObj[S_MSG_PARAMS]["EmptyMap"] = CSmartObject(SmartType_Map);
+      srcObj[S_MSG_PARAMS]["AnotherEmptyArray"] = srcObj[S_MSG_PARAMS]["EmptyArray"];
+      srcObj[S_MSG_PARAMS]["AnotherEmptyMap"]  =  srcObj[S_MSG_PARAMS]["EmptyMap"];
+
+      // SmartObjects --> JSON
+      FormatterV2::toString(srcObj, str);
+
+      std::cout << str << std::endl;
+
+      // JSON --> SmartObjects
+      FormatterV2::fromString<int, int>(str, dstObj, 0, 0, 0);
+
+      compareObjects(srcObj, dstObj);
     }
 
 }}}}
