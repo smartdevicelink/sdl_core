@@ -86,11 +86,15 @@ namespace NsSmartDeviceLink
             virtual bool setDefaultValue(CSmartObject & Object);
             
             /**
-             * @brief Build smart object by smart schema
-             * 
-             * @param Object Object to build
-             **/
-            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object);
+             * @brief Build smart object by smart schema having copied matched
+             *        parameters from pattern smart object
+             *
+             * @param pattern_object pattern object
+             * @param result_object object to build
+             */
+            virtual void BuildObjectBySchema(
+              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
 
         private:            
             
@@ -236,11 +240,15 @@ bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaul
 
 template <typename NumberType>
 void NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::BuildObjectBySchema(
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
-  bool result = setDefaultValue(object);
-  if (false == result)  {
-    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Double == getSmartType()) {
-      object = static_cast<NumberType>(0.0);
+    const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
+
+  if (getSmartType() == pattern_object.getType()) {
+    result_object = static_cast<NumberType>(pattern_object);
+  }else {
+    bool result = setDefaultValue(result_object);
+    if (false == result)  {
+      result_object = static_cast<NumberType>(0);
     }
   }
 }

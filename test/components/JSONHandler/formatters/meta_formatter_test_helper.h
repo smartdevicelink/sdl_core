@@ -1,7 +1,7 @@
 /**
- * @file meta_fromatter.h
- * @brief file describes class CMetaFormatter which is designed to format
- *        the smart object against given schema for given formatter
+ * @file meta_formatter_test_helper.h
+ * @brief file describes class CMetaFormatterTestHelper which is designed to 
+ *        create test environemnt to test class CMetaFormatter
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -33,46 +33,45 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
-#define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
+#ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTERTESTHELPER_H__
+#define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTERTESTHELPER_H__
+
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include "SmartObjects/CSmartObject.hpp"
-#include "SmartObjects/CSmartSchema.hpp"
+#include "test/components/JSONHandler/formatters/test_JSONHandler_alrpcv2.hpp"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace generated_ns = Gen::test::components::JSONHandler2;
 
-  /**
-   * @brief Formats to string the smart object against given schema for given formatter
-   *
-   * Sample usage:
-   *    CSmartFactory factory;
-   *    CSmartObject object;
-   *    CSmartSchmema schema;
-   * 
-   */
-  class CMetaFormatter
-  {
-   public:
+namespace test {
+namespace components {
+namespace JSONHandler {
+namespace formatters {
+  
+  class CMetaFormatterTestHelper :public ::testing::Test {
+   protected:
 
-    /**
-     * @brief Creates smart object by the given schema having copied
-     *        matched tree elements from original object.
-     *
-     * @param object Original smart object which macthed tree elements
-     *        will be copied from
-     * @param schema Smart schema which describes result smart object
-     * @param result_object createdsmart object
-     * @return true if successful, false - otherwise
-     */
-    static bool CreateObjectByPattern(
-            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-            NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+    // for messageType::request, FunctionID::RegisterAppInterfaceID
+    void FillObjectIdenticalToSchema(
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+
+    // for messageType::request, FunctionID::RegisterAppInterfaceID
+    void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+
+
+    void CompareObjects(
+        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
+        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second);
+
+    // members
+    generated_ns::test_JSONHandler_alrpcv2 factory;
   };
-}  
-}
-}// namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
+}
+}
+}
+}
+
+#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTERTESTHELPER_H__

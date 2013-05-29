@@ -45,6 +45,8 @@
 #include "ISchemaItem.hpp"
 #include "TSchemaItemParameter.hpp"
 
+namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+
 namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
@@ -106,13 +108,15 @@ namespace NsSmartDeviceLink
             virtual void unapplySchema(CSmartObject & Object);
             
             /**
-             * @brief Build smart object by smart schema
-             * 
-             * Fill smart object with default values
-             * 
-             * @param object Object to build
-             **/
-            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & object);
+             * @brief Build smart object by smart schema having copied matched
+             *        parameters from pattern smart object
+             *
+             * @param pattern_object pattern object
+             * @param result_object object to build
+             */
+            virtual void BuildObjectBySchema(
+              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
             
             /**
              * @brief The method converts a string into the value of enum EnumType
@@ -256,11 +260,17 @@ void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema
 }
 
 template <typename EnumType>
-void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::BuildObjectBySchema(
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
-  bool result = setDefaultValue(object);
-  if (false ==result) {
-    object = static_cast<EnumType>(-1);
+void smart_objects_ns::TEnumSchemaItem<EnumType>::BuildObjectBySchema(
+    const smart_objects_ns::CSmartObject& pattern_object,
+    smart_objects_ns::CSmartObject& result_object) {
+
+  if (smart_objects_ns::SmartType_Integer == pattern_object.getType()) {
+    result_object = static_cast<int>(pattern_object);
+  } else {
+    bool result = setDefaultValue(result_object);
+    if (false ==result) {
+      result_object = static_cast<EnumType>(EnumType::INVALID_ENUM);
+    }
   }
 }
 

@@ -35,6 +35,8 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "SmartObjects/CStringSchemaItem.hpp"
 
+namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+
 utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem> NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
                                                                                                                                          const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue)
 {
@@ -82,12 +84,20 @@ bool NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsSma
     return result;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::BuildObjectBySchema(
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
-  bool result = setDefaultValue(object);
-  if (false ==result) {
-    object = std::string("");
+void smart_objects_ns::CStringSchemaItem::BuildObjectBySchema(
+    const smart_objects_ns::CSmartObject& pattern_object,
+    smart_objects_ns::CSmartObject& result_object) {
+
+  if (smart_objects_ns::SmartType_String == pattern_object.getType()) {
+    result_object = pattern_object;
+  } else {
+    bool result = setDefaultValue(result_object);
+    if (false == result) {
+      result_object = std::string("");
+    }
   }
+  
+
 }
 
 NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::CStringSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,

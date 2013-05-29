@@ -82,13 +82,15 @@ namespace NsSmartDeviceLink
             virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
             
             /**
-             * @brief Build smart object by smart schema
-             * 
-             * Fill smart object with default values
-             * 
-             * @param object Object to build
-             **/
-            virtual void BuildObjectBySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object);
+             * @brief Build smart object by smart schema having copied matched
+             *        parameters from pattern smart object
+             *
+             * @param pattern_object pattern object
+             * @param result_object object to build
+             */
+            virtual void BuildObjectBySchema(
+              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
         };
     }
 }

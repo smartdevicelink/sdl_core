@@ -1,3 +1,6 @@
+# Generating interface
+GenerateInterface("test_JSONHandler_alrpcv2.xml" "Gen::test::components::JSONHandler2" "alrpcv2")
+
 include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/JSONHandler/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
@@ -15,13 +18,14 @@ set (LIBRARIES
     gtest_main
     gmock
     gmock_main
+    test_JSONHandler_alrpcv2
     SmartObjects
     log4cplus
     jsoncpp
-    JSONHandler
+    JSONHandler    
 )
 
 create_test("test_JSONHandler_FormatterJsonSDLRPCv2Test" "./CFormatterTestHelper.cpp;./FormatterJsonSDLRPCv2Test.cpp" "${LIBRARIES}")
 create_test("test_JSONHandler_FormatterJsonSDLRPCv1Test" "./CFormatterTestHelper.cpp;./FormatterJsonSDLRPCv1Test.cpp" "${LIBRARIES}")
 #create_test("test_JSONHandler_FormatterJsonRPC2Test" "./FormatterJsonRPC2Test.cpp" "${LIBRARIES}")
-#create_test("test_JSONHandler_MetaFormatter" "./meta_formatter_test.cc;./meta_formatter_test_helper.cc" "${LIBRARIES}")
+create_test("test_JSONHandler_MetaFormatter" "./meta_formatter_test.cc;./meta_formatter_test_helper.cc" "${LIBRARIES}")

@@ -53,11 +53,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     using namespace NsSmartDeviceLink::NsSmartObjects;
     using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
-    class ObjectSchemaItemTest : public ::testing::Test
-    {
-
-    public:
-        enum eTestType {
+    namespace TestType {
+      enum eType {
+                INVALID_ENUM = -1,
                 APPLICATION_NOT_REGISTERED = 0,
                 SUCCESS,
                 TOO_MANY_PENDING_REQUESTS,
@@ -69,30 +67,33 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
                 GENERIC_ERROR,
                 DISALLOWED
             };
+          }
 
+    class ObjectSchemaItemTest : public ::testing::Test
+    {
     protected:
 
         //Create SmartObjectSchema for test object
         utils::SharedPtr<ISchemaItem> initObjectSchemaItem(void)
         {
-            std::set<eTestType> resultCode_allowedEnumSubsetValues;
-            resultCode_allowedEnumSubsetValues.insert(APPLICATION_NOT_REGISTERED);
-            resultCode_allowedEnumSubsetValues.insert(SUCCESS);
-            resultCode_allowedEnumSubsetValues.insert(TOO_MANY_PENDING_REQUESTS);
-            resultCode_allowedEnumSubsetValues.insert(REJECTED);
-            resultCode_allowedEnumSubsetValues.insert(INVALID_DATA);
-            resultCode_allowedEnumSubsetValues.insert(OUT_OF_MEMORY);
-            resultCode_allowedEnumSubsetValues.insert(ABORTED);
-            resultCode_allowedEnumSubsetValues.insert(USER_DISALLOWED);
-            resultCode_allowedEnumSubsetValues.insert(GENERIC_ERROR);
-            resultCode_allowedEnumSubsetValues.insert(DISALLOWED);
+            std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
+            resultCode_allowedEnumSubsetValues.insert(TestType::APPLICATION_NOT_REGISTERED);
+            resultCode_allowedEnumSubsetValues.insert(TestType::SUCCESS);
+            resultCode_allowedEnumSubsetValues.insert(TestType::TOO_MANY_PENDING_REQUESTS);
+            resultCode_allowedEnumSubsetValues.insert(TestType::REJECTED);
+            resultCode_allowedEnumSubsetValues.insert(TestType::INVALID_DATA);
+            resultCode_allowedEnumSubsetValues.insert(TestType::OUT_OF_MEMORY);
+            resultCode_allowedEnumSubsetValues.insert(TestType::ABORTED);
+            resultCode_allowedEnumSubsetValues.insert(TestType::USER_DISALLOWED);
+            resultCode_allowedEnumSubsetValues.insert(TestType::GENERIC_ERROR);
+            resultCode_allowedEnumSubsetValues.insert(TestType::DISALLOWED);
 
             utils::SharedPtr<ISchemaItem> success_SchemaItem =
                 CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
             utils::SharedPtr<ISchemaItem> resultCode_SchemaItem =
-                TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues
-                    , TSchemaItemParameter<eTestType>());
+                TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues
+                    , TSchemaItemParameter<TestType::eType>());
 
             utils::SharedPtr<ISchemaItem> info_SchemaItem =
                 CStringSchemaItem::create(TSchemaItemParameter<size_t>(10)
@@ -111,8 +112,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
             schemaMembersMap["tryAgainTime"] = CObjectSchemaItem::SMember(tryAgainTime_SchemaItem, true);
 
             std::map<std::string, CObjectSchemaItem::SMember> paramsMembersMap;
-            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
-            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<eTestType>::create(resultCode_allowedEnumSubsetValues), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues), true);
+            paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues), true);
             paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
             paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(1, 2), true);
             paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
@@ -240,23 +241,23 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
 namespace NsSmartDeviceLink { namespace NsSmartObjects {
     template<>
-    const std::map<test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType, std::string> & TEnumSchemaItem<test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> & TEnumSchemaItem<test::components::SmartObjects::SchemaItem::TestType::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType, std::string> enumStringRepresentationMap;
+        static std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::SUCCESS, "SUCCESS"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::REJECTED, "REJECTED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::INVALID_DATA, "INVALID_DATA"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::ABORTED, "ABORTED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::USER_DISALLOWED, "USER_DISALLOWED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::GENERIC_ERROR, "GENERIC_ERROR"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::ObjectSchemaItemTest::eTestType::DISALLOWED, "DISALLOWED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::SUCCESS, "SUCCESS"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::REJECTED, "REJECTED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::INVALID_DATA, "INVALID_DATA"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::ABORTED, "ABORTED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::USER_DISALLOWED, "USER_DISALLOWED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::GENERIC_ERROR, "GENERIC_ERROR"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::DISALLOWED, "DISALLOWED"));
 
             isInitialized = true;
         }

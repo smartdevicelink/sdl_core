@@ -35,6 +35,8 @@
 #include "SmartObjects/CArraySchemaItem.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
+namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+
 utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem> NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::create(const utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> & ElementSchemaItem,
                                                                                                                                        const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MinSize,
                                                                                                                                        const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxSize)
@@ -111,11 +113,24 @@ void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsSmartD
     }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::BuildObjectBySchema(
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
+void smart_objects_ns::CArraySchemaItem::BuildObjectBySchema(
+    const smart_objects_ns::CSmartObject& pattern_object,
+    smart_objects_ns::CSmartObject& result_object) {
+
+  if (smart_objects_ns::SmartType_Array == pattern_object.getType()) {
+    int array_len = pattern_object.length();
+    if (array_len > 0) {
+      for(int i = 0; i < array_len; i++) {
+        mElementSchemaItem->BuildObjectBySchema(
+            pattern_object.getElement(i),
+            result_object[i]);
+      }
+      return;
+    } 
+  }
   // empty array
-  object = NsSmartDeviceLink::NsSmartObjects::CSmartObject(
-      NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
+  result_object = smart_objects_ns::CSmartObject(
+      smart_objects_ns::SmartType_Array);
 }
 
 NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::CArraySchemaItem(const utils::SharedPtr<ISchemaItem> & ElementSchemaItem,

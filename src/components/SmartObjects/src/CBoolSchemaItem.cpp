@@ -35,6 +35,8 @@
 #include "SmartObjects/CBoolSchemaItem.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
+namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+
 utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue)
 {
     return new CBoolSchemaItem(DefaultValue);
@@ -60,12 +62,20 @@ bool NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsSmart
 }
 
 
-void NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::BuildObjectBySchema(
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
-  bool result = setDefaultValue(object);
-  if (false == result) {
-    object = false;
+void smart_objects_ns::CBoolSchemaItem::BuildObjectBySchema(
+    const smart_objects_ns::CSmartObject& pattern_object,
+    smart_objects_ns::CSmartObject& result_object) {
+
+  if (smart_objects_ns::SmartType_Boolean == pattern_object.getType()) {
+    result_object = pattern_object;
+  } else {
+    bool result = setDefaultValue(result_object);
+    if (false == result) {
+      result_object = false;
+    }
   }
+  
+
 }
 
 NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::CBoolSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue):

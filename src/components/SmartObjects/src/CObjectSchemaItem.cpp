@@ -36,6 +36,8 @@
 #include "SmartObjects/CObjectSchemaItem.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
+namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+
 NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember::SMember(void):
 mSchemaItem(NsSmartDeviceLink::NsSmartObjects::CAlwaysFalseSchemaItem::create()),
 mIsMandatory(true)
@@ -131,15 +133,38 @@ void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsSmart
     }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::BuildObjectBySchema(
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
-  for (std::map<std::string,
-      NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember>::
-          const_iterator i = mMembers.begin();
-      i != mMembers.end(); ++i) {
-    
-        i->second.mSchemaItem->BuildObjectBySchema(object[i->first]);
-      }
+void smart_objects_ns::CObjectSchemaItem::BuildObjectBySchema(
+    const smart_objects_ns::CSmartObject& pattern_object,
+    smart_objects_ns::CSmartObject& result_object) {
+
+  if (smart_objects_ns::SmartType_Map == pattern_object.getType()) {
+    for (std::map<std::string,
+      smart_objects_ns::CObjectSchemaItem::SMember>::const_iterator i =
+          mMembers.begin();
+      i != mMembers.end(); ++i) { // for
+
+        if (true == pattern_object.keyExists(i->first)) {
+          i->second.mSchemaItem->BuildObjectBySchema(
+            pattern_object.getElement(i->first), result_object[i->first]);
+        } else if (true == i->second.mIsMandatory) {
+          i->second.mSchemaItem->BuildObjectBySchema(
+            smart_objects_ns::CSmartObject(), result_object[i->first]);
+        }
+      } // for
+  } else {
+    for (std::map<std::string,
+      smart_objects_ns::CObjectSchemaItem::SMember>::const_iterator i =
+          mMembers.begin();
+      i != mMembers.end(); ++i) { // for
+
+        if (true == i->second.mIsMandatory) {
+          i->second.mSchemaItem->BuildObjectBySchema(
+              smart_objects_ns::CSmartObject(), result_object[i->first]);
+        }
+      } // for
+  }
+  
+
 }
 
 NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::CObjectSchemaItem(const std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> & Members):

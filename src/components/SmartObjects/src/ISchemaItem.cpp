@@ -54,5 +54,7 @@ void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::unapplySchema(NsSmartDevice
 
 
 void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::BuildObjectBySchema(
-                NsSmartDeviceLink::NsSmartObjects::CSmartObject& object) {
+      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
+      NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
+  
 }

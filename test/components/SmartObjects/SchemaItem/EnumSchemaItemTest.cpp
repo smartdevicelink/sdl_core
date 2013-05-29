@@ -41,10 +41,9 @@
 namespace test { namespace components { namespace SmartObjects { namespace SchemaItem {
 
     using namespace NsSmartDeviceLink::NsSmartObjects;
-
-    class EnumSchemaItemTest : public ::testing::Test {
-    public:
-        enum eTestType {
+    namespace TestType {
+        enum eType {
+                INVALID_ENUM = -1,
                 USER_EXIT = 0,
                 IGNITION_OFF,
                 BLUETOOTH_OFF,
@@ -54,22 +53,27 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
                 FACTORY_DEFAULTS,
                 APP_UNAUTHORIZED
             };
+        }
+
+    class EnumSchemaItemTest : public ::testing::Test {
+    public:
+
     protected:
         EnumSchemaItemTest() {
-            testEnum.insert(USER_EXIT);
-            testEnum.insert(IGNITION_OFF);
-            testEnum.insert(BLUETOOTH_OFF);
-            testEnum.insert(USB_DISCONNECTED);
-            testEnum.insert(TOO_MANY_REQUESTS);
-            testEnum.insert(MASTER_RESET);
-            testEnum.insert(FACTORY_DEFAULTS);
-            testEnum.insert(APP_UNAUTHORIZED);
+            testEnum.insert(TestType::USER_EXIT);
+            testEnum.insert(TestType::IGNITION_OFF);
+            testEnum.insert(TestType::BLUETOOTH_OFF);
+            testEnum.insert(TestType::USB_DISCONNECTED);
+            testEnum.insert(TestType::TOO_MANY_REQUESTS);
+            testEnum.insert(TestType::MASTER_RESET);
+            testEnum.insert(TestType::FACTORY_DEFAULTS);
+            testEnum.insert(TestType::APP_UNAUTHORIZED);
         }
 
         virtual void SetUp() {
         }
 
-        std::set<eTestType> testEnum;
+        std::set<TestType::eType> testEnum;
     };
 
     /**
@@ -82,16 +86,16 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST_F(EnumSchemaItemTest, test_item_with_default_value)
     {
         CSmartObject obj;
-        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<eTestType>::create(testEnum,
-            TSchemaItemParameter<eTestType>(FACTORY_DEFAULTS));
+        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<TestType::eType>::create(testEnum,
+            TSchemaItemParameter<TestType::eType>(TestType::FACTORY_DEFAULTS));
 
         //Object - valid enum
-        obj = eTestType::BLUETOOTH_OFF;
+        obj = TestType::BLUETOOTH_OFF;
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
 
         //Obj - bool
         obj = true;
@@ -100,7 +104,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
 
         //Object - number
         obj = 3.1415926;
@@ -110,7 +114,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
 
         //Object - string
         obj = "Some string";
@@ -119,7 +123,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
     }
 
     /**
@@ -132,16 +136,16 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         CSmartObject obj;
 
-        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<eTestType>::create(testEnum,
-            TSchemaItemParameter<eTestType>());
+        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<TestType::eType>::create(testEnum,
+            TSchemaItemParameter<TestType::eType>());
 
         //Object - valid enum
-        obj = eTestType::BLUETOOTH_OFF;
+        obj = TestType::BLUETOOTH_OFF;
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_EQ(eTestType::BLUETOOTH_OFF, (int)obj);
+        EXPECT_EQ(TestType::BLUETOOTH_OFF, (int)obj);
 
         //Obj - bool
         obj = true;
@@ -189,16 +193,16 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         CSmartObject obj;
 
-        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<eTestType>::create(testEnum,
-            TSchemaItemParameter<eTestType>(FACTORY_DEFAULTS));
+        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<TestType::eType>::create(testEnum,
+            TSchemaItemParameter<TestType::eType>(TestType::FACTORY_DEFAULTS));
 
         //Object - valid enum
-        obj = eTestType::BLUETOOTH_OFF;
+        obj = TestType::BLUETOOTH_OFF;
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
 
         item->unapplySchema(obj);
         resultType = item->validate(obj);
@@ -208,13 +212,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         item->applySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(eTestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
 
         obj = "TOO_MANY_REQUESTS";
         item->applySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(eTestType::TOO_MANY_REQUESTS, (int)obj);
+        EXPECT_EQ(TestType::TOO_MANY_REQUESTS, (int)obj);
 
         obj = "ENOUGH_REQUESTS";
         item->applySchema(obj);
@@ -227,21 +231,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
 namespace NsSmartDeviceLink { namespace NsSmartObjects {
     template<>
-    const std::map<test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType, std::string> & TEnumSchemaItem<test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> & TEnumSchemaItem<test::components::SmartObjects::SchemaItem::TestType::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType, std::string> enumStringRepresentationMap;
+        static std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::USER_EXIT, "USER_EXIT"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::IGNITION_OFF, "IGNITION_OFF"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::BLUETOOTH_OFF, "BLUETOOTH_OFF"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::USB_DISCONNECTED, "USB_DISCONNECTED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::MASTER_RESET, "MASTER_RESET"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::FACTORY_DEFAULTS, "FACTORY_DEFAULTS"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::EnumSchemaItemTest::eTestType::APP_UNAUTHORIZED, "APP_UNAUTHORIZED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::USER_EXIT, "USER_EXIT"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::IGNITION_OFF, "IGNITION_OFF"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::BLUETOOTH_OFF, "BLUETOOTH_OFF"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::USB_DISCONNECTED, "USB_DISCONNECTED"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::MASTER_RESET, "MASTER_RESET"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::FACTORY_DEFAULTS, "FACTORY_DEFAULTS"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::APP_UNAUTHORIZED, "APP_UNAUTHORIZED"));
 
             isInitialized = true;
         }

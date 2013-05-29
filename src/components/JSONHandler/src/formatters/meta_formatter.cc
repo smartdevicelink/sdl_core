@@ -37,63 +37,24 @@
 #include <string>
 
 #include "JSONHandler/formatters/meta_formatter.h"
-#include "JSONHandler/CSmartFactory.hpp"
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 
 namespace formatter_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
-namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 
 //---------------------------------------------------------------
 
 bool formatter_ns::CMetaFormatter::CreateObjectByPattern(
-            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-            NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
+    const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+    const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
 
   if (smart_objects_ns::SmartType_Invalid == result_object.getType()) {
     return false;
   }
+  
+  schema.BuildObjectBySchema(object, result_object);
 
-  // build temporary object by schema filled with default values
-  schema.BuildObjectBySchema(result_object);
-
-  // fill output object
-  CMetaFormatter::FillOutputObject(object, result_object);
+  result_object.setSchema(schema);
 
   return true;
-}
-
-//---------------------------------------------------------------
-
-void formatter_ns::CMetaFormatter::FillOutputObject(
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& in_object,
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& out_object) {
-  
-  if (in_object.getType() == smart_objects_ns::SmartType_Invalid
-      || in_object.getType() == smart_objects_ns::SmartType_Null
-      || in_object.getType() != out_object.getType()) {
-    return;
-  }
-
-  if (in_object.getType() == smart_objects_ns::SmartType_Map) {
-    
-    const std::set<std::string> in_object_keys = in_object.enumerate();
-    for(std::set<std::string>::const_iterator i = in_object_keys.begin();
-        i != in_object_keys.end(); ++i) {
-      if (true == out_object.keyExists(*i)) {
-        CMetaFormatter::FillOutputObject(in_object.getElement(*i),
-                                          out_object[*i]);
-      }      
-    }      
-  } else if (in_object.getType() == smart_objects_ns::SmartType_Array) {
-    
-    for(int i = 0; i < in_object.length(); i++) {
-      CMetaFormatter::FillOutputObject(in_object.getElement(i), out_object[i]);      
-    }    
-  } else {
-    out_object = in_object;
-  }
 }  
-  
