@@ -35,13 +35,31 @@
 
 
 #include "meta_formatter_test_helper.h"
+#include <JSONHandler/formatters/CFormatterJsonBase.hpp>
 
-namespace formatter_ns = test::components::JSONHandler::formatters;
+using test::components::JSONHandler::formatters::CMetaFormatterTestHelper;
+namespace formatter_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 namespace strings_ns = NsSmartDeviceLink::NsJSONHandler::strings;
 
-void formatter_ns::CMetaFormatterTestHelper::FillObjectIdenticalToSchema(
+//-----------------------------------------------------------
+
+void CMetaFormatterTestHelper::AnyObjectToJsonString(
+    const smart_objects_ns::CSmartObject& obj, std::string& result_string) {  
+  
+    Json::Value params(Json::objectValue);
+
+    smart_objects_ns::CSmartObject formattedObj(obj);
+
+    formatter_ns::CFormatterJsonBase::objToJsonValue(formattedObj, params);
+
+    result_string = params.toStyledString();
+}
+
+//-----------------------------------------------------------
+
+void CMetaFormatterTestHelper::FillObjectIdenticalToSchema(
     NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
   
   obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] =
@@ -71,8 +89,9 @@ void formatter_ns::CMetaFormatterTestHelper::FillObjectIdenticalToSchema(
   obj[strings_ns::S_MSG_PARAMS]["appID"] = "APP ID";
 }
 
+//-----------------------------------------------------------
 
-void formatter_ns::CMetaFormatterTestHelper::FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
+void CMetaFormatterTestHelper::FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
         NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
   obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] =
       generated_ns::messageType::request;
@@ -101,12 +120,44 @@ void formatter_ns::CMetaFormatterTestHelper::FillObjectIdenticalToSchemaWithoutN
   obj[strings_ns::S_MSG_PARAMS]["appID"] = "APP ID"; 
 }
 
-void formatter_ns::CMetaFormatterTestHelper::CompareObjects(
+void CMetaFormatterTestHelper::FillObjectWithoutSomeMandatoryFields(
+      NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
+obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] =
+      generated_ns::messageType::request;
+  obj[strings_ns::S_PARAMS][strings_ns::S_FUNCTION_ID] =
+      generated_ns::FunctionID::RegisterAppInterfaceID;
+//   obj[strings_ns::S_PARAMS][strings_ns::S_CORRELATION_ID] = 12;
+  obj[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION] = 1;
+  obj[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_TYPE] = 0;
+
+//   obj[strings_ns::S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 2;
+//   obj[strings_ns::S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 10;
+  obj[strings_ns::S_MSG_PARAMS]["appName"] = "APP NAME";
+  obj[strings_ns::S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
+  obj[strings_ns::S_MSG_PARAMS]["ttsName"][0]["type"] =
+      generated_ns::SpeechCapabilities::SC_TEXT;
+  obj[strings_ns::S_MSG_PARAMS]["ngnMediaScreenAppName"] = "SCREEN NAME";
+  obj[strings_ns::S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
+  obj[strings_ns::S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
+  obj[strings_ns::S_MSG_PARAMS]["isMediaApplication"] = true;
+  obj[strings_ns::S_MSG_PARAMS]["languageDesired"] =
+      generated_ns::Language::EN_EU;
+  obj[strings_ns::S_MSG_PARAMS]["hmiDisplayLanguageDesired"] =
+      generated_ns::Language::RU_RU;
+  obj[strings_ns::S_MSG_PARAMS]["appType"][0] = generated_ns::AppType::SYSTEM;
+  obj[strings_ns::S_MSG_PARAMS]["appType"][1] = generated_ns::AppType::MEDIA;
+  obj[strings_ns::S_MSG_PARAMS]["appID"] = "APP ID";   
+}
+
+//-----------------------------------------------------------
+
+void CMetaFormatterTestHelper::CompareObjects(
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second) {
   
   if (smart_objects_ns::SmartType_Array == first.getType())
   {
+      ASSERT_EQ(smart_objects_ns::SmartType_Array, second.getType());
       for (int i = 0; i < first.length(); i++)
       {
           CompareObjects(first.getElement(i), second.getElement(i));
@@ -114,6 +165,7 @@ void formatter_ns::CMetaFormatterTestHelper::CompareObjects(
   }
   else if (smart_objects_ns::SmartType_Map == first.getType())
   {
+      ASSERT_EQ(smart_objects_ns::SmartType_Map, second.getType());
       std::set<std::string> keys = first.enumerate();
 
       for (std::set<std::string>::const_iterator key = keys.begin(); key != keys.end(); key++)
@@ -145,4 +197,32 @@ void formatter_ns::CMetaFormatterTestHelper::CompareObjects(
   {
       FAIL() << "Unknown SmartObject type: " << first.getType();
   }
+}
+
+//-----------------------------------------------------------
+
+void CMetaFormatterTestHelper::FillObjectWithDefaultValues(
+      NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
+
+  obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] = -1;      
+  obj[strings_ns::S_PARAMS][strings_ns::S_FUNCTION_ID] = -1;
+  obj[strings_ns::S_PARAMS][strings_ns::S_CORRELATION_ID] = 0;
+  obj[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION] = 0;
+  obj[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_TYPE] = 0;
+
+  obj[strings_ns::S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 0;
+  obj[strings_ns::S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 0;
+  obj[strings_ns::S_MSG_PARAMS]["appName"] = "";
+//   obj[strings_ns::S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC"; // not mandatory
+//   obj[strings_ns::S_MSG_PARAMS]["ttsName"][0]["type"] =
+//       generated_ns::SpeechCapabilities::SC_TEXT;
+  obj[strings_ns::S_MSG_PARAMS]["ngnMediaScreenAppName"] = "";
+//   obj[strings_ns::S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1"; // not mandatory
+//   obj[strings_ns::S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
+  obj[strings_ns::S_MSG_PARAMS]["isMediaApplication"] = false;
+  obj[strings_ns::S_MSG_PARAMS]["languageDesired"] = -1;
+  obj[strings_ns::S_MSG_PARAMS]["hmiDisplayLanguageDesired"] = -1;      
+//   obj[strings_ns::S_MSG_PARAMS]["appType"][0] = generated_ns::AppType::SYSTEM; // not mandatory
+//   obj[strings_ns::S_MSG_PARAMS]["appType"][1] = generated_ns::AppType::MEDIA;
+  obj[strings_ns::S_MSG_PARAMS]["appID"] = "";
 }

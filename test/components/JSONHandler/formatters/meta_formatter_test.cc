@@ -40,6 +40,8 @@
 #include "JSONHandler/formatters/meta_formatter.h"
 #include "JSONHandler/CSmartFactory.hpp"
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "SmartObjects/CObjectSchemaItem.hpp"
+#include "SmartObjects/CArraySchemaItem.hpp"
 
 #include "meta_formatter_test_helper.h"
 
@@ -47,16 +49,17 @@ using test::components::JSONHandler::formatters::CMetaFormatterTestHelper;
 namespace formatter_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace generated_ns = Gen::test::components::JSONHandler2;
 namespace strings_ns = NsSmartDeviceLink::NsJSONHandler::strings;
+namespace smartobjects_ns = NsSmartDeviceLink::NsSmartObjects;
 
 TEST_F(CMetaFormatterTestHelper, test_inputObjectIdenticalToSchemaWithAndWithoutMandatoryParams) {
   Json::Value value;  // just a quick workaround to avoid undefined reference to Json
   Json::Reader reader;    // the same thing
   
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject object1 = factory.CreateSmartObject(
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject object1 = factory_.CreateSmartObject(
       generated_ns::FunctionID::RegisterAppInterfaceID,
       generated_ns::messageType::request);
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject object2 = factory.CreateSmartObject(
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject object2 = factory_.CreateSmartObject(
       generated_ns::FunctionID::RegisterAppInterfaceID,
       generated_ns::messageType::request);
   
@@ -64,7 +67,7 @@ TEST_F(CMetaFormatterTestHelper, test_inputObjectIdenticalToSchemaWithAndWithout
   NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object2;
   // get schema
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;  
-  bool get_schema_result = factory.GetSchema(
+  bool get_schema_result = factory_.GetSchema(
       generated_ns::FunctionID::RegisterAppInterfaceID,
       generated_ns::messageType::request,
       schema);
@@ -77,7 +80,7 @@ TEST_F(CMetaFormatterTestHelper, test_inputObjectIdenticalToSchemaWithAndWithout
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object1, schema, result_object1);
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object2, schema, result_object2);
 
-  if (1) { // printing out
+  if (true == kIsPrintOut) { // printing out
     std::string formatted_string;
     formatter_ns::CFormatterJsonSDLRPCv1::toString(object1, formatted_string);
     printf("object1 %s\n", formatted_string.c_str());
@@ -111,6 +114,127 @@ TEST_F(CMetaFormatterTestHelper, test_inputObjectIdenticalToSchemaWithAndWithout
             result_object2[strings_ns::S_PARAMS][strings_ns::S_FUNCTION_ID].asString());
 }
 
+
+TEST_F(CMetaFormatterTestHelper, test_NormalSchemaWithEmptyObject) {
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject object;
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object;
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject expected_object;
+  // get schema
+  NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;
+  bool get_schema_result = factory_.GetSchema(
+      generated_ns::FunctionID::RegisterAppInterfaceID,
+      generated_ns::messageType::request,
+      schema);
+
+  ASSERT_TRUE(get_schema_result);
+
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, schema, result_object);
+
+  FillObjectWithDefaultValues(expected_object);
+
+  CompareObjects(expected_object, result_object);
+  CompareObjects(result_object, expected_object);
+
+  if (true == kIsPrintOut) {
+    std::string str;
+    AnyObjectToJsonString(result_object, str);
+    printf("result_object(default) %s", str.c_str());
+  }
+}
+
+TEST_F(CMetaFormatterTestHelper, test_NormalSchemaWithObjectWithoutSomeMandatoryFields) {
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject object;
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object;
+  // get schema
+  NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;
+  bool get_schema_result = factory_.GetSchema(
+      generated_ns::FunctionID::RegisterAppInterfaceID,
+      generated_ns::messageType::request,
+      schema);
+
+  ASSERT_TRUE(get_schema_result);
+
+  FillObjectWithoutSomeMandatoryFields(object);
+
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, schema, result_object);
+
+  CompareObjects(object, result_object);
+  EXPECT_EQ(0,
+    result_object[strings_ns::S_PARAMS][strings_ns::S_CORRELATION_ID].asInt());
+  EXPECT_EQ(0,
+    result_object[strings_ns::S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"].asInt());
+  EXPECT_EQ(0,
+    result_object[strings_ns::S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"].asInt());
+
+  if (true == kIsPrintOut) {
+    std::string str;
+    AnyObjectToJsonString(result_object, str);
+    printf("result_object %s", str.c_str());
+  }
+}
+
+TEST_F(CMetaFormatterTestHelper, test_EmptyMap) {
+  std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember> schemaMembersMap;
+  smartobjects_ns::CSmartSchema map_schema =
+      smartobjects_ns::CSmartSchema(smartobjects_ns::CObjectSchemaItem::create(schemaMembersMap));
+
+  smartobjects_ns::CSmartObject object;
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object_empty_map;
+  
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, map_schema, result_object_empty_map);
+  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType());
+  ASSERT_EQ(0, result_object_empty_map.length());
+
+  // fill object with any values. Result must be the same
+  FillObjectIdenticalToSchema(object);
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, map_schema, result_object_empty_map);
+  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType());
+  ASSERT_EQ(0, result_object_empty_map.length());
+
+  // fill object with any values. Result must be the same
+  FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(object);
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, map_schema, result_object_empty_map);
+  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType());
+  ASSERT_EQ(0, result_object_empty_map.length());
+  
+  if (true == kIsPrintOut) {
+    std::string str;
+    AnyObjectToJsonString(result_object_empty_map, str);
+    printf("result_object(empty map) %s", str.c_str());
+  }
+
+
+}
+
+TEST_F(CMetaFormatterTestHelper, test_EmptyArray) {
+  smartobjects_ns::CSmartObject object;
+  
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object_empty_array;
+  smartobjects_ns::CSmartSchema array_schema =
+      smartobjects_ns::CSmartSchema(smartobjects_ns::CArraySchemaItem::create());
+
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, array_schema, result_object_empty_array);
+  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType());
+  ASSERT_EQ(0, result_object_empty_array.length());
+
+  // fill object with any values. Result must be the same
+  FillObjectIdenticalToSchema(object);
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, array_schema, result_object_empty_array);
+  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType());
+  ASSERT_EQ(0, result_object_empty_array.length());
+
+  // fill object with any values. Result must be the same
+  FillObjectWithoutSomeMandatoryFields(object);
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, array_schema, result_object_empty_array);
+  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType());
+  ASSERT_EQ(0, result_object_empty_array.length());
+
+  if (true == kIsPrintOut) {
+    std::string str;
+    AnyObjectToJsonString(result_object_empty_array, str);
+    printf("result_object(empty array) %s", str.c_str());
+  }
+}
 
 int main(int argc, char **argv)
 {

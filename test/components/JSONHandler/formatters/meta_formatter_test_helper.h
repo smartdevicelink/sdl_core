@@ -52,6 +52,10 @@ namespace formatters {
   class CMetaFormatterTestHelper :public ::testing::Test {
    protected:
 
+     void AnyObjectToJsonString(
+       const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
+       std::string& result_string);
+
     // for messageType::request, FunctionID::RegisterAppInterfaceID
     void FillObjectIdenticalToSchema(
         NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
@@ -60,13 +64,21 @@ namespace formatters {
     void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
         NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
-
     void CompareObjects(
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second);
 
+    // for messageType::request, FunctionID::RegisterAppInterfaceID
+    void FillObjectWithDefaultValues(
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+
+    void FillObjectWithoutSomeMandatoryFields(
+      NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+
     // members
-    generated_ns::test_JSONHandler_alrpcv2 factory;
+    generated_ns::test_JSONHandler_alrpcv2 factory_;
+
+    static const bool kIsPrintOut = true;
   };
 
 }
