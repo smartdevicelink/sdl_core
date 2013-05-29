@@ -232,7 +232,8 @@ class Parser(object):
         params, subelements, attrib = self._parse_base_item(element, prefix)
 
         if len(attrib) != 0:
-            raise ParseError("Unexpected attributes for struct")
+            raise ParseError("Unexpected attributes for struct '" +
+                             params["name"] + "'")
 
         members = collections.OrderedDict()
         for subelement in subelements:
