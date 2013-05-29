@@ -50,6 +50,8 @@
 #include "application_manager/commands/delete_interaction_choice_set_response_command.h"
 #include "application_manager/commands/alert_command.h"
 #include "application_manager/commands/alert_response_command.h"
+#include "application_manager/commands/perform_audio_pass_thru_command.h"
+#include "application_manager/commands/perform_audio_pass_thru_response_command.h"
 #include "application_manager/commands/create_interaction_choice_set_command.h"
 #include "application_manager/commands/create_interaction_choice_set_command_response.h"
 #include "application_manager/commands/perform_interaction_command.h"
@@ -139,12 +141,19 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
       }
       break;
     }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::PerformAudioPassThruID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::PerformAudioPassThruCommandResponse(message));
+      } else {
+        command.reset(new commands::PerformAudioPassThruCommandRequest(message));
+      }
+      break;
+    }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::CreateInteractionChoiceSetID: {
       if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
         command.reset(new commands::CreateInteractionChoiceSetResponseCommand(message));
       } else {
         command.reset(new commands::CreateInteractionChoiceSetCommand(message));
-
       }
       break;
     }
