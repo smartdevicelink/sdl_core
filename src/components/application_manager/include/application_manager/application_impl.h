@@ -146,6 +146,11 @@ class ApplicationImpl : public Application {
                   const smart_objects::CSmartObject& menu);
 
   /*
+   * @brief Returns true if sub menu with such name already exist
+   */
+ bool IsSubMenuNameAlreadyExist(const std::string& name);
+
+  /*
    * @brief Deletes menu from the application menu
    */
   void RemoveSubMenu(unsigned int menu_id);

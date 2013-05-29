@@ -162,7 +162,6 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         command.reset(new commands::PerformInteractionResponseCommand(message));
       } else {
         command.reset(new commands::PerformInteractionCommand(message));
-
       }
       break;
     }

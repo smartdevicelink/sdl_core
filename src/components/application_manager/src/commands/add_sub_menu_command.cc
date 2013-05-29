@@ -58,19 +58,18 @@ void AddSubMenuCommand::Run() {
     return;
   }
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject* menu =
-      application->FindSubMenu(
-          (*message_)[strings::msg_params][strings::menu_id].asInt());
 
-  if (menu) {
-    if ((*menu)[strings::menu_name].asString() ==
-        (*message_)[strings::msg_params][strings::menu_name].asString()) {
-      SendResponse(false,
-                   NsSmartDeviceLinkRPC::V2::Result::DUPLICATE_NAME);
-    }
-
+  if (application->FindSubMenu(
+      (*message_)[strings::msg_params][strings::menu_id].asInt())) {
     SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
 
+    return;
+  }
+
+  if (application->IsSubMenuNameAlreadyExist(
+      (*message_)[strings::msg_params][strings::menu_name].asString())) {
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::DUPLICATE_NAME);
     return;
   }
 

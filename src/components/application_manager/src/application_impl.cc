@@ -358,6 +358,18 @@ void ApplicationImpl::RemoveSubMenu(unsigned int menu_id) {
   }
 }
 
+bool ApplicationImpl::IsSubMenuNameAlreadyExist(const std::string& name)
+{
+  for (SubMenuMap::iterator it = sub_menu_.begin();
+        sub_menu_.end() != it; ++it) {
+    smart_objects::CSmartObject* menu = it->second;
+    if ((*menu)[strings::menu_name] == name) {
+      return true;
+    }
+  }
+  return false;
+}
+
 smart_objects::CSmartObject*  ApplicationImpl::FindSubMenu(unsigned int menu_id)
 {
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
