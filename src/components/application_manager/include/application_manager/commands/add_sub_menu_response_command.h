@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief ResetGlobalPropertiesResponse command class
+ * @brief AddSubMenuResponseCommand command class
  **/
 class AddSubMenuResponseCommand : public CommandResponseImpl {
  public:

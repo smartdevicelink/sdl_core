@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_COMMAND_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_COMMAND_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
@@ -42,21 +42,21 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief CreateInteractionChoiceSetResponseCommand command class
+ * @brief PerformInteractionResponseCommand command class
  **/
-class CreateInteractionChoiceSetResponseCommand : public CommandResponseImpl {
+class PerformInteractionResponseCommand : public CommandResponseImpl {
  public:
   /**
-   * @brief CreateInteractionChoiceSetResponseCommand class constructor
+   * @brief PerformInteractionResponseCommand class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit CreateInteractionChoiceSetResponseCommand(const MessageSharedPtr& message);
+  explicit PerformInteractionResponseCommand(const MessageSharedPtr& message);
 
   /**
-   * @brief CreateInteractionChoiceSetResponseCommand class destructor
+   * @brief PerformInteractionResponseCommand class destructor
    **/
-  virtual ~CreateInteractionChoiceSetResponseCommand();
+  virtual ~PerformInteractionResponseCommand();
 
   /**
    * @brief Execute command
@@ -64,10 +64,10 @@ class CreateInteractionChoiceSetResponseCommand : public CommandResponseImpl {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetResponseCommand);
+  DISALLOW_COPY_AND_ASSIGN(PerformInteractionResponseCommand);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_COMMAND_RESPONSE_H_

@@ -52,6 +52,8 @@ set (SOURCES
 ./src/commands/alert_response_command.cc
 ./src/commands/create_interaction_choice_set_command.cc
 ./src/commands/create_interaction_choice_set_command_response.cc
+./src/commands/perform_interaction_command.cc
+./src/commands/perform_interaction_response_command.cc
 )
 
 

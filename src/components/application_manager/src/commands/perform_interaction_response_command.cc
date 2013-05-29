@@ -31,43 +31,40 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
-
-#include "application_manager/commands/command_response_impl.h"
-#include "utils/macro.h"
+#include "application_manager/commands/perform_interaction_response_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
+#include "v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief CreateInteractionChoiceSetResponseCommand command class
- **/
-class CreateInteractionChoiceSetResponseCommand : public CommandResponseImpl {
- public:
-  /**
-   * @brief CreateInteractionChoiceSetResponseCommand class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit CreateInteractionChoiceSetResponseCommand(const MessageSharedPtr& message);
+PerformInteractionResponseCommand::PerformInteractionResponseCommand(
+    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  if ((*message_)[strings::params][strings::success] == false) {
+    SendResponse();
+    return;
+  }
 
-  /**
-   * @brief CreateInteractionChoiceSetResponseCommand class destructor
-   **/
-  virtual ~CreateInteractionChoiceSetResponseCommand();
+  const int hmi_request_id = 205;
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
+    (*message_)[strings::params][strings::success] = true;
+    (*message_)[strings::params][strings::result_code] =
+            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    SendResponse();
+  }
+}
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetResponseCommand);
-};
+PerformInteractionResponseCommand::~PerformInteractionResponseCommand() {
+}
+
+void PerformInteractionResponseCommand::Run() {
+
+}
 
 }  // namespace commands
-}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
+}  // namespace application_manager

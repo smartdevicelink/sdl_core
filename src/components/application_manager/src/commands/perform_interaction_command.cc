@@ -31,43 +31,56 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
+#include "application_manager/commands/perform_interaction_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
-#include "application_manager/commands/command_response_impl.h"
-#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief CreateInteractionChoiceSetResponseCommand command class
- **/
-class CreateInteractionChoiceSetResponseCommand : public CommandResponseImpl {
- public:
-  /**
-   * @brief CreateInteractionChoiceSetResponseCommand class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit CreateInteractionChoiceSetResponseCommand(const MessageSharedPtr& message);
+PerformInteractionCommand::PerformInteractionCommand(
+    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  ApplicationImpl* app = static_cast<ApplicationImpl*>(
+      ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params][strings::connection_key]));
 
-  /**
-   * @brief CreateInteractionChoiceSetResponseCommand class destructor
-   **/
-  virtual ~CreateInteractionChoiceSetResponseCommand();
+  if (NULL == app) {
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  const int choise_set_id =
+   (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetResponseCommand);
-};
+  if (!app->find_choice_set(choise_set_id)) {
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    return;
+  }
+
+  const int corellation_id =
+      (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+      (*message_)[strings::params][strings::connection_key];
+
+  // TODO(VS): HMI Request Id
+  const int hmi_request_id = 205;
+
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+        connection_key, corellation_id, hmi_request_id, &(*message_));
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+}
+
+PerformInteractionCommand::~PerformInteractionCommand() {
+}
+
+void PerformInteractionCommand::Run() {
+
+}
 
 }  // namespace commands
-}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
+}  // namespace application_manager
