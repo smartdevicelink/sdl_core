@@ -51,6 +51,7 @@ void DeleteCommandResponse::Run() {
   if ((*message_)[strings::params][strings::success] == false)
   {
     SendResponse();
+    return;
   }
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -76,21 +77,20 @@ void DeleteCommandResponse::Run() {
   bool result_vr = false;
 
   if (function_id == ui_cmd_id) {
-    if (true == code) {
+    if (code) {
       result_ui = true;
     }
   } else if (function_id == vr_cmd_id) {
-    if (true == code) {
+    if (code) {
       result_vr = true;
     }
   }
 
   // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      (*message_)[strings::params][strings::function_id].asInt())) {
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(function_id)) {
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
           ApplicationManagerImpl::instance()->
-          application(data[strings::params][strings::connection_key]));
+          application(data[strings::params][strings::app_id]));
 
     smart_objects::CSmartObject* command =
         app->FindCommand(

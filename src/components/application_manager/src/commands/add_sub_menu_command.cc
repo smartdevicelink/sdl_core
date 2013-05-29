@@ -84,7 +84,7 @@ void AddSubMenuCommand::Run() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, corellation_id, hmi_request_id, &(*message_));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands

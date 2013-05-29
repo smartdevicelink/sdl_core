@@ -29,19 +29,57 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
+
+#include "application_manager/commands/create_interaction_choice_set_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 
-#include "application_manager/commands/register_app_interface_response_command.h"
+namespace application_manager {
 
-namespace application_manager  {
+namespace commands {
 
-namespace commands  {
+CreateInteractionChoiceSetCommand::CreateInteractionChoiceSetCommand(
+    const MessageSharedPtr& message): CommandRequestImpl(message) {
+}
 
-void RegisterAppInterfaceResponseCommand::Run()  {
-  // TODO(VS): Add response params to response SmarObject
-  SendResponse();
+CreateInteractionChoiceSetCommand::~CreateInteractionChoiceSetCommand() {
+}
+
+void CreateInteractionChoiceSetCommand::Run() {
+  ApplicationImpl* app = static_cast<ApplicationImpl*>(
+      ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params][strings::connection_key]));
+
+  if (NULL == app) {
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  const int choise_set_id =
+  (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
+
+  if (app->find_choice_set(choise_set_id)) {
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    return;
+  }
+
+  const int corellation_id =
+      (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+      (*message_)[strings::params][strings::connection_key];
+
+  // TODO(VS): HMI Request Id
+  const int hmi_request_id = 204;
+
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+        connection_key, corellation_id, hmi_request_id, &(*message_));
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands
+
 }  // namespace application_manager

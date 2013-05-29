@@ -29,19 +29,45 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_
 
-#include "application_manager/commands/register_app_interface_response_command.h"
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
-namespace application_manager  {
+namespace application_manager {
 
-namespace commands  {
+namespace commands {
 
-void RegisterAppInterfaceResponseCommand::Run()  {
-  // TODO(VS): Add response params to response SmarObject
-  SendResponse();
-}
+/**
+ * @brief ResetGlobalPropertiesResponse command class
+ **/
+class CreateInteractionChoiceSetResponseCommand : public CommandResponseImpl {
+ public:
+  /**
+   * @brief CreateInteractionChoiceSetResponseCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit CreateInteractionChoiceSetResponseCommand(const MessageSharedPtr& message);
+
+  /**
+   * @brief CreateInteractionChoiceSetResponseCommand class destructor
+   **/
+  virtual ~CreateInteractionChoiceSetResponseCommand();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetResponseCommand);
+};
 
 }  // namespace commands
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_COMMAND_RESPONSE_H_

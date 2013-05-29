@@ -50,6 +50,8 @@
 #include "application_manager/commands/delete_interaction_choice_set_response_command.h"
 #include "application_manager/commands/alert_command.h"
 #include "application_manager/commands/alert_response_command.h"
+#include "application_manager/commands/create_interaction_choice_set_command.h"
+#include "application_manager/commands/create_interaction_choice_set_command_response.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -105,9 +107,9 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::AddSubMenuID: {
       if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-       // command.reset(new commands::AddSubMenuResponseCommand(message));
+        command.reset(new commands::AddSubMenuResponseCommand(message));
       } else {
-      //  command.reset(new commands::AddSubMenuCommand(message));
+        command.reset(new commands::AddSubMenuCommand(message));
       }
       break;
     }
@@ -132,6 +134,15 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         command.reset(new commands::AlertCommandResponse(message));
       } else {
         command.reset(new commands::AlertCommandRequest(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::CreateInteractionChoiceSetID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::CreateInteractionChoiceSetResponseCommand(message));
+      } else {
+        command.reset(new commands::CreateInteractionChoiceSetCommand(message));
+
       }
       break;
     }
