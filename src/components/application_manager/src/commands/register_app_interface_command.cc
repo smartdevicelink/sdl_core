@@ -106,6 +106,9 @@ void RegisterAppInterfaceCommand::Run() {
     } else {
       SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
     }
+
+    // TODO(VS): Send notification to hmi
+    // HMIHandler::getInstance().sendNotification(appRegistered);
   }
 }
 

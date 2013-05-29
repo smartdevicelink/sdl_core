@@ -29,19 +29,51 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
+#include "application_manager/commands/create_interaction_choice_set_command_response.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
+#include "v4_protocol_v2_0_revT.h"
 
-#include "application_manager/commands/register_app_interface_response_command.h"
+namespace application_manager {
 
-namespace application_manager  {
+namespace commands {
 
-namespace commands  {
+CreateInteractionChoiceSetResponseCommand::CreateInteractionChoiceSetResponseCommand(
+    const MessageSharedPtr& message): CommandResponseImpl(message) {
+}
 
-void RegisterAppInterfaceResponseCommand::Run()  {
-  // TODO(VS): Add response params to response SmarObject
-  SendResponse();
+CreateInteractionChoiceSetResponseCommand::~CreateInteractionChoiceSetResponseCommand() {
+}
+
+void CreateInteractionChoiceSetResponseCommand::Run() {
+  if ((*message_)[strings::params][strings::success] == false) {
+    SendResponse();
+    return;
+  }
+
+  const int hmi_request_id = 204;
+
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
+    smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
+        GetMessageChain(hmi_request_id)->data();
+
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(
+        ApplicationManagerImpl::instance()->
+          application(data[strings::params][strings::connection_key]));
+
+    app->add_choice_set(data[strings::msg_params][strings::interaction_choice_set_id].asInt(),
+                   data[strings::msg_params]);
+
+    (*message_)[strings::params][strings::success] = true;
+    (*message_)[strings::params][strings::result_code] =
+          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    SendResponse();
+  }
 }
 
 }  // namespace commands
+
 }  // namespace application_manager

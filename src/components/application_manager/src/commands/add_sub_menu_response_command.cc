@@ -51,6 +51,7 @@ void AddSubMenuResponseCommand::Run() {
   if ((*message_)[strings::params][strings::success] == false)
   {
     SendResponse();
+    return;
   }
 
   const int hmi_request_id = 200;
@@ -64,7 +65,7 @@ void AddSubMenuResponseCommand::Run() {
           application(data[strings::params][strings::connection_key]));
 
     app->AddSubMenu(data[strings::msg_params][strings::menu_id].asInt(),
-                   (*message_)[strings::msg_params]);
+                   data[strings::msg_params]);
 
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =

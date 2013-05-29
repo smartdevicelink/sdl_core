@@ -84,9 +84,6 @@ void DeleteCommandRequest::Run() {
       (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];
 
-      (*p_smrt_ui)[strings::msg_params][strings::connection_key] =
-          (*message_)[strings::msg_params][strings::connection_key];
-
       (*p_smrt_ui)[strings::msg_params][strings::app_id] =
           application->app_id();
 
@@ -110,9 +107,6 @@ void DeleteCommandRequest::Run() {
 
       (*p_smrt_vr)[strings::msg_params][strings::vr_commands] =
           (*message_)[strings::msg_params][strings::vr_commands];
-
-      (*p_smrt_vr)[strings::msg_params][strings::connection_key] =
-          (*message_)[strings::msg_params][strings::connection_key];
 
       (*p_smrt_vr)[strings::msg_params][strings::app_id] =
                application->app_id();

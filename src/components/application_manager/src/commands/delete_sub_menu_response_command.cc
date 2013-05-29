@@ -51,6 +51,7 @@ void DeleteSubMenuResponseCommand::Run() {
   if ((*message_)[strings::params][strings::success] == false)
   {
     SendResponse();
+    return;
   }
 
   const int hmi_request_id = 201;
