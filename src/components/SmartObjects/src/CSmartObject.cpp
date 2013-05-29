@@ -150,7 +150,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator int(void) const
     return convert_int();
 }
 
-int NsSmartDeviceLink::NsSmartObjects::CSmartObject::asInt()
+int NsSmartDeviceLink::NsSmartObjects::CSmartObject::asInt() const
 {
     return (int)(*this);
 }
@@ -230,7 +230,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator long(void) const
     return convert_long();
 }
 
-long NsSmartDeviceLink::NsSmartObjects::CSmartObject::asLong()
+long NsSmartDeviceLink::NsSmartObjects::CSmartObject::asLong() const
 {
     return (long)(*this);
 }
@@ -300,7 +300,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator double(void) const
     return convert_double();
 }
 
-double NsSmartDeviceLink::NsSmartObjects::CSmartObject::asDouble()
+double NsSmartDeviceLink::NsSmartObjects::CSmartObject::asDouble() const
 {
     return (double)(*this);
 }
@@ -368,7 +368,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator bool(void) const
     return convert_bool();
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::asBool()
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::asBool() const
 {
     return (bool)(*this);
 }
@@ -439,7 +439,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator char(void) const
     return convert_char();
 }
 
-char NsSmartDeviceLink::NsSmartObjects::CSmartObject::asChar()
+char NsSmartDeviceLink::NsSmartObjects::CSmartObject::asChar() const
 {
     return (char)(*this);
 }
@@ -505,7 +505,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator std::string(void) cons
     return convert_string();
 }
 
-std::string NsSmartDeviceLink::NsSmartObjects::CSmartObject::asString()
+std::string NsSmartDeviceLink::NsSmartObjects::CSmartObject::asString() const
 {
     return (std::string)(*this);
 }
@@ -625,7 +625,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject::operator SmartBinary(void) cons
     return convert_binary();
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartBinary NsSmartDeviceLink::NsSmartObjects::CSmartObject::asBinary()
+NsSmartDeviceLink::NsSmartObjects::SmartBinary NsSmartDeviceLink::NsSmartObjects::CSmartObject::asBinary() const
 {
     //return static_cast<NsSmartDeviceLink::NsSmartObjects::SmartBinary>(*this);
     return convert_binary();

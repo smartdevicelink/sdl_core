@@ -197,7 +197,7 @@ namespace NsSmartDeviceLink
              *
              * @return int
              **/
-            int asInt();
+            int asInt() const;
 
             /**
              * @brief Assignment operator for type: int
@@ -236,7 +236,7 @@ namespace NsSmartDeviceLink
              *
              * @return double
              **/
-            long asLong();
+            long asLong() const;
 
             /**
              * @brief Assignment operator for type: int
@@ -280,7 +280,7 @@ namespace NsSmartDeviceLink
              *
              * @return double
              **/
-            double asDouble();
+            double asDouble() const;
 
             /**
              * @brief Assignment operator for type: double
@@ -323,7 +323,7 @@ namespace NsSmartDeviceLink
              *
              * @return bool
              **/
-            bool asBool();
+            bool asBool() const;
 
             /**
              * @brief Assignment operator for type: bool
@@ -366,7 +366,7 @@ namespace NsSmartDeviceLink
              *
              * @return char
              **/
-            char asChar();
+            char asChar() const;
 
             /**
              * @brief Assignment operator for type: char
@@ -416,7 +416,7 @@ namespace NsSmartDeviceLink
              *
              * @return std::string
              **/
-            std::string asString();
+            std::string asString() const;
 
             /**
              * @brief Assignment operator for type: string
@@ -475,7 +475,7 @@ namespace NsSmartDeviceLink
              *
              * @return SmartBinary
              **/
-            SmartBinary asBinary();
+            SmartBinary asBinary() const;
 
             /**
              * @brief Assignment operator for type: binary
