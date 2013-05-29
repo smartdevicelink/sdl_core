@@ -41,6 +41,11 @@
 
 namespace application_manager {
 
+ApplicationManagerImpl::ApplicationManagerImpl()
+: hmi_deletes_commands_(false),
+  audio_pass_thru_flag_(false) {
+}
+
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
 }
@@ -85,8 +90,7 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     unsigned int correlation_id,
     unsigned int function_id,
     const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data) {
-  if (!chain)
-  {
+  if (!chain) {
       chain = new MessageChaining(
           connection_key,
           correlation_id);
@@ -97,20 +101,17 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
       MessageChainPtr ptr(chain);
       message_chaining_[function_id] = ptr;
       return chain;
-  }
-  else
-  {
+  } else  {
       chain->increment_counter();
-      MessageChains::const_iterator iter;
-      for (iter = message_chaining_.begin(); iter != message_chaining_.end(); ++iter) {
-        if ((*iter->second) == *chain) {
-          message_chaining_[function_id] = iter->second;
+      MessageChains::const_iterator it = message_chaining_.begin();
+      for (; it != message_chaining_.end(); ++it) {
+        if ((*it->second) == *chain) {
+          message_chaining_[function_id] = it->second;
           break;
         }
       }
       return chain;
   }
-
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
@@ -127,13 +128,22 @@ bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
   return result;
 }
 
-const MessageChaining* ApplicationManagerImpl::GetMessageChain(unsigned int function_id) const {
+const MessageChaining* ApplicationManagerImpl::GetMessageChain(
+    unsigned int function_id) const {
   MessageChains::const_iterator it = message_chaining_.find(function_id);
   if (message_chaining_.end() != it) {
     return &(*it->second);
   }
 
   return NULL;
+}
+
+bool ApplicationManagerImpl::audio_pass_thru_flag() const {
+  return audio_pass_thru_flag_;
+}
+
+void ApplicationManagerImpl::set_audio_pass_thru_flag(bool flag) {
+  audio_pass_thru_flag_ = flag;
 }
 
 void ApplicationManagerImpl::onMessageReceived(

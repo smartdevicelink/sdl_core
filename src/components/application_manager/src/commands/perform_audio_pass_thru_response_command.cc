@@ -62,6 +62,9 @@ void PerformAudioPassThruCommandResponse::Run() {
     SendResponse();
     return;
   }
+
+  // TODO(DK): Some logic
+  SendResponse();
 }
 
 }  // namespace commands

@@ -126,6 +126,20 @@ class ApplicationManagerImpl : public ApplicationManager
      */
     const MessageChaining* GetMessageChain(unsigned int function_id) const;
 
+    /*
+     * @brief Retrieves flag for audio pass thru request
+     *
+     * @return Current state of the audio pass thru request flag
+     */
+    bool audio_pass_thru_flag() const;
+
+    /*
+     * @brief Sets flag for audio pass thru request
+     *
+     * @param flag New state to be set
+     */
+    void set_audio_pass_thru_flag(bool flag);
+
     /////////////////////////////////////////////////////
 
     void set_hmi_message_handler(
@@ -191,6 +205,7 @@ class ApplicationManagerImpl : public ApplicationManager
     std::map<int, Application*> applications_;
     MessageChains               message_chaining_;
     bool                        hmi_deletes_commands_;
+    bool                        audio_pass_thru_flag_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };

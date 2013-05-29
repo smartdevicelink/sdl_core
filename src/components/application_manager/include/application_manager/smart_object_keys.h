@@ -86,6 +86,9 @@ const char tts_chunks[] = "ttsChunks";
 const char duration[] = "duration";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
+const char audio_pass_display_text1[] = "audioPassThruDisplayText1";
+const char audio_pass_display_text2[] = "audioPassThruDisplayText2";
+const char max_duration[] = "maxDuration";
 
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
@@ -99,6 +102,8 @@ namespace hmi_request {
   const char duration[] = "duration";
   const char soft_buttons[] = "softButtons";
   const char tts_chunks[] = "ttsChunks";
+  const char audio_pass_display_texts[] = "audioPassThruDisplayTexts";
+  const char max_duration[] = "maxDuration";
 }  // namespace hmi_request
 
 namespace hmi_response {

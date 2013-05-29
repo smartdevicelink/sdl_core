@@ -42,6 +42,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace str = strings;
+
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
@@ -55,16 +57,99 @@ PerformAudioPassThruCommandRequest::~PerformAudioPassThruCommandRequest() {
 void PerformAudioPassThruCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "PerformAudioPassThruCommandRequest::Run ");
 
+  if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
+    LOG4CXX_ERROR_EXT(logger_, "TOO_MANY_PENDING_REQUESTS");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::TOO_MANY_PENDING_REQUESTS);
+    return;
+  }
+
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+      application((*message_)[str::params][str::connection_key]));
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
+    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+
+  send_speek_request();
+
+  // crate HMI TTS speak request
+  smart_objects::CSmartObject* ui_audio = new smart_objects::CSmartObject();
+  // TODO(DK): HMI tts request Id
+  const int audio_cmd_id = 61;
+  (*ui_audio)[str::params][str::function_id] = audio_cmd_id;
+  (*ui_audio)[str::params][str::message_type] = MessageType::kRequest;
+
+  int i = 0;
+  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
+    (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i] =
+        smart_objects::CSmartObject();
+    (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i]
+        [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT1;
+    (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i]
+        [hmi_request::field_text] =
+            (*message_)[str::msg_params][str::audio_pass_display_text1];
+    // increment index
+    ++i;
+  }
+
+  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
+    (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i] =
+        smart_objects::CSmartObject();
+    (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i]
+        [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT2;
+    (*ui_audio)[str::msg_params][hmi_request::audio_pass_display_texts][i]
+        [hmi_request::field_text] =
+            (*message_)[str::msg_params][str::audio_pass_display_text2];
+  }
+
+  // duration
+  (*ui_audio)[strings::msg_params][hmi_request::duration] =
+      (*message_)[str::msg_params][str::duration];
+
+  const int corellation_id =
+      (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+      (*message_)[strings::params][strings::connection_key];
+
+  MessageChaining * chain = NULL;
+  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
+      connection_key, corellation_id, audio_cmd_id);
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
+  // TODO(DK): AudioPassThruThreadImpl startWithOptions
+}
+
+void PerformAudioPassThruCommandRequest::send_speek_request() const {
+  // crate HMI TTS speak request
+  smart_objects::CSmartObject* tts_speak = new smart_objects::CSmartObject();
+  // TODO(DK): HMI tts request Id
+  const int tts_cmd_id = 51;
+  (*tts_speak)[str::params][str::function_id] = tts_cmd_id;
+  (*tts_speak)[str::params][str::message_type] = MessageType::kRequest;
+
+  int i = 0;
+  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
+    (*tts_speak)[str::msg_params][hmi_request::tts_chunks][i++] =
+        (*message_)[str::msg_params][str::audio_pass_display_text1];
+  }
+
+  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
+    (*tts_speak)[str::msg_params][hmi_request::tts_chunks][i] =
+        (*message_)[str::msg_params][str::audio_pass_display_text2];
+  }
+
+  // app_id
+  (*tts_speak)[strings::msg_params][strings::app_id] =
+      (*message_)[strings::params][strings::connection_key];
+
+    if (0 < tts_speak->length()) {
+      ApplicationManagerImpl::instance()->SendMessageToHMI(tts_speak);
+    }
 }
 
 }  // namespace commands
