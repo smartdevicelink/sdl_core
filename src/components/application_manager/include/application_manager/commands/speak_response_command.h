@@ -58,9 +58,6 @@ class SpeakResponseCommand : public CommandResponseImpl {
    **/
   virtual void Run();
 
- private:
-  MessageSharedPtr message_;
-
   DISALLOW_COPY_AND_ASSIGN(SpeakResponseCommand);
 };
 

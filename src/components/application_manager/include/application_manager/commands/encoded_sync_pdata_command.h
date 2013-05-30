@@ -62,9 +62,6 @@ class EncodedSyncPDataCommand : public CommandRequestImpl {
    **/
   virtual void Run();
 
- private:
-  MessageSharedPtr message_;
-
   DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataCommand);
 };
 
