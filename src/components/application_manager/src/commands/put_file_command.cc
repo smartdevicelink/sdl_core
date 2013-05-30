@@ -59,30 +59,28 @@ void PutFileCommand::Run() {
     return;
   }
 
-  unsigned long int free_space = file_system::AvailableSpace();
+  uint64_t free_space = file_system::AvailableSpace();
 
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name];
 
   bool is_persistent_file = false;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::persistent_file))
-  {
+  if ((*message_)[strings::msg_params].keyExists(strings::persistent_file)) {
     is_persistent_file =
         (*message_)[strings::msg_params][strings::persistent_file];
   }
 
   const std::vector<unsigned char> file_data = message_->asBinary();
 
-  if (free_space > file_data.size())
-  {
+  if (free_space > file_data.size()) {
     std::string relative_file_path =
         file_system::CreateDirectory(application->name());
     relative_file_path += "/";
     relative_file_path += sync_file_name;
 
-    if (file_system::Write(file_system::FullPath(relative_file_path ), file_data))
-    {
+    if (file_system::Write(file_system::FullPath(relative_file_path),
+                           file_data)) {
       application->AddFile(sync_file_name, is_persistent_file);
 
       SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
