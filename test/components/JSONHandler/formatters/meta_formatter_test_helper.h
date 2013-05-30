@@ -51,102 +51,102 @@ namespace JSONHandler {
 namespace formatters {
 
 namespace FunctionID {
+/**
+  * @brief Enumeration FunctionID.
+  *
+  * Enumeration linking function names with function IDs in WiPro protocol.
+  * Assumes enumeration starts at value 0.
+  */
+enum eType {
   /**
-    * @brief Enumeration FunctionID.
-    *
-    * Enumeration linking function names with function IDs in WiPro protocol.
-    * Assumes enumeration starts at value 0.
+    * @brief INVALID_ENUM.
     */
-  enum eType {
-    /**
-      * @brief INVALID_ENUM.
-      */
-    INVALID_ENUM = -1,
+  INVALID_ENUM = -1,
 
-    /**
-    * @brief RegisterAppInterface.
+  /**
+  * @brief RegisterAppInterface.
+  */
+  kRegisterAppInterfaceID,
+
+  /**
+    * @brief UnregisterAppInterface.
     */
-    kRegisterAppInterfaceID,
+  kUnregisterAppInterfaceID,
 
-    /**
-      * @brief UnregisterAppInterface.
-      */
-    kUnregisterAppInterfaceID,
-
-    /**
-      * @brief SetGlobalProperties.
-      */
-    kSetGlobalPropertiesID,
-  };
+  /**
+    * @brief SetGlobalProperties.
+    */
+  kSetGlobalPropertiesID,
+};
 }
 
 namespace messageType {
+/**
+  * @brief Enumeration messageType.
+  *
+  * Enumeration linking message types with function types in WiPro protocol.
+  * Assumes enumeration starts at value 0.
+  */
+enum eType {
   /**
-    * @brief Enumeration messageType.
-    *
-    * Enumeration linking message types with function types in WiPro protocol.
-    * Assumes enumeration starts at value 0.
+    * @brief INVALID_ENUM.
     */
-  enum eType {
-    /**
-      * @brief INVALID_ENUM.
-      */
-    INVALID_ENUM = -1,
+  INVALID_ENUM = -1,
 
-    /**
-      * @brief request.
-      */
-    kRequest = 0,
+  /**
+    * @brief request.
+    */
+  kRequest = 0,
 
-    /**
-      * @brief response.
-      */
-    kResponse = 1,
+  /**
+    * @brief response.
+    */
+  kResponse = 1,
 
-    /**
-      * @brief notification.
-      */
-    kNotification = 2
-  };
+  /**
+    * @brief notification.
+    */
+  kNotification = 2
+};
 }
   
-  class CMetaFormatterTestHelper :public ::testing::Test {
-   protected:
+class CMetaFormatterTestHelper :public ::testing::Test {
+  protected:
 
-    virtual void SetUp();
+  virtual void SetUp();
 
-    virtual void TearDown();
+  virtual void TearDown();
 
-    void AnyObjectToJsonString(
-       const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
-       std::string& result_string);
+  void AnyObjectToJsonString(
+      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
+      std::string& result_string);
 
-    // for messageType::request, FunctionID::RegisterAppInterfaceID
-    void FillObjectIdenticalToSchema(
+  // for messageType::request, FunctionID::RegisterAppInterfaceID
+  void FillObjectIdenticalToSchema(
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+
+  // for messageType::request, FunctionID::RegisterAppInterfaceID
+  void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
       NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
-    // for messageType::request, FunctionID::RegisterAppInterfaceID
-    void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+  void CompareObjects(
+      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
+      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second);
 
-    void CompareObjects(
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second);
-
-    // for messageType::request, FunctionID::RegisterAppInterfaceID
-    void FillObjectWithDefaultValues(
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
-
-    void FillObjectWithoutSomeMandatoryFields(
+  // for messageType::request, FunctionID::RegisterAppInterfaceID
+  void FillObjectWithDefaultValues(
       NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
-    // members
-    generated_ns::test_JSONHandler_alrpcv2 factory_;
-    std::set<FunctionID::eType> function_id_items_;
-    std::set<messageType::eType> message_type_items_;
+  void FillObjectWithoutSomeMandatoryFields(
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
-    static const bool kIsPrintOut = false;    
-  };
+  // members
+  generated_ns::test_JSONHandler_alrpcv2 factory_;
+  std::set<FunctionID::eType> function_id_items_;
+  std::set<messageType::eType> message_type_items_;
+
+  static const bool kIsPrintOut = false;
+};
 
 }
 }

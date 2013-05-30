@@ -34,20 +34,25 @@
 
 #include "SmartObjects/TNumberSchemaItem.hpp"
 
+namespace smartobejct_ns = NsSmartDeviceLink::NsSmartObjects;
+
 template <>
-NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::getSmartType(void)
-{
-    return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
+smartobejct_ns::SmartType smartobejct_ns::TNumberSchemaItem<int>
+    ::getSmartType(void) {
+      
+  return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
 }
 
 template <>
-NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<long>::getSmartType(void)
-{
-    return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
+smartobejct_ns::SmartType smartobejct_ns::TNumberSchemaItem<long>
+    ::getSmartType(void) {
+
+  return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
 }
 
 template <>
-NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<double>::getSmartType(void)
-{
-    return NsSmartDeviceLink::NsSmartObjects::SmartType_Double;
+smartobejct_ns::SmartType smartobejct_ns::TNumberSchemaItem<double>
+    ::getSmartType(void) {
+
+  return NsSmartDeviceLink::NsSmartObjects::SmartType_Double;
 }
