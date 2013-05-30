@@ -31,30 +31,65 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_audio_pass_thru_command.h"
+#include "application_manager/commands/put_file_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
-#include "v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+#include "utils/file_system.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
-OnAudioPassThruCommand::OnAudioPassThruCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+PutFileCommand::PutFileCommand(
+    const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
-OnAudioPassThruCommand::~OnAudioPassThruCommand() {
+PutFileCommand::~PutFileCommand() {
 }
 
-void OnAudioPassThruCommand::Run() {
-  LOG4CXX_INFO(logger_, "OnAudioPassThruCommand::Run ");
-  SendResponse();
+void PutFileCommand::Run() {
+  ApplicationImpl* application =
+      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params][strings::connection_key]));
+
+  if (!application) {
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  uint64_t free_space = file_system::AvailableSpace();
+
+  const std::string& sync_file_name =
+      (*message_)[strings::msg_params][strings::sync_file_name];
+
+  bool is_persistent_file = false;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::persistent_file)) {
+    is_persistent_file =
+        (*message_)[strings::msg_params][strings::persistent_file];
+  }
+
+  const std::vector<unsigned char> file_data = message_->asBinary();
+
+  if (free_space > file_data.size()) {
+    std::string relative_file_path =
+        file_system::CreateDirectory(application->name());
+    relative_file_path += "/";
+    relative_file_path += sync_file_name;
+
+    if (file_system::Write(file_system::FullPath(relative_file_path),
+                           file_data)) {
+      application->AddFile(sync_file_name, is_persistent_file);
+
+      SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+    } else {
+      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+    }
+  } else {
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+  }
 }
 
 }  // namespace commands

@@ -31,29 +31,26 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_audio_pass_thru_command.h"
+#include "application_manager/commands/put_file_response_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
-OnAudioPassThruCommand::OnAudioPassThruCommand(
+PutFileResponseCommand::PutFileResponseCommand(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-OnAudioPassThruCommand::~OnAudioPassThruCommand() {
+PutFileResponseCommand::~PutFileResponseCommand() {
 }
 
-void OnAudioPassThruCommand::Run() {
-  LOG4CXX_INFO(logger_, "OnAudioPassThruCommand::Run ");
+void PutFileResponseCommand::Run() {
+  (*message_)[strings::msg_params][strings::space_available] =
+      static_cast<int>(file_system::AvailableSpace());
   SendResponse();
 }
 

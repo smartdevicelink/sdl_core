@@ -31,32 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_audio_pass_thru_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
-#include "v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PUT_FILE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PUT_FILE_COMMAND_H_
+
+#include "application_manager/commands/command_request_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+/**
+ * @brief PutFileCommand command class
+ **/
+class PutFileCommand : public CommandRequestImpl {
+ public:
+  /**
+   * @brief PutFileCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit PutFileCommand(const MessageSharedPtr& message);
 
-OnAudioPassThruCommand::OnAudioPassThruCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
-}
+  /**
+   * @brief PutFileCommand class destructor
+   **/
+  virtual ~PutFileCommand();
 
-OnAudioPassThruCommand::~OnAudioPassThruCommand() {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-void OnAudioPassThruCommand::Run() {
-  LOG4CXX_INFO(logger_, "OnAudioPassThruCommand::Run ");
-  SendResponse();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(PutFileCommand);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PUT_FILE_COMMAND_H_

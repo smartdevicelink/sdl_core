@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief OnAudioPassThruCommand class used to send (notification) binary data written from
+ * @brief OnAudioPassThruCommand class used to send notification with binary data written from
  * microphone to mobile device while PerformAudioPassThru is active.
  **/
 class OnAudioPassThruCommand : public CommandResponseImpl {
