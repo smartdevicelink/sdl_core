@@ -50,11 +50,11 @@
 
 namespace test { namespace components { namespace JSONHandler { namespace formatters {
 
-namespace FunctionID {
+namespace function_id {
 /**
   * @brief Enumeration FunctionID.
   */
-enum eType {
+enum Type {
   /**
     * @brief INVALID_ENUM.
     */
@@ -63,25 +63,25 @@ enum eType {
   /**
     * @brief RegisterAppInterface.
     */
-  RegisterAppInterface,
+  kRegisterAppInterface,
 
   /**
     * @brief UnregisterAppInterface.
     */
-  UnregisterAppInterface,
+  kUnregisterAppInterface,
 
   /**
     * @brief SetGlobalProperties.
     */
-  SetGlobalProperties,
+  kSetGlobalProperties,
 };
 } //namespace FunctionID
 
-namespace messageType {
+namespace message_type {
 /**
   * @brief Enumeration messageType.
   */
-enum eType {
+enum Type {
   /**
     * @brief INVALID_ENUM.
     */
@@ -90,17 +90,17 @@ enum eType {
   /**
     * @brief request.
     */
-  request,
+  kRequest,
 
   /**
     * @brief response.
     */
-  response,
+  kResponse,
 
   /**
     * @brief notification.
     */
-  notification
+  kNotification
 };
 } //namespace messageType
 
@@ -257,8 +257,8 @@ TEST_F(CFormatterTestHelper, test_SDLRPCv2_MetaFormatToString_Empty) {
   so::CSmartObject function_object(so::SmartType_Map);
 
   function_object[S_PARAMS][S_FUNCTION_ID] =
-      FunctionID::UnregisterAppInterface;
-  function_object[S_PARAMS][S_MESSAGE_TYPE] = messageType::request;
+      function_id::kUnregisterAppInterface;
+  function_object[S_PARAMS][S_MESSAGE_TYPE] = message_type::kRequest;
   function_object[S_MSG_PARAMS]["Some data"] = "Some data";
 
   error_code = FormatterV2::MetaFormatToString(function_object,
@@ -327,15 +327,15 @@ TEST_F(CFormatterTestHelper, test_SDLRPCv2_MetaFormatToString_Valid) {
 
   so::CSmartObject empty_object;
 
-  std::set<FunctionID::eType> function_id_items;
-  function_id_items.insert(FunctionID::RegisterAppInterface);
-  function_id_items.insert(FunctionID::UnregisterAppInterface);
-  function_id_items.insert(FunctionID::SetGlobalProperties);
+  std::set<function_id::Type> function_id_items;
+  function_id_items.insert(function_id::kRegisterAppInterface);
+  function_id_items.insert(function_id::kUnregisterAppInterface);
+  function_id_items.insert(function_id::kSetGlobalProperties);
 
-  std::set<messageType::eType> message_type_items;
-  message_type_items.insert(messageType::request);
-  message_type_items.insert(messageType::response);
-  message_type_items.insert(messageType::notification);
+  std::set<message_type::Type> message_type_items;
+  message_type_items.insert(message_type::kRequest);
+  message_type_items.insert(message_type::kResponse);
+  message_type_items.insert(message_type::kNotification);
 
   std::map<std::string, so::CObjectSchemaItem::SMember>
       test_struct_members;
@@ -435,28 +435,28 @@ TEST_F(CFormatterTestHelper, test_SDLRPCv2_MetaFormatToString_Valid) {
 
   schema_members["mandatory_auto_default_enum"] =
       so::CObjectSchemaItem::SMember(
-          so::TEnumSchemaItem<messageType::eType>::create(
+          so::TEnumSchemaItem<message_type::Type>::create(
               message_type_items),
           true);
 
   schema_members["mandatory_manual_default_enum"] =
       so::CObjectSchemaItem::SMember(
-          so::TEnumSchemaItem<messageType::eType>::create(
+          so::TEnumSchemaItem<message_type::Type>::create(
               message_type_items,
-              messageType::request),
+              message_type::kRequest),
           true);
 
   schema_members["non_mandatory_auto_default_enum"] =
       so::CObjectSchemaItem::SMember(
-          so::TEnumSchemaItem<messageType::eType>::create(
+          so::TEnumSchemaItem<message_type::Type>::create(
               message_type_items),
           false);
 
   schema_members["non_mandatory_manual_default_enum"] =
       so::CObjectSchemaItem::SMember(
-          so::TEnumSchemaItem<messageType::eType>::create(
+          so::TEnumSchemaItem<message_type::Type>::create(
               message_type_items,
-              messageType::request),
+              message_type::kRequest),
           false);
 
   schema_members["non_mandatory_struct"] =
@@ -496,11 +496,11 @@ TEST_F(CFormatterTestHelper, test_SDLRPCv2_MetaFormatToString_Valid) {
 
   function_params_members[S_FUNCTION_ID] =
       so::CObjectSchemaItem::SMember(
-          so::TEnumSchemaItem<FunctionID::eType>::create(function_id_items),
+          so::TEnumSchemaItem<function_id::Type>::create(function_id_items),
           true);
   function_params_members[S_MESSAGE_TYPE] =
       so::CObjectSchemaItem::SMember(
-          so::TEnumSchemaItem<messageType::eType>::create(
+          so::TEnumSchemaItem<message_type::Type>::create(
               message_type_items), true);
   function_params_members[S_CORRELATION_ID] =
       so::CObjectSchemaItem::SMember(
@@ -565,9 +565,9 @@ TEST_F(CFormatterTestHelper, test_SDLRPCv2_MetaFormatToString_Valid) {
 
   so::CSmartObject function_object(so::SmartType_Map);
 
-  function_object[S_PARAMS][S_MESSAGE_TYPE] = messageType::response;
+  function_object[S_PARAMS][S_MESSAGE_TYPE] = message_type::kResponse;
   function_object[S_PARAMS][S_FUNCTION_ID] =
-      FunctionID::RegisterAppInterface;
+      function_id::kRegisterAppInterface;
   function_object[S_PARAMS][S_PROTOCOL_VERSION] = 13;
 
   error_code = FormatterV2::MetaFormatToString(function_object,
@@ -673,21 +673,21 @@ TEST_F(CFormatterTestHelper, test_SDLRPCv2_MetaFormatToString_Valid) {
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-namespace func_id = test::components::JSONHandler::formatters::FunctionID;
+namespace func_id = test::components::JSONHandler::formatters::function_id;
 
 template <>
-const std::map<func_id::eType, std::string> &
-TEnumSchemaItem<func_id::eType>::getEnumElementsStringRepresentation() {
+const std::map<func_id::Type, std::string> &
+TEnumSchemaItem<func_id::Type>::getEnumElementsStringRepresentation() {
   static bool is_initialized = false;
-  static std::map<func_id::eType, std::string> enum_string_representation;
+  static std::map<func_id::Type, std::string> enum_string_representation;
 
   if (!is_initialized) {
     enum_string_representation.insert(std::make_pair(
-        func_id::RegisterAppInterface, "RegisterAppInterface"));
+        func_id::kRegisterAppInterface, "RegisterAppInterface"));
     enum_string_representation.insert(std::make_pair(
-        func_id::UnregisterAppInterface, "UnregisterAppInterface"));
+        func_id::kUnregisterAppInterface, "UnregisterAppInterface"));
     enum_string_representation.insert(std::make_pair(
-        func_id::SetGlobalProperties, "SetGlobalProperties"));
+        func_id::kSetGlobalProperties, "SetGlobalProperties"));
 
     is_initialized = true;
   }
@@ -695,21 +695,21 @@ TEnumSchemaItem<func_id::eType>::getEnumElementsStringRepresentation() {
   return enum_string_representation;
 }
 
-namespace msg_type = test::components::JSONHandler::formatters::messageType; 
+namespace msg_type = test::components::JSONHandler::formatters::message_type;
 
 template <>
-const std::map<msg_type::eType, std::string> &
-TEnumSchemaItem<msg_type::eType>::getEnumElementsStringRepresentation() {
+const std::map<msg_type::Type, std::string> &
+TEnumSchemaItem<msg_type::Type>::getEnumElementsStringRepresentation() {
   static bool is_initialized = false;
-  static std::map<msg_type::eType, std::string> enum_string_representation;
+  static std::map<msg_type::Type, std::string> enum_string_representation;
 
   if (!is_initialized) {
     enum_string_representation.insert(std::make_pair(
-      msg_type::request, "request"));
+        msg_type::kRequest, "request"));
     enum_string_representation.insert(std::make_pair(
-      msg_type::response, "response"));
+        msg_type::kResponse, "response"));
     enum_string_representation.insert(std::make_pair(
-      msg_type::notification, "notification"));
+        msg_type::kNotification, "notification"));
 
     is_initialized = true;
   }
