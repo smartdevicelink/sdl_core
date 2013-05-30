@@ -90,6 +90,23 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
          * @param out Output SmartObject
          * @param functionId The corresponding field in SmartObject is filled with this param.
          * @param messageType The corresponding field in SmartObject is filled with this param.
+         * @return true if success, otherwise - false
+         */
+        template<typename FunctionId, typename MessageType>
+        static bool fromString(const std::string &str,
+                NsSmartDeviceLink::NsSmartObjects::CSmartObject &out,
+                FunctionId functionId,
+                MessageType messageType);
+
+        /**
+         * @brief Creates a SmartObject from a JSON string.
+         *
+         * Version with CorrelationID.
+         *
+         * @param str Input JSON string in SDLRPCv2 format
+         * @param out Output SmartObject
+         * @param functionId The corresponding field in SmartObject is filled with this param.
+         * @param messageType The corresponding field in SmartObject is filled with this param.
          * @param correlatioId It's like sequence number. The corresponding field in SmartObject
          *  is filled with this param.
          * @return true if success, otherwise - false
@@ -115,36 +132,52 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
                 std::string& outStr);
     };
 
-} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+template<typename FunctionId, typename MessageType>
+inline bool CFormatterJsonSDLRPCv2::fromString(
+        const std::string& str,
+        NsSmartDeviceLink::NsSmartObjects::CSmartObject& out,
+        FunctionId functionId,
+        MessageType messageType) {
 
+  Json::Value root;
+  Json::Reader reader;
+
+  namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
+
+  bool parsingSuccessful = reader.parse(str, root);
+
+  if (true == parsingSuccessful) {
+    out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
+    out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
+    out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
+    out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 2;
+
+    jsonValueToObj(root,
+        out[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]);
+  }
+
+  return parsingSuccessful;
+}
 
 template<typename FunctionId, typename MessageType>
-inline bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::fromString(
+inline bool CFormatterJsonSDLRPCv2::fromString(
         const std::string& str,
         NsSmartDeviceLink::NsSmartObjects::CSmartObject& out,
         FunctionId functionId,
         MessageType messageType,
-        int correlationId)
-{
-    Json::Value root;
-    Json::Reader reader;
+        int correlationId) {
 
-    namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
+  bool result = fromString(str, out, functionId, messageType);
 
-    out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
-    out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
+  namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
+
+  if (true == result) {
     out[S::S_PARAMS][S::S_CORRELATION_ID] = correlationId;
-    out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
-    out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 2;
+  }
 
-    bool parsingSuccessful = reader.parse(str, root);
-
-    if (true == parsingSuccessful)
-    {
-        jsonValueToObj(root, out[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]);
-    }
-
-    return parsingSuccessful;
+  return result;
 }
+
+} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 #endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__

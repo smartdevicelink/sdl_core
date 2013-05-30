@@ -37,7 +37,7 @@
 
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace SmartObjects = NsSmartDeviceLink::NsSmartObjects;
-namespace Strings = NsSmartDeviceLink::NsJSONHandler::strings;
+namespace str = NsSmartDeviceLink::NsJSONHandler::strings;
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 
@@ -61,7 +61,7 @@ const int Formatters::CFormatterJsonSDLRPCv1::kCorrelationIdNotFound = 1 << 3;
 const std::string Formatters::CFormatterJsonSDLRPCv1::getMessageType(
         const SmartObjects::CSmartObject& obj)
 {
-    return obj.getElement(Strings::S_PARAMS).getElement(Strings::S_MESSAGE_TYPE);
+    return obj.getElement(str::S_PARAMS).getElement(str::S_MESSAGE_TYPE);
 }
 
 // ----------------------------------------------------------------------------
@@ -101,17 +101,19 @@ bool Formatters::CFormatterJsonSDLRPCv1::toString(
     SmartObjects::CSmartObject formattedObj(obj);
     formattedObj.getSchema().unapplySchema(formattedObj);       // converts enums(as int) to strings
 
-    objToJsonValue(formattedObj.getElement(Strings::S_MSG_PARAMS), params);
+    objToJsonValue(formattedObj.getElement(str::S_MSG_PARAMS), params);
 
     std::string type = getMessageType(formattedObj);
     root[type] = Json::Value(Json::objectValue);
     root[type][S_PARAMETERS] = params;
 
-    root[type][S_CORRELATION_ID] = static_cast<int>(
-            formattedObj.getElement(Strings::S_PARAMS).getElement(Strings::S_CORRELATION_ID));
+    if (formattedObj[str::S_PARAMS].keyExists(str::S_CORRELATION_ID)) {
+      root[type][S_CORRELATION_ID] =
+          formattedObj[str::S_PARAMS][str::S_CORRELATION_ID].asInt();
+    }
 
-    root[type][S_NAME] = static_cast<std::string>(
-            formattedObj.getElement(Strings::S_PARAMS).getElement(Strings::S_FUNCTION_ID));
+    root[type][S_NAME] =
+        formattedObj[str::S_PARAMS][str::S_FUNCTION_ID].asString();
 
     outStr = root.toStyledString();
 
