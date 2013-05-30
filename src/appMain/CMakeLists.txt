@@ -14,12 +14,16 @@ set(LIBRARIES
   pthread
   rt
   ConfigProfile
+  MobileMessageHandler
+  ApplicationManager
 )
 
 include_directories (
   ./
   ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/
+  ../components/mobile_message_handler/include
+  ../components/application_manager/include
   ../components/JSONHandler/include
   ../components/AppMgr/include
   ../components/TransportManager/include

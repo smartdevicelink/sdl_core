@@ -38,16 +38,16 @@ namespace components  {
 namespace utils  {
   TEST(FileSystemTest, CommonFileSystemTest)  {
     // Directory creation
-    ASSERT_FALSE(file_system::directory_exists("./Test directory"));
+    ASSERT_FALSE(file_system::DirectoryExists("./Test directory"));
 
-    file_system::create_directory("./Test directory");
+    file_system::CreateDirectory("./Test directory");
 
-    ASSERT_TRUE(file_system::directory_exists("./Test directory"));
+    ASSERT_TRUE(file_system::DirectoryExists("./Test directory"));
 
-    ASSERT_TRUE(file_system::is_directory("./Test directory"));
+    ASSERT_TRUE(file_system::IsDirectory("./Test directory"));
 
     // File creation
-    ASSERT_FALSE(file_system::file_exists("./Test directory/test file"));
+    ASSERT_FALSE(file_system::FileExists("./Test directory/test file"));
 
     std::vector<unsigned char> data;
     data.push_back('t');
@@ -55,54 +55,54 @@ namespace utils  {
     data.push_back('s');
     data.push_back('t');
 
-    ASSERT_TRUE(file_system::write("./Test directory/test file", data));
+    ASSERT_TRUE(file_system::Write("./Test directory/test file", data));
 
-    ASSERT_TRUE(file_system::file_exists("./Test directory/test file"));
+    ASSERT_TRUE(file_system::FileExists("./Test directory/test file"));
 
-    ASSERT_FALSE(file_system::is_directory("./Test directory/test file"));
+    ASSERT_FALSE(file_system::IsDirectory("./Test directory/test file"));
 
     // Read data from file
     std::vector<unsigned char> result;
 
-    ASSERT_TRUE(file_system::read_binary_file("./Test directory/test file",
+    ASSERT_TRUE(file_system::ReadBinaryFile("./Test directory/test file",
                                               result));
     ASSERT_FALSE(result.empty());
 
     // list files
-    ASSERT_TRUE(file_system::write("./Test directory/test file 2", data));
+    ASSERT_TRUE(file_system::Write("./Test directory/test file 2", data));
 
     std::vector<std::string> list;
-    list = file_system::list_files("./Test directory");
+    list = file_system::ListFiles("./Test directory");
 
     ASSERT_FALSE(list.empty());
     ASSERT_EQ("test file 2", list[0]);
     ASSERT_EQ("test file", list[1]);
 
     // Delete file
-    ASSERT_TRUE(file_system::file_exists("./Test directory/test file 2"));
-    ASSERT_TRUE(file_system::delete_file("./Test directory/test file 2"));
-    ASSERT_FALSE(file_system::file_exists("./Test directory/test file 2"));
+    ASSERT_TRUE(file_system::FileExists("./Test directory/test file 2"));
+    ASSERT_TRUE(file_system::DeleteFile("./Test directory/test file 2"));
+    ASSERT_FALSE(file_system::FileExists("./Test directory/test file 2"));
 
     // Delete empty directory
-    file_system::create_directory("./Test directory/Empty directory");
+    file_system::CreateDirectory("./Test directory/Empty directory");
 
-    ASSERT_TRUE(file_system::directory_exists(
+    ASSERT_TRUE(file_system::DirectoryExists(
         "./Test directory/Empty directory"));
-    ASSERT_TRUE(file_system::remove_directory(
+    ASSERT_TRUE(file_system::RemoveDirectory(
         "./Test directory/Empty directory", false));
-    ASSERT_FALSE(file_system::directory_exists(
+    ASSERT_FALSE(file_system::DirectoryExists(
         "./Test directory/Empty directory"));
 
-    ASSERT_FALSE(file_system::remove_directory("./Test directory", false));
-    ASSERT_TRUE(file_system::directory_exists("./Test directory"));
+    ASSERT_FALSE(file_system::RemoveDirectory("./Test directory", false));
+    ASSERT_TRUE(file_system::DirectoryExists("./Test directory"));
 
     // Delete directory recursively
-    file_system::create_directory("./Test directory/Test directory 2");
-    ASSERT_TRUE(file_system::write(
+    file_system::CreateDirectory("./Test directory/Test directory 2");
+    ASSERT_TRUE(file_system::Write(
         "./Test directory/Test directory 2/test file 2", data));
-    ASSERT_TRUE(file_system::remove_directory("./Test directory", true));
+    ASSERT_TRUE(file_system::RemoveDirectory("./Test directory", true));
 
-    ASSERT_FALSE(file_system::directory_exists("./Test directory"));
+    ASSERT_FALSE(file_system::DirectoryExists("./Test directory"));
   }
 }  // namespace utils
 }  // namespace components

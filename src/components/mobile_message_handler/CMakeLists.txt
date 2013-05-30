@@ -8,6 +8,7 @@ include_directories (
 set (SOURCES
 ./src/mobile_message_handler_impl.cc
 ./src/messages_from_mobile_app_handler.cc
+./src/message_to_mobile_app_handler.cc
 )
 
 

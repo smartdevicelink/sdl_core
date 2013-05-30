@@ -34,6 +34,9 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
 
 #include <assert.h>
+#include <stddef.h>
+
+#include "utils/macro.h"
 
 namespace utils {
 /**
@@ -146,6 +149,11 @@ class SharedPtr {
   void reset();
   void reset(ObjectType * other);
 
+  /**
+   * @return true if mObject not NULL
+   */
+  bool valid() const;
+
  private:
   // TSharedPtr needs access to other TSharedPtr private members
   // for shared pointers type casts.
@@ -173,8 +181,10 @@ class SharedPtr {
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType * Object)
-    : mObject(Object),
+    : mObject(NULL),
       mReferenceCounter(new unsigned int(1)) {
+  DCHECK(Object);
+  mObject = Object;
 }
 
 template<typename ObjectType>
@@ -252,6 +262,7 @@ utils::SharedPtr<ObjectType>::reset() {
 
 template<typename ObjectType> void
 utils::SharedPtr<ObjectType>::reset(ObjectType * other) {
+  DCHECK(other);
   dropReference();
   mObject = other;
   mReferenceCounter = new unsigned int(1);
@@ -268,6 +279,11 @@ inline void SharedPtr<ObjectType>::dropReference(void) {
       mReferenceCounter = 0;
     }
   }
+}
+
+template<typename ObjectType>
+inline bool SharedPtr<ObjectType>::valid() const {
+  return (mObject != NULL);
 }
 
 }  // namespace utils

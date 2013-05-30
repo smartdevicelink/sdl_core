@@ -34,14 +34,18 @@
 #define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MOBILE_MESSAGE_HANDLER_H_
 
 #include "application_manager/message.h"
+#include "mobile_message_handler/mobile_message_observer.h"
+
+// TODO(AK): Can we move application_manager::Message to utils folder or any other?
+typedef utils::SharedPtr<application_manager::Message> MobileMessage;
 
 namespace mobile_message_handler {
 class MobileMessageHandler {
  public:
-  // TODO(akandul): replace with smart pointer
-  virtual bool sendMessageToMobileApp(
-      const application_manager::Message* message) = 0;
-  virtual ~MobileMessageHandler() = 0;
+  virtual void SendMessageToMobileApp(const MobileMessage& message) = 0;
+  virtual void AddMobileMessageListener(MobileMessageObserver* listener) = 0;
+  virtual void RemoveMobileMessageListener(MobileMessageObserver* listener) = 0;
+  virtual ~MobileMessageHandler() {}
 };
 }  // namespace mobile_message_handler
 

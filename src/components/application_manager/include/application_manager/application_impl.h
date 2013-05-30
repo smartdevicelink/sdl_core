@@ -188,10 +188,6 @@ class ApplicationImpl : public Application {
     void add_choice_set(unsigned int choice_set_id,
                         const smart_objects::CSmartObject& choice_set);
 
-  /*
-   * @brief Deletes menu from the application menu
-   */
-  void RemoveSubMenu(unsigned int menu_id);
     /*
      * @brief Deletes choice set from the application
      *

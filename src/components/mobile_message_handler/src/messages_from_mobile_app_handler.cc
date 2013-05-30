@@ -32,18 +32,27 @@
 
 #include "mobile_message_handler/messages_from_mobile_app_handler.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
+
 #include "application_manager/message.h"
 
 namespace mobile_message_handler {
 
+log4cxx::LoggerPtr MessagesFromMobileAppHandler::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("MessagesFromMobileAppHandler"));
+
+//! ---------------------------------------------------------------------------
+
 MessagesFromMobileAppHandler::MessagesFromMobileAppHandler() {
+  LOG4CXX_INFO(logger_, "MessagesFromMobileAppHandler ctor");
 }
 
 MessagesFromMobileAppHandler::~MessagesFromMobileAppHandler() {
+  LOG4CXX_INFO(logger_, "MessagesFromMobileAppHandler dtor");
 }
 
 void MessagesFromMobileAppHandler::threadMain() {
-  MobileMessageHandlerImpl* handler = MobileMessageHandlerImpl::getInstance();
+  LOG4CXX_INFO(logger_, "MessagesFromMobileAppHandler threadMain()");
+  MobileMessageHandlerImpl* handler = MobileMessageHandlerImpl::instance();
 
   while (1) {
     while (!handler->messages_from_mobile_app_.empty()) {
@@ -53,21 +62,27 @@ void MessagesFromMobileAppHandler::threadMain() {
       application_manager::Message* outgoing_message =
           new application_manager::Message;
       if (message->protocol_version() == 1) {
-        outgoing_message = handler->handleIncomingMessageProtocolV1(message);
+        outgoing_message = handler->HandleIncomingMessageProtocolV1(message);
       } else if (message->protocol_version() == 2) {
-        outgoing_message = handler->handleIncomingMessageProtocolV2(message);
+        outgoing_message = handler->HandleIncomingMessageProtocolV2(message);
       } else {
+        LOG4CXX_WARN(logger_, "Unknown protocol version.");
         continue;
       }
 
       if (!outgoing_message) {
+        LOG4CXX_WARN(logger_, "Incorrect message received");
         continue;
       }
 
-      // TODO(akandul): send message to application manager here.
-      // handler->mMessagesObserver->onMessageReceivedCallback(outgoing_message);
+      LOG4CXX_INFO(logger_, "Sending message to listeners.");
+      std::vector<MobileMessageObserver*>::const_iterator i = handler
+          ->mobile_message_listeners_.begin();
+      for (; i != handler->mobile_message_listeners_.end(); ++i) {
+        (*i)->OnMobileMessageReceived(outgoing_message);
+      }
     }
     handler->messages_from_mobile_app_.wait();
   }
 }
-}  // // namespace mobile_message_handler
+}  // namespace mobile_message_handler

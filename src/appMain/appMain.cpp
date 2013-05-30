@@ -50,6 +50,8 @@
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "utils/macro.h"
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppMgrCore.h"
@@ -140,15 +142,18 @@ int main(int argc, char** argv)
     NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager = NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
     CTransportManagerListener tsl(transportManager);
 
-    JSONHandler jsonHandler;
+    //JSONHandler jsonHandler;
+    mobile_message_handler::MobileMessageHandlerImpl* mmh = mobile_message_handler::MobileMessageHandlerImpl::instance();
+    DCHECK(mmh);
 
     protocol_handler::ProtocolHandlerImpl* pProtocolHandler = new protocol_handler::ProtocolHandlerImpl(transportManager);
 
-    pProtocolHandler -> set_protocol_observer( &jsonHandler );
+    pProtocolHandler -> set_protocol_observer(mmh /*&jsonHandler*/ );
 
     transportManager -> addDataListener( pProtocolHandler );
+    mmh->setProtocolHandler(pProtocolHandler);
 
-    jsonHandler.setProtocolHandler(pProtocolHandler);
+    //jsonHandler.setProtocolHandler(pProtocolHandler);
 
     connection_handler::ConnectionHandlerImpl * connectionHandler = connection_handler::ConnectionHandlerImpl::getInstance();
 
@@ -160,11 +165,11 @@ int main(int argc, char** argv)
 
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 
-    jsonHandler.setRPCMessagesObserver(&appMgr);
+    //jsonHandler.setRPCMessagesObserver(&appMgr);
 
     connectionHandler -> set_connection_handler_observer(&appMgr);
 
-    appMgr.setJsonHandler(&jsonHandler);
+    //appMgr.setJsonHandler(&jsonHandler);
 
     NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
     if (!pMessageBroker)

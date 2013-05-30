@@ -30,25 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGES_FROM_MOBILE_APP_HANDLER_H_
-#define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGES_FROM_MOBILE_APP_HANDLER_H_
+#ifndef SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGE_TO_MOBILE_APP_HANDLER_H_
+#define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGE_TO_MOBILE_APP_HANDLER_H_
 
 #include "utils/macro.h"
-#include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
 
 namespace mobile_message_handler {
-class MessagesFromMobileAppHandler : public threads::ThreadDelegate {
+class MessagesToMobileAppHandler : public threads::ThreadDelegate {
  public:
-  MessagesFromMobileAppHandler();
-  ~MessagesFromMobileAppHandler();
+  MessagesToMobileAppHandler();
+  ~MessagesToMobileAppHandler();
 
   void threadMain();
 
  private:
-  static log4cxx::LoggerPtr logger_;
-  DISALLOW_COPY_AND_ASSIGN(MessagesFromMobileAppHandler);
+  DISALLOW_COPY_AND_ASSIGN(MessagesToMobileAppHandler);
 };
 }  // namespace mobile_message_handler
 
-#endif  // SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGES_FROM_MOBILE_APP_HANDLER_H_
+#endif  // SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGE_TO_MOBILE_APP_HANDLER_H_

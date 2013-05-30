@@ -60,8 +60,8 @@ void CommandResponseImpl::Run() {
 
 void CommandResponseImpl::SendResponse() {
   Message message = SmartObjectToMessage(&(*message_));
-  mobile_message_handler::MobileMessageHandlerImpl::getInstance()->
-      sendMessageToMobileApp(&message);
+  mobile_message_handler::MobileMessageHandlerImpl::instance()->
+      SendMessageToMobileApp(&message);
 }
 
 }  // namespace commands

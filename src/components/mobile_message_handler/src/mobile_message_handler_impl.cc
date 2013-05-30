@@ -31,6 +31,8 @@
  */
 
 #include <stddef.h>
+#include <string.h>
+#include <algorithm>
 
 #include "utils/macro.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
@@ -45,28 +47,44 @@ const unsigned char kUnknown = 0xF;
 namespace mobile_message_handler {
 
 MobileMessageHandlerImpl* MobileMessageHandlerImpl::self_ = NULL;
+log4cxx::LoggerPtr MobileMessageHandlerImpl::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("MobileMessageHandler"));
 //! ----------------------------------------------------------------------------
 
 MobileMessageHandlerImpl::MobileMessageHandlerImpl()
     : handle_messages_from_mobile_app_(NULL),
+      handle_messages_to_mobile_app_(NULL),
       protocol_handler_(NULL) {
-
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl ctor");
   handle_messages_from_mobile_app_ = new threads::Thread(
       "MobileMessageHandler::MessagesFromMobileAppHandler",
       new MessagesFromMobileAppHandler());
 
   handle_messages_from_mobile_app_->startWithOptions(
       threads::ThreadOptions(threads::Thread::kMinStackSize));
+
+  handle_messages_to_mobile_app_ = new threads::Thread(
+      "MobileMessageHandler::MessagesToMobileAppHandler",
+      new MessagesFromMobileAppHandler());
+
+  handle_messages_to_mobile_app_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 MobileMessageHandlerImpl::~MobileMessageHandlerImpl() {
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl dtor");
   handle_messages_from_mobile_app_->stop();
   delete handle_messages_from_mobile_app_;
   handle_messages_from_mobile_app_ = NULL;
+
+  handle_messages_to_mobile_app_->stop();
+  delete handle_messages_to_mobile_app_;
+  handle_messages_to_mobile_app_ = NULL;
 }
 
-MobileMessageHandlerImpl* MobileMessageHandlerImpl::getInstance() {
-  if (NULL != MobileMessageHandlerImpl::self_) {
+MobileMessageHandlerImpl* MobileMessageHandlerImpl::instance() {
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl instance()");
+  if (NULL == MobileMessageHandlerImpl::self_) {
     MobileMessageHandlerImpl::self_ = new MobileMessageHandlerImpl;
   }
 
@@ -75,31 +93,45 @@ MobileMessageHandlerImpl* MobileMessageHandlerImpl::getInstance() {
 
 void MobileMessageHandlerImpl::setProtocolHandler(
     protocol_handler::ProtocolHandler* protocolHandler) {
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl setProtocolHandler()");
   DCHECK(protocolHandler);
   protocol_handler_ = protocolHandler;
 }
 
 void MobileMessageHandlerImpl::onMessageReceived(
     const protocol_handler::RawMessage* message) {
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl onMessageReceived()");
   DCHECK(message);
+
+  if (!message) {
+    return;
+  }
+
+  messages_from_mobile_app_.push(message);
 }
 
-bool MobileMessageHandlerImpl::sendMessageToMobileApp(
-    const application_manager::Message* message) {
-  DCHECK(message);
+void MobileMessageHandlerImpl::SendMessageToMobileApp(
+    const MobileMessage& message) {
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl SendMessageToMobileApp()");
+  DCHECK(message.valid());
 
-  return true;
+  std::vector<MobileMessageObserver*>::const_iterator i =
+      mobile_message_listeners_.begin();
+  for (; i != mobile_message_listeners_.end(); ++i) {
+    (*i)->OnMobileMessageReceived(message);
+  }
 }
 
 application_manager::Message*
-MobileMessageHandlerImpl::handleIncomingMessageProtocolV1(
+MobileMessageHandlerImpl::HandleIncomingMessageProtocolV1(
     const protocol_handler::RawMessage* message) {
+  LOG4CXX_INFO(logger_,
+               "MobileMessageHandlerImpl HandleIncomingMessageProtocolV1()");
   application_manager::Message* outgoing_message =
       new application_manager::Message;
   if (!message) {
     NOTREACHED();
-
-    // TODO(AK): check memory allocation here.
+    return NULL;
   }
 
   outgoing_message->set_json_message(
@@ -114,14 +146,16 @@ MobileMessageHandlerImpl::handleIncomingMessageProtocolV1(
 }
 
 application_manager::Message*
-MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
+MobileMessageHandlerImpl::HandleIncomingMessageProtocolV2(
     const protocol_handler::RawMessage* message) {
+  LOG4CXX_INFO(logger_,
+                 "MobileMessageHandlerImpl HandleIncomingMessageProtocolV2()");
   application_manager::Message* outgoing_message =
       new application_manager::Message;
   if (!message) {
     NOTREACHED();
-
-    // TODO(AK): check memory allocation here.
+    LOG4CXX_ERROR(logger_, "Allocation failed: outgoing message");
+    return NULL;
   }
 
   unsigned char* receivedData = message->data();
@@ -139,6 +173,9 @@ MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
       break;
     case kNotification:
       rpcType = 2;
+      break;
+    default:
+      NOTREACHED();
       break;
   }
 
@@ -161,18 +198,16 @@ MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
 
   if (jsonSize > message->data_size()) {
     delete outgoing_message;
-    // Received invalid json packet header.
+    LOG4CXX_ERROR(logger_, "Received invalid json packet header.");
     return NULL;
   }
 
   std::string json_string = std::string(
       reinterpret_cast<const char*>(receivedData) + offset, jsonSize);
 
-  if (functionId == 0 || rpcType == application_manager::kUnknownType
-      || correlationId == 0 || message->connection_key() == 0
-      || outgoing_message->json_message().empty()) {
+  if (functionId == 0 || correlationId == 0 || message->connection_key() == 0) {
     delete outgoing_message;
-    // Invaled message constructed.
+    LOG4CXX_ERROR(logger_, "Invalid message constructed.");
     return NULL;
   }
 
@@ -191,6 +226,8 @@ MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
 
     if (!binaryData) {
       delete outgoing_message;
+      LOG4CXX_ERROR(logger_, "Allocation failed: binary data");
+      NOTREACHED();
       return NULL;
     }
 
@@ -198,6 +235,185 @@ MobileMessageHandlerImpl::handleIncomingMessageProtocolV2(
   }
 
   return outgoing_message;
+}
+
+protocol_handler::RawMessage*
+MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV1(
+    const application_manager::Message* message) {
+  LOG4CXX_INFO(logger_,
+                 "MobileMessageHandlerImpl HandleOutgoingMessageProtocolV1()");
+  std::string messageString = message->json_message();
+  if (messageString.length() == 0) {
+    return NULL;
+  }
+
+  unsigned char* rawMessage = new unsigned char[messageString.length() + 1];
+  memcpy(rawMessage, messageString.c_str(), messageString.length() + 1);
+
+  protocol_handler::RawMessage* result = new protocol_handler::RawMessage(
+      message->connection_key(), 1, rawMessage, messageString.length() + 1);
+
+  return result;
+}
+
+protocol_handler::RawMessage*
+MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
+    const application_manager::Message* message) {
+  LOG4CXX_INFO(logger_,
+               "MobileMessageHandlerImpl HandleOutgoingMessageProtocolV2()");
+//  if (json.isNull()) {
+//    if (NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID
+//        == message->getMethodId()) {
+//
+//      // Workaround to have no JSON string in OnAudioPassThru notification
+//      // This notification contains audio data only.
+//      const uint MAX_HEADER_SIZE = 12;
+//      unsigned int jsonSize = 0;
+//      unsigned int binarySize = 0;
+//      if (message->has_binary_data()) {
+//        binarySize = message->binary_data()->size();
+//      }
+//      unsigned char* dataForSending = new unsigned char[MAX_HEADER_SIZE
+//          + jsonSize + binarySize];
+//      unsigned char offset = 0;
+//
+//      unsigned char rpcTypeFlag = RPC_NOTIFICATION;
+//
+//      unsigned int functionId = message->function_id();
+//      dataForSending[offset++] = ((rpcTypeFlag << 4) & 0xF0)
+//          | (functionId >> 24);
+//      dataForSending[offset++] = functionId >> 16;
+//      dataForSending[offset++] = functionId >> 8;
+//      dataForSending[offset++] = functionId;
+//
+//      unsigned int correlationId = message->correlation_id()();
+//      dataForSending[offset++] = correlationId >> 24;
+//      dataForSending[offset++] = correlationId >> 16;
+//      dataForSending[offset++] = correlationId >> 8;
+//      dataForSending[offset++] = correlationId;
+//
+//      dataForSending[offset++] = jsonSize >> 24;
+//      dataForSending[offset++] = jsonSize >> 16;
+//      dataForSending[offset++] = jsonSize >> 8;
+//      dataForSending[offset++] = jsonSize;
+//
+//      if (message->has_binary_data()) {
+//        const std::vector<unsigned char>& binaryData =
+//            *(message->binary_data());
+//        unsigned char* currentPointer = dataForSending + offset + jsonSize;
+//        for (unsigned int i = 0; i < binarySize; ++i) {
+//          currentPointer[i] = binaryData[i];
+//        }
+//      }
+//
+//      protocol_handler::RawMessage* msgToProtocolHandler =
+//          new protocol_handler::RawMessage(
+//              message->connection_key(), 2, dataForSending,
+//              MAX_HEADER_SIZE + jsonSize + binarySize);
+//
+//      return msgToProtocolHandler;
+//    } else {
+//      return 0;
+//    }
+//  }
+
+  if (message->json_message().length() == 0) {
+    LOG4CXX_ERROR(logger_, "json string is empty.")
+    return NULL;
+  }
+
+  const uint MAX_HEADER_SIZE = 12;
+  unsigned int jsonSize = message->json_message().length() + 1;
+  unsigned int binarySize = 0;
+  if (message->has_binary_data()) {
+    binarySize = message->binary_data()->size();
+  }
+
+  unsigned char* dataForSending = new unsigned char[MAX_HEADER_SIZE + jsonSize
+      + binarySize];
+  unsigned char offset = 0;
+
+  unsigned char rpcTypeFlag = 0;
+  switch (message->type()) {
+    case application_manager::kRequest:
+      rpcTypeFlag = kRequest;
+      break;
+    case application_manager::kResponse:
+      rpcTypeFlag = kResponse;
+      break;
+    case application_manager::kNotification:
+      rpcTypeFlag = kNotification;
+      break;
+    default:
+      NOTREACHED();
+      break;
+  }
+
+  unsigned int functionId = message->function_id();
+  dataForSending[offset++] = ((rpcTypeFlag << 4) & 0xF0) | (functionId >> 24);
+  dataForSending[offset++] = functionId >> 16;
+  dataForSending[offset++] = functionId >> 8;
+  dataForSending[offset++] = functionId;
+
+  unsigned int correlationId = message->correlation_id();
+  dataForSending[offset++] = correlationId >> 24;
+  dataForSending[offset++] = correlationId >> 16;
+  dataForSending[offset++] = correlationId >> 8;
+  dataForSending[offset++] = correlationId;
+
+  dataForSending[offset++] = jsonSize >> 24;
+  dataForSending[offset++] = jsonSize >> 16;
+  dataForSending[offset++] = jsonSize >> 8;
+  dataForSending[offset++] = jsonSize;
+
+  memcpy(dataForSending + offset, message->json_message().c_str(), jsonSize);
+
+  if (message->has_binary_data()) {
+    const std::vector<unsigned char>& binaryData = *(message->binary_data());
+    unsigned char* currentPointer = dataForSending + offset + jsonSize;
+    for (unsigned int i = 0; i < binarySize; ++i) {
+      currentPointer[i] = binaryData[i];
+    }
+  }
+
+  protocol_handler::RawMessage* msgToProtocolHandler =
+      new protocol_handler::RawMessage(message->connection_key(), 2,
+                                       dataForSending,
+                                       MAX_HEADER_SIZE + jsonSize + binarySize);
+
+  return msgToProtocolHandler;
+}
+
+void MobileMessageHandlerImpl::AddMobileMessageListener(
+    MobileMessageObserver* listener) {
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl AddMobileMessageListener()");
+  if (NULL == listener) {
+    NOTREACHED();
+    return;
+  }
+
+  std::vector<MobileMessageObserver*>::const_iterator i = std::find(
+      mobile_message_listeners_.begin(), mobile_message_listeners_.end(),
+      listener);
+
+  if (mobile_message_listeners_.end() != i)
+    mobile_message_listeners_.push_back(listener);
+}
+
+void MobileMessageHandlerImpl::RemoveMobileMessageListener(
+    MobileMessageObserver* listener) {
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl RemoveMobileMessageListener()");
+  if (NULL == listener) {
+    NOTREACHED();
+    return;
+  }
+
+  std::vector<MobileMessageObserver*>::iterator i = std::find(
+      mobile_message_listeners_.begin(), mobile_message_listeners_.end(),
+      listener);
+
+  if (mobile_message_listeners_.end() != i)
+    mobile_message_listeners_.erase(i);
 }
 
 }  // namespace mobile_message_handler

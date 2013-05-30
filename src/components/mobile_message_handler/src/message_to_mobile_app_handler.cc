@@ -30,25 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGES_FROM_MOBILE_APP_HANDLER_H_
-#define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGES_FROM_MOBILE_APP_HANDLER_H_
-
-#include "utils/macro.h"
-#include "utils/logger.h"
-#include "utils/threads/thread_delegate.h"
+#include "mobile_message_handler/message_to_mobile_app_handler.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "application_manager/message.h"
 
 namespace mobile_message_handler {
-class MessagesFromMobileAppHandler : public threads::ThreadDelegate {
- public:
-  MessagesFromMobileAppHandler();
-  ~MessagesFromMobileAppHandler();
 
-  void threadMain();
+MessagesToMobileAppHandler::MessagesToMobileAppHandler() {
+}
 
- private:
-  static log4cxx::LoggerPtr logger_;
-  DISALLOW_COPY_AND_ASSIGN(MessagesFromMobileAppHandler);
-};
+MessagesToMobileAppHandler::~MessagesToMobileAppHandler() {
+}
+
+void MessagesToMobileAppHandler::threadMain() {
+  MobileMessageHandlerImpl* handler = MobileMessageHandlerImpl::instance();
+
+  while (1) {
+    while (!handler->messages_to_mobile_app_.empty()) {
+      application_manager::Message* message = handler->messages_to_mobile_app_
+          .pop();
+
+      protocol_handler::RawMessage* rawMessage = 0;
+      if (message->protocol_version() == application_manager::kV1) {
+        rawMessage = handler->HandleOutgoingMessageProtocolV1(message);
+      } else if (message->protocol_version() == application_manager::kV2) {
+        rawMessage = handler->HandleOutgoingMessageProtocolV2(message);
+      } else {
+        continue;
+      }
+
+      if (!handler->protocol_handler_) {
+        return;
+      }
+
+      handler->protocol_handler_->sendMessageToMobileApp(rawMessage);
+      delete message;
+    }
+    handler->messages_to_mobile_app_.wait();
+  }
+}
 }  // namespace mobile_message_handler
-
-#endif  // SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MESSAGES_FROM_MOBILE_APP_HANDLER_H_

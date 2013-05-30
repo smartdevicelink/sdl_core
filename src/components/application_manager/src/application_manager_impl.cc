@@ -166,7 +166,6 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     }
     return chain;
   }
-}
 
 bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
   bool result = false;

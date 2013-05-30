@@ -33,7 +33,10 @@
 #ifndef SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MOBILE_MESSAGE_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_MOBILE_MESSAGE_HANDLER_INCLUDE_MOBILE_MESSAGE_HANDLER_MOBILE_MESSAGE_HANDLER_IMPL_H_
 
+#include <vector>
+
 #include "utils/macro.h"
+#include "utils/logger.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/shared_ptr.h"
@@ -49,33 +52,56 @@ namespace mobile_message_handler {
 class MobileMessageHandlerImpl : public MobileMessageHandler,
     public protocol_handler::ProtocolObserver {
  public:
-  static MobileMessageHandlerImpl* getInstance();
+  static MobileMessageHandlerImpl* instance();
 
   void setProtocolHandler(protocol_handler::ProtocolHandler* protocolHandler);
   void onMessageReceived(const protocol_handler::RawMessage* message);
-  bool sendMessageToMobileApp(const application_manager::Message* message);
+  void SendMessageToMobileApp(const MobileMessage& message);
+
+  void AddMobileMessageListener(MobileMessageObserver* listener);
+  void RemoveMobileMessageListener(MobileMessageObserver* listener);
 
  private:
-  // TODO(akandul): add message listener here.
+  // TODO(AK): add message listener here.
   MobileMessageHandlerImpl();
   ~MobileMessageHandlerImpl();
 
-  application_manager::Message* handleIncomingMessageProtocolV1(
+  //! -------------------------------------------------------------------------
+
+  application_manager::Message* HandleIncomingMessageProtocolV1(
       const protocol_handler::RawMessage* message);
 
-  application_manager::Message* handleIncomingMessageProtocolV2(
+  application_manager::Message* HandleIncomingMessageProtocolV2(
       const protocol_handler::RawMessage* message);
+
+  //! -------------------------------------------------------------------------
+
+  protocol_handler::RawMessage* HandleOutgoingMessageProtocolV1(
+      const application_manager::Message* message);
+
+  protocol_handler::RawMessage* HandleOutgoingMessageProtocolV2(
+      const application_manager::Message* message);
+
+  //! -------------------------------------------------------------------------
 
   protocol_handler::ProtocolHandler* protocol_handler_;
 
   MessageQueue<const protocol_handler::RawMessage*> messages_from_mobile_app_;
   MessageQueue<application_manager::Message*> messages_to_mobile_app_;
 
-  // Thread for handling messages from Mobile side.
+  std::vector<MobileMessageObserver*> mobile_message_listeners_;
+
+  // Thread for handling messages from Mobile.
   threads::Thread* handle_messages_from_mobile_app_;
   friend class MessagesFromMobileAppHandler;
 
+  // Thread for sending messages to Mobile.
+  threads::Thread* handle_messages_to_mobile_app_;
+  friend class MessagesToMobileAppHandler;
+
+
   static MobileMessageHandlerImpl* self_;
+  static log4cxx::LoggerPtr logger_;
 
   DISALLOW_COPY_AND_ASSIGN(MobileMessageHandlerImpl);
 };
