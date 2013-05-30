@@ -155,7 +155,7 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
       message_chaining_[function_id] = ptr;
       return chain;
   } else  {
-      chain->increment_counter();
+      chain->IncrementCounter();
       MessageChains::const_iterator it = message_chaining_.begin();
       for (; it != message_chaining_.end(); ++it) {
         if ((*it->second) == *chain) {
@@ -172,7 +172,7 @@ bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
   MessageChains::iterator it = message_chaining_.find(function_id);
 
   if (message_chaining_.end() != it) {
-    (*it->second).decrement_counter();
+    (*it->second).DecrementCounter();
     if (!(*it->second).counter()) {
       result = true;
     }

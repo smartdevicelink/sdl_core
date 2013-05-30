@@ -75,7 +75,7 @@ void PerformAudioPassThruCommandRequest::Run() {
     return;
   }
 
-  send_speek_request();
+  SendSpeakRequest();
 
   // crate HMI TTS speak request
   smart_objects::CSmartObject* ui_audio = new smart_objects::CSmartObject();
@@ -124,7 +124,7 @@ void PerformAudioPassThruCommandRequest::Run() {
   // TODO(DK): AudioPassThruThreadImpl startWithOptions
 }
 
-void PerformAudioPassThruCommandRequest::send_speek_request() const {
+void PerformAudioPassThruCommandRequest::SendSpeakRequest() const {
   // crate HMI TTS speak request
   smart_objects::CSmartObject* tts_speak = new smart_objects::CSmartObject();
   // TODO(DK): HMI tts request Id

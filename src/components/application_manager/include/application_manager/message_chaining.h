@@ -83,19 +83,19 @@ class MessageChaining {
    * amount of pending HMI responses
    *
    **/
-  void increment_counter();
+  void IncrementCounter();
 
   /**
    * @brief Decrements counter representing that
    * corresponding HMI response received
    *
    **/
-  void decrement_counter();
+  void DecrementCounter();
 
   /**
-   * @brief Retrieves connection key
+   * @brief Retrieves counter
    *
-   * @return connection_key
+   * @return counter
    **/
   int counter() const;
 

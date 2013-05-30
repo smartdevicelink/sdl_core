@@ -61,7 +61,7 @@ void CreateInteractionChoiceSetCommand::Run() {
   const int choise_set_id =
   (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
 
-  if (app->find_choice_set(choise_set_id)) {
+  if (app->FindChoiceSet(choise_set_id)) {
     SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
     return;
   }

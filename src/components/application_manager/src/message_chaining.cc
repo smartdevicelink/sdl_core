@@ -60,11 +60,11 @@ int MessageChaining::connection_key() const {
   return connection_key_;
 }
 
-void MessageChaining::increment_counter() {
+void MessageChaining::IncrementCounter() {
   ++counter_;
 }
 
-void MessageChaining::decrement_counter() {
+void MessageChaining::DecrementCounter() {
   --counter_;
 }
 

@@ -68,12 +68,12 @@ void AlertCommandRequest::Run() {
     return;
   }
 
-  send_alert_request();
-  send_speek_request();
-  send_play_tone_request();
+  SendAlertRequest();
+  SendPlayToneRequest();
+  SendSpeekRequest();
 }
 
-void AlertCommandRequest::send_alert_request() const {
+void AlertCommandRequest::SendAlertRequest() const {
   const int corellation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
@@ -132,7 +132,7 @@ void AlertCommandRequest::send_alert_request() const {
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_alert);
 }
 
-void AlertCommandRequest::send_speek_request() const {
+void AlertCommandRequest::SendSpeekRequest() const {
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
@@ -153,7 +153,7 @@ void AlertCommandRequest::send_speek_request() const {
   }
 }
 
-void AlertCommandRequest::send_play_tone_request() const {
+void AlertCommandRequest::SendPlayToneRequest() const {
   // check playtone parameter
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {

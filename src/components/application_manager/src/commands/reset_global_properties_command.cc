@@ -76,19 +76,19 @@ void ResetGlobalPropertiesCommand::Run() {
   for (size_t i = 0; i < obj_length; ++i) {
     switch((*message_)[strings::msg_params][strings::properties][i].asInt()) {
       case GlobalProperty::HELPPROMT: {
-        reset_help_promt(app);
+        ResetHelpPromt(app);
         break;
       }
       case GlobalProperty::TIMEOUTPROMT: {
-        reset_timeout_prompt(app);
+        ResetTimeoutPromt(app);
         break;
       }
       case GlobalProperty::VRHELPTITLE: {
-        reset_vr_help_title(app);
+        ResetVrHelpTitle(app);
         break;
       }
       case GlobalProperty::VRHELPITEMS: {
-        reset_vr_help_items(app);
+        ResetVrHelpItems(app);
         break;
       }
       default: {
@@ -112,7 +112,7 @@ void ResetGlobalPropertiesCommand::Run() {
   */
 }
 
-void ResetGlobalPropertiesCommand::reset_help_promt(ApplicationImpl* const app, bool is_timeout_promp) {
+void ResetGlobalPropertiesCommand::ResetHelpPromt(ApplicationImpl* const app, bool is_timeout_promp) {
   if (NULL == app) {
     return;
   }
@@ -138,11 +138,11 @@ void ResetGlobalPropertiesCommand::reset_help_promt(ApplicationImpl* const app, 
   }
 }
 
-void ResetGlobalPropertiesCommand::reset_timeout_prompt(ApplicationImpl* const app) {
-  reset_help_promt(app, true);
+void ResetGlobalPropertiesCommand::ResetTimeoutPromt(ApplicationImpl* const app) {
+  ResetHelpPromt(app, true);
 }
 
-void ResetGlobalPropertiesCommand::reset_vr_help_title(ApplicationImpl* const app) {
+void ResetGlobalPropertiesCommand::ResetVrHelpTitle(ApplicationImpl* const app) {
   if (NULL == app) {
     return;
   }
@@ -151,7 +151,7 @@ void ResetGlobalPropertiesCommand::reset_vr_help_title(ApplicationImpl* const ap
   app->set_vr_help_title(help_title);
 }
 
-void ResetGlobalPropertiesCommand::reset_vr_help_items(ApplicationImpl* const app) {
+void ResetGlobalPropertiesCommand::ResetVrHelpItems(ApplicationImpl* const app) {
 }
 
 }  // namespace commands

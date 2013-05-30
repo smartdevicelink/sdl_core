@@ -86,7 +86,7 @@ void DeleteInteractionChoiceSetResponse::Run() {
             ApplicationManagerImpl::instance()->
             application((*message_)[strings::params][strings::connection_key]));
 
-      app->remove_choice_set(
+      app->RemoveChoiceSet(
         data[strings::msg_params][strings::interaction_choice_set_id].asInt());
 
       (*message_)[strings::msg_params][strings::success] = true;

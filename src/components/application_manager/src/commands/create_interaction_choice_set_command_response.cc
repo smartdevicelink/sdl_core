@@ -64,7 +64,7 @@ void CreateInteractionChoiceSetResponseCommand::Run() {
         ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::connection_key]));
 
-    app->add_choice_set(data[strings::msg_params][strings::interaction_choice_set_id].asInt(),
+    app->AddChoiceSet(data[strings::msg_params][strings::interaction_choice_set_id].asInt(),
                    data[strings::msg_params]);
 
     (*message_)[strings::params][strings::success] = true;

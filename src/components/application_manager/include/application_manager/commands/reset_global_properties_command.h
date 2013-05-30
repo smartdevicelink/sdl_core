@@ -86,7 +86,7 @@ class ResetGlobalPropertiesCommand : public CommandRequestImpl {
    * @param is_timeout_promp Flag indicating that timeout prompt
    * should be reset
    */
-  void reset_help_promt(ApplicationImpl* const app, bool is_timeout_promp = false);
+  void ResetHelpPromt(ApplicationImpl* const app, bool is_timeout_promp = false);
 
   /*
    * @brief  Sets default value of the TIMEOUTPROMT global property
@@ -94,7 +94,7 @@ class ResetGlobalPropertiesCommand : public CommandRequestImpl {
    *
    * @param app Registered application
    */
-  void reset_timeout_prompt(ApplicationImpl* const app);
+  void ResetTimeoutPromt(ApplicationImpl* const app);
 
   /*
    * @brief Sets default value of the VRHELPTITLE global property
@@ -102,7 +102,7 @@ class ResetGlobalPropertiesCommand : public CommandRequestImpl {
    *
    * @param app Registered application
    */
-  void reset_vr_help_title(ApplicationImpl* const app);
+  void ResetVrHelpTitle(ApplicationImpl* const app);
 
   /*
    * @brief Sets default value of the VRHELPITEMS global property
@@ -110,7 +110,7 @@ class ResetGlobalPropertiesCommand : public CommandRequestImpl {
    *
    * @param app Registered application
    */
-  void reset_vr_help_items(ApplicationImpl* const app);
+  void ResetVrHelpItems(ApplicationImpl* const app);
 
   DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesCommand);
 };

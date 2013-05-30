@@ -185,7 +185,7 @@ class ApplicationImpl : public Application {
      * @param choice_set_id Unique ID used for this interaction choice set
      * @param choice_set SmartObject that represent choice set
      */
-    void add_choice_set(unsigned int choice_set_id,
+    void AddChoiceSet(unsigned int choice_set_id,
                         const smart_objects::CSmartObject& choice_set);
 
     /*
@@ -193,14 +193,14 @@ class ApplicationImpl : public Application {
      *
      * @param choice_set_id Unique ID of the interaction choice set
      */
-    void remove_choice_set(unsigned int choice_set_id);
+    void RemoveChoiceSet(unsigned int choice_set_id);
 
     /*
      * @brief Finds choice set with the specified choice_set_id id
      *
      * @param choice_set_id Unique ID of the interaction choice set
      */
-    smart_objects::CSmartObject*  find_choice_set(unsigned int choice_set_id);
+    smart_objects::CSmartObject*  FindChoiceSet(unsigned int choice_set_id);
 
     bool SubscribeToButton(unsigned int btn_name);
     bool IsSubscribedToButton(unsigned int btn_name);
