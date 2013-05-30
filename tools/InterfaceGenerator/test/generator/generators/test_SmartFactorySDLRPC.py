@@ -4,13 +4,14 @@ import unittest
 from generator.generators import SmartFactorySDLRPC
 from generator import Model
 
-expected_result_code = (
+expected_notification_result_code = \
 u"""params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<FunctionID::eType>::create(function_id_items), true);\n""" \
 u"""params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<messageType::eType>::create(message_type_items), true);\n""" \
-u"""params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);\n""" \
 u"""params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);\n""" \
 u"""params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);\n"""
-)
+
+expected_req_resp_result_code = "".join([expected_notification_result_code,
+u"""params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);\n"""])
 
 description = [u"Description Line1", u"Description Line2"]
 
@@ -28,19 +29,19 @@ class TestSmartSchema(unittest.TestCase):
         generator = SmartFactorySDLRPC.CodeGenerator()
 
         self.assertEqual(generator._gen_schema_params_fill("request"),
-                         expected_result_code,
+                         expected_req_resp_result_code,
                          "Invalid code generation")
 
         self.assertEqual(generator._gen_schema_params_fill("response"),
-                         expected_result_code,
+                         expected_req_resp_result_code,
                          "Invalid code generation")
 
         self.assertEqual(generator._gen_schema_params_fill("notification"),
-                         expected_result_code,
+                         expected_notification_result_code,
                          "Invalid code generation")
 
         self.assertEqual(generator._gen_schema_params_fill("any text as input"),
-                         expected_result_code,
+                         expected_req_resp_result_code,
                          "Invalid code generation")
 
     def test_full_generation(self):
