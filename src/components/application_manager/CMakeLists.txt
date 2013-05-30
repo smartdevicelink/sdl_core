@@ -61,6 +61,8 @@ set (SOURCES
 ./src/commands/create_interaction_choice_set_command_response.cc
 ./src/commands/perform_interaction_command.cc
 ./src/commands/perform_interaction_response_command.cc
+./src/commands/end_audio_pass_thru_command.cc
+./src/commands/end_audio_pass_thru_response_command.cc
 )
 
 
