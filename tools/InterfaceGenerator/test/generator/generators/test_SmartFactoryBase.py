@@ -224,5 +224,22 @@ class TestSmartSchema(unittest.TestCase):
                          u"{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
                          , "Generated enums are invalid")
 
+    def test_normalize_multiline_comments(self):
+        generator = SmartFactoryBase.CodeGenerator()
+
+        self.assertEqual(generator._normalize_multiline_comments([]),
+                         [])
+
+        self.assertEqual(generator._normalize_multiline_comments(["aaa",
+                                                                  "bbb",
+                                                                  "ccc ccc",
+                                                                  "ddd\tddd"]),
+                         ["aaa", "bbb", "ccc ccc", "ddd\tddd"])
+        self.assertEqual(generator._normalize_multiline_comments(["aaa\n1",
+                                                                  "bbb\r\n2",
+                                                                  "ccc\r3",
+                                                                  "aaa aaa"]),
+                         ["aaa", "1", "bbb", "2", "ccc", "3", "aaa aaa"])
+
 if __name__ == '__main__':
     unittest.main()

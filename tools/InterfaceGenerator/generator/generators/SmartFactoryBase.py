@@ -1029,7 +1029,8 @@ class CodeGenerator(object):
 
         description = u"".join([(u" * {0}\n" if use_doxygen
                                 is True else u"// {0}\n").format(x)
-                                for x in interface_item_base.description])
+                                for x in self._normalize_multiline_comments(
+                                    interface_item_base.description)])
         if description is not u"":
             description = u"".join([u" *\n" if use_doxygen
                                     is True else u"//\n", description])
@@ -1037,22 +1038,26 @@ class CodeGenerator(object):
         design_description = u"".join([(u" * {0}\n" if use_doxygen is
                                        True else u"// {0}\n").format(x)
                                        for x in
-                                       interface_item_base.design_description])
+                                       self._normalize_multiline_comments(
+                                           interface_item_base.
+                                           design_description)])
         if design_description is not u"":
             design_description = u"".join([u" *\n" if use_doxygen is
                                            True else "//\n",
                                            design_description])
 
         issues = u"".join([(u" * @note {0}\n" if use_doxygen is
-                           True else u"// Note: {0}\n").format(x.value)
-                           for x in interface_item_base.issues])
+                           True else u"// Note: {0}\n").format(x)
+                           for x in self._normalize_multiline_comments(
+                               [x.value for x in interface_item_base.issues])])
         if issues is not u"":
             issues = u"".join([u" *\n" if use_doxygen is
                               True else u"//\n", issues])
 
         todos = u"".join([(u" * @todo {0}\n" if use_doxygen is
                           True else u"// ToDo: {0}\n").format(x)
-                          for x in interface_item_base.todos])
+                          for x in self._normalize_multiline_comments(
+                              interface_item_base.todos)])
         if todos is not u"":
             todos = u"".join([u" *\n" if use_doxygen is
                               True else u"//\n", todos])
@@ -1091,6 +1096,26 @@ class CodeGenerator(object):
             [u"{0}{1}\n".format(
                 self._indent_template * indent_level,
                 x) if x is not u"" else u"\n" for x in code_lines])
+
+    @staticmethod
+    def _normalize_multiline_comments(initial_strings):
+        """Normalize multiline comments.
+
+        Makes multiline comment clean of any line breaks creating additional
+        strings for the comment.
+
+        Keyword arguments:
+        initial_strings -- initial list of strings to process.
+
+        Returns:
+        New list of the strings (with contains no strings with line breaks).
+
+        """
+
+        result = []
+        for initial_string in initial_strings:
+            result = result + initial_string.splitlines()
+        return result
 
     _model_types_briefs = dict(
         {u"EnumElement": u"",
@@ -1140,7 +1165,7 @@ class CodeGenerator(object):
         u'''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
         u'''LIMITED TO, THE\n'''
         u'''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
-        u''''A PARTICULAR PURPOSE\n'''
+        u'''A PARTICULAR PURPOSE\n'''
         u'''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
         u'''OR CONTRIBUTORS BE\n'''
         u'''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
@@ -1205,7 +1230,7 @@ class CodeGenerator(object):
         u'''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
         u'''LIMITED TO, THE\n'''
         u'''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
-        u''''A PARTICULAR PURPOSE\n'''
+        u'''A PARTICULAR PURPOSE\n'''
         u'''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
         u'''OR CONTRIBUTORS BE\n'''
         u'''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
