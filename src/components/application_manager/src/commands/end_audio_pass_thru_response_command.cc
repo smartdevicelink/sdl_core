@@ -57,14 +57,17 @@ void EndAudioPassThruCommandResponse::Run() {
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-  // check if response
   if (false == (*message_)[strings::msg_params][strings::success].asBool()) {
     SendResponse();
     return;
   }
 
-  // TODO(DK): Some logic
-  SendResponse();
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      (*message_)[strings::params]["function_id"].asInt())) {
+
+    ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
+    SendResponse();
+  }
 }
 
 }  // namespace commands

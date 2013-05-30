@@ -57,24 +57,29 @@ EndAudioPassThruCommandRequest::~EndAudioPassThruCommandRequest() {
 void EndAudioPassThruCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "EndAudioPassThruCommandRequest::Run ");
 
-  if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
-    LOG4CXX_ERROR_EXT(logger_, "TOO_MANY_PENDING_REQUESTS");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::TOO_MANY_PENDING_REQUESTS);
-    return;
-  }
+  // crate HMI UI request
+  smart_objects::CSmartObject* ui_audio = new smart_objects::CSmartObject();
+  // TODO(DK): HMI ui request Id
+  const int audio_cmd_id = 62;
+  (*ui_audio)[str::params][str::function_id] = audio_cmd_id;
+  (*ui_audio)[str::params][str::message_type] = MessageType::kRequest;
+  // app_id
+  (*ui_audio)[strings::msg_params][strings::app_id] =
+      (*message_)[strings::params][strings::connection_key];
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[str::params][str::connection_key]));
+  const int corellation_id =
+      (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+      (*message_)[strings::params][strings::connection_key];
 
-  if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
+  (*ui_audio)[str::params][str::correlation_id] = corellation_id;
+  (*ui_audio)[str::params][str::connection_key] = connection_key;
 
+  MessageChaining * chain = NULL;
+  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
+      connection_key, corellation_id, audio_cmd_id);
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
 }
 
 }  // namespace commands
