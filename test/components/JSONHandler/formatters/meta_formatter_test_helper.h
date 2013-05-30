@@ -50,14 +50,14 @@ namespace components {
 namespace JSONHandler {
 namespace formatters {
 
-namespace FunctionID {
+namespace function_id {
 /**
-  * @brief Enumeration FunctionID.
+  * @brief Enumeration function_id.
   *
   * Enumeration linking function names with function IDs in WiPro protocol.
   * Assumes enumeration starts at value 0.
   */
-enum eType {
+enum EType {
   /**
     * @brief INVALID_ENUM.
     */
@@ -80,14 +80,14 @@ enum eType {
 };
 }
 
-namespace messageType {
+namespace message_type {
 /**
-  * @brief Enumeration messageType.
+  * @brief Enumeration message_type.
   *
   * Enumeration linking message types with function types in WiPro protocol.
   * Assumes enumeration starts at value 0.
   */
-enum eType {
+enum EType {
   /**
     * @brief INVALID_ENUM.
     */
@@ -121,11 +121,11 @@ class CMetaFormatterTestHelper :public ::testing::Test {
       const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
       std::string& result_string);
 
-  // for messageType::request, FunctionID::RegisterAppInterfaceID
+  // for message_type::request, function_id::RegisterAppInterfaceID
   void FillObjectIdenticalToSchema(
     NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
-  // for messageType::request, FunctionID::RegisterAppInterfaceID
+  // for message_type::request, function_id::RegisterAppInterfaceID
   void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
       NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
@@ -133,7 +133,7 @@ class CMetaFormatterTestHelper :public ::testing::Test {
       const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
       const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second);
 
-  // for messageType::request, FunctionID::RegisterAppInterfaceID
+  // for message_type::request, function_id::RegisterAppInterfaceID
   void FillObjectWithDefaultValues(
       NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
@@ -142,8 +142,8 @@ class CMetaFormatterTestHelper :public ::testing::Test {
 
   // members
   generated_ns::test_JSONHandler_alrpcv2 factory_;
-  std::set<FunctionID::eType> function_id_items_;
-  std::set<messageType::eType> message_type_items_;
+  std::set<function_id::EType> function_id_items_;
+  std::set<message_type::EType> message_type_items_;
 
   static const bool kIsPrintOut = false;
 };

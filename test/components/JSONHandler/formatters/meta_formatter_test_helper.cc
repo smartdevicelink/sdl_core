@@ -47,13 +47,13 @@ namespace strings_ns = NsSmartDeviceLink::NsJSONHandler::strings;
 
 void CMetaFormatterTestHelper::SetUp() {
   
-  function_id_items_.insert(testhelper_ns::FunctionID::kRegisterAppInterfaceID);
-  function_id_items_.insert(testhelper_ns::FunctionID::kUnregisterAppInterfaceID);
-  function_id_items_.insert(testhelper_ns::FunctionID::kSetGlobalPropertiesID);
+  function_id_items_.insert(testhelper_ns::function_id::kRegisterAppInterfaceID);
+  function_id_items_.insert(testhelper_ns::function_id::kUnregisterAppInterfaceID);
+  function_id_items_.insert(testhelper_ns::function_id::kSetGlobalPropertiesID);
   
-  message_type_items_.insert(testhelper_ns::messageType::kRequest);
-  message_type_items_.insert(testhelper_ns::messageType::kResponse);
-  message_type_items_.insert(testhelper_ns::messageType::kNotification);
+  message_type_items_.insert(testhelper_ns::message_type::kRequest);
+  message_type_items_.insert(testhelper_ns::message_type::kResponse);
+  message_type_items_.insert(testhelper_ns::message_type::kNotification);
 }
 
 void CMetaFormatterTestHelper::TearDown() {
@@ -173,42 +173,35 @@ void CMetaFormatterTestHelper::CompareObjects(
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second) {
   
-  if (smart_objects_ns::SmartType_Array == first.getType())
-  {
-      ASSERT_EQ(smart_objects_ns::SmartType_Array, second.getType());
-      for (int i = 0; i < first.length(); i++)
-      {
-          CompareObjects(first.getElement(i), second.getElement(i));
-      }
+  if (smart_objects_ns::SmartType_Array == first.getType()) {
+    ASSERT_EQ(smart_objects_ns::SmartType_Array, second.getType());
+    for (int i = 0; i < first.length(); i++) {
+      CompareObjects(first.getElement(i), second.getElement(i));
+    }
   }
   else if (smart_objects_ns::SmartType_Map == first.getType())
   {
-      ASSERT_EQ(smart_objects_ns::SmartType_Map, second.getType());
-      std::set<std::string> keys = first.enumerate();
+    ASSERT_EQ(smart_objects_ns::SmartType_Map, second.getType());
+    std::set<std::string> keys = first.enumerate();
 
-      for (std::set<std::string>::const_iterator key = keys.begin(); key != keys.end(); key++)
-      {
-          CompareObjects(first.getElement(*key), second.getElement(*key));
-      }
+    for (std::set<std::string>::const_iterator key = keys.begin();
+          key != keys.end(); key++){
+      CompareObjects(first.getElement(*key), second.getElement(*key));
+    }
   }
-  else if (smart_objects_ns::SmartType_Boolean == first.getType())
-  {
+  else if (smart_objects_ns::SmartType_Boolean == first.getType())  {
       ASSERT_EQ((bool)first, (bool)second);
   }
-  else if (smart_objects_ns::SmartType_Integer == first.getType())
-  {
+  else if (smart_objects_ns::SmartType_Integer == first.getType()) {
       ASSERT_EQ((int)first, (int)second);
   }
-  else if (smart_objects_ns::SmartType_Double == first.getType())
-  {
+  else if (smart_objects_ns::SmartType_Double == first.getType())  {
       ASSERT_EQ((double)first, (double)second);
   }
-  else if (smart_objects_ns::SmartType_String == first.getType())
-  {
+  else if (smart_objects_ns::SmartType_String == first.getType()) {
       ASSERT_EQ((std::string)first, (std::string)second);
   }
-  else if (smart_objects_ns::SmartType_Null == first.getType())
-  {
+  else if (smart_objects_ns::SmartType_Null == first.getType())  {
       ASSERT_EQ(smart_objects_ns::SmartType_Null, second.getType());
   }
   else
