@@ -49,7 +49,7 @@ PutFileResponseCommand::~PutFileResponseCommand() {
 }
 
 void PutFileResponseCommand::Run() {
-  (*message_)[strings::msg_params][strings::space_available] = file_system::AvailableSpace();
+  // (*message_)[strings::msg_params][strings::space_available] = file_system::AvailableSpace();
   SendResponse();
 }
 
