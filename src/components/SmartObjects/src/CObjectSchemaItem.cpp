@@ -137,11 +137,13 @@ void smart_objects_ns::CObjectSchemaItem::BuildObjectBySchema(
     const smart_objects_ns::CSmartObject& pattern_object,
     smart_objects_ns::CSmartObject& result_object) {
 
+  result_object = smart_objects_ns::CSmartObject(smart_objects_ns::SmartType_Map);
+
   if (smart_objects_ns::SmartType_Map == pattern_object.getType()) {
     for (std::map<std::string,
       smart_objects_ns::CObjectSchemaItem::SMember>::const_iterator i =
-          mMembers.begin();
-      i != mMembers.end(); ++i) { // for
+      mMembers.begin();
+        i != mMembers.end(); ++i) { // for
 
         if (true == pattern_object.keyExists(i->first)) {
           i->second.mSchemaItem->BuildObjectBySchema(
@@ -155,8 +157,8 @@ void smart_objects_ns::CObjectSchemaItem::BuildObjectBySchema(
     bool is_any_mandatory_field = false;
     for (std::map<std::string,
       smart_objects_ns::CObjectSchemaItem::SMember>::const_iterator i =
-          mMembers.begin();
-      i != mMembers.end(); ++i) { // for
+      mMembers.begin();
+        i != mMembers.end(); ++i) { // for
 
         if (true == i->second.mIsMandatory) {
           is_any_mandatory_field = true;
@@ -164,9 +166,6 @@ void smart_objects_ns::CObjectSchemaItem::BuildObjectBySchema(
               smart_objects_ns::CSmartObject(), result_object[i->first]);
         }
       } // for
-      if (false == is_any_mandatory_field) {
-        result_object = smart_objects_ns::CSmartObject(smart_objects_ns::SmartType_Map);
-      }
   }
 }
 
