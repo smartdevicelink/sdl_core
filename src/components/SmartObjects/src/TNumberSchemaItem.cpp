@@ -33,3 +33,21 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "SmartObjects/TNumberSchemaItem.hpp"
+
+template <>
+NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::getSmartType(void)
+{
+    return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
+}
+
+template <>
+NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<long>::getSmartType(void)
+{
+    return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
+}
+
+template <>
+NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<double>::getSmartType(void)
+{
+    return NsSmartDeviceLink::NsSmartObjects::SmartType_Double;
+}

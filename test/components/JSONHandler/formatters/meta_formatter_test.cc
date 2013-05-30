@@ -40,17 +40,28 @@
 #include "JSONHandler/formatters/meta_formatter.h"
 #include "JSONHandler/CSmartFactory.hpp"
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
-#include "SmartObjects/CObjectSchemaItem.hpp"
-#include "SmartObjects/CArraySchemaItem.hpp"
 
-#include "meta_formatter_test_helper.h"
+#include "SmartObjects/CAlwaysTrueSchemaItem.hpp"
+#include "SmartObjects/CAlwaysFalseSchemaItem.hpp"
+#include "SmartObjects/CArraySchemaItem.hpp"
+#include "SmartObjects/CBoolSchemaItem.hpp"
+#include "SmartObjects/CObjectSchemaItem.hpp"
+#include "SmartObjects/CStringSchemaItem.hpp"
+#include "SmartObjects/TEnumSchemaItem.hpp"
+#include "SmartObjects/TNumberSchemaItem.hpp"
+#include "SmartObjects/TSchemaItemParameter.hpp"
+
+#include "meta_formatter_test_helper.h" 
 
 using test::components::JSONHandler::formatters::CMetaFormatterTestHelper;
+namespace testhelper_ns = test::components::JSONHandler::formatters;
 namespace formatter_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace generated_ns = Gen::test::components::JSONHandler2;
 namespace strings_ns = NsSmartDeviceLink::NsJSONHandler::strings;
 namespace smartobjects_ns = NsSmartDeviceLink::NsSmartObjects;
 
+namespace test { namespace components { namespace JSONHandler { namespace formatters {
+  
 TEST_F(CMetaFormatterTestHelper, test_inputObjectIdenticalToSchemaWithAndWithoutMandatoryParams) {
   Json::Value value;  // just a quick workaround to avoid undefined reference to Json
   Json::Reader reader;    // the same thing
@@ -173,29 +184,46 @@ TEST_F(CMetaFormatterTestHelper, test_NormalSchemaWithObjectWithoutSomeMandatory
   }
 }
 
-TEST_F(CMetaFormatterTestHelper, test_EmptyMap) {
+TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyMap) {
   std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember> schemaMembersMap;
   smartobjects_ns::CSmartSchema map_schema =
       smartobjects_ns::CSmartSchema(smartobjects_ns::CObjectSchemaItem::create(schemaMembersMap));
 
   smartobjects_ns::CSmartObject object;
   NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object_empty_map;
+
+  smartobjects_ns::CSmartObject object_empty_map =
+  smartobjects_ns::CSmartObject(smartobjects_ns::SmartType_Map);
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object_empty_map, map_schema, result_object_empty_map);
+  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
+      << "smartObject is not map type";
+  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
   
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object, map_schema, result_object_empty_map);
-  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType());
-  ASSERT_EQ(0, result_object_empty_map.length());
+  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
+      << "smartObject is not map type";
+  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
+  
+  object["field1"] = 0;
+  object["field2"] = smartobjects_ns::CSmartObject();
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, map_schema, result_object_empty_map);
+  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
+      << "smartObject is not map type";
+  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
 
   // fill object with any values. Result must be the same
   FillObjectIdenticalToSchema(object);
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object, map_schema, result_object_empty_map);
-  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType());
-  ASSERT_EQ(0, result_object_empty_map.length());
+  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
+      << "smartObject is not map type";
+  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
 
   // fill object with any values. Result must be the same
   FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(object);
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object, map_schema, result_object_empty_map);
-  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType());
-  ASSERT_EQ(0, result_object_empty_map.length());
+  ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
+      << "smartObject is not map type";
+  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
   
   if (true == kIsPrintOut) {
     std::string str;
@@ -206,28 +234,39 @@ TEST_F(CMetaFormatterTestHelper, test_EmptyMap) {
 
 }
 
-TEST_F(CMetaFormatterTestHelper, test_EmptyArray) {
+TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyArray) {
   smartobjects_ns::CSmartObject object;
   
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object_empty_array;
+  smartobjects_ns::CSmartObject result_object_empty_array;
   smartobjects_ns::CSmartSchema array_schema =
       smartobjects_ns::CSmartSchema(smartobjects_ns::CArraySchemaItem::create());
 
+  smartobjects_ns::CSmartObject object_empty_aray =
+    smartobjects_ns::CSmartObject(smartobjects_ns::SmartType_Array);
+
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object_empty_aray, array_schema, result_object_empty_array);
+  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType())
+      << "smartObject is not array type";
+  ASSERT_EQ(0, result_object_empty_array.length())  << "non empty array";
+
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object, array_schema, result_object_empty_array);
-  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType());
-  ASSERT_EQ(0, result_object_empty_array.length());
+  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType())
+      << "smartObject is not array type";
+  ASSERT_EQ(0, result_object_empty_array.length()) << "non empty array";
 
   // fill object with any values. Result must be the same
   FillObjectIdenticalToSchema(object);
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object, array_schema, result_object_empty_array);
-  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType());
-  ASSERT_EQ(0, result_object_empty_array.length());
+  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType())
+      << "smartObject is not array type";
+  ASSERT_EQ(0, result_object_empty_array.length()) << "non empty array";
 
   // fill object with any values. Result must be the same
   FillObjectWithoutSomeMandatoryFields(object);
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object, array_schema, result_object_empty_array);
-  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType());
-  ASSERT_EQ(0, result_object_empty_array.length());
+  ASSERT_EQ(smartobjects_ns::SmartType_Array,  result_object_empty_array.getType())
+      << "smartObject is not array type";
+  ASSERT_EQ(0, result_object_empty_array.length()) << "non empty array";
 
   if (true == kIsPrintOut) {
     std::string str;
@@ -235,6 +274,155 @@ TEST_F(CMetaFormatterTestHelper, test_EmptyArray) {
     printf("result_object(empty array) %s", str.c_str());
   }
 }
+
+TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
+  smartobjects_ns::CSmartObject result_object;
+  smartobjects_ns::CSmartObject object;
+  
+  std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember> paramsMembersMap;
+  paramsMembersMap[strings_ns::S_FUNCTION_ID] =
+    smartobjects_ns::CObjectSchemaItem::SMember(smartobjects_ns::TEnumSchemaItem<FunctionID::eType>::create(function_id_items_), true);
+  paramsMembersMap[strings_ns::S_MESSAGE_TYPE] =
+    smartobjects_ns::CObjectSchemaItem::SMember(smartobjects_ns::TEnumSchemaItem<messageType::eType>::create(message_type_items_), true);
+  paramsMembersMap[strings_ns::S_CORRELATION_ID] =
+    smartobjects_ns::CObjectSchemaItem::SMember(smartobjects_ns::TNumberSchemaItem<int>::create(0, 100, 55), true);
+  paramsMembersMap[strings_ns::S_PROTOCOL_VERSION] =
+    smartobjects_ns::CObjectSchemaItem::SMember(smartobjects_ns::TNumberSchemaItem<int>::create(1, 2), false);
+  paramsMembersMap[strings_ns::S_PROTOCOL_TYPE] =
+    smartobjects_ns::CObjectSchemaItem::SMember(smartobjects_ns::TNumberSchemaItem<int>::create(), false);
+
+  std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember> schemaMembersMap;
+  schemaMembersMap["mandatory_emptyMap1"] =
+     smartobjects_ns::CObjectSchemaItem::SMember(
+       smartobjects_ns::CObjectSchemaItem::create(
+         std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember>()), true);
+  schemaMembersMap["mandatory_emptyMap2"] =
+     smartobjects_ns::CObjectSchemaItem::SMember(
+       smartobjects_ns::CObjectSchemaItem::create(
+         std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember>()), true);
+  schemaMembersMap["mandatory_emptyAray"] =
+     smartobjects_ns::CObjectSchemaItem::SMember(
+       smartobjects_ns::CArraySchemaItem::create(
+         smartobjects_ns::TNumberSchemaItem<int>::create()), true);
+
+  schemaMembersMap["non_mandatory_Array"] =
+     smartobjects_ns::CObjectSchemaItem::SMember(
+       smartobjects_ns::CArraySchemaItem::create(
+         smartobjects_ns::TNumberSchemaItem<int>::create(),
+         smartobjects_ns::TSchemaItemParameter<size_t>(1),
+         smartobjects_ns::TSchemaItemParameter<size_t>(2)), false);
+  schemaMembersMap["mandatory_string"] =
+    smartobjects_ns::CObjectSchemaItem::SMember(
+      smartobjects_ns::CStringSchemaItem::create(500, std::string("defValue")), true);
+  schemaMembersMap["non_mandatory_string"] =
+    smartobjects_ns::CObjectSchemaItem::SMember(
+      smartobjects_ns::CStringSchemaItem::create(500, std::string("ignoredDefValue")), false);
+
+  std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember> rootMembersMap;
+  rootMembersMap[strings_ns::S_MSG_PARAMS] =
+    smartobjects_ns::CObjectSchemaItem::SMember(
+      smartobjects_ns::CObjectSchemaItem::create(schemaMembersMap), true);
+  rootMembersMap[strings_ns::S_PARAMS] =
+    smartobjects_ns::CObjectSchemaItem::SMember(
+      smartobjects_ns::CObjectSchemaItem::create(paramsMembersMap), true);
+
+  smartobjects_ns::CSmartSchema schema =
+    smartobjects_ns::CSmartSchema(smartobjects_ns::CObjectSchemaItem::create(rootMembersMap));
+
+  // set object value
+  object[strings_ns::S_PARAMS][strings_ns::S_FUNCTION_ID] = 500;
+  object[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION] = 11;
+  object[strings_ns::S_PARAMS]["new_field"] = "100500 string";
+
+  object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"]["field1"] = 123;
+  object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"]["field2"][0] = 100;
+  object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"]["field2"][1] = 200;
+  object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][0] = 100;
+  object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][1] = 200;
+  object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][2] = 300;
+  object[strings_ns::S_MSG_PARAMS]["non_mandatory_string"] = "some string";
+  
+
+  formatter_ns::CMetaFormatter::CreateObjectByPattern(object, schema, result_object);
+  if (true == kIsPrintOut) {
+    std::string str;
+    AnyObjectToJsonString(object, str);
+    printf("object %s", str.c_str());
+    AnyObjectToJsonString(result_object, str);
+    printf("result_object %s", str.c_str());
+  }
+
+  EXPECT_EQ(500, result_object[strings_ns::S_PARAMS][strings_ns::S_FUNCTION_ID].asInt());
+  EXPECT_EQ(-1, result_object[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE].asInt());
+  EXPECT_EQ(55, result_object[strings_ns::S_PARAMS][strings_ns::S_CORRELATION_ID].asInt());
+  EXPECT_EQ(11, result_object[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION].asLong());
+
+  EXPECT_EQ(smartobjects_ns::SmartType_Map,
+      result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"].getType());
+  EXPECT_EQ(0,
+      result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"].length());
+  EXPECT_EQ(smartobjects_ns::SmartType_Map,
+      result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap2"].getType());
+  EXPECT_EQ(0,
+      result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap2"].length());
+  EXPECT_EQ(smartobjects_ns::SmartType_Array,
+    result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyAray"].getType());
+  EXPECT_EQ(0,
+      result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyAray"].length());
+  EXPECT_EQ(100,
+      result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][0].asInt());
+  EXPECT_EQ(200,
+      result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][1].asInt());
+  EXPECT_EQ(300,
+      result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][2].asLong());
+  EXPECT_EQ(std::string("defValue"),
+      result_object[strings_ns::S_MSG_PARAMS]["mandatory_string"].asString());
+  EXPECT_EQ(std::string("some string"),
+      result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_string"].asString());
+  
+}
+}}}}
+
+namespace NsSmartDeviceLink { namespace NsSmartObjects {
+
+    template <>
+    const std::map<testhelper_ns::FunctionID::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<testhelper_ns::FunctionID::eType>::getEnumElementsStringRepresentation(void)
+    {
+        static bool isInitialized = false;
+        static std::map<testhelper_ns::FunctionID::eType, std::string> enumStringRepresentationMap;
+
+        if (false == isInitialized)
+        {
+            enumStringRepresentationMap.insert(std::make_pair(testhelper_ns::FunctionID::kRegisterAppInterfaceID, "RegisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(testhelper_ns::FunctionID::kUnregisterAppInterfaceID, "UnregisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(testhelper_ns::FunctionID::kSetGlobalPropertiesID, "SetGlobalProperties"));
+
+            isInitialized = true;
+        }
+
+        return enumStringRepresentationMap;
+    }
+
+    template <>
+    const std::map<test::components::JSONHandler::formatters::messageType::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::formatters::messageType::eType>::getEnumElementsStringRepresentation(void)
+    {
+        static bool isInitialized = false;
+        static std::map<test::components::JSONHandler::formatters::messageType::eType, std::string> enumStringRepresentationMap;
+
+        if (false == isInitialized)
+        {
+            enumStringRepresentationMap.insert(std::make_pair(testhelper_ns::messageType::kRequest, "request"));
+            enumStringRepresentationMap.insert(std::make_pair(testhelper_ns::messageType::kResponse, "response"));
+            enumStringRepresentationMap.insert(std::make_pair(testhelper_ns::messageType::kNotification, "notification"));
+
+            isInitialized = true;
+        }
+
+        return enumStringRepresentationMap;
+    }
+}}
 
 int main(int argc, char **argv)
 {

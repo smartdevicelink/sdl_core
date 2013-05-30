@@ -39,8 +39,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "SmartObjects/CSmartObject.hpp"
 #include "test/components/JSONHandler/formatters/test_JSONHandler_alrpcv2.hpp"
+
+#include "SmartObjects/CSmartObject.hpp"
 
 namespace generated_ns = Gen::test::components::JSONHandler2;
 
@@ -48,17 +49,81 @@ namespace test {
 namespace components {
 namespace JSONHandler {
 namespace formatters {
+
+namespace FunctionID {
+  /**
+    * @brief Enumeration FunctionID.
+    *
+    * Enumeration linking function names with function IDs in WiPro protocol.
+    * Assumes enumeration starts at value 0.
+    */
+  enum eType {
+    /**
+      * @brief INVALID_ENUM.
+      */
+    INVALID_ENUM = -1,
+
+    /**
+    * @brief RegisterAppInterface.
+    */
+    kRegisterAppInterfaceID,
+
+    /**
+      * @brief UnregisterAppInterface.
+      */
+    kUnregisterAppInterfaceID,
+
+    /**
+      * @brief SetGlobalProperties.
+      */
+    kSetGlobalPropertiesID,
+  };
+}
+
+namespace messageType {
+  /**
+    * @brief Enumeration messageType.
+    *
+    * Enumeration linking message types with function types in WiPro protocol.
+    * Assumes enumeration starts at value 0.
+    */
+  enum eType {
+    /**
+      * @brief INVALID_ENUM.
+      */
+    INVALID_ENUM = -1,
+
+    /**
+      * @brief request.
+      */
+    kRequest = 0,
+
+    /**
+      * @brief response.
+      */
+    kResponse = 1,
+
+    /**
+      * @brief notification.
+      */
+    kNotification = 2
+  };
+}
   
   class CMetaFormatterTestHelper :public ::testing::Test {
    protected:
 
-     void AnyObjectToJsonString(
+    virtual void SetUp();
+
+    virtual void TearDown();
+
+    void AnyObjectToJsonString(
        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
        std::string& result_string);
 
     // for messageType::request, FunctionID::RegisterAppInterfaceID
     void FillObjectIdenticalToSchema(
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+      NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
 
     // for messageType::request, FunctionID::RegisterAppInterfaceID
     void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
@@ -77,8 +142,10 @@ namespace formatters {
 
     // members
     generated_ns::test_JSONHandler_alrpcv2 factory_;
+    std::set<FunctionID::eType> function_id_items_;
+    std::set<messageType::eType> message_type_items_;
 
-    static const bool kIsPrintOut = true;
+    static const bool kIsPrintOut = false;    
   };
 
 }

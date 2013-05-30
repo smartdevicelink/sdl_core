@@ -37,11 +37,29 @@
 #include "meta_formatter_test_helper.h"
 #include <JSONHandler/formatters/CFormatterJsonBase.hpp>
 
+namespace testhelper_ns = test::components::JSONHandler::formatters;
 using test::components::JSONHandler::formatters::CMetaFormatterTestHelper;
 namespace formatter_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 namespace strings_ns = NsSmartDeviceLink::NsJSONHandler::strings;
+
+
+void CMetaFormatterTestHelper::SetUp() {
+  
+  function_id_items_.insert(testhelper_ns::FunctionID::kRegisterAppInterfaceID);
+  function_id_items_.insert(testhelper_ns::FunctionID::kUnregisterAppInterfaceID);
+  function_id_items_.insert(testhelper_ns::FunctionID::kSetGlobalPropertiesID);
+  
+  message_type_items_.insert(testhelper_ns::messageType::kRequest);
+  message_type_items_.insert(testhelper_ns::messageType::kResponse);
+  message_type_items_.insert(testhelper_ns::messageType::kNotification);
+}
+
+void CMetaFormatterTestHelper::TearDown() {
+  function_id_items_.clear();
+  message_type_items_.clear();
+}
 
 //-----------------------------------------------------------
 
