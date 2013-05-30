@@ -62,9 +62,6 @@ class ShowCommand : public CommandRequestImpl {
    **/
   virtual void Run();
 
- private:
-  MessageSharedPtr message_;
-
   DISALLOW_COPY_AND_ASSIGN(ShowCommand);
 };
 
