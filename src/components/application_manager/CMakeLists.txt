@@ -63,6 +63,7 @@ set (SOURCES
 ./src/commands/perform_interaction_response_command.cc
 ./src/commands/end_audio_pass_thru_command.cc
 ./src/commands/end_audio_pass_thru_response_command.cc
+./src/commands/on_audio_pass_thru_command.cc
 )
 
 
