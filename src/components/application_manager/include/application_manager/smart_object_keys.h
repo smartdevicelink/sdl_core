@@ -90,6 +90,12 @@ const char audio_pass_display_text1[] = "audioPassThruDisplayText1";
 const char audio_pass_display_text2[] = "audioPassThruDisplayText2";
 const char max_duration[] = "maxDuration";
 
+// PutFile
+const char sync_file_name[] = "syncFileName";
+const char file_type[] = "fileType";
+const char persistent_file[] = "persistentFile";
+const char file_data[] = "fileData";
+const char space_available[] = "spaceAvailable";
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 

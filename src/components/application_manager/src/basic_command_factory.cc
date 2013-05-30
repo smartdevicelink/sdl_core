@@ -58,6 +58,9 @@
 #include "application_manager/commands/create_interaction_choice_set_command_response.h"
 #include "application_manager/commands/perform_interaction_command.h"
 #include "application_manager/commands/perform_interaction_response_command.h"
+#include "application_manager/commands/put_file_command.h"
+#include "application_manager/commands/put_file_response_command.h"
+
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -172,6 +175,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         command.reset(new commands::EndAudioPassThruCommandResponse(message));
       } else {
         command.reset(new commands::EndAudioPassThruCommandRequest(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::PutFileID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::PutFileResponseCommand(message));
+      } else {
+        command.reset(new commands::PutFileCommand(message));
       }
       break;
     }
