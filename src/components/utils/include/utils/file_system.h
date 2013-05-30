@@ -43,35 +43,35 @@ namespace file_system {
    *
    * @return free disc space.
    */
-  uint64_t available_space();
+  uint64_t AvailableSpace();
 
   /**
     * @brief Creates directory
     * @param name path to directory
     * @return path to created directory.
     */
-  std::string create_directory(const std::string& name);
+  std::string CreateDirectory(const std::string& name);
 
   /**
     * @brief Checks the file to see whether the file is a directory
     * @param name path to file
     * @return returns true if file is directory.
     */
-  bool is_directory(const std::string & name);
+  bool IsDirectory(const std::string & name);
 
   /**
     * @brief Is directory exist
     * @param name path to directory
     * @return returns true if directory is exists.
     */
-  bool directory_exists(const std::string& name);
+  bool DirectoryExists(const std::string& name);
 
   /**
     * @brief Is file exist
     * @param name path to file
     * @return returns true if file is exists.
     */
-  bool file_exists(const std::string& name);
+  bool FileExists(const std::string& name);
 
   /**
     * @brief Writes to file
@@ -81,7 +81,7 @@ namespace file_system {
     * @param data data to write
     * @return returns true if the operation is successfully.
     */
-  bool write(const std::string& file_name,
+  bool Write(const std::string& file_name,
              const std::vector<unsigned char>& data); // TODO(VS): Add appen mode to write function
 
   /**
@@ -90,7 +90,7 @@ namespace file_system {
     * @param name file name
     * @return returns full file path.
     */
-  std::string full_path(const std::string& name);
+  std::string FullPath(const std::string& name);
 
   /**
     * @brief Removes file
@@ -98,7 +98,7 @@ namespace file_system {
     * @param name path to file
     * @return returns true if the file is successfully deleted.
     */
-  bool delete_file(const std::string& name);
+  bool DeleteFile(const std::string& name);
 
   /**
    * @brief Removes directory.
@@ -107,7 +107,7 @@ namespace file_system {
    * @param is_recursively true if you need delete directory recursively, otherwise false.
    * @return returns true if the directory is successfully deleted.
    */
-  bool remove_directory(const std::string& directory_name,
+  bool RemoveDirectory(const std::string& directory_name,
                         bool is_recursively = true);
 
   /**
@@ -117,7 +117,7 @@ namespace file_system {
     * @param how Read/write attribute.
     * @return returns true if file has the given mode.
     */
-  bool is_accessible(const std::string& name, int how);
+  bool IsAccessible(const std::string& name, int how);
 
   /**
     * @brief Lists all files in given directory
@@ -125,7 +125,7 @@ namespace file_system {
     * @param name path to directory.
     * @return returns list of files.
     */
-  std::vector<std::string> list_files(const std::string& directory_name);
+  std::vector<std::string> ListFiles(const std::string& directory_name);
 
   /**
     * @brief Reads from file
@@ -134,7 +134,7 @@ namespace file_system {
     * @param result read data
     * @return returns true if the operation is successfully.
     */
-  bool read_binary_file(const std::string& name,
+  bool ReadBinaryFile(const std::string& name,
                         std::vector<unsigned char>& result);
 }  // namespace file_system
 

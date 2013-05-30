@@ -1739,7 +1739,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    unsigned long int freeSpace = file_system::available_space();
+                    unsigned long int freeSpace = file_system::AvailableSpace();
                     const std::string& syncFileName = object->get_syncFileName();
                     const NsSmartDeviceLinkRPCV2::FileType& fileType = object->get_fileType();
                     bool persistentFile = object->get_persistentFile();
@@ -1753,24 +1753,24 @@ namespace NsAppManager
                         bool flag = false;
                         if (freeSpace > fileData->size())
                         {
-                            std::string relativeFilePath = file_system::create_directory(app->getName());
+                            std::string relativeFilePath = file_system::CreateDirectory(app->getName());
 
                             relativeFilePath += "/";
                             relativeFilePath += syncFileName;
 
                             LOG4CXX_INFO(logger_, "Relative path to file " << relativeFilePath);
 
-                            std::string fullFilePath = file_system::full_path(relativeFilePath );
+                            std::string fullFilePath = file_system::FullPath(relativeFilePath );
 
                             LOG4CXX_INFO(logger_, "Full path to file " << fullFilePath);
 
-                            if (file_system::file_exists(fullFilePath))
+                            if (file_system::FileExists(fullFilePath))
                             {
-                                file_system::delete_file(fullFilePath);
+                                file_system::DeleteFile(fullFilePath);
                             }
 
                             LOG4CXX_INFO_EXT(logger_, "Saving to file " << fullFilePath);
-                            flag = file_system::write(fullFilePath, *fileData);
+                            flag = file_system::Write(fullFilePath, *fileData);
                             if (persistentFile)
                             {
                                 app->addPersistentFile(syncFileName);
@@ -1825,7 +1825,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    unsigned long int freeSpace = file_system::available_space();
+                    unsigned long int freeSpace = file_system::AvailableSpace();
                     const std::string& syncFileName = object->get_syncFileName();
                     if(!syncFileName.empty())
                     {
@@ -1833,11 +1833,11 @@ namespace NsAppManager
                         relativeFilePath += "/";
                         relativeFilePath += syncFileName;
 
-                        std::string fullFilePath = file_system::full_path( relativeFilePath );
+                        std::string fullFilePath = file_system::FullPath( relativeFilePath );
 
                         LOG4CXX_INFO(logger_, "Trying to remove file " << fullFilePath);
 
-                        if ( file_system::delete_file(fullFilePath) )
+                        if ( file_system::DeleteFile(fullFilePath) )
                         {
                             response->set_success(true);
                             response->set_resultCode(NsSmartDeviceLinkRPCV2::Result::SUCCESS);
@@ -1869,7 +1869,7 @@ namespace NsAppManager
                     response->setMessageType(NsSmartDeviceLinkRPC::SDLRPCMessage::RESPONSE);
                     response->setMethodId(NsSmartDeviceLinkRPCV2::FunctionID::ListFilesID);
                     response->setCorrelationID(object->getCorrelationID());
-                    unsigned long int freeSpace = file_system::available_space();
+                    unsigned long int freeSpace = file_system::AvailableSpace();
 
                     Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
@@ -1891,10 +1891,10 @@ namespace NsAppManager
 
                     bool successFlag = false;
 
-                    if ( file_system::directory_exists(app->getName()))
+                    if ( file_system::DirectoryExists(app->getName()))
                     {
-                        const std::string & fullDirectoryPath = file_system::full_path(app->getName());
-                        std::vector<std::string> listFiles = file_system::list_files( fullDirectoryPath );
+                        const std::string & fullDirectoryPath = file_system::FullPath(app->getName());
+                        std::vector<std::string> listFiles = file_system::ListFiles( fullDirectoryPath );
                         if (!listFiles.empty())
                         {
                             successFlag = true;
@@ -3692,8 +3692,8 @@ namespace NsAppManager
                         relativeFilePath += "/";
                         relativeFilePath += i->get_turnIcon().get_value();
 
-                        std::string fullFilePath = file_system::full_path( relativeFilePath );
-                        if (!file_system::file_exists(fullFilePath))
+                        std::string fullFilePath = file_system::FullPath( relativeFilePath );
+                        if (!file_system::FileExists(fullFilePath))
                         {
                             LOG4CXX_ERROR_EXT(logger_, "UpdateTurnList file doesn't exist");
                                 sendResponse<NsSmartDeviceLinkRPCV2::UpdateTurnList_response
@@ -6584,12 +6584,12 @@ namespace NsAppManager
         }
 
         // Delete app files
-        std::string fullPath = file_system::full_path(app->getName());
+        std::string fullPath = file_system::FullPath(app->getName());
         std::string fullFilePath;
         LOG4CXX_INFO_EXT(logger_, "Full path to app folder: " << fullPath);
-        if (file_system::directory_exists(fullPath))
+        if (file_system::DirectoryExists(fullPath))
         {
-            std::vector<std::string> files = file_system::list_files(fullPath);
+            std::vector<std::string> files = file_system::ListFiles(fullPath);
             std::vector<std::string>::const_iterator i = files.begin();
             for (i; i != files.end(); ++i)
             {
@@ -6602,13 +6602,13 @@ namespace NsAppManager
                 fullFilePath += "/";
                 fullFilePath += *i;
                 LOG4CXX_INFO_EXT(logger_, "File to be removed: " << fullFilePath);
-                if (file_system::file_exists(fullFilePath))
+                if (file_system::FileExists(fullFilePath))
                 {
-                    file_system::delete_file(fullFilePath);
+                    file_system::DeleteFile(fullFilePath);
                 }
             }
 
-            file_system::delete_file(fullPath);
+            file_system::DeleteFile(fullPath);
         }
 
         const std::string& appName = app->getName();

@@ -45,7 +45,7 @@
 #include <sstream>
 #include "utils/file_system.h"
 
-uint64_t file_system::available_space() {
+uint64_t file_system::AvailableSpace() {
   char currentAppPath[FILENAME_MAX];
   memset(reinterpret_cast<void*>(currentAppPath), 0, FILENAME_MAX);
   getcwd(currentAppPath, FILENAME_MAX - 1);
@@ -56,15 +56,15 @@ uint64_t file_system::available_space() {
   return fsInfo.f_bsize * fsInfo.f_bfree;
 }
 
-std::string file_system::create_directory(const std::string & name) {
-  if (!directory_exists(name)) {
+std::string file_system::CreateDirectory(const std::string& name) {
+  if (!DirectoryExists(name)) {
     mkdir(name.c_str(), S_IRWXU);
   }
 
   return name;
 }
 
-bool file_system::is_directory(const std::string & name) {
+bool file_system::IsDirectory(const std::string& name) {
   struct stat status;
   memset(&status, 0, sizeof(status));
 
@@ -75,7 +75,7 @@ bool file_system::is_directory(const std::string & name) {
   return S_ISDIR(status.st_mode);
 }
 
-bool file_system::directory_exists(const std::string & name) {
+bool file_system::DirectoryExists(const std::string& name) {
   struct stat status;
   memset(&status, 0, sizeof(status));
 
@@ -86,7 +86,7 @@ bool file_system::directory_exists(const std::string & name) {
   return true;
 }
 
-bool file_system::file_exists(const std::string & name) {
+bool file_system::FileExists(const std::string& name) {
   struct stat status;
   memset(&status, 0, sizeof(status));
 
@@ -96,8 +96,8 @@ bool file_system::file_exists(const std::string & name) {
   return true;
 }
 
-bool file_system::write(
-    const std::string & file_name, const std::vector<unsigned char>& data) {
+bool file_system::Write(
+  const std::string& file_name, const std::vector<unsigned char>& data) {
   std::ofstream file(file_name.c_str(), std::ios_base::binary);
   if (file.is_open()) {
     for (int i = 0; i < data.size(); ++i) {
@@ -109,7 +109,7 @@ bool file_system::write(
   return false;
 }
 
-std::string file_system::full_path(const std::string & file) {
+std::string file_system::FullPath(const std::string& file) {
   char currentAppPath[FILENAME_MAX];
   memset(currentAppPath, 0, FILENAME_MAX);
   getcwd(currentAppPath, FILENAME_MAX);
@@ -120,8 +120,8 @@ std::string file_system::full_path(const std::string & file) {
   return std::string(path);
 }
 
-bool file_system::delete_file(const std::string & name) {
-  if (file_exists(name) && is_accessible(name, W_OK)) {
+bool file_system::DeleteFile(const std::string& name) {
+  if (FileExists(name) && IsAccessible(name, W_OK)) {
     return !remove(name.c_str());
   }
   return false;
@@ -129,9 +129,9 @@ bool file_system::delete_file(const std::string & name) {
 
 void remove_directory_content(const std::string& directory_name) {
   int return_code = 0;
-  DIR * directory = NULL;
+  DIR* directory = NULL;
   struct dirent dir_element;
-  struct dirent *result = NULL;
+  struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
 
@@ -147,7 +147,7 @@ void remove_directory_content(const std::string& directory_name) {
 
       std::string full_element_path = directory_name + "/" + dir_element.d_name;
 
-      if (file_system::is_directory(full_element_path)) {
+      if (file_system::IsDirectory(full_element_path)) {
         remove_directory_content(full_element_path);
         rmdir(full_element_path.c_str());
       } else {
@@ -159,10 +159,10 @@ void remove_directory_content(const std::string& directory_name) {
   closedir(directory);
 }
 
-bool file_system::remove_directory(const std::string& directory_name,
-                                   bool is_recursively) {
-  if (directory_exists(directory_name)
-      && is_accessible(directory_name, W_OK)) {
+bool file_system::RemoveDirectory(const std::string& directory_name,
+                                  bool is_recursively) {
+  if (DirectoryExists(directory_name)
+      && IsAccessible(directory_name, W_OK)) {
     if (is_recursively) {
       remove_directory_content(directory_name);
     }
@@ -172,21 +172,21 @@ bool file_system::remove_directory(const std::string& directory_name,
   return false;
 }
 
-bool file_system::is_accessible(const std::string& name, int how) {
+bool file_system::IsAccessible(const std::string& name, int how) {
   return !access(name.c_str(), how);
 }
 
-std::vector<std::string> file_system::list_files(
-    const std::string & directory_name) {
+std::vector<std::string> file_system::ListFiles(
+  const std::string& directory_name) {
   std::vector<std::string> listFiles;
-  if (!directory_exists(directory_name)) {
+  if (!DirectoryExists(directory_name)) {
     return listFiles;
   }
 
   int return_code = 0;
-  DIR * directory = NULL;
+  DIR* directory = NULL;
   struct dirent dir_element;
-  struct dirent *result = NULL;
+  struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
   if (NULL != directory) {
@@ -208,10 +208,11 @@ std::vector<std::string> file_system::list_files(
   return listFiles;
 }
 
-bool file_system::read_binary_file(const std::string& name,
-                                   std::vector<unsigned char>& result) {
-  if (!file_exists(name) || !is_accessible(name, R_OK))
+bool file_system::ReadBinaryFile(const std::string& name,
+                                 std::vector<unsigned char>& result) {
+  if (!FileExists(name) || !IsAccessible(name, R_OK)) {
     return false;
+  }
 
   std::ifstream file(name.c_str(), std::ios_base::binary);
   std::ostringstream ss;

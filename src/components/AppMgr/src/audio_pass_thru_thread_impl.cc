@@ -167,7 +167,7 @@ void AudioPassThruThreadImpl::threadMain() {
   }
 
   std::vector<unsigned char> binaryData;
-  if (!file_system::read_binary_file(filename, binaryData)) {
+  if (!file_system::ReadBinaryFile(filename, binaryData)) {
 #if defined(OS_POSIX) && defined(OS_LINUX)
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif

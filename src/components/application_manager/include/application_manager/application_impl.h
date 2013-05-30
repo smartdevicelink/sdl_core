@@ -35,7 +35,8 @@
 
 #include <string>
 #include <map>
-
+#include <set>
+#include <vector>
 #include "SmartObjects/CSmartObject.hpp"
 
 #include "application_manager/message.h"
@@ -62,6 +63,14 @@ struct InitialApplicationData {
   smart_objects::CSmartObject* tts_name_;
 };
 
+struct AppFile {
+  AppFile(const std::string& name, bool persistent)
+    : is_persistent(persistent),
+      file_name(name) {}
+  std::string file_name;
+  bool is_persistent;
+};
+
 /*
  * @brief Typedef for supported commands in application menu
  */
@@ -78,136 +87,163 @@ typedef std::map<unsigned int, smart_objects::CSmartObject*> SubMenuMap;
 typedef std::map<unsigned int, smart_objects::CSmartObject*> ChoiceSetMap;
 
 class ApplicationImpl : public Application {
- public:
-  explicit ApplicationImpl(int app_id);
-  ~ApplicationImpl();
+  public:
+    explicit ApplicationImpl(int app_id);
+    ~ApplicationImpl();
 
-  void ProcessMessage(smart_objects::CSmartObject* message);
-  void ReportError(smart_objects::CSmartObject* message,
-                   ErrorCode error_code);
-  const smart_objects::CSmartObject* active_message() const;
-  void CloseActiveMessage();
-  const Version& version() const;
-  int app_id() const;
-  const std::string& name() const;
+    void ProcessMessage(smart_objects::CSmartObject* message);
+    void ReportError(smart_objects::CSmartObject* message,
+                     ErrorCode error_code);
+    const smart_objects::CSmartObject* active_message() const;
+    void CloseActiveMessage();
+    const Version& version() const;
+    int app_id() const;
+    const std::string& name() const;
+    bool IsFullscreen() const;
+    bool IsAudible() const;
+    bool HasbeenActivated() const;
 
-  bool is_media_application() const;
-  const smart_objects::CSmartObject* app_types() const;
-  const smart_objects::CSmartObject* vr_synonyms() const;
-  const smart_objects::CSmartObject* mobile_app_id() const;
-  const smart_objects::CSmartObject* tts_name() const;
-  const smart_objects::CSmartObject* ngn_media_screen_name() const;
-  const smart_objects::CSmartObject& hmi_level() const;
-  const smart_objects::CSmartObject& system_context() const;
-  const smart_objects::CSmartObject& language() const;
-  const smart_objects::CSmartObject& ui_language() const;
-  const smart_objects::CSmartObject* help_promt() const;
-  const smart_objects::CSmartObject* timeout_promt() const;
-  const smart_objects::CSmartObject* vr_help_title() const;
-  const smart_objects::CSmartObject* vr_help() const;
+    bool is_media_application() const;
+    const smart_objects::CSmartObject* app_types() const;
+    const smart_objects::CSmartObject* vr_synonyms() const;
+    const smart_objects::CSmartObject* mobile_app_id() const;
+    const smart_objects::CSmartObject* tts_name() const;
+    const smart_objects::CSmartObject* ngn_media_screen_name() const;
+    const mobile_api::HMILevel::eType& hmi_level() const;
+    const mobile_api::SystemContext::eType& system_context() const;
+    const smart_objects::CSmartObject& language() const;
+    const smart_objects::CSmartObject& ui_language() const;
+    const smart_objects::CSmartObject* help_promt() const;
+    const smart_objects::CSmartObject* timeout_promt() const;
+    const smart_objects::CSmartObject* vr_help_title() const;
+    const smart_objects::CSmartObject* vr_help() const;
+    const mobile_api::TBTState::eType& tbt_state() const;
 
-  void set_version(const Version& version);
-  void set_name(const std::string& name);
-  void set_is_media_application(bool is_media);
-  void set_hmi_level(const smart_objects::CSmartObject& hmi_level);
-  void set_system_context(const smart_objects::CSmartObject& system_context);
-  void set_language(const smart_objects::CSmartObject& language);
-  void set_ui_language(const smart_objects::CSmartObject& ui_language);
-  void set_app_types(const smart_objects::CSmartObject& app_types);
-  void set_vr_synonyms(const smart_objects::CSmartObject& vr_synonyms);
-  void set_mobile_app_id(const smart_objects::CSmartObject& mobile_app_id);
-  void set_tts_name(const smart_objects::CSmartObject& tts_name);
-  void set_ngn_media_screen_name(const smart_objects::CSmartObject& ngn_name);
-  void set_help_prompt(const smart_objects::CSmartObject& help_promt);
-  void set_timeout_prompt(const smart_objects::CSmartObject& timeout_promt);
-  void set_vr_help_title(const smart_objects::CSmartObject& vr_help_title);
-  void set_vr_help(const smart_objects::CSmartObject& vr_help);
+    void set_version(const Version& version);
+    void set_name(const std::string& name);
+    void set_is_media_application(bool is_media);
+    void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
+    void set_system_context(
+      const mobile_api::SystemContext::eType& system_context);
+    void set_language(const smart_objects::CSmartObject& language);
+    void set_ui_language(const smart_objects::CSmartObject& ui_language);
+    void set_app_types(const smart_objects::CSmartObject& app_types);
+    void set_vr_synonyms(const smart_objects::CSmartObject& vr_synonyms);
+    void set_mobile_app_id(const smart_objects::CSmartObject& mobile_app_id);
+    void set_tts_name(const smart_objects::CSmartObject& tts_name);
+    void set_ngn_media_screen_name(const smart_objects::CSmartObject& ngn_name);
+    void set_help_prompt(const smart_objects::CSmartObject& help_promt);
+    void set_timeout_prompt(const smart_objects::CSmartObject& timeout_promt);
+    void set_vr_help_title(const smart_objects::CSmartObject& vr_help_title);
+    void set_vr_help(const smart_objects::CSmartObject& vr_help);
+    void set_tbt_state(const mobile_api::TBTState::eType& tbt_state);
 
-  /*
-   * @brief Adds a command to the in application menu
-   */
-  void AddCommand(unsigned int cmd_id,
-                  const smart_objects::CSmartObject& command);
+    /*
+     * @brief Adds a command to the in application menu
+     */
+    void AddCommand(unsigned int cmd_id,
+                    const smart_objects::CSmartObject& command);
 
-  /*
-   * @brief Deletes all commands from the application menu with the specified command id
-   */
-  void RemoveCommand(unsigned int cmd_id);
+    /*
+     * @brief Deletes all commands from the application menu with the specified command id
+     */
+    void RemoveCommand(unsigned int cmd_id);
 
-  /*
-   * @brief Finds command with the specified command id
-   */
-  smart_objects::CSmartObject*  FindCommand(unsigned int cmd_id);
+    /*
+     * @brief Finds command with the specified command id
+     */
+    smart_objects::CSmartObject*  FindCommand(unsigned int cmd_id);
 
-  /*
-   * @brief Adds a menu to the application
-   */
-  void AddSubMenu(unsigned int menu_id,
-                  const smart_objects::CSmartObject& menu);
+    /*
+     * @brief Adds a menu to the application
+     */
+    void AddSubMenu(unsigned int menu_id,
+                    const smart_objects::CSmartObject& menu);
+
+    /*
+     * @brief Deletes menu from the application menu
+     */
+    void RemoveSubMenu(unsigned int menu_id);
+
+    /*
+     * @brief Finds menu with the specified id
+     */
+    smart_objects::CSmartObject*  FindSubMenu(unsigned int menu_id);
+
+    /*
+     * @brief Retrieve application commands
+     */
+    inline const CommandsMap& commands_map() const;
 
   /*
    * @brief Returns true if sub menu with such name already exist
    */
  bool IsSubMenuNameAlreadyExist(const std::string& name);
+    /*
+     * @brief Adds a interaction choice set to the application
+     *
+     * @param choice_set_id Unique ID used for this interaction choice set
+     * @param choice_set SmartObject that represent choice set
+     */
+    void add_choice_set(unsigned int choice_set_id,
+                        const smart_objects::CSmartObject& choice_set);
 
   /*
    * @brief Deletes menu from the application menu
    */
   void RemoveSubMenu(unsigned int menu_id);
+    /*
+     * @brief Deletes choice set from the application
+     *
+     * @param choice_set_id Unique ID of the interaction choice set
+     */
+    void remove_choice_set(unsigned int choice_set_id);
 
-  /*
-   * @brief Finds menu with the specified id
-   */
-  smart_objects::CSmartObject*  FindSubMenu(unsigned int menu_id);
+    /*
+     * @brief Finds choice set with the specified choice_set_id id
+     *
+     * @param choice_set_id Unique ID of the interaction choice set
+     */
+    smart_objects::CSmartObject*  find_choice_set(unsigned int choice_set_id);
 
-  /*
-   * @brief Retrieve application commands
-   */
-  inline const CommandsMap& commands_map() const;
+    bool SubscribeToButton(unsigned int btn_name);
+    bool IsSubscribedToButton(unsigned int btn_name);
+    bool UnsubscribeFromButton(unsigned int btn_name);
 
-  /*
-   * @brief Adds a interaction choice set to the application
-   *
-   * @param choice_set_id Unique ID used for this interaction choice set
-   * @param choice_set SmartObject that represent choice set
-   */
-  void add_choice_set(unsigned int choice_set_id,
-                  const smart_objects::CSmartObject& choice_set);
+    bool SubscribeToIVI(unsigned int vehicle_info_type_);
+    bool IsSubscribedToIVI(unsigned int vehicle_info_type_);
+    bool UnsubscribeFromIVI(unsigned int vehicle_info_type_);
 
-  /*
-   * @brief Deletes choice set from the application
-   *
-   * @param choice_set_id Unique ID of the interaction choice set
-   */
-  void remove_choice_set(unsigned int choice_set_id);
+    bool AddFile(const std::string& file_name, bool is_persistent);
+    bool DeleteFile(const std::string& file_name);
 
-  /*
-   * @brief Finds choice set with the specified choice_set_id id
-   *
-   * @param choice_set_id Unique ID of the interaction choice set
-   */
-  smart_objects::CSmartObject*  find_choice_set(unsigned int choice_set_id);
+  protected:
+    void CleanupFiles();
 
- private:
-  Version version_;
-  int app_id_;
-  std::string app_name_;
+  private:
+    Version version_;
+    int app_id_;
+    std::string app_name_;
 
-  smart_objects::CSmartObject* active_message_;
-  InitialApplicationData initial_app_data_;
+    smart_objects::CSmartObject* active_message_;
+    InitialApplicationData initial_app_data_;
 
-  bool is_media_;
-  smart_objects::CSmartObject hmi_level_;
-  smart_objects::CSmartObject system_context_;
+    bool is_media_;
+    mobile_api::HMILevel::eType hmi_level_;
+    mobile_api::SystemContext::eType system_context_;
 
-  smart_objects::CSmartObject* help_promt_;
-  smart_objects::CSmartObject* timeout_promt_;
-  smart_objects::CSmartObject* vr_help_title_;
-  smart_objects::CSmartObject* vr_help_;
+    mobile_api::TBTState::eType tbt_state_;
+    smart_objects::CSmartObject* help_promt_;
+    smart_objects::CSmartObject* timeout_promt_;
+    smart_objects::CSmartObject* vr_help_title_;
+    smart_objects::CSmartObject* vr_help_;
 
-  CommandsMap   commands_;
-  SubMenuMap    sub_menu_;
-  ChoiceSetMap  choice_set_map_;
+    CommandsMap   commands_;
+    SubMenuMap    sub_menu_;
+    ChoiceSetMap  choice_set_map_;
+    std::set<unsigned int> subscribed_buttons_;
+    std::set<unsigned int> subscribed_vehicle_info_;
+    std::vector<AppFile> app_files_;
 };
 
 const CommandsMap& ApplicationImpl::commands_map() const {

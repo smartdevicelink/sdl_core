@@ -35,9 +35,10 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include "application_manager/application_manager.h"
 #include "application_manager/message.h"
-#include "application_manager/application.h"
+#include "application_manager/application_impl.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "request_watchdog/watchdog_subscriber.h"
@@ -74,14 +75,16 @@ class ApplicationManagerImpl : public ApplicationManager
     /////////////////////////////////////////////////////
 
     Application* application(int app_id);
-    std::vector<Application*> applications() const;
+    const std::set<Application*>& applications() const;
     Application* active_application() const;
+    std::vector<Application*> applications_by_button(unsigned int button);
+    std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
 
     /////////////////////////////////////////////////////
 
     bool RegisterApplication(Application* application);
     bool UnregisterApplication(Application* application);
-    bool UnregisterAllApplications();
+    void UnregisterAllApplications();
     bool RemoveAppDataFromHMI(Application* application);
     bool LoadAppDataToHMI(Application* application);
     bool ActivateApplication(Application* application);
@@ -102,10 +105,10 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return pointer to MessageChaining
      */
     MessageChaining* AddMessageChain(MessageChaining* chain,
-        unsigned int connection_key,
-        unsigned int correlation_id,
-        unsigned int function_id,
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
+                                     unsigned int connection_key,
+                                     unsigned int correlation_id,
+                                     unsigned int function_id,
+                                     const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
      * @brief Decrease chain for correlation ID
@@ -202,7 +205,14 @@ class ApplicationManagerImpl : public ApplicationManager
        */
     bool CheckHMIMatrix(smart_objects::CSmartObject* message);
 
+    /**
+     * @brief Map of connection keys and associated applications
+     */
     std::map<int, Application*> applications_;
+    /**
+     * @brief List of applications
+     */
+    std::set<Application*> application_list_;
     MessageChains               message_chaining_;
     bool                        hmi_deletes_commands_;
     bool                        audio_pass_thru_flag_;

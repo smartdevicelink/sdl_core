@@ -65,6 +65,7 @@ struct Version {
 
 class Application {
   public:
+    virtual ~Application() = 0;
     /**
      * @brief Processes received pre-validated message: creates
      * appropriate command, if required adds to/removes from watchod
@@ -94,10 +95,15 @@ class Application {
     virtual const Version& version() const = 0;
     virtual int app_id() const = 0;
     virtual const std::string& name() const = 0;
+    virtual bool IsFullscreen() const = 0;
 
-  protected:
-    virtual ~Application() {
-    }
+    virtual bool SubscribeToButton(unsigned int btn_name) = 0;
+    virtual bool IsSubscribedToButton(unsigned int btn_name) = 0;
+    virtual bool UnsubscribeFromButton(unsigned int btn_name) = 0;
+
+    virtual bool SubscribeToIVI(unsigned int vehicle_info_type_) = 0;
+    virtual bool IsSubscribedToIVI(unsigned int vehicle_info_type_) = 0;
+    virtual bool UnsubscribeFromIVI(unsigned int vehicle_info_type_) = 0;
 };
 
 }  // namespace application_manager

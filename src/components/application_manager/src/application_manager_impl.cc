@@ -30,8 +30,6 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <vector>
-#include <map>
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/basic_command_factory.h"
@@ -64,26 +62,81 @@ Application* ApplicationManagerImpl::application(int app_id) {
   }
 }
 
-bool ApplicationManagerImpl::RegisterApplication(Application* application) {
-  return true;
-}
-
-bool ApplicationManagerImpl::UnregisterApplication(Application* application) {
-  return true;
-}
-
-std::vector<Application*>
-ApplicationManagerImpl::applications() const {
-  std::vector<Application*> result;
-  for (std::map<int, Application*>::const_iterator it = applications_.begin();
-       applications_.end() != it;
+Application* ApplicationManagerImpl::active_application() const {
+  for (std::set<Application*>::iterator it = application_list_.begin();
+       application_list_.end() != it;
        ++it) {
-    if (it->second->app_id() == it->first) {
-      result.push_back(it->second);
+    if ((*it)->IsFullscreen()) {
+      return *it;
+    }
+  }
+  return NULL;
+}
+
+std::vector<Application*> ApplicationManagerImpl::applications_by_button(
+  unsigned int button) {
+  std::vector<Application*> result;
+  for (std::set<Application*>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    if ((*it)->IsSubscribedToButton(static_cast<mobile_api::ButtonName::eType>(
+                                      button))) {
+      result.push_back(*it);
     }
   }
   return result;
 }
+
+std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
+  unsigned int vehicle_info) {
+  return std::vector<Application*>();
+}
+
+bool ApplicationManagerImpl::RegisterApplication(Application* application) {
+  DCHECK(application);
+  if (NULL == application) {
+    return false;
+  }
+  std::map<int, Application*>::iterator it = applications_.find(
+        application->app_id());
+  if (applications_.end() != it) {
+    return false;
+  }
+  applications_.insert(std::pair<int, Application*>(
+                         application->app_id(), application));
+  application_list_.insert(application);
+  return true;
+}
+
+bool ApplicationManagerImpl::UnregisterApplication(Application* application) {
+  DCHECK(application);
+  if (NULL == application) {
+    return false;
+  }
+  std::map<int, Application*>::iterator it = applications_.find(
+        application->app_id());
+  if (applications_.end() == it) {
+    return false;
+  }
+  applications_.erase(it);
+  application_list_.erase(application);
+  return true;
+}
+
+void ApplicationManagerImpl::UnregisterAllApplications() {
+  applications_.clear();
+  for (std::set<Application*>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    delete (*it);
+  }
+  application_list_.clear();
+}
+
+/*std::set<Application*>
+ApplicationManagerImpl::applications() const {
+  return application_list_;
+}*/
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     unsigned int connection_key,
@@ -110,7 +163,8 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
           break;
         }
       }
-      return chain;
+    }
+    return chain;
   }
 }
 

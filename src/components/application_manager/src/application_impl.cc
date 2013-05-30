@@ -32,6 +32,7 @@
 
 #include <string>
 #include "application_manager/application_impl.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -74,6 +75,9 @@ ApplicationImpl::ApplicationImpl(int app_id)
   : app_id_(app_id),
     active_message_(NULL),
     is_media_(false),
+    hmi_level_(mobile_api::HMILevel::INVALID_ENUM),
+    system_context_(mobile_api::SystemContext::INVALID_ENUM),
+    tbt_state_(mobile_api::TBTState::INVALID_ENUM),
     help_promt_(NULL),
     timeout_promt_(NULL),
     vr_help_title_(NULL),
@@ -120,6 +124,28 @@ ApplicationImpl::~ApplicationImpl() {
   }
 
   sub_menu_.clear();
+
+  CleanupFiles();
+}
+
+void ApplicationImpl::CleanupFiles() {
+  std::string directory_name = file_system::FullPath(name());
+  if (file_system::DirectoryExists(directory_name)) {
+    for (size_t i = 0; i < app_files_.size(); ++i) {
+      if (!app_files_[i].is_persistent) {
+        std::string file_name = directory_name;
+        file_name += "/";
+        file_name += app_files_[i].file_name;
+        file_system::DeleteFile(file_name);
+      }
+    }
+    std::vector<std::string> persistent_files = file_system::ListFiles(
+          directory_name);
+    if (0 == persistent_files.size()) {
+      file_system::RemoveDirectory(directory_name);
+    }
+  }
+  app_files_.clear();
 }
 
 void ApplicationImpl::ProcessMessage(smart_objects::CSmartObject* message) {
@@ -175,11 +201,12 @@ ApplicationImpl::ngn_media_screen_name() const {
   return initial_app_data_.ngn_media_screen_name_;
 }
 
-const smart_objects::CSmartObject& ApplicationImpl::hmi_level() const {
+const mobile_api::HMILevel::eType& ApplicationImpl::hmi_level() const {
   return hmi_level_;
 }
 
-const smart_objects::CSmartObject& ApplicationImpl::system_context() const {
+const mobile_api::SystemContext::eType&
+ApplicationImpl::system_context() const {
   return system_context_;
 }
 
@@ -220,12 +247,12 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
 }
 
 void ApplicationImpl::set_hmi_level(
-  const smart_objects::CSmartObject& hmi_level) {
+  const mobile_api::HMILevel::eType& hmi_level) {
   hmi_level_ = hmi_level;
 }
 
 void ApplicationImpl::set_system_context(
-  const smart_objects::CSmartObject& system_context) {
+  const mobile_api::SystemContext::eType& system_context) {
   system_context_ = system_context;
 }
 
@@ -319,6 +346,15 @@ void ApplicationImpl::set_vr_help(
   vr_help_ = new smart_objects::CSmartObject(vr_help);
 }
 
+void ApplicationImpl::set_tbt_state(
+  const mobile_api::TBTState::eType& tbt_state) {
+  tbt_state_ = tbt_state;
+}
+
+const mobile_api::TBTState::eType& ApplicationImpl::tbt_state() const {
+  return tbt_state_;
+}
+
 void ApplicationImpl::AddCommand(unsigned int cmd_id,
                                  const smart_objects::CSmartObject& command) {
   commands_[cmd_id] = new smart_objects::CSmartObject(command);
@@ -373,16 +409,15 @@ bool ApplicationImpl::IsSubMenuNameAlreadyExist(const std::string& name)
 smart_objects::CSmartObject*  ApplicationImpl::FindSubMenu(unsigned int menu_id)
 {
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
-  if(it != sub_menu_.end())
-  {
-      return it->second;
+  if (it != sub_menu_.end()) {
+    return it->second;
   }
 
   return NULL;
 }
 
 void ApplicationImpl::add_choice_set(unsigned int choice_set_id,
-                                 const smart_objects::CSmartObject& choice_set) {
+                                     const smart_objects::CSmartObject& choice_set) {
   choice_set_map_[choice_set_id] = new smart_objects::CSmartObject(choice_set);
 }
 
@@ -395,15 +430,83 @@ void ApplicationImpl::remove_choice_set(unsigned int choice_set_id) {
   }
 }
 
-smart_objects::CSmartObject*  ApplicationImpl::find_choice_set(unsigned int choice_set_id)
-{
+smart_objects::CSmartObject*  ApplicationImpl::find_choice_set(unsigned int choice_set_id) {
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
-  if(it != choice_set_map_.end())
-  {
-      return it->second;
+  if (it != choice_set_map_.end()) {
+    return it->second;
   }
 
   return NULL;
+}
+bool ApplicationImpl::IsFullscreen() const {
+  return mobile_api::HMILevel::HMI_FULL == hmi_level_;
+}
+
+bool ApplicationImpl::IsAudible() const {
+  return mobile_api::HMILevel::HMI_FULL == hmi_level_ ||
+         mobile_api::HMILevel::HMI_LIMITED == hmi_level_;
+}
+
+bool ApplicationImpl::HasbeenActivated() const {
+  return mobile_api::HMILevel::HMI_NONE != hmi_level_;
+}
+
+bool ApplicationImpl::SubscribeToButton(unsigned int btn_name) {
+  size_t old_size = subscribed_buttons_.size();
+  subscribed_buttons_.insert(btn_name);
+  return (subscribed_buttons_.size() == old_size + 1);
+}
+
+bool ApplicationImpl::IsSubscribedToButton(unsigned int btn_name) {
+  std::set<unsigned int>::iterator it = subscribed_buttons_.find(btn_name);
+  return (subscribed_buttons_.end() != it);
+}
+bool ApplicationImpl::UnsubscribeFromButton(unsigned int btn_name) {
+  size_t old_size = subscribed_buttons_.size();
+  subscribed_buttons_.erase(btn_name);
+  return (subscribed_buttons_.size() == old_size - 1);
+}
+
+bool ApplicationImpl::SubscribeToIVI(unsigned int vehicle_info_type_) {
+  size_t old_size = subscribed_vehicle_info_.size();
+  subscribed_vehicle_info_.insert(vehicle_info_type_);
+  return (subscribed_vehicle_info_.size() == old_size + 1);
+}
+
+bool ApplicationImpl::IsSubscribedToIVI(unsigned int vehicle_info_type_) {
+  std::set<unsigned int>::iterator it = subscribed_vehicle_info_.find(
+                                          vehicle_info_type_);
+  return (subscribed_vehicle_info_.end() != it);
+}
+
+bool ApplicationImpl::UnsubscribeFromIVI(unsigned int vehicle_info_type_) {
+  size_t old_size = subscribed_vehicle_info_.size();
+  subscribed_vehicle_info_.erase(vehicle_info_type_);
+  return (subscribed_vehicle_info_.size() == old_size - 1);
+}
+
+bool ApplicationImpl::AddFile(
+  const std::string& file_name, bool is_persistent) {
+  for (size_t i = 0; i < app_files_.size(); ++i) {
+    if (0 == file_name.compare(app_files_[i].file_name)) {
+      return false;
+    }
+  }
+  AppFile app_file(file_name, is_persistent);
+  app_files_.push_back(app_file);
+  return true;
+}
+
+bool ApplicationImpl::DeleteFile(const std::string& file_name) {
+  for (std::vector<AppFile>::iterator it = app_files_.begin();
+      app_files_.end() != it;
+      ++it) {
+    if (0 == it->file_name.compare(file_name)) {
+      app_files_.erase(it);
+      return true;
+    }
+  }
+  return false;
 }
 
 }  // namespace application_manager
