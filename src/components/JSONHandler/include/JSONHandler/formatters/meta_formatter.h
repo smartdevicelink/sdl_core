@@ -53,7 +53,7 @@ namespace Formatters {
   *
   */
 class CMetaFormatter {
-  public:
+ public:
 
   /**
     * @brief Creates smart object by the given schema having copied
