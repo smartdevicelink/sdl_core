@@ -61,6 +61,8 @@
 #include "application_manager/commands/perform_interaction_response_command.h"
 #include "application_manager/commands/put_file_command.h"
 #include "application_manager/commands/put_file_response_command.h"
+#include "application_manager/commands/delete_file_command.h"
+#include "application_manager/commands/delete_file_response_command.h"
 
 
 // TODO(AK): Include the directory when naming .h files
@@ -184,6 +186,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         command.reset(new commands::PutFileResponseCommand(message));
       } else {
         command.reset(new commands::PutFileCommand(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::DeleteFileID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::DeleteFileResponseCommand(message));
+      } else {
+        command.reset(new commands::DeleteFileCommand(message));
       }
       break;
     }

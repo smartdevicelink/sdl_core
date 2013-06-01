@@ -31,26 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/put_file_response_command.h"
-#include "utils/file_system.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_FILE_RESPONSE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_FILE_RESPONSE_COMMAND_H_
+
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-PutFileResponseCommand::PutFileResponseCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
-}
+/**
+ * @brief DeleteFileResponseCommand command class
+ **/
+class DeleteFileResponseCommand : public CommandResponseImpl {
+ public:
+  /**
+   * @brief DeleteFileResponseCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit DeleteFileResponseCommand(const MessageSharedPtr& message);
 
-PutFileResponseCommand::~PutFileResponseCommand() {
-}
+  /**
+   * @brief DeleteFileResponseCommand class destructor
+   **/
+  virtual ~DeleteFileResponseCommand();
 
-void PutFileResponseCommand::Run() {
-  (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int>(file_system::AvailableSpace());
-  SendResponse();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(DeleteFileResponseCommand);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_FILE_RESPONSE_COMMAND_H_

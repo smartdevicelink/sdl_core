@@ -31,21 +31,21 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/put_file_response_command.h"
+#include "application_manager/commands/delete_file_response_command.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-PutFileResponseCommand::PutFileResponseCommand(
+DeleteFileResponseCommand::DeleteFileResponseCommand(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-PutFileResponseCommand::~PutFileResponseCommand() {
+DeleteFileResponseCommand::~DeleteFileResponseCommand() {
 }
 
-void PutFileResponseCommand::Run() {
+void DeleteFileResponseCommand::Run() {
   (*message_)[strings::msg_params][strings::space_available] =
       static_cast<int>(file_system::AvailableSpace());
   SendResponse();
