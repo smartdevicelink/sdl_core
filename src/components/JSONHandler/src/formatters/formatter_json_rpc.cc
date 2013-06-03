@@ -117,6 +117,7 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
       }
     }
   }
+  out_str = root.toStyledString();
 
   return result;
 }
