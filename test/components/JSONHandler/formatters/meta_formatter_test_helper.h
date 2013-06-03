@@ -42,6 +42,7 @@
 #include "test/components/JSONHandler/formatters/test_JSONHandler_alrpcv2.hpp"
 
 #include "SmartObjects/CSmartObject.hpp"
+#include "test/components/JSONHandler/formatters/test_JSONHandler_alrpcv2.h"
 
 namespace generated_ns = Gen::test::components::JSONHandler2;
 

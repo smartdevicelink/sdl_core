@@ -146,7 +146,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
 
         //ASSERT_EQ(inputJsonString, outputJsonString);
 
-        std::cout<<outputJsonString<<std::endl;
+        //std::cout<<outputJsonString<<std::endl;
     }
 
     TEST(test_general, test_AttachSchema) {
@@ -240,12 +240,6 @@ namespace test { namespace components { namespace json_handler { namespace smart
       ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
                 object.isValid());
 
-      object[S_PARAMS][S_PROTOCOL_VERSION] = 200;
-
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
-          object.isValid());
-
-      object[S_PARAMS][S_PROTOCOL_VERSION] = 1;
       object[S_MSG_PARAMS]["Noise"] = "Bzzzzzz!!!";      
       
       ASSERT_EQ(
@@ -313,12 +307,6 @@ namespace test { namespace components { namespace json_handler { namespace smart
       ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
                 object.isValid());
 
-      object[S_PARAMS][S_PROTOCOL_VERSION] = 100;
-      
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
-          object.isValid());
-
-      object[S_PARAMS][S_PROTOCOL_VERSION] = 1;
       object[S_PARAMS]["blah-blah"] = "YouShallNotPass!";
 
       ASSERT_EQ(

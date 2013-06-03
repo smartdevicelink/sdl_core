@@ -34,12 +34,12 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
 
         """
 
-        return "".join(
+        return u"".join(
             [self._base_params,
              self._correlation_id_param
-                if message_type_name is not "notification" else "",
+                if unicode(message_type_name) != u"notification" else u"",
              self._additional_response_params
-                if message_type_name is "response" else ""])
+                if unicode(message_type_name) == u"response" else u""])
 
     _base_params = (
         u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
@@ -68,8 +68,4 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
         u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
         u'''strings::kCode] = CObjectSchemaItem::'''
         u'''SMember(TNumberSchemaItem<int>::create(), true);\n'''
-        u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
-        u'''strings::kMethod] = CObjectSchemaItem::'''
-        u'''SMember(TEnumSchemaItem<FunctionID::eType>::'''
-        u'''create(function_id_items), true);\n'''
     )

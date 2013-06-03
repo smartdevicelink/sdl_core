@@ -67,25 +67,24 @@ class CodeGenerator(object):
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
 
-        indent_level = 0
         namespace_open = u""
         namespace_close = u""
 
         if namespace:
             parts = namespace.split(u"::")
             for part in parts:
-                namespace_open = u"".join([namespace_open, self._indent_code(
-                    self._namespace_open_template.substitute(name=part),
-                    indent_level)])
-                namespace_close = "".join([namespace_close, self._indent_code(
-                    "}", len(parts) - indent_level - 1)])
-                indent_level = indent_level + 1
+                namespace_open = u"".join(
+                    [namespace_open,
+                     self._namespace_open_template.substitute(name=part)])
+                namespace_close = u"".join(
+                    [namespace_close,
+                     "}} // {0}\n".format(part)])
 
         class_name = unicode(os.path.splitext(filename)[0])
         guard = u"__CSMARTFACTORY_{0}_{1}_H__".format(
             class_name.upper(),
             unicode(uuid.uuid1().hex.capitalize()))
-        header_file_name = "".join("{0}.h".format(class_name))
+        header_file_name = u"".join("{0}.h".format(class_name))
 
         with codecs.open(os.path.join(destination_dir, header_file_name),
                          encoding="utf-8",
@@ -94,16 +93,15 @@ class CodeGenerator(object):
                 class_name=class_name,
                 guard=guard,
                 namespace_open=namespace_open,
-                enums_content=self._indent_code(
-                    self._gen_enums(
-                        interface.enums.values(),
-                        interface.structs.values()),
-                    indent_level),
-                class_content=self._indent_code(self._gen_h_class(
+                enums_content=self._gen_enums(
+                    interface.enums.values(),
+                    interface.structs.values()),
+
+                class_content=self._gen_h_class(
                     class_name,
                     interface.params,
                     interface.functions.values(),
-                    interface.structs.values()), indent_level),
+                    interface.structs.values()),
                 namespace_close=namespace_close))
 
         self._gen_struct_schema_items(interface.structs.values())
@@ -150,7 +148,7 @@ class CodeGenerator(object):
                 namespace_close=namespace_close))
 
         with codecs.open(os.path.join(destination_dir,
-                                      "".join("{0}_schema.cc".format(class_name))),
+                                      u"".join("{0}_schema.cc".format(class_name))),
                          encoding="utf-8", mode="w") as f_s:
             f_s.write(self._cc_file_template.substitute(
                 header_file_name=unicode(header_file_name),
@@ -191,16 +189,11 @@ class CodeGenerator(object):
         if enums is None:
             raise GenerateError("Enums is None")
 
-        return u"\n".join([self._indent_code(
-            self._enum_to_str_converter_template.substitute(
-                namespace=namespace,
-                enum=x.name,
-                mapping=self._indent_code(
-                    self._gen_enum_to_str_mapping(
-                        x,
-                        namespace),
-                    2)),
-            2) for x in enums])
+        return u"\n".join([self._enum_to_str_converter_template.substitute(
+            namespace=namespace,
+            enum=x.name,
+            mapping=self._indent_code(self._gen_enum_to_str_mapping(
+                x, namespace), 1)) for x in enums])
 
     def _gen_enum_to_str_mapping(self, enum, namespace):
         """Generate enum to string mapping code.
@@ -264,7 +257,7 @@ class CodeGenerator(object):
             raise GenerateError("Structs is None")
 
         return u"\n".join([self._indent_code(
-            self._gen_struct_decl(x), 2) for x in structs])
+            self._gen_struct_decl(x), 1) for x in structs])
 
     def _gen_struct_decl(self, struct):
         """Generate method prototype for struct for header file.
@@ -302,7 +295,7 @@ class CodeGenerator(object):
             raise GenerateError("Functions is None")
 
         return u"\n".join([self._indent_code(
-            self._gen_function_decl(x), 2) for x in functions])
+            self._gen_function_decl(x), 1) for x in functions])
 
     def _gen_function_decl(self, function):
         """Generate method prototype for function for header file.
@@ -555,9 +548,9 @@ class CodeGenerator(object):
                                     value=x.primary_name)
                              for x in member.param_type.
                              allowed_elements.values()])])
-                result = "".join([result, u"\n\n"]) if result else u""
+                result = u"".join([result, u"\n\n"]) if result else u""
             elif type(member.param_type) is Model.Array:
-                result = "".join(
+                result = u"".join(
                     [result, self._gen_schema_loc_decls(
                         [Model.Param(name=member.param_type.element_type.name
                          if type(member.param_type.element_type) is
@@ -668,7 +661,7 @@ class CodeGenerator(object):
         elif type(param) is Model.Enum:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.name,
-                params="".join(
+                params=u"".join(
                     [self._gen_schema_loc_emum_var_name(param),
                      u", ",
                      self._gen_schema_item_param_values(
@@ -682,7 +675,7 @@ class CodeGenerator(object):
                     [self._gen_schema_loc_emum_s_var_name(member_name),
                      u", ",
                      self._gen_schema_item_param_values(
-                         [["".join([param.enum.name, u"::eType"]),
+                         [[u"".join([param.enum.name, u"::eType"]),
                           default_value.primary_name if default_value
                           is not None else None]])]))
         else:
@@ -929,10 +922,10 @@ class CodeGenerator(object):
             internal_name=None,
             value=u"-1"))
         return self._enum_template.substitute(
-            comment=self._indent_code(self._gen_comment(enum), 1),
+            comment=self._gen_comment(enum),
             name=enum.name,
             enum_items=self._indent_code(self._gen_enum_elements(
-                enum_elements), 2))
+                enum_elements), 1))
 
     def _gen_enum_elements(self, enum_elements):
         """Generate enum elements for header file.
@@ -1064,7 +1057,7 @@ class CodeGenerator(object):
 
         returns = u""
         if type(interface_item_base) is Model.Function:
-            returns = "".join([u" *\n", self._function_return_comment])
+            returns = u"".join([u" *\n", self._function_return_comment])
 
         template = self._comment_doxygen_template if use_doxygen is \
             True else self._comment_cc_template
@@ -1256,13 +1249,16 @@ class CodeGenerator(object):
         u'''#include "$header_file_name"\n'''
         u'''\n'''
         u'''$namespace_open'''
+        u'''\n\n'''
         u'''$class_content'''
+        u'''\n\n'''
         u'''$namespace_close'''
+        u'''\n'''
         u'''#endif //$guard\n'''
-        u'''\n\n''')
+        u'''\n''')
 
     _namespace_open_template = string.Template(
-        u'''namespace $name {''')
+        u'''namespace $name {\n''')
 
     _cc_file_template = string.Template(
         u'''/**\n'''
@@ -1389,34 +1385,34 @@ class CodeGenerator(object):
         u'''//-------------- String to value enum mapping ----------------\n'''
         u'''\n'''
         u'''namespace NsSmartDeviceLink {\n'''
-        u'''  namespace NsSmartObjects {\n'''
+        u'''namespace NsSmartObjects {\n'''
+        u'''\n'''
         u'''$enum_string_coversions'''
-        u'''  }\n'''
-        u'''}\n'''
+        u'''\n'''
+        u'''} // NsSmartObjects\n'''
+        u'''} // NsSmartDeviceLink\n'''
         u'''\n''')
 
     _enum_to_str_converter_template = string.Template(
         u'''template <>\n'''
         u'''const std::map<${namespace}::${enum}::eType, '''
         u'''std::string> &TEnumSchemaItem<${namespace}::${enum}::eType>::'''
-        u'''getEnumElementsStringRepresentation(void)\n'''
-        u'''{\n'''
-        u'''    static bool isInitialized = false;\n'''
-        u'''    static std::map<${namespace}::${enum}::eType, '''
-        u'''std::string> enumStringRepresentationMap;\n'''
+        u'''getEnumElementsStringRepresentation() {\n'''
+        u'''  static bool is_initialized = false;\n'''
+        u'''  static std::map<${namespace}::${enum}::eType, '''
+        u'''std::string> enum_string_representation;\n'''
         u'''\n'''
-        u'''    if (false == isInitialized)\n'''
-        u'''    {\n'''
+        u'''  if (false == is_initialized) {\n'''
         u'''${mapping}'''
         u'''\n'''
-        u'''        isInitialized = true;\n'''
-        u'''    }\n'''
+        u'''    is_initialized = true;\n'''
+        u'''  }\n'''
         u'''\n'''
-        u'''    return enumStringRepresentationMap;\n'''
-        u'''}''')
+        u'''  return enum_string_representation;\n'''
+        u'''}\n''')
 
     _enum_to_str_mapping_template = string.Template(
-        u'''enumStringRepresentationMap.insert(std::make_pair(${namespace}::'''
+        u'''enum_string_representation.insert(std::make_pair(${namespace}::'''
         u'''${enum_name}::${enum_value}, "${string}"));''')
 
     _struct_schema_item_template = string.Template(
@@ -1524,53 +1520,53 @@ class CodeGenerator(object):
         u'''class $class_name : public NsSmartDeviceLink::NsJSONHandler::'''
         u'''CSmartFactory<FunctionID::eType, messageType::eType, '''
         u'''StructIdentifiers::eType> {\n'''
-        u'''  public:\n'''
-        u'''    /**\n'''
-        u'''     * @brief Constructor.\n'''
-        u'''     */\n'''
-        u'''    $class_name();\n'''
+        u''' public:\n'''
+        u'''  /**\n'''
+        u'''   * @brief Constructor.\n'''
+        u'''   */\n'''
+        u'''  $class_name();\n'''
         u'''\n'''
-        u'''  protected:\n'''
-        u'''    /**\n'''
-        u'''     * @brief Type that maps of struct IDs to schema items.\n'''
-        u'''     */\n'''
-        u'''    typedef std::map<const StructIdentifiers::eType, '''
+        u''' protected:\n'''
+        u'''  /**\n'''
+        u'''   * @brief Type that maps of struct IDs to schema items.\n'''
+        u'''   */\n'''
+        u'''  typedef std::map<const StructIdentifiers::eType, '''
         u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::'''
         u'''ISchemaItem> > TStructsSchemaItems;\n'''
         u'''\n'''
-        u'''    /**\n'''
-        u'''     * @brief Helper that allows to make reference to struct\n'''
-        u'''     *\n'''
-        u'''     * @param struct_schema_items Struct schema items.\n'''
-        u'''     * @param struct_id ID of structure to provide.\n'''
-        u'''     *\n'''
-        u'''     * @return utils::SharedPtr of strucute\n'''
-        u'''     */\n'''
-        u'''    static '''
+        u'''  /**\n'''
+        u'''   * @brief Helper that allows to make reference to struct\n'''
+        u'''   *\n'''
+        u'''   * @param struct_schema_items Struct schema items.\n'''
+        u'''   * @param struct_id ID of structure to provide.\n'''
+        u'''   *\n'''
+        u'''   * @return utils::SharedPtr of strucute\n'''
+        u'''   */\n'''
+        u'''  static '''
         u'''utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> '''
         u'''ProvideObjectSchemaItemForStruct(\n'''
         u'''        const TStructsSchemaItems &struct_schema_items,\n'''
         u'''        const StructIdentifiers::eType struct_id);\n'''
         u'''\n'''
-        u'''    /**\n'''
-        u'''     * @brief Initializes all struct schemes.\n'''
-        u'''     */\n'''
-        u'''    void InitStructSchemes('''
+        u'''  /**\n'''
+        u'''   * @brief Initializes all struct schemes.\n'''
+        u'''   */\n'''
+        u'''  void InitStructSchemes('''
         u'''TStructsSchemaItems &struct_schema_items);\n'''
         u'''\n'''
-        u'''    /**\n'''
-        u'''     * @brief Initializes all function schemes.\n'''
-        u'''     *\n'''
-        u'''     * @param struct_schema_items Struct schema items.\n'''
-        u'''     * @param function_id_items Set of all elements '''
+        u'''  /**\n'''
+        u'''   * @brief Initializes all function schemes.\n'''
+        u'''   *\n'''
+        u'''   * @param struct_schema_items Struct schema items.\n'''
+        u'''   * @param function_id_items Set of all elements '''
         u'''of FunctionID enum.\n'''
-        u'''     * @param message_type_items Set of all elements '''
+        u'''   * @param message_type_items Set of all elements '''
         u'''of messageType enum.\n'''
-        u'''     */\n'''
-        u'''    void InitFunctionSchemes(\n'''
-        u'''        const TStructsSchemaItems &struct_schema_items,\n'''
-        u'''        const std::set<FunctionID::eType> &function_id_items,\n'''
-        u'''        const std::set<messageType::eType> '''
+        u'''   */\n'''
+        u'''  void InitFunctionSchemes(\n'''
+        u'''      const TStructsSchemaItems &struct_schema_items,\n'''
+        u'''      const std::set<FunctionID::eType> &function_id_items,\n'''
+        u'''      const std::set<messageType::eType> '''
         u'''&message_type_items);\n'''
         u'''\n'''
         u'''$init_function_decls'''
@@ -1623,10 +1619,10 @@ class CodeGenerator(object):
 
     _enum_template = string.Template(
         u'''namespace $name {\n'''
-        u'''$comment'''
-        u'''  enum eType {\n'''
-        u'''$enum_items  };\n'''
-        u'''}\n''')
+        u'''$comment\n'''
+        u'''enum eType {\n'''
+        u'''$enum_items};\n'''
+        u'''} // $name\n''')
 
     _enum_element_with_value_template = string.Template(
         u'''$comment\n'''
