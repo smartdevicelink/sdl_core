@@ -265,12 +265,13 @@ int FormatterJsonRpc::FromString(const std::string &str,
 
     std::string message_type_string;
     Json::Value response_value;
+    bool response_value_found = false;
 
     if (false == root.isMember(kId)) {
       message_type_string = kNotification;
 
       if (false == root.isMember(kMethod)) {
-        result |= kMethodNotSpecified;
+        result |= kMethodNotSpecified | kUnknownMethod;
       } else {
         result |= ParseFunctionId<FunctionId>(root[kMethod], out);
       }
@@ -293,34 +294,49 @@ int FormatterJsonRpc::FromString(const std::string &str,
         result |= kInvalidFormat | kInvalidId;
       }
 
-      if (true == root.isMember(kMethod)) {
+      if (true == root.isMember(kParams)) {
         message_type_string = kRequest;
-        result |= ParseFunctionId<FunctionId>(root[kMethod], out);
+
+        if (false == root.isMember(kMethod)) {
+          result |= kMethodNotSpecified | kUnknownMethod;
+        } else {
+          result |= ParseFunctionId<FunctionId>(root[kMethod], out);
+        }
       } else {
         Json::Value method_container;
+        bool method_container_found = false;
 
-        if (true == root.isMember(kParams)) {
-          method_container = response_value;
-        } else if (true == root.isMember(kResult)) {
+        if (true == root.isMember(kResult)) {
           response_value = root[kResult];
+          response_value_found = true;
           method_container = root[kResult];
+          method_container_found = true;
         } else if (true == root.isMember(kError)) {
           response_value = root[kError];
+          response_value_found = true;
 
-          if (true == response_value.isMember(kData)) {
-            method_container = response_value[kData];
+          if (true == response_value.isObject()) {
+            if (true == response_value.isMember(kData)) {
+              method_container = response_value[kData];
+              method_container_found = true;
+            }
           }
+        } else {
+          result |= kUnknownMessageType;
         }
 
-        if (false == method_container.isObject()) {
-          result |= kInvalidFormat | kUnknownMessageType |
-              kMethodNotSpecified | kUnknownMethod;
+        if (0 == (result & kUnknownMessageType)) {
+          message_type_string = kResponse;
+        }
+
+        if (false == method_container_found) {
+          result |= kMethodNotSpecified | kUnknownMethod;
+        } else if (false == method_container.isObject()) {
+          result |= kInvalidFormat | kMethodNotSpecified | kUnknownMethod;
         } else {
           if (false == method_container.isMember(kMethod)) {
-            result |= kInvalidFormat | kUnknownMessageType |
-                kMethodNotSpecified | kUnknownMethod;
+            result |= kMethodNotSpecified | kUnknownMethod;
           } else {
-            message_type_string = kResponse;
             result |= ParseFunctionId<FunctionId>(method_container[kMethod],
                                                   out);
           }
@@ -340,9 +356,21 @@ int FormatterJsonRpc::FromString(const std::string &str,
     }
 
     if (true == root.isMember(kParams)) {
-      jsonValueToObj(root[kParams], out[strings::S_MSG_PARAMS]);
+      const Json::Value &params_value = root[kParams];
+
+      if (false == params_value.isObject()) {
+        result |= kInvalidFormat;
+      } else {
+        jsonValueToObj(root[kParams], out[strings::S_MSG_PARAMS]);
+      }
     } else if (true == root.isMember(kResult)) {
-      jsonValueToObj(root[kResult], out[strings::S_MSG_PARAMS]);
+      const Json::Value &result_value = root[kResult];
+
+      if (false == result_value.isObject()) {
+        result |= kInvalidFormat;
+      } else {
+        jsonValueToObj(root[kResult], out[strings::S_MSG_PARAMS]);
+      }
     } else {
       out[strings::S_MSG_PARAMS] = NsSmartObjects::CSmartObject(
           NsSmartObjects::SmartType_Map);
@@ -352,9 +380,11 @@ int FormatterJsonRpc::FromString(const std::string &str,
       out[strings::S_MSG_PARAMS].erase(kMethod);
       out[strings::S_MSG_PARAMS].erase(kCode);
 
-      if (true == root.isMember(kParams)) {
+      if (false == response_value_found) {
+        result |= kResponseCodeNotAvailable;
+      } else {
         if (false == response_value.isObject()) {
-          result |= kResponseCodeNotAvailable;
+          result |= kInvalidFormat | kResponseCodeNotAvailable;
         } else {
           if (false == response_value.isMember(kCode)) {
             result |= kResponseCodeNotAvailable;
@@ -362,7 +392,7 @@ int FormatterJsonRpc::FromString(const std::string &str,
             const Json::Value &code_value = response_value[kCode];
 
             if (false == code_value.isInt()) {
-              result |= kResponseCodeNotAvailable;
+              result |= kInvalidFormat | kResponseCodeNotAvailable;
             } else {
               out[strings::S_PARAMS][strings::kCode] = code_value.asInt();
             }
