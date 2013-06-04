@@ -73,6 +73,8 @@ set (SOURCES
 ./src/commands/list_files_response_command.cc
 ./src/commands/subscribe_button_command.cc
 ./src/commands/subscribe_button_response_command.cc
+./src/commands/show_constant_tbt_command.cc
+./src/commands/show_constant_tbt_response_command.cc
 )
 
 
