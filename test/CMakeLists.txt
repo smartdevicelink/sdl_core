@@ -20,6 +20,7 @@ include_directories (
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
   ../test/components/json_handler/include
+  ../test/components/
   ${CMAKE_BINARY_DIR}
 )
 

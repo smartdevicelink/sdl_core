@@ -37,7 +37,7 @@
 #include <string>
 #include <iostream>
 #include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
-#include "test/components/JSONHandler/test_JSONHandler_v4_protocol_v2_0_revP_schema.h"
+#include "test/components/json_handler/test_JSONHandler_v4_protocol_v2_0_revP_schema.h"
 
 using namespace Gen::test::components::JSONHandler2;
 using namespace NsSmartDeviceLink::NsSmartObjects;
