@@ -31,24 +31,53 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/put_file_response_command.h"
+#include "application_manager/commands/delete_file_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "utils/file_system.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-PutFileResponseCommand::PutFileResponseCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+DeleteFileCommand::DeleteFileCommand(
+    const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
-PutFileResponseCommand::~PutFileResponseCommand() {
+DeleteFileCommand::~DeleteFileCommand() {
 }
 
-void PutFileResponseCommand::Run() {
-  (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int>(file_system::AvailableSpace());
-  SendResponse();
+void DeleteFileCommand::Run() {
+  ApplicationImpl* application =
+      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params][strings::connection_key]));
+
+  if (!application) {
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  const std::string& sync_file_name =
+        (*message_)[strings::msg_params][strings::sync_file_name];
+
+  std::string relative_file_path = application->name();
+  relative_file_path += "/";
+  relative_file_path += sync_file_name;
+
+  std::string full_file_path = file_system::FullPath(relative_file_path);
+
+  if (file_system::FileExists(full_file_path)) {
+    if (file_system::DeleteFile(full_file_path)) {
+      application->DeleteFile(sync_file_name);
+      SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+    } else {
+      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+    }
+  } else {
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+  }
 }
 
 }  // namespace commands

@@ -31,24 +31,22 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/put_file_response_command.h"
-#include "utils/file_system.h"
+#include "application_manager/commands/list_files_command.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-PutFileResponseCommand::PutFileResponseCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+ListFilesCommand::ListFilesCommand(
+    const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
-PutFileResponseCommand::~PutFileResponseCommand() {
+ListFilesCommand::~ListFilesCommand() {
 }
 
-void PutFileResponseCommand::Run() {
-  (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int>(file_system::AvailableSpace());
-  SendResponse();
+void ListFilesCommand::Run() {
+  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
 }
 
 }  // namespace commands

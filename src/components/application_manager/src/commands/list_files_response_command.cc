@@ -31,21 +31,56 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/put_file_response_command.h"
+#include "application_manager/commands/list_files_response_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-PutFileResponseCommand::PutFileResponseCommand(
+ListFilesResponseCommand::ListFilesResponseCommand(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-PutFileResponseCommand::~PutFileResponseCommand() {
+ListFilesResponseCommand::~ListFilesResponseCommand() {
 }
 
-void PutFileResponseCommand::Run() {
+void ListFilesResponseCommand::Run() {
+  ApplicationImpl* application =
+        static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
+        application((*message_)[strings::params][strings::connection_key]));
+
+  if (!application) {
+    (*message_)[strings::msg_params][strings::success] = false;
+    (*message_)[strings::msg_params][strings::result_code] =
+        NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED;
+  } else {
+    if (!file_system::DirectoryExists(application->name())) {
+      (*message_)[strings::msg_params][strings::success] = false;
+      (*message_)[strings::msg_params][strings::result_code] =
+          NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR;
+    } else {
+      const std::string full_directory_path =
+          file_system::FullPath(application->name());
+      std::vector<std::string> list_files =
+          file_system::ListFiles(full_directory_path);
+      if (!list_files.empty()) {
+        int i = 0;
+        for (std::vector<std::string>::iterator it = list_files.begin();
+            list_files.end() != it; ++it) {
+          (*message_)[strings::msg_params][strings::filenames][i] = *it;
+          ++i;
+        }
+      } else {
+        (*message_)[strings::msg_params][strings::success] = false;
+        (*message_)[strings::msg_params][strings::result_code] =
+            NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR;
+      }
+    }
+  }
+
   (*message_)[strings::msg_params][strings::space_available] =
       static_cast<int>(file_system::AvailableSpace());
   SendResponse();

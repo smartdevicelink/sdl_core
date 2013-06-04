@@ -100,6 +100,8 @@ const char persistent_file[] = "persistentFile";
 const char file_data[] = "fileData";
 const char space_available[] = "spaceAvailable";
 
+const char filenames[] = "filenames";
+
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 
 }  // namespace strings
