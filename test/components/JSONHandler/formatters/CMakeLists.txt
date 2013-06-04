@@ -19,6 +19,7 @@ set (LIBRARIES
     gmock
     gmock_main
     test_JSONHandler_alrpcv2
+    test_json_rpc
     SmartObjects
     log4cplus
     jsoncpp
