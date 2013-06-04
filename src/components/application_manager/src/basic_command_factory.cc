@@ -67,6 +67,8 @@
 #include "application_manager/commands/list_files_response_command.h"
 #include "application_manager/commands/subscribe_button_command.h"
 #include "application_manager/commands/subscribe_button_response_command.h"
+#include "application_manager/commands/show_constant_tbt_command.h"
+#include "application_manager/commands/show_constant_tbt_response_command.h"
 
 
 // TODO(AK): Include the directory when naming .h files
@@ -217,6 +219,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         }
         break;
     }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ShowConstantTBTID: {
+         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+           command.reset(new commands::ShowConstantTBTResponseCommand(message));
+         } else {
+           command.reset(new commands::ShowConstantTBTCommand(message));
+         }
+         break;
+     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAudioPassThruID: {
       command.reset(new commands::OnAudioPassThruCommand(message));
       break;
