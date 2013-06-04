@@ -27,5 +27,5 @@ set (LIBRARIES
 
 create_test("test_JSONHandler_FormatterJsonSDLRPCv2Test" "./CFormatterTestHelper.cpp;./FormatterJsonSDLRPCv2Test.cpp" "${LIBRARIES}")
 create_test("test_JSONHandler_FormatterJsonSDLRPCv1Test" "./CFormatterTestHelper.cpp;./FormatterJsonSDLRPCv1Test.cpp" "${LIBRARIES}")
-#create_test("test_JSONHandler_FormatterJsonRPC2Test" "./FormatterJsonRPC2Test.cpp" "${LIBRARIES}")
+create_test("test_JSONHandler_FormatterJsonRPC2Test" "./CFormatterTestHelper.cpp;./formatter_json_rpc_test.cc" "${LIBRARIES}")
 create_test("test_JSONHandler_MetaFormatter" "./meta_formatter_test.cc;./meta_formatter_test_helper.cc" "${LIBRARIES}")

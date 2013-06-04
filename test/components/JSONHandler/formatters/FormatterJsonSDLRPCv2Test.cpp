@@ -48,7 +48,7 @@
 #include "CFormatterTestHelper.hpp"
 
 
-namespace test { namespace components { namespace JSONHandler { namespace formatters {
+namespace test { namespace components { namespace JSONHandler { namespace Formatters {
 
 namespace function_id {
 /**
@@ -237,7 +237,7 @@ enum Type {
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-namespace func_id = test::components::JSONHandler::formatters::function_id;
+namespace func_id = test::components::JSONHandler::Formatters::function_id;
 
 template <>
 const std::map<func_id::Type, std::string> &
@@ -259,7 +259,7 @@ TEnumSchemaItem<func_id::Type>::getEnumElementsStringRepresentation() {
   return enum_string_representation;
 }
 
-namespace msg_type = test::components::JSONHandler::formatters::message_type;
+namespace msg_type = test::components::JSONHandler::Formatters::message_type;
 
 template <>
 const std::map<msg_type::Type, std::string> &

@@ -39,7 +39,7 @@
 
 #include "CFormatterTestHelper.hpp"
 
-namespace test { namespace components { namespace JSONHandler { namespace formatters {
+namespace test { namespace components { namespace JSONHandler { namespace Formatters {
 
     // The code below is cut and paste from the generated code just to provide necessary environment for string <-> enum conversion.
     namespace FunctionID
@@ -445,17 +445,17 @@ namespace test { namespace components { namespace JSONHandler { namespace format
 namespace NsSmartDeviceLink { namespace NsSmartObjects {
 
     template <>
-    const std::map<test::components::JSONHandler::formatters::FunctionID::eType, std::string> &
-    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::formatters::FunctionID::eType>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::JSONHandler::Formatters::FunctionID::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::Formatters::FunctionID::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::JSONHandler::formatters::FunctionID::eType, std::string> enumStringRepresentationMap;
+        static std::map<test::components::JSONHandler::Formatters::FunctionID::eType, std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::RegisterAppInterface, "RegisterAppInterface"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::UnregisterAppInterface, "UnregisterAppInterface"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::SetGlobalProperties, "SetGlobalProperties"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::Formatters::FunctionID::RegisterAppInterface, "RegisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::Formatters::FunctionID::UnregisterAppInterface, "UnregisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::Formatters::FunctionID::SetGlobalProperties, "SetGlobalProperties"));
 
             isInitialized = true;
         }
@@ -464,17 +464,17 @@ namespace NsSmartDeviceLink { namespace NsSmartObjects {
     }
 
     template <>
-    const std::map<test::components::JSONHandler::formatters::messageType::eType, std::string> &
-    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::formatters::messageType::eType>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::JSONHandler::Formatters::messageType::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::Formatters::messageType::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::JSONHandler::formatters::messageType::eType, std::string> enumStringRepresentationMap;
+        static std::map<test::components::JSONHandler::Formatters::messageType::eType, std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::request, "request"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::response, "response"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::notification, "notification"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::Formatters::messageType::request, "request"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::Formatters::messageType::response, "response"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::Formatters::messageType::notification, "notification"));
 
             isInitialized = true;
         }
