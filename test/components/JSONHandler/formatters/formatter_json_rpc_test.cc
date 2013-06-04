@@ -162,6 +162,526 @@ TEST_F(CFormatterTestHelper, test_JsonRPC2) {
   compareObjects(srcObj, dstObj);
 }
 
+/**
+ * @brief Check result of parsing of the specified string for specific error.
+ *
+ * @param error Error code to check.
+ * @param str String to parse.
+ *
+ * @return true if parsing result contains specified error code.
+ */
+bool CheckErrorCode(int error, const std::string &str) {
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject out;
+
+  return error == (error & JSONFormatter::FromString<FunctionID::eType,
+                                                     messageType::eType>(
+      str, out));
+}
+
+/**
+ * @brief Invalid JSON RPC string.
+ *
+ * Used in several tests because it must generate multiple error codes.
+ */
+static const char *g_invalid_jsonrpc_string =
+    "{"
+    "  id: 1"
+    "  method: \"Method1\""
+    "  params: {";
+
+TEST(FormatterJsonRpc, ParsingError) {
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kParsingError,
+                             g_invalid_jsonrpc_string));
+
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kParsingError,
+                              "{"
+                              "  \"method\": \"Method1\""
+                              "}"));
+}
+
+TEST(FormatterJsonRpc, InvalidFormat) {
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"id\": 1,"
+                             "  \"method\": \"Method1\""
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": 2,"
+                             "  \"id\": 1,"
+                             "  \"method\": \"Method1\""
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": [],"
+                             "  \"method\": \"Method1\""
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": {},"
+                             "  \"method\": \"Method1\""
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": {}"
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": {},"
+                             "  \"method\": 1"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": Null,"
+                              "  \"method\": \"Method1\""
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"method\": \"Method1\""
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": \"stringId\","
+                              "  \"method\": \"Method1\""
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"params\": 10"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"params\": {}"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"params\": 10"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"params\": {}"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"result\": 10"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"result\": {}"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"error\": 10"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidFormat,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"error\": {}"
+                              "}"));
+}
+
+TEST(FormatterJsonRpc, MethodNotSpecified) {
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                             g_invalid_jsonrpc_string));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\""
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"method\": \"Method1\""
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"params\":"
+                             "  {"
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"method\": \"Method1\","
+                              "  \"params\":"
+                              "  {"
+                              "    \"p\": 0"
+                              "  }"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"result\":"
+                             "  {"
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"result\":"
+                              "  {"
+                              "    \"method\": \"Method1\","
+                              "    \"p\": 0"
+                              "  }"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"error\":"
+                             "  {"
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kMethodNotSpecified,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"error\":"
+                              "  {"
+                              "    \"data\":"
+                              "    {"
+                              "      \"method\": \"Method1\""
+                              "    },"
+                              "    \"p\": 0"
+                              "  }"
+                              "}"));
+}
+
+TEST(FormatterJsonRpc, UnknownMethod) {
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             g_invalid_jsonrpc_string));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\""
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"method\": \"Method1\""
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"method\": \"RegisterAppInterface\""
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"params\":"
+                             "  {"
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"method\": \"Method1\","
+                             "  \"params\":"
+                             "  {"
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"method\": \"UnregisterAppInterface\","
+                              "  \"params\":"
+                              "  {"
+                              "    \"p\": 0"
+                              "  }"
+                              "}"));
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"result\":"
+                             "  {"
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"result\":"
+                             "  {"
+                             "    \"method\": \"Method1\","
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"result\":"
+                              "  {"
+                              "    \"method\": \"SetGlobalProperties\","
+                              "    \"p\": 0"
+                              "  }"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"error\":"
+                             "  {"
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"error\":"
+                             "  {"
+                             "    \"data\":"
+                             "    {"
+                             "      \"method\": \"Method1\""
+                             "    },"
+                             "    \"p\": 0"
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMethod,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"error\":"
+                              "  {"
+                              "    \"data\":"
+                              "    {"
+                              "      \"method\": \"RegisterAppInterface\""
+                              "    },"
+                              "    \"p\": 0"
+                              "  }"
+                              "}"));
+}
+
+TEST(FormatterJsonRpc, UnknownMessageType) {
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMessageType,
+                             g_invalid_jsonrpc_string));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMessageType, "{}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMessageType,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMessageType,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\""
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMessageType,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"params\": {}"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMessageType,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"params\": {}"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMessageType,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"result\": {}"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMessageType,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"error\": {}"
+                              "}"));
+}
+
+TEST(FormatterJsonRpc, InvalidId) {
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidId,
+                             g_invalid_jsonrpc_string));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidId, "{}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidId,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidId,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1.5"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidId,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": \"StringId\""
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidId,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": Null"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidId,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": []"
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidId,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": {}"
+                             "}"));
+}
+
+TEST(FormatterJsonRpc, ResponseCodeNotAvailable) {
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                              g_invalid_jsonrpc_string));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable, "{}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\""
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"params\": {}"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"result\": {}"
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"result\":"
+                             "  {"
+                             "    \"code\": \"c\""
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"result\":"
+                              "  {"
+                              "    \"code\": 10"
+                              "  }"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"error\":"
+                             "  {"
+                             "    \"code\": \"c\""
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kResponseCodeNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"error\":"
+                              "  {"
+                              "    \"code\": 10"
+                              "  }"
+                              "}"));
+}
+
 }  //namespace Formatters
 }  //namespace JSONHandler
 }  //namespace components
