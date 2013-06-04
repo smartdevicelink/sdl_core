@@ -31,56 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/subscribe_button_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
-#include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/Result.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNSUBSCRIBE_BUTTON_RESPONSE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNSUBSCRIBE_BUTTON_RESPONSE_COMMAND_H_
+
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-namespace str = strings;
+/**
+ * @brief UnsubscribeButtonCommandResponse command class
+ **/
+class UnsubscribeButtonCommandResponse : public CommandResponseImpl {
+ public:
+  /**
+   * @brief UnsubscribeButtonCommandResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit UnsubscribeButtonCommandResponse(const MessageSharedPtr& message);
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+  /**
+   * @brief UnsubscribeButtonCommandResponse class destructor
+   **/
+  virtual ~UnsubscribeButtonCommandResponse();
 
-SubscribeButtonCommandRequest::SubscribeButtonCommandRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-SubscribeButtonCommandRequest::~SubscribeButtonCommandRequest() {
-}
-
-void SubscribeButtonCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeButtonCommandRequest::Run ");
-
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[str::params][str::connection_key]));
-
-  if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  const unsigned int btn_id = static_cast<unsigned int>
-      ((*message_)[str::params][str::button_name].asInt());
-  if (app->IsSubscribedToButton(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button " << btn_id);
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::SUBSCRIBED_ALREADY);
-    return;
-  }
-
-  app->SubscribeToButton(btn_id);
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UnsubscribeButtonCommandResponse);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNSUBSCRIBE_BUTTON_RESPONSE_COMMAND_H_

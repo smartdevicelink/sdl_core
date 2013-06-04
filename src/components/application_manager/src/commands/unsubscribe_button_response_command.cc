@@ -31,54 +31,40 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/subscribe_button_command.h"
+#include "application_manager/commands/unsubscribe_button_response_command.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/Result.h"
+#include "application_manager/message_chaining.h"
+#include "v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-namespace str = strings;
-
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-SubscribeButtonCommandRequest::SubscribeButtonCommandRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+UnsubscribeButtonCommandResponse::UnsubscribeButtonCommandResponse(
+    const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-SubscribeButtonCommandRequest::~SubscribeButtonCommandRequest() {
+UnsubscribeButtonCommandResponse::~UnsubscribeButtonCommandResponse() {
 }
 
-void SubscribeButtonCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeButtonCommandRequest::Run ");
+void UnsubscribeButtonCommandResponse::Run() {
+  LOG4CXX_INFO(logger_, "UnsubscribeButtonCommandResponse::Run ");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[str::params][str::connection_key]));
+  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-  if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+  // check if response false
+  if ((*message_)[strings::msg_params][strings::success] == false) {
+    SendResponse();
     return;
   }
 
-  const unsigned int btn_id = static_cast<unsigned int>
-      ((*message_)[str::params][str::button_name].asInt());
-  if (app->IsSubscribedToButton(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button " << btn_id);
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::SUBSCRIBED_ALREADY);
-    return;
-  }
-
-  app->SubscribeToButton(btn_id);
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  // TODO(DK): Some logic
+  SendResponse();
 }
 
 }  // namespace commands

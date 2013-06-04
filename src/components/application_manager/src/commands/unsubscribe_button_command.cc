@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/subscribe_button_command.h"
+#include "application_manager/commands/unsubscribe_button_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
@@ -47,15 +47,15 @@ namespace str = strings;
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-SubscribeButtonCommandRequest::SubscribeButtonCommandRequest(
+UnsubscribeButtonCommandRequest::UnsubscribeButtonCommandRequest(
     const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
-SubscribeButtonCommandRequest::~SubscribeButtonCommandRequest() {
+UnsubscribeButtonCommandRequest::~UnsubscribeButtonCommandRequest() {
 }
 
-void SubscribeButtonCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeButtonCommandRequest::Run ");
+void UnsubscribeButtonCommandRequest::Run() {
+  LOG4CXX_INFO(logger_, "UnsubscribeButtonCommandRequest::Run ");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
@@ -70,14 +70,14 @@ void SubscribeButtonCommandRequest::Run() {
 
   const unsigned int btn_id = static_cast<unsigned int>
       ((*message_)[str::params][str::button_name].asInt());
-  if (app->IsSubscribedToButton(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button " << btn_id);
+  if (!app->IsSubscribedToButton(btn_id)) {
+    LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::SUBSCRIBED_ALREADY);
+                 NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
     return;
   }
 
-  app->SubscribeToButton(btn_id);
+  app->UnsubscribeFromButton(btn_id);
   SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
 }
 

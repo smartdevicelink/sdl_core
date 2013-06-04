@@ -67,6 +67,8 @@
 #include "application_manager/commands/list_files_response_command.h"
 #include "application_manager/commands/subscribe_button_command.h"
 #include "application_manager/commands/subscribe_button_response_command.h"
+#include "application_manager/commands/unsubscribe_button_command.h"
+#include "application_manager/commands/unsubscribe_button_response_command.h"
 #include "application_manager/commands/show_constant_tbt_command.h"
 #include "application_manager/commands/show_constant_tbt_response_command.h"
 
@@ -216,6 +218,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
           command.reset(new commands::SubscribeButtonCommandResponse(message));
         } else {
           command.reset(new commands::SubscribeButtonCommandRequest(message));
+        }
+        break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::UnsubscribeButtonID: {
+        if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+          command.reset(new commands::UnsubscribeButtonCommandResponse(message));
+        } else {
+          command.reset(new commands::UnsubscribeButtonCommandRequest(message));
         }
         break;
     }
