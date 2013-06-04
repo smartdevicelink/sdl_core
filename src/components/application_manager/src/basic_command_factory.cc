@@ -71,7 +71,8 @@
 #include "application_manager/commands/unsubscribe_button_response_command.h"
 #include "application_manager/commands/show_constant_tbt_command.h"
 #include "application_manager/commands/show_constant_tbt_response_command.h"
-
+#include "application_manager/commands/subscribe_vehicle_data_command.h"
+#include "application_manager/commands/subscribe_vehicle_data_response_command.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -234,6 +235,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
            command.reset(new commands::ShowConstantTBTResponseCommand(message));
          } else {
            command.reset(new commands::ShowConstantTBTCommand(message));
+         }
+         break;
+     }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SubscribeVehicleDataID: {
+         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+           command.reset(new commands::SubscribeVehicleDataCommandResponse(message));
+         } else {
+           command.reset(new commands::SubscribeVehicleDataCommandRequest(message));
          }
          break;
      }

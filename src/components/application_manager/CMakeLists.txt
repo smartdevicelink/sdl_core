@@ -77,6 +77,8 @@ set (SOURCES
 ./src/commands/unsubscribe_button_response_command.cc
 ./src/commands/show_constant_tbt_command.cc
 ./src/commands/show_constant_tbt_response_command.cc
+./src/commands/subscribe_vehicle_data_command.cc
+./src/commands/subscribe_vehicle_data_response_command.cc
 )
 
 
