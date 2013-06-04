@@ -73,6 +73,9 @@
 #include "application_manager/commands/show_constant_tbt_response_command.h"
 #include "application_manager/commands/subscribe_vehicle_data_command.h"
 #include "application_manager/commands/subscribe_vehicle_data_response_command.h"
+#include "application_manager/commands/alert_maneuver_command.h"
+#include "application_manager/commands/alert_maneuver_response_command.h"
+
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -245,7 +248,15 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
            command.reset(new commands::SubscribeVehicleDataCommandRequest(message));
          }
          break;
-     }
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::AlertManeuverID: {
+         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+           command.reset(new commands::AlertManeuverResponseCommand(message));
+         } else {
+           command.reset(new commands::AlertManeuverCommand(message));
+         }
+         break;
+    }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAudioPassThruID: {
       command.reset(new commands::OnAudioPassThruCommand(message));
       break;
