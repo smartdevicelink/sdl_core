@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "JSONHandler/SDLRPCObjects/V2/Result.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -57,13 +57,6 @@ SubscribeButtonCommandRequest::~SubscribeButtonCommandRequest() {
 void SubscribeButtonCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeButtonCommandRequest::Run ");
 
-  if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
-    LOG4CXX_ERROR_EXT(logger_, "TOO_MANY_PENDING_REQUESTS");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::TOO_MANY_PENDING_REQUESTS);
-    return;
-  }
-
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[str::params][str::connection_key]));
@@ -74,6 +67,18 @@ void SubscribeButtonCommandRequest::Run() {
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+
+  const unsigned int btn_id = static_cast<unsigned int>
+      ((*message_)[str::params][str::button_name].asInt());
+  if (app->IsSubscribedToButton(btn_id)) {
+    LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::SUBSCRIBED_ALREADY);
+    return;
+  }
+
+  app->SubscribeToButton(btn_id);
+  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
 }
 
 }  // namespace commands

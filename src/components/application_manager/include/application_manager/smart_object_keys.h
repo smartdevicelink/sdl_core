@@ -92,6 +92,7 @@ const char max_duration[] = "maxDuration";
 const char sampling_rate[] = "samplingRate";
 const char bits_per_sample[] = "bitsPerSample";
 const char audio_type[] = "audioType";
+const char button_name[] = "buttonName";
 
 // PutFile
 const char sync_file_name[] = "syncFileName";
