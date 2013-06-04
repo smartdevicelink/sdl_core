@@ -35,17 +35,21 @@
 #include "application_manager/basic_command_factory.h"
 #include "application_manager/message_conversion.h"
 #include "application_manager/message_chaining.h"
+#include "application_manager/audio_pass_thru_thread_impl.h"
 #include "utils/macro.h"
+#include "utils/threads/thread.h"
 
 namespace application_manager {
 
 ApplicationManagerImpl::ApplicationManagerImpl()
 : hmi_deletes_commands_(false),
-  audio_pass_thru_flag_(false) {
+  audio_pass_thru_flag_(false),
+  perform_audio_thread_(NULL) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
+  delete perform_audio_thread_;
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -197,6 +201,31 @@ bool ApplicationManagerImpl::audio_pass_thru_flag() const {
 
 void ApplicationManagerImpl::set_audio_pass_thru_flag(bool flag) {
   audio_pass_thru_flag_ = flag;
+}
+
+void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
+                               int correlation_id, int max_duration,
+                               int sampling_rate, int bits_per_sample,
+                               int audio_type) {
+  AudioPassThruThreadImpl* thread_impl =
+    new AudioPassThruThreadImpl(static_cast<unsigned int>(session_key),
+        static_cast<unsigned int>(correlation_id),
+        static_cast<unsigned int>(max_duration),
+        static_cast<SamplingRate>(sampling_rate),
+        static_cast<AudioCaptureQuality>(bits_per_sample),
+        static_cast<AudioType>(audio_type));
+  thread_impl->Init();
+  perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
+                              thread_impl);
+
+  perform_audio_thread_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
+}
+
+void ApplicationManagerImpl::StopAudioPassThruThread() {
+  perform_audio_thread_->stop();
+  delete perform_audio_thread_;
+  perform_audio_thread_ = NULL;
 }
 
 void ApplicationManagerImpl::onMessageReceived(

@@ -89,6 +89,9 @@ const char soft_buttons[] = "softButtons";
 const char audio_pass_display_text1[] = "audioPassThruDisplayText1";
 const char audio_pass_display_text2[] = "audioPassThruDisplayText2";
 const char max_duration[] = "maxDuration";
+const char sampling_rate[] = "samplingRate";
+const char bits_per_sample[] = "bitsPerSample";
+const char audio_type[] = "audioType";
 
 // PutFile
 const char sync_file_name[] = "syncFileName";

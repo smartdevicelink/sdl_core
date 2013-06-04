@@ -108,8 +108,8 @@ void PerformAudioPassThruCommandRequest::Run() {
   }
 
   // duration
-  (*ui_audio)[strings::msg_params][hmi_request::duration] =
-      (*message_)[str::msg_params][str::duration];
+  (*ui_audio)[strings::msg_params][hmi_request::max_duration] =
+      (*message_)[str::msg_params][str::max_duration];
 
   const int corellation_id =
       (*message_)[strings::params][strings::correlation_id];
@@ -121,7 +121,11 @@ void PerformAudioPassThruCommandRequest::Run() {
       connection_key, corellation_id, audio_cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
-  // TODO(DK): AudioPassThruThreadImpl startWithOptions
+  ApplicationManagerImpl::instance()->StartAudioPassThruThread(connection_key,
+      corellation_id, (*message_)[str::msg_params][str::max_duration].asInt(),
+      (*message_)[str::msg_params][str::sampling_rate].asInt(),
+      (*message_)[str::msg_params][str::bits_per_sample].asInt(),
+      (*message_)[str::msg_params][str::audio_type].asInt());
 }
 
 void PerformAudioPassThruCommandRequest::SendSpeakRequest() const {

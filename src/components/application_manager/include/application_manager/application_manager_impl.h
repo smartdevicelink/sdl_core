@@ -51,6 +51,10 @@ class CSmartObject;
 }
 }
 
+namespace threads {
+class Thread;
+}
+
 namespace application_manager {
 
 /**
@@ -105,10 +109,10 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return pointer to MessageChaining
      */
     MessageChaining* AddMessageChain(MessageChaining* chain,
-                                     unsigned int connection_key,
-                                     unsigned int correlation_id,
-                                     unsigned int function_id,
-                                     const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
+        unsigned int connection_key,
+        unsigned int correlation_id,
+        unsigned int function_id,
+        const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
      * @brief Decrease chain for correlation ID
@@ -142,6 +146,25 @@ class ApplicationManagerImpl : public ApplicationManager
      * @param flag New state to be set
      */
     void set_audio_pass_thru_flag(bool flag);
+
+    /*
+     * @brief Starts audio pass thru thread
+     *
+     * @param session_key     Session key of connection for Mobile side
+     * @param correlation_id  Correlation id for response for Mobile side
+     * @param max_duration    Max duration of audio recording in milliseconds
+     * @param sampling_rate   Value for rate(8, 16, 22, 44 kHz)
+     * @param bits_per_sample The quality the audio is recorded.
+     * @param audio_type      Type of audio data
+     */
+    void StartAudioPassThruThread(int session_key, int correlation_id,
+                                   int max_duration, int sampling_rate,
+                                   int bits_per_sample, int audio_type);
+
+    /*
+     * @brief Terminates audio pass thru thread
+     */
+    void StopAudioPassThruThread();
 
     /////////////////////////////////////////////////////
 
@@ -212,10 +235,11 @@ class ApplicationManagerImpl : public ApplicationManager
     /**
      * @brief List of applications
      */
-    std::set<Application*> application_list_;
+    std::set<Application*>      application_list_;
     MessageChains               message_chaining_;
     bool                        hmi_deletes_commands_;
     bool                        audio_pass_thru_flag_;
+    threads::Thread*            perform_audio_thread_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };

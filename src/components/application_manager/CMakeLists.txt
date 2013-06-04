@@ -19,6 +19,7 @@ set (SOURCES
 ./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/basic_command_factory.cc
+./src/audio_pass_thru_thread_impl.cc
 ./src/commands/command_impl.cc
 ./src/commands/command_request_impl.cc
 ./src/commands/command_response_impl.cc

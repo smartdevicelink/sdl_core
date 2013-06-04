@@ -79,6 +79,7 @@ void EndAudioPassThruCommandRequest::Run() {
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
       connection_key, corellation_id, audio_cmd_id);
 
+  ApplicationManagerImpl::instance()->StopAudioPassThruThread();
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
 }
 
