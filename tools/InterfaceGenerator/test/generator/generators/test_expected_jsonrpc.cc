@@ -125,7 +125,7 @@ CSmartSchema XXX::YYY::ZZZ::Test::InitFunction_name1_request(
   //
   // ToDo: Do1
   // ToDo: Do2
-  TSharedPtr<ISchemaItem> param1_SchemaItem = TEnumSchemaItem<Enum_new4::eType>::create(Enum_new4_all_enum_values, TSchemaItemParameter<Enum_new4::eType>(_11));
+  TSharedPtr<ISchemaItem> param1_SchemaItem = TEnumSchemaItem<Enum_new4::eType>::create(Enum_new4_all_enum_values, TSchemaItemParameter<Enum_new4::eType>(Enum_new4::_11));
 
   // Function parameter param2.
   TSharedPtr<ISchemaItem> param2_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(param2_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>(name1));

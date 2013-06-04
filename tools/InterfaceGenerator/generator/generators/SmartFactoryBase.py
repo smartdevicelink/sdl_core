@@ -641,7 +641,9 @@ class CodeGenerator(object):
             code = self._impl_code_string_item_template.substitute(
                 params=self._gen_schema_item_param_values(
                     [[u"size_t", param.max_length],
-                     [u"std::string", default_value]]))
+                     [u"std::string", u"".join(
+                    [u'"', default_value, u'"']) if default_value
+                         is not None else u""]]))
         elif type(param) is Model.Array:
             code = self._impl_code_array_item_template.substitute(
                 params=u"".join(
@@ -666,8 +668,9 @@ class CodeGenerator(object):
                      u", ",
                      self._gen_schema_item_param_values(
                          [[u"".join([param.name, u"::eType"]),
-                          default_value.primary_name if default_value
-                          is not None else None]])]))
+                          u"".join([param.name, u"::",
+                                    default_value.primary_name]) if
+                           default_value is not None else None]])]))
         elif type(param) is Model.EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
