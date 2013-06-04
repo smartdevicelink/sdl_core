@@ -71,6 +71,9 @@ AudioPassThruThreadImpl::~AudioPassThruThreadImpl() {
 void AudioPassThruThreadImpl::Init() {
   synchronisation_.init();
   timer_ = new sync_primitives::Timer(&synchronisation_);
+  if (!timer_) {
+    LOG4CXX_ERROR_EXT(logger_, "Init NULL pointer");
+  }
 }
 
 void AudioPassThruThreadImpl::FactoryCreateCommand(
@@ -92,10 +95,10 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
       (*error_response)[strings::params][strings::message_type] =
           MessageType::kResponse;
       (*error_response)[strings::params][strings::correlation_id] =
-          correlation_id_;
+          static_cast<int>(correlation_id_);
 
       (*error_response)[strings::params][strings::connection_key] =
-          session_key_;
+          static_cast<int>(session_key_);
       (*error_response)[strings::params][strings::function_id] =
           NsSmartDeviceLinkRPC::V2::FunctionID::eType::PerformAudioPassThruID;
 
@@ -118,9 +121,10 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
   (*end_audio)[strings::params][strings::message_type] =
       MessageType::kResponse;
   (*end_audio)[strings::params][strings::correlation_id] =
-      correlation_id_;
+      static_cast<int>(correlation_id_);
 
-  (*end_audio)[strings::params][strings::connection_key] = session_key_;
+  (*end_audio)[strings::params][strings::connection_key] =
+      static_cast<int>(session_key_);
   (*end_audio)[strings::params][strings::function_id] =
       NsSmartDeviceLinkRPC::V2::FunctionID::eType::EndAudioPassThruID;
   (*end_audio)[strings::msg_params][strings::success] = true;
@@ -249,9 +253,10 @@ void AudioPassThruThreadImpl::threadMain() {
     (*on_audio_pass)[strings::params][strings::message_type] =
         MessageType::kNotification;
     (*on_audio_pass)[strings::params][strings::correlation_id] =
-        correlation_id_;
+        static_cast<int>(correlation_id_);
 
-    (*on_audio_pass)[strings::params][strings::connection_key] = session_key_;
+    (*on_audio_pass)[strings::params][strings::connection_key] =
+        static_cast<int>(session_key_);
     (*on_audio_pass)[strings::params][strings::function_id] =
         NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAudioPassThruID;
 

@@ -163,8 +163,8 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
   sync_primitives::SynchronisationPrimitives synchronisation_;
   sync_primitives::Timer*     timer_;
 
-  int                         session_key_;
-  int                         correlation_id_;
+  unsigned int                session_key_;
+  unsigned int                correlation_id_;
   unsigned int                max_duration_;
   SamplingRate                sampling_rate_;
   AudioCaptureQuality         bits_per_sample_;

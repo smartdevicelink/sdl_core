@@ -65,6 +65,8 @@
 #include "application_manager/commands/delete_file_response_command.h"
 #include "application_manager/commands/list_files_command.h"
 #include "application_manager/commands/list_files_response_command.h"
+#include "application_manager/commands/subscribe_button_command.h"
+#include "application_manager/commands/subscribe_button_response_command.h"
 
 
 // TODO(AK): Include the directory when naming .h files
@@ -204,6 +206,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
           command.reset(new commands::ListFilesResponseCommand(message));
         } else {
           command.reset(new commands::ListFilesCommand(message));
+        }
+        break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SubscribeButtonID: {
+        if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+          command.reset(new commands::SubscribeButtonCommandResponse(message));
+        } else {
+          command.reset(new commands::SubscribeButtonCommandRequest(message));
         }
         break;
     }

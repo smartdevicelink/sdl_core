@@ -71,6 +71,8 @@ set (SOURCES
 ./src/commands/delete_file_response_command.cc
 ./src/commands/list_files_command.cc
 ./src/commands/list_files_response_command.cc
+./src/commands/subscribe_button_command.cc
+./src/commands/subscribe_button_response_command.cc
 )
 
 
