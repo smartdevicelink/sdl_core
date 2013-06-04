@@ -39,7 +39,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "../../../src/components/TransportManager/src/CTransportManager.hpp"
+#include "TransportManager/ITransportManager.hpp"
 
 using ::testing::_;
 
@@ -52,7 +52,7 @@ namespace test
             namespace HandleGeneratorsTest
             {
 
-                class TestTransportManager: public NsSmartDeviceLink::NsTransportManager::CTransportManager
+                class TestTransportManager: public NsSmartDeviceLink::NsTransportManager::ITransportManager
                 {
                 public:
                     void run()

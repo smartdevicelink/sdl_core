@@ -20,4 +20,8 @@ set(LIBRARIES
     jsoncpp
 )
 
-# create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")
+set (SOURCES
+  ./api_converter_v1_test.cpp
+)
+
+#add_library("test_ApplicationManagerTest" "${SOURCES}")

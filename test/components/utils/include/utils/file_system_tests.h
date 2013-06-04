@@ -28,6 +28,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_UTILS_INCLUDE_REQUEST_UTILS_FILE_SYSTEM_TESTS_H_
+#define TEST_COMPONENTS_UTILS_INCLUDE_REQUEST_UTILS_FILE_SYSTEM_TESTS_H_
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -108,8 +111,4 @@ namespace utils  {
 }  // namespace components
 }  // namespace test
 
-
-int main(int argc, char **argv) {
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+#endif  //TEST_COMPONENTS_UTILS_INCLUDE_REQUEST_UTILS_FILE_SYSTEM_TESTS_H_
