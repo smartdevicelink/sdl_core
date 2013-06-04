@@ -48,6 +48,7 @@ const char *FormatterJsonRpc::kJsonRpcExpectedValue = "2.0";
 const char *FormatterJsonRpc::kId = "id";
 const char *FormatterJsonRpc::kMethod = "method";
 const char *FormatterJsonRpc::kParams = "params";
+const char *FormatterJsonRpc::kResult = "result";
 const char *FormatterJsonRpc::kError = "error";
 const char *FormatterJsonRpc::kCode = "code";
 const char *FormatterJsonRpc::kData = "data";
@@ -59,6 +60,7 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
   root[kJsonRpc] = kJsonRpcExpectedValue;
 
   NsSmartObjects::CSmartObject formatted_object(obj);
+  Json::Value msg_params_json(Json::objectValue);
   formatted_object.getSchema().unapplySchema(formatted_object);
 
   bool result = formatted_object.keyExists(strings::S_MSG_PARAMS);
@@ -68,9 +70,7 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
 
     result = (NsSmartObjects::SmartType_Map == msg_params.getType());
     if (true == result) {
-      Json::Value msg_params_json(Json::objectValue);
       objToJsonValue(msg_params, msg_params_json);
-      root[kParams] = msg_params_json;
     }
   }
 
@@ -91,10 +91,12 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
         const std::string message_type = message_type_object;
 
         if (kRequest == message_type) {
+          root[kParams] = msg_params_json;
           result = result && SetMethod(params, root);
           result = result && SetId(params, root);
         } else if (kResponse == message_type) {
-          result = result && SetMethod(params, root[kParams]);
+          root[kResult] = msg_params_json;
+          result = result && SetMethod(params, root[kResult]);
           result = result && SetId(params, root);
 
           if (false == params.keyExists(strings::kCode)) {
@@ -106,10 +108,11 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
             if (NsSmartObjects::SmartType_Integer != code.getType()) {
               result = false;
             } else {
-              root[kParams][kCode] = code.asInt();
+              root[kResult][kCode] = code.asInt();
             }
           }
         } else if (kNotification == message_type) {
+          root[kParams] = msg_params_json;
           result = result && SetMethod(params, root);
         } else {
           result = false;

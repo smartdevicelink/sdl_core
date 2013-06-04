@@ -163,6 +163,11 @@ class FormatterJsonRpc: public CFormatterJsonBase {
   static const char *kParams;
 
   /**
+   * @brief Name of "result" field.
+   */
+  static const char *kResult;
+
+  /**
    * @brief Name of "error" field.
    */
   static const char *kError;
@@ -244,7 +249,8 @@ int FormatterJsonRpc::FromString(const std::string &str,
   namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
 
   if (false == reader.parse(str, root)) {
-    result = kParsingError;
+    result = kParsingError | kMethodNotSpecified | kUnknownMethod |
+        kUnknownMessageType;
   } else {
     if (false == root.isMember(kJsonRpc)) {
       result |= kInvalidFormat;
@@ -294,8 +300,10 @@ int FormatterJsonRpc::FromString(const std::string &str,
         Json::Value method_container;
 
         if (true == root.isMember(kParams)) {
-          response_value = root[kParams];
           method_container = response_value;
+        } else if (true == root.isMember(kResult)) {
+          response_value = root[kResult];
+          method_container = root[kResult];
         } else if (true == root.isMember(kError)) {
           response_value = root[kError];
 
@@ -305,10 +313,12 @@ int FormatterJsonRpc::FromString(const std::string &str,
         }
 
         if (false == method_container.isObject()) {
-          result |= kInvalidFormat | kUnknownMessageType;
+          result |= kInvalidFormat | kUnknownMessageType |
+              kMethodNotSpecified | kUnknownMethod;
         } else {
           if (false == method_container.isMember(kMethod)) {
-            result |= kInvalidFormat | kUnknownMessageType;
+            result |= kInvalidFormat | kUnknownMessageType |
+                kMethodNotSpecified | kUnknownMethod;
           } else {
             message_type_string = kResponse;
             result |= ParseFunctionId<FunctionId>(method_container[kMethod],
@@ -331,6 +341,8 @@ int FormatterJsonRpc::FromString(const std::string &str,
 
     if (true == root.isMember(kParams)) {
       jsonValueToObj(root[kParams], out[strings::S_MSG_PARAMS]);
+    } else if (true == root.isMember(kResult)) {
+      jsonValueToObj(root[kResult], out[strings::S_MSG_PARAMS]);
     } else {
       out[strings::S_MSG_PARAMS] = NsSmartObjects::CSmartObject(
           NsSmartObjects::SmartType_Map);
