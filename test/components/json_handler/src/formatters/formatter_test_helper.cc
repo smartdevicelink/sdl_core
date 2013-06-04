@@ -28,15 +28,13 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "CFormatterTestHelper.hpp"
+#include "json_handler/formatters/formatter_test_helper.h"
 
 #include "JSONHandler/CSmartFactory.hpp"
 
-using namespace test::components::JSONHandler::formatters;
+using namespace test::components::json_handler::formatters;
 using namespace NsSmartDeviceLink::NsSmartObjects;
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-
-// ----------------------------------------------------------------------------
 
 void CFormatterTestHelper::fillTestObject(CSmartObject& obj)
 {
@@ -62,7 +60,6 @@ void CFormatterTestHelper::fillTestObject(CSmartObject& obj)
     obj[S_MSG_PARAMS]["double"] = -0.1234;
 }
 
-// ----------------------------------------------------------------------------
 
 void CFormatterTestHelper::compareObjects(
         const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,

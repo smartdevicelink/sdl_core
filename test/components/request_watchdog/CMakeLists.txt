@@ -4,15 +4,11 @@ include_directories (
   ../../../src/components/request_watchdog/include
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src/components/utils/include/
+  ../../../test/components/request_watchdog/include
 )
 
-set(LIBRARIES
-    gtest
-    gtest_main
-    gmock
-    gmock_main
-    RequestWatchdog
-    Utils
+set (SOURCES
+  ./src/request_watchdog_test.cc
 )
 
-create_test("test_RequestWatchdogTest" "./request_watchdog_test.cpp" "${LIBRARIES}")
+add_library("test_RequestWatchdogTest" "${SOURCES}")

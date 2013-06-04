@@ -33,6 +33,9 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef TEST_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_WATCHDOG_TEST_H_
+#define TEST_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_WATCHDOG_TEST_H_
+
 #include <list>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -49,27 +52,8 @@ log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("request_watchdog_test"));
 
 class RequestWatchdogTest : public ::testing::Test {
  protected:
-    virtual void SetUp() {
-    for ( int i = 0; i < 100000; i++ ) {
-      if ( i < 10 ) {
-        smallRequestList.push_back(generateRequestInfo());
-      }
-
-      if ( i < 100 ) {
-        normalRequestList.push_back(generateRequestInfo());
-      }
-
-      hugeRequestList.push_back(generateRequestInfo());
-    }
-  }
-
-  virtual void TearDown() {
-    request_watchdog::RequestWatchdog::
-      getRequestWatchdog()->removeAllListeners();
-
-    request_watchdog::RequestWatchdog::
-      getRequestWatchdog()->removeAllRequests();
-  }
+  virtual void SetUp();
+  virtual void TearDown();
 
   class WatchdogInstantiator : public threads::ThreadDelegate {
    private:
@@ -85,12 +69,7 @@ class RequestWatchdogTest : public ::testing::Test {
   std::list<request_watchdog::RequestInfo> hugeRequestList;
   unsigned int seed;
 
-  request_watchdog::RequestInfo generateRequestInfo() {
-    return request_watchdog::RequestInfo(rand_r(&seed) % INT_MAX,
-                                         rand_r(&seed) % INT_MAX,
-                                         rand_r(&seed) % INT_MAX,
-                                         rand_r(&seed) % INT_MAX);
-  }
+  request_watchdog::RequestInfo generateRequestInfo();
 };
 
 class RequestWatchdogSubscriber : public request_watchdog::
@@ -99,31 +78,67 @@ class RequestWatchdogSubscriber : public request_watchdog::
   /**
   * Default constructor
   */
-  RequestWatchdogSubscriber(): WatchdogSubscriber() {
-  }
+  RequestWatchdogSubscriber();
 
-  virtual void onTimeoutExpired(request_watchdog::RequestInfo requestInfo) {
-    LOG4CXX_TRACE_ENTER(logger);
-    LOG4CXX_INFO(logger, this << "::onTimeoutExpired\n"
-                 << "for the following  request: "
-                 << "\n ConnectionID : " << requestInfo.connectionID_
-                 << "\n CorrelationID : " << requestInfo.correlationID_
-                 << "\n FunctionID : " << requestInfo.functionID_
-                 << "\n CustomTimeOut : " << requestInfo.customTimeout_
-                 << "\n");
-  }
+  virtual void onTimeoutExpired(request_watchdog::RequestInfo requestInfo);
 
   /**
   * Default destructor
   */
-  virtual ~RequestWatchdogSubscriber() {
-    destructor();
-  }
+  virtual ~RequestWatchdogSubscriber();
 
   MOCK_METHOD0(destructor, void());
 };
 
-/*TEST_F(RequestWatchdogTest, Constructor) {
+void RequestWatchdogTest::SetUp() {
+  for ( int i = 0; i < 100000; i++ ) {
+    if ( i < 10 ) {
+      smallRequestList.push_back(generateRequestInfo());
+    }
+
+    if ( i < 100 ) {
+      normalRequestList.push_back(generateRequestInfo());
+    }
+
+    hugeRequestList.push_back(generateRequestInfo());
+  }
+}
+
+void RequestWatchdogTest::TearDown() {
+  request_watchdog::RequestWatchdog::
+    getRequestWatchdog()->removeAllListeners();
+
+  request_watchdog::RequestWatchdog::
+    getRequestWatchdog()->removeAllRequests();
+}
+
+request_watchdog::RequestInfo RequestWatchdogTest::generateRequestInfo() {
+  return request_watchdog::RequestInfo(rand_r(&seed) % INT_MAX,
+                                       rand_r(&seed) % INT_MAX,
+                                       rand_r(&seed) % INT_MAX,
+                                       rand_r(&seed) % INT_MAX);
+}
+
+RequestWatchdogSubscriber::RequestWatchdogSubscriber():
+  WatchdogSubscriber() {
+}
+
+RequestWatchdogSubscriber::~RequestWatchdogSubscriber() {
+  destructor();
+}
+
+void RequestWatchdogSubscriber::onTimeoutExpired(request_watchdog::RequestInfo requestInfo) {
+  LOG4CXX_TRACE_ENTER(logger);
+  LOG4CXX_INFO(logger, this << "::onTimeoutExpired\n"
+               << "for the following  request: "
+               << "\n ConnectionID : " << requestInfo.connectionID_
+               << "\n CorrelationID : " << requestInfo.correlationID_
+               << "\n FunctionID : " << requestInfo.functionID_
+               << "\n CustomTimeOut : " << requestInfo.customTimeout_
+               << "\n");
+}
+
+TEST_F(RequestWatchdogTest, Constructor) {
   test::components::request_watchdog_test::
     RequestWatchdogSubscriber* object1 =
   new test::components::request_watchdog_test::
@@ -132,9 +147,9 @@ class RequestWatchdogSubscriber : public request_watchdog::
   EXPECT_CALL(*object1, destructor()).Times(0);
   EXPECT_CALL(*object1, destructor()).Times(1);
   delete object1;
-}*/
+}
 
-TEST_F(RequestWatchdogTest, TimeoutExpiredCallbackTest) {
+/*TEST_F(RequestWatchdogTest, TimeoutExpiredCallbackTest) {
   request_watchdog::WatchdogSubscriber* subscriber_one =
       new RequestWatchdogSubscriber();
   request_watchdog::WatchdogSubscriber* subscriber_two =
@@ -194,9 +209,9 @@ TEST_F(RequestWatchdogTest, TimeoutExpiredCallbackTest) {
 
   delete subscriber_one;
   delete subscriber_two;
-}
+}*/
 
-/*TEST_F(RequestWatchdogTest, GetWachdogInsanceSingleThread) {
+TEST_F(RequestWatchdogTest, GetWachdogInsanceSingleThread) {
   request_watchdog::Watchdog* watchdogInstance =
       request_watchdog::RequestWatchdog::getRequestWatchdog();
 
@@ -240,16 +255,11 @@ TEST_F(RequestWatchdogTest, SimpleAddRemoveRequest) {
 
   watchdogInstance->removeRequest(requestOne);
   ASSERT_EQ(0, watchdogInstance->getRegesteredRequestsNumber());
-}*/
+}
 
 }  //  namespace request_watchdog_test
 }  //  namespace components
 }  //  namespace test
 
-int main(int argc, char** argv) {
-  ::testing::InitGoogleMock(&argc, argv);
+#endif  // TEST_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_WATCHDOG_TEST_H_
 
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-
-  return RUN_ALL_TESTS();
-}

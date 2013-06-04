@@ -5,6 +5,7 @@ include_directories (
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
+  ../../../test/components/protocol_handler/include
 )
 
 set (LIBRARIES
@@ -19,4 +20,8 @@ set (LIBRARIES
     bluetooth    
 )
 
-#create_test("interface_test" "./protocol_handler_tm_test.cpp" "${LIBRARIES}")
+set (SOURCES
+  ./src/protocol_handler_tm_test.cc
+)
+
+add_library("test_ProtocolHandlerTest" "${SOURCES}")

@@ -28,6 +28,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_FORMATTERS_FORMATTER_JSON_ALRPCV2_TEST_H_
+#define TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_FORMATTERS_FORMATTER_JSON_ALRPCV2_TEST_H_
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -37,10 +40,10 @@
 
 #include "json/json.h"
 
-#include "CFormatterTestHelper.hpp"
+#include "json_handler/formatters/formatter_test_helper.h"
 
 
-namespace test { namespace components { namespace JSONHandler { namespace formatters {
+namespace test { namespace components { namespace json_handler { namespace formatters {
 
     using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
@@ -108,9 +111,4 @@ namespace test { namespace components { namespace JSONHandler { namespace format
 
 }}}}
 
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-
+#endif  // TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_FORMATTERS_FORMATTER_JSON_ALRPCV2_TEST_H_

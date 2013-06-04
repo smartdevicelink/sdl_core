@@ -28,6 +28,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_SMART_SCHEMA_DRAFT_TEST_H_
+#define TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_SMART_SCHEMA_DRAFT_TEST_H_
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -41,7 +44,7 @@ using namespace NsSmartDeviceLink::NsSmartObjects;
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-namespace test { namespace components { namespace JSONHandler { namespace SmartSchemaDraftTest {
+namespace test { namespace components { namespace json_handler { namespace smart_schema_draft_test {
 
     TEST(test_general, test_SmartSchemaDraftTest)
     {
@@ -147,8 +150,4 @@ namespace test { namespace components { namespace JSONHandler { namespace SmartS
     }
 }}}}
 
-int main(int argc, char **argv) {
-    //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
-    ::testing::InitGoogleMock(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#endif  // TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_SMART_SCHEMA_DRAFT_TEST_H_
