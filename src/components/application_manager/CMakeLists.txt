@@ -68,6 +68,8 @@ set (SOURCES
 ./src/commands/on_audio_pass_thru_command.cc
 ./src/commands/delete_file_command.cc
 ./src/commands/delete_file_response_command.cc
+./src/commands/list_files_command.cc
+./src/commands/list_files_response_command.cc
 )
 
 

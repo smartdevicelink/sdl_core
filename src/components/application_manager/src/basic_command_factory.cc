@@ -63,6 +63,8 @@
 #include "application_manager/commands/put_file_response_command.h"
 #include "application_manager/commands/delete_file_command.h"
 #include "application_manager/commands/delete_file_response_command.h"
+#include "application_manager/commands/list_files_command.h"
+#include "application_manager/commands/list_files_response_command.h"
 
 
 // TODO(AK): Include the directory when naming .h files
@@ -196,6 +198,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         command.reset(new commands::DeleteFileCommand(message));
       }
       break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ListFilesID: {
+        if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+          command.reset(new commands::ListFilesResponseCommand(message));
+        } else {
+          command.reset(new commands::ListFilesCommand(message));
+        }
+        break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAudioPassThruID: {
       command.reset(new commands::OnAudioPassThruCommand(message));
