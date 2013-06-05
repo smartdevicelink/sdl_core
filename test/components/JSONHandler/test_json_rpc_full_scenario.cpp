@@ -46,6 +46,44 @@ namespace gen = gen::test::components::json_rpc;
 namespace fm = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
 
+TEST(test_general, test_json_rpc_full) {
+  std::string input_json =
+  "{\n"
+  "   \"id\" : 1,\n"
+  "   \"jsonrpc\" : \"2.0\",\n"
+  "   \"method\" : \"interface1.Function1\",\n"
+  "   \"params\" : {\n"
+  "      \"param1\" : \"String Value\",\n"
+  "      \"param2\" : 13,\n"
+  "      \"param3\" : {\n"
+  "         \"member1\" : 1,\n"
+  "         \"member2\" : true,\n"
+  "         \"member3\" : 13.130,\n"
+  "         \"member4\" : [ 30, 40, 50 ]\n"
+  "      }\n"
+  "   }\n"
+  "}\n";
+
+  so::CSmartObject object;
+  ASSERT_TRUE(fm::FormatterJsonRpc::kSuccess ==
+              (fm::FormatterJsonRpc::FromString<gen::FunctionID::eType,
+                                                gen::messageType::eType>(
+      input_json, object)));
+
+  ASSERT_EQ(gen::FunctionID::interface1_Function1,
+            (int)object[jhs::S_PARAMS][jhs::S_FUNCTION_ID]);
+  ASSERT_EQ(gen::messageType::request,
+            (int)object[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE]);
+
+  gen::test_json_rpc factory;
+  ASSERT_TRUE(factory.attachSchema(object));
+  ASSERT_EQ(so::Errors::OK, object.isValid());
+
+  std::string output_json;
+  ASSERT_TRUE(fm::FormatterJsonRpc::ToString(object, output_json));
+
+  ASSERT_EQ(input_json, output_json);
+}
 
 TEST(test_JSONRPC_general, test_AttachSchema) {
   so::CSmartObject object(so::SmartType_Map);
