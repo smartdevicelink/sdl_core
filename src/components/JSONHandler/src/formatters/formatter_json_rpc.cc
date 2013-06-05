@@ -83,7 +83,7 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
       result = false;
     } else {
       const NsSmartObjects::CSmartObject &message_type_object =
-          formatted_object.getElement(strings::S_MESSAGE_TYPE);
+          params.getElement(strings::S_MESSAGE_TYPE);
 
       if (NsSmartObjects::SmartType_String != message_type_object.getType()) {
         result = false;
