@@ -614,6 +614,96 @@ TEST(FormatterJsonRpc, ResponseCodeNotAvailable) {
                               "}"));
 }
 
+TEST(FormatterJsonRpc, ErrorResponseMessageNotAvailable) {
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              g_invalid_jsonrpc_string));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              "{}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\""
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"params\": {}"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"result\": {}"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"result\":"
+                              "  {"
+                              "    \"message\": \"c\""
+                              "  }"
+                              "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"result\":"
+                              "  {"
+                              "    \"message\": 1"
+                              "  }"
+                              "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"error\": 10"
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"error\":"
+                             "  {"
+                             "    \"code\": 1"
+                             "  }"
+                             "}"));
+
+  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                             "{"
+                             "  \"jsonrpc\": \"2.0\","
+                             "  \"id\": 1,"
+                             "  \"error\":"
+                             "  {"
+                             "    \"message\": 1"
+                             "  }"
+                             "}"));
+
+  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
+                              "{"
+                              "  \"jsonrpc\": \"2.0\","
+                              "  \"id\": 1,"
+                              "  \"error\":"
+                              "  {"
+                              "    \"message\": \"Error message\""
+                              "  }"
+                              "}"));
+}
+
 }  //namespace Formatters
 }  //namespace JSONHandler
 }  //namespace components

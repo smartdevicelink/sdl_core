@@ -96,6 +96,11 @@ class FormatterJsonRpc: public CFormatterJsonBase {
   static const int kResponseCodeNotAvailable = 64;
 
   /**
+   * @brief Message for error response is not available.
+   */
+  static const int kErrorResponseMessageNotAvailable = 128;
+
+  /**
    * @brief Creates a JSON string from a SmartObject.
    *
    * @param obj Input SmartObject.
@@ -183,6 +188,11 @@ class FormatterJsonRpc: public CFormatterJsonBase {
   static const char *kData;
 
   /**
+   * @brief Name of "message" field.
+   */
+  static const char *kMessage;
+
+  /**
    * @brief Constructor.
    */
   FormatterJsonRpc();
@@ -266,6 +276,7 @@ int FormatterJsonRpc::FromString(const std::string &str,
     std::string message_type_string;
     Json::Value response_value;
     bool response_value_found = false;
+    bool is_error_response = false;
 
     if (false == root.isMember(kId)) {
       message_type_string = kNotification;
@@ -314,6 +325,7 @@ int FormatterJsonRpc::FromString(const std::string &str,
         } else if (true == root.isMember(kError)) {
           response_value = root[kError];
           response_value_found = true;
+          is_error_response = true;
 
           if (true == response_value.isObject()) {
             if (true == response_value.isMember(kData)) {
@@ -385,6 +397,10 @@ int FormatterJsonRpc::FromString(const std::string &str,
       } else {
         if (false == response_value.isObject()) {
           result |= kInvalidFormat | kResponseCodeNotAvailable;
+
+          if (true == is_error_response) {
+            result |= kErrorResponseMessageNotAvailable;
+          }
         } else {
           if (false == response_value.isMember(kCode)) {
             result |= kResponseCodeNotAvailable;
@@ -395,6 +411,21 @@ int FormatterJsonRpc::FromString(const std::string &str,
               result |= kInvalidFormat | kResponseCodeNotAvailable;
             } else {
               out[strings::S_PARAMS][strings::kCode] = code_value.asInt();
+            }
+          }
+
+          if (true == is_error_response) {
+            if (false == response_value.isMember(kMessage)) {
+              result |= kErrorResponseMessageNotAvailable;
+            } else {
+              const Json::Value &message_value = response_value[kMessage];
+
+              if (false == message_value.isString()) {
+                result |= kErrorResponseMessageNotAvailable;
+              } else {
+                out[strings::S_PARAMS][strings::kMessage] =
+                    message_value.asString();
+              }
             }
           }
         }

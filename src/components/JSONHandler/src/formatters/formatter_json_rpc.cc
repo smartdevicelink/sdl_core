@@ -52,6 +52,7 @@ const char *FormatterJsonRpc::kResult = "result";
 const char *FormatterJsonRpc::kError = "error";
 const char *FormatterJsonRpc::kCode = "code";
 const char *FormatterJsonRpc::kData = "data";
+const char *FormatterJsonRpc::kMessage = "message";
 
 bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
                                 std::string &out_str) {
