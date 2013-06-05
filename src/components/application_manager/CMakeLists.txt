@@ -83,6 +83,8 @@ set (SOURCES
 ./src/commands/alert_maneuver_response_command.cc
 ./src/commands/set_icon_command.cc
 ./src/commands/set_icon_response_command.cc
+./src/commands/set_display_layout_command.cc
+./src/commands/set_display_layout_response_command.cc
 )
 
 
