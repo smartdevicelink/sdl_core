@@ -81,6 +81,8 @@ set (SOURCES
 ./src/commands/subscribe_vehicle_data_response_command.cc
 ./src/commands/alert_maneuver_command.cc
 ./src/commands/alert_maneuver_response_command.cc
+./src/commands/set_icon_command.cc
+./src/commands/set_icon_response_command.cc
 )
 
 
