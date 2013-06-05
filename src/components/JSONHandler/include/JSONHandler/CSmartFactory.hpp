@@ -88,6 +88,11 @@ namespace NsSmartDeviceLink
            * @brief String constant for "code" param name.
            */
           extern const std::string kCode;
+
+          /**
+           * @brief String constant for "message" param name.
+           */
+          extern const std::string kMessage;
         }
 
         /**

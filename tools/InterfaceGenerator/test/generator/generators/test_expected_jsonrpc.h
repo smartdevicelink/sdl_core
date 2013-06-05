@@ -206,7 +206,12 @@ enum eType {
   /**
    * @brief notification.
    */
-  notification
+  notification,
+
+  /**
+   * @brief error_response.
+   */
+  error_response
 };
 } // messageType
 

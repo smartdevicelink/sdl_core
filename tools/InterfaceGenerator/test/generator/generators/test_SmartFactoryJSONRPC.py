@@ -76,6 +76,50 @@ EXPECTED_RESULT_NOTIFICATION = (
     u"""TNumberSchemaItem<int>::create(), true);\n"""
 )
 
+EXPECTED_PRE_FUNCTION_CODE = (
+    u"""  std::map<std::string, CObjectSchemaItem::SMember> """
+    u"""params_members;\n"""
+    u"""  params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember("""
+    u"""TEnumSchemaItem<FunctionID::eType>::create("""
+    u"""function_id_items), true);\n"""
+    u"""  params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember("""
+    u"""TEnumSchemaItem<messageType::eType>::create("""
+    u"""message_type_items), true);\n"""
+    u"""  params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember("""
+    u"""TNumberSchemaItem<int>::create(), true);\n"""
+    u"""  params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember("""
+    u"""TNumberSchemaItem<int>::create(), true);\n"""
+    u"""  params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember("""
+    u"""TNumberSchemaItem<int>::create(), true);\n"""
+    u"""  params_members[NsSmartDeviceLink::NsJSONHandler"""
+    u"""::strings::kCode] = CObjectSchemaItem::SMember("""
+    u"""TNumberSchemaItem<int>::create(), true);\n"""
+    u"""  params_members[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""strings::kMessage] = CObjectSchemaItem::SMember("""
+    u"""CStringSchemaItem::create(), true);\n"""
+    u"""\n"""
+    u"""  std::map<std::string, CObjectSchemaItem::SMember> """
+    u"""root_members_map;\n"""
+    u"""  root_members_map[NsSmartDeviceLink::NsJSONHandler::"""
+    u"""strings::S_PARAMS] = CObjectSchemaItem::SMember("""
+    u"""CObjectSchemaItem::create(params_members), true);\n"""
+    u"""\n"""
+    u"""  CSmartSchema error_response_schema(CObjectSchemaItem::create("""
+    u"""root_members_map));\n"""
+    u"""\n"""
+    u"""  functions_schemes_.insert(std::make_pair("""
+    u"""NsSmartDeviceLink::NsJSONHandler::SmartSchemaKey<"""
+    u"""FunctionID::eType, messageType::eType>("""
+    u"""FunctionID::request, messageType::error_response)"""
+    u""", error_response_schema));\n"""
+    u"""\n"""
+)
+
 DESCRIPTION = [u"Description Line1", u"Description Line2"]
 
 DESIGN_DESCRIPTION = [u"Design Line1"]
@@ -98,7 +142,7 @@ class Test(unittest.TestCase):
     def test_gen_schema_params_fill(self):
         """Test feature that allows to create format specific PARAMS.
 
-        Verifies SDLRPC implementation of the _gen_schema_params_fill
+        Verifies JSONRPC implementation of the _gen_schema_params_fill
         method.
 
         """
@@ -127,6 +171,89 @@ class Test(unittest.TestCase):
         self.assertEqual(generator._gen_schema_params_fill(u"notification"),
                          EXPECTED_RESULT_NOTIFICATION,
                          "Invalid code generation for notification")
+
+    def test_preprocess_message_type(self):
+        """Test preprocessing of the message_type enum.
+
+        Verifies JSONPRC implementation of the _preprocess_message_type
+        function.
+
+        """
+
+        generator = SmartFactoryJSONRPC.CodeGenerator()
+
+        message_type_elements = collections.OrderedDict()
+        message_type_elements[u"request"] = Model.EnumElement(name=u"request")
+        message_type_elements[u"response"] = Model.EnumElement(
+            name=u"response")
+        message_type_elements[u"notification"] = Model.EnumElement(
+            name=u"notification")
+
+        message_type = Model.Enum(name=u"messageType",
+                                  elements=message_type_elements)
+
+        result_enum = generator._preprocess_message_type(message_type)
+
+        self.assertEqual(True, "error_response" in result_enum.elements)
+        self.assertEqual("error_response",
+                         result_enum.elements["error_response"].primary_name)
+
+        message_type_elements = collections.OrderedDict()
+        message_type_elements[u"request"] = Model.EnumElement(name=u"request")
+        message_type_elements[u"notification"] = Model.EnumElement(
+            name=u"notification")
+
+        message_type = Model.Enum(name=u"messageType",
+                                  elements=message_type_elements)
+
+        result_enum = generator._preprocess_message_type(message_type)
+
+        self.assertEqual(False, "error_response" in result_enum.elements)
+
+    def test_gen_pre_function_schemas(self):
+        """Test code that goes before schema initialization.
+
+        Verifies JSONPRC implementation of the _gen_pre_function_schemas
+        function.
+
+        """
+
+        generator = SmartFactoryJSONRPC.CodeGenerator()
+
+        self.assertEqual(u"",
+                         generator._gen_pre_function_schemas([]),
+                         "Invalid code for empty functions list")
+
+        message_type_elements = collections.OrderedDict()
+        message_type_elements[u"request"] = Model.EnumElement(name=u"request")
+        message_type_elements[u"response"] = Model.EnumElement(
+            name=u"response")
+        message_type_elements[u"notification"] = Model.EnumElement(
+            name=u"notification")
+
+        message_type = Model.Enum(name=u"messageType",
+                                  elements=message_type_elements)
+
+        function1 = Model.Function(
+            "func1", function_id=message_type.elements[u"request"],
+            message_type=message_type.elements[u"request"])
+
+        self.assertEqual(u"",
+                         generator._gen_pre_function_schemas([function1]),
+                         "Invalid code for empty functions list")
+
+        function2 = Model.Function(
+            "func2", function_id=message_type.elements[u"request"],
+            message_type=message_type.elements[u"response"])
+
+        self.assertEqual(EXPECTED_PRE_FUNCTION_CODE,
+                         generator._gen_pre_function_schemas([function2]),
+                         "Invalid code for single response function")
+
+        self.assertEqual(EXPECTED_PRE_FUNCTION_CODE,
+                         generator._gen_pre_function_schemas([function1,
+                                                              function2]),
+                         "Invalid code for mixed function list")
 
     def test_full_generation(self):
         """Test full generation using JSONRPC SmartSchema generator.

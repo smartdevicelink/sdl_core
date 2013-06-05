@@ -289,8 +289,8 @@ const std::map<XXX::YYY::ZZZ::Enum1::eType, std::string> &TEnumSchemaItem<XXX::Y
   static std::map<XXX::YYY::ZZZ::Enum1::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum1::name1, "name1"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum1::internal_name2, "name2"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum1::name1, "name1"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum1::internal_name2, "name2"));
 
     is_initialized = true;
   }
@@ -304,9 +304,9 @@ const std::map<XXX::YYY::ZZZ::E2::eType, std::string> &TEnumSchemaItem<XXX::YYY:
   static std::map<XXX::YYY::ZZZ::E2::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_1, "xxx"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_2, "yyy"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_3, "val_3"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_1, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_2, "yyy"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_3, "val_3"));
 
     is_initialized = true;
   }
@@ -320,9 +320,9 @@ const std::map<XXX::YYY::ZZZ::Enum_new2::eType, std::string> &TEnumSchemaItem<XX
   static std::map<XXX::YYY::ZZZ::Enum_new2::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_1, "xxx"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_2, "xxx"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_3, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_1, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_2, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_3, "xxx"));
 
     is_initialized = true;
   }
@@ -336,8 +336,8 @@ const std::map<XXX::YYY::ZZZ::Enum_new4::eType, std::string> &TEnumSchemaItem<XX
   static std::map<XXX::YYY::ZZZ::Enum_new4::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new4::_11, "xxx"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new4::_22, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new4::_11, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new4::_22, "xxx"));
 
     is_initialized = true;
   }
@@ -351,9 +351,9 @@ const std::map<XXX::YYY::ZZZ::messageType::eType, std::string> &TEnumSchemaItem<
   static std::map<XXX::YYY::ZZZ::messageType::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::request, "request"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::response, "response"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::notification, "notification"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::request, "request"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::response, "response"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::notification, "notification"));
 
     is_initialized = true;
   }

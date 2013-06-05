@@ -64,6 +64,10 @@ class CodeGenerator(object):
         self._generated_structs = []
         self._structs_add_code = ""
 
+        if "messageType" in interface.enums:
+            interface.enums["messageType"] = self._preprocess_message_type(
+                interface.enums["messageType"])
+
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
 
@@ -157,6 +161,8 @@ class CodeGenerator(object):
                 function_id_items=self._indent_code(function_id_items, 1),
                 message_type_items=self._indent_code(message_type_items, 1),
                 struct_schema_items=self._structs_add_code,
+                pre_function_schemas=self._gen_pre_function_schemas(
+                    interface.functions.values()),
                 function_schemas=self._gen_function_schemas(
                     interface.functions.values()),
                 init_function_impls=self._gen_function_impls(
@@ -170,6 +176,20 @@ class CodeGenerator(object):
                 enum_string_coversions=self._gen_enum_to_str_converters(
                     interface.enums.values(),
                     namespace)))
+
+    def _preprocess_message_type(self, message_type):
+        """Preprocess message_type enum.
+
+        In base class this method is unimplemented and will cause runtime
+        exception. This method must be overridden by the subclasses to
+        return message_type enum after preprocessing.
+
+        Keyword arguments:
+        message_type -- message_type enum to preprocess.
+
+        """
+
+        raise GenerateError("Unexpected call to the unimplemented function.")
 
     def _gen_enum_to_str_converters(self, enums, namespace):
         """Generate enum to string converters.
@@ -193,7 +213,7 @@ class CodeGenerator(object):
             namespace=namespace,
             enum=x.name,
             mapping=self._indent_code(self._gen_enum_to_str_mapping(
-                x, namespace), 1)) for x in enums])
+                x, namespace), 2)) for x in enums])
 
     def _gen_enum_to_str_mapping(self, enum, namespace):
         """Generate enum to string mapping code.
@@ -403,6 +423,20 @@ class CodeGenerator(object):
         """
 
         return self._struct_schema_item_template.substitute(name=struct.name)
+
+    def _gen_pre_function_schemas(self, functions):
+        """Generate specific code that goes before schema initialization.
+
+        In base class this function is unimplemented and it will raise an
+        runtime exception. Subclasses must implement this function in order
+        to provide format-specific code that goes before schema initialization.
+
+        Keyword arguments:
+        functions -- list of functions to generate code for.
+
+        """
+
+        raise GenerateError("Unexpected call to the unimplemented function.")
 
     def _gen_function_schemas(self, functions):
         """Generate functions initialization code for source file.
@@ -1374,6 +1408,7 @@ class CodeGenerator(object):
         u'''    const TStructsSchemaItems &struct_schema_items,\n'''
         u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
         u'''    const std::set<messageType::eType> &message_type_items) {\n'''
+        u'''$pre_function_schemas'''
         u'''$function_schemas'''
         u'''}\n'''
         u'''\n'''

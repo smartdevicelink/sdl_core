@@ -64,6 +64,7 @@ XXX::YYY::ZZZ::Test::Test()
   message_type_items.insert(messageType::request);
   message_type_items.insert(messageType::response);
   message_type_items.insert(messageType::notification);
+  message_type_items.insert(messageType::error_response);
 
   InitFunctionSchemes(struct_schema_items, function_id_items, message_type_items);
 }
@@ -94,6 +95,22 @@ void XXX::YYY::ZZZ::Test::InitFunctionSchemes(
     const TStructsSchemaItems &struct_schema_items,
     const std::set<FunctionID::eType> &function_id_items,
     const std::set<messageType::eType> &message_type_items) {
+  std::map<std::string, CObjectSchemaItem::SMember> params_members;
+  params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<FunctionID::eType>::create(function_id_items), true);
+  params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<messageType::eType>::create(message_type_items), true);
+  params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[NsSmartDeviceLink::NsJSONHandler::strings::kCode] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[NsSmartDeviceLink::NsJSONHandler::strings::kMessage] = CObjectSchemaItem::SMember(CStringSchemaItem::create(), true);
+
+  std::map<std::string, CObjectSchemaItem::SMember> root_members_map;
+  root_members_map[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(params_members), true);
+
+  CSmartSchema error_response_schema(CObjectSchemaItem::create(root_members_map));
+
+  functions_schemes_.insert(std::make_pair(NsSmartDeviceLink::NsJSONHandler::SmartSchemaKey<FunctionID::eType, messageType::eType>(FunctionID::val_1, messageType::error_response), error_response_schema));
+
   functions_schemes_.insert(std::make_pair(NsSmartDeviceLink::NsJSONHandler::SmartSchemaKey<FunctionID::eType, messageType::eType>(FunctionID::name1, messageType::request), InitFunction_name1_request(struct_schema_items, function_id_items, message_type_items)));
   functions_schemes_.insert(std::make_pair(NsSmartDeviceLink::NsJSONHandler::SmartSchemaKey<FunctionID::eType, messageType::eType>(FunctionID::val_1, messageType::response), InitFunction_val_1_response(struct_schema_items, function_id_items, message_type_items)));
   functions_schemes_.insert(std::make_pair(NsSmartDeviceLink::NsJSONHandler::SmartSchemaKey<FunctionID::eType, messageType::eType>(FunctionID::val_2, messageType::notification), InitFunction_val_2_notification(struct_schema_items, function_id_items, message_type_items)));
@@ -290,8 +307,8 @@ const std::map<XXX::YYY::ZZZ::Enum1::eType, std::string> &TEnumSchemaItem<XXX::Y
   static std::map<XXX::YYY::ZZZ::Enum1::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum1::name1, "name1"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum1::internal_name2, "name2"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum1::name1, "name1"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum1::internal_name2, "name2"));
 
     is_initialized = true;
   }
@@ -305,9 +322,9 @@ const std::map<XXX::YYY::ZZZ::E2::eType, std::string> &TEnumSchemaItem<XXX::YYY:
   static std::map<XXX::YYY::ZZZ::E2::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_1, "xxx"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_2, "yyy"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_3, "val_3"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_1, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_2, "yyy"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::E2::val_3, "val_3"));
 
     is_initialized = true;
   }
@@ -321,9 +338,9 @@ const std::map<XXX::YYY::ZZZ::Enum_new2::eType, std::string> &TEnumSchemaItem<XX
   static std::map<XXX::YYY::ZZZ::Enum_new2::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_1, "xxx"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_2, "xxx"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_3, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_1, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_2, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new2::_3, "xxx"));
 
     is_initialized = true;
   }
@@ -337,8 +354,8 @@ const std::map<XXX::YYY::ZZZ::Enum_new4::eType, std::string> &TEnumSchemaItem<XX
   static std::map<XXX::YYY::ZZZ::Enum_new4::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new4::_11, "xxx"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new4::_22, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new4::_11, "xxx"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::Enum_new4::_22, "xxx"));
 
     is_initialized = true;
   }
@@ -352,9 +369,10 @@ const std::map<XXX::YYY::ZZZ::messageType::eType, std::string> &TEnumSchemaItem<
   static std::map<XXX::YYY::ZZZ::messageType::eType, std::string> enum_string_representation;
 
   if (false == is_initialized) {
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::request, "request"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::response, "response"));
-  enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::notification, "notification"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::request, "request"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::response, "response"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::notification, "notification"));
+    enum_string_representation.insert(std::make_pair(XXX::YYY::ZZZ::messageType::error_response, "error_response"));
 
     is_initialized = true;
   }
