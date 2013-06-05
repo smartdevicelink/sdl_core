@@ -45,6 +45,7 @@ const char protocol_version[] = "protocol_version";
 const char connection_key[] = "connection_key";
 
 const char msg_params[] = "msg_params";
+const char info[] = "info";
 const char app_id[] = "appId";
 const char result_code[] = "resultCode";
 const char success[] = "success";
@@ -93,6 +94,7 @@ const char sampling_rate[] = "samplingRate";
 const char bits_per_sample[] = "bitsPerSample";
 const char audio_type[] = "audioType";
 const char button_name[] = "buttonName";
+const char data_type[] = "dataType";
 
 // PutFile
 const char sync_file_name[] = "syncFileName";

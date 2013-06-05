@@ -72,8 +72,7 @@ void UnsubscribeButtonCommandRequest::Run() {
       ((*message_)[str::params][str::button_name].asInt());
   if (!app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
     return;
   }
 

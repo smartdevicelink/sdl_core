@@ -31,9 +31,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/subscribe_vehicle_data_command.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/Result.h"
 #include "utils/logger.h"
@@ -61,14 +61,44 @@ void SubscribeVehicleDataCommandRequest::Run() {
       ApplicationManagerImpl::instance()->
       application((*message_)[str::params][str::connection_key]));
 
-  if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
+  std::string info = "";
+  bool result = false;
+  NsSmartDeviceLinkRPC::V2::Result::eType result_code =
+      NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;
 
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  do {
+    if (NULL == app) {
+      LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
+      result_code =
+          NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED;
+      break;
+    }
+
+    size_t length = (*message_)[str::msg_params][str::data_type].length();
+    int item_count = 0;
+    for (int i = 0; i < length; ++i) {
+      if (app->SubscribeToIVI(static_cast<unsigned int>(
+          (*message_)[str::msg_params][str::data_type][i].asInt()))) {
+        ++item_count;
+      }
+    }
+
+    if (item_count == length) {
+      result = true;
+      result_code = NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    } else if (0 == item_count) {
+      result_code = NsSmartDeviceLinkRPC::V2::Result::REJECTED;
+      info = "Already subscribed on all VehicleData";
+    } else if (item_count < length) {
+      result_code = NsSmartDeviceLinkRPC::V2::Result::WARNINGS;
+      info = "Already subscribed on some VehicleData";
+    } else {
+      LOG4CXX_ERROR_EXT(logger_, "Unknown command sequence!");
+      break;
+    }
+  } while (0);
+
+  SendResponse(result, result_code, info.c_str());
 }
 
 }  // namespace commands

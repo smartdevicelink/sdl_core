@@ -82,7 +82,8 @@ class CommandRequestImpl : public CommandImpl {
   virtual bool CleanUp();
   virtual void Run();
   void SendResponse(const bool success,
-      const NsSmartDeviceLinkRPC::V2::Result::eType& errorCode);
+      const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
+      const char* info = NULL);
 };
 
 }  // namespace commands

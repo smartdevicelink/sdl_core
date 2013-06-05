@@ -30,6 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/basic_command_factory.h"
 #include "SmartObjects/CSmartObject.hpp"
@@ -58,7 +59,8 @@ void CommandRequestImpl::Run() {
 }
 
 void CommandRequestImpl::SendResponse(const bool success,
-    const NsSmartDeviceLinkRPC::V2::Result::eType& errorCode) {
+    const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
+    const char* info) {
 
   NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
 
@@ -74,7 +76,11 @@ void CommandRequestImpl::SendResponse(const bool success,
 
   response[strings::msg_params][strings::success] = success;
   response[strings::msg_params][strings::result_code] =
-      errorCode;
+      result_code;
+
+  if (info) {
+    response[strings::msg_params][strings::info] = std::string(info);
+  }
 
 
   CommandSharedPtr command = BasicCommandFactory::CreateCommand(&response);
