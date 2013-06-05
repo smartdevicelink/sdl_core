@@ -48,50 +48,143 @@ namespace Formatters {
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 using namespace gen::test::components::json_rpc;
 typedef NsSmartDeviceLink::NsJSONHandler::Formatters::FormatterJsonRpc JSONFormatter;
+typedef NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase FBase;
 
-TEST_F(CFormatterTestHelper, test_JsonRPC2) {
-  Json::Value value;  // just a quick workaround to avoid undefined reference to Json
-  Json::Reader reader;    // the same thing
+/**
+ * @brief Convert SmartObject to JSON string.
+ *
+ * @param obj Source SmartObject to convert.
+ * @param[out] result_string Output JSON string.
+ */
+void AnyObjectToJsonString(
+  const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
+    std::string& result_string) {
+
+  Json::Value params(Json::objectValue);
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject formattedObj(obj);
+  FBase::objToJsonValue(formattedObj, params);
+  result_string = params.toStyledString();
+}
+
+TEST_F(CFormatterTestHelper, ToString) {
 
   std::string str;
   NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
   NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
 
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;
-
   test_json_rpc factory;
-
-  factory.GetSchema(FunctionID::interface2_Function1,
-                                messageType::notification,
+  factory.GetSchema(FunctionID::interface1_Function1,
+                                messageType::request,
                                 schema);
 
   srcObj.setSchema(schema);
 
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionID::interface2_Function1;
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = messageType::notification;
+  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionID::interface1_Function1;
+  srcObj[S_PARAMS][S_MESSAGE_TYPE] = messageType::request;
   srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
   srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 1;
-  srcObj[S_MSG_PARAMS]["param"] = interface2_enum2::element2;
-  srcObj[S_MSG_PARAMS]["i1"]["m1"] = "xxx";
-  srcObj[S_MSG_PARAMS]["i1"]["m2"][0] = "yyy";
-  srcObj[S_MSG_PARAMS]["i1"]["m3"] = interface1_enum1::element1;
-  srcObj[S_MSG_PARAMS]["i1"]["m4"][0]["member1"] = 1;
-  srcObj[S_MSG_PARAMS]["i1"]["m4"][0]["member2"] = true;
-  srcObj[S_MSG_PARAMS]["i1"]["m4"][0]["member3"] = 13.1313;
-  srcObj[S_MSG_PARAMS]["i1"]["m4"][0]["member4"][0] = 12;
+  srcObj[S_PARAMS][S_CORRELATION_ID] = 123;
+
+  srcObj[S_MSG_PARAMS]["param1"] = "Param1_string";
+  srcObj[S_MSG_PARAMS]["param2"] = 123456789;
+
+  srcObj[S_MSG_PARAMS]["param3"]["member1"] = 1;
+  srcObj[S_MSG_PARAMS]["param3"]["member2"] = true;
+  srcObj[S_MSG_PARAMS]["param3"]["member3"] = 13.3;
+  srcObj[S_MSG_PARAMS]["param3"]["member4"][0] = 13;
+  srcObj[S_MSG_PARAMS]["param3"]["member4"][1] = 14;
 
   ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, srcObj.isValid());
 
   // SmartObjects --> JSON
-  JSONFormatter::ToString(srcObj, str);
-
-  std::cout << str << std::endl;
+  ASSERT_TRUE(JSONFormatter::ToString(srcObj, str));
 
   // JSON --> SmartObjects
-//  JSONFormatter::FromString<FunctionID::eType, messageType::eType>(str, dstObj);
+  int result;
+  result = JSONFormatter::FromString<FunctionID::eType, messageType::eType>(str, dstObj);
+  ASSERT_TRUE(JSONFormatter::kSuccess == result);
 
   // Compare SmartObjects
-//  compareObjects(srcObj, dstObj);
+  compareObjects(srcObj, dstObj);
+
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj2;
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj2;
+  factory.GetSchema(FunctionID::interface2_Function1,
+                                  messageType::notification,
+                                  schema);
+
+  srcObj2.setSchema(schema);
+
+  srcObj2[S_PARAMS][S_FUNCTION_ID] = FunctionID::interface2_Function1;
+  srcObj2[S_PARAMS][S_MESSAGE_TYPE] = messageType::notification;
+  srcObj2[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  srcObj2[S_PARAMS][S_PROTOCOL_TYPE] = 1;
+
+  srcObj2[S_MSG_PARAMS]["param"] = interface2_enum2::element2;
+  srcObj2[S_MSG_PARAMS]["i1"]["m1"] = "if1_struct2";
+  srcObj2[S_MSG_PARAMS]["i1"]["m2"][0] = "arr_str";
+  srcObj2[S_MSG_PARAMS]["i1"]["m3"] = interface1_enum1::element1;
+  srcObj2[S_MSG_PARAMS]["i1"]["m4"][0]["member1"] = 1313;
+  srcObj2[S_MSG_PARAMS]["i1"]["m4"][0]["member2"] = true;
+  srcObj2[S_MSG_PARAMS]["i1"]["m4"][0]["member3"] = 0.01;
+  srcObj2[S_MSG_PARAMS]["i1"]["m4"][0]["member4"][0] = 99;
+
+  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, srcObj2.isValid());
+
+  // SmartObjects --> JSON
+  ASSERT_TRUE(JSONFormatter::ToString(srcObj2, str));
+
+  // JSON --> SmartObjects
+  result =  JSONFormatter::FromString<FunctionID::eType, messageType::eType>(str, dstObj2);
+  ASSERT_TRUE(JSONFormatter::kSuccess == result);
+
+  factory.attachSchema(dstObj2);
+
+  // Compare SmartObjects
+  compareObjects(srcObj2, dstObj2);
+}
+
+TEST_F(CFormatterTestHelper, FromString) {
+
+  std::string srcStr = "\
+        {\
+            \"id\": 99,\
+            \"jsonrpc\": \"2.0\",\
+            \"result\": {\
+                \"code\": 0,\
+                \"method\": \"interface1.Function1\",\
+                \"p1\": 10,\
+                \"p2\": 12,\
+                \"p3\": true\
+            }\
+        }";
+
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
+
+  int result =
+      JSONFormatter::FromString<FunctionID::eType, messageType::eType>(
+          srcStr, dstObj);
+
+  ASSERT_TRUE(JSONFormatter::kSuccess == result);
+
+  NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;
+  test_json_rpc factory;
+  factory.GetSchema(FunctionID::interface1_Function1,
+                                messageType::response,
+                                schema);
+  dstObj.setSchema(schema);
+
+  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, dstObj.isValid());
+
+  ASSERT_EQ(99, (int)dstObj[S_PARAMS][S_CORRELATION_ID]);
+  ASSERT_EQ(2, (int)dstObj[S_PARAMS][S_PROTOCOL_VERSION]);
+  ASSERT_EQ(messageType::response, (int)dstObj[S_PARAMS][S_MESSAGE_TYPE]);
+  ASSERT_EQ(0, (int)dstObj[S_PARAMS][kCode]);
+  ASSERT_EQ(FunctionID::interface1_Function1, (int)dstObj[S_PARAMS][S_FUNCTION_ID]);
+  ASSERT_EQ(interface1_enum1::element1, (int)dstObj[S_MSG_PARAMS]["p1"]);
+  ASSERT_EQ(interface1_enum1::element3, (int)dstObj[S_MSG_PARAMS]["p2"]);
+  ASSERT_EQ(true, (bool)dstObj[S_MSG_PARAMS]["p3"]);
 }
 
 /**
