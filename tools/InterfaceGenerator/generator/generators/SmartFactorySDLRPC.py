@@ -23,7 +23,7 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
     def _gen_pre_function_schemas(self, functions):
         """Generate specific code that goes before schema initialization.
 
-        In SDL RPC generator where is no need to generate any code before
+        In SDL RPC generator there is no need to generate any code before
         schemas initialization.
 
         Keyword arguments:
@@ -39,7 +39,7 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
     def _preprocess_message_type(self, message_type):
         """Preprocess message_type enum.
 
-        In SDL RPC generator where is no need to preprocess message_type
+        In SDL RPC generator there is no need to preprocess message_type
         enum values.
 
         Keyword arguments:

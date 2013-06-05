@@ -194,7 +194,7 @@ class Test(unittest.TestCase):
 
         result_enum = generator._preprocess_message_type(message_type)
 
-        self.assertEqual(True, "error_response" in result_enum.elements)
+        self.assertIn("error_response", result_enum.elements)
         self.assertEqual("error_response",
                          result_enum.elements["error_response"].primary_name)
 
@@ -208,7 +208,7 @@ class Test(unittest.TestCase):
 
         result_enum = generator._preprocess_message_type(message_type)
 
-        self.assertEqual(False, "error_response" in result_enum.elements)
+        self.assertNotIn("error_response", result_enum.elements)
 
     def test_gen_pre_function_schemas(self):
         """Test code that goes before schema initialization.
