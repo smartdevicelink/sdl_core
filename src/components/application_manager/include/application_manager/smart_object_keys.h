@@ -95,6 +95,9 @@ const char bits_per_sample[] = "bitsPerSample";
 const char audio_type[] = "audioType";
 const char button_name[] = "buttonName";
 const char data_type[] = "dataType";
+const char turn_list[] = "turnList";
+const char turn_icon[] = "turnIcon";
+const char value[] = "value";
 
 // PutFile
 const char sync_file_name[] = "syncFileName";

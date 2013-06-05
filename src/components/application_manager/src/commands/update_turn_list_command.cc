@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/set_icon_command.h"
+#include "application_manager/commands/update_turn_list_command.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -41,14 +41,14 @@ namespace application_manager {
 
 namespace commands {
 
-SetIconCommand::SetIconCommand(
+UpdateTurnListCommand::UpdateTurnListCommand(
     const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
-SetIconCommand::~SetIconCommand() {
+UpdateTurnListCommand::~UpdateTurnListCommand() {
 }
 
-void SetIconCommand::Run() {
+void UpdateTurnListCommand::Run() {
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
@@ -59,26 +59,24 @@ void SetIconCommand::Run() {
     return;
   }
 
-  const std::string& sync_file_name =
-          (*message_)[strings::msg_params][strings::sync_file_name];
+  std::string file_path;
 
-  std::string relative_file_path = app->name();
-  relative_file_path += "/";
-  relative_file_path += sync_file_name;
+  const size_t turn_list_size = (*message_)[strings::msg_params][strings::turn_list].length();
 
-  std::string full_file_path = file_system::FullPath(relative_file_path);
+  for (int i = 0; i < turn_list_size; ++i) {
+    file_path = app->name() + "/" +
+        (*message_)[strings::msg_params][strings::turn_list][i]
+                   [strings::turn_icon][strings::value].asString();
+    file_path = file_system::FullPath(file_path);
 
-  if (!file_system::FileExists(full_file_path)) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
-    return;
+    if (!file_system::FileExists(file_path)) {
+      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+      return;
+    }
+
+    (*message_)[strings::msg_params][strings::turn_list][i]
+               [strings::turn_icon][strings::value] = file_path;
   }
-
-  smart_objects::CSmartObject* set_app_icon_hmi_request  = new smart_objects::CSmartObject();
-
-  (*set_app_icon_hmi_request)[strings::params][strings::app_id] =
-      (*message_)[strings::msg_params][strings::correlation_id];
-
-  (*set_app_icon_hmi_request)[strings::params][strings::sync_file_name] = full_file_path;
 
   const int corellation_id =
       (*message_)[strings::params][strings::correlation_id];
@@ -86,7 +84,7 @@ void SetIconCommand::Run() {
       (*message_)[strings::params][strings::connection_key];
 
   // TODO(VS): HMI Request Id
-  const int hmi_request_id = 208;
+  const int hmi_request_id = 209;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, corellation_id, hmi_request_id, &(*message_));

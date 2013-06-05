@@ -89,6 +89,8 @@ set (SOURCES
 ./src/commands/set_icon_response_command.cc
 ./src/commands/set_display_layout_command.cc
 ./src/commands/set_display_layout_response_command.cc
+./src/commands/update_turn_list_command.cc
+./src/commands/update_turn_list_response_command.cc
 )
 
 
