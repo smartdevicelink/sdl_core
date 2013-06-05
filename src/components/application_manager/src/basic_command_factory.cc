@@ -73,6 +73,8 @@
 #include "application_manager/commands/show_constant_tbt_response_command.h"
 #include "application_manager/commands/subscribe_vehicle_data_command.h"
 #include "application_manager/commands/subscribe_vehicle_data_response_command.h"
+#include "application_manager/commands/unsubscribe_vehicle_data_command.h"
+#include "application_manager/commands/unsubscribe_vehicle_data_response_command.h"
 #include "application_manager/commands/alert_maneuver_command.h"
 #include "application_manager/commands/alert_maneuver_response_command.h"
 #include "application_manager/commands/set_icon_command.h"
@@ -250,6 +252,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
            command.reset(new commands::SubscribeVehicleDataCommandResponse(message));
          } else {
            command.reset(new commands::SubscribeVehicleDataCommandRequest(message));
+         }
+         break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::UnsubscribeVehicleDataID: {
+         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+           command.reset(new commands::UnsubscribeVehicleDataCommandResponse(message));
+         } else {
+           command.reset(new commands::UnsubscribeVehicleDataCommandRequest(message));
          }
          break;
     }

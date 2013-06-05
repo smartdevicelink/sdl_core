@@ -79,6 +79,8 @@ set (SOURCES
 ./src/commands/show_constant_tbt_response_command.cc
 ./src/commands/subscribe_vehicle_data_command.cc
 ./src/commands/subscribe_vehicle_data_response_command.cc
+./src/commands/unsubscribe_vehicle_data_command.cc
+./src/commands/unsubscribe_vehicle_data_response_command.cc
 ./src/commands/alert_maneuver_command.cc
 ./src/commands/alert_maneuver_response_command.cc
 ./src/commands/set_icon_command.cc
