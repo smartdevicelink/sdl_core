@@ -797,6 +797,66 @@ TEST(FormatterJsonRpc, ErrorResponseMessageNotAvailable) {
                               "}"));
 }
 
+TEST(FormatterJsonRpc, MessageType) {
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject out;
+
+  ASSERT_TRUE((JSONFormatter::kSuccess ==
+      JSONFormatter::FromString<FunctionID::eType, messageType::eType>(
+          "{"
+          "  \"jsonrpc\": \"2.0\","
+          "  \"method\": \"interface2.Function1\","
+          "  \"params\": {}"
+          "}",
+          out)));
+
+  ASSERT_TRUE(messageType::notification ==
+      out[S_PARAMS][S_MESSAGE_TYPE].asInt());
+
+  ASSERT_TRUE((JSONFormatter::kSuccess ==
+      JSONFormatter::FromString<FunctionID::eType, messageType::eType>(
+          "{"
+          "  \"jsonrpc\": \"2.0\","
+          "  \"method\": \"interface2.Function1\","
+          "  \"id\": 1,"
+          "  \"params\": {}"
+          "}",
+          out)));
+
+  ASSERT_TRUE(messageType::request == out[S_PARAMS][S_MESSAGE_TYPE].asInt());
+
+  ASSERT_TRUE((JSONFormatter::kSuccess ==
+      JSONFormatter::FromString<FunctionID::eType, messageType::eType>(
+          "{"
+          "  \"jsonrpc\": \"2.0\","
+          "  \"id\": 1,"
+          "  \"result\": {"
+          "    \"method\": \"interface2.Function1\","
+          "    \"code\": 1"
+          "  }"
+          "}",
+          out)));
+
+  ASSERT_TRUE(messageType::response == out[S_PARAMS][S_MESSAGE_TYPE].asInt());
+
+  ASSERT_TRUE((JSONFormatter::kSuccess ==
+      JSONFormatter::FromString<FunctionID::eType, messageType::eType>(
+          "{"
+          "  \"jsonrpc\": \"2.0\","
+          "  \"id\": 1,"
+          "  \"error\": {"
+          "    \"data\": {"
+          "      \"method\": \"interface2.Function1\""
+          "    },"
+          "    \"code\": 1,"
+          "    \"message\": \"Fail\""
+          "  }"
+          "}",
+          out)));
+
+  ASSERT_TRUE(messageType::error_response ==
+      out[S_PARAMS][S_MESSAGE_TYPE].asInt());
+}
+
 }  //namespace Formatters
 }  //namespace JSONHandler
 }  //namespace components

@@ -43,6 +43,7 @@ namespace strings = NsJSONHandler::strings;
 const char *FormatterJsonRpc::kRequest = "request";
 const char *FormatterJsonRpc::kResponse = "response";
 const char *FormatterJsonRpc::kNotification = "notification";
+const char *FormatterJsonRpc::kErrorResponse = "error_response";
 const char *FormatterJsonRpc::kJsonRpc = "jsonrpc";
 const char *FormatterJsonRpc::kJsonRpcExpectedValue = "2.0";
 const char *FormatterJsonRpc::kId = "id";

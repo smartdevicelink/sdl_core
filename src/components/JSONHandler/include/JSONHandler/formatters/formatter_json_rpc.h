@@ -143,6 +143,11 @@ class FormatterJsonRpc: public CFormatterJsonBase {
   static const char *kNotification;
 
   /**
+   * @brief Error reponse.
+   */
+  static const char *kErrorResponse;
+
+  /**
    * @brief Name of "jsonrpc" message field.
    */
   static const char *kJsonRpc;
@@ -318,11 +323,13 @@ int FormatterJsonRpc::FromString(const std::string &str,
         bool method_container_found = false;
 
         if (true == root.isMember(kResult)) {
+          message_type_string = kResponse;
           response_value = root[kResult];
           response_value_found = true;
           method_container = root[kResult];
           method_container_found = true;
         } else if (true == root.isMember(kError)) {
+          message_type_string = kErrorResponse;
           response_value = root[kError];
           response_value_found = true;
           is_error_response = true;
@@ -335,10 +342,6 @@ int FormatterJsonRpc::FromString(const std::string &str,
           }
         } else {
           result |= kUnknownMessageType;
-        }
-
-        if (0 == (result & kUnknownMessageType)) {
-          message_type_string = kResponse;
         }
 
         if (false == method_container_found) {
@@ -388,7 +391,8 @@ int FormatterJsonRpc::FromString(const std::string &str,
           NsSmartObjects::SmartType_Map);
     }
 
-    if (kResponse == message_type_string) {
+    if ((kResponse == message_type_string) ||
+        (kErrorResponse == message_type_string)) {
       out[strings::S_MSG_PARAMS].erase(kMethod);
       out[strings::S_MSG_PARAMS].erase(kCode);
 
