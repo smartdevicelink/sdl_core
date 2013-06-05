@@ -349,7 +349,7 @@ TEST(FormatterJsonRpc, UnknownMethod) {
   ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMethod,
                               "{"
                               "  \"jsonrpc\": \"2.0\","
-                              "  \"method\": \"RegisterAppInterface\""
+                              "  \"method\": \"interface1.Function1\""
                               "}"));
 
   ASSERT_TRUE(CheckErrorCode(JSONFormatter::kUnknownMethod,
@@ -377,7 +377,7 @@ TEST(FormatterJsonRpc, UnknownMethod) {
                               "{"
                               "  \"jsonrpc\": \"2.0\","
                               "  \"id\": 1,"
-                              "  \"method\": \"UnregisterAppInterface\","
+                              "  \"method\": \"interface1.Function2\","
                               "  \"params\":"
                               "  {"
                               "    \"p\": 0"
@@ -410,7 +410,7 @@ TEST(FormatterJsonRpc, UnknownMethod) {
                               "  \"id\": 1,"
                               "  \"result\":"
                               "  {"
-                              "    \"method\": \"SetGlobalProperties\","
+                              "    \"method\": \"interface2.Function1\","
                               "    \"p\": 0"
                               "  }"
                               "}"));
@@ -447,7 +447,7 @@ TEST(FormatterJsonRpc, UnknownMethod) {
                               "  {"
                               "    \"data\":"
                               "    {"
-                              "      \"method\": \"RegisterAppInterface\""
+                              "      \"method\": \"interface1.Function1\""
                               "    },"
                               "    \"p\": 0"
                               "  }"
