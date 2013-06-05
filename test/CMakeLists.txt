@@ -30,10 +30,10 @@ set(LIBRARIES
     gmock
     gmock_main
     RequestWatchdog
-    JSONHandler
+    #JSONHandler
     jsoncpp
-    test_JSONHandler_v4_protocol_v2_0_revP
-    test_JSONHandlerTest
+    #test_JSONHandler_v4_protocol_v2_0_revP
+    #test_JSONHandlerTest
     test_UtilsTest
     test_RequestWatchdogTest
     test_ProtocolHandlerTest
