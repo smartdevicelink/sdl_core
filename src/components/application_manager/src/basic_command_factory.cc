@@ -87,6 +87,8 @@
 #include "application_manager/commands/set_display_layout_response_command.h"
 #include "application_manager/commands/update_turn_list_command.h"
 #include "application_manager/commands/update_turn_list_response_command.h"
+#include "application_manager/commands/on_app_interface_unregistered_command.h"
+
 
 
 // TODO(AK): Include the directory when naming .h files
@@ -321,6 +323,10 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
       command.reset(new commands::OnAudioPassThruCommand(message));
       break;
     }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAppInterfaceUnregisteredID: {
+       command.reset(new commands::OnAppInterfaceUnregisteredCommand(message));
+       break;
+     }
     default: {
       command.reset(new commands::GenericResponseCommand(message));
       break;
