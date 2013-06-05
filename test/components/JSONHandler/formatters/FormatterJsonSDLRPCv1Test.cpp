@@ -423,8 +423,6 @@ namespace test { namespace components { namespace JSONHandler { namespace Format
     // SmartObjects --> JSON
     FormatterV1::toString(src_obj, str);
 
-    std::cout << str << std::endl;
-
     ASSERT_TRUE(str.find("correlation") == std::string::npos) << "CorrelationId is present in JSON string";
 
     // JSON --> SmartObjects
@@ -440,6 +438,520 @@ namespace test { namespace components { namespace JSONHandler { namespace Format
     compareObjects(src_obj, dst_obj);
   }
 
+  namespace so = NsSmartDeviceLink::NsSmartObjects;
+  namespace mf = NsSmartDeviceLink::NsJSONHandler::Formatters::
+      meta_formatter_error_code;
+      
+  TEST_F(CFormatterTestHelper, test_SDLRPCv1_MetaFormatToString_Empty) {
+    std::string result;
+    FormatterV1::tMetaFormatterErrorCode error_code;
+
+    so::CSmartObject empty_object;
+    so::CSmartSchema empty_schema;
+
+    error_code = FormatterV1::MetaFormatToString(empty_object,
+                                                 empty_schema,
+                                                 result);
+
+    std::string expected_result(
+        "{\n"
+        "   \"\" : {\n"
+        "      \"name\" : \"\",\n"
+        "      \"parameters\" : \"\"\n"
+        "   }\n"
+        "}\n");
+
+    ASSERT_EQ(expected_result, result) <<
+        "Unexpected result string";
+
+    ASSERT_FALSE(mf::kErrorOk & error_code) <<
+        "Result must not be OK in such case";
+    
+    ASSERT_TRUE(mf::kErrorObjectIsNotFunction & error_code) <<
+        "Object must be not be detected as function";
+    
+    ASSERT_TRUE(mf::kErrorSchemaIsNotFunction & error_code) <<
+        "Target schema does not define a function";
+
+    ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
+        "This creation shold not fail because of valid empty schema";
+
+    so::CSmartObject object(so::SmartType_Map);
+
+    object["1"] = 1;
+    object["2"] = "two";
+    object["3"] = false;
+
+    error_code = FormatterV1::MetaFormatToString(object,
+                                                 empty_schema,
+                                                 result);
+    
+    ASSERT_EQ(expected_result, result) <<
+        "Unexpected result string";
+
+    ASSERT_FALSE(mf::kErrorOk & error_code) <<
+        "Result must not be OK in such case";
+
+    ASSERT_TRUE(mf::kErrorObjectIsNotFunction & error_code) <<
+        "Object must be not be detected as function";
+
+    ASSERT_TRUE(mf::kErrorSchemaIsNotFunction & error_code) <<
+        "Target schema does not define a function";
+
+    ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
+        "This creation shold not fail because of valid empty schema";
+
+    so::CSmartObject function_object(so::SmartType_Map);
+
+    function_object[S_PARAMS][S_FUNCTION_ID] =
+        FunctionID::UnregisterAppInterface;
+    function_object[S_PARAMS][S_MESSAGE_TYPE] = messageType::request;
+    function_object[S_MSG_PARAMS]["Some data"] = "Some data";
+
+    error_code = FormatterV1::MetaFormatToString(function_object,
+                                                 empty_schema,
+                                                 result);
+
+    ASSERT_EQ(expected_result, result) <<
+        "Unexpected result string";
+
+    ASSERT_FALSE(mf::kErrorOk & error_code) <<
+        "Result must not be OK in such case";
+
+    ASSERT_FALSE(mf::kErrorObjectIsNotFunction & error_code) <<
+        "Object must be detected as function";
+
+    ASSERT_TRUE(mf::kErrorSchemaIsNotFunction & error_code) <<
+        "Target schema does not define a function";
+
+    ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
+        "This creation shold not fail because of valid empty schema";
+
+    std::map<std::string, so::CObjectSchemaItem::SMember>
+        non_function_schema_members_map;
+
+    non_function_schema_members_map["StringField"] =
+        so::CObjectSchemaItem::SMember(
+            so::CStringSchemaItem::create(
+                so::TSchemaItemParameter<size_t>(1000),
+                so::TSchemaItemParameter<std::string>()),
+            false);
+    non_function_schema_members_map["IntField"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<int>::create(
+            1, 20, 10), true);
+    non_function_schema_members_map["BoolField"] =
+        so::CObjectSchemaItem::SMember(
+            so::CBoolSchemaItem::create(
+                so::TSchemaItemParameter<bool>()),
+            true);
+
+    so::CSmartSchema non_function_schema(so::CObjectSchemaItem::create(
+        non_function_schema_members_map));
+
+    error_code = FormatterV1::MetaFormatToString(empty_object,
+                                                 non_function_schema,
+                                                 result);
+
+    ASSERT_EQ(expected_result, result) <<
+        "Unexpected result string";
+
+    ASSERT_FALSE(mf::kErrorOk & error_code) <<
+        "Result must not be OK in such case";
+
+    ASSERT_TRUE(mf::kErrorObjectIsNotFunction & error_code) <<
+        "Object must not be detected as function";
+
+    ASSERT_TRUE(mf::kErrorSchemaIsNotFunction & error_code) <<
+        "Target schema does not define a function";
+
+    ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
+        "This creation shold not fail because of valid empty schema";
+  }
+
+  TEST_F(CFormatterTestHelper, test_SDLRPCv1_MetaFormatToString_Valid) {
+    std::string result;
+    FormatterV1::tMetaFormatterErrorCode error_code;
+    
+    so::CSmartObject empty_object;
+
+    std::set<FunctionID::eType> function_id_items;
+    function_id_items.insert(FunctionID::RegisterAppInterface);
+    function_id_items.insert(FunctionID::UnregisterAppInterface);
+    function_id_items.insert(FunctionID::SetGlobalProperties);
+
+    std::set<messageType::eType> message_type_items;
+    message_type_items.insert(messageType::request);
+    message_type_items.insert(messageType::response);
+    message_type_items.insert(messageType::notification);
+
+    std::map<std::string, so::CObjectSchemaItem::SMember>
+        test_struct_members;
+
+    test_struct_members["mandatory_int_field"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<int>::create(
+            1, 20, 15), true);
+        
+    test_struct_members["mandatory_string_field"] =
+        so::CObjectSchemaItem::SMember(
+            so::CStringSchemaItem::create(
+                500,
+                std::string("Mandatory text")),
+            true);
+            
+    test_struct_members["non_mandatory_string_field"] =
+        so::CObjectSchemaItem::SMember(
+            so::CStringSchemaItem::create(
+                500,
+                std::string("Non-mandatory text")),
+            false);
+
+    std::map<std::string, so::CObjectSchemaItem::SMember>
+        test_non_mandatory_struct_members;
+
+    test_non_mandatory_struct_members["non_mandatory_int_field"] =
+    so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<int>::create(
+        1, 20, 15), false);
+
+    std::map<std::string, so::CObjectSchemaItem::SMember> schema_members;
+    
+    schema_members["mandatory_auto_default_string"] =
+        so::CObjectSchemaItem::SMember(so::CStringSchemaItem::create(100),
+                                       true);
+
+    schema_members["non_mandatory_auto_default_string"] =
+        so::CObjectSchemaItem::SMember(so::CStringSchemaItem::create(100),
+                                       false);
+
+    schema_members["mandatory_manual_default_string"] =
+        so::CObjectSchemaItem::SMember(
+            so::CStringSchemaItem::create(500,
+                                          std::string("String")),
+            true);
+
+    schema_members["non_mandatory_manual_default_string"] =
+        so::CObjectSchemaItem::SMember(
+            so::CStringSchemaItem::create(500,
+                                          std::string("String")),
+            false);
+
+    schema_members["mandatory_auto_default_int"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<int>::create(
+            1, 200), true);
+
+    schema_members["mandatory_manual_default_int"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<int>::create(
+            1, 20, 10), true);
+
+    schema_members["non_mandatory_manual_default_int"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<int>::create(
+            1, 20, 10), false);
+
+    schema_members["non_mandatory_auto_default_int"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<int>::create(
+            1, 200), false);
+
+    schema_members["non_mandatory_auto_default_float"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<double>::create(
+            0.0, 100.0), false);
+
+    schema_members["non_mandatory_manual_default_float"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<double>::create(
+            0.0, 100.0, 33.33), false);
+
+    schema_members["mandatory_auto_default_float"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<double>::create(
+            0.0, 100.0), false);
+
+    schema_members["mandatory_manual_default_float"] =
+        so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<double>::create(
+            0.0, 100.0, 33.33), false);
+
+    schema_members["non_mandatory_auto_default_bool"] =
+        so::CObjectSchemaItem::SMember(so::CBoolSchemaItem::create(), false);
+
+    schema_members["non_mandatory_manual_default_bool"] =
+        so::CObjectSchemaItem::SMember(so::CBoolSchemaItem::create(true),
+                                       false);
+
+    schema_members["mandatory_auto_default_bool"] =
+        so::CObjectSchemaItem::SMember(so::CBoolSchemaItem::create(), true);
+
+    schema_members["mandatory_manual_default_bool"] =
+        so::CObjectSchemaItem::SMember(so::CBoolSchemaItem::create(true),
+                                       true);
+
+    schema_members["mandatory_auto_default_enum"] =
+        so::CObjectSchemaItem::SMember(
+            so::TEnumSchemaItem<messageType::eType>::create(
+                message_type_items),
+            true);
+
+    schema_members["mandatory_manual_default_enum"] =
+        so::CObjectSchemaItem::SMember(
+            so::TEnumSchemaItem<messageType::eType>::create(
+                message_type_items,
+                messageType::request),
+            true);
+
+    schema_members["non_mandatory_auto_default_enum"] =
+        so::CObjectSchemaItem::SMember(
+            so::TEnumSchemaItem<messageType::eType>::create(
+                message_type_items),
+            false);
+
+    schema_members["non_mandatory_manual_default_enum"] =
+        so::CObjectSchemaItem::SMember(
+            so::TEnumSchemaItem<messageType::eType>::create(
+                message_type_items,
+                messageType::request),
+            false);
+
+    schema_members["non_mandatory_struct"] =
+        so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
+            test_struct_members), false);
+
+    schema_members["mandatory_struct"] =
+        so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
+            test_struct_members), true);
+
+    schema_members["mandatory_struct_nm"] =
+        so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
+            test_non_mandatory_struct_members), true);    
+
+    schema_members["non_mandatory_struct_nm"] =
+        so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
+            test_non_mandatory_struct_members), false);
+
+    schema_members["non_mandatory_non_empty_array"] =
+        so::CObjectSchemaItem::SMember(so::CArraySchemaItem::create(
+            so::TNumberSchemaItem<int>::create()), false);
+
+    schema_members["mandatory_empty_array"] =
+        so::CObjectSchemaItem::SMember(so::CArraySchemaItem::create(
+            so::TNumberSchemaItem<int>::create(0, 0, 0)), true);
+
+    schema_members["mandatory_empty_map"] =
+        so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
+            std::map<std::string, so::CObjectSchemaItem::SMember>()), true);
+
+    schema_members["non_mandatory_empty_map"] =
+        so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
+            std::map<std::string, so::CObjectSchemaItem::SMember>()), false);
+        
+    std::map<std::string, so::CObjectSchemaItem::SMember>
+        function_params_members;
+        
+    function_params_members[S_FUNCTION_ID] =
+        so::CObjectSchemaItem::SMember(
+            so::TEnumSchemaItem<FunctionID::eType>::create(function_id_items),
+            true);
+    function_params_members[S_MESSAGE_TYPE] =
+        so::CObjectSchemaItem::SMember(
+            so::TEnumSchemaItem<messageType::eType>::create(
+                message_type_items), true);
+    function_params_members[S_CORRELATION_ID] =
+        so::CObjectSchemaItem::SMember(
+            so::TNumberSchemaItem<int>::create(), true);
+    function_params_members[S_PROTOCOL_VERSION] =
+        so::CObjectSchemaItem::SMember(
+            so::TNumberSchemaItem<int>::create(), true);
+    function_params_members[S_PROTOCOL_TYPE] =
+        so::CObjectSchemaItem::SMember(
+            so::TNumberSchemaItem<int>::create(), true);
+
+    std::map<std::string, so::CObjectSchemaItem::SMember>
+        functiom_root_members;
+
+    functiom_root_members[S_MSG_PARAMS] =
+        so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
+            schema_members), true);
+    functiom_root_members[S_PARAMS] =
+        so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
+            function_params_members), true);
+
+    so::CSmartSchema function_schema(
+        so::CObjectSchemaItem::create(functiom_root_members));
+
+    std::string expected_result1(
+        "{\n"
+        "   \"-1\" : {\n"
+        "      \"correlationID\" : 0,\n"
+        "      \"name\" : \"-1\",\n"
+        "      \"parameters\" : {\n"
+        "         \"mandatory_auto_default_bool\" : false,\n"
+        "         \"mandatory_auto_default_enum\" : -1,\n"
+        "         \"mandatory_auto_default_int\" : 0,\n"
+        "         \"mandatory_auto_default_string\" : \"\",\n"
+        "         \"mandatory_empty_array\" : [],\n"
+        "         \"mandatory_empty_map\" : {},\n"
+        "         \"mandatory_manual_default_bool\" : true,\n"
+        "         \"mandatory_manual_default_enum\" : \"request\",\n"
+        "         \"mandatory_manual_default_int\" : 10,\n"
+        "         \"mandatory_manual_default_string\" : \"String\",\n"
+        "         \"mandatory_struct\" : {\n"
+        "            \"mandatory_int_field\" : 15,\n"
+        "            \"mandatory_string_field\" : \"Mandatory text\"\n"
+        "         },\n"
+        "         \"mandatory_struct_nm\" : {}\n"        
+        "      }\n"
+        "   }\n"
+        "}\n");
+    
+    error_code = FormatterV1::MetaFormatToString(empty_object,
+                                                 function_schema,
+                                                 result);
+    
+    ASSERT_EQ(expected_result1, result) <<
+        "Invalid result JSON string";
+    
+    ASSERT_FALSE(mf::kErrorOk & error_code) <<
+        "Result must not be OK in such case";
+
+    ASSERT_TRUE(mf::kErrorObjectIsNotFunction & error_code) <<
+        "Object must not be detected as function";
+
+    ASSERT_FALSE(mf::kErrorSchemaIsNotFunction & error_code) <<
+        "Target schema defines a function";
+
+    ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
+        "This creation shold not fail because of valid schema";
+
+    so::CSmartObject function_object(so::SmartType_Map);
+
+    function_object[S_PARAMS][S_MESSAGE_TYPE] = messageType::response;
+    function_object[S_PARAMS][S_FUNCTION_ID] =
+        FunctionID::RegisterAppInterface;
+    function_object[S_PARAMS][S_PROTOCOL_VERSION] = 13;
+
+    std::string expected_result2(
+        "{\n"
+        "   \"response\" : {\n"
+        "      \"correlationID\" : 0,\n"
+        "      \"name\" : \"RegisterAppInterface\",\n"
+        "      \"parameters\" : {\n"
+        "         \"mandatory_auto_default_bool\" : false,\n"
+        "         \"mandatory_auto_default_enum\" : -1,\n"
+        "         \"mandatory_auto_default_int\" : 0,\n"
+        "         \"mandatory_auto_default_string\" : \"\",\n"
+        "         \"mandatory_empty_array\" : [],\n"
+        "         \"mandatory_empty_map\" : {},\n"        
+        "         \"mandatory_manual_default_bool\" : true,\n"
+        "         \"mandatory_manual_default_enum\" : \"request\",\n"
+        "         \"mandatory_manual_default_int\" : 10,\n"
+        "         \"mandatory_manual_default_string\" : \"String\",\n"
+        "         \"mandatory_struct\" : {\n"
+        "            \"mandatory_int_field\" : 15,\n"
+        "            \"mandatory_string_field\" : \"Mandatory text\"\n"
+        "         },\n"
+        "         \"mandatory_struct_nm\" : {}\n"
+        "      }\n"
+        "   }\n"
+        "}\n");
+    
+    error_code = FormatterV1::MetaFormatToString(function_object,
+                                                 function_schema,
+                                                 result);
+
+    ASSERT_EQ(expected_result2, result) <<
+        "Invalid result JSON string";
+
+    ASSERT_FALSE(mf::kErrorOk & error_code) <<
+        "Result must not be OK in such case";
+
+    ASSERT_TRUE(mf::kErrorObjectIsNotFunction & error_code) <<
+        "Object must not be detected as function";
+
+    ASSERT_FALSE(mf::kErrorSchemaIsNotFunction & error_code) <<
+        "Target schema defines a function";
+
+    ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
+        "This creation shold not fail because of valid schema";
+
+    function_object[S_MSG_PARAMS]["non_schema_int_field"] = 13;
+    function_object[S_MSG_PARAMS]["non_schema_string_field"] = "xxx";
+    function_object[S_PARAMS]["Noise"] = "bzzzz";
+
+    error_code = FormatterV1::MetaFormatToString(function_object,
+                                                 function_schema,
+                                                 result);
+
+    ASSERT_EQ(expected_result2, result) <<
+        "Invalid result JSON string";
+
+    ASSERT_FALSE(mf::kErrorOk & error_code) <<
+        "Result must not be OK in such case";
+
+    ASSERT_FALSE(mf::kErrorObjectIsNotFunction & error_code) <<
+        "Object must be detected as function";
+
+    ASSERT_FALSE(mf::kErrorSchemaIsNotFunction & error_code) <<
+        "Target schema defines a function";
+
+    ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
+        "This creation shold not fail because of valid schema";
+
+    function_object[S_MSG_PARAMS]["mandatory_auto_default_int"] = 25;
+    function_object[S_MSG_PARAMS]["non_mandatory_auto_default_int"] = 100;
+    function_object[S_MSG_PARAMS]["non_mandatory_struct_nm"]
+        ["non_mandatory_int_field"] = 3;
+    function_object[S_MSG_PARAMS]["mandatory_empty_map"]["x"] = 0;
+    function_object[S_MSG_PARAMS]["mandatory_empty_map"]["y"] = 0;
+    function_object[S_MSG_PARAMS]["non_mandatory_non_empty_array"][0] = 1;
+    function_object[S_MSG_PARAMS]["non_mandatory_non_empty_array"][1] = 2;
+    function_object[S_MSG_PARAMS]["non_mandatory_non_empty_array"][2] = 3;
+    function_object[S_MSG_PARAMS]["mandatory_empty_array"][0] = 0;
+    function_object[S_MSG_PARAMS]["mandatory_empty_array"][1] = 1;
+    function_object[S_MSG_PARAMS]["mandatory_empty_array"][2] = 2;
+
+    std::string expected_result3(
+        "{\n"
+        "   \"response\" : {\n"
+        "      \"correlationID\" : 0,\n"
+        "      \"name\" : \"RegisterAppInterface\",\n"
+        "      \"parameters\" : {\n"
+        "         \"mandatory_auto_default_bool\" : false,\n"
+        "         \"mandatory_auto_default_enum\" : -1,\n"
+        "         \"mandatory_auto_default_int\" : 25,\n"
+        "         \"mandatory_auto_default_string\" : \"\",\n"
+        "         \"mandatory_empty_array\" : [ 0, 1, 2 ],\n"
+        "         \"mandatory_empty_map\" : {},\n"
+        "         \"mandatory_manual_default_bool\" : true,\n"
+        "         \"mandatory_manual_default_enum\" : \"request\",\n"
+        "         \"mandatory_manual_default_int\" : 10,\n"
+        "         \"mandatory_manual_default_string\" : \"String\",\n"
+        "         \"mandatory_struct\" : {\n"
+        "            \"mandatory_int_field\" : 15,\n"
+        "            \"mandatory_string_field\" : \"Mandatory text\"\n"
+        "         },\n"
+        "         \"mandatory_struct_nm\" : {},\n"
+        "         \"non_mandatory_auto_default_int\" : 100,\n"
+        "         \"non_mandatory_non_empty_array\" : [ 1, 2, 3 ],\n"
+        "         \"non_mandatory_struct_nm\" : {\n"
+        "            \"non_mandatory_int_field\" : 3\n"
+        "         }\n"
+        "      }\n"
+        "   }\n"
+        "}\n");
+
+    error_code = FormatterV1::MetaFormatToString(function_object,
+                                                 function_schema,
+                                                 result);
+
+    ASSERT_EQ(expected_result3, result) <<
+        "Invalid result JSON string";
+
+    ASSERT_FALSE(mf::kErrorOk & error_code) <<
+        "Result must not be OK in such case";
+
+    ASSERT_FALSE(mf::kErrorObjectIsNotFunction & error_code) <<
+        "Object must be detected as function";
+
+    ASSERT_FALSE(mf::kErrorSchemaIsNotFunction & error_code) <<
+        "Target schema defines a function";
+
+    ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
+        "This creation shold not fail because of valid schema";    
+  }
 }}}}
 
 namespace NsSmartDeviceLink { namespace NsSmartObjects {
