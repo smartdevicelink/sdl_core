@@ -75,6 +75,8 @@
 #include "application_manager/commands/subscribe_vehicle_data_response_command.h"
 #include "application_manager/commands/unsubscribe_vehicle_data_command.h"
 #include "application_manager/commands/unsubscribe_vehicle_data_response_command.h"
+#include "application_manager/commands/read_did_command.h"
+#include "application_manager/commands/read_did_response_command.h"
 #include "application_manager/commands/get_vehicle_data_command.h"
 #include "application_manager/commands/get_vehicle_data_response_command.h"
 #include "application_manager/commands/alert_maneuver_command.h"
@@ -262,6 +264,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
            command.reset(new commands::UnsubscribeVehicleDataCommandResponse(message));
          } else {
            command.reset(new commands::UnsubscribeVehicleDataCommandRequest(message));
+         }
+         break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ReadDIDID: {
+         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+           command.reset(new commands::ReadDIDCommandResponse(message));
+         } else {
+           command.reset(new commands::ReadDIDCommandRequest(message));
          }
          break;
     }

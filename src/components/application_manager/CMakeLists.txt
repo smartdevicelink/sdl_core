@@ -81,6 +81,8 @@ set (SOURCES
 ./src/commands/subscribe_vehicle_data_response_command.cc
 ./src/commands/unsubscribe_vehicle_data_command.cc
 ./src/commands/unsubscribe_vehicle_data_response_command.cc
+./src/commands/read_did_command.cc
+./src/commands/read_did_response_command.cc
 ./src/commands/get_vehicle_data_command.cc
 ./src/commands/get_vehicle_data_response_command.cc
 ./src/commands/alert_maneuver_command.cc
