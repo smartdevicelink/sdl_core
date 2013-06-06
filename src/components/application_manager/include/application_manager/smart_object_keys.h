@@ -94,6 +94,8 @@ const char sampling_rate[] = "samplingRate";
 const char bits_per_sample[] = "bitsPerSample";
 const char audio_type[] = "audioType";
 const char button_name[] = "buttonName";
+const char button_event_mode[] = "buttonEventMode";
+const char custom_button_id[] = "customButtonID";
 const char data_type[] = "dataType";
 const char turn_list[] = "turnList";
 const char turn_icon[] = "turnIcon";
@@ -127,6 +129,9 @@ namespace hmi_response {
   const char code[] = "code";
   const char method[] = "method";
   const char try_again_time[] = "tryAgainTime";
+  const char custom_button_id[] = "customButtonID";
+  const char button_name[] = "name";
+  const char button_mode[] = "mode";
 }  // namespace hmi_response
 
 }  // namespace application_manager

@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
 
 /**
@@ -65,6 +67,15 @@ class OnButtonEventCommand : public CommandResponseImpl {
   virtual void Run();
 
  private:
+  /*
+   * @brief Sends btton event notification to mobile device
+   *
+   * @param app Application to receive notification
+   * @param is_custom_btn_id Indicates if received notification
+   *  with custom button param
+   */
+  void SendButtonEvent(const ApplicationImpl* app, bool is_custom_btn_id);
+
   DISALLOW_COPY_AND_ASSIGN(OnButtonEventCommand);
 };
 

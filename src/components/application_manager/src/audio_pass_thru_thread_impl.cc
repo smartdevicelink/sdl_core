@@ -263,6 +263,7 @@ void AudioPassThruThreadImpl::threadMain() {
     (*on_audio_pass)[strings::msg_params][strings::success] = true;
     (*on_audio_pass)[strings::msg_params][strings::result_code] =
         NsSmartDeviceLinkRPCV2::Result::SUCCESS;
+    // TODO(DK): key for binary data
     (*on_audio_pass)[strings::msg_params][strings::success] =
         smart_objects::CSmartObject(std::vector<unsigned char>(from, to));
 
