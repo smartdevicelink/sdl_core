@@ -32,21 +32,21 @@
  */
 
 #include "application_manager/commands/on_app_interface_unregistered_command.h"
-
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnAppInterfaceUnregisteredCommand::OnAppInterfaceUnregisteredCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 OnAppInterfaceUnregisteredCommand::~OnAppInterfaceUnregisteredCommand() {
 }
 
 void OnAppInterfaceUnregisteredCommand::Run() {
-  SendResponse();
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands
