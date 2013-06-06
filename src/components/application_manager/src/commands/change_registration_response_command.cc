@@ -31,96 +31,94 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/delete_command_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/commands/change_registration_response_command.h"
 #include "application_manager/message_chaining.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-bool DeleteCommandResponse::result_ui = false;
-bool DeleteCommandResponse::result_vr = false;
+bool ChangeRegistrationResponseCommand::result_ui = false;
+bool ChangeRegistrationResponseCommand::result_vr = false;
 
-DeleteCommandResponse::DeleteCommandResponse(
+ChangeRegistrationResponseCommand::ChangeRegistrationResponseCommand(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-DeleteCommandResponse::~DeleteCommandResponse() {
+ChangeRegistrationResponseCommand::~ChangeRegistrationResponseCommand() {
 }
 
-void DeleteCommandResponse::Run() {
-  if ((*message_)[strings::params][strings::success] == false)
-  {
+void ChangeRegistrationResponseCommand::Run() {
+  if ((*message_)[strings::msg_params].keyExists(strings::success)) {
     SendResponse();
     return;
   }
 
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
-  // TODO(DK) HMI Request Id
   const int function_id =
       (*message_)[strings::params][strings::function_id].asInt();
 
-  // TODO(VS) HMI code Id
+  // TODO(DK): HMI code Id
   const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
 
-  // TODO(VS) HMI Request Id
-  const int ui_cmd_id = 202;
-  const int vr_cmd_id = 203;
+  // TODO(DK): HMI Request Id
+  const int ui_request = 210;
+  const int vr_request = 211;
 
-  smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
-    GetMessageChain(function_id)->data();
-
+  const MessageChaining* msg_chain =
   ApplicationManagerImpl::instance()->GetMessageChain(function_id);
 
-  if (function_id == ui_cmd_id) {
-    if (code) {
+  if (NULL == msg_chain) {
+    return;
+  }
+
+  if (function_id == ui_request) {
+    if (true == code) {
       result_ui = true;
     }
-  } else if (function_id == vr_cmd_id) {
-    if (code) {
+  } else if (function_id == vr_request) {
+    if (true == code) {
       result_vr = true;
     }
   }
 
   // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(function_id)) {
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-          ApplicationManagerImpl::instance()->
-          application(data[strings::params][strings::app_id]));
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      (*message_)[strings::params][strings::function_id].asInt())) {
+    smart_objects::CSmartObject data =
+        msg_chain->data();
 
-    smart_objects::CSmartObject* command =
-        app->FindCommand(
-            data[strings::msg_params][strings::cmd_id].asInt());
+    ApplicationImpl* application = static_cast<ApplicationImpl*>(
+      ApplicationManagerImpl::instance()->
+      application(data[strings::params][strings::connection_key]));
 
-    if (command)  {
-      if (true == result_ui) {
-        (*command).erase(strings::menu_params);
-      }
-
-      if (true == result_vr) {
-        (*command).erase(strings::vr_commands);
-      }
-
-      if (!(*command).keyExists(strings::menu_params) &&
-          !(*command).keyExists(strings::vr_commands)) {
-        app->RemoveCommand(
-            data[strings::msg_params][strings::cmd_id].asInt());
-        (*message_)[strings::msg_params][strings::success] = true;
-        (*message_)[strings::msg_params][strings::result_code] =
-            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-        SendResponse();
-      }
+    if (true == result_ui) {
+      application->set_language(
+          static_cast<mobile_api::Language::eType>(
+              data[strings::msg_params][strings::language].asInt()));
     }
 
+    if (true == result_vr) {
+      application->set_ui_language(
+          static_cast<mobile_api::Language::eType>(
+            data[strings::msg_params][strings::hmi_display_language].asInt()));
+    }
+
+    if ((true == result_ui) && (true == result_vr)) {
+      (*message_)[strings::msg_params][strings::success] = true;
+      (*message_)[strings::msg_params][strings::result_code] =
+          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+      SendResponse();
+    } else {
+      // TODO(VS): check ui and vr response code
+    }
     // reset flags for HMI response
     result_ui = false;
     result_vr = false;
   }
 }
+
 }  // namespace commands
 
 }  // namespace application_manager

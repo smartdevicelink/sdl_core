@@ -31,10 +31,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CHANGE_REGISTRATION_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CHANGE_REGISTRATION_COMMAND_H_
 
-#include "application_manager/commands/command_response_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -42,21 +42,21 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief DeleteCommandResponse command class
+ * @brief ChangeRegistrationCommand command class
  **/
-class DeleteCommandResponse : public CommandResponseImpl {
+class ChangeRegistrationCommand : public CommandRequestImpl {
  public:
   /**
-   * @brief DeleteCommandResponse class constructor
+   * @brief ChangeRegistrationCommand class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteCommandResponse(const MessageSharedPtr& message);
+  explicit ChangeRegistrationCommand(const MessageSharedPtr& message);
 
   /**
-   * @brief DeleteCommandResponse class destructor
+   * @brief ChangeRegistrationCommand class destructor
    **/
-  virtual ~DeleteCommandResponse();
+  virtual ~ChangeRegistrationCommand();
 
   /**
    * @brief Execute command
@@ -64,13 +64,10 @@ class DeleteCommandResponse : public CommandResponseImpl {
   virtual void Run();
 
  private:
-  static bool result_ui;  // flag for ui HMI response
-  static bool result_vr;  // flag for vr HMI response
-
-  DISALLOW_COPY_AND_ASSIGN(DeleteCommandResponse);
+  DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationCommand);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CHANGE_REGISTRATION_COMMAND_H_

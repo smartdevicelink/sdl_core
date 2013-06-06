@@ -89,6 +89,9 @@
 #include "application_manager/commands/update_turn_list_response_command.h"
 #include "application_manager/commands/on_app_interface_unregistered_command.h"
 #include "application_manager/commands/on_button_event_command.h"
+#include "application_manager/commands/change_registration_command.h"
+#include "application_manager/commands/change_registration_response_command.h"
+
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -315,6 +318,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
            command.reset(new commands::UpdateTurnListResponseCommand(message));
          } else {
            command.reset(new commands::UpdateTurnListCommand(message));
+         }
+         break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ChangeRegistrationID: {
+         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+           command.reset(new commands::ChangeRegistrationResponseCommand(message));
+         } else {
+           command.reset(new commands::ChangeRegistrationCommand(message));
          }
          break;
     }

@@ -98,6 +98,8 @@ const char data_type[] = "dataType";
 const char turn_list[] = "turnList";
 const char turn_icon[] = "turnIcon";
 const char value[] = "value";
+const char hmi_display_language[] = "hmiDisplayLanguage";
+const char language[] = "language";
 
 // PutFile
 const char sync_file_name[] = "syncFileName";
