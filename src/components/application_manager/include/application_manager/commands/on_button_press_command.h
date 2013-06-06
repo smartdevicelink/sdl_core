@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_EVENT_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_EVENT_COMMAND_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_PRESS_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_PRESS_COMMAND_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
@@ -44,22 +44,22 @@ class ApplicationImpl;
 namespace commands {
 
 /**
- * @brief OnButtonEventCommand class is used to send notification
+ * @brief OnButtonPressCommand class is used to send notification
  * to mobile device that some button was pressed on HMI.
  **/
-class OnButtonEventCommand : public CommandResponseImpl {
+class OnButtonPressCommand : public CommandResponseImpl {
  public:
   /**
-   * @brief OnButtonEventCommand class constructor
+   * @brief OnButtonPressCommand class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnButtonEventCommand(const MessageSharedPtr& message);
+  explicit OnButtonPressCommand(const MessageSharedPtr& message);
 
   /**
    * @brief OnButtonEventCommand class destructor
    **/
-  virtual ~OnButtonEventCommand();
+  virtual ~OnButtonPressCommand();
 
   /**
    * @brief Execute command
@@ -68,18 +68,18 @@ class OnButtonEventCommand : public CommandResponseImpl {
 
  private:
   /*
-   * @brief Sends button event notification to mobile device
+   * @brief Sends button press notification to mobile device
    *
    * @param app Application to receive notification
    * @param is_custom_btn_id Indicates if received notification
    *  with custom button param
    */
-  void SendButtonEvent(const ApplicationImpl* app, bool is_custom_btn_id);
+  void SendButtonPress(const ApplicationImpl* app, bool is_custom_btn_id);
 
-  DISALLOW_COPY_AND_ASSIGN(OnButtonEventCommand);
+  DISALLOW_COPY_AND_ASSIGN(OnButtonPressCommand);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_EVENT_COMMAND_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_PRESS_COMMAND_H_

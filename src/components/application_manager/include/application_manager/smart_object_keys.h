@@ -95,6 +95,7 @@ const char bits_per_sample[] = "bitsPerSample";
 const char audio_type[] = "audioType";
 const char button_name[] = "buttonName";
 const char button_event_mode[] = "buttonEventMode";
+const char button_press_mode[] = "buttonPressMode";
 const char custom_button_id[] = "customButtonID";
 const char data_type[] = "dataType";
 const char turn_list[] = "turnList";

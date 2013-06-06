@@ -66,7 +66,6 @@ set (SOURCES
 ./src/commands/end_audio_pass_thru_response_command.cc
 ./src/commands/put_file_command.cc
 ./src/commands/put_file_response_command.cc
-./src/commands/on_audio_pass_thru_command.cc
 ./src/commands/delete_file_command.cc
 ./src/commands/delete_file_response_command.cc
 ./src/commands/list_files_command.cc
@@ -94,9 +93,11 @@ set (SOURCES
 ./src/commands/update_turn_list_command.cc
 ./src/commands/update_turn_list_response_command.cc
 ./src/commands/on_app_interface_unregistered_command.cc
-./src/commands/on_button_event_command.cc
 ./src/commands/change_registration_command.cc
 ./src/commands/change_registration_response_command.cc
+./src/commands/on_audio_pass_thru_command.cc
+./src/commands/on_button_event_command.cc
+./src/commands/on_button_press_command.cc
 )
 
 

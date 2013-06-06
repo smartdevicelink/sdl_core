@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_button_event_command.h"
+#include "application_manager/commands/on_button_press_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "v4_protocol_v2_0_revT.h"
@@ -44,15 +44,15 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-OnButtonEventCommand::OnButtonEventCommand(
+OnButtonPressCommand::OnButtonPressCommand(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-OnButtonEventCommand::~OnButtonEventCommand() {
+OnButtonPressCommand::~OnButtonPressCommand() {
 }
 
-void OnButtonEventCommand::Run() {
-  LOG4CXX_INFO(logger_, "OnButtonEventCommand::Run ");
+void OnButtonPressCommand::Run() {
+  LOG4CXX_INFO(logger_, "OnButtonPressCommand::Run ");
 
   if ((*message_)[strings::msg_params].keyExists(
                                             hmi_response::custom_button_id)) {
@@ -62,10 +62,10 @@ void OnButtonEventCommand::Run() {
         ApplicationManagerImpl::instance()->active_application());
 
     if (NULL == app) {
-      LOG4CXX_WARN_EXT(logger_, "OnButtonEvent came but no app is active.");
+      LOG4CXX_WARN_EXT(logger_, "OnButtonPress came but no app is active.");
       return;
     }
-    SendButtonEvent(app, true);
+    SendButtonPress(app, true);
     return;
   }
 
@@ -84,25 +84,25 @@ void OnButtonEventCommand::Run() {
     }
 
     if (!subscribed_app->IsAudible()) {
-        LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
+        LOG4CXX_WARN_EXT(logger_, "OnButtonPress in HMI_BACKGROUND or NONE");
         continue;
     }
-    SendButtonEvent(subscribed_app, false);
+    SendButtonPress(subscribed_app, false);
   }
 }
 
-void OnButtonEventCommand::SendButtonEvent(const ApplicationImpl* app,
+void OnButtonPressCommand::SendButtonPress(const ApplicationImpl* app,
                                            bool is_custom_btn_id) {
   smart_objects::CSmartObject* on_btn_event =
       new smart_objects::CSmartObject();
 
   if (!on_btn_event) {
-    LOG4CXX_ERROR_EXT(logger_, "OnButtonEvent NULL pointer");
+    LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
     return;
   }
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "OnButtonEvent NULL pointer");
+    LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
     return;
   }
   const int correlation_id =
@@ -124,7 +124,7 @@ void OnButtonEventCommand::SendButtonEvent(const ApplicationImpl* app,
       NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnButtonEventID;
   (*on_btn_event)[strings::msg_params][strings::button_name] =
       (*message_)[strings::msg_params][hmi_response::button_name];
-  (*on_btn_event)[strings::msg_params][strings::button_event_mode] =
+  (*on_btn_event)[strings::msg_params][strings::button_press_mode] =
       (*message_)[strings::msg_params][hmi_response::button_mode];
 
   if (is_custom_btn_id) {
