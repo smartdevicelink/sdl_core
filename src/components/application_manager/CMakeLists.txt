@@ -10,6 +10,7 @@ include_directories (
   ../request_watchdog/include/
   ../TransportManager/include/
   ../../thirdPartyLibs/jsoncpp/include/
+  ../../thirdPartyLibs/encryption/include/
   ${CMAKE_BINARY_DIR}/src/components/Interfaces
 )
 
