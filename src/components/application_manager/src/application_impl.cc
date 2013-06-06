@@ -210,11 +210,11 @@ ApplicationImpl::system_context() const {
   return system_context_;
 }
 
-const smart_objects::CSmartObject& ApplicationImpl::language() const {
+const mobile_api::Language::eType& ApplicationImpl::language() const {
   return initial_app_data_.language_;
 }
 
-const smart_objects::CSmartObject& ApplicationImpl::ui_language() const {
+const mobile_api::Language::eType& ApplicationImpl::ui_language() const {
   return initial_app_data_.ui_language_;
 }
 
@@ -257,12 +257,12 @@ void ApplicationImpl::set_system_context(
 }
 
 void ApplicationImpl::set_language(
-  const smart_objects::CSmartObject& language) {
+  const mobile_api::Language::eType& language) {
   initial_app_data_.language_ = language;
 }
 
 void ApplicationImpl::set_ui_language(
-  const smart_objects::CSmartObject& ui_language) {
+  const mobile_api::Language::eType& ui_language) {
   initial_app_data_.ui_language_ = ui_language;
 }
 

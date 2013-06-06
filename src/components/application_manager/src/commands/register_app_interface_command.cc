@@ -82,9 +82,12 @@ void RegisterAppInterfaceCommand::Run() {
     }
 
     application_impl->set_language(
-        (*message_)[strings::msg_params][strings::language_desired]);
+      static_cast<mobile_api::Language::eType>(
+        (*message_)[strings::msg_params][strings::language_desired].asInt()));
     application_impl->set_ui_language(
-      (*message_)[strings::msg_params][strings::hmi_display_language_desired]);
+      static_cast<mobile_api::Language::eType>(
+        (*message_)[strings::msg_params]
+                   [strings::hmi_display_language_desired].asInt()));
 
     if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
       application_impl->set_tts_name(

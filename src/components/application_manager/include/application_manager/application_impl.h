@@ -54,8 +54,8 @@ struct InitialApplicationData {
   InitialApplicationData();
   ~InitialApplicationData();
 
-  smart_objects::CSmartObject language_;
-  smart_objects::CSmartObject ui_language_;
+  mobile_api::Language::eType language_;
+  mobile_api::Language::eType ui_language_;
   smart_objects::CSmartObject* app_types_;
   smart_objects::CSmartObject* vr_synonyms_;
   smart_objects::CSmartObject* ngn_media_screen_name_;
@@ -111,8 +111,8 @@ class ApplicationImpl : public Application {
     const smart_objects::CSmartObject* ngn_media_screen_name() const;
     const mobile_api::HMILevel::eType& hmi_level() const;
     const mobile_api::SystemContext::eType& system_context() const;
-    const smart_objects::CSmartObject& language() const;
-    const smart_objects::CSmartObject& ui_language() const;
+    const mobile_api::Language::eType& language() const;
+    const mobile_api::Language::eType& ui_language() const;
     const smart_objects::CSmartObject* help_promt() const;
     const smart_objects::CSmartObject* timeout_promt() const;
     const smart_objects::CSmartObject* vr_help_title() const;
@@ -125,8 +125,8 @@ class ApplicationImpl : public Application {
     void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
     void set_system_context(
       const mobile_api::SystemContext::eType& system_context);
-    void set_language(const smart_objects::CSmartObject& language);
-    void set_ui_language(const smart_objects::CSmartObject& ui_language);
+    void set_language(const mobile_api::Language::eType& language);
+    void set_ui_language(const mobile_api::Language::eType& ui_language);
     void set_app_types(const smart_objects::CSmartObject& app_types);
     void set_vr_synonyms(const smart_objects::CSmartObject& vr_synonyms);
     void set_mobile_app_id(const smart_objects::CSmartObject& mobile_app_id);
