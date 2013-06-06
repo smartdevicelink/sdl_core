@@ -92,6 +92,7 @@
 #include "application_manager/commands/on_audio_pass_thru_command.h"
 #include "application_manager/commands/on_button_event_command.h"
 #include "application_manager/commands/on_button_press_command.h"
+#include "application_manager/commands/on_vehicle_data_command.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -339,6 +340,10 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAudioPassThruID: {
       command.reset(new commands::OnAudioPassThruCommand(message));
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnVehicleDataID: {
+      command.reset(new commands::OnVehicleDataCommand(message));
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAppInterfaceUnregisteredID: {

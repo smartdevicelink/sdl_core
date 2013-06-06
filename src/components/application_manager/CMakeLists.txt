@@ -98,6 +98,7 @@ set (SOURCES
 ./src/commands/on_audio_pass_thru_command.cc
 ./src/commands/on_button_event_command.cc
 ./src/commands/on_button_press_command.cc
+./src/commands/on_vehicle_data_command.cc
 )
 
 
