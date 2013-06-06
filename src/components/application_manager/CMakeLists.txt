@@ -94,6 +94,7 @@ set (SOURCES
 ./src/commands/update_turn_list_command.cc
 ./src/commands/update_turn_list_response_command.cc
 ./src/commands/on_app_interface_unregistered_command.cc
+./src/commands/on_button_event_command.cc
 )
 
 

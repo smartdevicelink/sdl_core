@@ -88,8 +88,7 @@
 #include "application_manager/commands/update_turn_list_command.h"
 #include "application_manager/commands/update_turn_list_response_command.h"
 #include "application_manager/commands/on_app_interface_unregistered_command.h"
-
-
+#include "application_manager/commands/on_button_event_command.h"
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -318,6 +317,10 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
            command.reset(new commands::UpdateTurnListCommand(message));
          }
          break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnButtonEventID: {
+      command.reset(new commands::OnButtonEventCommand(message));
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAudioPassThruID: {
       command.reset(new commands::OnAudioPassThruCommand(message));
