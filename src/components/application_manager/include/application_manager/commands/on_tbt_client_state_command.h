@@ -31,32 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_app_interface_unregistered_command.h"
-#include "application_manager/message.h"
-#include "v4_protocol_v2_0_revT.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_TBT_CLIENT_STATE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_TBT_CLIENT_STATE_COMMAND_H_
+
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnAppInterfaceUnregisteredCommand::OnAppInterfaceUnregisteredCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
-}
+/**
+ * @brief OnTBTClientStateCommand class
+ **/
+class OnTBTClientStateCommand : public CommandResponseImpl {
+ public:
+  /**
+   * @brief OnTBTClientStateCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnTBTClientStateCommand(const MessageSharedPtr& message);
 
-OnAppInterfaceUnregisteredCommand::~OnAppInterfaceUnregisteredCommand() {
-}
+  /**
+   * @brief OnTBTClientStateCommand class destructor
+   **/
+  virtual ~OnTBTClientStateCommand();
 
-void OnAppInterfaceUnregisteredCommand::Run() {
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
-
-  (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAppInterfaceUnregisteredID;
-
-  SendResponse();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnTBTClientStateCommand);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_TBT_CLIENT_STATE_COMMAND_H_

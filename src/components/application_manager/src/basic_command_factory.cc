@@ -94,6 +94,8 @@
 #include "application_manager/commands/on_button_press_command.h"
 #include "application_manager/commands/on_vehicle_data_command.h"
 #include "application_manager/commands/on_menu_entry_command.h"
+#include "application_manager/commands/on_tbt_client_state_command.h"
+
 
 // TODO(AK): Include the directory when naming .h files
 #include "v4_protocol_v2_0_revT.h"
@@ -355,6 +357,10 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
        command.reset(new commands::OnMenuEntryCommand(message));
        break;
      }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnTBTClientStateID: {
+       command.reset(new commands::OnTBTClientStateCommand(message));
+       break;
+    }
     default: {
       command.reset(new commands::GenericResponseCommand(message));
       break;

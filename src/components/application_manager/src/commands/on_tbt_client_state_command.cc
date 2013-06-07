@@ -31,30 +31,41 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_app_interface_unregistered_command.h"
-#include "application_manager/message.h"
+#include "application_manager/commands/on_tbt_client_state_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnAppInterfaceUnregisteredCommand::OnAppInterfaceUnregisteredCommand(
+OnTBTClientStateCommand::OnTBTClientStateCommand(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-OnAppInterfaceUnregisteredCommand::~OnAppInterfaceUnregisteredCommand() {
+OnTBTClientStateCommand::~OnTBTClientStateCommand() {
 }
 
-void OnAppInterfaceUnregisteredCommand::Run() {
+void OnTBTClientStateCommand::Run() {
 
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 
   (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAppInterfaceUnregisteredID;
+      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnTBTClientStateID;
 
-  SendResponse();
+  std::vector<Application*> applications =
+      ApplicationManagerImpl::instance()->applications_with_navi();
+
+  for (std::vector<Application*>::iterator it = applications.begin();
+      applications.end() != it; ++it) {
+    if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE !=
+        (*it)->hmi_level()) {
+      (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
+      SendResponse();
+    }
+  }
 }
 
 }  // namespace commands

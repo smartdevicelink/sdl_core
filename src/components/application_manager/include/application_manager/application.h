@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_H_
 
+#include "v4_protocol_v2_0_revT.h"
 #include <string>
 
 namespace NsSmartDeviceLink {
@@ -62,6 +63,8 @@ struct Version {
       max_supported_api_version(APIVersion::kUnknownAPI) {
   }
 };
+
+namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 
 class Application {
   public:
@@ -98,6 +101,8 @@ class Application {
     virtual bool IsFullscreen() const = 0;
     virtual bool SupportsNavigation() const = 0;
     virtual void AllowNavigation(bool allow) = 0;
+
+    virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
 
     virtual bool SubscribeToButton(unsigned int btn_name) = 0;
     virtual bool IsSubscribedToButton(unsigned int btn_name) = 0;
