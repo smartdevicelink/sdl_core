@@ -99,6 +99,7 @@ set (SOURCES
 ./src/commands/on_button_event_command.cc
 ./src/commands/on_button_press_command.cc
 ./src/commands/on_vehicle_data_command.cc
+./src/commands/on_menu_entry_command.cc
 )
 
 

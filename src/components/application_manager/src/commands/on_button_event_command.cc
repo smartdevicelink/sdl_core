@@ -105,6 +105,7 @@ void OnButtonEventCommand::SendButtonEvent(const ApplicationImpl* app,
     LOG4CXX_ERROR_EXT(logger_, "OnButtonEvent NULL pointer");
     return;
   }
+
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
@@ -138,6 +139,7 @@ void OnButtonEventCommand::SendButtonEvent(const ApplicationImpl* app,
   (*on_btn_event)[strings::msg_params][strings::result_code] =
       NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
 
+  message_.reset(on_btn_event);
   SendResponse();
 }
 

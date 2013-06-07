@@ -65,6 +65,7 @@ void OnButtonPressCommand::Run() {
       LOG4CXX_WARN_EXT(logger_, "OnButtonPress came but no app is active.");
       return;
     }
+
     SendButtonPress(app, true);
     return;
   }
@@ -93,10 +94,10 @@ void OnButtonPressCommand::Run() {
 
 void OnButtonPressCommand::SendButtonPress(const ApplicationImpl* app,
                                            bool is_custom_btn_id) {
-  smart_objects::CSmartObject* on_btn_event =
+  smart_objects::CSmartObject* on_btn_press =
       new smart_objects::CSmartObject();
 
-  if (!on_btn_event) {
+  if (!on_btn_press) {
     LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
     return;
   }
@@ -105,39 +106,41 @@ void OnButtonPressCommand::SendButtonPress(const ApplicationImpl* app,
     LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
     return;
   }
+
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  (*on_btn_event)[strings::params][strings::message_type] =
+  (*on_btn_press)[strings::params][strings::message_type] =
           MessageType::kNotification;
-  (*on_btn_event)[strings::params][strings::correlation_id] =
+  (*on_btn_press)[strings::params][strings::correlation_id] =
       correlation_id;
 
-  (*on_btn_event)[strings::params][strings::app_id] =
+  (*on_btn_press)[strings::params][strings::app_id] =
       app->app_id();
 
-  (*on_btn_event)[strings::params][strings::connection_key] =
+  (*on_btn_press)[strings::params][strings::connection_key] =
       connection_key;
-  (*on_btn_event)[strings::params][strings::function_id] =
+  (*on_btn_press)[strings::params][strings::function_id] =
       NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnButtonEventID;
-  (*on_btn_event)[strings::msg_params][strings::button_name] =
+  (*on_btn_press)[strings::msg_params][strings::button_name] =
       (*message_)[strings::msg_params][hmi_response::button_name];
-  (*on_btn_event)[strings::msg_params][strings::button_press_mode] =
+  (*on_btn_press)[strings::msg_params][strings::button_press_mode] =
       (*message_)[strings::msg_params][hmi_response::button_mode];
 
   if (is_custom_btn_id) {
-    (*on_btn_event)[strings::msg_params][strings::custom_button_id] =
+    (*on_btn_press)[strings::msg_params][strings::custom_button_id] =
         (*message_)[strings::msg_params][strings::custom_button_id];
   } else {
-    (*on_btn_event)[strings::msg_params][strings::custom_button_id] = 0;
+    (*on_btn_press)[strings::msg_params][strings::custom_button_id] = 0;
   }
 
-  (*on_btn_event)[strings::msg_params][strings::success] = true;
-  (*on_btn_event)[strings::msg_params][strings::result_code] =
+  (*on_btn_press)[strings::msg_params][strings::success] = true;
+  (*on_btn_press)[strings::msg_params][strings::result_code] =
       NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
 
+  message_.reset(on_btn_press);
   SendResponse();
 }
 
