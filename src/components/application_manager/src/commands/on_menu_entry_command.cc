@@ -32,6 +32,9 @@
  */
 
 #include "application_manager/commands/on_menu_entry_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -51,6 +54,75 @@ OnMenuEntryCommand::~OnMenuEntryCommand() {
 void OnMenuEntryCommand::Run() {
   LOG4CXX_INFO(logger_, "OnMenuEntryCommand::Run ");
 
+  ApplicationImpl* app =
+     static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
+       application((*message_)[strings::msg_params][strings::app_id].asInt()));
+
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    return;
+  }
+
+  const unsigned int cmd_id = static_cast<unsigned int>(
+      (*message_)[strings::msg_params][strings::cmd_id].asInt());
+
+  if (!app->FindCommand(cmd_id)) {
+    LOG4CXX_ERROR_EXT(logger_,
+                      " No applications found for the command " << cmd_id);
+    return;
+  }
+
+  SendOnMenuCommand(app);
+}
+
+void OnMenuEntryCommand::SendOnMenuCommand(const ApplicationImpl* app) {
+  smart_objects::CSmartObject* on_menu_cmd =
+        new smart_objects::CSmartObject();
+
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "OnMenuEntryCommand NULL pointer");
+    return;
+  }
+
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+      (*message_)[strings::params][strings::connection_key];
+
+  (*on_menu_cmd)[strings::params][strings::message_type] =
+          MessageType::kNotification;
+  (*on_menu_cmd)[strings::params][strings::correlation_id] =
+      correlation_id;
+
+  (*on_menu_cmd)[strings::params][strings::connection_key] =
+      connection_key;
+  (*on_menu_cmd)[strings::params][strings::function_id] =
+      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
+
+  (*on_menu_cmd)[strings::msg_params][strings::app_id] =
+      app->app_id();
+
+  (*on_menu_cmd)[strings::msg_params][strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+
+  const int on_cmd_ui_id = 77;
+  const int on_cmd_vr_id = 66;
+  const int on_cmd_id =
+      (*message_)[strings::params][strings::function_id].asInt();
+
+  if (on_cmd_ui_id == on_cmd_id) {
+  (*on_menu_cmd)[strings::params][strings::trigger_source] =
+      CommandTriggerSource::TS_MENU;
+  } else {
+    (*on_menu_cmd)[strings::params][strings::trigger_source] =
+        CommandTriggerSource::TS_VR;
+  }
+
+  (*on_menu_cmd)[strings::msg_params][strings::success] = true;
+  (*on_menu_cmd)[strings::msg_params][strings::result_code] =
+      NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+
+  message_.reset(on_menu_cmd);
   SendResponse();
 }
 

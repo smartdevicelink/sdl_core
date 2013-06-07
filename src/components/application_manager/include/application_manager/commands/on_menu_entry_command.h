@@ -39,7 +39,17 @@
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
+
+/*
+ * @brief Enum for HMI TriggerSource type
+ */
+enum CommandTriggerSource {
+  TS_MENU              = 0,
+  TS_VR                = 1
+};
 
 /**
  * @brief OnMenuEntryCommand class is used to send notification
@@ -65,6 +75,14 @@ class OnMenuEntryCommand : public CommandResponseImpl {
   virtual void Run();
 
  private:
+
+  /*
+   * @brief Send notification to the mobile device
+   *
+   * @param app Application to receive notification
+   */
+  void SendOnMenuCommand(const ApplicationImpl* app);
+
   DISALLOW_COPY_AND_ASSIGN(OnMenuEntryCommand);
 };
 
