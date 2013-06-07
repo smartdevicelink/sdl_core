@@ -79,6 +79,9 @@ void ChangeRegistrationCommand::Run() {
     (*ui_request)[strings::params][strings::function_id] =
         ui_hmi_request_id;
 
+    (*ui_request)[strings::params][strings::message_type] =
+        MessageType::kRequest;
+
     (*ui_request)[strings::msg_params][strings::language] =
         (*message_)[strings::msg_params][strings::hmi_display_language];
 
@@ -102,6 +105,9 @@ void ChangeRegistrationCommand::Run() {
     const int vr_hmi_request_id = 211;
     (*vr_request)[strings::params][strings::function_id] =
         vr_hmi_request_id;
+
+    (*vr_request)[strings::params][strings::message_type] =
+        MessageType::kRequest;
 
     (*vr_request)[strings::msg_params][strings::language] =
         (*message_)[strings::msg_params][strings::language];

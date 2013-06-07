@@ -42,9 +42,9 @@
 namespace application_manager {
 
 ApplicationManagerImpl::ApplicationManagerImpl()
-: hmi_deletes_commands_(false),
-  audio_pass_thru_flag_(false),
-  perform_audio_thread_(NULL) {
+  : hmi_deletes_commands_(false),
+    audio_pass_thru_flag_(false),
+    perform_audio_thread_(NULL) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -132,7 +132,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
-    delete (*it);
+    delete(*it);
   }
   application_list_.clear();
 }
@@ -148,28 +148,28 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     unsigned int function_id,
     const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data) {
   if (!chain) {
-      chain = new MessageChaining(
-          connection_key,
-          correlation_id);
-      if (data) {
-        chain->set_data(*data);
-      }
+    chain = new MessageChaining(
+      connection_key,
+      correlation_id);
+    if (data) {
+      chain->set_data(*data);
+    }
 
-      MessageChainPtr ptr(chain);
-      message_chaining_[function_id] = ptr;
-      return chain;
+    MessageChainPtr ptr(chain);
+    message_chaining_[function_id] = ptr;
+    return chain;
   } else  {
-      chain->IncrementCounter();
-      MessageChains::const_iterator it = message_chaining_.begin();
-      for (; it != message_chaining_.end(); ++it) {
-        if ((*it->second) == *chain) {
-          message_chaining_[function_id] = it->second;
-          break;
-        }
+    chain->IncrementCounter();
+    MessageChains::const_iterator it = message_chaining_.begin();
+    for (; it != message_chaining_.end(); ++it) {
+      if ((*it->second) == *chain) {
+        message_chaining_[function_id] = it->second;
+        break;
       }
     }
-    return chain;
   }
+  return chain;
+}
 
 bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
   bool result = false;
@@ -186,7 +186,7 @@ bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
 }
 
 const MessageChaining* ApplicationManagerImpl::GetMessageChain(
-    unsigned int function_id) const {
+  unsigned int function_id) const {
   MessageChains::const_iterator it = message_chaining_.find(function_id);
   if (message_chaining_.end() != it) {
     return &(*it->second);
@@ -204,22 +204,22 @@ void ApplicationManagerImpl::set_audio_pass_thru_flag(bool flag) {
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
-                               int correlation_id, int max_duration,
-                               int sampling_rate, int bits_per_sample,
-                               int audio_type) {
+    int correlation_id, int max_duration,
+    int sampling_rate, int bits_per_sample,
+    int audio_type) {
   AudioPassThruThreadImpl* thread_impl =
     new AudioPassThruThreadImpl(static_cast<unsigned int>(session_key),
-        static_cast<unsigned int>(correlation_id),
-        static_cast<unsigned int>(max_duration),
-        static_cast<SamplingRate>(sampling_rate),
-        static_cast<AudioCaptureQuality>(bits_per_sample),
-        static_cast<AudioType>(audio_type));
+                                static_cast<unsigned int>(correlation_id),
+                                static_cast<unsigned int>(max_duration),
+                                static_cast<SamplingRate>(sampling_rate),
+                                static_cast<AudioCaptureQuality>(bits_per_sample),
+                                static_cast<AudioType>(audio_type));
   thread_impl->Init();
   perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
-                              thread_impl);
+      thread_impl);
 
   perform_audio_thread_->startWithOptions(
-      threads::ThreadOptions(threads::Thread::kMinStackSize));
+    threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 void ApplicationManagerImpl::StopAudioPassThruThread() {

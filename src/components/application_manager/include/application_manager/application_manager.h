@@ -61,10 +61,10 @@ class ApplicationManager {
       connection_handler::ConnectionHandler* handler) = 0;
     virtual void set_watchdog(
       request_watchdog::Watchdog* watchdog) = 0;
-    /*TODO(PV): set or create?*/
-    virtual void set_hmi_matrix(HMIMatrix* matrix) = 0;
-    /*TODO(PV): set or create?*/
-    virtual void set_policies_manager(PoliciesManager* managaer) = 0;
+
+  protected:
+    virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;
+    virtual void CreatePoliciesManager(PoliciesManager* managaer) = 0;
 };
 
 }  // namespace application_manager

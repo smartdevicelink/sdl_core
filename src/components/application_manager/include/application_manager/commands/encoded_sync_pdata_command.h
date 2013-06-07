@@ -34,6 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
 
+#include <string>
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
@@ -63,6 +64,9 @@ class EncodedSyncPDataCommand : public CommandRequestImpl {
   virtual void Run();
 
   DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataCommand);
+
+ private:
+  static const std::string TEMPORARY_HARDCODED_FILENAME;
 };
 
 }  // namespace commands

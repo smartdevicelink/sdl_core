@@ -61,6 +61,40 @@ void ShowCommand::Run() {
       new MessageChaining(connectionKey, corellationId),
       connectionKey, corellationId, cmd_id);
 
+  MessageSharedPtr persistentData;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
+     (*persistentData)[strings::msg_params][strings::main_field_1] =
+     (*message_)[strings::msg_params][strings::main_field_1];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
+      (*persistentData)[strings::msg_params][strings::main_field_2] =
+      (*message_)[strings::msg_params][strings::main_field_2];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::alignment)) {
+      (*persistentData)[strings::msg_params][strings::alignment] =
+      (*message_)[strings::msg_params][strings::alignment];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
+      (*persistentData)[strings::msg_params][strings::status_bar] =
+      (*message_)[strings::msg_params][strings::status_bar];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
+      (*persistentData)[strings::msg_params][strings::media_clock] =
+      (*message_)[strings::msg_params][strings::media_clock];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
+      (*persistentData)[strings::msg_params][strings::media_track] =
+      (*message_)[strings::msg_params][strings::media_track];
+  }
+
+  application_impl->set_show_command(*persistentData);
+
   ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }
 

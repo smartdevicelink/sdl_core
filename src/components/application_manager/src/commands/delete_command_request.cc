@@ -81,6 +81,9 @@ void DeleteCommandRequest::Run() {
       const int ui_cmd_id = 202;
       (*p_smrt_ui)[strings::params][strings::function_id] = ui_cmd_id;
 
+      (*p_smrt_ui)[strings::params][strings::message_type] =
+          MessageType::kRequest;
+
       (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];
 
@@ -101,6 +104,9 @@ void DeleteCommandRequest::Run() {
       // TODO(DK) HMI Request Id
       const int vr_cmd_id = 203;
       (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
+
+      (*p_smrt_vr)[strings::params][strings::message_type] =
+          MessageType::kRequest;
 
       (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];

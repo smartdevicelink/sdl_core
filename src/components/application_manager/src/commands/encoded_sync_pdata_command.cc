@@ -35,10 +35,14 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "utils/file_system.h"
+#include "encryption/Base64.h"
 
 namespace application_manager {
 
 namespace commands {
+
+const std::string TEMPORARY_HARDCODED_FILENAME = "policy_sync_data.dat";
 
 void EncodedSyncPDataCommand::Run() {
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
@@ -62,6 +66,32 @@ void EncodedSyncPDataCommand::Run() {
         connectionKey, corellationId, cmd_id);
 
     ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+
+    uint64_t free_space = file_system::AvailableSpace();
+
+    const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
+
+    const std::string string_pdata = base64_decode(((*message_)[strings::params]
+                                              [strings::data]).asString());
+
+    const std::vector<unsigned char> char_vector_pdata(string_pdata.begin(),
+                                                       string_pdata.end());
+
+    if (free_space > string_pdata.size()) {
+      std::string relative_file_path =
+          file_system::CreateDirectory(application_impl->name());
+      relative_file_path += "/";
+      relative_file_path += sync_file_name;
+
+      if (file_system::Write(file_system::FullPath(relative_file_path),
+                             char_vector_pdata)) {
+        SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+      } else {
+        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+      }
+    } else {
+      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    }
 }
 
 }  // namespace commands
