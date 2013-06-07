@@ -61,7 +61,7 @@ void OnTBTClientStateCommand::Run() {
   for (std::vector<Application*>::iterator it = applications.begin();
       applications.end() != it; ++it) {
     if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE !=
-        (*it)->hmi_level()) {
+        static_cast<ApplicationImpl*>(*it)->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
       SendResponse();
     }
