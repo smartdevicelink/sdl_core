@@ -1,3 +1,6 @@
+[CW23]
+* Fix: ModuleTest: allow to test the responses to Register/UnregisterAppInterface requests.
+
 [CW20]
 + The user can now send brand new MakeMeFeelGood request. Used to test that the response is GenericResponse.
 + ShowConstantTBT dialog (v2): add turn icon parameter.

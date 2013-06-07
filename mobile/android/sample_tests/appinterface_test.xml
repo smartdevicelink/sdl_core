@@ -3,13 +3,13 @@
     <type type="unit"/>
 
     <!-- NB! First we unregister the current application. -->
-    <test testName="UnregisterAppInterface_Success">
+    <test testName="UnregisterAppInterface_Success" pause="500">
         <UnregisterAppInterface correlationID="42" />
 
         <result correlationID="42" return="SUCCESS"/>
     </test>
 
-    <test testName="RegisterAppInterface_NoAppName">
+    <test testName="RegisterAppInterface_NoAppName" pause="500">
         <RegisterAppInterface correlationID="43">
             <syncMsgVersion>
                 <Integer majorVersion="1" />
@@ -26,14 +26,14 @@
 
     <!-- We can't send anything other than RegisterAppInterface message
         when the app isn't registered yet.
-    <test testName="UnregisterAppInterface_NotRegistered">
+    <test testName="UnregisterAppInterface_NotRegistered" pause="500">
         <UnregisterAppInterface correlationID="44" />
 
         <result correlationID="44" return="APPLICATION_NOT_REGISTERED"/>
     </test>
     -->
 
-    <test testName="RegisterAppInterface_WrongVersion">
+    <test testName="RegisterAppInterface_WrongVersion" pause="500">
         <RegisterAppInterface correlationID="45">
             <syncMsgVersion>
                 <Integer majorVersion="-1" />
@@ -49,7 +49,7 @@
         <result correlationID="45" return="UNSUPPORTED_VERSION"/>
     </test>
 
-    <test testName="RegisterAppInterface_WrongLanguage">
+    <test testName="RegisterAppInterface_WrongLanguage" pause="500">
         <RegisterAppInterface correlationID="45">
             <syncMsgVersion>
                 <Integer majorVersion="1" />
@@ -65,7 +65,7 @@
         <result correlationID="45" return="WRONG_LANGUAGE"/>
     </test>
 
-    <test testName="RegisterAppInterface_Success">
+    <test testName="RegisterAppInterface_Success" pause="500">
         <RegisterAppInterface correlationID="45">
             <syncMsgVersion>
                 <Integer majorVersion="1" />
@@ -81,7 +81,7 @@
         <result correlationID="45" return="SUCCESS"/>
     </test>
 
-    <test testName="RegisterAppInterface_AlreadyRegistered">
+    <test testName="RegisterAppInterface_AlreadyRegistered" pause="500">
         <RegisterAppInterface correlationID="46">
             <syncMsgVersion>
                 <Integer majorVersion="1" />
@@ -97,7 +97,7 @@
         <result correlationID="46" return="APPLICATION_REGISTERED_ALREADY"/>
     </test>
 
-    <test testName="RegisterAppInterface_DuplicateAppName">
+    <test testName="RegisterAppInterface_DuplicateAppName" pause="500">
         <RegisterAppInterface correlationID="46">
             <syncMsgVersion>
                 <Integer majorVersion="1" />

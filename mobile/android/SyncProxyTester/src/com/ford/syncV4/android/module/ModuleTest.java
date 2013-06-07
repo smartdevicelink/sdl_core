@@ -845,6 +845,15 @@ public class ModuleTest {
 					Log.i(TAG, "No pause after " + currentTest.getName());
 				}
 				
+				// wait for incoming messages
+				try {
+					synchronized (this) {
+						this.wait(100);
+					}
+				} catch (InterruptedException e) {
+					_msgAdapter.logMessage("InterruptedException", true);
+				}
+				
 				ProxyService.waiting(false);
 				
 				if (expecting.equals(responses)) {
