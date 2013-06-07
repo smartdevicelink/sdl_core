@@ -215,6 +215,8 @@ class ApplicationImpl : public Application,
     bool IsFullscreen() const;
     bool IsAudible() const;
     bool HasbeenActivated() const;
+    bool SupportsNavigation() const;
+    void AllowNavigation(bool allow);
 
     const smart_objects::CSmartObject* active_message() const;
     const Version& version() const;
@@ -254,6 +256,7 @@ class ApplicationImpl : public Application,
     int app_id_;
     std::string app_name_;
     bool is_media_;
+    bool allowed_support_navigation_;
 
     mobile_api::HMILevel::eType hmi_level_;
     mobile_api::SystemContext::eType system_context_;

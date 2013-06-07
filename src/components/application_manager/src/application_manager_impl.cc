@@ -96,6 +96,18 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
   return std::vector<Application*>();
 }
 
+std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
+  std::vector<Application*> result;
+  for(std::set<Application*>::iterator it = application_list_.begin();
+      application_list_.end() != it;
+      ++it) {
+    if((*it)->SupportsNavigation()) {
+      result.push_back(*it);
+    }
+  }
+  return result;
+}
+
 bool ApplicationManagerImpl::RegisterApplication(Application* application) {
   DCHECK(application);
   if (NULL == application) {

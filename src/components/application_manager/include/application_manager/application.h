@@ -96,6 +96,8 @@ class Application {
     virtual int app_id() const = 0;
     virtual const std::string& name() const = 0;
     virtual bool IsFullscreen() const = 0;
+    virtual bool SupportsNavigation() const = 0;
+    virtual void AllowNavigation(bool allow) = 0;
 
     virtual bool SubscribeToButton(unsigned int btn_name) = 0;
     virtual bool IsSubscribedToButton(unsigned int btn_name) = 0;

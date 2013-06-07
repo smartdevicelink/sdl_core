@@ -83,6 +83,7 @@ class ApplicationManagerImpl : public ApplicationManager
     Application* active_application() const;
     std::vector<Application*> applications_by_button(unsigned int button);
     std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
+    std::vector<Application*> applications_with_navi();
 
     /////////////////////////////////////////////////////
 

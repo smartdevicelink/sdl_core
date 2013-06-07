@@ -400,6 +400,7 @@ ApplicationImpl::ApplicationImpl(int app_id)
   : app_id_(app_id),
     active_message_(NULL),
     is_media_(false),
+    allowed_support_navigation_(false),
     hmi_level_(mobile_api::HMILevel::INVALID_ENUM),
     system_context_(mobile_api::SystemContext::INVALID_ENUM) {
 }
@@ -448,6 +449,14 @@ bool ApplicationImpl::IsAudible() const {
 
 bool ApplicationImpl::HasbeenActivated() const {
   return mobile_api::HMILevel::HMI_NONE != hmi_level_;
+}
+
+bool ApplicationImpl::SupportsNavigation() const {
+  return allowed_support_navigation_;
+}
+
+void ApplicationImpl::AllowNavigation(bool allow) {
+  allowed_support_navigation_ = allow;
 }
 
 const smart_objects::CSmartObject* ApplicationImpl::active_message() const {
