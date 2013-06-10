@@ -30,9 +30,11 @@ import android.util.Xml;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
+import com.ford.syncV4.android.marshaller.InvalidJsonRPCMarshaller;
 import com.ford.syncV4.android.module.reader.BinaryDataReaderFactory;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
@@ -79,14 +81,19 @@ import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class ModuleTest {
 	
-	/** Wraps the {@link RPCRequest} class to add the pause field. */
+	/**
+	 * Wraps the {@link RPCRequest} class to add some extra fields (pause after
+	 * the request; whether to generate invalid JSON).
+	 */
 	class RPCRequestWrapper {
 		private RPCRequest request = null;
 		private long pause = 0;
+		private boolean generateInvalidJSON = false;
 		
-		public RPCRequestWrapper(RPCRequest request, long pause) {
+		public RPCRequestWrapper(RPCRequest request, long pause, boolean generateInvalidJSON) {
 			this.request = request;
 			this.pause = pause;
+			this.generateInvalidJSON = generateInvalidJSON;
 		}
 
 		public long getPause() {
@@ -99,6 +106,14 @@ public class ModuleTest {
 
 		public RPCRequest getRequest() {
 			return request;
+		}
+
+		public boolean isGenerateInvalidJSON() {
+			return generateInvalidJSON;
+		}
+
+		public void setGenerateInvalidJSON(boolean generateInvalidJSON) {
+			this.generateInvalidJSON = generateInvalidJSON;
 		}
 	}
 	
@@ -177,6 +192,11 @@ public class ModuleTest {
 	private final static String TEST_NAME_ATTR = "testName";
 	/** Attribute name that defines the timeout of a &lt;test&gt; or a request. */
 	private final static String PAUSE_ATTR = "pause";
+	/**
+	 * Attribute name that defines if the generated request's JSON should be
+	 * invalid.
+	 */
+	private final static String INVALID_JSON_ATTR = "invalidJSON";
 	/** Attribute name of request's correlation ID. */
 	private final static String CORRELATION_ID_ATTR = "correlationID";
 	
@@ -508,6 +528,9 @@ public class ModuleTest {
 										}
 									}
 									
+									boolean generateInvalidJSON = (parser.getAttributeValue(null, INVALID_JSON_ATTR)
+											!= null);
+									
 									//TODO: Set rpc parameters
 									Hashtable hash = setParams(name, parser);
 									logParserDebugInfo("" + hash);
@@ -527,7 +550,7 @@ public class ModuleTest {
 								    }
 									
 								    if (currentTest != null) {
-								    		RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause);
+								    		RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause, generateInvalidJSON);
 								    		currentTest.addRequest(wrapper);
 								    }
 								} else if (name.equalsIgnoreCase("result")) {
@@ -804,10 +827,16 @@ public class ModuleTest {
 				int numResponses = expecting.size();
 				if (numResponses > 0) ProxyService.waiting(true);
 				
+				IJsonRPCMarshaller defaultMarshaller = ProxyService.getProxyInstance().getJsonRPCMarshaller();
+				IJsonRPCMarshaller invalidMarshaller = new InvalidJsonRPCMarshaller();
+				
 				for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
 					RPCRequest rpc = wrapper.getRequest();
+					boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
 					
 					_msgAdapter.logMessage(rpc, true);
+					ProxyService.getProxyInstance().setJsonRPCMarshaller(generateInvalidJSON ?
+							invalidMarshaller : defaultMarshaller);
 					try {
 						ProxyService.getProxyInstance().sendRPCRequest(rpc);
 					} catch (SyncException e) {
@@ -888,6 +917,9 @@ public class ModuleTest {
 						}
 					}
 				}
+				
+				// restore the default marshaller
+				ProxyService.getProxyInstance().setJsonRPCMarshaller(defaultMarshaller);
 				
 				synchronized (_instance) { _instance.notify();}
 				
