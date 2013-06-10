@@ -3,6 +3,8 @@
 
 # --- components tests
 add_subdirectory(./components)
+add_subdirectory(./thirdPartyLibs)
+
 
 include_directories (
   ../src/thirdPartyLibs/gmock-1.6.0/include
@@ -21,6 +23,7 @@ include_directories (
   ../test/components/utils/include
   ../test/components/json_handler/include
   ../test/components/
+  ../test/thirdPartyLibs/jsoncpp/include
   ${CMAKE_BINARY_DIR}
 )
 
@@ -37,6 +40,7 @@ set(LIBRARIES
     test_UtilsTest
     test_RequestWatchdogTest
     test_ProtocolHandlerTest
+    test_JSONCPPTest
     SmartObjects
     Utils
 )

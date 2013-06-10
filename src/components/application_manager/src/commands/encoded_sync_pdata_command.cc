@@ -43,6 +43,7 @@ namespace application_manager {
 namespace commands {
 
 const std::string TEMPORARY_HARDCODED_FILENAME = "policy_sync_data.dat";
+const std::string TEMPORARY_HARDCODED_FOLDERNAME = "/config/policies";
 
 void EncodedSyncPDataCommand::Run() {
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
@@ -79,7 +80,7 @@ void EncodedSyncPDataCommand::Run() {
 
     if (free_space > string_pdata.size()) {
       std::string relative_file_path =
-          file_system::CreateDirectory(application_impl->name());
+          file_system::CreateDirectory(TEMPORARY_HARDCODED_FOLDERNAME);
       relative_file_path += "/";
       relative_file_path += sync_file_name;
 
