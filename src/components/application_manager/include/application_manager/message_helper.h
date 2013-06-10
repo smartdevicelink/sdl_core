@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -31,28 +30,31 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_permissions_change_command.h"
-#include "application_manager/application_manager_impl.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
+
 #include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
-namespace commands {
+namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 
-OnPermissionsChangeCommand::OnPermissionsChangeCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
-}
-
-OnPermissionsChangeCommand::~OnPermissionsChangeCommand() {
-}
-
-void OnPermissionsChangeCommand::Run() {
-  (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
-
-  SendResponse();
-}
-
-}  // namespace commands
+/**
+ * @brief MessageHelper class
+ **/
+class MessageHelper {
+ public:
+  /**
+   * @brief Sends HMI status notification to mobile
+   *
+   **/
+  static void SendHMIStatusNotification(
+      const int& app_id,
+      const mobile_api::HMILevel::eType& hmi_level,
+      const mobile_api::AudioStreamingState::eType& audio_streaming_state,
+      const mobile_api::SystemContext::eType& system_context);
+};
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_

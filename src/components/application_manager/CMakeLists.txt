@@ -110,6 +110,8 @@ set (SOURCES
 ./src/commands/slider_response_command.cc
 ./src/commands/scrollable_message_command.cc
 ./src/commands/scrollable_message_response_command.cc
+./src/commands/on_hmi_status_command.cc
+./src/message_helper.cc
 )
 
 
