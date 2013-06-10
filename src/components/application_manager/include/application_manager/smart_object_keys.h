@@ -105,6 +105,7 @@ const char hmi_display_language[] = "hmiDisplayLanguage";
 const char language[] = "language";
 const char data[] = "data";
 const char trigger_source[] = "triggerSource";
+const char prndl[] = "prndl";
 
 // PutFile
 const char sync_file_name[] = "syncFileName";
@@ -138,6 +139,10 @@ namespace hmi_response {
   const char button_name[] = "name";
   const char button_mode[] = "mode";
 }  // namespace hmi_response
+
+namespace hmi_notification {
+  const char prndl[] = "prndl";
+}  // namespace hmi_notification
 
 }  // namespace application_manager
 

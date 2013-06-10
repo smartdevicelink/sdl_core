@@ -93,15 +93,22 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_button(
 
 std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
   unsigned int vehicle_info) {
-  return std::vector<Application*>();
+  std::vector<Application*> result;
+  for (std::set<Application*>::iterator it = application_list_.begin();
+      application_list_.end() != it; ++it) {
+    if ((*it)->IsSubscribedToIVI(vehicle_info)) {
+      result.push_back(*it);
+    }
+  }
+  return result;
 }
 
 std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
   std::vector<Application*> result;
-  for(std::set<Application*>::iterator it = application_list_.begin();
+  for (std::set<Application*>::iterator it = application_list_.begin();
       application_list_.end() != it;
       ++it) {
-    if((*it)->SupportsNavigation()) {
+    if ((*it)->SupportsNavigation()) {
       result.push_back(*it);
     }
   }
@@ -149,10 +156,9 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   application_list_.clear();
 }
 
-/*std::set<Application*>
-ApplicationManagerImpl::applications() const {
+const std::set<Application*>& ApplicationManagerImpl::applications() const {
   return application_list_;
-}*/
+}
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     unsigned int connection_key,
@@ -216,16 +222,16 @@ void ApplicationManagerImpl::set_audio_pass_thru_flag(bool flag) {
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
-    int correlation_id, int max_duration,
-    int sampling_rate, int bits_per_sample,
-    int audio_type) {
-  AudioPassThruThreadImpl* thread_impl =
-    new AudioPassThruThreadImpl(static_cast<unsigned int>(session_key),
-                                static_cast<unsigned int>(correlation_id),
-                                static_cast<unsigned int>(max_duration),
-                                static_cast<SamplingRate>(sampling_rate),
-                                static_cast<AudioCaptureQuality>(bits_per_sample),
-                                static_cast<AudioType>(audio_type));
+    int correlation_id, int max_duration, int sampling_rate,
+    int bits_per_sample, int audio_type) {
+  AudioPassThruThreadImpl* thread_impl = new AudioPassThruThreadImpl(
+      static_cast<unsigned int>(session_key),
+      static_cast<unsigned int>(correlation_id),
+      static_cast<unsigned int>(max_duration),
+      static_cast<SamplingRate>(sampling_rate),
+      static_cast<AudioCaptureQuality>(bits_per_sample),
+      static_cast<AudioType>(audio_type));
+
   thread_impl->Init();
   perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
       thread_impl);

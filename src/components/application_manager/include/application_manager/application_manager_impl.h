@@ -109,11 +109,12 @@ class ApplicationManagerImpl : public ApplicationManager
      * @param function_id Id of HMI request/response
      * @return pointer to MessageChaining
      */
-    MessageChaining* AddMessageChain(MessageChaining* chain,
-                                     unsigned int connection_key,
-                                     unsigned int correlation_id,
-                                     unsigned int function_id,
-                                     const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
+    MessageChaining* AddMessageChain(
+        MessageChaining* chain,
+        unsigned int connection_key,
+        unsigned int correlation_id,
+        unsigned int function_id,
+        const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
      * @brief Decrease chain for correlation ID

@@ -32,6 +32,9 @@
  */
 
 #include "application_manager/commands/on_vehicle_data_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -51,6 +54,67 @@ OnVehicleDataCommand::~OnVehicleDataCommand() {
 void OnVehicleDataCommand::Run() {
   LOG4CXX_INFO(logger_, "OnVehicleDataCommand::Run ");
 
+  if ((*message_)[strings::msg_params].keyExists(hmi_notification::prndl)) {
+    const unsigned int prndl = static_cast<unsigned int>(
+        (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
+
+    const std::vector<Application*> applications =
+        ApplicationManagerImpl::instance()->applications_by_ivi(prndl);
+
+    std::vector<Application*>::const_iterator it = applications.begin();
+    for (; applications.end() != it; ++it) {
+      ApplicationImpl* app = static_cast<ApplicationImpl*>(*it);
+      if (!app) {
+          LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+          continue;
+      }
+
+      LOG4CXX_INFO(logger_, "Send OnVehicleData PRNDL notification to "
+                     << app->name() << " application id " << app->app_id());
+      SendVehicleData(app);
+    }
+  }
+}
+
+void OnVehicleDataCommand::SendVehicleData(const ApplicationImpl* app) {
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "SendVehicleData NULL pointer");
+    return;
+  }
+
+  smart_objects::CSmartObject* on_vehicle_data =
+      new smart_objects::CSmartObject();
+
+  if (!on_vehicle_data) {
+    LOG4CXX_ERROR_EXT(logger_, "SendVehicleData NULL pointer");
+    return;
+  }
+
+  const int correlation_id =
+    (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+    (*message_)[strings::params][strings::connection_key];
+
+  (*on_vehicle_data)[strings::params][strings::message_type] =
+    MessageType::kNotification;
+  (*on_vehicle_data)[strings::params][strings::correlation_id] =
+    correlation_id;
+
+  (*on_vehicle_data)[strings::params][strings::app_id] =
+    app->app_id();
+
+  (*on_vehicle_data)[strings::params][strings::connection_key] =
+    connection_key;
+  (*on_vehicle_data)[strings::params][strings::function_id] =
+    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnVehicleDataID;
+  (*on_vehicle_data)[strings::msg_params][strings::prndl] =
+    (*message_)[strings::msg_params][hmi_notification::prndl];
+
+  (*on_vehicle_data)[strings::msg_params][strings::success] = true;
+  (*on_vehicle_data)[strings::msg_params][strings::result_code] =
+    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+
+  message_.reset(on_vehicle_data);
   SendResponse();
 }
 

@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
 
 /**
@@ -65,6 +67,13 @@ class OnVehicleDataCommand : public CommandResponseImpl {
   virtual void Run();
 
  private:
+  /*
+   * @brief Sends vehicle data notification to mobile device
+   *
+   * @param app Application to receive notification
+   */
+  void SendVehicleData(const ApplicationImpl* app);
+
   DISALLOW_COPY_AND_ASSIGN(OnVehicleDataCommand);
 };
 
