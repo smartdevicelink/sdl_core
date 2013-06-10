@@ -47,12 +47,8 @@ OnAppInterfaceUnregisteredCommand::~OnAppInterfaceUnregisteredCommand() {
 }
 
 void OnAppInterfaceUnregisteredCommand::Run() {
-
   (*message_)[strings::params][strings::message_type] =
     MessageType::kNotification;
-
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAppInterfaceUnregisteredID;
 
   SendResponse();
 }

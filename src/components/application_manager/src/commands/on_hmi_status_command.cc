@@ -31,22 +31,23 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_permissions_change_command.h"
+#include "application_manager/commands/on_hmi_status_command.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnPermissionsChangeCommand::OnPermissionsChangeCommand(
+OnHMIStatusCommand::OnHMIStatusCommand(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-OnPermissionsChangeCommand::~OnPermissionsChangeCommand() {
+OnHMIStatusCommand::~OnHMIStatusCommand() {
 }
 
-void OnPermissionsChangeCommand::Run() {
+void OnHMIStatusCommand::Run() {
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 

@@ -105,7 +105,9 @@ const char hmi_display_language[] = "hmiDisplayLanguage";
 const char language[] = "language";
 const char data[] = "data";
 const char trigger_source[] = "triggerSource";
-
+const char hmi_level[] = "hmiLevel";
+const char audio_streaming_state[] = "audioStreamingState";
+const char system_context[] = "systemContext";
 // PutFile
 const char sync_file_name[] = "syncFileName";
 const char file_type[] = "fileType";

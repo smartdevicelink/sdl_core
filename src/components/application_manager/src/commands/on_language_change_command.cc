@@ -51,9 +51,6 @@ void OnLanguageChangeCommand::Run() {
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 
-  (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID;
-
   std::set<Application*> applications =
       ApplicationManagerImpl::instance()->applications();
 

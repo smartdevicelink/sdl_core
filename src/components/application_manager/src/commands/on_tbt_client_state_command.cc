@@ -51,9 +51,6 @@ void OnTBTClientStateCommand::Run() {
   (*message_)[strings::params][strings::message_type] =
     MessageType::kNotification;
 
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnTBTClientStateID;
-
   std::vector<Application*> applications =
     ApplicationManagerImpl::instance()->applications_with_navi();
 

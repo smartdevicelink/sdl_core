@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -31,28 +30,44 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_permissions_change_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/basic_command_factory.h"
 
 namespace application_manager {
 
-namespace commands {
+void MessageHelper::SendHMIStatusNotification(
+    const int& app_id,
+    const mobile_api::HMILevel::eType& hmi_level,
+    const mobile_api::AudioStreamingState::eType& audio_streaming_state,
+    const mobile_api::SystemContext::eType& system_context) {
 
-OnPermissionsChangeCommand::OnPermissionsChangeCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  smart_objects::CSmartObject* hmi_status_notification =
+      new smart_objects::CSmartObject();
+
+  if (!hmi_status_notification) {
+    return;
+  }
+
+  (*hmi_status_notification)[strings::params][strings::function_id] =
+      mobile_api::FunctionID::eType::OnHMIStatusID;
+
+  (*hmi_status_notification)[strings::params][strings::connection_key] =
+      app_id;
+
+  (*hmi_status_notification)[strings::msg_params][strings::hmi_level] =
+      hmi_level;
+
+  (*hmi_status_notification)[strings::msg_params]
+                            [strings::audio_streaming_state] =
+                                audio_streaming_state;
+
+  (*hmi_status_notification)[strings::msg_params][strings::system_context] =
+      system_context;
+
+  CommandSharedPtr command = BasicCommandFactory::CreateCommand(hmi_status_notification);
+  command->Init();
+  command->Run();
+  command->CleanUp();
 }
 
-OnPermissionsChangeCommand::~OnPermissionsChangeCommand() {
 }
-
-void OnPermissionsChangeCommand::Run() {
-  (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
-
-  SendResponse();
-}
-
-}  // namespace commands
-
-}  // namespace application_manager

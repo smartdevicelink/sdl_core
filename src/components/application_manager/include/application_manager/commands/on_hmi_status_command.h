@@ -31,28 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_permissions_change_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_COMMAND_H_
+
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnPermissionsChangeCommand::OnPermissionsChangeCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
-}
+/**
+ * @brief OnHMIStatusCommand class
+ **/
+class OnHMIStatusCommand : public CommandResponseImpl {
+ public:
+  /**
+   * @brief OnHMIStatusCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnHMIStatusCommand(const MessageSharedPtr& message);
 
-OnPermissionsChangeCommand::~OnPermissionsChangeCommand() {
-}
+  /**
+   * @brief OnHMIStatusCommand class destructor
+   **/
+  virtual ~OnHMIStatusCommand();
 
-void OnPermissionsChangeCommand::Run() {
-  (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  SendResponse();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnHMIStatusCommand);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_COMMAND_H_

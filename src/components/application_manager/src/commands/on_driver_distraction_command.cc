@@ -51,9 +51,6 @@ void OnDriverDistractionCommand::Run() {
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 
-  (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnDriverDistractionID;
-
   std::set<Application*> applications =
       ApplicationManagerImpl::instance()->applications();
 

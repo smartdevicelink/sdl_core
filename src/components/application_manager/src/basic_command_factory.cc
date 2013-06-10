@@ -98,9 +98,9 @@
 #include "application_manager/commands/on_driver_distraction_command.h"
 #include "application_manager/commands/on_language_change_command.h"
 #include "application_manager/commands/on_permissions_change_command.h"
+#include "application_manager/commands/on_hmi_status_command.h"
 
 
-// TODO(AK): Include the directory when naming .h files
 #include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
@@ -369,11 +369,15 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
        break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID: {
-       command.reset(new commands::OnDriverDistractionCommand(message));
+       command.reset(new commands::OnLanguageChangeCommand(message));
        break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnPermissionsChangeID: {
-       command.reset(new commands::OnDriverDistractionCommand(message));
+       command.reset(new commands::OnPermissionsChangeCommand(message));
+       break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnHMIStatusID: {
+       command.reset(new commands::OnHMIStatusCommand(message));
        break;
     }
     default: {
