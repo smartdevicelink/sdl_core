@@ -34,6 +34,7 @@
 #include "application_manager/commands/change_registration_response_command.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
