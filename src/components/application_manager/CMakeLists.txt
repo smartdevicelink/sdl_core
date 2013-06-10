@@ -107,7 +107,9 @@ set (SOURCES
 ./src/commands/on_language_change_command.cc
 ./src/commands/on_permissions_change_command.cc
 ./src/commands/slider_command.cc
+./src/commands/slider_response_command.cc
 ./src/commands/scrollable_message_command.cc
+./src/commands/scrollable_message_response_command.cc
 )
 
 
