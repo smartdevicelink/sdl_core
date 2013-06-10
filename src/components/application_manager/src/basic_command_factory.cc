@@ -96,6 +96,7 @@
 #include "application_manager/commands/on_menu_entry_command.h"
 #include "application_manager/commands/on_tbt_client_state_command.h"
 #include "application_manager/commands/on_driver_distraction_command.h"
+#include "application_manager/commands/on_language_change_command.h"
 
 
 // TODO(AK): Include the directory when naming .h files
@@ -363,6 +364,10 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
        break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnDriverDistractionID: {
+       command.reset(new commands::OnDriverDistractionCommand(message));
+       break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID: {
        command.reset(new commands::OnDriverDistractionCommand(message));
        break;
     }

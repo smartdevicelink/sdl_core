@@ -104,6 +104,7 @@ set (SOURCES
 ./src/commands/on_menu_entry_command.cc
 ./src/commands/on_tbt_client_state_command.cc
 ./src/commands/on_driver_distraction_command.cc
+./src/commands/on_language_change_command.cc
 )
 
 

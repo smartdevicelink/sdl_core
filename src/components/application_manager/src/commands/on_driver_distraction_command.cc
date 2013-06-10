@@ -48,7 +48,6 @@ OnDriverDistractionCommand::~OnDriverDistractionCommand() {
 }
 
 void OnDriverDistractionCommand::Run() {
-
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 

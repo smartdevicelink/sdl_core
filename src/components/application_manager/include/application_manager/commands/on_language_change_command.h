@@ -31,42 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_tbt_client_state_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_LANGUAGE_CHANGE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_LANGUAGE_CHANGE_COMMAND_H_
+
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnTBTClientStateCommand::OnTBTClientStateCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
-}
+/**
+ * @brief OnLanguageChangeCommand class
+ **/
+class OnLanguageChangeCommand : public CommandResponseImpl {
+ public:
+  /**
+   * @brief OnLanguageChangeCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnLanguageChangeCommand(const MessageSharedPtr& message);
 
-OnTBTClientStateCommand::~OnTBTClientStateCommand() {
-}
+  /**
+   * @brief OnLanguageChangeCommand class destructor
+   **/
+  virtual ~OnLanguageChangeCommand();
 
-void OnTBTClientStateCommand::Run() {
-  (*message_)[strings::params][strings::message_type] =
-    MessageType::kNotification;
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnTBTClientStateID;
-
-  std::vector<Application*> applications =
-    ApplicationManagerImpl::instance()->applications_with_navi();
-
-  for (std::vector<Application*>::iterator it = applications.begin();
-       applications.end() != it; ++it) {
-    if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE !=
-        static_cast<ApplicationImpl*>(*it)->hmi_level()) {
-      (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
-      SendResponse();
-    }
-  }
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnLanguageChangeCommand);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_LANGUAGE_CHANGE_COMMAND_H_
