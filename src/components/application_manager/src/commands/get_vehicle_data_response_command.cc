@@ -32,6 +32,7 @@
  */
 
 #include "application_manager/commands/get_vehicle_data_response_command.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
