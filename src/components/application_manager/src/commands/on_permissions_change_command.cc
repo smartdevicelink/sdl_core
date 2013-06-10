@@ -31,47 +31,32 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
-
-#include <string>
-#include "application_manager/commands/command_request_impl.h"
-#include "utils/macro.h"
+#include "application_manager/commands/on_permissions_change_command.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief EncodedSyncPData request command class
- **/
-class EncodedSyncPDataCommand : public CommandRequestImpl {
- public:
-  /**
-   * \brief EncodedSyncPDataCommand class constructor
-   **/
-  explicit EncodedSyncPDataCommand(const MessageSharedPtr& message);
+OnPermissionsChangeCommand::OnPermissionsChangeCommand(
+    const MessageSharedPtr& message): CommandResponseImpl(message) {
+}
 
-  /**
-   * \brief EncodedSyncPDataCommand class destructor
-   **/
-  virtual ~EncodedSyncPDataCommand() {
-  }
+OnPermissionsChangeCommand::~OnPermissionsChangeCommand() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void OnPermissionsChangeCommand::Run() {
+  (*message_)[strings::params][strings::message_type] =
+          MessageType::kNotification;
 
-  DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataCommand);
+  (*message_)[strings::params][strings::function_id] =
+      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnPermissionsChangeID;
 
- private:
-  static const std::string TEMPORARY_HARDCODED_FILENAME;
-  static const std::string TEMPORARY_HARDCODED_FOLDERNAME;
-};
+  SendResponse();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_

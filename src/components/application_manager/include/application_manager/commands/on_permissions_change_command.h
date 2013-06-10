@@ -31,11 +31,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_PERMISSIONS_CHANGE_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_PERMISSIONS_CHANGE_COMMAND_H_
 
-#include <string>
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -43,35 +42,32 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief EncodedSyncPData request command class
+ * @brief OnPermissionsChangeCommand class
  **/
-class EncodedSyncPDataCommand : public CommandRequestImpl {
+class OnPermissionsChangeCommand : public CommandResponseImpl {
  public:
   /**
-   * \brief EncodedSyncPDataCommand class constructor
+   * @brief OnPermissionsChangeCommand class constructor
+   *
+   * @param message Incoming SmartObject message
    **/
-  explicit EncodedSyncPDataCommand(const MessageSharedPtr& message);
+  explicit OnPermissionsChangeCommand(const MessageSharedPtr& message);
 
   /**
-   * \brief EncodedSyncPDataCommand class destructor
+   * @brief OnPermissionsChangeCommand class destructor
    **/
-  virtual ~EncodedSyncPDataCommand() {
-  }
+  virtual ~OnPermissionsChangeCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
-  DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataCommand);
-
  private:
-  static const std::string TEMPORARY_HARDCODED_FILENAME;
-  static const std::string TEMPORARY_HARDCODED_FOLDERNAME;
+  DISALLOW_COPY_AND_ASSIGN(OnPermissionsChangeCommand);
 };
 
 }  // namespace commands
-
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_PERMISSIONS_CHANGE_COMMAND_H_

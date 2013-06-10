@@ -31,47 +31,40 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
+#include "application_manager/commands/slider_command.h"
+#include "application_manager/message_chaining.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
-#include <string>
-#include "application_manager/commands/command_request_impl.h"
-#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief EncodedSyncPData request command class
- **/
-class EncodedSyncPDataCommand : public CommandRequestImpl {
- public:
-  /**
-   * \brief EncodedSyncPDataCommand class constructor
-   **/
-  explicit EncodedSyncPDataCommand(const MessageSharedPtr& message);
+void SliderCommand::Run() {
+  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
+      (application_manager::ApplicationManagerImpl::instance()->
+      application((*message_)[strings::msg_params][strings::app_id]));
 
-  /**
-   * \brief EncodedSyncPDataCommand class destructor
-   **/
-  virtual ~EncodedSyncPDataCommand() {
+  if (NULL == application_impl) {
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::
+                 Result::APPLICATION_NOT_REGISTERED);
+    return;
   }
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  const int corellationId =
+    (*message_)[strings::params][strings::correlation_id];
+  const int connectionKey =
+    (*message_)[strings::params][strings::connection_key];
 
-  DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataCommand);
+  const unsigned int cmd_id = 105;
+    ApplicationManagerImpl::instance()->AddMessageChain(
+      new MessageChaining(connectionKey, corellationId),
+      connectionKey, corellationId, cmd_id);
 
- private:
-  static const std::string TEMPORARY_HARDCODED_FILENAME;
-  static const std::string TEMPORARY_HARDCODED_FOLDERNAME;
-};
+  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+}
 
-}  // namespace commands
+}
+}
 
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_COMMAND_H_
