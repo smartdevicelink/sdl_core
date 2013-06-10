@@ -35,7 +35,8 @@
 #include "application_manager/commands/get_vehicle_data_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/Result.h"
+#include "application_manager/message_chaining.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -61,12 +62,48 @@ void GetVehicleDataCommandRequest::Run() {
       ApplicationManagerImpl::instance()->
       application((*message_)[str::params][str::connection_key]));
 
-  std::string info = "";
-  bool result = false;
-  NsSmartDeviceLinkRPC::V2::Result::eType result_code =
-      NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;
+  if (!app) {
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
 
-  SendResponse(result, result_code, info.c_str());
+  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
+    SendResponse(false,
+                     NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+    return;
+  }
+
+  smart_objects::CSmartObject* p_smrt_vr  =
+      new smart_objects::CSmartObject();
+
+  if (!p_smrt_vr) {
+    SendResponse(false,
+                     NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    return;
+  }
+
+  // copy entirely smart object
+  (*p_smrt_vr) = (*message_);
+
+  const int corellation_id =
+        (*p_smrt_vr)[strings::params][strings::correlation_id];
+  const int connection_key =
+        (*p_smrt_vr)[strings::params][strings::connection_key];
+
+  // TODO(DK) HMI Request Id
+  const int vr_cmd_id = 92;
+  (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
+
+  (*p_smrt_vr)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+
+
+  MessageChaining * chain = NULL;
+  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
+      connection_key, corellation_id, vr_cmd_id, p_smrt_vr);
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
 }
 
 }  // namespace commands

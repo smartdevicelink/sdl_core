@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class CSmartObject;
+
 namespace commands {
 
 /**

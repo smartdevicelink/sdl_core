@@ -32,8 +32,7 @@
  */
 
 #include "application_manager/commands/get_vehicle_data_response_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
@@ -62,8 +61,24 @@ void GetVehicleDataCommandResponse::Run() {
     return;
   }
 
-  // TODO(DK): Some logic
-  SendResponse();
+  // sending response
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      (*message_)[strings::params]["function_id"].asInt())) {
+
+    // TODO(DK): HMI code Id
+    const int code =
+        (*message_)[strings::msg_params][hmi_response::code].asInt();
+
+    if (code) {
+      (*message_)[strings::msg_params][strings::success] = true;
+      (*message_)[strings::msg_params][strings::result_code] =
+          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+
+    } else {
+      // TODO(DK): Some logic
+    }
+    SendResponse();
+  }
 }
 
 }  // namespace commands
