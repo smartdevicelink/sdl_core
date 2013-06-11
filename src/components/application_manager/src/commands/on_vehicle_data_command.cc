@@ -58,7 +58,7 @@ void OnVehicleDataCommand::Run() {
     const unsigned int prndl = static_cast<unsigned int>(
         (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
 
-    const std::vector<Application*> applications =
+    const std::vector<Application*>& applications =
         ApplicationManagerImpl::instance()->applications_by_ivi(prndl);
 
     std::vector<Application*>::const_iterator it = applications.begin();

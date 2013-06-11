@@ -119,7 +119,8 @@ const char space_available[] = "spaceAvailable";
 const char filenames[] = "filenames";
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
-
+const char ecu_name[] = "ecuName";
+const char did_location[] = "didLocation";
 }  // namespace strings
 
 namespace hmi_request {
