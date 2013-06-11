@@ -44,6 +44,9 @@ SpeakResponseCommand::SpeakResponseCommand(const MessageSharedPtr& message)
   : CommandResponseImpl(message) {
 }
 
+SpeakResponseCommand::~SpeakResponseCommand(){
+}
+
 void SpeakResponseCommand::Run() {
   SendResponse();
 }

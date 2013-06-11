@@ -50,14 +50,14 @@ class ShowResponseCommand : public CommandResponseImpl {
   /**
    * \brief ShowResponseCommand class destructor
    **/
-  virtual ~ShowResponseCommand() {
-  }
+  virtual ~ShowResponseCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(ShowResponseCommand);
 };
 

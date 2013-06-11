@@ -41,6 +41,13 @@ namespace application_manager {
 
 namespace commands {
 
+SliderCommand::SliderCommand(const MessageSharedPtr& message)
+    : CommandRequestImpl(message){
+}
+
+SliderCommand::~SliderCommand(){
+}
+
 void SliderCommand::Run() {
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
@@ -65,6 +72,6 @@ void SliderCommand::Run() {
   ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }
 
-}
-}
+}  // namespace commands
+}  // namespace application_manager
 

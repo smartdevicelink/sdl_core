@@ -40,6 +40,13 @@ namespace application_manager {
 
 namespace commands {
 
+DialNumberCommand::DialNumberCommand(const MessageSharedPtr& message)
+: CommandRequestImpl(message) {
+}
+
+DialNumberCommand::~DialNumberCommand() {
+}
+
 void DialNumberCommand::Run() {
   SendResponse(false, NsSmartDeviceLinkRPC::V2::
                    Result::UNSUPPORTED_REQUEST);

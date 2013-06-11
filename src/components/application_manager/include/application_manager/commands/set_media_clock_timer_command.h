@@ -54,14 +54,14 @@ class SetMediaClockCommand : public CommandRequestImpl {
   /**
    * \brief ShowCommand class destructor
    **/
-  virtual ~SetMediaClockCommand() {
-  }
+  virtual ~SetMediaClockCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(SetMediaClockCommand);
 };
 

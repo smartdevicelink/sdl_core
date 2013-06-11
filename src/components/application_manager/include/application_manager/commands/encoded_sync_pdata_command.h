@@ -55,17 +55,16 @@ class EncodedSyncPDataCommand : public CommandRequestImpl {
   /**
    * \brief EncodedSyncPDataCommand class destructor
    **/
-  virtual ~EncodedSyncPDataCommand() {
-  }
+  virtual ~EncodedSyncPDataCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataCommand);
 
- private:
   static const std::string TEMPORARY_HARDCODED_FILENAME;
   static const std::string TEMPORARY_HARDCODED_FOLDERNAME;
 };

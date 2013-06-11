@@ -54,14 +54,14 @@ class SpeakCommand : public CommandRequestImpl {
   /**
    * \brief SpeakCommand class destructor
    **/
-  virtual ~SpeakCommand() {
-  }
+  virtual ~SpeakCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(SpeakCommand);
 };
 

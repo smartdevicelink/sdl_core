@@ -50,14 +50,14 @@ class SliderResponseCommand : public CommandResponseImpl {
   /**
    * \brief SpeakResponseCommand class destructor
    **/
-  virtual ~SliderResponseCommand() {
-  }
+  virtual ~SliderResponseCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(SliderResponseCommand);
 };
 

@@ -50,14 +50,14 @@ class SetMediaClockTimerResponseCommand : public CommandResponseImpl {
   /**
    * \brief SetMediaClockTimerResponseCommand class destructor
    **/
-  virtual ~SetMediaClockTimerResponseCommand() {
-  }
+  virtual ~SetMediaClockTimerResponseCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(SetMediaClockTimerResponseCommand);
 };
 

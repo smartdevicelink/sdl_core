@@ -54,14 +54,14 @@ class DialNumberCommand : public CommandRequestImpl {
   /**
    * \brief DialNumberCommand class destructor
    **/
-  virtual ~DialNumberCommand() {
-  }
+  virtual ~DialNumberCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(DialNumberCommand);
 };
 

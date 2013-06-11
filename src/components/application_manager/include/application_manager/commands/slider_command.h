@@ -54,14 +54,14 @@ class SliderCommand : public CommandRequestImpl {
   /**
    * \brief SliderCommand class destructor
    **/
-  virtual ~SliderCommand() {
-  }
+  virtual ~SliderCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(SliderCommand);
 };
 

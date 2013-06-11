@@ -50,14 +50,14 @@ class SpeakResponseCommand : public CommandResponseImpl {
   /**
    * \brief SpeakResponseCommand class destructor
    **/
-  virtual ~SpeakResponseCommand() {
-  }
+  virtual ~SpeakResponseCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(SpeakResponseCommand);
 };
 

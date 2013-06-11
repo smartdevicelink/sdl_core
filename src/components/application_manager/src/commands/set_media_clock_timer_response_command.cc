@@ -45,6 +45,9 @@ SetMediaClockTimerResponseCommand::SetMediaClockTimerResponseCommand(
   : CommandResponseImpl(message) {
 }
 
+SetMediaClockTimerResponseCommand::~SetMediaClockTimerResponseCommand(){
+}
+
 void SetMediaClockTimerResponseCommand::Run() {
   SendResponse();
 }

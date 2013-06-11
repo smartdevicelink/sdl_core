@@ -44,6 +44,9 @@ SliderResponseCommand::SliderResponseCommand(const MessageSharedPtr& message)
   : CommandResponseImpl(message) {
 }
 
+SliderResponseCommand::~SliderResponseCommand(){
+}
+
 void SliderResponseCommand::Run() {
   SendResponse();
 }

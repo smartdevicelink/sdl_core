@@ -65,6 +65,6 @@ void ScrollabeMessageCommand::Run() {
   ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }
 
-}
-}
+}  // namespace commands
+}  // namespace application_manager
 
