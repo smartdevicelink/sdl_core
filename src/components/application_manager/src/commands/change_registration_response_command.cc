@@ -61,7 +61,7 @@ void ChangeRegistrationResponseCommand::Run() {
 
   // TODO(DK): HMI code Id
   const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
+      (*message_)[strings::params][hmi_response::code].asInt();
 
   // TODO(DK): HMI Request Id
   const int ui_request = 210;
@@ -75,11 +75,11 @@ void ChangeRegistrationResponseCommand::Run() {
   }
 
   if (function_id == ui_request) {
-    if (true == code) {
+    if (code) {
       result_ui = true;
     }
   } else if (function_id == vr_request) {
-    if (true == code) {
+    if (code) {
       result_vr = true;
     }
   }

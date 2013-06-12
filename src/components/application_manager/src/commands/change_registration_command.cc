@@ -69,7 +69,6 @@ void ChangeRegistrationCommand::Run() {
 
   MessageChaining * chain = NULL;
 
-
   bool has_actually_changed = false;
   if (app->ui_language() !=
      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
