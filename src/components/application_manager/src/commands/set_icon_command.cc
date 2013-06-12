@@ -73,10 +73,19 @@ void SetIconCommand::Run() {
     return;
   }
 
+  // TODO(VS): HMI Request Id
+    const int hmi_request_id = 208;
+
   smart_objects::CSmartObject* set_app_icon_hmi_request  = new smart_objects::CSmartObject();
 
-  (*set_app_icon_hmi_request)[strings::params][strings::app_id] =
-      (*message_)[strings::msg_params][strings::correlation_id];
+  (*set_app_icon_hmi_request)[strings::params][strings::function_id] =
+      hmi_request_id;
+
+  (*set_app_icon_hmi_request)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+
+  (*set_app_icon_hmi_request)[strings::msg_params][strings::app_id] =
+      (*message_)[strings::msg_params][strings::connection_key];
 
   (*set_app_icon_hmi_request)[strings::params][strings::sync_file_name] = full_file_path;
 
@@ -85,13 +94,10 @@ void SetIconCommand::Run() {
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  // TODO(VS): HMI Request Id
-  const int hmi_request_id = 208;
-
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, corellation_id, hmi_request_id, &(*message_));
+        connection_key, corellation_id, hmi_request_id, &(*set_app_icon_hmi_request));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  ApplicationManagerImpl::instance()->SendMessageToHMI(set_app_icon_hmi_request);
 }
 
 }  // namespace commands

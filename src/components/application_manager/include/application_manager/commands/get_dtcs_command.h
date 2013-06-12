@@ -31,39 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/perform_interaction_response_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_DTCS_COMMAND_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_DTCS_COMMAND_H_
+
+#include "application_manager/commands/command_request_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-PerformInteractionResponseCommand::PerformInteractionResponseCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
-}
+/**
+ * @brief GetDTCsCommand command class
+ **/
+class GetDTCsCommand : public CommandRequestImpl {
+ public:
+  /**
+   * @brief GetDTCsCommand class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit GetDTCsCommand(const MessageSharedPtr& message);
 
-PerformInteractionResponseCommand::~PerformInteractionResponseCommand() {
-}
+  /**
+   * @brief GetDTCsCommand class destructor
+   **/
+  virtual ~GetDTCsCommand();
 
-void PerformInteractionResponseCommand::Run() {
-  if ((*message_)[strings::params][strings::success] == false) {
-     SendResponse();
-     return;
-   }
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-   const int hmi_request_id = 205;
-
-   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
-     (*message_)[strings::params][strings::success] = true;
-     (*message_)[strings::params][strings::result_code] =
-       NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-     SendResponse();
-   }
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GetDTCsCommand);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_DTCS_COMMAND_H_

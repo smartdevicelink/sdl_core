@@ -41,31 +41,28 @@ void MessageHelper::SendHMIStatusNotification(
     const mobile_api::AudioStreamingState::eType& audio_streaming_state,
     const mobile_api::SystemContext::eType& system_context) {
 
-  smart_objects::CSmartObject* hmi_status_notification =
-      new smart_objects::CSmartObject();
+  smart_objects::CSmartObject hmi_status_notification;
 
-  if (!hmi_status_notification) {
-    return;
-  }
 
-  (*hmi_status_notification)[strings::params][strings::function_id] =
+  hmi_status_notification[strings::params][strings::function_id] =
       mobile_api::FunctionID::eType::OnHMIStatusID;
 
-  (*hmi_status_notification)[strings::params][strings::connection_key] =
+  hmi_status_notification[strings::params][strings::connection_key] =
       app_id;
 
-  (*hmi_status_notification)[strings::msg_params][strings::hmi_level] =
+  hmi_status_notification[strings::msg_params][strings::hmi_level] =
       hmi_level;
 
-  (*hmi_status_notification)[strings::msg_params]
+  hmi_status_notification[strings::msg_params]
                             [strings::audio_streaming_state] =
                                 audio_streaming_state;
 
-  (*hmi_status_notification)[strings::msg_params][strings::system_context] =
+  hmi_status_notification[strings::msg_params][strings::system_context] =
       system_context;
 
-  CommandSharedPtr command = BasicCommandFactory::CreateCommand(hmi_status_notification);
+  CommandSharedPtr command = BasicCommandFactory::CreateCommand(&hmi_status_notification);
   command->Init();
+  //TODO (VS): run must return bool, so SendHMIStatusNotification must also return bool
   command->Run();
   command->CleanUp();
 }

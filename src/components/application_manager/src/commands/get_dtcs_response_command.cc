@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/perform_interaction_response_command.h"
+#include "application_manager/commands/get_dtcs_response_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
@@ -41,27 +41,31 @@ namespace application_manager {
 
 namespace commands {
 
-PerformInteractionResponseCommand::PerformInteractionResponseCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+GetDTCsResponseCommand::GetDTCsResponseCommand(
+    const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-PerformInteractionResponseCommand::~PerformInteractionResponseCommand() {
+GetDTCsResponseCommand::~GetDTCsResponseCommand() {
 }
 
-void PerformInteractionResponseCommand::Run() {
+void GetDTCsResponseCommand::Run() {
   if ((*message_)[strings::params][strings::success] == false) {
-     SendResponse();
-     return;
-   }
+    SendResponse();
+    return;
+  }
 
-   const int hmi_request_id = 205;
+  const int hmi_request_id = (*message_)[strings::params][strings::function_id];
 
-   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
-     (*message_)[strings::params][strings::success] = true;
-     (*message_)[strings::params][strings::result_code] =
-       NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-     SendResponse();
-   }
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
+    if ((*message_)[strings::msg_params][hmi_response::code].asInt()) {
+      (*message_)[strings::params][strings::success] = true;
+      (*message_)[strings::params][strings::result_code] =
+          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+      SendResponse();
+    } else {
+      // TODO(VS): Some logic
+    }
+  }
 }
 
 }  // namespace commands

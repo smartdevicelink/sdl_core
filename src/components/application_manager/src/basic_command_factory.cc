@@ -99,6 +99,8 @@
 #include "application_manager/commands/on_language_change_command.h"
 #include "application_manager/commands/on_permissions_change_command.h"
 #include "application_manager/commands/on_hmi_status_command.h"
+#include "application_manager/commands/get_dtcs_command.h"
+#include "application_manager/commands/get_dtcs_response_command.h"
 
 
 #include "interfaces/v4_protocol_v2_0_revT.h"
@@ -333,6 +335,14 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
         command.reset(new commands::ChangeRegistrationResponseCommand(message));
       } else {
         command.reset(new commands::ChangeRegistrationCommand(message));
+      }
+      break;
+    }
+    case NsSmartDeviceLinkRPC::V2::FunctionID::eType::GetDTCsID: {
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::GetDTCsCommand(message));
+      } else {
+        command.reset(new commands::GetDTCsCommand(message));
       }
       break;
     }

@@ -31,37 +31,46 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/perform_interaction_response_command.h"
+#include "application_manager/commands/get_dtcs_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-PerformInteractionResponseCommand::PerformInteractionResponseCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+GetDTCsCommand::GetDTCsCommand(
+    const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
-PerformInteractionResponseCommand::~PerformInteractionResponseCommand() {
+GetDTCsCommand::~GetDTCsCommand() {
 }
 
-void PerformInteractionResponseCommand::Run() {
-  if ((*message_)[strings::params][strings::success] == false) {
-     SendResponse();
-     return;
-   }
+void GetDTCsCommand::Run() {
+  ApplicationImpl* app = static_cast<ApplicationImpl*>(
+      ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params][strings::connection_key]));
 
-   const int hmi_request_id = 205;
+  if (NULL == app) {
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
 
-   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
-     (*message_)[strings::params][strings::success] = true;
-     (*message_)[strings::params][strings::result_code] =
-       NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-     SendResponse();
-   }
+  const int corellation_id =
+      (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+      (*message_)[strings::params][strings::connection_key];
+
+  // TODO(VS): HMI Request Id
+  const int hmi_request_id = 212;
+  (*message_)[strings::params][strings::function_id] = hmi_request_id;
+
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+        connection_key, corellation_id, hmi_request_id, &(*message_));
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands

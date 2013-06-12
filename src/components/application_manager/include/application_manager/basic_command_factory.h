@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_BASIC_COMMAND_FACTORY_H_
 
 #include "application_manager/commands/command.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
@@ -51,6 +52,10 @@ class BasicCommandFactory {
    * @return Pointer to created command object.
    **/
   static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
+
+ private:
+   BasicCommandFactory();
+   DISALLOW_COPY_AND_ASSIGN(BasicCommandFactory);
 };
 
 }  // namespace application_manager

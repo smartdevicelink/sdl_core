@@ -112,6 +112,8 @@ set (SOURCES
 ./src/commands/scrollable_message_response_command.cc
 ./src/commands/on_hmi_status_command.cc
 ./src/message_helper.cc
+./src/commands/get_dtcs_command.cc
+./src/commands/get_dtcs_response_command.cc
 )
 
 

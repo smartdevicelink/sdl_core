@@ -84,11 +84,12 @@ void ChangeRegistrationResponseCommand::Run() {
     }
   }
 
+  smart_objects::CSmartObject data =
+      msg_chain->data();
+
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       (*message_)[strings::params][strings::function_id].asInt())) {
-    smart_objects::CSmartObject data =
-        msg_chain->data();
 
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->

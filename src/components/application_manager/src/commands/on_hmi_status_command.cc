@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/on_hmi_status_command.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
