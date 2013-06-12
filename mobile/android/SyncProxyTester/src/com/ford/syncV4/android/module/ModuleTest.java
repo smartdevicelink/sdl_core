@@ -30,6 +30,7 @@ import android.util.Xml;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
+import com.ford.syncV4.android.marshaller.CustomJsonRPCMarshaller;
 import com.ford.syncV4.android.marshaller.InvalidJsonRPCMarshaller;
 import com.ford.syncV4.android.module.reader.BinaryDataReaderFactory;
 import com.ford.syncV4.android.service.ProxyService;
@@ -83,17 +84,26 @@ public class ModuleTest {
 	
 	/**
 	 * Wraps the {@link RPCRequest} class to add some extra fields (pause after
-	 * the request; whether to generate invalid JSON).
+	 * the request; whether to generate invalid JSON; custom JSON to set in
+	 * request).
 	 */
 	class RPCRequestWrapper {
 		private RPCRequest request = null;
 		private long pause = 0;
 		private boolean generateInvalidJSON = false;
+		private String customJSON = null;
 		
-		public RPCRequestWrapper(RPCRequest request, long pause, boolean generateInvalidJSON) {
+		public RPCRequestWrapper(RPCRequest request, long pause,
+				boolean generateInvalidJSON) {
+			this(request, pause, generateInvalidJSON, null);
+		}
+		
+		public RPCRequestWrapper(RPCRequest request, long pause,
+				boolean generateInvalidJSON, String customJSON) {
 			this.request = request;
 			this.pause = pause;
 			this.generateInvalidJSON = generateInvalidJSON;
+			this.customJSON = customJSON;
 		}
 
 		public long getPause() {
@@ -114,6 +124,14 @@ public class ModuleTest {
 
 		public void setGenerateInvalidJSON(boolean generateInvalidJSON) {
 			this.generateInvalidJSON = generateInvalidJSON;
+		}
+
+		public String getCustomJSON() {
+			return customJSON;
+		}
+
+		public void setCustomJSON(String customJSON) {
+			this.customJSON = customJSON;
 		}
 	}
 	
@@ -197,6 +215,8 @@ public class ModuleTest {
 	 * invalid.
 	 */
 	private final static String INVALID_JSON_ATTR = "invalidJSON";
+	/** Attribute name that defines custom JSON of the request. */
+	private final static String CUSTOM_JSON_ATTR = "customJSON";
 	/** Attribute name of request's correlation ID. */
 	private final static String CORRELATION_ID_ATTR = "correlationID";
 	
@@ -531,6 +551,8 @@ public class ModuleTest {
 									boolean generateInvalidJSON = (parser.getAttributeValue(null, INVALID_JSON_ATTR)
 											!= null);
 									
+									String customJSON = parser.getAttributeValue(null, CUSTOM_JSON_ATTR);
+									
 									//TODO: Set rpc parameters
 									Hashtable hash = setParams(name, parser);
 									logParserDebugInfo("" + hash);
@@ -550,7 +572,8 @@ public class ModuleTest {
 								    }
 									
 								    if (currentTest != null) {
-								    		RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause, generateInvalidJSON);
+								    		RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause,
+								    				generateInvalidJSON, customJSON);
 								    		currentTest.addRequest(wrapper);
 								    }
 								} else if (name.equalsIgnoreCase("result")) {
@@ -829,19 +852,29 @@ public class ModuleTest {
 				
 				IJsonRPCMarshaller defaultMarshaller = ProxyService.getProxyInstance().getJsonRPCMarshaller();
 				IJsonRPCMarshaller invalidMarshaller = new InvalidJsonRPCMarshaller();
+				CustomJsonRPCMarshaller customMarshaller = new CustomJsonRPCMarshaller(null);
 				
 				for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
 					RPCRequest rpc = wrapper.getRequest();
 					boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
+					String customJSON = wrapper.getCustomJSON();
+					if (customJSON != null) {
+						customMarshaller.setStubbedValue(customJSON);
+					}
 					
 					_msgAdapter.logMessage(rpc, true);
-					ProxyService.getProxyInstance().setJsonRPCMarshaller(generateInvalidJSON ?
-							invalidMarshaller : defaultMarshaller);
+					IJsonRPCMarshaller currentMarshaller = (customJSON != null) ? customMarshaller
+							: (generateInvalidJSON ? invalidMarshaller
+									: defaultMarshaller);
+					ProxyService.getProxyInstance().setJsonRPCMarshaller(currentMarshaller);
 					try {
 						ProxyService.getProxyInstance().sendRPCRequest(rpc);
 					} catch (SyncException e) {
 						_msgAdapter.logMessage("Error sending RPC", Log.ERROR, e, true);
 					}
+					
+					// restore the default marshaller
+					ProxyService.getProxyInstance().setJsonRPCMarshaller(defaultMarshaller);
 					
 					long pause = wrapper.getPause();
 					if (pause > 0) {

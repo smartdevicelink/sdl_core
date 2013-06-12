@@ -1,4 +1,5 @@
 [CW24]
++ ModuleTest: add the ability to set custom JSON messages for requests in XML test.
 + ModuleTest: add invalidJSON attribute to request tags to produce invalid JSON sent to the core.
 * Fix: ModuleTest: allow to test the responses to Register/UnregisterAppInterface requests.
 
