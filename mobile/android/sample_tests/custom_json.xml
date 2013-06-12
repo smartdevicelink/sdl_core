@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file>
+    <type type="unit"/>
+
+    <test testName="AddSubMenu" pause="2000">
+        <AddSubMenu correlationID="1" pause="2000" customJSON='{"menuID":1000a, "menuName": "Submenu"}' />
+
+        <result correlationID="1" return="INVALID_DATA"/>
+    </test>
+
+    <test testName="AlertTest2">
+        <Alert correlationID="2" pause="2000" customJSON='{"duration":&amp;5000, "alertText1": "&lt;Here &amp; there&gt;"}' />
+
+        <result correlationID="2" return="INVALID_DATA"/>
+    </test>
+
+</file>

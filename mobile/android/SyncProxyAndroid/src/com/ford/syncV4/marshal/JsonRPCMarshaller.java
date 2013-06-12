@@ -19,11 +19,11 @@ import com.ford.syncV4.util.DebugTool;
  * over transmission
  */
 
-public class JsonRPCMarshaller {
+public class JsonRPCMarshaller implements IJsonRPCMarshaller {
 	
 	private static final String SYNC_LIB_PRIVATE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
 	
-	public static byte[] marshall(RPCMessage msg, byte version) {
+	public byte[] marshall(RPCMessage msg, byte version) {
 		byte[] jsonBytes = null;
 		try {
 			JSONObject jsonObject = msg.serializeJSON(version);
@@ -36,7 +36,7 @@ public class JsonRPCMarshaller {
 		return jsonBytes;
 	}
 	
-	public static Hashtable<String, Object> unmarshall(byte[] message) {
+	public Hashtable<String, Object> unmarshall(byte[] message) {
 		SyncTrace.logMarshallingEvent(InterfaceActivityDirection.Receive, message, SYNC_LIB_PRIVATE_KEY);
 		Hashtable<String, Object> ret = null;
 		try {
