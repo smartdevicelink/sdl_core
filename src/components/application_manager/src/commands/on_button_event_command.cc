@@ -45,7 +45,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 OnButtonEventCommand::OnButtonEventCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnButtonEventCommand::~OnButtonEventCommand() {
@@ -143,7 +143,7 @@ void OnButtonEventCommand::SendButtonEvent(const ApplicationImpl* app,
     NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
 
   message_.reset(on_btn_event);
-  SendResponse();
+  SendNotification();
 }
 
 }  // namespace commands

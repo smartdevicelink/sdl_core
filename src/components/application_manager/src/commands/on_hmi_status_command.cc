@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/on_hmi_status_command.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
@@ -41,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 OnHMIStatusCommand::OnHMIStatusCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnHMIStatusCommand::~OnHMIStatusCommand() {
@@ -51,7 +50,7 @@ void OnHMIStatusCommand::Run() {
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 
-  SendResponse();
+  SendNotification();
 }
 
 }  // namespace commands

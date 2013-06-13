@@ -34,6 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 
 #include "interfaces/v4_protocol_v2_0_revT.h"
+#include "application_manager/application_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
@@ -47,12 +49,15 @@ class MessageHelper {
   /**
    * @brief Sends HMI status notification to mobile
    *
+   *@param application_impl application with changed HMI status
+   *
    **/
   static void SendHMIStatusNotification(
-      const int& app_id,
-      const mobile_api::HMILevel::eType& hmi_level,
-      const mobile_api::AudioStreamingState::eType& audio_streaming_state,
-      const mobile_api::SystemContext::eType& system_context);
+      const ApplicationImpl& application_impl);
+
+ private:
+   MessageHelper();
+   DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 };
 
 }  // namespace application_manager

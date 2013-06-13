@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file>
+    <type type="unit"/>
+
+    <test testName="AddSubMenu" pause="2000">
+        <AddSubMenu correlationID="1" invalidJSON="invalidJSON">
+            <String menuName="Submenu 1" />
+        </AddSubMenu>
+
+        <result correlationID="1" return="INVALID_DATA"/>
+    </test>
+
+    <test testName="AlertTest2">
+        <Alert correlationID="2" pause="2000" invalidJSON="invalidJSON">
+            <String alertText1="Alert 2" />
+            <String alertText2="Alert 2" />
+            <Vector name="ttsChunks">
+                <TTSChunk>
+                    <String text="This is the first T T S" />
+                    <String type="TEXT" />
+                </TTSChunk>
+                <TTSChunk>
+                    <String text="This is the second T T S" />
+                    <String type="TEXT" />
+                </TTSChunk>
+            </Vector>
+            <Integer duration="3000" />
+            <Boolean playtone="false" />
+        </Alert>
+
+        <result correlationID="2" return="INVALID_DATA"/>
+    </test>
+
+</file>

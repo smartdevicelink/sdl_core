@@ -42,6 +42,12 @@ namespace commands {
 
 PerformInteractionCommand::PerformInteractionCommand(
     const MessageSharedPtr& message): CommandRequestImpl(message) {
+}
+
+PerformInteractionCommand::~PerformInteractionCommand() {
+}
+
+void PerformInteractionCommand::Run() {
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
@@ -72,13 +78,6 @@ PerformInteractionCommand::PerformInteractionCommand(
         connection_key, correlation_id, hmi_request_id, &(*message_));
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
-}
-
-PerformInteractionCommand::~PerformInteractionCommand() {
-}
-
-void PerformInteractionCommand::Run() {
-
 }
 
 }  // namespace commands

@@ -31,41 +31,35 @@
  */
 
 #include "application_manager/message_helper.h"
-#include "application_manager/basic_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 
 namespace application_manager {
 
 void MessageHelper::SendHMIStatusNotification(
-    const int& app_id,
-    const mobile_api::HMILevel::eType& hmi_level,
-    const mobile_api::AudioStreamingState::eType& audio_streaming_state,
-    const mobile_api::SystemContext::eType& system_context) {
+          const ApplicationImpl& application_impl) {
 
-  smart_objects::CSmartObject* hmi_status_notification =
-      new smart_objects::CSmartObject();
+  smart_objects::CSmartObject hmi_status_notification;
 
-  if (!hmi_status_notification) {
-    return;
-  }
 
-  (*hmi_status_notification)[strings::params][strings::function_id] =
+  hmi_status_notification[strings::params][strings::function_id] =
       mobile_api::FunctionID::eType::OnHMIStatusID;
 
-  (*hmi_status_notification)[strings::params][strings::connection_key] =
-      app_id;
+  hmi_status_notification[strings::params][strings::connection_key] =
+      application_impl.app_id();
 
-  (*hmi_status_notification)[strings::msg_params][strings::hmi_level] =
-      hmi_level;
+  hmi_status_notification[strings::msg_params][strings::hmi_level] =
+      application_impl.hmi_level();
 
-  (*hmi_status_notification)[strings::msg_params]
-                            [strings::audio_streaming_state] =
-                                audio_streaming_state;
+ // hmi_status_notification[strings::msg_params]
+   //                         [strings::audio_streaming_state] =
+     //                           application_impl.audio_streaming_state();
 
-  (*hmi_status_notification)[strings::msg_params][strings::system_context] =
-      system_context;
+  hmi_status_notification[strings::msg_params][strings::system_context] =
+      application_impl.system_context();
 
-  CommandSharedPtr command = BasicCommandFactory::CreateCommand(hmi_status_notification);
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&hmi_status_notification);
   command->Init();
+  //TODO (VS): run must return bool, so SendHMIStatusNotification must also return bool
   command->Run();
   command->CleanUp();
 }

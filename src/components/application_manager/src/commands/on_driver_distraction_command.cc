@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 OnDriverDistractionCommand::OnDriverDistractionCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnDriverDistractionCommand::~OnDriverDistractionCommand() {
@@ -59,7 +59,7 @@ void OnDriverDistractionCommand::Run() {
     if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE !=
         static_cast<ApplicationImpl*>(*it)->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
-      SendResponse();
+      SendNotification();
     }
   }
 }

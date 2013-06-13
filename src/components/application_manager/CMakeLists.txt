@@ -19,7 +19,7 @@ set (SOURCES
 ./src/message.cc
 ./src/message_chaining.cc
 ./src/application_impl.cc
-./src/basic_command_factory.cc
+./src/mobile_command_factory.cc
 ./src/application_command_factory.cc
 ./src/audio_pass_thru_thread_impl.cc
 ./src/commands/command_impl.cc
@@ -111,7 +111,12 @@ set (SOURCES
 ./src/commands/scrollable_message_command.cc
 ./src/commands/scrollable_message_response_command.cc
 ./src/commands/on_hmi_status_command.cc
+./src/commands/on_encoded_sync_pdata_command.cc
 ./src/message_helper.cc
+./src/commands/get_dtcs_command.cc
+./src/commands/get_dtcs_response_command.cc
+./src/commands/command_notification_impl.cc
+./src/hmi_command_factory.cc
 )
 
 

@@ -54,14 +54,14 @@ class ShowCommand : public CommandRequestImpl {
   /**
    * \brief ShowCommand class destructor
    **/
-  virtual ~ShowCommand() {
-  }
+  virtual ~ShowCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(ShowCommand);
 };
 

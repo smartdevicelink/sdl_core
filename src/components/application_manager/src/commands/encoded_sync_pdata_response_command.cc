@@ -44,6 +44,9 @@ EncodedSyncPDataResponseCommand::EncodedSyncPDataResponseCommand(const MessageSh
   : CommandResponseImpl(message) {
 }
 
+EncodedSyncPDataResponseCommand::~EncodedSyncPDataResponseCommand(){
+}
+
 void EncodedSyncPDataResponseCommand::Run() {
   SendResponse();
 }

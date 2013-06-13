@@ -46,7 +46,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 OnAudioPassThruCommand::OnAudioPassThruCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnAudioPassThruCommand::~OnAudioPassThruCommand() {
@@ -54,7 +54,7 @@ OnAudioPassThruCommand::~OnAudioPassThruCommand() {
 
 void OnAudioPassThruCommand::Run() {
   LOG4CXX_INFO(logger_, "OnAudioPassThruCommand::Run ");
-  SendResponse();
+  SendNotification();
 }
 
 }  // namespace commands

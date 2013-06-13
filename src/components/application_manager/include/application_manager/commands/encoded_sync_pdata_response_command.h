@@ -50,14 +50,14 @@ class EncodedSyncPDataResponseCommand : public CommandResponseImpl {
   /**
    * \brief EncodedSyncPDataResponseCommand class destructor
    **/
-  virtual ~EncodedSyncPDataResponseCommand() {
-  }
+  virtual ~EncodedSyncPDataResponseCommand();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataResponseCommand);
 };
 

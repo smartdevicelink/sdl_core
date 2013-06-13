@@ -40,7 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-ScrollableMessageResponseCommand::ScrollableMessageResponseCommand(const MessageSharedPtr& message)
+ScrollableMessageResponseCommand::ScrollableMessageResponseCommand(
+  const MessageSharedPtr& message)
   : CommandResponseImpl(message) {
 }
 

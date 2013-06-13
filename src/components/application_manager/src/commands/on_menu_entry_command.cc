@@ -45,7 +45,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 OnMenuEntryCommand::OnMenuEntryCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnMenuEntryCommand::~OnMenuEntryCommand() {
@@ -123,7 +123,7 @@ void OnMenuEntryCommand::SendOnMenuCommand(const ApplicationImpl* app) {
     NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
 
   message_.reset(on_menu_cmd);
-  SendResponse();
+  SendNotification();
 }
 
 }  // namespace commands

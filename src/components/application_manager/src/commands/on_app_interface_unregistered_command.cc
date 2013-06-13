@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 OnAppInterfaceUnregisteredCommand::OnAppInterfaceUnregisteredCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnAppInterfaceUnregisteredCommand::~OnAppInterfaceUnregisteredCommand() {
@@ -50,7 +50,7 @@ void OnAppInterfaceUnregisteredCommand::Run() {
   (*message_)[strings::params][strings::message_type] =
     MessageType::kNotification;
 
-  SendResponse();
+  SendNotification();
 }
 
 }  // namespace commands

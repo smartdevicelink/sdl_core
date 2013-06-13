@@ -30,10 +30,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_BASIC_COMMAND_FACTORY_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_BASIC_COMMAND_FACTORY_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
 
 #include "application_manager/commands/command.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
@@ -42,7 +43,7 @@ typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
 /**
  * @brief Factory class for command creation
  **/
-class BasicCommandFactory {
+class MobileCommandFactory {
  public:
   /**
    * @brief Create command object and return pointer to it
@@ -51,8 +52,12 @@ class BasicCommandFactory {
    * @return Pointer to created command object.
    **/
   static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
+
+ private:
+   MobileCommandFactory();
+   DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
 };
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_BASIC_COMMAND_FACTORY_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_

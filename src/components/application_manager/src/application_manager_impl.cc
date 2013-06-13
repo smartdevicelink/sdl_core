@@ -32,7 +32,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/basic_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 #include "application_manager/message_conversion.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/audio_pass_thru_thread_impl.h"
@@ -253,7 +253,7 @@ void ApplicationManagerImpl::onMessageReceived(
   application_manager::Message* message) {
   NsSmartDeviceLink::NsSmartObjects::CSmartObject smart_object =
     MessageToSmartObject(*message);
-  CommandSharedPtr command = BasicCommandFactory::CreateCommand(&smart_object);
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&smart_object);
   command->Init();
   command->Run();
   command->CleanUp();

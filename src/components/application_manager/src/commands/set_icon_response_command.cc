@@ -52,13 +52,34 @@ void SetIconResponseCommand::Run() {
     return;
   }
 
-  const int hmi_request_id = 208;
+  const int hmi_request_id = (*message_)[strings::params][strings::function_id];
+
+  const MessageChaining* msg_chain =
+  ApplicationManagerImpl::instance()->GetMessageChain(hmi_request_id);
+
+  if (NULL == msg_chain) {
+    return;
+  }
+
+  smart_objects::CSmartObject data =
+      msg_chain->data();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-    SendResponse();
+    if ((*message_)[strings::msg_params][hmi_response::code].asInt()) {
+      ApplicationImpl* app = static_cast<ApplicationImpl*>(
+          ApplicationManagerImpl::instance()->
+          application(data[strings::msg_params][strings::app_id]));
+
+      app->set_app_icon_path(data[strings::msg_params][strings::sync_file_name]);
+
+      (*message_)[strings::params][strings::success] = true;
+      (*message_)[strings::params][strings::result_code] =
+              NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+      SendResponse();
+    } else {
+      // TODO(VS): Some logic
+    }
+
   }
 }
 

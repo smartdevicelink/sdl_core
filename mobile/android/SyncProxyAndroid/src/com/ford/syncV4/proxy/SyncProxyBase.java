@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.messageDispatcher.IDispatchingStrategy;
 import com.ford.syncV4.messageDispatcher.IncomingProtocolMessageComparitor;
@@ -203,6 +204,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private String _autoActivateIdDesired = null;
 	private SyncMsgVersion _syncMsgVersionRequest = null;
 	private Vector<String> _vrSynonyms = null;
+	
+	// JSON RPC Marshaller
+	private IJsonRPCMarshaller _jsonRPCMarshaller = new JsonRPCMarshaller();
 	
 	/**
 	 * Contains current configuration for the transport that was selected during 
@@ -1242,7 +1246,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						Hashtable hashTemp = new Hashtable();
 						hashTemp.put(Names.correlationID, message.getCorrID());
 						if (message.getJsonSize() > 0) {
-							final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
+							final Hashtable<String, Object> mhash = _jsonRPCMarshaller.unmarshall(message.getData());
 							//hashTemp.put(Names.parameters, mhash.get(Names.parameters));
 							hashTemp.put(Names.parameters, mhash);
 						}
@@ -1257,7 +1261,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						}
 						if (message.getBulkData() != null) hash.put(Names.bulkData, message.getBulkData());
 					} else {
-						final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
+						final Hashtable<String, Object> mhash = _jsonRPCMarshaller.unmarshall(message.getData());
 						hash = mhash;
 					}
 					handleRPCMessage(hash);							
@@ -1387,7 +1391,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		try {
 			SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
 	
-			byte[] msgBytes = JsonRPCMarshaller.marshall(request, _wiproVersion);
+			byte[] msgBytes = _jsonRPCMarshaller.marshall(request, _wiproVersion);
 	
 			ProtocolMessage pm = new ProtocolMessage();
 			pm.setData(msgBytes);
@@ -3196,6 +3200,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			
 		return _syncConnection.getCurrentTransportType();
 	}
+
+	/**
+	 * @param jsonRPCMarshaller the jsonRPCMarshaller to set
+	 */
+	public void setJsonRPCMarshaller(IJsonRPCMarshaller jsonRPCMarshaller) throws IllegalArgumentException {
+		if (jsonRPCMarshaller == null) {
+			throw new IllegalArgumentException("jsonRPCMarshaller must not be null");
+		}
+		
+		this._jsonRPCMarshaller = jsonRPCMarshaller;
+	}
 	
+	public IJsonRPCMarshaller getJsonRPCMarshaller() {
+		return this._jsonRPCMarshaller;
+	}
 	
 } // end-class

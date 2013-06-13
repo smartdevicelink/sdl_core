@@ -58,6 +58,8 @@ void ShowConstantTBTCommand::Run() {
     return;
   }
 
+  app->set_tbt_show_command((*message_)[strings::msg_params]);
+
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =

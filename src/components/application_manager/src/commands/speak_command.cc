@@ -44,6 +44,9 @@ SpeakCommand::SpeakCommand(const MessageSharedPtr& message)
   : CommandRequestImpl(message) {
 }
 
+SpeakCommand::~SpeakCommand(){
+}
+
 void SpeakCommand::Run() {
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
         (application_manager::ApplicationManagerImpl::instance()->

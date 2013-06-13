@@ -40,6 +40,13 @@ namespace application_manager {
 
 namespace commands {
 
+SetMediaClockCommand::SetMediaClockCommand(const MessageSharedPtr& message)
+ : CommandRequestImpl(message) {
+}
+
+SetMediaClockCommand::~SetMediaClockCommand(){
+}
+
 void SetMediaClockCommand::Run() {
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->

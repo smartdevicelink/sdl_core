@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 OnLanguageChangeCommand::OnLanguageChangeCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnLanguageChangeCommand::~OnLanguageChangeCommand() {
@@ -57,7 +57,7 @@ void OnLanguageChangeCommand::Run() {
   for (std::set<Application*>::iterator it = applications.begin();
       applications.end() != it; ++it) {
       (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
-      SendResponse();
+      SendNotification();
   }
 }
 

@@ -42,8 +42,18 @@ namespace application_manager {
 
 namespace commands {
 
-const std::string TEMPORARY_HARDCODED_FILENAME = "policy_sync_data.dat";
-const std::string TEMPORARY_HARDCODED_FOLDERNAME = "/config/policies";
+const std::string EncodedSyncPDataCommand::TEMPORARY_HARDCODED_FILENAME
+                = "policy_sync_data.dat";
+const std::string EncodedSyncPDataCommand::TEMPORARY_HARDCODED_FOLDERNAME
+                = "/config/policies";
+
+EncodedSyncPDataCommand::EncodedSyncPDataCommand(
+    const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
+}
+
+EncodedSyncPDataCommand::~EncodedSyncPDataCommand() {
+}
 
 void EncodedSyncPDataCommand::Run() {
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>

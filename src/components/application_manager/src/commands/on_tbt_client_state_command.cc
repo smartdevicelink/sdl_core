@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 OnTBTClientStateCommand::OnTBTClientStateCommand(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnTBTClientStateCommand::~OnTBTClientStateCommand() {
@@ -59,7 +59,7 @@ void OnTBTClientStateCommand::Run() {
     if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE !=
         static_cast<ApplicationImpl*>(*it)->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
-      SendResponse();
+      SendNotification();
     }
   }
 }

@@ -44,6 +44,9 @@ ShowResponseCommand::ShowResponseCommand(const MessageSharedPtr& message)
   : CommandResponseImpl(message) {
 }
 
+ShowResponseCommand::~ShowResponseCommand(){
+}
+
 void ShowResponseCommand::Run() {
   SendResponse();
 }

@@ -43,26 +43,25 @@ namespace commands {
 
 PerformInteractionResponseCommand::PerformInteractionResponseCommand(
   const MessageSharedPtr& message): CommandResponseImpl(message) {
-  if ((*message_)[strings::params][strings::success] == false) {
-    SendResponse();
-    return;
-  }
-
-  const int hmi_request_id = 205;
-
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-      NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-    SendResponse();
-  }
 }
 
 PerformInteractionResponseCommand::~PerformInteractionResponseCommand() {
 }
 
 void PerformInteractionResponseCommand::Run() {
+  if ((*message_)[strings::params][strings::success] == false) {
+     SendResponse();
+     return;
+   }
 
+   const int hmi_request_id = 205;
+
+   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
+     (*message_)[strings::params][strings::success] = true;
+     (*message_)[strings::params][strings::result_code] =
+       NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+     SendResponse();
+   }
 }
 
 }  // namespace commands

@@ -40,6 +40,13 @@ namespace application_manager {
 
 namespace commands {
 
+ShowCommand::ShowCommand(const MessageSharedPtr& message)
+ : CommandRequestImpl(message){
+}
+
+ShowCommand::~ShowCommand(){
+}
+
 void ShowCommand::Run() {
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->

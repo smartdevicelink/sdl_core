@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_AUDIO_PASS_THRU_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_AUDIO_PASS_THRU_COMMAND_H_
 
-#include "application_manager/commands/command_response_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -45,7 +45,7 @@ namespace commands {
  * @brief OnAudioPassThruCommand class used to send notification with binary data written from
  * microphone to mobile device while PerformAudioPassThru is active.
  **/
-class OnAudioPassThruCommand : public CommandResponseImpl {
+class OnAudioPassThruCommand : public CommandNotificationImpl {
  public:
   /**
    * @brief OnAudioPassThruCommand class constructor
