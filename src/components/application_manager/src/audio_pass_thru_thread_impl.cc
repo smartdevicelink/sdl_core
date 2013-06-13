@@ -35,7 +35,7 @@
 #endif
 
 #include <string>
-#include "application_manager/basic_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_manager_impl.h"
 #include "SmartObjects/CSmartObject.hpp"
 #include "application_manager/application_impl.h"
@@ -78,7 +78,7 @@ void AudioPassThruThreadImpl::Init() {
 
 void AudioPassThruThreadImpl::FactoryCreateCommand(
                                           smart_objects::CSmartObject* cmd) {
-  CommandSharedPtr command = BasicCommandFactory::CreateCommand(&(*cmd));
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&(*cmd));
   command->Init();
   command->Run();
   command->CleanUp();

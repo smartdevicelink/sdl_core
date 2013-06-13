@@ -33,11 +33,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_COMMAND_FACTORY_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_COMMAND_FACTORY_H_
 
-#include "application_manager/basic_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 
 namespace application_manager {
 
-class ApplicationCommandFactory : public BasicCommandFactory {
+class ApplicationCommandFactory : public MobileCommandFactory {
   public:
     static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
 };

@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/message_helper.h"
-#include "application_manager/basic_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 
 namespace application_manager {
 
@@ -57,7 +57,7 @@ void MessageHelper::SendHMIStatusNotification(
   hmi_status_notification[strings::msg_params][strings::system_context] =
       application_impl.system_context();
 
-  CommandSharedPtr command = BasicCommandFactory::CreateCommand(&hmi_status_notification);
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&hmi_status_notification);
   command->Init();
   //TODO (VS): run must return bool, so SendHMIStatusNotification must also return bool
   command->Run();

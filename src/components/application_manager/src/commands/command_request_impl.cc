@@ -32,7 +32,7 @@
 
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/basic_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 #include "SmartObjects/CSmartObject.hpp"
 #include "application_manager/message.h"
 
@@ -83,7 +83,7 @@ void CommandRequestImpl::SendResponse(const bool success,
   }
 
 
-  CommandSharedPtr command = BasicCommandFactory::CreateCommand(&response);
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&response);
   command->Init();
   command->Run();
   command->CleanUp();

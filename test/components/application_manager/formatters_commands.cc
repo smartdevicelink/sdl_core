@@ -37,7 +37,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "application_manager/basic_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 #include "utils/shared_ptr.h"
 
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
