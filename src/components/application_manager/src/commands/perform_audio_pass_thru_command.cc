@@ -111,18 +111,18 @@ void PerformAudioPassThruCommandRequest::Run() {
   (*ui_audio)[strings::msg_params][hmi_request::max_duration] =
       (*message_)[str::msg_params][str::max_duration];
 
-  const int corellation_id =
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
   MessageChaining * chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, corellation_id, audio_cmd_id);
+      connection_key, correlation_id, audio_cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(connection_key,
-      corellation_id, (*message_)[str::msg_params][str::max_duration].asInt(),
+      correlation_id, (*message_)[str::msg_params][str::max_duration].asInt(),
       (*message_)[str::msg_params][str::sampling_rate].asInt(),
       (*message_)[str::msg_params][str::bits_per_sample].asInt(),
       (*message_)[str::msg_params][str::audio_type].asInt());

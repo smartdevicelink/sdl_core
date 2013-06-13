@@ -40,9 +40,6 @@ namespace application_manager {
 
 namespace commands {
 
-bool DeleteCommandResponse::result_ui = false;
-bool DeleteCommandResponse::result_vr = false;
-
 DeleteCommandResponse::DeleteCommandResponse(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
@@ -63,31 +60,40 @@ void DeleteCommandResponse::Run() {
   const int function_id =
       (*message_)[strings::params][strings::function_id].asInt();
 
-  // TODO(VS) HMI code Id
-  const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
+
+  // TODO(DK): HMI code Id
+  const NsSmartDeviceLinkRPC::V2::Result::eType code =
+      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+      (*message_)[strings::msg_params][hmi_response::code].asInt());
 
   // TODO(VS) HMI Request Id
   const int ui_cmd_id = 202;
   const int vr_cmd_id = 203;
 
-  smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
-    GetMessageChain(function_id)->data();
+  MessageChaining* msg_chain =
+  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
-  ApplicationManagerImpl::instance()->GetMessageChain(function_id);
-
-  if (function_id == ui_cmd_id) {
-    if (code) {
-      result_ui = true;
-    }
-  } else if (function_id == vr_cmd_id) {
-    if (code) {
-      result_vr = true;
-    }
+  if (NULL == msg_chain) {
+    return;
   }
 
+  smart_objects::CSmartObject data = msg_chain->data();
+
+  if (function_id == ui_cmd_id) {
+    msg_chain->set_ui_response_result(code);
+  } else if (function_id == vr_cmd_id) {
+    msg_chain->set_vr_response_result(code);
+  }
+
+  // we need to retrieve stored response code before message chain decrase
+  const bool result_ui = msg_chain->ui_response_result();
+  const bool result_vr = msg_chain->vr_response_result();
+
   // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(function_id)) {
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      correlation_id)) {
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
           ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::app_id]));
@@ -115,10 +121,6 @@ void DeleteCommandResponse::Run() {
         SendResponse();
       }
     }
-
-    // reset flags for HMI response
-    result_ui = false;
-    result_vr = false;
   }
 }
 }  // namespace commands

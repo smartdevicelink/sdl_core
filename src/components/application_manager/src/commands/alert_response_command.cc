@@ -64,10 +64,11 @@ void AlertCommandResponse::Run() {
   }
 
   // TODO(DK) HMI Request Id
-  const int function_id =
-    (*message_)[strings::params][strings::function_id].asInt();
+  const int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asInt();
 
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(function_id)) {
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      correlation_id)) {
     // TODO(DK): HMI code Id
     const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();

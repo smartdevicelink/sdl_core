@@ -52,9 +52,10 @@ void UpdateTurnListResponseCommand::Run() {
     return;
   }
 
-  const int hmi_request_id = 209;
+  const int hmi_correlation_id = 209;
 
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      hmi_correlation_id)) {
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =
             NsSmartDeviceLinkRPC::V2::Result::SUCCESS;

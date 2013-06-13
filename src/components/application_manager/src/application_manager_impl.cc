@@ -174,14 +174,14 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     }
 
     MessageChainPtr ptr(chain);
-    message_chaining_[function_id] = ptr;
+    message_chaining_[correlation_id] = ptr;
     return chain;
   } else  {
-    chain->IncrementCounter();
     MessageChains::const_iterator it = message_chaining_.begin();
     for (; it != message_chaining_.end(); ++it) {
       if ((*it->second) == *chain) {
-        message_chaining_[function_id] = it->second;
+        it->second->IncrementCounter();
+        message_chaining_[correlation_id] = it->second;
         break;
       }
     }
@@ -189,9 +189,11 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
   return chain;
 }
 
-bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
+bool ApplicationManagerImpl::DecreaseMessageChain(
+    unsigned int correlation_id) {
   bool result = false;
-  MessageChains::iterator it = message_chaining_.find(function_id);
+  MessageChains::iterator it =
+      message_chaining_.find(correlation_id);
 
   if (message_chaining_.end() != it) {
     (*it->second).DecrementCounter();
@@ -203,9 +205,10 @@ bool ApplicationManagerImpl::DecreaseMessageChain(unsigned int function_id) {
   return result;
 }
 
-const MessageChaining* ApplicationManagerImpl::GetMessageChain(
-  unsigned int function_id) const {
-  MessageChains::const_iterator it = message_chaining_.find(function_id);
+MessageChaining* ApplicationManagerImpl::GetMessageChain(
+  unsigned int correlation_id) const {
+  MessageChains::const_iterator it =
+      message_chaining_.find(correlation_id);
   if (message_chaining_.end() != it) {
     return &(*it->second);
   }

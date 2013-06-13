@@ -33,25 +33,27 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CHAINING_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CHAINING_IMPL_H_
 
+#include "interfaces/v4_protocol_v2_0_revT.h"
 #include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 
 /**
  * @brief Messagechaining class is intended to
- **/
+ */
 class MessageChaining {
  public:
-  /*
+  /**
    * @brief MessageChaining class constructor
    *
    * @param connection_key of connection for Mobile side
    * @param correlation_id Correlation id for response for Mobile side
    */
   MessageChaining(int connection_key, unsigned int correlation_id);
-  /*
+  /**
    * @brief MessageChaining class destructor
    */
   ~MessageChaining();
@@ -61,64 +63,103 @@ class MessageChaining {
    *
    * @param other Reference to the object to be compared with
    * @return bool
-   **/
+   */
   bool operator==(const MessageChaining& other) const;
 
   /**
    * @brief Retrieves correlation ID
    *
    * @return correlation_id
-   **/
+   */
   const unsigned int correlation_id() const;
 
   /**
    * @brief Retrieves connection key
    *
    * @return connection_key
-   **/
+   */
   int connection_key() const;
 
   /**
    * @brief Increments counter that represent
    * amount of pending HMI responses
    *
-   **/
+   */
   void IncrementCounter();
 
   /**
    * @brief Decrements counter representing that
    * corresponding HMI response received
    *
-   **/
+   */
   void DecrementCounter();
 
   /**
    * @brief Retrieves counter
    *
    * @return counter
-   **/
+   */
   int counter() const;
 
   /**
    * @brief Sets SmartObject data
    *
    * @return reference to SmartObject data
-   **/
+   */
   void set_data(const smart_objects::CSmartObject& data);
 
   /**
    * @brief Retrieves SmartObject data
    *
    * @return reference to SmartObject data
-   **/
+   */
   const smart_objects::CSmartObject& data() const;
 
+  /**
+   * @brief Sets VR HMI response result code
+   *
+   * @param result Received VR HMI result code
+   */
+  void set_vr_response_result(const mobile_api::Result::eType& result);
+
+  /**
+   * @brief Retrieve HMI VR response result code
+   */
+  const mobile_api::Result::eType& vr_response_result() const;
+
+  /**
+   * @brief Sets UI HMI response result code
+   *
+   * @param result Received UI HMI result code
+   */
+  void set_ui_response_result(const mobile_api::Result::eType& result);
+
+  /**
+   * @brief Retrieve HMI UI response result code
+   */
+  const mobile_api::Result::eType& ui_response_result() const;
+
+  /**
+   * @brief Sets TTS HMI response result code
+   *
+   * @param result Received UI HMI result code
+   */
+  void set_tts_response_result(const mobile_api::Result::eType& result);
+
+  /**
+   * @brief Retrieve HMI TTS response result code
+   */
+  const mobile_api::Result::eType& tts_response_result() const;
+
  private:
-  unsigned int correlation_id_;
-  int connection_key_;
-  bool success_;
-  int counter_;                        // amount of pending HMI responses
+  unsigned int                correlation_id_;
+  int                         connection_key_;
+  bool                        success_;
+  int                         counter_; // amount of pending HMI responses
   smart_objects::CSmartObject data_;   // temporal data
+  mobile_api::Result::eType   vr_response_result_;
+  mobile_api::Result::eType   ui_response_result_;
+  mobile_api::Result::eType   tts_response_result_;
 };
 
 }  // namespace application_manager

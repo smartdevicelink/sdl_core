@@ -62,8 +62,12 @@ void EndAudioPassThruCommandResponse::Run() {
     return;
   }
 
+
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
+
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        (*message_)[strings::params]["function_id"].asInt())) {
+      correlation_id)) {
 
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
     SendResponse();

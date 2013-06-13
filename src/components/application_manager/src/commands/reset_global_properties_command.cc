@@ -66,7 +66,7 @@ void ResetGlobalPropertiesCommand::Run() {
     return;
   }
 
-  const int corellation_id =
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];

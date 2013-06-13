@@ -54,11 +54,11 @@ void CreateInteractionChoiceSetResponseCommand::Run() {
     return;
   }
 
-  const int hmi_request_id = 204;
+  const int hmi_correlation_id = 204;
 
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_correlation_id)) {
     smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
-                                       GetMessageChain(hmi_request_id)->data();
+                                       GetMessageChain(hmi_correlation_id)->data();
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
                              ApplicationManagerImpl::instance()->

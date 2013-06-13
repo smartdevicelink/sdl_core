@@ -80,7 +80,7 @@ void SetIconCommand::Run() {
 
   (*set_app_icon_hmi_request)[strings::params][strings::sync_file_name] = full_file_path;
 
-  const int corellation_id =
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
@@ -89,7 +89,7 @@ void SetIconCommand::Run() {
   const int hmi_request_id = 208;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, corellation_id, hmi_request_id, &(*message_));
+        connection_key, correlation_id, hmi_request_id, &(*message_));
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }

@@ -64,7 +64,7 @@ void DeleteSubMenuCommand::Run() {
     return;
   }
 
-  const int corellation_id =
+  const int correlation_id =
         (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
         (*message_)[strings::params][strings::connection_key];
@@ -72,7 +72,7 @@ void DeleteSubMenuCommand::Run() {
   const int hmi_request_id = 201;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, corellation_id, hmi_request_id, &(*message_));
+        connection_key, correlation_id, hmi_request_id, &(*message_));
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }

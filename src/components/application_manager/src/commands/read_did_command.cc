@@ -84,7 +84,7 @@ void ReadDIDCommandRequest::Run() {
     return;
   }
 
-  const int corellation_id =
+  const int correlation_id =
         (*p_vr_read_id)[strings::params][strings::correlation_id];
   const int connection_key =
         (*p_vr_read_id)[strings::params][strings::connection_key];
@@ -105,7 +105,7 @@ void ReadDIDCommandRequest::Run() {
 
   MessageChaining * chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, corellation_id, vr_read_id, p_vr_read_id);
+      connection_key, correlation_id, vr_read_id, p_vr_read_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(p_vr_read_id);
 }

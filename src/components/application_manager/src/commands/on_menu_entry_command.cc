@@ -56,7 +56,7 @@ void OnMenuEntryCommand::Run() {
 
   ApplicationImpl* app =
     static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-                                  application((*message_)[strings::msg_params][strings::app_id].asInt()));
+       application((*message_)[strings::msg_params][strings::app_id].asInt()));
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -64,7 +64,7 @@ void OnMenuEntryCommand::Run() {
   }
 
   const unsigned int cmd_id = static_cast<unsigned int>(
-                                (*message_)[strings::msg_params][strings::cmd_id].asInt());
+      (*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!app->FindCommand(cmd_id)) {
     LOG4CXX_ERROR_EXT(logger_,

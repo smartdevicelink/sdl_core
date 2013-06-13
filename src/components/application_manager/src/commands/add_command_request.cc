@@ -72,7 +72,7 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  const int corellation_id =
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
@@ -100,7 +100,7 @@ void AddCommandRequest::Run() {
         app->app_id();
 
     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, corellation_id, ui_cmd_id, &(*message_));
+        connection_key, correlation_id, ui_cmd_id, &(*message_));
 
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
   }
@@ -127,7 +127,7 @@ void AddCommandRequest::Run() {
         app->app_id();
 
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, corellation_id, vr_cmd_id, &(*message_));
+        connection_key, correlation_id, vr_cmd_id, &(*message_));
 
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
   }

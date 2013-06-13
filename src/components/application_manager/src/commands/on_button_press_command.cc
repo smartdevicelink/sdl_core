@@ -84,11 +84,14 @@ void OnButtonPressCommand::Run() {
       continue;
     }
 
-    if (!subscribed_app->IsAudible()) {
-      LOG4CXX_WARN_EXT(logger_, "OnButtonPress in HMI_BACKGROUND or NONE");
+    if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level()) ||
+        (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
+            && NsSmartDeviceLinkRPC::V2::ButtonName::OK != btn_id)) {
+      SendButtonPress(subscribed_app, false);
+    } else {
+      LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
       continue;
     }
-    SendButtonPress(subscribed_app, false);
   }
 }
 

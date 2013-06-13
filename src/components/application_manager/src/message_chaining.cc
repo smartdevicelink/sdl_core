@@ -40,7 +40,10 @@ MessageChaining::MessageChaining(int connection_key,
   connection_key_(connection_key),
   success_(true),
   counter_(1),
-  data_() {
+  data_(),
+  ui_response_result_(mobile_api::Result::INVALID_ENUM),
+  vr_response_result_(mobile_api::Result::INVALID_ENUM),
+  tts_response_result_(mobile_api::Result::INVALID_ENUM) {
 }
 
 MessageChaining::~MessageChaining() {
@@ -78,6 +81,30 @@ void MessageChaining::set_data(const smart_objects::CSmartObject& data) {
 
 const smart_objects::CSmartObject& MessageChaining::data() const {
   return data_;
+}
+
+void MessageChaining::set_vr_response_result(const mobile_api::Result::eType& result) {
+  vr_response_result_ = result;
+}
+
+const mobile_api::Result::eType& MessageChaining::vr_response_result() const {
+  return vr_response_result_;
+}
+
+void MessageChaining::set_ui_response_result(const mobile_api::Result::eType& result) {
+  ui_response_result_ = result;
+}
+
+const mobile_api::Result::eType& MessageChaining::ui_response_result() const {
+  return ui_response_result_;
+}
+
+void MessageChaining::set_tts_response_result(const mobile_api::Result::eType& result) {
+  tts_response_result_ = result;
+}
+
+const mobile_api::Result::eType& MessageChaining::tts_response_result() const {
+  return tts_response_result_;
 }
 
 }  // namespace application_manager

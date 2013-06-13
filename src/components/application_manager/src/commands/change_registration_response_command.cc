@@ -40,9 +40,6 @@ namespace application_manager {
 
 namespace commands {
 
-bool ChangeRegistrationResponseCommand::result_ui = false;
-bool ChangeRegistrationResponseCommand::result_vr = false;
-
 ChangeRegistrationResponseCommand::ChangeRegistrationResponseCommand(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
@@ -59,34 +56,42 @@ void ChangeRegistrationResponseCommand::Run() {
   const int function_id =
       (*message_)[strings::params][strings::function_id].asInt();
 
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
+
   // TODO(DK): HMI code Id
-  const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
+  const NsSmartDeviceLinkRPC::V2::Result::eType code =
+      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+      (*message_)[strings::msg_params][hmi_response::code].asInt());
 
   // TODO(DK): HMI Request Id
   const int ui_request = 210;
   const int vr_request = 211;
 
-  const MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(function_id);
+  MessageChaining* msg_chain =
+  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     return;
   }
 
+  smart_objects::CSmartObject data = msg_chain->data();
+
+  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+
   if (function_id == ui_request) {
-    if (true == code) {
-      result_ui = true;
-    }
+    msg_chain->set_ui_response_result(code);
   } else if (function_id == vr_request) {
-    if (true == code) {
-      result_vr = true;
-    }
+    msg_chain->set_vr_response_result(code);
   }
+
+  // we need to retrieve stored response code before message chain decrase
+  const bool result_ui = msg_chain->ui_response_result();
+  const bool result_vr = msg_chain->vr_response_result();
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      (*message_)[strings::params][strings::function_id].asInt())) {
+      correlation_id)) {
     smart_objects::CSmartObject data =
         msg_chain->data();
 
@@ -114,9 +119,6 @@ void ChangeRegistrationResponseCommand::Run() {
     } else {
       // TODO(VS): check ui and vr response code
     }
-    // reset flags for HMI response
-    result_ui = false;
-    result_vr = false;
   }
 }
 

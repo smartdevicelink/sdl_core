@@ -120,20 +120,20 @@ class ApplicationManagerImpl : public ApplicationManager
      * @brief Decrease chain for correlation ID
      * after response from hmi was received.
      *
-     * @param function_id HMI response/request ID
+     * @param correlation_id Correlation id for response for Mobile side
      *
      * @return true if there is no other pending responses
      */
-    bool DecreaseMessageChain(unsigned int function_id);
+    bool DecreaseMessageChain(unsigned int correlation_id);
 
     /*
      * @brief Retriev MessageChaining object from chain
      *
-     * @param function_id HMI function ID to be search
+     * @param correlation_id Correlation id for response for Mobile side
      *
      * @return MessageChaining on success, otherwise NULL
      */
-    const MessageChaining* GetMessageChain(unsigned int function_id) const;
+    MessageChaining* GetMessageChain(unsigned int correlation_id) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request

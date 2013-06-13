@@ -86,7 +86,7 @@ void GetVehicleDataCommandRequest::Run() {
   // copy entirely smart object
   (*p_smrt_vr) = (*message_);
 
-  const int corellation_id =
+  const int correlation_id =
         (*p_smrt_vr)[strings::params][strings::correlation_id];
   const int connection_key =
         (*p_smrt_vr)[strings::params][strings::connection_key];
@@ -101,7 +101,7 @@ void GetVehicleDataCommandRequest::Run() {
 
   MessageChaining * chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, corellation_id, vr_cmd_id, p_smrt_vr);
+      connection_key, correlation_id, vr_cmd_id, p_smrt_vr);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
 }

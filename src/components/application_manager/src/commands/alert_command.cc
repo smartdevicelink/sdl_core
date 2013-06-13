@@ -74,7 +74,7 @@ void AlertCommandRequest::Run() {
 }
 
 void AlertCommandRequest::SendAlertRequest() const {
-  const int corellation_id =
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
@@ -127,7 +127,7 @@ void AlertCommandRequest::SendAlertRequest() const {
 
   MessageChaining * chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, corellation_id, ui_cmd_id);
+      connection_key, correlation_id, ui_cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_alert);
 }

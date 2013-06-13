@@ -52,9 +52,10 @@ void AlertManeuverResponseCommand::Run() {
     return;
   }
 
-  const int hmi_request_id = 207;
+  const int correlation_id = 207;
 
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      correlation_id)) {
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =
             NsSmartDeviceLinkRPC::V2::Result::SUCCESS;

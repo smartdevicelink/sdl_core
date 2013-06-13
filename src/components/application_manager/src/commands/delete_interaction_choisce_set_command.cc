@@ -74,7 +74,7 @@ void DeleteInteractionChoiceSetCommand::Run() {
     return;
   }
 
-  const int corellation_id =
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
@@ -101,7 +101,7 @@ void DeleteInteractionChoiceSetCommand::Run() {
       app->app_id();
 
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, corellation_id, ui_cmd_id, p_smrt_ui);
+      connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
 }

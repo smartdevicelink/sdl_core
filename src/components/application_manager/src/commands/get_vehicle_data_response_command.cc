@@ -62,9 +62,12 @@ void GetVehicleDataCommandResponse::Run() {
     return;
   }
 
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
+
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      (*message_)[strings::params]["function_id"].asInt())) {
+      correlation_id)) {
 
     // TODO(DK): HMI code Id
     const int code =

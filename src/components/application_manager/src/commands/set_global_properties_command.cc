@@ -75,15 +75,15 @@ void SetGlobalPropertiesCommand::Run() {
   app->set_vr_help(
       (*message_)[strings::msg_params][strings::vr_help]);
 
-  const int corellation_id =
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
   const unsigned int cmd_id = 14;
   ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, corellation_id),
-      connection_key, corellation_id, cmd_id);
+      new MessageChaining(connection_key, correlation_id),
+      connection_key, correlation_id, cmd_id);
 
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 

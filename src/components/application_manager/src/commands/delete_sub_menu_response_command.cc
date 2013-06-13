@@ -54,11 +54,11 @@ void DeleteSubMenuResponseCommand::Run() {
     return;
   }
 
-  const int hmi_request_id = 201;
+  const int hmi_correlation_id = 201;
+  smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
+    GetMessageChain(hmi_correlation_id)->data();
 
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
-    smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
-      GetMessageChain(hmi_request_id)->data();
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_correlation_id)) {
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
         ApplicationManagerImpl::instance()->

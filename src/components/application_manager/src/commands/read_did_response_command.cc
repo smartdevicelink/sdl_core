@@ -61,10 +61,10 @@ void ReadDIDCommandResponse::Run() {
     return;
   }
 
-  const int hmi_response_id = 205;
+  const int hmi_correlation_id = 205;
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-         hmi_response_id)) {
+      hmi_correlation_id)) {
     // TODO(DK): HMI code Id
     const int code =
         (*message_)[strings::msg_params][hmi_response::code].asInt();

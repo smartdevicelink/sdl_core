@@ -44,9 +44,6 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-bool AddCommandResponse::result_ui = false;
-bool AddCommandResponse::result_vr = false;
-
 AddCommandResponse::AddCommandResponse(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
@@ -67,18 +64,22 @@ void AddCommandResponse::Run() {
 
   // TODO(DK): HMI Request Id
   const int function_id =
-      (*message_)[strings::params]["function_id"].asInt();
+      (*message_)[strings::params][strings::function_id].asInt();
+
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
 
   // TODO(DK): HMI code Id
-  const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
+  const NsSmartDeviceLinkRPC::V2::Result::eType code =
+      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+      (*message_)[strings::msg_params][hmi_response::code].asInt());
 
   // TODO(DK): HMI Request Id
   const int ui_cmd_id = 1;
   const int vr_cmd_id = 2;
 
-  const MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(function_id);
+  MessageChaining* msg_chain =
+  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     return;
@@ -87,19 +88,20 @@ void AddCommandResponse::Run() {
   smart_objects::CSmartObject data =
       msg_chain->data();
 
+  // save received response code in message chain for further processing
   if (function_id == ui_cmd_id) {
-    if (true == code) {
-      result_ui = true;
-    }
+    msg_chain->set_ui_response_result(code);
   } else if (function_id == vr_cmd_id) {
-    if (true == code) {
-      result_vr = true;
-    }
+    msg_chain->set_vr_response_result(code);
   }
+
+  // we need to retrieve stored response code before message chain decrase
+  const bool result_ui = msg_chain->ui_response_result();
+  const bool result_vr = msg_chain->vr_response_result();
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      (*message_)[strings::params]["function_id"].asInt())) {
+      correlation_id)) {
     // add comand to application
     // TODO(DK): integrate SmartObject delete key
     if (false == result_ui) {
@@ -123,9 +125,6 @@ void AddCommandResponse::Run() {
     } else {
       // TODO(DK): check ui and vr response code
     }
-    // reset flags for HMI response
-    result_ui = false;
-    result_vr = false;
   }
 }
 

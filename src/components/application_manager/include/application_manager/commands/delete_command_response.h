@@ -64,9 +64,6 @@ class DeleteCommandResponse : public CommandResponseImpl {
   virtual void Run();
 
  private:
-  static bool result_ui;  // flag for ui HMI response
-  static bool result_vr;  // flag for vr HMI response
-
   DISALLOW_COPY_AND_ASSIGN(DeleteCommandResponse);
 };
 

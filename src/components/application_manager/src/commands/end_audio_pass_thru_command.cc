@@ -67,17 +67,17 @@ void EndAudioPassThruCommandRequest::Run() {
   (*ui_audio)[strings::msg_params][strings::app_id] =
       (*message_)[strings::params][strings::connection_key];
 
-  const int corellation_id =
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  (*ui_audio)[str::params][str::correlation_id] = corellation_id;
+  (*ui_audio)[str::params][str::correlation_id] = correlation_id;
   (*ui_audio)[str::params][str::connection_key] = connection_key;
 
   MessageChaining * chain = NULL;
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-      connection_key, corellation_id, audio_cmd_id);
+      connection_key, correlation_id, audio_cmd_id);
 
   ApplicationManagerImpl::instance()->StopAudioPassThruThread();
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);

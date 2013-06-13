@@ -52,15 +52,15 @@ void ScrollabeMessageCommand::Run() {
     return;
   }
 
-  const int corellationId =
+  const int correlationId =
     (*message_)[strings::params][strings::correlation_id];
   const int connectionKey =
     (*message_)[strings::params][strings::connection_key];
 
   const unsigned int cmd_id = 106;
     ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, corellationId),
-      connectionKey, corellationId, cmd_id);
+      new MessageChaining(connectionKey, correlationId),
+      connectionKey, correlationId, cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }
