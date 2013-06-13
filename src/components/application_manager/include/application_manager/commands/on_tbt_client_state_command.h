@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_TBT_CLIENT_STATE_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_TBT_CLIENT_STATE_COMMAND_H_
 
-#include "application_manager/commands/command_response_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnTBTClientStateCommand class
  **/
-class OnTBTClientStateCommand : public CommandResponseImpl {
+class OnTBTClientStateCommand : public CommandNotificationImpl {
  public:
   /**
    * @brief OnTBTClientStateCommand class constructor

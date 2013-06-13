@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 OnHMIStatusCommand::OnHMIStatusCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnHMIStatusCommand::~OnHMIStatusCommand() {
@@ -50,7 +50,7 @@ void OnHMIStatusCommand::Run() {
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 
-  SendResponse();
+  SendNotification();
 }
 
 }  // namespace commands

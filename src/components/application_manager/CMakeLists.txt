@@ -115,6 +115,7 @@ set (SOURCES
 ./src/message_helper.cc
 ./src/commands/get_dtcs_command.cc
 ./src/commands/get_dtcs_response_command.cc
+./src/commands/command_notification_impl.cc
 )
 
 

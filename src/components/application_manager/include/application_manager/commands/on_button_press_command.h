@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_PRESS_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_PRESS_COMMAND_H_
 
-#include "application_manager/commands/command_response_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -47,7 +47,7 @@ namespace commands {
  * @brief OnButtonPressCommand class is used to send notification
  * to mobile device that some button was pressed on HMI.
  **/
-class OnButtonPressCommand : public CommandResponseImpl {
+class OnButtonPressCommand : public CommandNotificationImpl {
  public:
   /**
    * @brief OnButtonPressCommand class constructor

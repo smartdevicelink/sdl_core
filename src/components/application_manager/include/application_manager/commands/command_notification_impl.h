@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -31,32 +30,33 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/on_audio_pass_thru_command.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_NOTIFICATION_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_NOTIFICATION_IMPL_H_
+
+#include "application_manager/commands/command_impl.h"
+
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class CSmartObject;
+}
+}
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
-OnAudioPassThruCommand::OnAudioPassThruCommand(
-  const MessageSharedPtr& message): CommandNotificationImpl(message) {
-}
-
-OnAudioPassThruCommand::~OnAudioPassThruCommand() {
-}
-
-void OnAudioPassThruCommand::Run() {
-  LOG4CXX_INFO(logger_, "OnAudioPassThruCommand::Run ");
-  SendNotification();
-}
+class CommandNotificationImpl : public CommandImpl {
+  public:
+    explicit CommandNotificationImpl(const MessageSharedPtr& message);
+    virtual ~CommandNotificationImpl();
+    virtual bool Init();
+    virtual bool CleanUp();
+    virtual void Run();
+    void SendNotification();
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_NOTIFICATION_IMPL_H_

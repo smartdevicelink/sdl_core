@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_DRIVER_DISTRACTION_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_DRIVER_DISTRACTION_COMMAND_H_
 
-#include "application_manager/commands/command_response_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnDriverDistractionCommand class
  **/
-class OnDriverDistractionCommand : public CommandResponseImpl {
+class OnDriverDistractionCommand : public CommandNotificationImpl {
  public:
   /**
    * @brief OnDriverDistractionCommand class constructor

@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_MENU_ENTRY_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_MENU_ENTRY_COMMAND_H_
 
-#include "application_manager/commands/command_response_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -55,7 +55,7 @@ enum CommandTriggerSource {
  * @brief OnMenuEntryCommand class is used to send notification
  * to mobile device.
  **/
-class OnMenuEntryCommand : public CommandResponseImpl {
+class OnMenuEntryCommand : public CommandNotificationImpl {
  public:
   /**
    * @brief OnMenuEntryCommand class constructor

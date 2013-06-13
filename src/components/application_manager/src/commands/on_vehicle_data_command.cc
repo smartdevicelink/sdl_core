@@ -45,7 +45,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 OnVehicleDataCommand::OnVehicleDataCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnVehicleDataCommand::~OnVehicleDataCommand() {
@@ -115,7 +115,7 @@ void OnVehicleDataCommand::SendVehicleData(const ApplicationImpl* app) {
     NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
 
   message_.reset(on_vehicle_data);
-  SendResponse();
+  SendNotification();
 }
 
 }  // namespace commands
