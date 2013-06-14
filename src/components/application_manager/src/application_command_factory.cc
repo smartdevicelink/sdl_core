@@ -34,8 +34,8 @@
 #include "utils/macro.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/commands/unregister_app_interface_command.h"
-#include "application_manager/commands/unregister_app_interface_response_command.h"
+#include "application_manager/commands/mobile/unregister_app_interface_request.h"
+#include "application_manager/commands/mobile/unregister_app_interface_response.h"
 
 #include "interfaces/v4_protocol_v2_0_revT.h"
 
@@ -67,10 +67,10 @@ CommandSharedPtr CreateCommand(const MessageSharedPtr& message) {
     case function_ids::UnregisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kRequest) {
-        command.reset(new commands::UnregisterAppInterfaceCommand(message));
+        command.reset(new commands::UnregisterAppInterfaceRequest(message));
       } else {
         command.reset(
-          new commands::UnregisterAppInterfaceResponseCommand(message));
+          new commands::UnregisterAppInterfaceResponse(message));
       }
       break;
     }

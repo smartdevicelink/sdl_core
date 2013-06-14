@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/mobile/command_impl.h"
 
 namespace application_manager {
 

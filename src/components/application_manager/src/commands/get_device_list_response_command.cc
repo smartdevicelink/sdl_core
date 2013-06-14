@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/get_device_list_response_command.h"
+#include "application_manager/commands/mobile/get_device_list_response_command.h"
 #include "JSONHandler/CSmartFactory.hpp"
 #include "SmartObjects/CSmartObject.hpp"
 
