@@ -130,18 +130,20 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kRequest) {
         command.reset(new commands::RegisterAppInterfaceRequest(message));
-      } else
+      } else {
         command.reset(
             new commands::RegisterAppInterfaceResponse(message));
+      }
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::UnregisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kRequest) {
         command.reset(new commands::UnregisterAppInterfaceRequest(message));
-      } else
+      } else {
         command.reset(
             new commands::UnregisterAppInterfaceResponse(message));
+      }
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetGlobalPropertiesID: {

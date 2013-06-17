@@ -41,6 +41,7 @@
 #include "application_manager/application_impl.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "connection_handler/connection_handler_observer.h"
+#include "connection_handler/device.h"
 #include "request_watchdog/watchdog_subscriber.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -84,6 +85,8 @@ class ApplicationManagerImpl : public ApplicationManager
     std::vector<Application*> applications_by_button(unsigned int button);
     std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
     std::vector<Application*> applications_with_navi();
+
+    std::set<connection_handler::Device>& device_list();
 
     /////////////////////////////////////////////////////
 

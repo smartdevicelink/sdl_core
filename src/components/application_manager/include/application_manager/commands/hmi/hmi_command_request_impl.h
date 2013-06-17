@@ -30,45 +30,29 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/hmi_command_factory.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_REQUEST_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_REQUEST_IMPL_H_
 
-
-#include "application_manager/message.h"
-#include "interfaces/HMI_API.h"
-
-#include "application_manager/commands/hmi/get_device_list_request.h"
-#include "application_manager/commands/hmi/get_device_list_response.h"
-#include "application_manager/commands/hmi/get_app_list_request.h"
-#include "application_manager/commands/hmi/get_app_list_response.h"
+#include "application_manager/commands/command_impl.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
-CommandSharedPtr HMICommandFactory::CreateCommand(
-  const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+namespace commands {
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case  hmi_apis::FunctionID::eType::BasicCommunication_GetDeviceList: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
-        command.reset(new commands::GetDeviceListResponse(message));
-      } else {
-        command.reset(new commands::GetDeviceListRequest(message));
-      }
-      break;
-    }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_GetAppList: {
-       if ((*message)[strings::params][strings::message_type] ==
-           MessageType::kResponse) {
-         command.reset(new commands::GetAppListResponse(message));
-       } else {
-         command.reset(new commands::GetAppListRequest(message));
-       }
-       break;
-     }
-  }
 
-  return command;
-}
+class HMICommandRequestImpl : public CommandImpl {
+  public:
+    explicit HMICommandRequestImpl(const MessageSharedPtr& message);
+    virtual ~HMICommandRequestImpl();
+    virtual bool Init();
+    virtual bool CleanUp();
+    virtual void Run();
+    void SendResponse();
+};
+
+}  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_REQUEST_IMPL_H_

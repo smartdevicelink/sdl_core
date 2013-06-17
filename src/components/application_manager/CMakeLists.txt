@@ -34,10 +34,6 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/command_request_impl.cc
 ./src/commands/command_response_impl.cc
 ./src/commands/command_notification_impl.cc
-
-./src/commands/get_device_list_command.cc
-#./src/commands/get_device_list_response_command.cc
-
 ./src/commands/mobile/add_command_request.cc
 ./src/commands/mobile/add_command_response.cc
 ./src/commands/mobile/add_sub_menu_request.cc
@@ -124,6 +120,12 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/unsubscribe_vehicle_data_response.cc
 ./src/commands/mobile/update_turn_list_request.cc
 ./src/commands/mobile/update_turn_list_response.cc
+./src/commands/hmi/hmi_command_request_impl.cc
+./src/commands/hmi/hmi_command_response_impl.cc
+./src/commands/hmi/get_app_list_request.cc
+./src/commands/hmi/get_app_list_response.cc
+./src/commands/hmi/get_device_list_request.cc
+./src/commands/hmi/get_device_list_response.cc
 )
 
 

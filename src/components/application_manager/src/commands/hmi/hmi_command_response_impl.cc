@@ -30,45 +30,36 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/hmi_command_factory.h"
+#include "application_manager/commands/hmi/hmi_command_response_impl.h"
+#include "application_manager/application_manager_impl.h"
 
-
-#include "application_manager/message.h"
-#include "interfaces/HMI_API.h"
-
-#include "application_manager/commands/hmi/get_device_list_request.h"
-#include "application_manager/commands/hmi/get_device_list_response.h"
-#include "application_manager/commands/hmi/get_app_list_request.h"
-#include "application_manager/commands/hmi/get_app_list_response.h"
 
 namespace application_manager {
 
-CommandSharedPtr HMICommandFactory::CreateCommand(
-  const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+namespace commands {
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case  hmi_apis::FunctionID::eType::BasicCommunication_GetDeviceList: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
-        command.reset(new commands::GetDeviceListResponse(message));
-      } else {
-        command.reset(new commands::GetDeviceListRequest(message));
-      }
-      break;
-    }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_GetAppList: {
-       if ((*message)[strings::params][strings::message_type] ==
-           MessageType::kResponse) {
-         command.reset(new commands::GetAppListResponse(message));
-       } else {
-         command.reset(new commands::GetAppListRequest(message));
-       }
-       break;
-     }
-  }
-
-  return command;
+HMICommandResponseImpl::HMICommandResponseImpl(const MessageSharedPtr& message)
+  : CommandImpl(message) {
 }
+
+HMICommandResponseImpl::~HMICommandResponseImpl() {
+}
+
+bool HMICommandResponseImpl::Init() {
+  return true;
+}
+
+bool HMICommandResponseImpl::CleanUp() {
+  return true;
+}
+
+void HMICommandResponseImpl::Run() {
+}
+
+void HMICommandResponseImpl::SendResponse() {
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+}
+
+}  // namespace commands
 
 }  // namespace application_manager

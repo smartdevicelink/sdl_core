@@ -121,6 +121,10 @@ const char filenames[] = "filenames";
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
 const char ecu_name[] = "ecuName";
 const char did_location[] = "didLocation";
+const char app_list[] = "appList";
+const char device_list[] = "deviceList";
+const char name[] = "name";
+const char id[] = "id";
 }  // namespace strings
 
 namespace hmi_request {

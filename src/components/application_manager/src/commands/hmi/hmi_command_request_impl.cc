@@ -30,45 +30,39 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+#include "application_manager/commands/hmi/hmi_command_request_impl.h"
 #include "application_manager/hmi_command_factory.h"
-
-
-#include "application_manager/message.h"
-#include "interfaces/HMI_API.h"
-
-#include "application_manager/commands/hmi/get_device_list_request.h"
-#include "application_manager/commands/hmi/get_device_list_response.h"
-#include "application_manager/commands/hmi/get_app_list_request.h"
-#include "application_manager/commands/hmi/get_app_list_response.h"
 
 namespace application_manager {
 
-CommandSharedPtr HMICommandFactory::CreateCommand(
-  const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+namespace commands {
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case  hmi_apis::FunctionID::eType::BasicCommunication_GetDeviceList: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
-        command.reset(new commands::GetDeviceListResponse(message));
-      } else {
-        command.reset(new commands::GetDeviceListRequest(message));
-      }
-      break;
-    }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_GetAppList: {
-       if ((*message)[strings::params][strings::message_type] ==
-           MessageType::kResponse) {
-         command.reset(new commands::GetAppListResponse(message));
-       } else {
-         command.reset(new commands::GetAppListRequest(message));
-       }
-       break;
-     }
-  }
-
-  return command;
+HMICommandRequestImpl::HMICommandRequestImpl(const MessageSharedPtr& message)
+: CommandImpl(message) {
 }
+
+HMICommandRequestImpl::~HMICommandRequestImpl() {
+}
+
+bool HMICommandRequestImpl::Init() {
+  return true;
+}
+
+bool HMICommandRequestImpl::CleanUp() {
+  return true;
+}
+
+void HMICommandRequestImpl::Run() {
+}
+
+void HMICommandRequestImpl::SendResponse() {
+  CommandSharedPtr command = HMICommandFactory::CreateCommand(message_);
+  command->Init();
+  command->Run();
+  command->CleanUp();
+}
+
+}  // namespace commands
 
 }  // namespace application_manager

@@ -115,6 +115,11 @@ std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
   return result;
 }
 
+std::set<connection_handler::Device>& ApplicationManagerImpl::device_list() {
+  std::set<connection_handler::Device> devices;
+  return devices;
+}
+
 bool ApplicationManagerImpl::RegisterApplication(Application* application) {
   DCHECK(application);
   if (NULL == application) {

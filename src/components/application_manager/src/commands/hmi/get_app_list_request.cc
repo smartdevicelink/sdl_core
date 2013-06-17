@@ -30,18 +30,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/get_device_list_command.h"
+#include "application_manager/commands/hmi/get_app_list_request.h"
+
+#include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
+
 namespace commands {
 
-GetDeviceListCommand::~GetDeviceListCommand() {
+GetAppListRequest::GetAppListRequest(
+    const MessageSharedPtr& message): HMICommandRequestImpl(message) {
 }
 
-void GetDeviceListCommand::run() {
-  // application_manager::ApplicationManager.getInstance().getDeviceList();
+GetAppListRequest::~GetAppListRequest() {
+}
+
+void GetAppListRequest::Run() {
+  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
+
+  const std::set<Application*>& applications =
+      ApplicationManagerImpl::instance()->applications();
+
+  int index = 0;
+
+  if (applications.empty())  {
+    (*message_)[strings::msg_params][strings::success] = false;
+    (*message_)[strings::msg_params][strings::result_code] =
+          hmi_apis::Common_Result::eType::NO_APPS_REGISTERED;
+  } else {
+    (*message_)[strings::msg_params][strings::success] = true;
+    (*message_)[strings::msg_params][strings::result_code] =
+          hmi_apis::Common_Result::eType::SUCCESS;
+
+    for (std::set<Application*>::iterator it = applications.begin();
+        applications.end() != it; ++it) {
+      (*message_)[strings::msg_params][strings::app_list][index] = *it;
+      ++index;
+    }
+  }
+
+  SendResponse();
 }
 
 }  // namespace commands
+
 }  // namespace application_manager
 

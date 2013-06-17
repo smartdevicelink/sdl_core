@@ -30,21 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_DEVICE_LIST_COMMAND_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_DEVICE_LIST_COMMAND_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/hmi/hmi_command_request_impl.h"
 
 namespace application_manager {
+
 namespace commands {
 
-class GetDeviceListCommand : public CommandRequestImpl {
+/**
+ * @brief GetAppListRequest command class
+ **/
+class GetAppListRequest : public HMICommandRequestImpl {
  public:
-  ~GetDeviceListCommand();
-  void run();
+  /**
+   * @brief GetAppListRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit GetAppListRequest(const MessageSharedPtr& message);
+
+  /**
+   * @brief GetAppListRequest class destructor
+   **/
+  virtual ~GetAppListRequest();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GetAppListRequest);
 };
 
 }  // namespace commands
+
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_DEVICE_LIST_COMMAND_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
