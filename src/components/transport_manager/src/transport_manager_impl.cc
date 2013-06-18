@@ -1,6 +1,7 @@
 /**
- * \file ITransportManager.cpp
- * \brief Class ITransportManager.
+ * \file transport_manager_impl.cpp
+ * \brief TransportManager class source file.
+ *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,13 +33,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CTransportManager.hpp"
+#include "transport_manager/transport_manager_impl.h"
 
-NsSmartDeviceLink::NsTransportManager::ITransportManager * NsSmartDeviceLink::NsTransportManager::ITransportManager::create(void)
-{
-    return new CTransportManager();
+namespace transport_manager {
+
+log4cxx::LoggerPtr TransportManagerImpl::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "TransportManager"));
+
+TransportManagerImpl::TransportManagerImpl(){
+
 }
 
-NsSmartDeviceLink::NsTransportManager::ITransportManager::~ITransportManager(void)
-{
+TransportManagerImpl::~TransportManagerImpl(){
+
 }
+
+TransportManagerImpl* TransportManagerImpl::instance() {
+  static TransportManagerImpl instance;
+  return &instance;
+}
+
+void TransportManagerImpl::connectDevice(const int SessionID){
+
+}
+void TransportManagerImpl::disconnectDevice(const int SessionID){
+
+}
+
+void TransportManagerImpl::postMessage(const int Message){
+
+}
+
+void TransportManagerImpl::addEventListener(const int EventType, const int *(Callback)(int *Data)){
+
+}
+
+void TransportManagerImpl::set_error_handler(const int ErrorHandler){
+
+}
+
+void TransportManagerImpl::set_message_container(const int MessageContainer){
+
+}
+
+void TransportManagerImpl::set_data_transmitter(const int DataTransmitter){
+
+}
+
+} // namespace transport_manager
