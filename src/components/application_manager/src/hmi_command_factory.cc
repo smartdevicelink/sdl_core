@@ -47,6 +47,7 @@
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
+#include "application_manager/commands/hmi/on_device_chosen_notification.h"
 
 namespace application_manager {
 
@@ -93,6 +94,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::eType::BasicCommunication_OnReady: {
       command.reset(new commands::OnReadyNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_OnDeviceChosen: {
+      command.reset(new commands::OnDeviceChosenNotification(message));
       break;
     }
   }

@@ -161,6 +161,10 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   application_list_.clear();
 }
 
+void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
+  // TODO(VS): Call function from ConnectionHandler
+}
+
 const std::set<Application*>& ApplicationManagerImpl::applications() const {
   return application_list_;
 }

@@ -123,6 +123,7 @@ const char ecu_name[] = "ecuName";
 const char did_location[] = "didLocation";
 const char app_list[] = "appList";
 const char device_list[] = "deviceList";
+const char device_info[] = "deviceInfo";
 const char name[] = "name";
 const char id[] = "id";
 }  // namespace strings

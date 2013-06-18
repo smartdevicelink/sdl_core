@@ -96,6 +96,7 @@ class ApplicationManagerImpl : public ApplicationManager
     bool RemoveAppDataFromHMI(Application* application);
     bool LoadAppDataToHMI(Application* application);
     bool ActivateApplication(Application* application);
+    void ConnectToDevice(unsigned int id);
 
     /*
      * @brief Add to the chain amount of requests sent to hmi

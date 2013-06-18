@@ -140,6 +140,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vr_add_command_request.cc
 ./src/commands/hmi/vr_add_command_response.cc
 ./src/commands/hmi/on_ready_notification.cc
+./src/commands/hmi/on_device_chosen_notification.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})
