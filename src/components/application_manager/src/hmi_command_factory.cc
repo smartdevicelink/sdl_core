@@ -44,6 +44,7 @@
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
+#include "application_manager/commands/hmi/on_ready_notification.h"
 
 namespace application_manager {
 
@@ -77,6 +78,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::TTSIsReadyRequest(message));
       }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_OnReady: {
+      command.reset(new commands::OnReadyNotification(message));
       break;
     }
   }
