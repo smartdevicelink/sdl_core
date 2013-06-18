@@ -42,6 +42,8 @@
 #include "application_manager/commands/hmi/get_app_list_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
+#include "application_manager/commands/hmi/vr_add_command_request.h"
+ #include "application_manager/commands/hmi/vr_add_command_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
@@ -68,6 +70,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::VRIsReadyResponse(message));
       } else {
         command.reset(new commands::VRIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::VR_AddCommand: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VRAddCommandResponse(message));
+      } else {
+        command.reset(new commands::VRAddCommandRequest(message));
       }
       break;
     }
