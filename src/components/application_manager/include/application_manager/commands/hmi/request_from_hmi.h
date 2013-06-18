@@ -30,39 +30,28 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_REQUEST_FROM_HMI_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_REQUEST_FROM_HMI_H_
 
-#include "application_manager/commands/hmi/hmi_command_request_impl.h"
-#include "application_manager/hmi_command_factory.h"
+#include "application_manager/commands/command_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-HMICommandRequestImpl::HMICommandRequestImpl(const MessageSharedPtr& message)
-: CommandImpl(message) {
-}
 
-HMICommandRequestImpl::~HMICommandRequestImpl() {
-}
-
-bool HMICommandRequestImpl::Init() {
-  return true;
-}
-
-bool HMICommandRequestImpl::CleanUp() {
-  return true;
-}
-
-void HMICommandRequestImpl::Run() {
-}
-
-void HMICommandRequestImpl::SendResponse() {
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(message_);
-  command->Init();
-  command->Run();
-  command->CleanUp();
-}
+class RequestFromHMI : public CommandImpl {
+  public:
+    explicit RequestFromHMI(const MessageSharedPtr& message);
+    virtual ~RequestFromHMI();
+    virtual bool Init();
+    virtual bool CleanUp();
+    virtual void Run();
+    void SendResponseToHMI();
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_REQUEST_FROM_HMI_H_

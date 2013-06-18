@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 GetAppListRequest::GetAppListRequest(
-    const MessageSharedPtr& message): HMICommandRequestImpl(message) {
+    const MessageSharedPtr& message): RequestFromHMI(message) {
 }
 
 GetAppListRequest::~GetAppListRequest() {
@@ -70,7 +70,7 @@ void GetAppListRequest::Run() {
     }
   }
 
-  SendResponse();
+  SendResponseToHMI();
 }
 
 }  // namespace commands

@@ -30,27 +30,28 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_RESPONSE_IMPL_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_RESPONSE_IMPL_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NOTIFICATION_FROM_HMI_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NOTIFICATION_FROM_HMI_H_
 
 #include "application_manager/commands/command_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-class HMICommandResponseImpl : public CommandImpl {
+
+class NotificationFromHMI : public CommandImpl {
   public:
-    explicit HMICommandResponseImpl(const MessageSharedPtr& message);
-    virtual ~HMICommandResponseImpl();
+    explicit NotificationFromHMI(const MessageSharedPtr& message);
+    virtual ~NotificationFromHMI();
     virtual bool Init();
     virtual bool CleanUp();
     virtual void Run();
-    void SendResponse();
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_RESPONSE_IMPL_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NOTIFICATION_FROM_HMI_H_

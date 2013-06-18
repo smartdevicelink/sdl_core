@@ -120,8 +120,12 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/unsubscribe_vehicle_data_response.cc
 ./src/commands/mobile/update_turn_list_request.cc
 ./src/commands/mobile/update_turn_list_response.cc
-./src/commands/hmi/hmi_command_request_impl.cc
-./src/commands/hmi/hmi_command_response_impl.cc
+./src/commands/hmi/request_from_hmi.cc
+./src/commands/hmi/response_to_hmi.cc
+./src/commands/hmi/request_to_hmi.cc
+./src/commands/hmi/response_from_hmi.cc
+./src/commands/hmi/notification_to_hmi.cc
+./src/commands/hmi/notification_from_hmi.cc
 ./src/commands/hmi/get_app_list_request.cc
 ./src/commands/hmi/get_app_list_response.cc
 ./src/commands/hmi/get_device_list_request.cc

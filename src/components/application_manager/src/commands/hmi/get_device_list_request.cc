@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 GetDeviceListRequest::GetDeviceListRequest(
-    const MessageSharedPtr& message): HMICommandRequestImpl(message) {
+    const MessageSharedPtr& message): RequestFromHMI(message) {
 }
 
 GetDeviceListRequest::~GetDeviceListRequest() {
@@ -75,7 +75,7 @@ void GetDeviceListRequest::Run() {
     }
   }
 
-  SendResponse();
+  SendResponseToHMI();
 }
 
 }  // namespace commands

@@ -30,29 +30,34 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_REQUEST_IMPL_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_REQUEST_IMPL_H_
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
-#include "application_manager/commands/command_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
+ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message)
+  : CommandImpl(message) {
+}
 
-class HMICommandRequestImpl : public CommandImpl {
-  public:
-    explicit HMICommandRequestImpl(const MessageSharedPtr& message);
-    virtual ~HMICommandRequestImpl();
-    virtual bool Init();
-    virtual bool CleanUp();
-    virtual void Run();
-    void SendResponse();
-};
+ResponseFromHMI::~ResponseFromHMI() {
+}
+
+bool ResponseFromHMI::Init() {
+  return true;
+}
+
+bool ResponseFromHMI::CleanUp() {
+  return true;
+}
+
+void ResponseFromHMI::Run() {
+}
+
+/*void ResponseFromHMI::SendResponse() {
+}*/
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_HMI_COMMAND_REQUEST_IMPL_H_
