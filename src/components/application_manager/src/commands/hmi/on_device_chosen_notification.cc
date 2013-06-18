@@ -47,7 +47,7 @@ OnDeviceChosenNotification::~OnDeviceChosenNotification() {
 
 void OnDeviceChosenNotification::Run() {
   ApplicationManagerImpl::instance()->ConnectToDevice(
-                       (*message_)[strings::device_info][strings::id].asInt());
+  (*message_)[strings::msg_params][strings::device_info][strings::id].asInt());
 }
 
 }  // namespace commands
