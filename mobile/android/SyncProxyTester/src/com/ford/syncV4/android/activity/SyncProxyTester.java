@@ -145,8 +145,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	private static final String ButtonSubscriptions = "ButtonSubscriptions";
 	private static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
-	/** Name of a fictional request. See {@link MakeMeFeelGoodRequest}. */
-	private static final String MakeMeFeelGood = "MakeMeFeelGood";
+	/** Name of a generic request. See {@link GenericRequest}. */
+	private static final String GenericRequest = "GenericRequest";
 
 	/**
 	 * The name of the file where all the data coming with
@@ -264,12 +264,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * A custom {@link RPCRequest} subclass that is not present in the
 	 * specification. Used to test that the response is {@link GenericResponse}.
 	 */
-	class MakeMeFeelGoodRequest extends RPCRequest {
-		public MakeMeFeelGoodRequest() {
-			super("MakeMeFeelGood");
+	class GenericRequest extends RPCRequest {
+		public GenericRequest() {
+			super("GenericRequest");
 		}
 		
-		public MakeMeFeelGoodRequest(Hashtable hash) {
+		public GenericRequest(Hashtable hash) {
 			super(hash);
 		}
 	}
@@ -997,7 +997,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				v1Functions.add(Names.UnsubscribeButton);
 				// it's the name of the menu item for the last two commands
 				v1Functions.add(ButtonSubscriptions);
-				v1Functions.add(MakeMeFeelGood);
+				v1Functions.add(GenericRequest);
 			}
 			
 			if (v1Functions.contains(functionName)) {
@@ -1047,7 +1047,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, protocolVersion, Names.AlertManeuver);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.UpdateTurnList);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.DialNumber);
-			addToFunctionsAdapter(adapter, protocolVersion, MakeMeFeelGood);
+			addToFunctionsAdapter(adapter, protocolVersion, GenericRequest);
 			
 			adapter.sort(new Comparator<String>() {
 				@Override
@@ -2105,8 +2105,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							sendUpdateTurnList();
 						} else if (adapter.getItem(which) == Names.DialNumber) {
 							sendDialNumber();
-						} else if (adapter.getItem(which) == MakeMeFeelGood) {
-							sendMakeMeFeelGood();
+						} else if (adapter.getItem(which) == GenericRequest) {
+							sendGenericRequest();
 						}
 						
 						String function = adapter.getItem(which);
@@ -3178,10 +3178,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 					}
 					
 					/**
-					 * Sends a MakeMeFeelGoodRequest message.
+					 * Sends a GenericRequest message.
 					 */
-					private void sendMakeMeFeelGood() {
-						MakeMeFeelGoodRequest msg = new MakeMeFeelGoodRequest();
+					private void sendGenericRequest() {
+						GenericRequest msg = new GenericRequest();
 						msg.setCorrelationID(autoIncCorrId++);
 						_msgAdapter.logMessage(msg, true);
 						try {
