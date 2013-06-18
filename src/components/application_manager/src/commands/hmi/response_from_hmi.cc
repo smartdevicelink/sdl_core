@@ -55,8 +55,6 @@ bool ResponseFromHMI::CleanUp() {
 void ResponseFromHMI::Run() {
 }
 
-/*void ResponseFromHMI::SendResponse() {
-}*/
 
 }  // namespace commands
 

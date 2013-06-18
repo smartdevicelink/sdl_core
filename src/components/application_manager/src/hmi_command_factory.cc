@@ -40,6 +40,8 @@
 #include "application_manager/commands/hmi/get_device_list_response.h"
 #include "application_manager/commands/hmi/get_app_list_request.h"
 #include "application_manager/commands/hmi/get_app_list_response.h"
+#include "application_manager/commands/hmi/vr_is_ready_request.h"
+#include "application_manager/commands/hmi/vr_is_ready_response.h"
 
 namespace application_manager {
 
@@ -57,15 +59,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_GetAppList: {
-       if ((*message)[strings::params][strings::message_type] ==
-           MessageType::kResponse) {
-         command.reset(new commands::GetAppListResponse(message));
-       } else {
-         command.reset(new commands::GetAppListRequest(message));
-       }
-       break;
-     }
+    case  hmi_apis::FunctionID::eType::VR_IsReady: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VRIsReadyResponse(message));
+      } else {
+        command.reset(new commands::VRIsReadyRequest(message));
+      }
+      break;
+    }
   }
 
   return command;
