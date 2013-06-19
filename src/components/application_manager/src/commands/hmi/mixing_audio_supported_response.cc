@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -43,7 +44,8 @@ MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {
 }
 
 void MixingAudioSupportedResponse::Run() {
-  // TODO(DK): Process response
+  ApplicationManagerImpl::instance()->set_attenuated_supported((*message_)
+      [strings::msg_params][hmi_response::attenuated_supported].asBool());
 }
 
 }  // namespace commands

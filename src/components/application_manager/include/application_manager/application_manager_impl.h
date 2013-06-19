@@ -154,6 +154,21 @@ class ApplicationManagerImpl : public ApplicationManager
     void set_audio_pass_thru_flag(bool flag);
 
     /*
+     * @brief Retrieves if mixing audio is supported by HMI
+     * (ie recording TTS command and playing audio)
+     *
+     * @return Current state of the mixing audio flag
+     */
+    bool attenuated_supported() const;
+
+    /*
+     * @brief Sets state for mixing audio
+     *
+     * @param state New state to be set
+     */
+    void set_attenuated_supported(bool state);
+
+    /*
      * @brief Starts audio pass thru thread
      *
      * @param session_key     Session key of connection for Mobile side
@@ -246,6 +261,7 @@ class ApplicationManagerImpl : public ApplicationManager
     bool                        hmi_deletes_commands_;
     bool                        audio_pass_thru_flag_;
     threads::Thread*            perform_audio_thread_;
+    bool                        attenuated_supported_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };

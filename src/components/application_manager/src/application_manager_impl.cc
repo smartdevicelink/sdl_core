@@ -44,7 +44,8 @@ namespace application_manager {
 ApplicationManagerImpl::ApplicationManagerImpl()
   : hmi_deletes_commands_(false),
     audio_pass_thru_flag_(false),
-    perform_audio_thread_(NULL) {
+    perform_audio_thread_(NULL),
+    attenuated_supported_(false) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -231,6 +232,14 @@ bool ApplicationManagerImpl::audio_pass_thru_flag() const {
 
 void ApplicationManagerImpl::set_audio_pass_thru_flag(bool flag) {
   audio_pass_thru_flag_ = flag;
+}
+
+bool ApplicationManagerImpl::attenuated_supported() const {
+  return attenuated_supported_;
+}
+
+void ApplicationManagerImpl::set_attenuated_supported(bool state) {
+  attenuated_supported_ = state;
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,

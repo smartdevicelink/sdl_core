@@ -149,6 +149,7 @@ namespace hmi_response {
   const char custom_button_id[] = "customButtonID";
   const char button_name[] = "name";
   const char button_mode[] = "mode";
+  const char attenuated_supported[] = "attenuatedSupported";
 }  // namespace hmi_response
 
 namespace hmi_notification {
