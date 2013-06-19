@@ -35,6 +35,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL
 
+#include <queue>
 #include "transport_manager.h"
 
 namespace transport_manager
@@ -46,11 +47,6 @@ namespace transport_manager
 	class TransportManagerImpl : public TransportManager
 	{
 	public:
-		/**
-		* \brief For logging.
-		*/
-		static log4cxx::LoggerPtr logger_;
-
 		/**
 		 * @brief provide instance of transport manager
 		 *
@@ -133,8 +129,119 @@ namespace transport_manager
 		 **/
 		virtual void set_data_transmitter(const int DataTransmitter);
 
-	private:
+	protected:
+
+        /**
+		 * @brief type for device adapter container
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 **/
+        typedef std::vector<int *> DeviceAdapterContainer;
+
+        /**
+		 * @brief type for mesage queue
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 **/
+        typedef std::queue<int> MessageQueue;
+
+        /**
+		 * @brief type for
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 **/
+        typedef int DeviceAdapter;
+
+        /**
+		 * @brief type for
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 **/
+        typedef int DeviceHandle;
+
+        /**
+		 * @brief type for
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 **/
+        typedef int SessionID;
+
+        /**
+		 * @brief type for
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 **/
+        typedef struct{
+        	DeviceAdapter *device_adapter;
+        	DeviceHandle device_handle;
+        } ConnectionHandler;
+
+        /**
+		 * @brief default constructor
+		 *
+		 * @param
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 **/
 		TransportManagerImpl();
+
+		/**
+		 * @brief scan message's queue and pull messages according to priority and serial number
+		 *
+		 * @param
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 */
+		void processQueue(void);
+
+		/**
+		 * @brief initialize TM
+		 *
+		 * @param
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 */
+		void initialize(void);
+
+		/**
+		 * @brief return device adapter corresponding to defined session id
+		 *
+		 * @param session id
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 */
+		 ConnectionHandler *getConnectionHandler(SessionID session_id);
+
+		/**
+		* \brief For logging.
+		*/
+		static log4cxx::LoggerPtr logger_;
+
+		/**
+		 * @brief store messages
+		 *
+		 * @param
+		 *
+		 * @see @ref components_transportmanager_client_connection_management
+		 **/
+		MessageQueue queue_;
+
+        /**
+         * @brief Mutex restricting access to messages.
+         **/
+
+        mutable pthread_mutex_t queue_mutex_;
+        /**
+         * @brief flag that indicates that thread must be terminated
+         **/
+
+        mutable bool process_queue_terminate_;
+
+        /**
+         * @brief Device adapters.
+         **/
+        DeviceAdapterContainer device_adapters_;
+
 	};
 }
 

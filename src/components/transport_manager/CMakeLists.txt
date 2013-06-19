@@ -4,6 +4,7 @@ include_directories (
 )
 
 set (SOURCES
+	./src/transport_manager.cc
 )
 
 add_library("TransportManager" ${SOURCES})
