@@ -515,7 +515,7 @@ void ApplicationImpl::set_system_context(
   system_context_ = system_context;
 }
 
-void ApplicationImpl::set_audi_streaming_state(
+void ApplicationImpl::set_audio_streaming_state(
       const mobile_api::AudioStreamingState::eType& state) {
   audio_streaming_state_ = state;
 }

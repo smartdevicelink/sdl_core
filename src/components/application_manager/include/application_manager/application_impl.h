@@ -224,7 +224,7 @@ class ApplicationImpl : public Application,
     bool is_media_application() const;
     const mobile_api::HMILevel::eType& hmi_level() const;
     const mobile_api::SystemContext::eType& system_context() const;
-    inline const mobile_api::AudioStreamingState::eType& audi_streaming_state() const;
+    inline const mobile_api::AudioStreamingState::eType& audio_streaming_state() const;
     const std::string& app_icon_path() const;
 
     void set_version(const Version& version);
@@ -233,7 +233,7 @@ class ApplicationImpl : public Application,
     void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
     void set_system_context(
       const mobile_api::SystemContext::eType& system_context);
-    void set_audi_streaming_state(
+    void set_audio_streaming_state(
           const mobile_api::AudioStreamingState::eType& state);
     bool set_app_icon_path(const std::string& file_name);
 
@@ -275,7 +275,7 @@ const CommandsMap& DynamicApplicationData::commands_map() const {
 }
 
 const mobile_api::AudioStreamingState::eType&
-    ApplicationImpl::audi_streaming_state() const {
+    ApplicationImpl::audio_streaming_state() const {
   return audio_streaming_state_;
 }
 

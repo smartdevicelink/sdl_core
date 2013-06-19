@@ -64,8 +64,8 @@ void OnSystemContextNotification::Run() {
   // TODO(DK): paste correct enum ID
   if (mobile_api::SystemContext::INVALID_ENUM == system_context_) {
     if (mobile_api::AudioStreamingState::AUDIBLE ==
-        app->audi_streaming_state()) {
-      app->set_audi_streaming_state(
+        app->audio_streaming_state()) {
+      app->set_audio_streaming_state(
           mobile_api::AudioStreamingState::NOT_AUDIBLE);
       NotifyMobileApp(app);
     }
@@ -73,7 +73,7 @@ void OnSystemContextNotification::Run() {
   } else {
       app->set_system_context(
           static_cast<mobile_api::SystemContext::eType>(system_context_));
-      app->set_audi_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
+      app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
       NotifyMobileApp(app);
       return;
   }
@@ -110,7 +110,7 @@ void OnSystemContextNotification::NotifyMobileApp(ApplicationImpl* const app) {
       MessageType::kNotification;
 
   (*on_hmi_status)[strings::msg_params][strings::audio_streaming_state] =
-      app->audi_streaming_state();
+      app->audio_streaming_state();
 
   (*on_hmi_status)[strings::msg_params][strings::hmi_level] =
       app->hmi_level();

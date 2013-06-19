@@ -70,6 +70,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_MixingAudioSupported: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::MixingAudioSupportedResponse(message));
+      } else {
+        command.reset(new commands::MixingAudioSupportedRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::eType::VR_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
