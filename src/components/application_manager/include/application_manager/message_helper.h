@@ -36,6 +36,7 @@
 #include "interfaces/v4_protocol_v2_0_revT.h"
 #include "application_manager/application_impl.h"
 #include "utils/macro.h"
+#include "connection_handler/device.h"
 
 namespace application_manager {
 
@@ -54,6 +55,15 @@ class MessageHelper {
    **/
   static void SendHMIStatusNotification(
       const ApplicationImpl& application_impl);
+
+  /**
+   * @brief Sends OnDeviceListUpdated notification to HMI
+   *
+   *@param device_list Device list
+   *
+   **/
+  static void SendDeviceListUpdatedNotificationToHMI(
+      const std::set<connection_handler::Device>& devices);
 
  private:
    MessageHelper();

@@ -43,12 +43,16 @@
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
- #include "application_manager/commands/hmi/vr_add_command_response.h"
+#include "application_manager/commands/hmi/vr_add_command_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
+#include "application_manager/commands/hmi/on_device_list_updated_notification.h"
+//#include "application_manager/commands/hmi/on_app_registered_notification.h"
+#include "application_manager/commands/hmi/on_app_unregistered_notification.h"
+
 
 namespace application_manager {
 
@@ -103,6 +107,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::eType::UI_OnSystemContext: {
       command.reset(new commands::OnSystemContextNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_OnDeviceListUpdated: {
+      command.reset(new commands::OnDeviceListUpdatedNotification(message));
+      break;
+    }
+/*    case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppRegistered: {
+      command.reset(new commands::OnAppRegisteredNotification(message));
+      break;
+    } */
+    case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppUnregistered: {
+      command.reset(new commands::OnAppUnregisteredNotification(message));
       break;
     }
   }
