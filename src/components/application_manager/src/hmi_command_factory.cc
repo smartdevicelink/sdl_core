@@ -50,7 +50,7 @@
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
 #include "application_manager/commands/hmi/on_device_list_updated_notification.h"
-//#include "application_manager/commands/hmi/on_app_registered_notification.h"
+#include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 
 
@@ -113,10 +113,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnDeviceListUpdatedNotification(message));
       break;
     }
-/*    case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppRegistered: {
+    case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppRegistered: {
       command.reset(new commands::OnAppRegisteredNotification(message));
       break;
-    } */
+    }
     case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppUnregistered: {
       command.reset(new commands::OnAppUnregisteredNotification(message));
       break;

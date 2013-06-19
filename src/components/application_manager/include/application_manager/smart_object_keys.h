@@ -126,6 +126,9 @@ const char device_list[] = "deviceList";
 const char device_info[] = "deviceInfo";
 const char name[] = "name";
 const char id[] = "id";
+const char application[] = "application";
+const char icon[] = "icon";
+const char device_name[] = "deviceName";
 }  // namespace strings
 
 namespace hmi_request {

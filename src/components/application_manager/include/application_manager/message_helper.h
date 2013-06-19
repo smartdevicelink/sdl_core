@@ -65,6 +65,15 @@ class MessageHelper {
   static void SendDeviceListUpdatedNotificationToHMI(
       const std::set<connection_handler::Device>& devices);
 
+  /**
+   * @brief Sends OnAppRegistered notification to HMI
+   *
+   *@param application_impl application with changed HMI status
+   *
+   **/
+  static void SendOnAppRegisteredNotificationToHMI(
+      const ApplicationImpl& application_impl);
+
  private:
    MessageHelper();
    DISALLOW_COPY_AND_ASSIGN(MessageHelper);
