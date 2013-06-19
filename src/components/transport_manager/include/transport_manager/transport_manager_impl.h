@@ -37,6 +37,7 @@
 
 #include <queue>
 #include "transport_manager.h"
+#include "device_adapter.h"
 
 namespace transport_manager
 {
@@ -44,205 +45,205 @@ namespace transport_manager
 	 * @brief Interface of transport manager.
 	 * @interface TransportManager
 	 **/
-	class TransportManagerImpl : public TransportManager
-	{
-	public:
-		/**
-		 * @brief provide instance of transport manager
-		 *
-		 * @see @ref components_transportmanager_client_device_management
-		 **/
-		static TransportManagerImpl *instance(void);
+class TransportManagerImpl : public TransportManager
+{
+public:
+	/**
+	 * @brief provide instance of transport manager
+	 *
+	 * @see @ref components_transportmanager_client_device_management
+	 **/
+	static TransportManagerImpl *instance(void);
 
-		/**
-		 * @brief Destructor.
-		 **/
-		virtual ~TransportManagerImpl(void);
+	/**
+	 * @brief Destructor.
+	 **/
+	virtual ~TransportManagerImpl(void);
 
-		/**
-		 * @brief Start scanning for new devices.
-		 *
-		 * @see @ref components_transportmanager_client_device_management
-		 **/
-		virtual void searchDevices(void);
+	/**
+	 * @brief Start scanning for new devices.
+	 *
+	 * @see @ref components_transportmanager_client_device_management
+	 **/
+	virtual void searchDevices(void) const;
 
-		/**
-		 * @brief Connect to all applications discovered on device.
-		 *
-		 * @param DeviceHandle Handle of device to connect to.
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void connectDevice(const int SessionID);
+	/**
+	 * @brief Connect to all applications discovered on device.
+	 *
+	 * @param DeviceHandle Handle of device to connect to.
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void connectDevice(const SessionID session_id);
 
-		/**
-		 * @brief Disconnect from all applications connected on device.
-		 *
-		 * @param DeviceHandle Handle of device to disconnect from.
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void disconnectDevice(const int SessionID);
+	/**
+	 * @brief Disconnect from all applications connected on device.
+	 *
+	 * @param DeviceHandle Handle of device to disconnect from.
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void disconnectDevice(const SessionID session_id);
 
-		/**
-		 * @brief post new mesage into TM's queue
-		 *
-		 * @param new message container
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void postMessage(const int Message);
+	/**
+	 * @brief post new mesage into TM's queue
+	 *
+	 * @param new message container
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void postMessage(const application_manager::Message message);
 
-		/**
-		 * @brief adds new call back function for specified event type
-		 *
-		 * @param event type, function address
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void addEventListener(const int EventType, const int *(Callback)(int *Data));
+	/**
+	 * @brief adds new call back function for specified event type
+	 *
+	 * @param event type, function address
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void addEventListener(const EventType event_type, const int *(Callback)(int *Data));
 
-		/**
-		 * @brief set new module that will process errors
-		 *
-		 * @param error handler
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void set_error_handler(const int ErrorHandler);
+	/**
+	 * @brief set new module that will process errors
+	 *
+	 * @param error handler
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void set_error_handler(const int ErrorHandler);
 
-		/**
-		 * @brief set new module that will handle messages
-		 *
-		 * @param message container
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void set_message_container(const int MessageContainer);
+	/**
+	 * @brief set new module that will handle messages
+	 *
+	 * @param message container
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void set_message_container(const int MessageContainer);
 
-		/**
-		 * @brief set new module that will exchange data in thread safe way
-		 *
-		 * @param data transmitter
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void set_data_transmitter(const int DataTransmitter);
+	/**
+	 * @brief set new module that will exchange data in thread safe way
+	 *
+	 * @param data transmitter
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void set_data_transmitter(const int DataTransmitter);
 
-	protected:
+	/**
+	 * @brief add new device adapter
+	 *
+	 * @param device adapter
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void addDeviceAdapter(DeviceAdapter *device_adapter);
 
-        /**
-		 * @brief type for device adapter container
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-        typedef std::vector<int *> DeviceAdapterContainer;
+protected:
 
-        /**
-		 * @brief type for mesage queue
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-        typedef std::queue<int> MessageQueue;
+	/**
+	 * @brief type for mesage queue
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	typedef std::queue<application_manager::Message> MessageQueue;
 
-        /**
-		 * @brief type for
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-        typedef int DeviceAdapter;
+	/**
+	 * @brief type for
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	typedef int DeviceHandle;
 
-        /**
-		 * @brief type for
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-        typedef int DeviceHandle;
+	/**
+	 * @brief type for
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	typedef std::vector<SessionID>  SessionList;
 
-        /**
-		 * @brief type for
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-        typedef int SessionID;
+	/**
+	 * @brief type for
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	typedef struct{
+		DeviceAdapter *device_adapter;
+		DeviceHandle device_handle;
+	} ConnectionHandle;
 
-        /**
-		 * @brief type for
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-        typedef struct{
-        	DeviceAdapter *device_adapter;
-        	DeviceHandle device_handle;
-        } ConnectionHandler;
+	/**
+	 * @brief default constructor
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	TransportManagerImpl();
 
-        /**
-		 * @brief default constructor
-		 *
-		 * @param
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		TransportManagerImpl();
+	/**
+	 * @brief scan message's queue and pull messages according to priority and serial number
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 */
+	static void *processQueue(void *);
 
-		/**
-		 * @brief scan message's queue and pull messages according to priority and serial number
-		 *
-		 * @param
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 */
-		void processQueue(void);
+	/**
+	 * @brief initialize TM
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 */
+	void initialize(void);
 
-		/**
-		 * @brief initialize TM
-		 *
-		 * @param
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 */
-		void initialize(void);
+	/**
+	 * @brief return device adapter corresponding to defined session id
+	 *
+	 * @param session id
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 */
+	ConnectionHandle *getConnectionHandler(SessionID session_id);
 
-		/**
-		 * @brief return device adapter corresponding to defined session id
-		 *
-		 * @param session id
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 */
-		 ConnectionHandler *getConnectionHandler(SessionID session_id);
 
-		/**
-		* \brief For logging.
-		*/
-		static log4cxx::LoggerPtr logger_;
+	/**
+	* \brief For logging.
+	*/
+	static log4cxx::LoggerPtr logger_;
 
-		/**
-		 * @brief store messages
-		 *
-		 * @param
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		MessageQueue queue_;
+	/**
+	 * @brief store messages
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	MessageQueue queue_;
 
-        /**
-         * @brief Mutex restricting access to messages.
-         **/
+	/**
+	 * @brief Mutex restricting access to messages.
+	 **/
 
-        mutable pthread_mutex_t queue_mutex_;
-        /**
-         * @brief flag that indicates that thread must be terminated
-         **/
+	mutable pthread_mutex_t queue_mutex_;
+	/**
+	 * @brief flag that indicates that thread must be terminated
+	 **/
 
-        mutable bool process_queue_terminate_;
+	mutable bool process_queue_terminate_;
 
-        /**
-         * @brief Device adapters.
-         **/
-        DeviceAdapterContainer device_adapters_;
+	/**
+	 * @brief Device adapters.
+	 **/
+	std::vector<DeviceAdapter *> device_adapters_;
 
-	};
+	/**
+	 * @brief ID of message queue processing thread
+	 **/
+	pthread_t messsage_queue_thread_;
+};
 }
 
 #endif
