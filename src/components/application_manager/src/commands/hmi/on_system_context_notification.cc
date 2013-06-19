@@ -29,22 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vr_add_command_response.h"
+
+#include "application_manager/commands/hmi/on_system_context_notification.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-VRAddCommandResponse::VRAddCommandResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+OnSystemContextNotification::OnSystemContextNotification(
+    const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
-VRAddCommandResponse::~VRAddCommandResponse() {
+OnSystemContextNotification::~OnSystemContextNotification() {
 }
 
-void VRAddCommandResponse::Run() {
+void OnSystemContextNotification::Run() {
+
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

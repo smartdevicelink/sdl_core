@@ -29,22 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vr_add_command_response.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_CONTEXT_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_CONTEXT_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VRAddCommandResponse::VRAddCommandResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+/**
+ * @brief OnSystemContextNotification command class
+ **/
+class OnSystemContextNotification : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnSystemContextNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnSystemContextNotification(const MessageSharedPtr& message);
 
-VRAddCommandResponse::~VRAddCommandResponse() {
-}
+  /**
+   * @brief OnSystemContextNotification class destructor
+   **/
+  virtual ~OnSystemContextNotification();
 
-void VRAddCommandResponse::Run() {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnSystemContextNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_CONTEXT_NOTIFICATION_H_
