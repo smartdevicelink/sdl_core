@@ -1,4 +1,5 @@
 [CW25]
++ ModuleTest can run tests from directory.
 * Rename MakeMeFeelGood request => GenericRequest.
 
 [CW24]
