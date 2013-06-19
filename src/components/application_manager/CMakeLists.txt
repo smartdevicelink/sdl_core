@@ -143,7 +143,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
 ./src/commands/hmi/on_device_list_updated_notification.cc
-#./src/commands/hmi/on_app_registered_notification.cc
+./src/commands/hmi/on_app_registered_notification.cc
 ./src/commands/hmi/on_app_unregistered_notification.cc
 )
 

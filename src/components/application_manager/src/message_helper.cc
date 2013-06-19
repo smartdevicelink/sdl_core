@@ -39,65 +39,106 @@ namespace application_manager {
 
 void MessageHelper::SendHMIStatusNotification(
           const ApplicationImpl& application_impl) {
+  smart_objects::CSmartObject message;
 
-  smart_objects::CSmartObject hmi_status_notification;
+  message[strings::params][strings::function_id] =
+                          mobile_api::FunctionID::eType::OnHMIStatusID;
 
+  message[strings::params][strings::message_type] = MessageType::kNotification;
 
-  hmi_status_notification[strings::params][strings::function_id] =
-      mobile_api::FunctionID::eType::OnHMIStatusID;
+  message[strings::params][strings::connection_key] =
+                                                application_impl.app_id();
 
-  hmi_status_notification[strings::params][strings::message_type] =
-                                                    MessageType::kNotification;
+  message[strings::msg_params][strings::hmi_level] =
+                                                application_impl.hmi_level();
 
-  hmi_status_notification[strings::params][strings::connection_key] =
-      application_impl.app_id();
+  // message[strings::msg_params][strings::audio_streaming_state] =
+  //                           application_impl.audio_streaming_state();
 
-  hmi_status_notification[strings::msg_params][strings::hmi_level] =
-      application_impl.hmi_level();
-
- // hmi_status_notification[strings::msg_params]
-   //                         [strings::audio_streaming_state] =
-     //                           application_impl.audio_streaming_state();
-
-  hmi_status_notification[strings::msg_params][strings::system_context] =
+  message[strings::msg_params][strings::system_context] =
       application_impl.system_context();
 
-  CommandSharedPtr command =
-      MobileCommandFactory::CreateCommand(&hmi_status_notification);
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&message);
   command->Init();
-  //TODO (VS): run must return bool, so SendHMIStatusNotification must also return bool
+  // TODO(VS): run must return bool, so SendHMIStatusNotification must also return bool
   command->Run();
   command->CleanUp();
 }
 
-void SendDeviceListUpdatedNotificationToHMI(
+void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
     const std::set<connection_handler::Device>& device_list) {
-  smart_objects::CSmartObject device_list_updated_notification;
+  smart_objects::CSmartObject message;
 
-  device_list_updated_notification[strings::params][strings::function_id] =
+  message[strings::params][strings::function_id] =
            hmi_apis::FunctionID::eType::BasicCommunication_OnDeviceListUpdated;
 
-  device_list_updated_notification[strings::params][strings::message_type] =
-                                                    MessageType::kNotification;
+  message[strings::params][strings::message_type] = MessageType::kNotification;
 
   int index = 0;
 
   for (std::set<connection_handler::Device>::iterator it = device_list.begin();
       device_list.end() != it; ++it) {
-    device_list_updated_notification[strings::msg_params]
-                           [strings::device_list]
+    message[strings::msg_params][strings::device_list]
                            [index][strings::name] = (*it).user_friendly_name();
-    device_list_updated_notification[strings::msg_params]
-                                  [strings::device_list]
+    message[strings::msg_params][strings::device_list]
                                   [index][strings::id] = (*it).device_handle();
     ++index;
   }
 
-  CommandSharedPtr command =
-      HMICommandFactory::CreateCommand(&device_list_updated_notification);
+  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
   command->Init();
   command->Run();
   command->CleanUp();
 }
 
+void MessageHelper::SendOnAppRegisteredNotificationToHMI(
+                                     const ApplicationImpl& application_impl) {
+  smart_objects::CSmartObject message;
+
+  message[strings::params][strings::function_id] =
+               hmi_apis::FunctionID::eType::BasicCommunication_OnAppRegistered;
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+
+
+
+  message[strings::msg_params][strings::application][strings::app_name] =
+      application_impl.name();
+
+  message[strings::msg_params]
+         [strings::application]
+         [strings::ngn_media_screen_app_name] =
+             application_impl.ngn_media_screen_name();
+
+  message[strings::msg_params]
+         [strings::application]
+         [strings::icon] = application_impl.app_icon_path();
+
+  // TODO(VS): get device name from application_impl
+  message[strings::msg_params]
+         [strings::application]
+         [strings::device_name] = "";
+
+  message[strings::msg_params]
+         [strings::application][strings::app_id] = application_impl.app_id();
+
+  message[strings::msg_params]
+         [strings::application]
+         [strings::hmi_display_language_desired] =
+                           application_impl.ui_language();
+
+  message[strings::msg_params]
+         [strings::application]
+         [strings::is_media_application] =
+             application_impl.is_media_application();
+
+  message[strings::msg_params][strings::application][strings::app_type] =
+      application_impl.app_types();
+
+  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
+  command->Init();
+  command->Run();
+  command->CleanUp();
 }
+
+} //  namespace application_manager
