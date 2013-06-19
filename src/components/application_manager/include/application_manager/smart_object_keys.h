@@ -151,6 +151,7 @@ namespace hmi_response {
 namespace hmi_notification {
   const char prndl[] = "prndl";
   const char file_name[] = "file_name";
+  const char system_context[] = "systemContext";
 }  // namespace hmi_notification
 
 }  // namespace application_manager

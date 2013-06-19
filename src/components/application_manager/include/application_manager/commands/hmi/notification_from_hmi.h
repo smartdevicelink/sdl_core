@@ -48,6 +48,7 @@ class NotificationFromHMI : public CommandImpl {
     virtual bool Init();
     virtual bool CleanUp();
     virtual void Run();
+    void SendNotificationToMobile();
 };
 
 }  // namespace commands

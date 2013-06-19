@@ -37,6 +37,8 @@
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
 
 /**
@@ -62,6 +64,15 @@ class OnSystemContextNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
+
+  /*
+   * @brief Sends OnHMIStatus notification to mobile about changes
+   * in its HNI status ie in system context/hmi level/audio streaming state
+   *
+   * @param app Mobile app to be notified about changes
+   */
+  void NotifyMobileApp(ApplicationImpl* const app);
+
   DISALLOW_COPY_AND_ASSIGN(OnSystemContextNotification);
 };
 
