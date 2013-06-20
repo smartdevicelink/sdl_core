@@ -36,6 +36,13 @@
 
 FFW.UI = FFW.RPCObserver.create( {
 
+    /**
+     * If true then UI is present and ready to communicate with SDL.
+     *
+     * @type {Boolean}
+     */
+    isReady: false,
+    
     /*
      * access to basic RPC functionality
      */
@@ -436,6 +443,23 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 this.client.send( JSONMessage );
 
+                break;
+            }
+            
+            case "UI.IsReady": {
+                
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "method" : "UI.IsReady",
+                        "available": this.get('isReady')
+                    }
+                };
+                
+                this.client.send( JSONMessage );
+                
                 break;
             }
 

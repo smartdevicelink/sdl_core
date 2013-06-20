@@ -37,6 +37,13 @@
 FFW.VehicleInfo = FFW.RPCObserver.create( {
 
     /**
+     * If true then VehicleInfo is present and ready to communicate with SDL.
+     *
+     * @type {Boolean}
+     */
+    isReady: false,
+
+    /**
      * access to basic RPC functionality
      */
     client: FFW.RPCClient.create( {
@@ -116,47 +123,76 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
     onRPCRequest: function( request ) {
         Em.Logger.log( "FFW.VehicleInfo.onRPCRequest" );
         this._super();
+        
+        switch( request.method ){
+            case "VehicleInfo.GetVehicleData": {
+                
+                var vehicleData = SDL.SDLVehicleInfoModel.getVehicleData( request.params ), resultCode;
 
-        if( request.method == "VehicleInfo.GetVehicleData" ){
-
-            var vehicleData = SDL.SDLVehicleInfoModel.getVehicleData( request.params ), resultCode;
-
-            if( vehicleData ){
-                resultCode = "SUCCESS";
-            }else{
-                resultCode = "GENERIC_ERROR";
-            }
-
-            // send repsonse
-            var JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": request.id,
-                "result": {
-                    "resultCode": resultCode, // type (enum) from SDL protocol
-                    "method": "VehicleInfo.GetVehicleDataResponse"
-                // request.params.dataType: vehicleData
+                if( vehicleData ){
+                    resultCode = "SUCCESS";
+                }else{
+                    resultCode = "GENERIC_ERROR";
                 }
-            };
-            JSONMessage.result[SDL.SDLVehicleInfoModel.vehicleData[request.params.dataType].type] = vehicleData;
-            this.client.send( JSONMessage );
-        }
-
-        if( request.method == "VehicleInfo.ReadDID" ){
-
-            SDL.SDLVehicleInfoModel.vehicleInfoReadDID( request.params, request.id );
-
-        }
-
-        if( request.method == "VehicleInfo.GetDTCs" ){
-
-            SDL.SDLVehicleInfoModel.vehicleInfoGetDTCs( request.params, request.id );
-
-        }
-
-        if( request.method == "VehicleInfo.GetVehicleType" ){
-
-            SDL.SDLVehicleInfoModel.getVehicleType( request.id );
-
+    
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "resultCode": resultCode, // type (enum) from SDL protocol
+                        "method": "VehicleInfo.GetVehicleDataResponse"
+                    // request.params.dataType: vehicleData
+                    }
+                };
+                JSONMessage.result[SDL.SDLVehicleInfoModel.vehicleData[request.params.dataType].type] = vehicleData;
+                this.client.send( JSONMessage );
+                
+                break;
+            }
+            
+            case "VehicleInfo.ReadDID": {
+                
+                SDL.SDLVehicleInfoModel.vehicleInfoReadDID( request.params, request.id );
+                
+                break;
+            }
+            
+            case "VehicleInfo.GetDTCs": {
+                
+                SDL.SDLVehicleInfoModel.vehicleInfoGetDTCs( request.params, request.id );
+                
+                break;
+            }
+            
+            case "VehicleInfo.GetVehicleType": {
+                
+                SDL.SDLVehicleInfoModel.getVehicleType( request.id );
+                
+                break;
+            }
+            
+            case "VehicleInfo.IsReady": {
+                
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "method" : "VehicleInfo.IsReady",
+                        "available": this.get('isReady')
+                    }
+                };
+                
+                this.client.send( JSONMessage );
+                
+                break;
+            }
+            
+            default: {
+                // statements_def
+                break;
+            }
         }
     },
 
