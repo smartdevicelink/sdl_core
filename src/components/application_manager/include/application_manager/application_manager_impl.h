@@ -45,6 +45,7 @@
 #include "request_watchdog/watchdog_subscriber.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
+#include "interfaces/HMI_API.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -97,6 +98,14 @@ class ApplicationManagerImpl : public ApplicationManager
     bool LoadAppDataToHMI(Application* application);
     bool ActivateApplication(Application* application);
     void ConnectToDevice(unsigned int id);
+
+    /*
+     * @brief Closes all registered applications
+     *
+     * @param reason Describes reason for exiting application
+     */
+    void ExitAllApplications(
+        const hmi_apis::Common_ApplicationsCloseReason::eType& reason);
 
     /*
      * @brief Add to the chain amount of requests sent to hmi

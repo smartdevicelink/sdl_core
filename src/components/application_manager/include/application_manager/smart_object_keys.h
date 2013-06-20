@@ -140,6 +140,7 @@ namespace hmi_request {
   const char tts_chunks[] = "ttsChunks";
   const char audio_pass_display_texts[] = "audioPassThruDisplayTexts";
   const char max_duration[] = "maxDuration";
+  const char reason[] = "reason";
 }  // namespace hmi_request
 
 namespace hmi_response {

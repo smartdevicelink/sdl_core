@@ -31,6 +31,8 @@
  */
 
 #include "application_manager/commands/hmi/exit_all_applications_request.h"
+#include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 
 namespace application_manager {
@@ -45,6 +47,11 @@ ExitAllApplicationsRequest::~ExitAllApplicationsRequest() {
 }
 
 void ExitAllApplicationsRequest::Run() {
+  const hmi_apis::Common_ApplicationsCloseReason::eType reason =
+      static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
+      (*message_)[strings::msg_params][hmi_request::reason].asInt());
+
+  ApplicationManagerImpl::instance()->ExitAllApplications(reason);
   SendResponseToHMI();
 }
 
