@@ -215,8 +215,8 @@ FFW.Buttons = FFW.RPCObserver.create( {
                     "presetBankCapabilities": {
                         "onScreenPresetsAvailable": true
                     },
-                    "method": "Buttons.GetCapabilitiesResponse",
-                    "resultCode": "SUCCESS" // type (enum) from SDL protocol
+                    "code": 0,
+                    "method": "Buttons.GetCapabilities"
                 }
             };
             this.client.send( JSONMessage );

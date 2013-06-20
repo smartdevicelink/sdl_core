@@ -32,7 +32,14 @@
  */
 
 FFW.TTS = FFW.RPCObserver.create( {
-
+    
+    /**
+     * If true then TTS is present and ready to communicate with SDL.
+     *
+     * @type {Boolean}
+     */
+    isReady: false,
+    
     /*
      * access to basic RPC functionality
      */
@@ -199,6 +206,24 @@ FFW.TTS = FFW.RPCObserver.create( {
                 };
                 this.client.send( JSONMessage );
 
+                break;
+            }
+            
+            case "TTS.IsReady": {
+                
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "available": this.get('isReady'),
+                        "code": 0,
+                        "method" : "TTS.IsReady"
+                    }
+                };
+                
+                this.client.send( JSONMessage );
+                
                 break;
             }
 
