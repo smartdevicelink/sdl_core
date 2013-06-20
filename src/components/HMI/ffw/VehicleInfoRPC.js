@@ -179,8 +179,9 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "method" : "VehicleInfo.IsReady",
-                        "available": this.get('isReady')
+                        "available": this.get('isReady'),
+                        "code": 0,
+                        "method" : "VehicleInfo.IsReady"
                     }
                 };
                 

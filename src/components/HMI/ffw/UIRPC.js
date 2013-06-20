@@ -371,46 +371,25 @@ FFW.UI = FFW.RPCObserver.create( {
                             "textFields":
                                 [
                                     {
-                                        "name": "mainField1",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "mainField1"
                                     },
                                     {
-                                        "name": "mainField2",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "mainField2"
                                     },
                                     {
-                                        "name": "statusBar",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "statusBar"
                                     },
                                     {
-                                        "name": "mediaClock",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "mediaClock"
                                     },
                                     {
-                                        "name": "mediaTrack",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "mediaTrack"
                                     },
                                     {
-                                        "name": "alertText1",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "alertText1"
                                     },
                                     {
-                                        "name": "alertText2",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "alertText2"
                                     }
                                 ],
                             "mediaClockFormats":
@@ -420,7 +399,8 @@ FFW.UI = FFW.RPCObserver.create( {
                                     "CLOCKTEXT1",
                                     "CLOCKTEXT2",
                                     "CLOCKTEXT3"
-                                ]
+                                ],
+                            "graphicSupported": true
                         },
                         "hmiZoneCapabilities":
                             [
@@ -436,8 +416,8 @@ FFW.UI = FFW.RPCObserver.create( {
                                     "imageSupported": true
                                 }
                             ],
-                        "method": "UI.GetCapabilitiesResponse",
-                        "resultCode": "SUCCESS" // type (enum) from SDL protocol
+                        "code": 0,
+                        "method": "UI.GetCapabilities"
                     }
                 };
 
@@ -453,8 +433,9 @@ FFW.UI = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "method" : "UI.IsReady",
-                        "available": this.get('isReady')
+                        "available": this.get('isReady'),
+                        "code": 0,
+                        "method" : "UI.IsReady"
                     }
                 };
                 

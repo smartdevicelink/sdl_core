@@ -252,8 +252,9 @@ FFW.VR = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "method" : "VR.IsReady",
-                        "available": this.get('isReady')
+                        "available": this.get('isReady'),
+                        "code": 0,
+                        "method" : "VR.IsReady"
                     }
                 };
                 
