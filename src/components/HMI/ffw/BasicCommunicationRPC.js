@@ -126,7 +126,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
             }
         }
 
-        if( response.result.method == "BasicCommunication.GetDeviceListResponse" ){
+        if( response.result.method == "BasicCommunication.GetDeviceList" ){
             if( SDL.States.info.active ){
                 SDL.SDLModel.onGetDeviceList( response.result );
             }
@@ -217,10 +217,9 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.getDeviceListRequestId = this.client.generateId();
 
         var JSONMessage = {
-            "jsonrpc": "2.0",
             "id": this.getDeviceListRequestId,
-            "method": "BasicCommunication.GetDeviceList",
-            "params": {}
+            "jsonrpc": "2.0",
+            "method": "BasicCommunication.GetDeviceList"
         };
         this.client.send( JSONMessage );
     },
