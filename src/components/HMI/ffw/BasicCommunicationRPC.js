@@ -120,7 +120,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         Em.Logger.log( "FFW.BasicCommunicationRPC.onRPCResult" );
         this._super();
 
-        if( response.result.method == "BasicCommunication.GetAppListResponse" ){
+        if( response.result.method == "BasicCommunication.GetAppList" ){
             if( SDL.States.info.active ){
                 SDL.SDLController.onGetAppList( response.result.appList );
             }
@@ -184,10 +184,9 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.getAppListRequestId = this.client.generateId();
 
         var JSONMessage = {
-            "jsonrpc": "2.0",
             "id": this.getAppListRequestId,
-            "method": "BasicCommunication.GetAppList",
-            "params": {}
+            "jsonrpc": "2.0",
+            "method": "BasicCommunication.GetAppList"
         };
         this.client.send( JSONMessage );
     },
