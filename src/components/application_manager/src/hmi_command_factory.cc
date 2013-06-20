@@ -42,6 +42,8 @@
 #include "application_manager/commands/hmi/get_app_list_response.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_request.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
+#include "application_manager/commands/hmi/exit_all_applications_request.h"
+#include "application_manager/commands/hmi/exit_all_applications_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -78,6 +80,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::MixingAudioSupportedResponse(message));
       } else {
         command.reset(new commands::MixingAudioSupportedRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_ExitAllApplications: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::ExitAllApplicationsResponse(message));
+      } else {
+        command.reset(new commands::ExitAllApplicationsRequest(message));
       }
       break;
     }

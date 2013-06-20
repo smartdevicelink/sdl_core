@@ -135,6 +135,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/get_app_list_response.cc
 ./src/commands/hmi/get_device_list_request.cc
 ./src/commands/hmi/get_device_list_response.cc
+./src/commands/hmi/exit_all_applications_request.cc
+./src/commands/hmi/exit_all_applications_response.cc
 ./src/commands/hmi/vr_is_ready_request.cc
 ./src/commands/hmi/vr_is_ready_response.cc
 ./src/commands/hmi/tts_is_ready_request.cc
