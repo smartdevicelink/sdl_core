@@ -160,9 +160,9 @@ FFW.UI = FFW.RPCObserver.create( {
                 SDL.TurnByTurnView.deactivate();
 
                 SDL.SDLController.getApplicationModel( request.params.appId ).onSDLUIShow( request.params );
-
-                this.sendUIResult( "SUCCESS", request.id, request.method );
-
+                
+                this.sendResponse(request.id, 0, 'Show');
+                
                 break;
             }
             case "UI.Alert": {
@@ -449,6 +449,27 @@ FFW.UI = FFW.RPCObserver.create( {
                 break;
             }
         }
+    },
+    
+    /**
+     * Updated version of response
+     * with no additional params
+     *
+     * @param {Number} responseId
+     * @param {Number} codeId
+     * @param {String} responseMethod
+     */
+    sendResponse: function( responseId, codeId, responseMethod ) {
+        var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": responseId,
+                "result": {
+                    "code": codeId,
+                    "method" : "UI." + responseMethod
+            }
+        };
+                
+        this.client.send( JSONMessage );
     },
 
     /*
