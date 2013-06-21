@@ -4,23 +4,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
@@ -194,6 +194,8 @@ public class ModuleTest {
 	private static final String TAG = ModuleTest.class.getSimpleName();
 	/** Specifies whether to display debug info from the XML parser. */
 	private static final boolean DISPLAY_PARSER_DEBUG_INFO = false;
+	/** Extension of supported test files. */
+	private static final String TEST_FILEEXT = ".xml";
 	
 	/**
 	 * The tag name used to specify where to get binary data from (e.g., for
@@ -243,6 +245,9 @@ public class ModuleTest {
 	
 	/** WakeLock to keep screen on while testing. */
 	private WakeLock wakeLock = null;
+
+	/** Full path to XML test file or directory with test files. */
+	private String mFilePath;
 	
 	public ModuleTest() {
 		this._mainInstance = SyncProxyTester.getInstance();
@@ -255,413 +260,429 @@ public class ModuleTest {
 		mainThread = makeThread();
 	}
 	
-	public void runTests() {
+	/**
+	 * Starts the thread for xml thread.
+	 * 
+	 * @param filePath
+	 *            path to XML test file or directory with XML test files to use.
+	 */
+	public void runTests(String filePath) {
+		this.mFilePath = filePath;
 		mainThread.start();
 	}
 
-	public void restart() {
+	/**
+	 * Recreates and starts a new thread for xml testing.
+	 * 
+	 * @param filePath
+	 *            path to XML test file or directory with XML test files to use.
+	 *            Pass null to use the previously set value.
+	 */
+	public void restart(String filePath) {
 		mainThread.interrupt();
 		mainThread = null;
+		if (filePath != null) {
+			this.mFilePath = filePath;
+		}
 		mainThread = makeThread();
 		mainThread.start();
 	}
 	
-	private String[] mFileList;
-	//private File mPath = new File(Environment.getExternalStorageDirectory() + "");//"//yourdir//");
-	//private File mPath = new File("/sdcard/");
-	private File mPath = new File(Environment.getExternalStorageDirectory() + "");
-	private String mChosenFile;
-	private static final String FTYPE = ".xml";    
-	private static final int DIALOG_LOAD_FILE = 1000;
-	
-	private void loadFileList(){
-		try{
-			mPath.mkdirs();
-		} catch(SecurityException e) {
-			Log.e(TAG, "unable to write on the sd card " + e.toString());
-		}
-		if (mPath.exists()) {
-			FilenameFilter filter = new FilenameFilter() {
-				public boolean accept(File dir, String filename) {
-					File sel = new File(dir, filename);
-					return filename.contains(FTYPE);// || sel.isDirectory();
-				}
-			};
-			mFileList = mPath.list(filter);
-		} else {
-			mFileList= new String[0];
-		}
-	}
-	
-	Dialog dialog;
-	
-	protected Dialog onCreateDialog(final int id) {
-		DialogThreadContext = this;
-		//Dialog dialog = null;
-		_mainInstance.runOnUiThread(new Runnable() {
+	public Thread makeThread () {
+		return new Thread(new Runnable() {
 			public void run() {
-				dialog = null;
-				AlertDialog.Builder builder = new Builder(_mainInstance);
-			
-				switch(id) {
-					case DIALOG_LOAD_FILE:
-						builder.setTitle("Choose your file");
-						if (mFileList == null) {
-							Log.e(TAG, "Showing file picker before loading the file list");
-							dialog = builder.create();
-							//return dialog;
-							synchronized (DialogThreadContext) { DialogThreadContext.notify();}
-							Thread.currentThread().interrupt();
-						}
-						builder.setItems(mFileList, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								mChosenFile = mFileList[which];
-								//you can do stuff with the file here too
-								synchronized (DialogThreadContext) { DialogThreadContext.notify();}
-								Thread.currentThread().interrupt();
+				if (mFilePath != null) {
+					// if the file path is a directory, find all xmls in it
+					File file = new File(mFilePath);
+					if (file.isDirectory()) {
+						String[] filenames = file.list(new FilenameFilter() {
+							@Override
+							public boolean accept(File dir, String filename) {
+								return filename.endsWith(TEST_FILEEXT);
 							}
 						});
-						break;
-				}
-				dialog = builder.show();
-			}
-		});
+						if (filenames != null) {
+							Arrays.sort(filenames);
 
-		try {
-			synchronized (this) { this.wait();}
-		} catch (InterruptedException e) {
-			_msgAdapter.logMessage("InterruptedException", true);
-		}
-		return dialog;
-		
-		/*
-		Dialog dialog = null;
-		AlertDialog.Builder builder = new Builder(_mainInstance);
-	
-		switch(id) {
-			case DIALOG_LOAD_FILE:
-				builder.setTitle("Choose your file");
-				if (mFileList == null) {
-					Log.e(TAG, "Showing file picker before loading the file list");
-					dialog = builder.create();
-					return dialog;
-				}
-				builder.setItems(mFileList, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						mChosenFile = mFileList[which];
-						//you can do stuff with the file here too
-					}
-				});
-				break;
-		}
-		dialog = builder.show();
-		return dialog;
-		*/
-	}
-	
-	public Thread makeThread () {
-		return new Thread (new Runnable () {
-			public void run () {
-				mChosenFile = null;
-				loadFileList();
-				onCreateDialog(DIALOG_LOAD_FILE);
-				if (mChosenFile != null) {
-					AcceptedRPC acceptedRPC = new AcceptedRPC();
-					XmlPullParser parser = Xml.newPullParser();
-					RPCRequest rpc;
-					try {
-						if (_mainInstance.getDisableLockFlag()) {
-							acquireWakeLock();
-						}
-						
-						//FileInputStream fin = new FileInputStream("/sdcard/test.xml");
-						FileInputStream fin = new FileInputStream("/sdcard/" + mChosenFile);
-						InputStreamReader isr = new InputStreamReader(fin);
-						
-						String outFile = "/sdcard/" + mChosenFile.substring(0, mChosenFile.length() - 4) + ".csv";
-						File out = new File(outFile);
-						FileWriter writer = new FileWriter(out);
-						writer.flush();
-						
-						parser.setInput(isr);
-						int eventType = parser.getEventType();
-						String name;
-						boolean done = false;
-						while (eventType != XmlPullParser.END_DOCUMENT && !done) {
-							name = parser.getName();
-							
-							switch (eventType) {
-							case XmlPullParser.START_DOCUMENT:
-								logParserDebugInfo("START_DOCUMENT, name: " + name);
-								break;
-							case XmlPullParser.END_DOCUMENT:
-								logParserDebugInfo("END_DOCUMENT, name: " + name);
-								break;
-							case XmlPullParser.START_TAG:
-								name = parser.getName();
-								if (name.equalsIgnoreCase("test")) {
-									_msgAdapter.logMessage("test " + parser.getAttributeValue(0), true);
-									
-									long pause = 0;
-									String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
-									if (pauseString != null) {
-										try {
-											pause = Long.parseLong(pauseString);
-										} catch (NumberFormatException e) {
-											Log.e(TAG, "Couldn't parse pause number: " + pauseString);
-										}
-									}
-									currentTest = new Test(parser.getAttributeValue(null, TEST_NAME_ATTR),
-											pause, null);
-									expecting.clear();
-									responses.clear();
+							if (filenames.length > 0) {
+								List<String> paths = new ArrayList<String>();
+								for (String filename : filenames) {
+									_msgAdapter.logMessage("Processing "
+											+ filename, Log.INFO, true);
 									try {
-										if (parser.getAttributeName(1) != null) {
-											if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
-												try {numIterations = Integer.parseInt(parser.getAttributeValue(1));} 
-												catch (Exception e) {Log.e(TAG, "Unable to parse number of iterations");}
-											} else numIterations = 1;
-										} else numIterations = 1;
+										String fullPath = mFilePath
+												+ File.separator + filename;
+										processTestFile(fullPath);
+										paths.add(getTestResultsFilename(fullPath));
 									} catch (Exception e) {
-										numIterations = 1;
-									}
-								} else if (name.equalsIgnoreCase("type")) {
-									if (parser.getAttributeValue(0).equalsIgnoreCase("integration")) integration = true;
-									else if (parser.getAttributeValue(0).equalsIgnoreCase("unit")) integration = false;
-								} else if (acceptedRPC.isAcceptedRPC(name)) {
-									//Create correct object
-									if (name.equalsIgnoreCase(Names.RegisterAppInterface)) {
-										rpc = new RegisterAppInterface();
-									} else if (name.equalsIgnoreCase(Names.UnregisterAppInterface)) {
-										rpc = new UnregisterAppInterface();
-									} else if (name.equalsIgnoreCase(Names.SetGlobalProperties)) {
-										rpc = new SetGlobalProperties();
-									} else if (name.equalsIgnoreCase(Names.ResetGlobalProperties)) {
-										rpc = new ResetGlobalProperties();
-									} else if (name.equalsIgnoreCase(Names.AddCommand)) {
-										rpc = new AddCommand();
-									} else if (name.equalsIgnoreCase(Names.DeleteCommand)) {
-										rpc = new DeleteCommand();
-									} else if (name.equalsIgnoreCase(Names.AddSubMenu)) {
-										rpc = new AddSubMenu();
-									} else if (name.equalsIgnoreCase(Names.DeleteSubMenu)) {
-										rpc = new DeleteSubMenu();
-									} else if (name.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
-										rpc = new CreateInteractionChoiceSet();
-									} else if (name.equalsIgnoreCase(Names.PerformInteraction)) {
-										rpc = new PerformInteraction();
-									} else if (name.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {
-										rpc = new DeleteInteractionChoiceSet();
-									} else if (name.equalsIgnoreCase(Names.Alert)) {
-										rpc = new Alert();
-									} else if (name.equalsIgnoreCase(Names.Show)) {
-										rpc = new Show();
-									} else if (name.equalsIgnoreCase(Names.Speak)) {
-										rpc = new Speak();
-									} else if (name.equalsIgnoreCase(Names.SetMediaClockTimer)) {
-										rpc = new SetMediaClockTimer();
-									} else if (name.equalsIgnoreCase(Names.EncodedSyncPData)) {
-										rpc = new EncodedSyncPData();
-									} else if (name.equalsIgnoreCase(Names.DialNumber)) {
-										rpc = new DialNumber();
-									} else if (name.equalsIgnoreCase(Names.PerformAudioPassThru)) {
-										rpc = new PerformAudioPassThru();
-									} else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {
-										rpc = new EndAudioPassThru();
-									} else if (name.equalsIgnoreCase(Names.SubscribeButton)) {
-										rpc = new SubscribeButton();
-									} else if (name.equalsIgnoreCase(Names.UnsubscribeButton)) {
-										rpc = new UnsubscribeButton();
-									} else if (name.equalsIgnoreCase(Names.SubscribeVehicleData)) {
-										rpc = new SubscribeVehicleData();
-								    } else if (name.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
-										rpc = new UnsubscribeVehicleData();
-								    } else if (name.equalsIgnoreCase(Names.GetVehicleData)) {
-										rpc = new GetVehicleData();
-								    } else if (name.equalsIgnoreCase(Names.ReadDID)) {
-										rpc = new ReadDID();
-								    } else if (name.equalsIgnoreCase(Names.GetDTCs)) {
-										rpc = new GetDTCs();
-								    } else if (name.equalsIgnoreCase(Names.ScrollableMessage)) {
-										rpc = new ScrollableMessage();
-								    } else if (name.equalsIgnoreCase(Names.Slider)) {
-										rpc = new Slider();
-								    } else if (name.equalsIgnoreCase(Names.ShowConstantTBT)) {
-										rpc = new ShowConstantTBT();
-								    } else if (name.equalsIgnoreCase(Names.AlertManeuver)) {
-										rpc = new AlertManeuver();
-								    } else if (name.equalsIgnoreCase(Names.UpdateTurnList)) {
-										rpc = new UpdateTurnList();
-								    } else if (name.equalsIgnoreCase(Names.ChangeRegistration)) {
-										rpc = new ChangeRegistration();
-								    } else if (name.equalsIgnoreCase(Names.PutFile)) {
-										rpc = new PutFile();
-								    } else if (name.equalsIgnoreCase(Names.DeleteFile)) {
-										rpc = new DeleteFile();
-								    } else if (name.equalsIgnoreCase(Names.ListFiles)) {
-										rpc = new ListFiles();
-								    } else if (name.equalsIgnoreCase(Names.SetAppIcon)) {
-										rpc = new SetAppIcon();
-								    } else if (name.equalsIgnoreCase(Names.SetDisplayLayout)) {
-										rpc = new SetDisplayLayout();
-									} else if (name.equalsIgnoreCase("ClearMediaClockTimer")) {
-										rpc = new Show();
-										((Show) rpc).setMainField1(null);
-										((Show) rpc).setMainField2(null);
-										((Show) rpc).setStatusBar(null);
-										((Show) rpc).setMediaClock("     ");
-										((Show) rpc).setMediaTrack(null);
-										((Show) rpc).setAlignment(null);
-									} else if (name.equalsIgnoreCase("PauseMediaClockTimer")) {
-										rpc = new SetMediaClockTimer();
-										StartTime startTime = new StartTime();
-										startTime.setHours(0);
-										startTime.setMinutes(0);
-										startTime.setSeconds(0);
-										((SetMediaClockTimer) rpc).setStartTime(startTime);
-										((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.PAUSE);
-									} else if (name.equalsIgnoreCase("ResumeMediaClockTimer")) {
-										rpc = new SetMediaClockTimer();
-										StartTime startTime = new StartTime();
-										startTime.setHours(0);
-										startTime.setMinutes(0);
-										startTime.setSeconds(0);
-										((SetMediaClockTimer) rpc).setStartTime(startTime);
-										((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.RESUME);
-									} else {
-										rpc = new SetGlobalProperties();
-									}
-
-									try {
-										rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(null, CORRELATION_ID_ATTR)));
-									} catch (NumberFormatException e) {
-										Log.e(TAG, "Unable to parse correlation ID");
-									}
-									
-									long pause = 0;
-									String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
-									if (pauseString != null) {
-										try {
-											pause = Long.parseLong(pauseString);
-										} catch (NumberFormatException e) {
-											Log.e(TAG, "Couldn't parse pause number: " + pauseString);
-										}
-									}
-									
-									boolean generateInvalidJSON = (parser.getAttributeValue(null, INVALID_JSON_ATTR)
-											!= null);
-									
-									String customJSON = parser.getAttributeValue(null, CUSTOM_JSON_ATTR);
-									
-									//TODO: Set rpc parameters
-									Hashtable hash = setParams(name, parser);
-									logParserDebugInfo("" + hash);
-									//TODO: Iterate through hash table and add it to parameters
-									for (Object key : hash.keySet()) {
-										if (((String)key).equals(BULK_DATA_ATTR)) {
-											rpc.setBulkData((byte[]) hash.get(key));
-										} else {
-											rpc.setParameters((String) key, hash.get(key));
-										}
-									}
-									
-								    Iterator it = hash.entrySet().iterator();
-								    while (it.hasNext()) {
-								    		Hashtable.Entry pairs = (Hashtable.Entry)it.next();
-								        logParserDebugInfo(pairs.getKey() + " = " + pairs.getValue());
-								    }
-									
-								    if (currentTest != null) {
-								    		RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause,
-								    				generateInvalidJSON, customJSON);
-								    		currentTest.addRequest(wrapper);
-								    }
-								} else if (name.equalsIgnoreCase("result")) {
-									expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
-								} else if (name.equalsIgnoreCase("userPrompt") && integration) {
-									userPrompt = parser.getAttributeValue(0);
-								}
-								break;
-							case XmlPullParser.END_TAG:
-								name = parser.getName();
-								if (name.equalsIgnoreCase("test")) {
-									try {
-										boolean localPass = true;
-										int i = numIterations;
-										int numPass = 0;
-										while (i > 0) {
-											xmlTest();
-											if (pass) numPass++;
-											else localPass = false;
-											i--;
-										}
-										
-										if (currentTest != null) {
-											String FIELD_SEPARATOR = ", ";
-											StringBuilder result = new StringBuilder(currentTest.getName());
-											String[] fields = { (localPass ? "Pass" : "Fail"), String.valueOf(numPass), String.valueOf(numIterations) };
-											for (String field : fields) {
-												result.append(FIELD_SEPARATOR);
-												result.append(field);
-											}
-											String resultLine = result.toString();
-											
-											writer.write(resultLine + "\n");
-											Log.i(TAG, resultLine);
-											_msgAdapter.logMessage(resultLine, true);
-										}
-									} catch (Exception e) {
-										if (currentTest != null) {
-											_msgAdapter.logMessage("Test " + currentTest.getName() + " Failed! ", Log.ERROR, e);
-										}
+										_msgAdapter
+												.logMessage("Parser Failed!!",
+														Log.ERROR, e);
 									}
 								}
-								break;
-							case XmlPullParser.TEXT:
-								//logParserDebugInfo("TEXT, name: " + name);
-								break;
-							case XmlPullParser.CDSECT:
-								logParserDebugInfo("CDSECT, name: " + name);
-								break;
-							case XmlPullParser.ENTITY_REF:
-								logParserDebugInfo("ENTITY_REF, name: " + name);
-								break;
-							case XmlPullParser.IGNORABLE_WHITESPACE:
-								logParserDebugInfo("IGNORABLE_WHITESPACE, name: " + name);
-								break;
-							case XmlPullParser.PROCESSING_INSTRUCTION:
-								logParserDebugInfo("PROCESSING_INSTRUCTION, name: " + name);
-								break;
-							case XmlPullParser.COMMENT:
-								logParserDebugInfo("COMMENT, name: " + name);
-								break;
-							case XmlPullParser.DOCDECL:
-								logParserDebugInfo("DOCDECL, name: " + name);
-								break;
-							default:
-								break;
+								_msgAdapter.logMessage("All tests finished",
+										Log.INFO, true);
+
+								if (paths.size() > 0) {
+									sendReportEmail(paths);
+								}
+							} else {
+								_msgAdapter.logMessage(
+										"No test files found in " + mFilePath,
+										Log.INFO, true);
 							}
-							eventType = parser.next();
+						} else {
+							_msgAdapter.logMessage(
+									"Couldn't list files in directory",
+									Log.ERROR, true);
 						}
-						writer.close();
-						Log.d(TAG, "Tests finished");
-						
-						currentTest = null;
-						
-						Intent email = new Intent(Intent.ACTION_SEND);
-						email.setType("plain/text");
-						email.putExtra(Intent.EXTRA_EMAIL, new String[]{"youremail@ford.com"});		  
-						email.putExtra(Intent.EXTRA_SUBJECT, "Lua Unit Test Export");
-						email.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(out));
-						
-						_mainInstance.startActivity(Intent.createChooser(email, "Choose an Email client :"));
-						
-					} catch (Exception e) {
-						_msgAdapter.logMessage("Parser Failed!!", Log.ERROR, e);
-					} finally {
-						releaseWakeLock();
+					} else {
+						try {
+							processTestFile(mFilePath);
+
+							List<String> paths = new ArrayList<String>();
+							paths.add(getTestResultsFilename(mFilePath));
+							sendReportEmail(paths);
+						} catch (Exception e) {
+							_msgAdapter.logMessage("Parser Failed!!",
+									Log.ERROR, e);
+						}
 					}
+				} else {
+					Log.w(TAG, "No file chosen");
 				}
+			}
+
+			private void sendReportEmail(List<String> filePaths) {
+				// http://stackoverflow.com/questions/2264622/android-multiple-email-attachments-using-intent/3300495#3300495
+				if (filePaths != null) {
+					final int numFilePaths = filePaths.size();
+
+					Intent email = new Intent(
+							numFilePaths > 1 ? Intent.ACTION_SEND_MULTIPLE
+									: Intent.ACTION_SEND);
+					email.setType("text/plain");
+					email.putExtra(Intent.EXTRA_EMAIL,
+							new String[] { "youremail@ford.com" });
+					email.putExtra(Intent.EXTRA_SUBJECT, "Lua Unit Test Export");
+
+					switch (numFilePaths) {
+					case 0:
+						// no attachments
+						break;
+
+					case 1:
+						email.putExtra(Intent.EXTRA_STREAM,
+								Uri.fromFile(new File(filePaths.get(0))));
+						break;
+
+					default:
+						// assuming there can't be negative array size
+						ArrayList<Uri> uris = new ArrayList<Uri>(numFilePaths);
+						for (String filePath : filePaths) {
+							uris.add(Uri.fromFile(new File(filePath)));
+						}
+						email.putParcelableArrayListExtra(Intent.EXTRA_STREAM,
+								uris);
+						break;
+					}
+
+					_mainInstance.startActivity(Intent.createChooser(email,
+							"Choose an Email client :"));
+				}
+			}
+
+			private void processTestFile(String filename) throws IOException,
+					XmlPullParserException {
+				AcceptedRPC acceptedRPC = new AcceptedRPC();
+				XmlPullParser parser = Xml.newPullParser();
+				RPCRequest rpc;
+				try {
+					if (_mainInstance.getDisableLockFlag()) {
+						acquireWakeLock();
+					}
+					
+					FileInputStream fin = new FileInputStream(filename);
+					InputStreamReader isr = new InputStreamReader(fin);
+					
+					String outFile = getTestResultsFilename(filename);
+					File out = new File(outFile);
+					FileWriter writer = new FileWriter(out);
+					writer.flush();
+					
+					parser.setInput(isr);
+					int eventType = parser.getEventType();
+					String name;
+					boolean done = false;
+					while (eventType != XmlPullParser.END_DOCUMENT && !done) {
+						name = parser.getName();
+						
+						switch (eventType) {
+						case XmlPullParser.START_DOCUMENT:
+							logParserDebugInfo("START_DOCUMENT, name: " + name);
+							break;
+						case XmlPullParser.END_DOCUMENT:
+							logParserDebugInfo("END_DOCUMENT, name: " + name);
+							break;
+						case XmlPullParser.START_TAG:
+							name = parser.getName();
+							if (name.equalsIgnoreCase("test")) {
+								_msgAdapter.logMessage("test " + parser.getAttributeValue(0), true);
+								
+								long pause = 0;
+								String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
+								if (pauseString != null) {
+									try {
+										pause = Long.parseLong(pauseString);
+									} catch (NumberFormatException e) {
+										Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+									}
+								}
+								currentTest = new Test(parser.getAttributeValue(null, TEST_NAME_ATTR),
+										pause, null);
+								expecting.clear();
+								responses.clear();
+								try {
+									if (parser.getAttributeName(1) != null) {
+										if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
+											try {numIterations = Integer.parseInt(parser.getAttributeValue(1));} 
+											catch (Exception e) {Log.e(TAG, "Unable to parse number of iterations");}
+										} else numIterations = 1;
+									} else numIterations = 1;
+								} catch (Exception e) {
+									numIterations = 1;
+								}
+							} else if (name.equalsIgnoreCase("type")) {
+								if (parser.getAttributeValue(0).equalsIgnoreCase("integration")) integration = true;
+								else if (parser.getAttributeValue(0).equalsIgnoreCase("unit")) integration = false;
+							} else if (acceptedRPC.isAcceptedRPC(name)) {
+								//Create correct object
+								if (name.equalsIgnoreCase(Names.RegisterAppInterface)) {
+									rpc = new RegisterAppInterface();
+								} else if (name.equalsIgnoreCase(Names.UnregisterAppInterface)) {
+									rpc = new UnregisterAppInterface();
+								} else if (name.equalsIgnoreCase(Names.SetGlobalProperties)) {
+									rpc = new SetGlobalProperties();
+								} else if (name.equalsIgnoreCase(Names.ResetGlobalProperties)) {
+									rpc = new ResetGlobalProperties();
+								} else if (name.equalsIgnoreCase(Names.AddCommand)) {
+									rpc = new AddCommand();
+								} else if (name.equalsIgnoreCase(Names.DeleteCommand)) {
+									rpc = new DeleteCommand();
+								} else if (name.equalsIgnoreCase(Names.AddSubMenu)) {
+									rpc = new AddSubMenu();
+								} else if (name.equalsIgnoreCase(Names.DeleteSubMenu)) {
+									rpc = new DeleteSubMenu();
+								} else if (name.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
+									rpc = new CreateInteractionChoiceSet();
+								} else if (name.equalsIgnoreCase(Names.PerformInteraction)) {
+									rpc = new PerformInteraction();
+								} else if (name.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {
+									rpc = new DeleteInteractionChoiceSet();
+								} else if (name.equalsIgnoreCase(Names.Alert)) {
+									rpc = new Alert();
+								} else if (name.equalsIgnoreCase(Names.Show)) {
+									rpc = new Show();
+								} else if (name.equalsIgnoreCase(Names.Speak)) {
+									rpc = new Speak();
+								} else if (name.equalsIgnoreCase(Names.SetMediaClockTimer)) {
+									rpc = new SetMediaClockTimer();
+								} else if (name.equalsIgnoreCase(Names.EncodedSyncPData)) {
+									rpc = new EncodedSyncPData();
+								} else if (name.equalsIgnoreCase(Names.DialNumber)) {
+									rpc = new DialNumber();
+								} else if (name.equalsIgnoreCase(Names.PerformAudioPassThru)) {
+									rpc = new PerformAudioPassThru();
+								} else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {
+									rpc = new EndAudioPassThru();
+								} else if (name.equalsIgnoreCase(Names.SubscribeButton)) {
+									rpc = new SubscribeButton();
+								} else if (name.equalsIgnoreCase(Names.UnsubscribeButton)) {
+									rpc = new UnsubscribeButton();
+								} else if (name.equalsIgnoreCase(Names.SubscribeVehicleData)) {
+									rpc = new SubscribeVehicleData();
+							    } else if (name.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
+									rpc = new UnsubscribeVehicleData();
+							    } else if (name.equalsIgnoreCase(Names.GetVehicleData)) {
+									rpc = new GetVehicleData();
+							    } else if (name.equalsIgnoreCase(Names.ReadDID)) {
+									rpc = new ReadDID();
+							    } else if (name.equalsIgnoreCase(Names.GetDTCs)) {
+									rpc = new GetDTCs();
+							    } else if (name.equalsIgnoreCase(Names.ScrollableMessage)) {
+									rpc = new ScrollableMessage();
+							    } else if (name.equalsIgnoreCase(Names.Slider)) {
+									rpc = new Slider();
+							    } else if (name.equalsIgnoreCase(Names.ShowConstantTBT)) {
+									rpc = new ShowConstantTBT();
+							    } else if (name.equalsIgnoreCase(Names.AlertManeuver)) {
+									rpc = new AlertManeuver();
+							    } else if (name.equalsIgnoreCase(Names.UpdateTurnList)) {
+									rpc = new UpdateTurnList();
+							    } else if (name.equalsIgnoreCase(Names.ChangeRegistration)) {
+									rpc = new ChangeRegistration();
+							    } else if (name.equalsIgnoreCase(Names.PutFile)) {
+									rpc = new PutFile();
+							    } else if (name.equalsIgnoreCase(Names.DeleteFile)) {
+									rpc = new DeleteFile();
+							    } else if (name.equalsIgnoreCase(Names.ListFiles)) {
+									rpc = new ListFiles();
+							    } else if (name.equalsIgnoreCase(Names.SetAppIcon)) {
+									rpc = new SetAppIcon();
+							    } else if (name.equalsIgnoreCase(Names.SetDisplayLayout)) {
+									rpc = new SetDisplayLayout();
+								} else if (name.equalsIgnoreCase("ClearMediaClockTimer")) {
+									rpc = new Show();
+									((Show) rpc).setMainField1(null);
+									((Show) rpc).setMainField2(null);
+									((Show) rpc).setStatusBar(null);
+									((Show) rpc).setMediaClock("     ");
+									((Show) rpc).setMediaTrack(null);
+									((Show) rpc).setAlignment(null);
+								} else if (name.equalsIgnoreCase("PauseMediaClockTimer")) {
+									rpc = new SetMediaClockTimer();
+									StartTime startTime = new StartTime();
+									startTime.setHours(0);
+									startTime.setMinutes(0);
+									startTime.setSeconds(0);
+									((SetMediaClockTimer) rpc).setStartTime(startTime);
+									((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.PAUSE);
+								} else if (name.equalsIgnoreCase("ResumeMediaClockTimer")) {
+									rpc = new SetMediaClockTimer();
+									StartTime startTime = new StartTime();
+									startTime.setHours(0);
+									startTime.setMinutes(0);
+									startTime.setSeconds(0);
+									((SetMediaClockTimer) rpc).setStartTime(startTime);
+									((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.RESUME);
+								} else {
+									rpc = new SetGlobalProperties();
+								}
+
+								try {
+									rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(null, CORRELATION_ID_ATTR)));
+								} catch (NumberFormatException e) {
+									Log.e(TAG, "Unable to parse correlation ID");
+								}
+								
+								long pause = 0;
+								String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
+								if (pauseString != null) {
+									try {
+										pause = Long.parseLong(pauseString);
+									} catch (NumberFormatException e) {
+										Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+									}
+								}
+								
+								boolean generateInvalidJSON = (parser.getAttributeValue(null, INVALID_JSON_ATTR)
+										!= null);
+								
+								String customJSON = parser.getAttributeValue(null, CUSTOM_JSON_ATTR);
+								
+								//TODO: Set rpc parameters
+								Hashtable hash = setParams(name, parser);
+								logParserDebugInfo("" + hash);
+								//TODO: Iterate through hash table and add it to parameters
+								for (Object key : hash.keySet()) {
+									if (((String)key).equals(BULK_DATA_ATTR)) {
+										rpc.setBulkData((byte[]) hash.get(key));
+									} else {
+										rpc.setParameters((String) key, hash.get(key));
+									}
+								}
+								
+							    Iterator it = hash.entrySet().iterator();
+							    while (it.hasNext()) {
+							    		Hashtable.Entry pairs = (Hashtable.Entry)it.next();
+							        logParserDebugInfo(pairs.getKey() + " = " + pairs.getValue());
+							    }
+								
+							    if (currentTest != null) {
+							    		RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause,
+							    				generateInvalidJSON, customJSON);
+							    		currentTest.addRequest(wrapper);
+							    }
+							} else if (name.equalsIgnoreCase("result")) {
+								expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
+							} else if (name.equalsIgnoreCase("userPrompt") && integration) {
+								userPrompt = parser.getAttributeValue(0);
+							}
+							break;
+						case XmlPullParser.END_TAG:
+							name = parser.getName();
+							if (name.equalsIgnoreCase("test")) {
+								try {
+									boolean localPass = true;
+									int i = numIterations;
+									int numPass = 0;
+									while (i > 0) {
+										xmlTest();
+										if (pass) numPass++;
+										else localPass = false;
+										i--;
+									}
+									
+									if (currentTest != null) {
+										String FIELD_SEPARATOR = ", ";
+										StringBuilder result = new StringBuilder(currentTest.getName());
+										String[] fields = { (localPass ? "Pass" : "Fail"), String.valueOf(numPass), String.valueOf(numIterations) };
+										for (String field : fields) {
+											result.append(FIELD_SEPARATOR);
+											result.append(field);
+										}
+										String resultLine = result.toString();
+										
+										writer.write(resultLine + "\n");
+										Log.i(TAG, resultLine);
+										_msgAdapter.logMessage(resultLine, true);
+									}
+								} catch (Exception e) {
+									if (currentTest != null) {
+										_msgAdapter.logMessage("Test " + currentTest.getName() + " Failed! ", Log.ERROR, e);
+									}
+								}
+							}
+							break;
+						case XmlPullParser.TEXT:
+							//logParserDebugInfo("TEXT, name: " + name);
+							break;
+						case XmlPullParser.CDSECT:
+							logParserDebugInfo("CDSECT, name: " + name);
+							break;
+						case XmlPullParser.ENTITY_REF:
+							logParserDebugInfo("ENTITY_REF, name: " + name);
+							break;
+						case XmlPullParser.IGNORABLE_WHITESPACE:
+							logParserDebugInfo("IGNORABLE_WHITESPACE, name: " + name);
+							break;
+						case XmlPullParser.PROCESSING_INSTRUCTION:
+							logParserDebugInfo("PROCESSING_INSTRUCTION, name: " + name);
+							break;
+						case XmlPullParser.COMMENT:
+							logParserDebugInfo("COMMENT, name: " + name);
+							break;
+						case XmlPullParser.DOCDECL:
+							logParserDebugInfo("DOCDECL, name: " + name);
+							break;
+						default:
+							break;
+						}
+						eventType = parser.next();
+					}
+					writer.close();
+					Log.d(TAG, "Tests finished");
+					
+					currentTest = null;
+				} finally {
+					releaseWakeLock();
+				}
+			}
+
+			private String getTestResultsFilename(String filename) {
+				return filename.substring(0,
+						filename.length() - TEST_FILEEXT.length())
+						+ ".csv";
 			}
 		});
 	}

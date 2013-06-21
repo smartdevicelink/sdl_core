@@ -162,7 +162,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
 	private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
 
-	private static final int REQUEST_PUTFILE_OPEN = 42;
+	private static final int REQUEST_PUTFILE_OPEN = 50;
+	private final static int REQUEST_CHOOSE_XML_TEST = 51;
 	
 	private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
 
@@ -781,14 +782,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			return true;
 
 		case XML_TEST:
-			if (_testerMain != null) {
-				_testerMain.restart();
-				Toast.makeText(getApplicationContext(), "start your engines", Toast.LENGTH_SHORT).show();
-			}else {
-				ProxyService.getInstance().startModuleTest();
-				_testerMain.restart();
-				Toast.makeText(getApplicationContext(), "Start the app on SYNC first", Toast.LENGTH_LONG).show();
-			}
+			xmlTest();
 			break;
 		case POLICIES_TEST:
 			if(PoliciesTesterActivity.getInstance() == null) {
@@ -880,6 +874,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		}
 		
 		return false;
+	}
+
+	private void xmlTest() {
+		openXmlFilePathDialog();
+	}
+	
+	private void xmlTestContinue(String filePath) {
+		if (_testerMain != null) {
+			_testerMain.restart(filePath);
+			Toast.makeText(getApplicationContext(), "start your engines", Toast.LENGTH_SHORT).show();
+		} else {
+			ProxyService.getInstance().startModuleTest();
+			_testerMain.restart(filePath);
+			Toast.makeText(getApplicationContext(), "Start the app on SYNC first", Toast.LENGTH_LONG).show();
+		}
 	}
 
 	/**
@@ -3579,6 +3588,15 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			}
 			break;
 			
+		case REQUEST_CHOOSE_XML_TEST:
+			if (resultCode == RESULT_OK) {
+				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
+				if (filePath != null) {
+					xmlTestContinue(filePath);
+				}
+			}
+			break;
+			
 		default:
 			Log.i(logTag, "Unknown request code: " + requestCode);
 			break;
@@ -3635,6 +3653,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Opens a dialog so that the user can select an XML test or a directory
+	 * with XML tests. The result will come to onActivityResult method.
+	 */
+	public void openXmlFilePathDialog() {
+		Intent intent = new Intent(this, FileDialog.class);
+		String sdcardPath = Environment.getExternalStorageDirectory().getPath();
+		intent.putExtra(FileDialog.START_PATH, sdcardPath);
+		intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
+		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
+		intent.putExtra(FileDialog.FORMAT_FILTER, new String[] { "xml" });
+		startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
 	}
 }
 
