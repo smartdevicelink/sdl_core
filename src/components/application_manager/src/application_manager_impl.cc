@@ -42,10 +42,11 @@
 namespace application_manager {
 
 ApplicationManagerImpl::ApplicationManagerImpl()
-  : hmi_deletes_commands_(false),
-    audio_pass_thru_flag_(false),
-    perform_audio_thread_(NULL),
-    attenuated_supported_(false) {
+: hmi_deletes_commands_(false),
+  audio_pass_thru_flag_(false),
+  perform_audio_thread_(NULL),
+  attenuated_supported_(false),
+  driver_distraction_(hmi_apis::Common_DriverDistractionState::INVALID_ENUM ) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -68,6 +69,7 @@ Application* ApplicationManagerImpl::application(int app_id) {
 }
 
 Application* ApplicationManagerImpl::active_application() const {
+  // TODO(DK) : check driver distraction
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
@@ -166,10 +168,6 @@ void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
   // TODO(VS): Call function from ConnectionHandler
 }
 
-const std::set<Application*>& ApplicationManagerImpl::applications() const {
-  return application_list_;
-}
-
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     unsigned int connection_key,
     unsigned int correlation_id,
@@ -240,6 +238,11 @@ bool ApplicationManagerImpl::attenuated_supported() const {
 
 void ApplicationManagerImpl::set_attenuated_supported(bool state) {
   attenuated_supported_ = state;
+}
+
+void ApplicationManagerImpl::set_driver_distraction(
+    const hmi_apis::Common_DriverDistractionState::eType& state) {
+  driver_distraction_ = state;
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,

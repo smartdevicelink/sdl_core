@@ -56,8 +56,8 @@ bool NotificationFromHMI::CleanUp() {
 void NotificationFromHMI::Run() {
 }
 
-void NotificationFromHMI::SendNotificationToMobile() {
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+void NotificationFromHMI::SendNotificationToMobile(const MessageSharedPtr& message) {
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message);
 }
 
 }  // namespace commands

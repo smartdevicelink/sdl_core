@@ -81,7 +81,7 @@ class ApplicationManagerImpl : public ApplicationManager
     /////////////////////////////////////////////////////
 
     Application* application(int app_id);
-    const std::set<Application*>& applications() const;
+    inline const std::set<Application*>& applications() const;
     Application* active_application() const;
     std::vector<Application*> applications_by_button(unsigned int button);
     std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
@@ -178,6 +178,22 @@ class ApplicationManagerImpl : public ApplicationManager
     void set_attenuated_supported(bool state);
 
     /*
+     * @brief Retrieves driver distraction state
+     *
+     * @return Current state of the distraction state
+     */
+    inline const hmi_apis::Common_DriverDistractionState::eType&
+        driver_distraction() const;
+
+    /*
+     * @brief Sets state for driver distraction
+     *
+     * @param state New state to be set
+     */
+    void set_driver_distraction(
+        const hmi_apis::Common_DriverDistractionState::eType& state);
+
+    /*
      * @brief Starts audio pass thru thread
      *
      * @param session_key     Session key of connection for Mobile side
@@ -261,19 +277,29 @@ class ApplicationManagerImpl : public ApplicationManager
     /**
      * @brief Map of connection keys and associated applications
      */
-    std::map<int, Application*> applications_;
+    std::map<int, Application*>                     applications_;
     /**
      * @brief List of applications
      */
-    std::set<Application*>      application_list_;
-    MessageChains               message_chaining_;
-    bool                        hmi_deletes_commands_;
-    bool                        audio_pass_thru_flag_;
-    threads::Thread*            perform_audio_thread_;
-    bool                        attenuated_supported_;
+    std::set<Application*>                          application_list_;
+    MessageChains                                   message_chaining_;
+    bool                                            hmi_deletes_commands_;
+    bool                                            audio_pass_thru_flag_;
+    threads::Thread*                                perform_audio_thread_;
+    bool                                            attenuated_supported_;
+    hmi_apis::Common_DriverDistractionState::eType  driver_distraction_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
+
+const std::set<Application*>& ApplicationManagerImpl::applications() const {
+    return application_list_;
+}
+
+const hmi_apis::Common_DriverDistractionState::eType&
+    ApplicationManagerImpl::driver_distraction() const {
+  return driver_distraction_;
+}
 
 }  // namespace application_manager
 

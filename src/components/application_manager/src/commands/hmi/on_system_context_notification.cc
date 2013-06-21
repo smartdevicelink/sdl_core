@@ -118,7 +118,7 @@ void OnSystemContextNotification::NotifyMobileApp(ApplicationImpl* const app) {
   (*on_hmi_status)[strings::msg_params][strings::system_context] =
       app->system_context();
 
-  SendNotificationToMobile();
+  SendNotificationToMobile(on_hmi_status);
 }
 
 }  // namespace commands

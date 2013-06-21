@@ -30,7 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <set>
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -48,6 +51,54 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 }
 
 void OnDriverDistractionNotification::Run() {
+  const std::set<Application*>& app_list =
+      ApplicationManagerImpl::instance()->applications();
+
+  const hmi_apis::Common_DriverDistractionState::eType state =
+      static_cast<hmi_apis::Common_DriverDistractionState::eType>(
+      (*message_)[strings::msg_params][hmi_notification::state].asInt());
+  ApplicationManagerImpl::instance()->set_driver_distraction(state);
+
+  std::set<Application*>::const_iterator it = app_list.begin();
+  for (; app_list.end() != it; ++it) {
+    const ApplicationImpl* app = static_cast<const ApplicationImpl*>(*it);
+    if (NULL != app) {
+      const mobile_api::HMILevel::eType hmiLevel = app->hmi_level();
+      if (mobile_api::HMILevel::HMI_FULL == hmiLevel ||
+          mobile_api::HMILevel::HMI_BACKGROUND == hmiLevel) {
+            NotifyMobileApp(app);
+        }
+    }
+}
+return;
+}
+
+void OnDriverDistractionNotification::NotifyMobileApp(
+    const ApplicationImpl* app) {
+  smart_objects::CSmartObject* on_driver_distraction =
+      new smart_objects::CSmartObject();
+
+  if (NULL == on_driver_distraction) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    return;
+  }
+
+  (*on_driver_distraction)[strings::params][strings::function_id] =
+      mobile_api::FunctionID::OnDriverDistractionID;
+
+  (*on_driver_distraction)[strings::params][strings::correlation_id] =
+      (*message_)[strings::params][strings::correlation_id];
+
+  (*on_driver_distraction)[strings::params][strings::message_type] =
+      MessageType::kNotification;
+
+  (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
+      ApplicationManagerImpl::instance()->driver_distraction();
+
+  (*on_driver_distraction)[strings::msg_params][strings::app_id] =
+      app->app_id();
+
+  SendNotificationToMobile(on_driver_distraction);
 }
 
 }  // namespace commands

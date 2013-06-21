@@ -37,6 +37,8 @@
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
 
 /**
@@ -62,6 +64,13 @@ class OnDriverDistractionNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
+  /*
+   * @brief Sends OnDriverDistraction notification to mobile app
+   *
+   * @param app Mobile app to be notified about changes
+   */
+  void NotifyMobileApp(const ApplicationImpl* app);
+
   DISALLOW_COPY_AND_ASSIGN(OnDriverDistractionNotification);
 };
 

@@ -131,6 +131,10 @@ const char icon[] = "icon";
 const char device_name[] = "deviceName";
 }  // namespace strings
 
+namespace mobile_notification {
+const char state[] = "state";
+}  // namespace mobile_notification
+
 namespace hmi_request {
   const char field_name[] = "fieldName";
   const char field_text[] = "fieldText";
@@ -157,6 +161,7 @@ namespace hmi_notification {
   const char prndl[] = "prndl";
   const char file_name[] = "file_name";
   const char system_context[] = "systemContext";
+  const char state[] = "state";
 }  // namespace hmi_notification
 
 }  // namespace application_manager
