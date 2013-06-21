@@ -35,92 +35,118 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER
 
+#include "device_adapter.h"
+
+
 namespace transport_manager
 {
+/**
+ * @brief type for
+ *
+ * @see @ref components_transportmanager_client_connection_management
+ **/
+typedef int SessionID;
+
+/**
+ * @brief type for
+ *
+ * @see @ref components_transportmanager_client_connection_management
+ **/
+typedef int EventType;
+
+/**
+ * @brief Interface of transport manager.
+ * @interface TransportManager
+ **/
+class TransportManager
+{
+public:
 	/**
-	 * @brief Interface of transport manager.
-	 * @interface TransportManager
+	 * @brief Destructor.
 	 **/
-	class TransportManager
-	{
-	public:
-		/**
-		 * @brief Destructor.
-		 **/
-		virtual ~TransportManager(void);
+	virtual ~TransportManager(void);
 
-		/**
-		 * @brief Start scanning for new devices.
-		 *
-		 *
-		 * @see @ref components_transportmanager_client_device_management
-		 **/
-		virtual void searchDevices(void) = 0;
+	/**
+	 * @brief Start scanning for new devices.
+	 *
+	 *
+	 * @see @ref components_transportmanager_client_device_management
+	 **/
+	virtual void searchDevices(void) const = 0;
 
-		/**
-		 * @brief Connect to all applications discovered on device.
-		 *
-		 * @param DeviceHandle Handle of device to connect to.
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void connectDevice(const int SessionID) = 0;
+	/**
+	 * @brief Connect to all applications discovered on device.
+	 *
+	 * @param DeviceHandle Handle of device to connect to.
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void connectDevice(const SessionID session_id) = 0;
 
-		/**
-		 * @brief Disconnect from all applications connected on device.
-		 *
-		 * @param DeviceHandle Handle of device to disconnect from.
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void disconnectDevice(const int SessionID) = 0;
+	/**
+	 * @brief Disconnect from all applications connected on device.
+	 *
+	 * @param DeviceHandle Handle of device to disconnect from.
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void disconnectDevice(const SessionID session_id) = 0;
 
-		/**
-		 * @brief post new mesage into TM's queue
-		 *
-		 * @param new message container
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void postMessage(const int Message) = 0;
+	/**
+	 * @brief post new mesage into TM's queue
+	 *
+	 * @param new message container
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void postMessage(const application_manager::Message message) = 0;
 
-		/**
-		 * @brief adds new call back function for specified event type
-		 *
-		 * @param event type, function address
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void addEventListener(const int EventType, const int *(Callback)(int *Data)) = 0;
+	/**
+	 * @brief adds new call back function for specified event type
+	 *
+	 * @param event type, function address
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void addEventListener(const EventType event_type, const int *(Callback)(int *Data)) = 0;
 
-		/**
-		 * @brief set new module that will process errors
-		 *
-		 * @param error handler
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void set_error_handler(const int ErrorHandler) = 0;
+	/**
+	 * @brief set new module that will process errors
+	 *
+	 * @param error handler
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void set_error_handler(const int ErrorHandler) = 0;
 
-		/**
-		 * @brief set new module that will handle messages
-		 *
-		 * @param message container
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void set_message_container(const int MessageContainer) = 0;
+	/**
+	 * @brief set new module that will handle messages
+	 *
+	 * @param message container
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void set_message_container(const int MessageContainer) = 0;
 
-		/**
-		 * @brief set new module that will exchange data in thread safe way
-		 *
-		 * @param data transmitter
-		 *
-		 * @see @ref components_transportmanager_client_connection_management
-		 **/
-		virtual void set_data_transmitter(const int DataTransmitter) = 0;
+	/**
+	 * @brief set new module that will exchange data in thread safe way
+	 *
+	 * @param data transmitter
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void set_data_transmitter(const int DataTransmitter) = 0;
 
-	};
+	/**
+	 * @brief add new device adapter
+	 *
+	 * @param device adapter
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void addDeviceAdapter(DeviceAdapter *device_adapter) = 0;
+
+};
 }
 
 #endif
