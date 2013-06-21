@@ -57,6 +57,8 @@
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
+#include "application_manager/commands/hmi/activate_app_request.h"
+#include "application_manager/commands/hmi/activate_app_response.h"
 
 
 namespace application_manager {
@@ -117,6 +119,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::TTSIsReadyResponse(message));
       } else {
         command.reset(new commands::TTSIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_ActivateApp: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::ActivateAppResponse(message));
+      } else {
+        command.reset(new commands::ActivateAppRequest(message));
       }
       break;
     }

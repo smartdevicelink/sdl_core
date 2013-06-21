@@ -150,6 +150,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_app_registered_notification.cc
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
+./src/commands/hmi/activate_app_request.cc
+./src/commands/hmi/activate_app_response.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})
