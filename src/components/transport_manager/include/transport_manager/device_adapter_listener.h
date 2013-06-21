@@ -45,22 +45,22 @@ class DeviceAdapterListener
 public:
   virtual ~DeviceAdapterListener();
 
-  virtual void OnSearchDeviceDone(const DeviceAdapter* device_adapter) = 0;
-  virtual void OnSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error) = 0;
+  virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter) = 0;
+  virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error) = 0;
 
-  virtual void OnDeviceConnectDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle) = 0;
-  virtual void OnDeviceConnectFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const ConnectDeviceError& error) = 0;
+  virtual void onConnectDone(const DeviceAdapter* device_adapter, const int session_id) = 0;
+  virtual void onConnectFailed(const DeviceAdapter* device_adapter, const int session_id, const ConnectDeviceError& error) = 0;
 
-  virtual void OnDeviceDisconnecteDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle) = 0;
-  virtual void OnDeviceDisconnecteFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DisconnectDeviceError& error) = 0;
+  virtual void onDisconnectDone(const DeviceAdapter* device_adapter, const int session_id) = 0;
+  virtual void onDisconnectFailed(const DeviceAdapter* device_adapter, const int session_id, const DisconnectDeviceError& error) = 0;
 
-  virtual void OnDataReceiveDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataContainerSptr data_container) = 0;
-  virtual void OnDataReceiveFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataReceiveError& error) = 0;
+  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter, const int session_id, const DataContainerSptr data_container) = 0;
+  virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter, const int session_id, const DataReceiveError& error) = 0;
 
-  virtual void OnDataSendDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataContainerSptr data_container) = 0;
-  virtual void OnDataSendFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataSendError& error) = 0;
+  virtual void onDataSendDone(const DeviceAdapter* device_adapter, const int session_id, const DataContainerSptr data_container) = 0;
+  virtual void onDataSendFailed(const DeviceAdapter* device_adapter, const int session_id, const DataSendError& error) = 0;
 
-  virtual void OnCommunicationError(const DeviceAdapter* device_adapter, CommunicationError& error) = 0;
+  virtual void onCommunicationError(const DeviceAdapter* device_adapter, const int session_id) = 0;
 };
 }//namespace
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER

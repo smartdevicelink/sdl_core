@@ -311,7 +311,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
     /**
      * @brief Reference to device adapter.
      **/
-    DeviceAdapter& device_adapter_;
+    DeviceAdapterImpl& device_adapter_;
 
     /**
      * @brief Connection handle.
@@ -429,7 +429,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
    **/
-  virtual void connection_thread(const ConnectionHandle connection_handle) = 0;
+  virtual void connectionThread(const ConnectionHandle connection_handle) = 0;
 
   /**
    * @brief Connections map.
