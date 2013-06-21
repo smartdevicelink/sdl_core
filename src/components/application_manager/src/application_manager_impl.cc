@@ -46,12 +46,18 @@ ApplicationManagerImpl::ApplicationManagerImpl()
   audio_pass_thru_flag_(false),
   perform_audio_thread_(NULL),
   attenuated_supported_(false),
-  driver_distraction_(hmi_apis::Common_DriverDistractionState::INVALID_ENUM ) {
+  driver_distraction_(hmi_apis::Common_DriverDistractionState::INVALID_ENUM ),
+  ui_supported_languages_(NULL),
+  tts_supported_languages_(NULL),
+  vr_supported_languages_(NULL) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
   delete perform_audio_thread_;
+  delete ui_supported_languages_;
+  delete tts_supported_languages_;
+  delete vr_supported_languages_;
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -243,6 +249,33 @@ void ApplicationManagerImpl::set_attenuated_supported(bool state) {
 void ApplicationManagerImpl::set_driver_distraction(
     const hmi_apis::Common_DriverDistractionState::eType& state) {
   driver_distraction_ = state;
+}
+
+void ApplicationManagerImpl::set_ui_supported_languages(
+    const smart_objects::CSmartObject& supported_languages) {
+  if (ui_supported_languages_) {
+    delete ui_supported_languages_;
+  }
+  ui_supported_languages_ =
+    new smart_objects::CSmartObject(supported_languages);
+}
+
+void ApplicationManagerImpl::set_tts_supported_languages(
+    const smart_objects::CSmartObject& supported_languages) {
+  if (tts_supported_languages_) {
+    delete tts_supported_languages_;
+  }
+  tts_supported_languages_ =
+    new smart_objects::CSmartObject(supported_languages);
+}
+
+void ApplicationManagerImpl::set_vr_supported_languages(
+    const smart_objects::CSmartObject& supported_languages) {
+  if (vr_supported_languages_) {
+    delete vr_supported_languages_;
+  }
+  vr_supported_languages_ =
+    new smart_objects::CSmartObject(supported_languages);
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,

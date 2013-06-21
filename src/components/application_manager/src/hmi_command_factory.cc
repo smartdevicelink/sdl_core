@@ -44,12 +44,16 @@
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 #include "application_manager/commands/hmi/exit_all_applications_request.h"
 #include "application_manager/commands/hmi/exit_all_applications_response.h"
+#include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
+#include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
 #include "application_manager/commands/hmi/vr_add_command_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
+#include "application_manager/commands/hmi/activate_app_request.h"
+#include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
@@ -57,9 +61,6 @@
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
-#include "application_manager/commands/hmi/activate_app_request.h"
-#include "application_manager/commands/hmi/activate_app_response.h"
-
 
 namespace application_manager {
 
@@ -92,6 +93,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::ExitAllApplicationsResponse(message));
       } else {
         command.reset(new commands::ExitAllApplicationsRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_GetSupportedLanguages: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIGetSupportedLanguagesResponse(message));
+      } else {
+        command.reset(new commands::UIGetSupportedLanguagesRequest(message));
       }
       break;
     }

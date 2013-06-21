@@ -53,6 +53,8 @@ class CSmartObject;
 }
 }
 
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
 namespace threads {
 class Thread;
 }
@@ -194,6 +196,54 @@ class ApplicationManagerImpl : public ApplicationManager
         const hmi_apis::Common_DriverDistractionState::eType& state);
 
     /*
+     * @brief Retrieves UI supported languages
+     *
+     * @return Currently supported UI languages
+     */
+    inline const smart_objects::CSmartObject*
+      ui_supported_languages() const;
+
+    /*
+     * @brief Sets supported UI languages
+     *
+     * @param supported_languages Supported UI languages
+     */
+    void set_ui_supported_languages(
+        const smart_objects::CSmartObject& supported_languages);
+
+    /*
+     * @brief Retrieves TTS  supported languages
+     *
+     * @return Currently supported TTS languages
+     */
+    inline const smart_objects::CSmartObject*
+      tts_supported_languages() const;
+
+    /*
+     * @brief Sets supported TTS languages
+     *
+     * @param supported_languages Supported TTS languages
+     */
+    void set_tts_supported_languages(
+        const smart_objects::CSmartObject& supported_languages);
+
+    /*
+     * @brief Retrieves VR supported languages
+     *
+     * @return Currently supported VR languages
+     */
+    inline const smart_objects::CSmartObject*
+      vr_supported_languages() const;
+
+    /*
+     * @brief Sets supported VR languages
+     *
+     * @param supported_languages Supported VR languages
+     */
+    void set_vr_supported_languages(
+        const smart_objects::CSmartObject& supported_languages);
+
+    /*
      * @brief Starts audio pass thru thread
      *
      * @param session_key     Session key of connection for Mobile side
@@ -288,6 +338,9 @@ class ApplicationManagerImpl : public ApplicationManager
     threads::Thread*                                perform_audio_thread_;
     bool                                            attenuated_supported_;
     hmi_apis::Common_DriverDistractionState::eType  driver_distraction_;
+    smart_objects::CSmartObject*                    ui_supported_languages_;
+    smart_objects::CSmartObject*                    tts_supported_languages_;
+    smart_objects::CSmartObject*                    vr_supported_languages_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
@@ -299,6 +352,21 @@ const std::set<Application*>& ApplicationManagerImpl::applications() const {
 const hmi_apis::Common_DriverDistractionState::eType&
     ApplicationManagerImpl::driver_distraction() const {
   return driver_distraction_;
+}
+
+const smart_objects::CSmartObject*
+    ApplicationManagerImpl::ui_supported_languages() const {
+  return ui_supported_languages_;
+}
+
+const smart_objects::CSmartObject*
+    ApplicationManagerImpl::tts_supported_languages() const {
+  return tts_supported_languages_;
+}
+
+const smart_objects::CSmartObject*
+    ApplicationManagerImpl::vr_supported_languages() const {
+  return vr_supported_languages_;
 }
 
 }  // namespace application_manager
