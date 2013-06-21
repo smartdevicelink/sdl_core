@@ -101,7 +101,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void addDeviceAdapterListener(DeviceAdapterListener *listener);
+	virtual void set_device_adapter_listener(DeviceAdapterListener *listener);
 
 	/**
 	 * @brief add new device adapter
@@ -111,6 +111,15 @@ public:
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
 	virtual void addDeviceAdapter(DeviceAdapter *device_adapter);
+
+	/**
+	 * @brief interface function to wake up adapter listener thread
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual pthread_cond_t event_thread_wakeup(void);
 
 protected:
 
@@ -234,7 +243,7 @@ protected:
 	/**
 	 * @brief Device adapter listener.
 	 **/
-	std::vector<DeviceAdapterListener *> device_adapter_listener_;
+	DeviceAdapterListener *device_adapter_listener_;
 
 	/**
 	 * @brief ID of message queue processing thread

@@ -44,6 +44,7 @@ namespace transport_manager
 class DeviceAdapterListenerImpl :public DeviceAdapterListener
 {
 public:
+	DeviceAdapterListenerImpl(transport_manager::TransportManager *tm);
 	virtual ~DeviceAdapterListenerImpl();
 
 	virtual void OnSearchDeviceDone(const DeviceAdapter* device_adapter);
@@ -68,6 +69,7 @@ private:
 	* \brief For logging.
 	*/
 	static log4cxx::LoggerPtr logger_;
+	transport_manager::TransportManager *transport_manager_;
 
 };
 } // namespace transport_manager

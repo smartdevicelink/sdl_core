@@ -115,7 +115,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void addDeviceAdapterListener(DeviceAdapterListener *listener) = 0;
+	virtual void set_device_adapter_listener(DeviceAdapterListener *listener) = 0;
 
 	/**
 	 * @brief add new device adapter
@@ -125,6 +125,15 @@ public:
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
 	virtual void addDeviceAdapter(DeviceAdapter *device_adapter) = 0;
+
+	/**
+	 * @brief interface function to wake up adapter listener thread
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual pthread_cond_t event_thread_wakeup(void) = 0;
 
 
 };

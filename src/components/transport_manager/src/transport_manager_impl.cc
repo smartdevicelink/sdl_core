@@ -40,9 +40,6 @@
 
 namespace transport_manager {
 
-class BluetoothAdapter;
-class TCPAdapter;
-
 log4cxx::LoggerPtr TransportManagerImpl::logger_ =
     log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "TransportManager"));
 
@@ -59,9 +56,12 @@ TransportManagerImpl::TransportManagerImpl():
     pthread_mutex_init(&queue_mutex_, 0);
     pthread_mutex_init(&event_thread_mutex_, 0);
     pthread_cond_init(&event_thread_wakeup_, NULL);
-    device_adapter_listener_ = new DeviceAdapterListenerImpl();
-    addDeviceAdapter(new BluetoothAdapter(device_adapter_listener_));
-    addDeviceAdapter(new TCPAdapter(device_adapter_listener_));
+    device_adapter_listener_ = new DeviceAdapterListenerImpl(this);
+    DeviceAdapter *d = new BluetoothAdapter();
+    d->Init(device_adapter_listener_, NULL, NULL);
+    addDeviceAdapter(d);
+    //addDeviceAdapter(new TCPAdapter());
+
 }
 
 TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter):
@@ -78,7 +78,7 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter):
     pthread_mutex_init(&event_thread_mutex_, 0);
     pthread_cond_init(&event_thread_wakeup_, NULL);
     device_adapter_listener_ = new DeviceAdapterListenerImpl();
-    device_adapter->Init(device_adapter_listener_);
+    device_adapter->Init(device_adapter_listener_, NULL, NULL);
     addDeviceAdapter(device_adapter);
 }
 
@@ -108,6 +108,7 @@ TransportManagerImpl::~TransportManagerImpl(){
 	for (std::vector<DeviceAdapter*>::iterator device = device_adapters_.begin(); device != device_adapters_.end(); ++device){
 		delete (*device);
 	}
+	delete device_adapter_listener_;
 }
 
 TransportManagerImpl* TransportManagerImpl::instance() {
@@ -128,8 +129,8 @@ void TransportManagerImpl::postMessage(const protocol_handler::RawMessage messag
 	pthread_mutex_unlock(&queue_mutex_);
 }
 
-void TransportManagerImpl::addDeviceAdapterListener(DeviceAdapterListener *listener){
-	device_adapter_listener_.push_back(listener);
+void TransportManagerImpl::set_device_adapter_listener(DeviceAdapterListener *listener){
+	device_adapter_listener_ = listener;
 }
 
 void TransportManagerImpl::initialize(void){
@@ -214,6 +215,10 @@ void TransportManagerImpl::searchDevices(void) const {
 		}
 	}
 
+}
+
+pthread_cond_t TransportManagerImpl::event_thread_wakeup(void){
+	return event_thread_wakeup_;
 }
 
 }//namespace

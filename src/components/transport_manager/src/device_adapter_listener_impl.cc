@@ -33,6 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <pthread.h>
+#include "transport_manager/device_adapter.h"
 #include "transport_manager/device_adapter_listener.h"
 
 
@@ -41,9 +43,12 @@ namespace transport_manager {
 
 log4cxx::LoggerPtr DeviceAdapterListenerImpl::logger_ =
     log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "DeviceAdapterListener"));
+DeviceAdapterListenerImpl::DeviceAdapterListenerImpl(transport_manager::TransportManager *tm){
+	transport_manager_ = tm;
+}
 
 void DeviceAdapterListenerImpl::OnSearchDeviceDone(const DeviceAdapter* device_adapter){
-
+	pthread_cond_signal(&(transport_manager_->event_thread_wakeup()));
 }
 
 void DeviceAdapterListenerImpl::OnSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error){
