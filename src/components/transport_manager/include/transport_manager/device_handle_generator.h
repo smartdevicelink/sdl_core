@@ -41,8 +41,6 @@
 namespace transport_manager
 {
 
-typedef int DeviceHandle;
-
 /**
  * @brief Interface for device handle generator.
  * @interface DeviceHandleGenerator

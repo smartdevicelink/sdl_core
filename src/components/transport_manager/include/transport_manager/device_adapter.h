@@ -44,6 +44,9 @@ namespace transport_manager
 class DataContainer;
 class DeviceAdapterListener;
 typedef std::string DeviceType;
+typedef int DeviceHandle;
+typedef int ApplicationHandle;
+typedef std::vector<ApplicationHandle> ApplicationList;
 typedef std::vector<DeviceHandle> DeviceList;
 
 typedef utils::SharedPtr<DataContainer> DataContainerSptr;
@@ -56,28 +59,29 @@ public:
 public:
   virtual ~DeviceAdapter();
 
-  virtual DeviceType GetDeviceType() const = 0;
+  virtual DeviceType getDeviceType() const = 0;
 
   /* TODO
   virtual Error LoadState(DeviceAdapterState* state) = 0;
   virtual void SaveState(DeviceAdapterState* state) = 0;
   */
 
-  virtual Error Init(DeviceAdapterListener* listener, HandleGenerator* handle_generator, Configuration* configuration) = 0;
+  virtual Error init(DeviceAdapterListener* listener, Configuration* configuration) = 0;
 
-  virtual bool IsSearchDevicesSupported() const = 0;
-  virtual Error SearchDevices() = 0;
+  virtual bool isSearchDevicesSupported() const = 0;
+  virtual Error searchDevices() = 0;
 
-  virtual bool IsServerOriginatedConnectSupported() const = 0;
-  virtual Error ConnectDevice(const DeviceHandle device_handle) = 0;
+  virtual bool isServerOriginatedConnectSupported() const = 0;
+  virtual Error connect(const DeviceHandle device_handle, const ApplicationHandle app_handle, const int session_id) = 0;
 
-  virtual bool IsClientOriginatedConnectSupported() const = 0;
+  virtual bool isClientOriginatedConnectSupported() const = 0;
 
-  virtual void DisconnectDevice(const DeviceHandle device_handle) = 0;
+  virtual void disconnect(const int session_id) = 0;
 
-  virtual void SendData(const DeviceHandle device_handle, const DataContainerSptr data_container) = 0;
+  virtual void sendData(const int session_id) = 0;
 
-  virtual DeviceList GetDeviceList() const = 0;
+  virtual DeviceList getDeviceList() const = 0;
+  virtual ApplicationList getApplicationList(const DeviceHandle device_handle) const = 0;
 };
 
 class DeviceAdapterError

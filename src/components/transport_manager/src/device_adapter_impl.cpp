@@ -844,7 +844,7 @@ void* DeviceAdapterImpl::connectionThreadStartRoutine(void* data)
 
     if (0 != connectionThreadParameters)
     {
-        DeviceAdapter& deviceAdapter(connectionThreadParameters->device_adapter_);
+        DeviceAdapterImpl& deviceAdapter(connectionThreadParameters->device_adapter_);
         ConnectionHandle connectionHandle(connectionThreadParameters->connection_handle_);
 
         delete connectionThreadParameters;
