@@ -37,6 +37,9 @@ namespace application_manager {
 
 namespace commands {
 
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+
 UIGetSupportedLanguagesResponse::UIGetSupportedLanguagesResponse(
     const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
@@ -45,6 +48,7 @@ UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {
 }
 
 void UIGetSupportedLanguagesResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesResponse::Run ");
   ApplicationManagerImpl::instance()->set_ui_supported_languages(
       (*message_)[strings::msg_params][hmi_response::languages]);
 }

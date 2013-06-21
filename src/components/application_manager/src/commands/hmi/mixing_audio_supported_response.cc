@@ -31,10 +31,14 @@
  */
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 #include "application_manager/application_manager_impl.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
+
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 MixingAudioSupportedResponse::MixingAudioSupportedResponse(
     const MessageSharedPtr& message): ResponseFromHMI(message) {
@@ -44,6 +48,7 @@ MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {
 }
 
 void MixingAudioSupportedResponse::Run() {
+  LOG4CXX_INFO(logger_, "MixingAudioSupportedResponse::Run ");
   ApplicationManagerImpl::instance()->set_attenuated_supported((*message_)
       [strings::msg_params][hmi_response::attenuated_supported].asBool());
 }

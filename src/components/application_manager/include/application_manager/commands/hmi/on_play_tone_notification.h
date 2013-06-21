@@ -30,29 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PLAY_TONE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PLAY_TONE_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_to_hmi.h"
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+/**
+ * @brief OnPlayToneNotification command class
+ **/
+class OnPlayToneNotification : public NotificationToHMI {
+ public:
+  /**
+   * @brief OnPlayToneNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnPlayToneNotification(const MessageSharedPtr& message);
 
-UIGetSupportedLanguagesRequest::UIGetSupportedLanguagesRequest(
-    const MessageSharedPtr& message): RequestToHMI(message) {
-}
+  /**
+   * @brief OnPlayToneNotification class destructor
+   **/
+  virtual ~OnPlayToneNotification();
 
-UIGetSupportedLanguagesRequest::~UIGetSupportedLanguagesRequest() {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-void UIGetSupportedLanguagesRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesRequest::Run ");
-  SendRequest();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnPlayToneNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PLAY_TONE_NOTIFICATION_H_

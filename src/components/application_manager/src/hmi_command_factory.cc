@@ -61,6 +61,7 @@
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
+#include "application_manager/commands/hmi/on_play_tone_notification.h"
 
 namespace application_manager {
 
@@ -167,6 +168,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppUnregistered: {
       command.reset(new commands::OnAppUnregisteredNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_PlayTone: {
+      command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
   }

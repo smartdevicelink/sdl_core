@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
+#include "application_manager/commands/hmi/on_play_tone_notification.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -40,16 +40,16 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-UIGetSupportedLanguagesRequest::UIGetSupportedLanguagesRequest(
-    const MessageSharedPtr& message): RequestToHMI(message) {
+OnPlayToneNotification::OnPlayToneNotification(
+    const MessageSharedPtr& message): NotificationToHMI(message) {
 }
 
-UIGetSupportedLanguagesRequest::~UIGetSupportedLanguagesRequest() {
+OnPlayToneNotification::~OnPlayToneNotification() {
 }
 
-void UIGetSupportedLanguagesRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesRequest::Run ");
-  SendRequest();
+void OnPlayToneNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnPlayToneNotification::Run ");
+  SendNotification();
 }
 
 }  // namespace commands

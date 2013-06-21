@@ -31,11 +31,15 @@
  */
 
 #include "application_manager/commands/hmi/mixing_audio_supported_request.h"
+#include "utils/logger.h"
 
 
 namespace application_manager {
 
 namespace commands {
+
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 MixingAudioSupportedRequest::MixingAudioSupportedRequest(
     const MessageSharedPtr& message): RequestToHMI(message) {
@@ -45,6 +49,7 @@ MixingAudioSupportedRequest::~MixingAudioSupportedRequest() {
 }
 
 void MixingAudioSupportedRequest::Run() {
+  LOG4CXX_INFO(logger_, "MixingAudioSupportedRequest::Run ");
   SendRequest();
 }
 
