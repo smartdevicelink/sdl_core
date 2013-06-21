@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/device_adapter.h"
+#include "transport_manager/device_adapter_listener.h"
 
 
 namespace transport_manager {
@@ -42,4 +42,47 @@ namespace transport_manager {
 log4cxx::LoggerPtr DeviceAdapterListenerImpl::logger_ =
     log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "DeviceAdapterListener"));
 
+void DeviceAdapterListenerImpl::OnSearchDeviceDone(const DeviceAdapter* device_adapter){
+
 }
+
+void DeviceAdapterListenerImpl::OnSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error){
+
+}
+
+void DeviceAdapterListenerImpl::OnDeviceConnectDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle){
+
+}
+
+void DeviceAdapterListenerImpl::OnDeviceConnectFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const ConnectDeviceError& error){
+
+}
+
+void DeviceAdapterListenerImpl::OnDeviceDisconnecteDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle){
+
+}
+void DeviceAdapterListenerImpl::OnDeviceDisconnecteFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DisconnectDeviceError& error){
+
+}
+
+void DeviceAdapterListenerImpl::OnDataReceiveDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataContainerSptr data_container){
+
+}
+
+void DeviceAdapterListenerImpl::OnDataReceiveFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataReceiveError& error){
+
+}
+
+void DeviceAdapterListenerImpl::OnDataSendDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataContainerSptr data_container){
+
+}
+
+void DeviceAdapterListenerImpl::OnDataSendFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataSendError& error){
+
+}
+
+void DeviceAdapterListenerImpl::OnCommunicationError(const DeviceAdapter* device_adapter, CommunicationError& error){
+
+}
+
+}//namespace

@@ -55,6 +55,13 @@ typedef int SessionID;
 typedef int EventType;
 
 /**
+ * @brief type for
+ *
+ * @see @ref components_transportmanager_client_connection_management
+ **/
+typedef int EventCallback;
+
+/**
  * @brief Interface of transport manager.
  * @interface TransportManager
  **/
@@ -99,7 +106,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void postMessage(const application_manager::Message message) = 0;
+	virtual void postMessage(const protocol_handler::RawMessage message) = 0;
 
 	/**
 	 * @brief adds new call back function for specified event type
@@ -108,34 +115,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void addEventListener(const EventType event_type, const int *(Callback)(int *Data)) = 0;
-
-	/**
-	 * @brief set new module that will process errors
-	 *
-	 * @param error handler
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void set_error_handler(const int ErrorHandler) = 0;
-
-	/**
-	 * @brief set new module that will handle messages
-	 *
-	 * @param message container
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void set_message_container(const int MessageContainer) = 0;
-
-	/**
-	 * @brief set new module that will exchange data in thread safe way
-	 *
-	 * @param data transmitter
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void set_data_transmitter(const int DataTransmitter) = 0;
+	virtual void addDeviceAdapterListener(DeviceAdapterListener *listener) = 0;
 
 	/**
 	 * @brief add new device adapter
@@ -145,6 +125,7 @@ public:
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
 	virtual void addDeviceAdapter(DeviceAdapter *device_adapter) = 0;
+
 
 };
 }

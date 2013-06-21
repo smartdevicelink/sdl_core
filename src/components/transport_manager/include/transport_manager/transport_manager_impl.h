@@ -49,7 +49,7 @@ class TransportManagerImpl : public TransportManager
 {
 public:
 	/**
-	 * @brief provide instance of transport manager
+	 * @brief provide default instance of transport manager
 	 *
 	 * @see @ref components_transportmanager_client_device_management
 	 **/
@@ -92,7 +92,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void postMessage(const application_manager::Message message);
+	virtual void postMessage(const protocol_handler::RawMessage message);
 
 	/**
 	 * @brief adds new call back function for specified event type
@@ -101,34 +101,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void addEventListener(const EventType event_type, const int *(Callback)(int *Data));
-
-	/**
-	 * @brief set new module that will process errors
-	 *
-	 * @param error handler
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void set_error_handler(const int ErrorHandler);
-
-	/**
-	 * @brief set new module that will handle messages
-	 *
-	 * @param message container
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void set_message_container(const int MessageContainer);
-
-	/**
-	 * @brief set new module that will exchange data in thread safe way
-	 *
-	 * @param data transmitter
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void set_data_transmitter(const int DataTransmitter);
+	virtual void addDeviceAdapterListener(DeviceAdapterListener *listener);
 
 	/**
 	 * @brief add new device adapter
@@ -146,14 +119,7 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	typedef std::queue<application_manager::Message> MessageQueue;
-
-	/**
-	 * @brief type for
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	typedef int DeviceHandle;
+	typedef std::vector<protocol_handler::RawMessage> MessageQueue;
 
 	/**
 	 * @brief type for
@@ -182,6 +148,24 @@ protected:
 	TransportManagerImpl();
 
 	/**
+	 * @brief constructor used to create new TM with device adapter
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter);
+
+	/**
+	 * @brief constructor used to create new TM with device adapter
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	TransportManagerImpl::TransportManagerImpl(std::vector<DeviceAdapter *> device_adapter_list);
+
+	/**
 	 * @brief scan message's queue and pull messages according to priority and serial number
 	 *
 	 * @param
@@ -189,6 +173,15 @@ protected:
 	 * @see @ref components_transportmanager_client_connection_management
 	 */
 	static void *processQueue(void *);
+
+	/**
+	 * @brief whait until event happens
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 */
+	static void *deviceListener(void *);
 
 	/**
 	 * @brief initialize TM
@@ -226,13 +219,12 @@ protected:
 	/**
 	 * @brief Mutex restricting access to messages.
 	 **/
-
 	mutable pthread_mutex_t queue_mutex_;
+
 	/**
 	 * @brief flag that indicates that thread must be terminated
 	 **/
-
-	mutable bool process_queue_terminate_;
+	mutable bool all_thread_active_;
 
 	/**
 	 * @brief Device adapters.
@@ -240,9 +232,29 @@ protected:
 	std::vector<DeviceAdapter *> device_adapters_;
 
 	/**
+	 * @brief Device adapter listener.
+	 **/
+	std::vector<DeviceAdapterListener *> device_adapter_listener_;
+
+	/**
 	 * @brief ID of message queue processing thread
 	 **/
 	pthread_t messsage_queue_thread_;
+
+	/**
+	 * @brief conditional event thread
+	 **/
+	pthread_t event_thread_;
+
+	/**
+	 * @brief condition variable to wake up event
+	 **/
+	pthread_cond_t event_thread_wakeup_;
+
+	/**
+	 * @brief Mutex restricting access to events.
+	 **/
+	mutable pthread_mutex_t event_thread_mutex_;
 };
 }
 

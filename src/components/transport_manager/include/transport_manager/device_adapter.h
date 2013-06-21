@@ -41,7 +41,6 @@
 namespace transport_manager
 {
 
-class DeviceHandle;
 class DataContainer;
 class DeviceAdapterListener;
 typedef std::string DeviceType;

@@ -36,6 +36,7 @@
 #include <queue>
 #include <pthread.h>
 #include "transport_manager/transport_manager_impl.h"
+#include "transport_manager/device_adapter_listener_impl.h"
 
 namespace transport_manager {
 
@@ -47,19 +48,63 @@ log4cxx::LoggerPtr TransportManagerImpl::logger_ =
 
 TransportManagerImpl::TransportManagerImpl():
 		queue_mutex_(),
-		process_queue_terminate_(false),
+		all_thread_active_(false),
 		device_adapters_(),
-		messsage_queue_thread_()
+		messsage_queue_thread_(),
+		event_thread_(),
+		event_thread_wakeup_(),
+		device_adapter_listener_()
 {
 
     pthread_mutex_init(&queue_mutex_, 0);
-    addDeviceAdapter(new BluetoothAdapter());
-    addDeviceAdapter(new TCPAdapter());
+    pthread_mutex_init(&event_thread_mutex_, 0);
+    pthread_cond_init(&event_thread_wakeup_, NULL);
+    device_adapter_listener_ = new DeviceAdapterListenerImpl();
+    addDeviceAdapter(new BluetoothAdapter(device_adapter_listener_));
+    addDeviceAdapter(new TCPAdapter(device_adapter_listener_));
 }
+
+TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter):
+		queue_mutex_(),
+		all_thread_active_(false),
+		device_adapters_(),
+		messsage_queue_thread_(),
+		event_thread_(),
+		event_thread_wakeup_(),
+		device_adapter_listener_()
+{
+
+    pthread_mutex_init(&queue_mutex_, 0);
+    pthread_mutex_init(&event_thread_mutex_, 0);
+    pthread_cond_init(&event_thread_wakeup_, NULL);
+    device_adapter_listener_ = new DeviceAdapterListenerImpl();
+    device_adapter->Init(device_adapter_listener_);
+    addDeviceAdapter(device_adapter);
+}
+
+/*todo:
+TransportManagerImpl::TransportManagerImpl(std::vector<DeviceAdapter *> device_adapter_list):
+		queue_mutex_(),
+		all_thread_active_(false),
+		device_adapters_(),
+		messsage_queue_thread_(),
+		event_thread_(),
+		event_thread_wakeup_(),
+		device_adapter_listener_()
+{
+
+    pthread_mutex_init(&queue_mutex_, 0);
+    pthread_mutex_init(&event_thread_mutex_, 0);
+    pthread_cond_init(&event_thread_wakeup_, NULL);
+    device_adapters_ = device_adapter_list;
+}
+*/
 
 TransportManagerImpl::~TransportManagerImpl(){
 
 	pthread_mutex_destroy(&queue_mutex_);
+	pthread_mutex_destroy(&event_thread_mutex_);
+	pthread_cond_destroy(&event_thread_wakeup_);
 	for (std::vector<DeviceAdapter*>::iterator device = device_adapters_.begin(); device != device_adapters_.end(); ++device){
 		delete (*device);
 	}
@@ -77,26 +122,14 @@ void TransportManagerImpl::disconnectDevice(const int SessionID){
 
 }
 
-void TransportManagerImpl::postMessage(const application_manager::Message message){
+void TransportManagerImpl::postMessage(const protocol_handler::RawMessage message){
 	pthread_mutex_lock(&queue_mutex_);
-	queue_.push(message);
+	queue_.push_back(message);
 	pthread_mutex_unlock(&queue_mutex_);
 }
 
-void TransportManagerImpl::addEventListener(const int EventType, const int *(Callback)(int *Data)){
-
-}
-
-void TransportManagerImpl::set_error_handler(const int ErrorHandler){
-
-}
-
-void TransportManagerImpl::set_message_container(const int MessageContainer){
-
-}
-
-void TransportManagerImpl::set_data_transmitter(const int DataTransmitter){
-
+void TransportManagerImpl::addDeviceAdapterListener(DeviceAdapterListener *listener){
+	device_adapter_listener_.push_back(listener);
 }
 
 void TransportManagerImpl::initialize(void){
@@ -106,12 +139,34 @@ void TransportManagerImpl::initialize(void){
     if (0 == error_code) {
     }
     else {
+    	return;
     }
+
+	int error_code = pthread_create(&event_thread_, 0, &deviceListener, 0);
+
+    if (0 == error_code) {
+    }
+    else {
+    	return;
+    }
+    all_thread_active_ = true;
 }
 
+void *TransportManagerImpl::deviceListener(void *){
+
+	while(true == all_thread_active_){
+
+		pthread_mutex_lock(&event_thread_mutex_);
+		pthread_cond_wait(&event_thread_wakeup_, &event_thread_mutex_);
+		pthread_mutex_unlock(&event_thread_mutex_);
+	}
+
+
+	return 0;
+}
 void *TransportManagerImpl::processQueue(void *){
 
-	while(true == process_queue_terminate_){
+	while(true == all_thread_active_){
 		/*
 		//get higher priority messages
 		u_int priority = 0;
@@ -128,23 +183,38 @@ void *TransportManagerImpl::processQueue(void *){
 		*/
 
 		u_int serial_number = 0;
-		for(std::deque<application_manager::Message>::iterator msg = queue_.c.begin(); msg != queue_.c.end(); ++msg){
-			if(msg.serial_number > serial_number){
-				active_msg = msg;
-				serial_number = msg.serial_number;
+		protocol_handler::RawMessage active_msg;
+		for(std::vector<protocol_handler::RawMessage>::iterator msg = queue_.begin(); msg != queue_.end(); ++msg){
+			if((*msg).serial_number() > serial_number){
+				active_msg = (*msg);
+				serial_number = (*msg).serial_number();
 			}
 		}
-		ConnectionHandle *connection = getConnectionHandler(active_msg.session_id);
-		connection->device_adapter->SendData(connection->device_handle, active_msg.data);
+		DataContainer dc = new DataContainer(active_msg.data(), active_msg.data_size());
+		ConnectionHandle *connection = getConnectionHandler(active_msg.connection_key());
+		connection->device_adapter->SendData(connection->device_handle, dc);
 
 		pthread_mutex_lock(&queue_mutex_);
-		queue_.remove(active_msg);
+		queue_.erase(std::remove(queue_.begin(), queue_.end(), active_msg), queue_.end());
 		pthread_mutex_unlock(&queue_mutex_);
 
 	}//while(true)
 	return 0;
 }
+
 void TransportManagerImpl::addDeviceAdapter(DeviceAdapter *device_adapter){
 	device_adapters_.push_back(device_adapter);
 }
+
+void TransportManagerImpl::searchDevices(void) const {
+	for(std::vector<DeviceAdapter *>::iterator da = device_adapters_.begin(); da != device_adapters_.end(); ++da){
+		DeviceAdapter::Error err = (*da)->SearchDevices();
+		if(DeviceAdapter::Error::OK == err){
+			;
+		}
+	}
+
 }
+
+}//namespace
+
