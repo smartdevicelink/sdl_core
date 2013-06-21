@@ -52,8 +52,8 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::hmi_level] =
                                                 application_impl.hmi_level();
 
-  // message[strings::msg_params][strings::audio_streaming_state] =
-  //                           application_impl.audio_streaming_state();
+  message[strings::msg_params][strings::audio_streaming_state] =
+                             application_impl.audio_streaming_state();
 
   message[strings::msg_params][strings::system_context] =
       application_impl.system_context();
