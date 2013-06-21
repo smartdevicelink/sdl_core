@@ -56,6 +56,7 @@
 #include "application_manager/commands/hmi/on_device_list_updated_notification.h"
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
+#include "application_manager/commands/hmi/on_driver_distraction_notification.h"
 
 
 namespace application_manager {
@@ -129,6 +130,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::eType::UI_OnSystemContext: {
       command.reset(new commands::OnSystemContextNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_OnDriverDistraction: {
+      command.reset(new commands::OnDriverDistractionNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::eType::BasicCommunication_OnDeviceListUpdated: {
