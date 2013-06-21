@@ -33,26 +33,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
 
 #include "utils/shared_ptr.h"
-#include "device_handle_generator.h"
 
 namespace transport_manager
 {
 
+class DeviceHandle;
 class DataContainer;
 class DeviceAdapterListener;
 typedef std::string DeviceType;
 typedef std::vector<DeviceHandle> DeviceList;
 
-typedef const utils::SharedPtr<DataContainer> DataContainerSptr;
+typedef utils::SharedPtr<DataContainer> DataContainerSptr;
 
 class DeviceAdapter
 {
 public:
-  enum Error {OK, NOT_SUPPORTED, NOT_INITIALIZED, BAD_ARGUMENT};
+  enum Error {OK, NOT_SUPPORTED};
 
 public:
   virtual ~DeviceAdapter();
@@ -64,22 +64,21 @@ public:
   virtual void SaveState(DeviceAdapterState* state) = 0;
   */
 
-  class Configuration; // FIXME
-  virtual Error init(DeviceAdapterListener* listener, DeviceHandleGenerator* handle_generator, Configuration* configuration) = 0;
+  virtual Error Init(DeviceAdapterListener* listener, HandleGenerator* handle_generator, Configuration* configuration) = 0;
 
-  virtual bool isSearchDevicesSupported() const = 0;
-  virtual Error searchDevices() = 0;
+  virtual bool IsSearchDevicesSupported() const = 0;
+  virtual Error SearchDevices() = 0;
 
-  virtual bool isServerOriginatedConnectSupported() const = 0;
-  virtual Error connectDevice(const DeviceHandle device_handle) = 0;
+  virtual bool IsServerOriginatedConnectSupported() const = 0;
+  virtual Error ConnectDevice(const DeviceHandle device_handle) = 0;
 
-  virtual bool isClientOriginatedConnectSupported() const = 0;
+  virtual bool IsClientOriginatedConnectSupported() const = 0;
 
-  virtual Error disconnectDevice(const DeviceHandle device_handle) = 0;
+  virtual void DisconnectDevice(const DeviceHandle device_handle) = 0;
 
-  virtual Error sendData(const DeviceHandle device_handle, const DataContainerSptr data_container) = 0;
+  virtual void SendData(const DeviceHandle device_handle, const DataContainerSptr data_container) = 0;
 
-  virtual DeviceList getDeviceList() const = 0;
+  virtual DeviceList GetDeviceList() const = 0;
 };
 
 class DeviceAdapterError
@@ -110,29 +109,6 @@ class CommunicationError : public DeviceAdapterError
 {
 };
 
-class DeviceAdapterListener
-{
-public:
-  virtual ~DeviceAdapterListener();
-
-  virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter) = 0;
-  virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error) = 0;
-
-  virtual void onDeviceConnectDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle) = 0;
-  virtual void onDeviceConnectFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const ConnectDeviceError& error) = 0;
-
-  virtual void onDeviceDisconnecteDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle) = 0;
-  virtual void onDeviceDisconnecteFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DisconnectDeviceError& error) = 0;
-
-  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataContainerSptr data_container) = 0;
-  virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataReceiveError& error) = 0;
-
-  virtual void onDataSendDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataContainerSptr data_container) = 0;
-  virtual void onDataSendFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataSendError& error) = 0;
-
-  virtual void onCommunicationError(const DeviceAdapter* device_adapter, CommunicationError& error) = 0;
-};
-
 class DataContainer
 {
 public:
@@ -141,4 +117,4 @@ public:
 
 } // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
