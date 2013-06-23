@@ -36,6 +36,7 @@
 #include <pthread.h>
 #include "transport_manager/device_adapter.h"
 #include "transport_manager/device_adapter_listener.h"
+#include "transport_manager/transport_manager_impl.h"
 
 
 namespace transport_manager {
@@ -43,12 +44,12 @@ namespace transport_manager {
 
 log4cxx::LoggerPtr DeviceAdapterListenerImpl::logger_ =
     log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "DeviceAdapterListener"));
-DeviceAdapterListenerImpl::DeviceAdapterListenerImpl(transport_manager::TransportManager *tm){
-	transport_manager_ = tm;
+DeviceAdapterListenerImpl::DeviceAdapterListenerImpl(transport_manager::TransportManagerImpl *tm){
+	transport_manager_impl_ = tm;
 }
 
 void DeviceAdapterListenerImpl::OnSearchDeviceDone(const DeviceAdapter* device_adapter){
-	pthread_cond_signal(&(transport_manager_->event_thread_wakeup()));
+	pthread_cond_signal(&(transport_manager_impl_->device_listener_thread_wakeup()));
 }
 
 void DeviceAdapterListenerImpl::OnSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error){

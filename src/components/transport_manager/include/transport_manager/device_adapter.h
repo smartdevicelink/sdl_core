@@ -42,7 +42,7 @@ namespace transport_manager
 {
 
 class DataContainer;
-class DeviceAdapterListener;
+class Configuration;
 typedef std::string DeviceType;
 typedef int DeviceHandle;
 typedef int ApplicationHandle;

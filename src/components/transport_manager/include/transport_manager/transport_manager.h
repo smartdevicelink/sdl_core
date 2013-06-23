@@ -35,7 +35,8 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER
 
-#include "device_adapter.h"
+#include "transport_manager/device_adapter.h"
+#include "transport_manager/transport_manager_listener.h"
 
 
 namespace transport_manager
@@ -46,20 +47,6 @@ namespace transport_manager
  * @see @ref components_transportmanager_client_connection_management
  **/
 typedef int SessionID;
-
-/**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
- **/
-typedef int EventType;
-
-/**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
- **/
-typedef int EventCallback;
 
 /**
  * @brief Interface of transport manager.
@@ -106,16 +93,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void postMessage(const protocol_handler::RawMessage message) = 0;
-
-	/**
-	 * @brief adds new call back function for specified event type
-	 *
-	 * @param event type, function address
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void set_device_adapter_listener(DeviceAdapterListener *listener) = 0;
+	virtual void sendMessageToDevice(const protocol_handler::RawMessage message) = 0;
 
 	/**
 	 * @brief add new device adapter
@@ -127,14 +105,22 @@ public:
 	virtual void addDeviceAdapter(DeviceAdapter *device_adapter) = 0;
 
 	/**
-	 * @brief interface function to wake up adapter listener thread
+	 * @brief register event listener that would be called when something happened in TM
 	 *
-	 * @param
+	 * @param event listener
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual pthread_cond_t event_thread_wakeup(void) = 0;
+	virtual void registerEventListener(TransportManagerListener *listener) = 0;
 
+	/**
+	 * @brief register listener that would be used to catch adapter's events
+	 *
+	 * @param event listener
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void registerAdapterListener(DeviceAdapterListener *listener) = 0;
 
 };
 }

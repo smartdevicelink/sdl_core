@@ -36,7 +36,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER_IMPL
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER_IMPL
 
+#include "transport_manager/device_adapter.h"
 #include "transport_manager/device_adapter_listener.h"
+#include "transport_manager/transport_manager_impl.h"
 
 namespace transport_manager
 {
@@ -44,32 +46,37 @@ namespace transport_manager
 class DeviceAdapterListenerImpl :public DeviceAdapterListener
 {
 public:
-	DeviceAdapterListenerImpl(transport_manager::TransportManager *tm);
+	class DeviceAdapterEvent
+	{
+
+	};
+
+	DeviceAdapterListenerImpl(transport_manager::TransportManagerImpl *tm);
 	virtual ~DeviceAdapterListenerImpl();
 
-	virtual void OnSearchDeviceDone(const DeviceAdapter* device_adapter);
-	virtual void OnSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error);
+	  virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter);
+	  virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error);
 
-	virtual void OnDeviceConnectDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle);
-	virtual void OnDeviceConnectFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const ConnectDeviceError& error);
+	  virtual void onConnectDone(const DeviceAdapter* device_adapter, const int session_id);
+	  virtual void onConnectFailed(const DeviceAdapter* device_adapter, const int session_id, const ConnectDeviceError& error);
 
-	virtual void OnDeviceDisconnecteDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle);
-	virtual void OnDeviceDisconnecteFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DisconnectDeviceError& error);
+	  virtual void onDisconnectDone(const DeviceAdapter* device_adapter, const int session_id);
+	  virtual void onDisconnectFailed(const DeviceAdapter* device_adapter, const int session_id, const DisconnectDeviceError& error);
 
-	virtual void OnDataReceiveDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataContainerSptr data_container);
-	virtual void OnDataReceiveFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataReceiveError& error);
+	  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter, const int session_id, const DataContainerSptr data_container);
+	  virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter, const int session_id, const DataReceiveError& error);
 
-	virtual void OnDataSendDone(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataContainerSptr data_container);
-	virtual void OnDataSendFailed(const DeviceAdapter* device_adapter, DeviceHandle device_handle, const DataSendError& error);
+	  virtual void onDataSendDone(const DeviceAdapter* device_adapter, const int session_id, const DataContainerSptr data_container);
+	  virtual void onDataSendFailed(const DeviceAdapter* device_adapter, const int session_id, const DataSendError& error);
 
-	virtual void OnCommunicationError(const DeviceAdapter* device_adapter, CommunicationError& error);
+	  virtual void onCommunicationError(const DeviceAdapter* device_adapter, const int session_id);
 
 private:
 	/**
 	* \brief For logging.
 	*/
 	static log4cxx::LoggerPtr logger_;
-	transport_manager::TransportManager *transport_manager_;
+	transport_manager::TransportManagerImpl *transport_manager_impl_;
 
 };
 } // namespace transport_manager

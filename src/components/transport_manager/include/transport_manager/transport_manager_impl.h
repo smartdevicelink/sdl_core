@@ -36,8 +36,10 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL
 
 #include <queue>
-#include "transport_manager.h"
-#include "device_adapter.h"
+#include "transport_manager/transport_manager.h"
+#include "transport_manager/transport_manager_listener.h"
+#include "transport_manager/device_adapter.h"
+#include "transport_manager/device_adapter_listener_impl.h"
 
 namespace transport_manager
 {
@@ -92,16 +94,16 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void postMessage(const protocol_handler::RawMessage message);
+	virtual void sendMessageToDevice(const protocol_handler::RawMessage message);
 
 	/**
-	 * @brief adds new call back function for specified event type
+	 * @brief register event listener
 	 *
-	 * @param event type, function address
+	 * @param event listener
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void set_device_adapter_listener(DeviceAdapterListener *listener);
+	virtual void registerEventListener(TransportManagerListener *listener);
 
 	/**
 	 * @brief add new device adapter
@@ -113,13 +115,68 @@ public:
 	virtual void addDeviceAdapter(DeviceAdapter *device_adapter);
 
 	/**
+	 * @brief register listener that would be used to catch adapter's events
+	 *
+	 * @param event listener
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void registerAdapterListener(DeviceAdapterListener *listener);
+
+	/**
+	 * @brief set new listener
+	 *
+	 * @param listener
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void set_device_adapter_listener(DeviceAdapterListener *listener);
+
+	/**
+	 * @brief set tm's event listener
+	 *
+	 * @param event type, function address
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void set_transport_manager_listener(TransportManagerListener *listener);
+
+	/**
+	 * @brief adds new call back function for specified event type
+	 *
+	 * @param event type, function address
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void set_device_adapter_listener(DeviceAdapterListener *listener);
+
+	/**
 	 * @brief interface function to wake up adapter listener thread
 	 *
 	 * @param
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual pthread_cond_t event_thread_wakeup(void);
+	pthread_cond_t device_listener_thread_wakeup(void);
+
+	/**
+	 * @brief post new mesage into TM's queue
+	 *
+	 * @param new message container
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void postMessage(const protocol_handler::RawMessage message);
+
+	/**
+	 * @brief post new event from device
+	 *
+	 * @param new event
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent event);
+
 
 protected:
 
@@ -129,6 +186,13 @@ protected:
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
 	typedef std::vector<protocol_handler::RawMessage> MessageQueue;
+
+	/**
+	 * @brief type for mesage queue
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	typedef std::vector<DeviceAdapterListenerImpl::DeviceAdapterEvent> EventQueue;
 
 	/**
 	 * @brief type for
@@ -181,7 +245,7 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 */
-	static void *processQueue(void *);
+	static void *messageQueueThread(void *);
 
 	/**
 	 * @brief whait until event happens
@@ -190,7 +254,7 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 */
-	static void *deviceListener(void *);
+	static void *deviceListenerThread(void *);
 
 	/**
 	 * @brief initialize TM
@@ -223,12 +287,26 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	MessageQueue queue_;
+	MessageQueue messageQueue_;
 
 	/**
 	 * @brief Mutex restricting access to messages.
 	 **/
-	mutable pthread_mutex_t queue_mutex_;
+	mutable pthread_mutex_t messageQueue_mutex_;
+
+	/**
+	 * @brief store events from comming device
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	EventQueue eventQueue_;
+
+	/**
+	 * @brief Mutex restricting access to messages.
+	 **/
+	mutable pthread_mutex_t eventQueue_mutex_;
 
 	/**
 	 * @brief flag that indicates that thread must be terminated
@@ -246,6 +324,11 @@ protected:
 	DeviceAdapterListener *device_adapter_listener_;
 
 	/**
+	 * @brief listener that would be called when TM's event happened.
+	 **/
+	TransportManagerListener *transport_manager_listener_;
+
+	/**
 	 * @brief ID of message queue processing thread
 	 **/
 	pthread_t messsage_queue_thread_;
@@ -253,17 +336,17 @@ protected:
 	/**
 	 * @brief conditional event thread
 	 **/
-	pthread_t event_thread_;
+	pthread_t device_listener_thread_;
 
 	/**
 	 * @brief condition variable to wake up event
 	 **/
-	pthread_cond_t event_thread_wakeup_;
+	pthread_cond_t device_listener_thread_wakeup_;
 
 	/**
 	 * @brief Mutex restricting access to events.
 	 **/
-	mutable pthread_mutex_t event_thread_mutex_;
+	mutable pthread_mutex_t device_listener_thread_mutex_;
 };
 }
 

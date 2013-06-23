@@ -85,6 +85,11 @@ class RawMessage {
    */
   unsigned int protocol_version() const;
 
+  /**
+   * \brief Getter for serial number
+   */
+  unsigned int serial_number() const;
+
  private:
   /**
    * \brief Connection Identifier
@@ -107,6 +112,11 @@ class RawMessage {
    * used for tranferring message.
    */
   unsigned int protocol_version_;
+  /**
+   * \brief serial number of message that
+   *
+   */
+  unsigned int serial_number_;
 };
 }  // namespace protocol_handler
 
