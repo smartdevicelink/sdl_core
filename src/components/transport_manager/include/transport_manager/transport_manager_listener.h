@@ -1,6 +1,6 @@
 /**
- * \file device_adapter_listener.h
- * \brief interface for DeviceAdapterListener header file.
+ * \file transport_manager_listener.h
+ * \brief interface for TransportManagerListener header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,18 +33,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGERLISTENER
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGERLISTENER
 
-#include "transport_manager/device_adapter.h"
 
 namespace transport_manager
 {
 
-class DeviceAdapterListener
+class TransportManagerListener
 {
 public:
-  virtual ~DeviceAdapterListener();
+  virtual ~TransportManagerListener();
 
   virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter) = 0;
   virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error) = 0;
@@ -55,13 +54,13 @@ public:
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter, const int session_id) = 0;
   virtual void onDisconnectFailed(const DeviceAdapter* device_adapter, const int session_id, const DisconnectDeviceError& error) = 0;
 
-  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter, const int session_id, const RawMessageSptr data_container) = 0;
+  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter, const int session_id, const DataContainerSptr data_container) = 0;
   virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter, const int session_id, const DataReceiveError& error) = 0;
 
-  virtual void onDataSendDone(const DeviceAdapter* device_adapter, const int session_id, const RawMessageSptr data_container) = 0;
+  virtual void onDataSendDone(const DeviceAdapter* device_adapter, const int session_id, const DataContainerSptr data_container) = 0;
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter, const int session_id, const DataSendError& error) = 0;
 
   virtual void onCommunicationError(const DeviceAdapter* device_adapter, const int session_id) = 0;
 };
 }//namespace
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER
+#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGERLISTENER
