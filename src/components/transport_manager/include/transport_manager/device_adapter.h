@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
 
 #include "utils/shared_ptr.h"
+#include "protocol_handler/raw_message.h"
 
 namespace transport_manager
 {
@@ -49,12 +50,12 @@ typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
 typedef std::vector<DeviceHandle> DeviceList;
 
-typedef utils::SharedPtr<DataContainer> DataContainerSptr;
+typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 
 class DeviceAdapter
 {
 public:
-  enum Error {OK, NOT_SUPPORTED};
+  enum Error {OK, FAIL, NOT_SUPPORTED, ALREADY_EXIST, BAD_STATE, BAD_PARAM};
 
 public:
   virtual ~DeviceAdapter();
@@ -78,7 +79,7 @@ public:
 
   virtual void disconnect(const int session_id) = 0;
 
-  virtual void sendData(const int session_id) = 0;
+  virtual void sendData(const int session_id, const RawMessageSptr data) = 0;
 
   virtual DeviceList getDeviceList() const = 0;
   virtual ApplicationList getApplicationList(const DeviceHandle device_handle) const = 0;
@@ -111,13 +112,13 @@ class DataSendError : public DeviceAdapterError
 class CommunicationError : public DeviceAdapterError
 {
 };
-
+/*
 class DataContainer
 {
 public:
   DataContainer(void* data, int data_size);
 };
-
+*/
 } // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER

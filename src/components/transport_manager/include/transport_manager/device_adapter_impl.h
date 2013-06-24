@@ -48,8 +48,6 @@ namespace transport_manager {
 class DeviceAdapterListener;
 class DeviceHandleGenerator;
 
-typedef int ConnectionHandle; //FIXME
-
 /**
  * @brief Base class for @link components_transportmanager_internal_design_device_adapters device adapters @endlink.
  **/
@@ -86,13 +84,15 @@ class DeviceAdapterImpl : public DeviceAdapter {
   virtual void scanForNewDevices();
 
   /**
-   * @brief Connect to all applications discovered on device.
+   * @brief Connect to the specified application discovered on device.
    *
-   * @param DeviceHandle Handle of device to connect to.
+   * @param device_handle Handle of device to connect to.
+   * @param app_handle Handle of application to connect to.
+   * @param session_id Session id for future identification.
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
    **/
-  virtual void connectDevice(const DeviceHandle device_handle);
+  virtual Error connect(const DeviceHandle device_handle, const ApplicationHandle app_handle, const int session_id);
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -222,9 +222,12 @@ class DeviceAdapterImpl : public DeviceAdapter {
     /**
      * @brief Constructor.
      *
-     * @param DeviceHandle Device handle.
+     * @param device_handle Device handle.
+     * @param app_handle Application handle.
+     * @param session_id Session identifier.
      **/
-    Connection(const DeviceHandle device_handle);
+    Connection(const DeviceHandle device_handle,
+               const ApplicationHandle app_handle, const int session_id);
 
     /**
      * @brief Destructor.
@@ -233,23 +236,33 @@ class DeviceAdapterImpl : public DeviceAdapter {
      **/
     virtual ~Connection();
 
-    /**
-     * @brief Compare connections.
-     *
-     * This method checks whether two SConnection structures
-     * refer to the same connection.
-     *
-     * @param OtherConnection Connection to compare with.
-     *
-     * @return true if connections are equal, false otherwise.
-     **/
-    virtual bool isSameAs(const Connection* other_connection) const;
+    DeviceHandle device_handle() const {
+      return device_handle_;
+    }
+
+    ApplicationHandle application_handle() const {
+      return app_handle_;
+    }
+
+    int session_id() const {
+      return session_id_;
+    }
 
    private:
     /**
      * @brief Device handle.
      **/
     const DeviceHandle device_handle_;
+
+    /**
+     * @brief Application handle.
+     **/
+    const ApplicationHandle app_handle_;
+
+    /**
+     * @brief Session identifier.
+     **/
+    const int session_id_;
 
     /**
      * @brief Thread that handles connection.
@@ -296,27 +309,11 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Parameters for starting connection thread.
    **/
-  class ConnectionThreadParameters {
-   public:
+  struct ConnectionThreadParameters {
     /**
-     * @brief Constructor.
-     *
-     * @param DeviceAdapter Reference to device adapter.
-     * @param ConnectionHandle Connection handle.
+     * @brief Pointer to device adapter.
      **/
-    ConnectionThreadParameters(DeviceAdapterImpl& device_adapter,
-                                ConnectionHandle connection_handle);
-
-   private:
-    /**
-     * @brief Reference to device adapter.
-     **/
-    DeviceAdapterImpl& device_adapter_;
-
-    /**
-     * @brief Connection handle.
-     **/
-    ConnectionHandle& connection_handle_;
+    DeviceAdapterImpl* device_adapter;
   };
 
   /**
@@ -327,19 +324,47 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_threads_termination
    **/
-  void waitForThreadsTermination(void);
+  void waitForThreadsTermination();
+
+
+  /**
+   * @brief Create connection.
+   *
+   * Check if connection is not in connection map
+   * and if it's not, add it to map.
+   *
+   * @param device_handle Device handle.
+   * @param app_handle Application handle.
+   * @param session_id Session identifier.
+   * @param connection Output pointer created connection or 0 in case of error.
+   *
+   * @return Status.
+   **/
+  DeviceAdapter::Error createConnection(const DeviceHandle device_handle,
+                                        const ApplicationHandle app_handle,
+                                        const int session_id,
+                                        Connection** connection);
+
+  /**
+   * @brief Delete connection.
+   *
+   * Destroy connection object and remove it from map.
+   *
+   * @param connection Connection to delete.
+   **/
+  void deleteConnection(Connection* connection);
+
 
   /**
    * @brief Start connection.
    *
-   * Check if connection is not in connection map
-   * and if it's not, add it to map and start connection thread.
+   * Start connection thread.
    *
-   * @param Connection Connection to start.
+   * @param connection Connection to start.
    *
    * @return true if connection thread has been started, false otherwise.
    **/
-  bool startConnection(Connection* connection);
+  Error startConnection(Connection* connection);
 
   /**
    * @brief Stop connection.
@@ -429,12 +454,12 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
    **/
-  virtual void connectionThread(const ConnectionHandle connection_handle) = 0;
+  virtual void connectionThread() = 0;
 
   /**
    * @brief Connections map.
    **/
-  typedef std::map<ConnectionHandle, Connection*> ConnectionMap;
+  typedef std::map<int, Connection*> ConnectionMap;
 
   /**
    * @brief Logger.

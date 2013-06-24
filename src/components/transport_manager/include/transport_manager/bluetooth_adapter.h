@@ -41,13 +41,13 @@
 namespace transport_manager
 {
 
-class BluetoothAdapter : public DeviceAdapter
+class BluetoothAdapter : public DeviceAdapterImpl
 {
 public:
   BluetoothAdapter();
   virtual ~BluetoothAdapter();
 
-private:
+protected:
   virtual DeviceType GetDeviceType() const;
 
   virtual Error init(DeviceAdapterListener* listener, DeviceHandleGenerator* handle_generator, Configuration* configuration);
@@ -65,6 +65,8 @@ private:
   virtual Error sendData(const DeviceHandle device_handle, const DataContainerSptr data_container);
 
   virtual DeviceList getDeviceList() const;
+
+  virtual void connectionThread() = 0;
 
 private:
   bool initialized_;

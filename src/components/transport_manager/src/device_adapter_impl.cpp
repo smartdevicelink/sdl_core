@@ -84,26 +84,28 @@ bool DeviceAdapterImpl::Device::isSameAs(const Device* other_device) const
     return true;
 }
 
-DeviceAdapterImpl::Connection::Connection(const DeviceHandle device_handle) :
-    device_handle_(device_handle),
-    connection_thread_(),
-    notification_pipe_fds_(),
-    connection_socket_(-1),
-    frames_to_send_(),
-    terminate_flag_(false)
-{
+DeviceAdapterImpl::Connection::Connection(const DeviceHandle device_handle,
+                                          const ApplicationHandle app_handle,
+                                          const int session_id)
+    : device_handle_(device_handle),
+      app_handle_(app_handle),
+      session_id_(session_id),
+      connection_thread_(),
+      notification_pipe_fds_(),
+      connection_socket_(-1),
+      frames_to_send_(),
+      terminate_flag_(false) {
 }
 
-DeviceAdapterImpl::Connection::~Connection(void)
-{
+DeviceAdapterImpl::Connection::~Connection(void) {
   while (false == frames_to_send_.empty()) {
     delete frames_to_send_.front();
     frames_to_send_.pop();
   }
 }
 
-bool DeviceAdapterImpl::Connection::isSameAs(const Connection* other_connection) const
-{
+bool DeviceAdapterImpl::Connection::isSameAs(
+    const Connection* other_connection) const {
   bool result = false;
 
   if (0 != other_connection) {
@@ -111,12 +113,6 @@ bool DeviceAdapterImpl::Connection::isSameAs(const Connection* other_connection)
   }
 
   return result;
-}
-
-DeviceAdapterImpl::ConnectionThreadParameters::ConnectionThreadParameters(
-    DeviceAdapterImpl& device_adapter, ConnectionHandle connection_handle)
-    : device_adapter_(device_adapter),
-      connection_handle_(connection_handle) {
 }
 
 DeviceAdapterImpl::DeviceAdapterImpl(
@@ -363,87 +359,86 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermin
     LOG4CXX_INFO(logger_, "Connection threads terminated");
 }
 
-bool DeviceAdapterImpl::startConnection(Connection* connection) {
-  bool isConnectionThreadStarted = false;
+DeviceAdapter::Error DeviceAdapterImpl::createConnection(
+    const DeviceHandle device_handle, const ApplicationHandle app_handle,
+    const int session_id, Connection** connection) {
+  assert(connection != 0);
+  *connection = 0;
 
-  if (0 != connection) {
-    ConnectionHandle newConnectionHandle = mHandleGenerator.generateNewConnectionHandle();
+  if(shutdown_flag_) {
+    return DeviceAdapter::BAD_STATE;
+  }
 
-    pthread_mutex_lock(&connections_mutex_);
+  DeviceAdapter::Error error = DeviceAdapter::OK;
 
-    if (!shutdown_flag_) {
-      ConnectionMap::const_iterator connectionIterator;
-      for (connectionIterator = connections_.begin();
-          connectionIterator != connections_.end(); ++connectionIterator) {
-        const Connection* existingConnection = connectionIterator->second;
+  pthread_mutex_lock(&connections_mutex_);
 
-        if (0 != existingConnection) {
-          if (existingConnection->isSameAs(connection)) {
-            LOG4CXX_WARN(
-                logger_,
-                "Connection is already opened (" << connectionIterator->first << ")");
-            break;
-          }
-        } else {
-          LOG4CXX_ERROR(
-              logger_, "Connection " << connectionIterator->first << " is null");
-        }
+    for (ConnectionMap::const_iterator it = connections_.begin();
+        it != connections_.end(); ++it) {
+      const Connection& existingConnection = *it;
+      if (existingConnection.application_handle() == app_handle
+          && existingConnection.device_handle() == device_handle) {
+        error = DeviceAdapter::ALREADY_EXIST;
+        break;
       }
-
-      if (connections_.end() == connectionIterator) {
-        std::pair<ConnectionMap::iterator, bool> insertResult = connections_
-            .insert(std::make_pair(newConnectionHandle, connection));
-
-        if (true == insertResult.second) {
-          Connection* newConnection = insertResult.first->second;
-
-          if (0 != newConnection) {
-            ConnectionThreadParameters* connectionThreadParameters =
-                ConnectionThreadParameters(*this, newConnectionHandle);
-
-            int errorCode = pthread_create(
-                &newConnection->connection_thread_, 0,
-                &connectionThreadStartRoutine,
-                static_cast<void*>(connectionThreadParameters));
-
-            if (0 == errorCode) {
-              LOG4CXX_INFO(
-                  logger_,
-                  "Connection thread started for connection " << newConnectionHandle << " (device " << newConnection->device_handle_ << ")");
-
-              isConnectionThreadStarted = true;
-            } else {
-              LOG4CXX_ERROR(
-                  logger_,
-                  "Connection thread start failed for connection " << newConnectionHandle << " (device " << newConnection->device_handle_ << ")");
-
-              delete connectionThreadParameters;
-              connections_.erase(insertResult.first);
-              delete newConnection;
-            }
-          } else {
-            LOG4CXX_ERROR(
-                logger_,
-                "Failed to allocate connection " << newConnectionHandle);
-
-            connections_.erase(newConnectionHandle);
-          }
-        } else {
-          LOG4CXX_ERROR(
-              logger_,
-              "Connection handle " << newConnectionHandle << " already exists");
-        }
-      } else {
-        delete Connection;
+      if (existingConnection.session_id() == session_id) {
+        error = DeviceAdapter::ALREADY_EXIST;
+        break;
       }
     }
 
-    pthread_mutex_unlock(&mConnectionsMutex);
-  } else {
-    LOG4CXX_ERROR(logger_, "Connection is null");
+  if(error == DeviceAdapter::OK) {
+    *connection = new Connection(device_handle, app_handle, session_id);
+    connections_[session_id] = *connection;
   }
 
-  return isConnectionThreadStarted;
+  pthread_mutex_unlock(&connections_mutex_);
+
+  return error;
+}
+
+void DeviceAdapterImpl::deleteConnection(Connection* connection) {
+  assert(connection != 0);
+
+  pthread_mutex_lock(&connections_mutex_);
+  connections_.erase(connection->session_id());
+  pthread_mutex_unlock(&connections_mutex_);
+  delete connection;
+}
+
+DeviceAdapter::Error DeviceAdapterImpl::startConnection(Connection* connection) {
+  assert(connection != 0);
+
+  if (shutdown_flag_) {
+    return DeviceAdapter::BAD_STATE;
+  }
+
+  bool is_thread_started = false;
+
+  if (!shutdown_flag_) {
+    ConnectionThreadParameters* thread_params = new ConnectionThreadParameters;
+    thread_params->device_adapter = this;
+
+    int errorCode = pthread_create(
+        &connection->connection_thread_, 0, &connectionThreadStartRoutine,
+        static_cast<void*>(thread_params));
+
+    if (0 == errorCode) {
+      LOG4CXX_INFO(
+          logger_,
+          "Connection thread started for session " << connection->session_id() << " (device " << connection->device_handle() << ")");
+
+      is_thread_started = true;
+    } else {
+      LOG4CXX_ERROR(
+          logger_,
+          "Connection thread start failed for session " << connection->session_id() << " (device " << connection->device_handle() << ")");
+
+      delete thread_params;
+    }
+  }
+
+  return is_thread_started ? DeviceAdapter::OK : DeviceAdapter::FAIL;
 }
 
 void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::stopConnection(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle)
@@ -821,7 +816,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::updateClientDeviceLi
     mListener.onDeviceListUpdated(this, clientDeviceList);
 }
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::createConnectionsListForDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector<NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection *> & ConnectionsList)
+void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::createConnection(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector<NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection *> & ConnectionsList)
 {
     ConnectionsList.clear();
 }
@@ -838,55 +833,51 @@ void * NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::mainThreadStartRou
     return 0;
 }
 
-void* DeviceAdapterImpl::connectionThreadStartRoutine(void* data)
-{
-    ConnectionThreadParameters* connectionThreadParameters = static_cast<ConnectionThreadParameters*>(data);
+void* DeviceAdapterImpl::connectionThreadStartRoutine(void* data) {
+  ConnectionThreadParameters* thread_params =
+      static_cast<ConnectionThreadParameters*>(data);
 
-    if (0 != connectionThreadParameters)
-    {
-        DeviceAdapterImpl& deviceAdapter(connectionThreadParameters->device_adapter_);
-        ConnectionHandle connectionHandle(connectionThreadParameters->connection_handle_);
-
-        delete connectionThreadParameters;
-        connectionThreadParameters = 0;
-
-        deviceAdapter.connectionThread(connectionHandle);
+  if (0 != thread_params) {
+    DeviceAdapterImpl* deviceAdapter(thread_params->device_adapter);
+    delete thread_params;
+    if (deviceAdapter) {
+      deviceAdapter->connectionThread(connectionHandle);
     }
+  }
 
-    return 0;
+  return 0;
 }
 
-void DeviceAdapterImpl::connectDevice(const DeviceHandle device_handle) {
-  bool is_device_valid = false;
+DeviceAdapter::Error DeviceAdapterImpl::connect(const DeviceHandle device_handle,
+                                const ApplicationHandle app_handle,
+                                const int session_id) {
+
+  //TODO check if initialized
 
   pthread_mutex_lock(&devices_mutex_);
-
-  if (devices_.end() != devices_.find(device_handle)) {
-    is_device_valid = true;
-  } else {
-    LOG4CXX_ERROR(logger_, "Device handle " << device_handle << " is invalid");
-    listener_.onDeviceConnectFailed(this, device_handle, ConnectDeviceError());
-  }
-
+  const bool is_device_valid = devices_.end() != devices_.find(device_handle);
   pthread_mutex_unlock(&devices_mutex_);
 
-  if (is_device_valid) {
-    std::vector<Connection*> connections;
-    createConnectionsListForDevice(device_handle, connections);
-
-    if (! connections.empty()) {
-      LOG4CXX_INFO(logger_, "Connecting device " << device_handle);
-
-      for (std::vector<Connection*>::iterator connectionIterator = connections
-          .begin(); connectionIterator != connections.end();
-          ++connectionIterator) {
-        startConnection(*connectionIterator);
-      }
-    } else {
-      LOG4CXX_WARN(logger_,
-                   "No connections to establish on device " << device_handle);
-    }
+  if (!is_device_valid) {
+    LOG4CXX_ERROR(logger_, "Device handle " << device_handle << " is invalid");
+    return DeviceAdapter::BAD_PARAM;
   }
+
+  //TODO check app_handle validity???
+
+  Connection* connection = 0;
+  Error error = createConnection(device_handle, app_handle, session_id, &connection);
+  if(error != DeviceAdapter::OK) {
+    return error;
+  }
+
+  error = startConnection(connection);
+  if(error != DeviceAdapter::OK) {
+    deleteConnection(connection);
+    return error;
+  }
+
+  return DeviceAdapter::OK;
 }
 
 void DeviceAdapterImpl::disconnectDevice(const DeviceHandle device_handle) {
