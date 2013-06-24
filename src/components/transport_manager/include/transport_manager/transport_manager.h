@@ -38,9 +38,7 @@
 #include "transport_manager/device_adapter.h"
 #include "transport_manager/transport_manager_listener.h"
 
-
-namespace transport_manager
-{
+namespace transport_manager {
 /**
  * @brief type for
  *
@@ -52,13 +50,28 @@ typedef int SessionID;
  * @brief Interface of transport manager.
  * @interface TransportManager
  **/
-class TransportManager
-{
+class TransportManager {
 public:
 	/**
 	 * @brief Destructor.
 	 **/
 	virtual ~TransportManager(void);
+
+	/**
+	 * @brief Start scanning for new devices.
+	 *
+	 *
+	 * @see @ref components_transportmanager_client_device_management
+	 **/
+	virtual void searchDevices(void) const = 0;
+
+	/**
+	 * @brief Start scanning for new devices.
+	 *
+	 *
+	 * @see @ref components_transportmanager_client_device_management
+	 **/
+	virtual void init(void) = 0;
 
 	/**
 	 * @brief Start scanning for new devices.
