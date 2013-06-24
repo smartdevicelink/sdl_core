@@ -54,10 +54,10 @@ public:
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter, const int session_id) = 0;
   virtual void onDisconnectFailed(const DeviceAdapter* device_adapter, const int session_id, const DisconnectDeviceError& error) = 0;
 
-  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter, const int session_id, const DataContainerSptr data_container) = 0;
+  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter, const int session_id, const RawMessageSptr data_container) = 0;
   virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter, const int session_id, const DataReceiveError& error) = 0;
 
-  virtual void onDataSendDone(const DeviceAdapter* device_adapter, const int session_id, const DataContainerSptr data_container) = 0;
+  virtual void onDataSendDone(const DeviceAdapter* device_adapter, const int session_id, const RawMessageSptr data_container) = 0;
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter, const int session_id, const DataSendError& error) = 0;
 
   virtual void onCommunicationError(const DeviceAdapter* device_adapter, const int session_id) = 0;
