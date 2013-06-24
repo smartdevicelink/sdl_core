@@ -135,19 +135,43 @@ void TransportManagerImpl::registerAdapterListener(DeviceAdapterListener *listen
 	this->set_device_adapter_listener(listener);
 }
 
-void TransportManagerImpl::sendMessageToDevice(const protocol_handler::RawMessage message){
-	this->postMessage(message);
+void TransportManagerImpl::sendMessageToDevice(const void *message){
+	protocol_handler::RawMessage &msg = static_cast<protocol_handler::RawMessage>(*message);
+
+	this->postMessage(msg);
 }
 
-void TransportManagerImpl::postMessage(const protocol_handler::RawMessage message){
+void TransportManagerImpl::receiveEventFromDevice(const void *event){
+	transport_manager::DeviceAdapterListenerImpl::DeviceAdapterEvent &evt =
+			static_cast<transport_manager::DeviceAdapterListenerImpl::DeviceAdapterEvent>(*event);
+	this->postEvent(evt);
+}
+
+void TransportManagerImpl::postMessage(const protocol_handler::RawMessage &message){
+	//todo: check data copying
+	protocol_handler::RawMessage msg(message.connection_key(), msg.protocol_version(), msg.data(), msg.data_size(), msg.serial_number());
 	pthread_mutex_lock(&messageQueue_mutex_);
-	messageQueue_.push_back(message);
+	messageQueue_.push_back(msg);
 	pthread_mutex_unlock(&messageQueue_mutex_);
 }
 
-void TransportManagerImpl::postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent event){
+void TransportManagerImpl::updateMessage(const protocol_handler::RawMessage &message){
+	pthread_mutex_lock(&messageQueue_mutex_);
+	pthread_mutex_unlock(&messageQueue_mutex_);
+
+}
+
+void TransportManagerImpl::removeMessage(const int session_id, const int serial_number){
+	pthread_mutex_lock(&messageQueue_mutex_);
+	messageQueue_.erase(std::remove(messageQueue_.begin(), messageQueue_.end(), message), messageQueue_.end());
+	pthread_mutex_unlock(&messageQueue_mutex_);
+}
+
+void TransportManagerImpl::postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event){
+	//todo: check data copying
+	DeviceAdapterListenerImpl::DeviceAdapterEvent evt(event.event_type(), event.session_id(), event.device_adapter(), event.data(), DeviceAdapterError(event.error()));
 	pthread_mutex_lock(&eventQueue_mutex_);
-	eventQueue_.push_back(event);
+	eventQueue_.push_back(evt);
 	pthread_mutex_unlock(&eventQueue_mutex_);
 }
 
@@ -185,8 +209,34 @@ void *TransportManagerImpl::deviceListenerThread(void *){
 
 		pthread_mutex_lock(&device_listener_thread_mutex_);
 		pthread_cond_wait(&device_listener_thread_wakeup_, &device_listener_thread_mutex_);
-		for(std::vector<DeviceAdapterListenerImpl::DeviceAdapterEvent>::iterator  evt = messageQueue_.begin(); evt != messageQueue_.end(); ++evt){
-			;
+
+		for(std::vector<DeviceAdapterListenerImpl::DeviceAdapterEvent>::iterator  evt = eventQueue_.begin(); evt != eventQueue_.end(); ++evt){
+			switch((*evt).event_type()){
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE:
+				transport_manager_listener_->onSearchDeviceDone();
+				this->removeMessage((*evt).session_id());
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL:
+				break;
+			case DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR:
+				break;
+			}
 		}
 		pthread_mutex_unlock(&device_listener_thread_mutex_);
 
@@ -221,13 +271,9 @@ void *TransportManagerImpl::messageQueueThread(void *){
 				serial_number = (*msg).serial_number();
 			}
 		}
-		DataContainer dc = new DataContainer(active_msg.data(), active_msg.data_size());
+		DataContainer *dc = new DataContainer(active_msg.data(), active_msg.data_size());
 		ConnectionHandle *connection = getConnectionHandler(active_msg.connection_key());
 		connection->device_adapter->sendData(active_msg.connection_key());
-
-		pthread_mutex_lock(&messageQueue_mutex_);
-		messageQueue_.erase(std::remove(messageQueue_.begin(), messageQueue_.end(), active_msg), messageQueue_.end());
-		pthread_mutex_unlock(&messageQueue_mutex_);
 
 	}//while(true)
 	return 0;

@@ -93,7 +93,16 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void sendMessageToDevice(const protocol_handler::RawMessage message) = 0;
+	virtual void sendMessageToDevice(const void *message) = 0;
+
+	/**
+	 * @brief receive event from device
+	 *
+	 * @param new event
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void receiveEventFromDevice(const void *event) = 0;
 
 	/**
 	 * @brief add new device adapter

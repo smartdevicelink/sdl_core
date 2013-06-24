@@ -94,7 +94,16 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void sendMessageToDevice(const protocol_handler::RawMessage message);
+	virtual void sendMessageToDevice(const void *message);
+
+	/**
+	 * @brief receive event from device
+	 *
+	 * @param new event
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void receiveEventFromDevice(const void *event);
 
 	/**
 	 * @brief register event listener
@@ -142,15 +151,6 @@ public:
 	void set_transport_manager_listener(TransportManagerListener *listener);
 
 	/**
-	 * @brief adds new call back function for specified event type
-	 *
-	 * @param event type, function address
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	void set_device_adapter_listener(DeviceAdapterListener *listener);
-
-	/**
 	 * @brief interface function to wake up adapter listener thread
 	 *
 	 * @param
@@ -166,8 +166,28 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	void postMessage(const protocol_handler::RawMessage message);
+	void postMessage(const protocol_handler::RawMessage &message);
 
+
+	/**
+	 * @brief update message in queue
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void updateMessage(const protocol_handler::RawMessage &message);
+
+	/**
+	 * @brief remove mesage from TM's queue
+	 *
+	 * @param new message container
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void removeMessage(const protocol_handler::RawMessage &message);
+
+	void updateMessage(const protocol_handler::RawMessage &message);
 	/**
 	 * @brief post new event from device
 	 *
@@ -175,7 +195,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent event);
+	void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
 
 
 protected:
