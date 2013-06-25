@@ -83,7 +83,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void connectDevice(const SessionID session_id);
+	virtual void connectDevice(DeviceHandle device_id, ApplicationHandle app_id, SessionID session_id);
 
 	/**
 	 * @brief Disconnect from all applications connected on device.
@@ -138,6 +138,15 @@ public:
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
 	virtual void registerAdapterListener(DeviceAdapterListener *listener);
+
+	/**
+	 * @brief remove device from internal storages
+	 *
+	 * @param event device id
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void removeDevice(DeviceHandle device);
 
 	/**
 	 * @brief set new listener
@@ -204,7 +213,42 @@ public:
 	void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
 
 protected:
+	typedef std::vector<DeviceAdapter *> AdapterList;
 
+	class AdapterHandler
+	{
+	public:
+		DeviceAdapter *getAdapterBySession(SessionID sid);
+		DeviceAdapter *getAdapterByDevice(DeviceHandle did);
+		void addSession(DeviceAdapter *da, SessionID sid);
+		void addDevice(DeviceAdapter *da, DeviceHandle did);
+		void addAdapter(DeviceAdapter *da);
+		void removeSession(DeviceAdapter *da, SessionID sid);
+		void removeDevice(DeviceHandle device);
+		AdapterList device_adapters(void);
+
+		~AdapterHandler();
+
+	private:
+		/**
+		 * @brief Device adapters.
+		 **/
+		AdapterList device_adapters_;
+
+		/**
+		 * @brief container that used to get device id by session id
+		 **/
+		std::map<SessionID, DeviceAdapter *> session_to_device_map_;
+
+		/**
+		 * @brief container that used to get adapter id by device id
+		 * filled after search process done and used in connect function
+		 **/
+		std::map<DeviceHandle, DeviceAdapter *> device_to_adapter_map_;
+
+		AdapterHandler();
+
+	};
 	/**
 	 * @brief type for mesage queue
 	 *
@@ -276,19 +320,11 @@ protected:
 	static void *deviceListenerThread(void *);
 
 	/**
-	 * @brief return device adapter corresponding to defined session id
-	 *
-	 * @param session id
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 */
-	DeviceAdapter *getDeviceAdapter(SessionID session_id);
-
-	/**
 	 * \brief For logging.
 	 */
 	static log4cxx::LoggerPtr logger_;
 
+	AdapterHandler adapter_handler_;
 	/**
 	 * @brief store messages
 	 *
@@ -323,11 +359,6 @@ protected:
 	mutable bool all_thread_active_;
 
 	/**
-	 * @brief Device adapters.
-	 **/
-	std::vector<DeviceAdapter *> device_adapters_;
-
-	/**
 	 * @brief Device adapter listener.
 	 **/
 	DeviceAdapterListener *device_adapter_listener_;
@@ -357,11 +388,7 @@ protected:
 	 **/
 	mutable pthread_mutex_t device_listener_thread_mutex_;
 
-	/**
-	 * @brief
-	 **/
-	std::map<SessionID, DeviceAdapter *> session_to_device_map_;
-};
-}
+}; //class
+} //namespace
 
 #endif

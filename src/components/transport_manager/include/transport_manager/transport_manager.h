@@ -88,7 +88,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void connectDevice(const SessionID session_id) = 0;
+	virtual void connectDevice(DeviceHandle device_id, ApplicationHandle app_id, SessionID session_id) = 0;
 
 	/**
 	 * @brief Disconnect from all applications connected on device.
@@ -143,6 +143,15 @@ public:
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
 	virtual void registerAdapterListener(DeviceAdapterListener *listener) = 0;
+
+	/**
+	 * @brief remove device from internal storages
+	 *
+	 * @param event device id
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void removeDevice(DeviceHandle device) = 0;
 
 };
 }

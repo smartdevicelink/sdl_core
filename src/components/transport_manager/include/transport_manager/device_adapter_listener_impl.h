@@ -42,6 +42,7 @@
 
 namespace transport_manager
 {
+typedef std::vector<DeviceHandle> DeviceAdapterSearchResult;
 
 class DeviceAdapterListenerImpl :public DeviceAdapterListener
 {
