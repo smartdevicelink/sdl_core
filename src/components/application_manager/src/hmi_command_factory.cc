@@ -181,7 +181,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::eType::VR_Stopped: {
-      command.reset(new commands::OnVRStartedNotification(message));
+      command.reset(new commands::OnVRStoppedNotification(message));
       break;
     }
   }
