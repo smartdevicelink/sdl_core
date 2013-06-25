@@ -30,52 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/activate_app_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_DEACTIVATED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_DEACTIVATED_NOTIFICATION_H_
 
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ActivateAppRequest::ActivateAppRequest(
-    const MessageSharedPtr& message): RequestFromHMI(message) {
-}
+/**
+ * @brief OnAppDeactivatedNotification command class
+ **/
+class OnAppDeactivatedNotification : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnAppDeactivatedNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnAppDeactivatedNotification(const MessageSharedPtr& message);
 
-ActivateAppRequest::~ActivateAppRequest() {
-}
+  /**
+   * @brief OnAppDeactivatedNotification class destructor
+   **/
+  virtual ~OnAppDeactivatedNotification();
 
-void ActivateAppRequest::Run() {
-  Application* application =
-      ApplicationManagerImpl::instance()->application(
-          (*message_)[strings::msg_params][strings::app_id]);
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  (*message_)[strings::msg_params].erase(strings::app_id);
-  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
-
-  if (!application) {
-    (*message_)[strings::msg_params][strings::success] = false;
-    (*message_)[strings::msg_params][strings::result_code] =
-          hmi_apis::Common_Result::eType::INVALID_DATA;
-  } else {
-    if (ApplicationManagerImpl::instance()->ActivateApplication(application))
-    {
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
-                hmi_apis::Common_Result::eType::SUCCESS;
-    } else {
-      (*message_)[strings::msg_params][strings::success] = false;
-      (*message_)[strings::msg_params][strings::result_code] =
-                      hmi_apis::Common_Result::eType::GENERIC_ERROR;
-    }
-
-
-  }
-
-  SendResponseToHMI();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnAppDeactivatedNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_DEACTIVATED_NOTIFICATION_H_
