@@ -155,6 +155,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
+./src/commands/hmi/on_vr_started_notification.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})

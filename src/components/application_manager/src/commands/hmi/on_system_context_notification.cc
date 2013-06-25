@@ -33,6 +33,7 @@
 #include "application_manager/commands/hmi/on_system_context_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -92,33 +93,7 @@ void OnSystemContextNotification::Run() {
 }
 
 void OnSystemContextNotification::NotifyMobileApp(ApplicationImpl* const app) {
-  smart_objects::CSmartObject* on_hmi_status =
-      new smart_objects::CSmartObject();
-
-  if (NULL == on_hmi_status) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-    return;
-  }
-
-  (*on_hmi_status)[strings::params][strings::function_id] =
-      mobile_api::FunctionID::OnHMIStatusID;
-
-  (*on_hmi_status)[strings::params][strings::correlation_id] =
-      (*message_)[strings::params][strings::correlation_id];
-
-  (*on_hmi_status)[strings::params][strings::message_type] =
-      MessageType::kNotification;
-
-  (*on_hmi_status)[strings::msg_params][strings::audio_streaming_state] =
-      app->audio_streaming_state();
-
-  (*on_hmi_status)[strings::msg_params][strings::hmi_level] =
-      app->hmi_level();
-
-  (*on_hmi_status)[strings::msg_params][strings::system_context] =
-      app->system_context();
-
-  SendNotificationToMobile(on_hmi_status);
+  MessageHelper::SendHMIStatusNotification(*app);
 }
 
 }  // namespace commands
