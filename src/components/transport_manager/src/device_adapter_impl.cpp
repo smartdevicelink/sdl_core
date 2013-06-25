@@ -43,6 +43,7 @@
 //#include "DeviceAdapterListener.h"
 //#include "HandleGenerator.h"
 #include "device_adapter_impl.h"
+#include "transport_manager/device_adapter_listener.h"
 
 namespace transport_manager {
 
@@ -474,6 +475,8 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
   const int notification_pipe_read_fd = connection->notification_pipe_fds_[0];
   const int connection_socket = connection->connection_socket();
 
+  bool is_connection_succeeded = false;
+
   if (-1 == connection_socket) {
     LOG4CXX_ERROR(
         logger_,
@@ -486,16 +489,17 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
     DeviceMap::const_iterator device_it = devices_.find(device_handle);
 
+    const Device* device = 0;
     if (device_it != devices_.end()) {
-      const Device* device = device_it->second;
-
+      device = device_it->second;
+      if (device != 0) {
         is_device_valid = true;
-/*
-        clientDeviceInfo.mDeviceHandle = deviceHandle;
-        clientDeviceInfo.mDeviceType = getDeviceType();
-        clientDeviceInfo.mUserFriendlyName = device->mName;
-        clientDeviceInfo.mUniqueDeviceId = device->mUniqueDeviceId;
-        */
+        /* TODO
+         clientDeviceInfo.mDeviceHandle = deviceHandle;
+         clientDeviceInfo.mDeviceType = getDeviceType();
+         clientDeviceInfo.mUserFriendlyName = device->mName;
+         clientDeviceInfo.mUniqueDeviceId = device->mUniqueDeviceId;
+         */
       } else {
         LOG4CXX_ERROR(logger_, "Device " << device_handle << " is not valid");
       }
@@ -503,179 +507,194 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
       LOG4CXX_ERROR(logger_, "Device " << device_handle << " does not exist");
     }
 
-    pthread_mutex_unlock(&mDevicesMutex);
+    pthread_mutex_unlock(&devices_mutex_);
 
-    if (true == isDeviceValid) {
-      if (true == isPipeCreated) {
+    if (true == is_device_valid) {
+      if (true == is_pipe_created) {
         if (0
-            == fcntl(notificationPipeReadFd, F_SETFL,
-                     fcntl(notificationPipeReadFd, F_GETFL) | O_NONBLOCK)) {
+            == fcntl(notification_pipe_read_fd, F_SETFL,
+                     fcntl(notification_pipe_read_fd, F_GETFL) | O_NONBLOCK)) {
           LOG4CXX_INFO(
               logger_,
-              "Connection " << ConnectionHandle << " to remote device " << clientDeviceInfo.mUniqueDeviceId << " established");
+              "Connection " << connection->session_id << " to remote device " << device->unique_device_id_ << " established");
 
-          mListener.onApplicationConnected(this, clientDeviceInfo,
-                                           ConnectionHandle);
+          listener_.onConnectDone(this, connection->session_id());
+          is_connection_succeeded = true;
 
-          pollfd pollFds[2];
-          pollFds[0].fd = connectionSocket;
-          pollFds[0].events = POLLIN | POLLPRI;
-          pollFds[1].fd = connection->mNotificationPipeFds[0];
-          pollFds[1].events = POLLIN | POLLPRI;
+          pollfd poll_fds[2];
+          poll_fds[0].fd = connection_socket;
+          poll_fds[0].events = POLLIN | POLLPRI;
+          poll_fds[1].fd = connection->notification_pipe_fds_[0];
+          poll_fds[1].events = POLLIN | POLLPRI;
 
-          while (false == connection->mTerminateFlag) {
-            if (-1 != poll(pollFds, sizeof(pollFds) / sizeof(pollFds[0]), -1)) {
-              if (0 != (pollFds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
-                LOG4CXX_INFO(logger_,
-                             "Connection " << ConnectionHandle << " terminated");
+          while (false == connection->terminate_flag_) {
+            if (-1
+                != poll(poll_fds, sizeof(poll_fds) / sizeof(poll_fds[0]), -1)) {
+              if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
+                LOG4CXX_INFO(
+                    logger_,
+                    "Connection " << connection->session_id() << " terminated");
 
-                connection->mTerminateFlag = true;
+                connection->terminate_flag_ = true;
               } else if (0
-                  != (pollFds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
+                  != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
                 LOG4CXX_ERROR(
                     logger_,
-                    "Notification pipe for connection " << ConnectionHandle << " terminated");
+                    "Notification pipe for connection " << connection->session_id() << " terminated");
 
-                connection->mTerminateFlag = true;
+                connection->terminate_flag_ = true;
               } else {
                 uint8_t buffer[4096];
-                ssize_t bytesRead = -1;
+                ssize_t bytes_read = -1;
 
-                if (0 != pollFds[0].revents) {
+                if (0 != poll_fds[0].revents) {
                   do {
-                    bytesRead = recv(connectionSocket, buffer, sizeof(buffer),
-                                     MSG_DONTWAIT);
+                    bytes_read = recv(connection_socket, buffer, sizeof(buffer),
+                                      MSG_DONTWAIT);
 
-                    if (bytesRead > 0) {
+                    if (bytes_read > 0) {
                       LOG4CXX_INFO(
                           logger_,
-                          "Received " << bytesRead << " bytes for connection " << ConnectionHandle);
-
-                      mListener.onFrameReceived(this, ConnectionHandle, buffer,
-                                                static_cast<size_t>(bytesRead));
-                    } else if (bytesRead < 0) {
+                          "Received " << bytes_read << " bytes for connection " << connection->session_id());
+                      /* TODO
+                       mListener.onFrameReceived(this, ConnectionHandle, buffer,
+                       static_cast<size_t>(bytesRead));
+                       */
+                    } else if (bytes_read < 0) {
                       if ((EAGAIN != errno)&&
                       (EWOULDBLOCK != errno)){
-                      LOG4CXX_ERROR_WITH_ERRNO(logger_, "recv() failed for connection " << ConnectionHandle);
+                      LOG4CXX_ERROR_WITH_ERRNO(logger_, "recv() failed for connection " << connection->session_id());
 
-                      connection->mTerminateFlag = true;
+                      connection->terminate_flag_ = true;
                     }
                   }
                   else
                   {
-                    LOG4CXX_INFO(logger_, "Connection " << ConnectionHandle << " closed by remote peer");
+                    LOG4CXX_INFO(logger_, "Connection " << connection->session_id() << " closed by remote peer");
 
-                    connection->mTerminateFlag = true;
+                    connection->terminate_flag_ = true;
                   }
-                } while (bytesRead > 0);
+                } while (bytes_read > 0);
               }
 
-                if ((false == connection->mTerminateFlag)
-                    && (0 != pollFds[1].revents)) {
+                if ((false == connection->terminate_flag_)
+                    && (0 != poll_fds[1].revents)) {
                   do {
-                    bytesRead = read(notificationPipeReadFd, buffer,
-                                     sizeof(buffer));
-                  } while (bytesRead > 0);
+                    bytes_read = read(notification_pipe_read_fd, buffer,
+                                      sizeof(buffer));
+                  } while (bytes_read > 0);
 
-                  if ((bytesRead < 0) && (EAGAIN != errno)) {
+                  if ((bytes_read < 0) && (EAGAIN != errno)) {
                     LOG4CXX_ERROR_WITH_ERRNO(
                         logger_,
-                        "Failed to clear notification pipe for connection " << ConnectionHandle);
+                        "Failed to clear notification pipe for connection " << connection->session_id());
 
-                    connection->mTerminateFlag = true;
+                    connection->terminate_flag_ = true;
                   }
+                  /*
+                   tFrameQueue framesToSend;
 
-                  tFrameQueue framesToSend;
+                   pthread_mutex_lock (&mConnectionsMutex);
+                   framesToSend.swap(connection->mFramesToSend);
+                   pthread_mutex_unlock(&mConnectionsMutex);
 
-                  pthread_mutex_lock (&mConnectionsMutex);
-                  framesToSend.swap(connection->mFramesToSend);
-                  pthread_mutex_unlock(&mConnectionsMutex);
+                   for (; false == framesToSend.empty(); framesToSend.pop()) {
+                   SFrame * frame = framesToSend.front();
+                   ESendStatus frameSendStatus = SendStatusUnknownError;
 
-                  for (; false == framesToSend.empty(); framesToSend.pop()) {
-                    SFrame * frame = framesToSend.front();
-                    ESendStatus frameSendStatus = SendStatusUnknownError;
+                   if (0 != frame) {
+                   if ((0 != frame->mData) && (0u != frame->mDataSize)) {
+                   ssize_t bytesSent = send(connectionSocket, frame->mData,
+                   frame->mDataSize, 0);
 
-                    if (0 != frame) {
-                      if ((0 != frame->mData) && (0u != frame->mDataSize)) {
-                        ssize_t bytesSent = send(connectionSocket, frame->mData,
-                                                 frame->mDataSize, 0);
+                   if (static_cast<size_t>(bytesSent) == frame->mDataSize) {
+                   frameSendStatus = SendStatusOK;
+                   } else {
+                   if (bytesSent >= 0) {
+                   LOG4CXX_ERROR(
+                   logger_,
+                   "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle);
+                   } else {
+                   LOG4CXX_ERROR_WITH_ERRNO(
+                   logger_,
+                   "Send failed for connection " << ConnectionHandle);
+                   }
 
-                        if (static_cast<size_t>(bytesSent) == frame->mDataSize) {
-                          frameSendStatus = SendStatusOK;
-                        } else {
-                          if (bytesSent >= 0) {
-                            LOG4CXX_ERROR(
-                                logger_,
-                                "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle);
-                          } else {
-                            LOG4CXX_ERROR_WITH_ERRNO(
-                                logger_,
-                                "Send failed for connection " << ConnectionHandle);
-                          }
+                   frameSendStatus = SendStatusFailed;
+                   }
+                   } else {
+                   LOG4CXX_ERROR(
+                   logger_,
+                   "Frame data is invalid for connection " << ConnectionHandle);
 
-                          frameSendStatus = SendStatusFailed;
-                        }
-                      } else {
-                        LOG4CXX_ERROR(
-                            logger_,
-                            "Frame data is invalid for connection " << ConnectionHandle);
+                   frameSendStatus = SendStatusInternalError;
+                   }
 
-                        frameSendStatus = SendStatusInternalError;
-                      }
+                   delete frame;
+                   } else {
+                   LOG4CXX_ERROR(
+                   logger_,
+                   "Frame data is null for connection " << ConnectionHandle);
 
-                      delete frame;
-                    } else {
-                      LOG4CXX_ERROR(
-                          logger_,
-                          "Frame data is null for connection " << ConnectionHandle);
+                   frameSendStatus = SendStatusInternalError;
+                   }
 
-                      frameSendStatus = SendStatusInternalError;
-                    }
-
-                    mListener.onFrameSendCompleted(this, ConnectionHandle,
-                                                   frame->mUserData,
-                                                   frameSendStatus);
-                  }
+                   mListener.onFrameSendCompleted(this, ConnectionHandle,
+                   frame->mUserData,
+                   frameSendStatus);
+                   }
+                   */
                 }
               }
             } else {
               LOG4CXX_ERROR_WITH_ERRNO(
-                  logger_, "poll() failed for connection " << ConnectionHandle);
+                  logger_,
+                  "poll() failed for connection " << connection->session_id());
 
-              connection->mTerminateFlag = true;
+              connection->terminate_flag_ = true;
             }
           }
-
-          mListener.onApplicationDisconnected(this, clientDeviceInfo,
-                                              ConnectionHandle);
         } else {
           LOG4CXX_ERROR_WITH_ERRNO(
               logger_,
-              "Failed to set O_NONBLOCK for notification pipe for connection " << ConnectionHandle);
+              "Failed to set O_NONBLOCK for notification pipe for connection " << connection->session_id());
         }
       } else {
         LOG4CXX_ERROR_WITH_ERRNO(
             logger_,
-            "Failed to create notification pipe for connection " << ConnectionHandle);
+            "Failed to create notification pipe for connection " << connection->session_id());
       }
     } else {
-      LOG4CXX_ERROR(logger_,
-                    "Device for connection " << ConnectionHandle << " is invalid");
+      LOG4CXX_ERROR(
+          logger_,
+          "Device for connection " << connection->session_id() << " is invalid");
     }
 
-    close (connectionSocket);
+    const int close_status = close(connection_socket);
+
+    if(is_connection_succeeded) {
+    if(close_status == 0) {
+      listener_.onDisconnectDone(this, connection->session_id());
+    } else {
+      listener_.onDisconnectFailed(this, connection->session_id(), DisconnectError());
+    }
+    }
   }
 
-  if (true == isPipeCreated) {
-    pthread_mutex_lock (&mConnectionsMutex);
+  if(!is_connection_succeeded) {
+    listener_.onConnectFailed(this, connection->session_id(), ConnectError());
+  }
 
-    close(connection->mNotificationPipeFds[0]);
-    close(connection->mNotificationPipeFds[1]);
+  if (true == is_pipe_created) {
+    pthread_mutex_lock(&connections_mutex_);
 
-    connection->mNotificationPipeFds[0] = connection->mNotificationPipeFds[1] =
-        -1;
+    close(connection->notification_pipe_fds_[0]);
+    close(connection->notification_pipe_fds_[1]);
 
-    pthread_mutex_unlock(&mConnectionsMutex);
+    connection->notification_pipe_fds_[0] =
+        connection->notification_pipe_fds_[1] = -1;
+
+    pthread_mutex_unlock(&connections_mutex_);
   }
 }
 

@@ -133,7 +133,6 @@ private:
   RfcommChannels rfcomm_channels_;
 
   bool initialized_;
-  DeviceAdapterListener* listener_;
   DeviceHandleGenerator* handle_generator_;
 };
 
