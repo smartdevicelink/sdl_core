@@ -426,7 +426,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  void handleCommunication(const Connection* connection);
+  void handleCommunication(Connection* connection);
 
   /**
    * @brief Update client device list.

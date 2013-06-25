@@ -178,12 +178,14 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
              sizeof(bdaddr_t));
       remoteSocketAddress.rc_channel = rfcomm_channels_it->second;
 
-      const int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+      const int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM,
+                                      BTPROTO_RFCOMM);
 
       if (-1 != rfcommSocket) {
-        if (0
-            == ::connect(rfcommSocket, (struct sockaddr *) &remoteSocketAddress,
-                         sizeof(remoteSocketAddress))) {
+        const int connect_status = ::connect(
+            rfcommSocket, static_cast<struct sockaddr*>(&remoteSocketAddress),
+            sizeof(remoteSocketAddress));
+        if (0 == connect_status) {
           connection->set_connection_socket(rfcommSocket);
           handleCommunication(connection);
         } else {

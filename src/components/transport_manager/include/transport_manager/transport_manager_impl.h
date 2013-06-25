@@ -41,14 +41,12 @@
 #include "transport_manager/device_adapter.h"
 #include "transport_manager/device_adapter_listener_impl.h"
 
-namespace transport_manager
-{
-	/**
-	 * @brief Interface of transport manager.
-	 * @interface TransportManager
-	 **/
-class TransportManagerImpl : public TransportManager
-{
+namespace transport_manager {
+/**
+ * @brief Interface of transport manager.
+ * @interface TransportManager
+ **/
+class TransportManagerImpl: public TransportManager {
 public:
 	/**
 	 * @brief provide default instance of transport manager
@@ -61,6 +59,15 @@ public:
 	 * @brief Destructor.
 	 **/
 	virtual ~TransportManagerImpl(void);
+
+	/**
+	 * @brief initialize TM
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 */
+	void init(void);
 
 	/**
 	 * @brief Start scanning for new devices.
@@ -94,7 +101,16 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void sendMessageToDevice(const protocol_handler::RawMessage message);
+	virtual void sendMessageToDevice(const void *message);
+
+	/**
+	 * @brief receive event from device
+	 *
+	 * @param new event
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	virtual void receiveEventFromDevice(const void *event);
 
 	/**
 	 * @brief register event listener
@@ -142,15 +158,6 @@ public:
 	void set_transport_manager_listener(TransportManagerListener *listener);
 
 	/**
-	 * @brief adds new call back function for specified event type
-	 *
-	 * @param event type, function address
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	void set_device_adapter_listener(DeviceAdapterListener *listener);
-
-	/**
 	 * @brief interface function to wake up adapter listener thread
 	 *
 	 * @param
@@ -166,8 +173,27 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	void postMessage(const protocol_handler::RawMessage message);
+	void postMessage(const protocol_handler::RawMessage &message);
 
+	/**
+	 * @brief update message in queue
+	 *
+	 * @param
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void updateMessage(const protocol_handler::RawMessage &message);
+
+	/**
+	 * @brief remove mesage from TM's queue
+	 *
+	 * @param new message container
+	 *
+	 * @see @ref components_transportmanager_client_connection_management
+	 **/
+	void removeMessage(const protocol_handler::RawMessage *message);
+
+	void updateMessage(const protocol_handler::RawMessage &message);
 	/**
 	 * @brief post new event from device
 	 *
@@ -175,8 +201,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent event);
-
+	void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
 
 protected:
 
@@ -199,14 +224,7 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	typedef std::vector<SessionID>  SessionList;
-
-	/**
-	 * @brief type for
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	typedef struct{
+	typedef struct {
 		DeviceAdapter *device_adapter;
 		DeviceHandle device_handle;
 	} ConnectionHandle;
@@ -236,7 +254,8 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	TransportManagerImpl::TransportManagerImpl(std::vector<DeviceAdapter *> device_adapter_list);
+	TransportManagerImpl::TransportManagerImpl(
+			std::vector<DeviceAdapter *> device_adapter_list);
 
 	/**
 	 * @brief scan message's queue and pull messages according to priority and serial number
@@ -257,27 +276,17 @@ protected:
 	static void *deviceListenerThread(void *);
 
 	/**
-	 * @brief initialize TM
-	 *
-	 * @param
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 */
-	void initialize(void);
-
-	/**
 	 * @brief return device adapter corresponding to defined session id
 	 *
 	 * @param session id
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 */
-	ConnectionHandle *getConnectionHandler(SessionID session_id);
-
+	DeviceAdapter *getDeviceAdapter(SessionID session_id);
 
 	/**
-	* \brief For logging.
-	*/
+	 * \brief For logging.
+	 */
 	static log4cxx::LoggerPtr logger_;
 
 	/**
@@ -347,6 +356,11 @@ protected:
 	 * @brief Mutex restricting access to events.
 	 **/
 	mutable pthread_mutex_t device_listener_thread_mutex_;
+
+	/**
+	 * @brief
+	 **/
+	std::map<SessionID, DeviceAdapter *> session_to_device_map_;
 };
 }
 

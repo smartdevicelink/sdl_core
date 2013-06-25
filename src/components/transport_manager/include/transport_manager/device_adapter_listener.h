@@ -38,33 +38,48 @@
 
 #include "transport_manager/device_adapter.h"
 
-namespace transport_manager
-{
+namespace transport_manager {
 
-class DeviceAdapterListener
-{
+class DeviceAdapterListener {
 public:
-  virtual ~DeviceAdapterListener();
+	virtual ~DeviceAdapterListener();
+	virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter) = 0;
+  virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
+                                    const SearchDeviceError& error) = 0;
 
-  virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter) = 0;
-  virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter, const SearchDeviceError& error) = 0;
+  virtual void onConnectDone(const DeviceAdapter* device_adapter,
+                             const transport_manager::SessionID session_id) = 0;
+  virtual void onConnectFailed(const DeviceAdapter* device_adapter,
+                               const transport_manager::SessionID session_id,
+                               const ConnectError& error) = 0;
 
-  virtual void onConnectDone(const DeviceAdapter* device_adapter, const int session_id) = 0;
-  virtual void onConnectFailed(const DeviceAdapter* device_adapter, const int session_id, const ConnectError& error) = 0;
+  virtual void onConnectDone(const DeviceAdapter* device_adapter,
+                             const SessionID session_id) = 0;
+  virtual void onConnectFailed(const DeviceAdapter* device_adapter,
+                               const SessionID session_id,
+                               const ConnectError& error) = 0;
 
-  virtual void onDisconnectDone(const DeviceAdapter* device_adapter, const int session_id) = 0;
-  virtual void onDisconnectFailed(const DeviceAdapter* device_adapter, const int session_id, const DisconnectError& error) = 0;
+  virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
+                                const SessionID session_id) = 0;
+  virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
+                                  const SessionID session_id,
+                                  const DisconnectError& error) = 0;
 
-  virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter, const int session_id) = 0;
-  virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter, const int session_id, const DisconnectDeviceError& error) = 0;
+  virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
+                                      const SessionID session_id) = 0;
+  virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
+                                        const SessionID session_id,
+                                        const DisconnectDeviceError& error) = 0;
 
-  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter, const int session_id, const RawMessageSptr data_container) = 0;
-  virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter, const int session_id, const DataReceiveError& error) = 0;
+  virtual void onDataSendDone(const DeviceAdapter* device_adapter,
+                              const SessionID session_id,
+                              const RawMessageSptr data_container) = 0;
+  virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
+                                const SessionID session_id,
+                                const DataSendError& error) = 0;
 
-  virtual void onDataSendDone(const DeviceAdapter* device_adapter, const int session_id, const RawMessageSptr data_container) = 0;
-  virtual void onDataSendFailed(const DeviceAdapter* device_adapter, const int session_id, const DataSendError& error) = 0;
-
-  virtual void onCommunicationError(const DeviceAdapter* device_adapter, const int session_id) = 0;
+  virtual void onCommunicationError(const DeviceAdapter* device_adapter,
+                                    const SessionID session_id) = 0;
 };
-}//namespace
+} //namespace
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER
