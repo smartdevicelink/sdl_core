@@ -143,6 +143,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vr_is_ready_response.cc
 ./src/commands/hmi/vr_add_command_request.cc
 ./src/commands/hmi/vr_add_command_response.cc
+./src/commands/hmi/vr_delete_command_request.cc
+./src/commands/hmi/vr_delete_command_response.cc
 ./src/commands/hmi/tts_is_ready_request.cc
 ./src/commands/hmi/tts_is_ready_response.cc
 ./src/commands/hmi/ui_get_supported_languages_request.cc
