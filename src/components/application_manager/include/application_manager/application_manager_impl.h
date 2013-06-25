@@ -201,7 +201,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return Currently supported UI languages
      */
     inline const smart_objects::CSmartObject*
-      ui_supported_languages() const;
+        ui_supported_languages() const;
 
     /*
      * @brief Sets supported UI languages
@@ -217,7 +217,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return Currently supported TTS languages
      */
     inline const smart_objects::CSmartObject*
-      tts_supported_languages() const;
+        tts_supported_languages() const;
 
     /*
      * @brief Sets supported TTS languages
@@ -233,7 +233,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return Currently supported VR languages
      */
     inline const smart_objects::CSmartObject*
-      vr_supported_languages() const;
+        vr_supported_languages() const;
 
     /*
      * @brief Sets supported VR languages
@@ -256,6 +256,54 @@ class ApplicationManagerImpl : public ApplicationManager
      * @param state Current HMI VR session state
      */
     void set_vr_session_started(const bool& state);
+
+    /*
+     * @brief Retrieves information about the display capabilities
+     *
+     * @return Currently supported display capabilities
+     */
+    inline const smart_objects::CSmartObject*
+        display_capabilities() const;
+
+    /*
+     * @brief Sets supported display capabilities
+     *
+     * @param display_capabilities supported display capabilities
+     */
+    void set_display_capabilities(
+        const smart_objects::CSmartObject& display_capabilities);
+
+    /*
+     * @brief Retrieves information about the HMI zone capabilities
+     *
+     * @return Currently supported HMI zone capabilities
+     */
+    inline const smart_objects::CSmartObject*
+        hmi_zone_capabilities() const;
+
+    /*
+     * @brief Sets supported HMI zone capabilities
+     *
+     * @param hmi_zone_capabilities supported HMI zone capabilities
+     */
+    void set_hmi_zone_capabilities(
+        const smart_objects::CSmartObject& hmi_zone_capabilities);
+
+    /*
+     * @brief Retrieves information about the SoftButton's capabilities
+     *
+     * @return Currently supported SoftButton's capabilities
+     */
+    inline const smart_objects::CSmartObject*
+        soft_button_capabilities() const;
+
+    /*
+     * @brief Sets supported SoftButton's capabilities
+     *
+     * @param soft_button_capabilities supported SoftButton's capabilities
+     */
+    void set_soft_button_capabilities(
+        const smart_objects::CSmartObject& soft_button_capabilities);
 
     /*
      * @brief Starts audio pass thru thread
@@ -355,7 +403,10 @@ class ApplicationManagerImpl : public ApplicationManager
     smart_objects::CSmartObject*                    ui_supported_languages_;
     smart_objects::CSmartObject*                    tts_supported_languages_;
     smart_objects::CSmartObject*                    vr_supported_languages_;
-    bool                                            is_vr_session_strated;
+    bool                                            is_vr_session_strated_;
+    smart_objects::CSmartObject*                    display_capabilities_;
+    smart_objects::CSmartObject*                    hmi_zone_capabilities_;
+    smart_objects::CSmartObject*                    soft_buttons_capabilities_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
@@ -385,7 +436,22 @@ const smart_objects::CSmartObject*
 }
 
 inline bool ApplicationManagerImpl::vr_session_started() const {
-  return is_vr_session_strated;
+  return is_vr_session_strated_;
+}
+
+inline const smart_objects::CSmartObject*
+    ApplicationManagerImpl::display_capabilities() const {
+  return display_capabilities_;
+}
+
+inline const smart_objects::CSmartObject*
+    ApplicationManagerImpl::hmi_zone_capabilities() const {
+  return hmi_zone_capabilities_;
+}
+
+inline const smart_objects::CSmartObject*
+    ApplicationManagerImpl::soft_button_capabilities() const {
+  return soft_buttons_capabilities_;
 }
 
 }  // namespace application_manager

@@ -50,7 +50,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
   ui_supported_languages_(NULL),
   tts_supported_languages_(NULL),
   vr_supported_languages_(NULL),
-  is_vr_session_strated(false) {
+  is_vr_session_strated_(false),
+  display_capabilities_(NULL),
+  hmi_zone_capabilities_(NULL),
+  soft_buttons_capabilities_(NULL) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -59,6 +62,9 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   delete ui_supported_languages_;
   delete tts_supported_languages_;
   delete vr_supported_languages_;
+  delete display_capabilities_;
+  delete hmi_zone_capabilities_;
+  delete soft_buttons_capabilities_;
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -280,7 +286,34 @@ void ApplicationManagerImpl::set_vr_supported_languages(
 }
 
 void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
-  is_vr_session_strated = state;
+  is_vr_session_strated_ = state;
+}
+
+void ApplicationManagerImpl::set_display_capabilities(
+    const smart_objects::CSmartObject& display_capabilities) {
+  if (display_capabilities_) {
+     delete display_capabilities_;
+   }
+  display_capabilities_ =
+     new smart_objects::CSmartObject(display_capabilities);
+}
+
+void ApplicationManagerImpl::set_hmi_zone_capabilities(
+    const smart_objects::CSmartObject& hmi_zone_capabilities) {
+  if (hmi_zone_capabilities_) {
+     delete hmi_zone_capabilities_;
+   }
+  hmi_zone_capabilities_ =
+     new smart_objects::CSmartObject(hmi_zone_capabilities);
+}
+
+void ApplicationManagerImpl::set_soft_button_capabilities(
+    const smart_objects::CSmartObject& soft_button_capabilities) {
+  if (soft_buttons_capabilities_) {
+     delete soft_buttons_capabilities_;
+   }
+  soft_buttons_capabilities_ =
+     new smart_objects::CSmartObject(soft_button_capabilities);
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
