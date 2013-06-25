@@ -46,6 +46,8 @@
 #include "application_manager/commands/hmi/exit_all_applications_response.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
+#include "application_manager/commands/hmi/ui_get_capabilities_request.h"
+#include "application_manager/commands/hmi/ui_get_capabilities_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -108,6 +110,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIGetSupportedLanguagesResponse(message));
       } else {
         command.reset(new commands::UIGetSupportedLanguagesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_GetCapabilities: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIGetCapabilitiesResponse(message));
+      } else {
+        command.reset(new commands::UIGetCapabilitiesRequest(message));
       }
       break;
     }
