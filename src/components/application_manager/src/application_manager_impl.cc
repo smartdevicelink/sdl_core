@@ -49,7 +49,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
   driver_distraction_(hmi_apis::Common_DriverDistractionState::INVALID_ENUM ),
   ui_supported_languages_(NULL),
   tts_supported_languages_(NULL),
-  vr_supported_languages_(NULL) {
+  vr_supported_languages_(NULL),
+  is_vr_session_strated(false) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -276,6 +277,10 @@ void ApplicationManagerImpl::set_vr_supported_languages(
   }
   vr_supported_languages_ =
     new smart_objects::CSmartObject(supported_languages);
+}
+
+void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
+  is_vr_session_strated = state;
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,

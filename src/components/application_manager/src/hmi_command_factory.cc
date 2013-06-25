@@ -63,6 +63,7 @@
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
 #include "application_manager/commands/hmi/on_play_tone_notification.h"
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
+#include "application_manager/commands/hmi/on_vr_stopped_notification.h"
 
 namespace application_manager {
 
@@ -176,6 +177,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::eType::VR_Started: {
+      command.reset(new commands::OnVRStartedNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::VR_Stopped: {
       command.reset(new commands::OnVRStartedNotification(message));
       break;
     }

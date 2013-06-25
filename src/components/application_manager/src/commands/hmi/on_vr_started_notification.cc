@@ -31,11 +31,15 @@
  */
 
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
-
+#include "application_manager/application_manager_impl.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
+
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 OnVRStartedNotification::OnVRStartedNotification(
     const MessageSharedPtr& message): NotificationFromHMI(message) {
@@ -45,7 +49,8 @@ OnVRStartedNotification::~OnVRStartedNotification() {
 }
 
 void OnVRStartedNotification::Run() {
-
+  LOG4CXX_INFO(logger_, "OnVRStartedNotification::Run ");
+  ApplicationManagerImpl::instance()->set_vr_session_started(true);
 }
 
 }  // namespace commands

@@ -244,6 +244,20 @@ class ApplicationManagerImpl : public ApplicationManager
         const smart_objects::CSmartObject& supported_languages);
 
     /*
+     * @brief Retrieves if VR session has started
+     *
+     * @return Current VR session state (started, stopped)
+     */
+    inline bool vr_session_started() const;
+
+    /*
+     * @brief Sets VR session state
+     *
+     * @param state Current HMI VR session state
+     */
+    void set_vr_session_started(const bool& state);
+
+    /*
      * @brief Starts audio pass thru thread
      *
      * @param session_key     Session key of connection for Mobile side
@@ -341,6 +355,7 @@ class ApplicationManagerImpl : public ApplicationManager
     smart_objects::CSmartObject*                    ui_supported_languages_;
     smart_objects::CSmartObject*                    tts_supported_languages_;
     smart_objects::CSmartObject*                    vr_supported_languages_;
+    bool                                            is_vr_session_strated;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
@@ -367,6 +382,10 @@ const smart_objects::CSmartObject*
 const smart_objects::CSmartObject*
     ApplicationManagerImpl::vr_supported_languages() const {
   return vr_supported_languages_;
+}
+
+inline bool ApplicationManagerImpl::vr_session_started() const {
+  return is_vr_session_strated;
 }
 
 }  // namespace application_manager
