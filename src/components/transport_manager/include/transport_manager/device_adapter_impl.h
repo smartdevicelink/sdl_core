@@ -95,13 +95,22 @@ class DeviceAdapterImpl : public DeviceAdapter {
   virtual Error connect(const DeviceHandle device_handle, const ApplicationHandle app_handle, const int session_id);
 
   /**
-   * @brief Disconnect from all applications connected on device.
+   * @brief Disconnect from specified session.
    *
-   * @param DeviceHandle Handle of device to disconnect from.
+   * @param session_id Session identifier to disconnect.
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
-  virtual void disconnectDevice(const DeviceHandle device_handle);
+  virtual Error disconnect(const int session_id);
+
+  /**
+   * @brief Disconnect from all sessions on specified device.
+   *
+   * @param device_handle Device handle to disconnect.
+   *
+   * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
+   **/
+  virtual Error disconnectDevice(const DeviceHandle device_handle);
 
   /**
    * @brief Send frame.
@@ -248,6 +257,14 @@ class DeviceAdapterImpl : public DeviceAdapter {
       return session_id_;
     }
 
+    void set_connection_socket(int socket) {
+      connection_socket_ = socket;
+    }
+
+    int connection_socket() const {
+      return connection_socket_;
+    }
+
    private:
     /**
      * @brief Device handle.
@@ -314,6 +331,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
      * @brief Pointer to device adapter.
      **/
     DeviceAdapterImpl* device_adapter;
+    Connection* connection;
   };
 
   /**
@@ -372,9 +390,9 @@ class DeviceAdapterImpl : public DeviceAdapter {
    * This method only initiates connection termination. It returns immediately
    * without waiting for actual termination of the connection.
    *
-   * @param ConnectionHandle Handle of connection to stop.
+   * @param connection Connection to stop.
    **/
-  void stopConnection(ConnectionHandle connection_handle);
+  Error stopConnection(Connection* connection);
 
   /**
    * @brief Wait for device scan request.
@@ -408,7 +426,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  void handleCommunication(const ConnectionHandle connection_handle);
+  void handleCommunication(const Connection* connection);
 
   /**
    * @brief Update client device list.
@@ -450,11 +468,11 @@ class DeviceAdapterImpl : public DeviceAdapter {
    * with remote device via specified connection. It must remove itself from
    * connection map when connection is terminated before terminating connection thread.
    *
-   * @param ConnectionHandle Connection handle.
+   * @param connection Connection.
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
    **/
-  virtual void connectionThread() = 0;
+  virtual void connectionThread(Connection* connection) = 0;
 
   /**
    * @brief Connections map.

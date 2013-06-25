@@ -33,6 +33,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+#include <errno.h>
+
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
+#include <bluetooth/sdp.h>
+#include <bluetooth/sdp_lib.h>
+#include <bluetooth/rfcomm.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
 #include "transport_manager/bluetooth_adapter.h"
 
 namespace transport_manager {
@@ -128,112 +140,76 @@ DeviceList BluetoothAdapter::getDeviceList() const {
   return DeviceList();
 }
 
-void BluetoothAdapter::connectionThread()
-{
-    LOG4CXX_INFO(logger_, "Connection thread started for connection " << ConnectionHandle);
+void BluetoothAdapter::connectionThread(Connection* connection) {
+  assert(connection != 0);
+  LOG4CXX_INFO(
+      logger_,
+      "Connection thread started for session " << connection->session_id());
 
-    tDeviceHandle deviceHandle = InvalidDeviceHandle;
-    struct sockaddr_rc remoteSocketAddress = {0};
-    remoteSocketAddress.rc_family = AF_BLUETOOTH;
+  const DeviceHandle device_handle = connection->device_handle();
+  const ApplicationHandle app_handle = connection->application_handle();
+  const int session_id = connection->session_id();
 
-    pthread_mutex_lock(&mConnectionsMutex);
-
-    SRFCOMMConnection * connection = 0;
-    tConnectionMap::const_iterator connectionIterator = mConnections.find(ConnectionHandle);
-
-    if (connectionIterator != mConnections.end())
-    {
-        connection = dynamic_cast<SRFCOMMConnection*>(connectionIterator->second);
-
-        if (0 != connection)
-        {
-            deviceHandle = connection->mDeviceHandle;
-            remoteSocketAddress.rc_channel = connection->mRFCOMMChannel;
-        }
-        else
-        {
-            LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " is not valid");
-        }
+  pthread_mutex_lock(&devices_mutex_);
+  BluetoothDevice* device = 0;
+  DeviceMap::const_iterator device_it = devices_.find(
+      connection->device_handle());
+  if (device_it == devices_.end()) {
+    LOG4CXX_ERROR(logger_, "Device " << device_handle << " does not exist");
+  } else {
+    device = dynamic_cast<BluetoothDevice*>(device_it->second);
+    if (device == 0) {
+      LOG4CXX_ERROR(logger_, "Device " << device_handle << " is not valid");
     }
-    else
-    {
-        LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " does not exist");
-    }
+  }
+  pthread_mutex_unlock(&devices_mutex_);
 
-    pthread_mutex_unlock(&mConnectionsMutex);
+  if (device != 0) {
+    RfcommChannels::const_iterator rfcomm_channels_it =
+        device->rfcomm_channels().find(app_handle);
+    if (device->rfcomm_channels().end() == rfcomm_channels_it) {
+      LOG4CXX_ERROR(
+          logger_,
+          "Device " << device_handle << " with application " << app_handle << " not found");
+    } else {
+      struct sockaddr_rc remoteSocketAddress = { 0 };
+      remoteSocketAddress.rc_family = AF_BLUETOOTH;
+      memcpy(&remoteSocketAddress.rc_bdaddr, &device->address(),
+             sizeof(bdaddr_t));
+      remoteSocketAddress.rc_channel = rfcomm_channels_it->second;
 
-    if (0 != connection)
-    {
-        if (InvalidDeviceHandle != deviceHandle)
-        {
-            bool isDeviceValid = false;
+      const int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 
-            pthread_mutex_lock(&mDevicesMutex);
-
-            tDeviceMap::const_iterator deviceIterator = mDevices.find(deviceHandle);
-
-            if (deviceIterator != mDevices.end())
-            {
-                const SBluetoothDevice * device = dynamic_cast<const SBluetoothDevice*>(deviceIterator->second);
-
-                if (0 != device)
-                {
-                    isDeviceValid = true;
-                    memcpy(&remoteSocketAddress.rc_bdaddr, &device->mAddress, sizeof(bdaddr_t));
-                }
-                else
-                {
-                    LOG4CXX_ERROR(logger_, "Device " << deviceHandle << " is not valid");
-                }
-            }
-            else
-            {
-                LOG4CXX_ERROR(logger_, "Device " << deviceHandle << " does not exist");
-            }
-
-            pthread_mutex_unlock(&mDevicesMutex);
-
-            if (true == isDeviceValid)
-            {
-                int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
-
-                if (-1 != rfcommSocket)
-                {
-                    if (0 == connect(rfcommSocket, (struct sockaddr *)&remoteSocketAddress, sizeof(remoteSocketAddress)))
-                    {
-                        connection->mConnectionSocket = rfcommSocket;
-                        handleCommunication(ConnectionHandle);
-                    }
-                    else
-                    {
-                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for connection " << ConnectionHandle);
-                    }
-                }
-                else
-                {
-                    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create RFCOMM socket for connection " << ConnectionHandle);
-                }
-            }
+      if (-1 != rfcommSocket) {
+        if (0
+            == ::connect(rfcommSocket, (struct sockaddr *) &remoteSocketAddress,
+                         sizeof(remoteSocketAddress))) {
+          connection->set_connection_socket(rfcommSocket);
+          handleCommunication(connection);
+        } else {
+          LOG4CXX_ERROR_WITH_ERRNO(
+              logger_,
+              "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << session_id);
         }
-        else
-        {
-            LOG4CXX_ERROR(logger_, "Device handle for connection " << ConnectionHandle << " is invalid");
-        }
+      } else {
+        LOG4CXX_ERROR_WITH_ERRNO(
+            logger_,
+            "Failed to create RFCOMM socket for device " << device_handle);
+      }
     }
-    else
-    {
-        LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " is null");
-    }
+  }
 
-    LOG4CXX_INFO(logger_, "Removing connection " << ConnectionHandle << " from connection map");
+  LOG4CXX_INFO(
+      logger_,
+      "Removing connection for session " << session_id << " from connection map");
 
-    pthread_mutex_lock(&mConnectionsMutex);
-    mConnections.erase(ConnectionHandle);
-    pthread_mutex_unlock(&mConnectionsMutex);
+  pthread_mutex_lock(&connections_mutex_);
+  connections_.erase(connection->session_id());
+  pthread_mutex_unlock(&connections_mutex_);
 
-    delete connection;
+  delete connection;
 
-    LOG4CXX_INFO(logger_, "Connection thread finished for connection " << ConnectionHandle);
+  LOG4CXX_INFO(logger_, "Connection thread finished for session " << session_id);
 }
 
 

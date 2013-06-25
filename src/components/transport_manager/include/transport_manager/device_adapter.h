@@ -77,7 +77,8 @@ public:
 
   virtual bool isClientOriginatedConnectSupported() const = 0;
 
-  virtual void disconnect(const int session_id) = 0;
+  virtual Error disconnect(const int session_id) = 0;
+  virtual Error disconnectDevice(const DeviceHandle device_handle) = 0;
 
   virtual void sendData(const int session_id, const RawMessageSptr data) = 0;
 
@@ -93,7 +94,11 @@ class SearchDeviceError : public DeviceAdapterError
 {
 };
 
-class ConnectDeviceError : public DeviceAdapterError
+class ConnectError : public DeviceAdapterError
+{
+};
+
+class DisconnectError : public DeviceAdapterError
 {
 };
 

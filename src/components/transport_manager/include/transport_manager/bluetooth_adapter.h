@@ -36,7 +36,8 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
 
-#include "device_adapter.h"
+#include "bluetooth_adapter.h"
+#include "device_adapter_impl.h"
 
 namespace transport_manager
 {
@@ -48,6 +49,7 @@ public:
   virtual ~BluetoothAdapter();
 
 protected:
+
   virtual DeviceType GetDeviceType() const;
 
   virtual Error init(DeviceAdapterListener* listener, DeviceHandleGenerator* handle_generator, Configuration* configuration);
@@ -66,9 +68,70 @@ protected:
 
   virtual DeviceList getDeviceList() const;
 
-  virtual void connectionThread() = 0;
+  virtual void connectionThread(Connection* connection);
+
+  /**
+   * @brief Get unique device ID.
+   *
+   * Get TransportManager-unique identifier of
+   * bluetooth device based on its bluetooth address.
+   *
+   * @param DeviceAddress Address of device.
+   *
+   * @return Unique device identifier.
+   **/
+  static std::string getUniqueDeviceId(const bdaddr_t & DeviceAddress);
+
+protected:
+  class BluetoothDevice : public Device {
+    typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
+   public:
+    /**
+     * @brief Constructor.
+     *
+     * @param address Bluetooth address.
+     * @param name Human-readable device name.
+     * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
+     **/
+    BluetoothDevice(const bdaddr_t& address, const char* name,
+                    const RfcommChannels& rfcomm_channels);
+
+    /**
+     * @brief Compare devices.
+     *
+     * This method checks whether two SBluetoothDevice structures
+     * refer to the same device.
+     *
+     * @param other Device to compare with.
+     *
+     * @return true if devices are equal, false otherwise.
+     **/
+    virtual bool isSameAs(const Device* other) const;
+
+    const RfcommChannels& rfcomm_channels() const {
+      return rfcomm_channels_;
+    }
+
+    const bdaddr_t& address() const {
+      return address_;
+    }
+
+   private:
+    /**
+     * @brief Device bluetooth address.
+     **/
+    bdaddr_t address_;
+
+    /**
+     * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
+     **/
+    RfcommChannels rfcomm_channels_;
+  };
 
 private:
+  typedef std::map<std::pair<DeviceHandle, ApplicationHandle>, uint8_t> RfcommChannels;
+  RfcommChannels rfcomm_channels_;
+
   bool initialized_;
   DeviceAdapterListener* listener_;
   DeviceHandleGenerator* handle_generator_;

@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <errno.h>
 #include <fcntl.h>
 #include <memory.h>
 #include <poll.h>
@@ -127,7 +128,7 @@ DeviceAdapterImpl::DeviceAdapterImpl(
       devices_mutex_(),
       connections_(),
       connections_mutex_(),
-      shutdownd_flag_(false),
+      shutdown_flag_(false),
       main_thread_(),
       main_thread_started_(false) {
   pthread_cond_init(&device_scan_requested_cond_, 0);
@@ -213,55 +214,6 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const 
         else
         {
             LOG4CXX_WARN(logger_, "No connections to establish on device " << DeviceHandle);
-        }
-    }
-}
-
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::disconnectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
-{
-    bool isDeviceValid = false;
-
-    pthread_mutex_lock(&mDevicesMutex);
-
-    if (mDevices.end() != mDevices.find(DeviceHandle))
-    {
-        isDeviceValid = true;
-    }
-    else
-    {
-        LOG4CXX_ERROR(logger_, "Device handle " << DeviceHandle << " is invalid");
-    }
-
-    pthread_mutex_unlock(&mDevicesMutex);
-
-    if (true == isDeviceValid)
-    {
-        std::vector<tConnectionHandle> connectionsToTerminate;
-
-        pthread_mutex_lock(&mConnectionsMutex);
-
-        for (tConnectionMap::const_iterator connectionIterator = mConnections.begin(); connectionIterator != mConnections.end(); ++connectionIterator)
-        {
-            SConnection * connection = connectionIterator->second;
-
-            if (0 != connection)
-            {
-                if (connection->mDeviceHandle == DeviceHandle)
-                {
-                    connectionsToTerminate.push_back(connectionIterator->first);
-                }
-            }
-            else
-            {
-                LOG4CXX_ERROR(logger_, "Connection " << connectionIterator->first << " is null");
-            }
-        }
-
-        pthread_mutex_unlock(&mConnectionsMutex);
-
-        for (std::vector<tConnectionHandle>::const_iterator connectionHandleIterator = connectionsToTerminate.begin(); connectionHandleIterator != connectionsToTerminate.end(); ++connectionHandleIterator)
-        {
-            stopConnection(*connectionHandleIterator);
         }
     }
 }
@@ -418,6 +370,7 @@ DeviceAdapter::Error DeviceAdapterImpl::startConnection(Connection* connection) 
   if (!shutdown_flag_) {
     ConnectionThreadParameters* thread_params = new ConnectionThreadParameters;
     thread_params->device_adapter = this;
+    thread_params->connection = connection;
 
     int errorCode = pthread_create(
         &connection->connection_thread_, 0, &connectionThreadStartRoutine,
@@ -441,48 +394,29 @@ DeviceAdapter::Error DeviceAdapterImpl::startConnection(Connection* connection) 
   return is_thread_started ? DeviceAdapter::OK : DeviceAdapter::FAIL;
 }
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::stopConnection(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle)
-{
-    pthread_mutex_lock(&mConnectionsMutex);
-
-    tConnectionMap::iterator connectionIterator = mConnections.find(ConnectionHandle);
-
-    if (mConnections.end() != connectionIterator)
-    {
-        SConnection * connection = connectionIterator->second;
-
-        if (0 != connection)
-        {
-            if (false == connection->mTerminateFlag)
-            {
-                connection->mTerminateFlag = true;
-                if (-1 != connection->mNotificationPipeFds[1])
-                {
-                    uint8_t c = 0;
-                    if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
-                    {
-                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to wake up connection thread for connection " << connectionIterator->first);
-                    }
-                }
-
-                LOG4CXX_INFO(logger_, "Connection " << ConnectionHandle << "(device " << connection->mDeviceHandle << ") has been marked for termination");
-            }
-            else
-            {
-                LOG4CXX_WARN(logger_, "Connection " << ConnectionHandle << " is already terminating");
-            }
-        }
-        else
-        {
-            LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " is null");
-        }
-    }
-    else
-    {
-        LOG4CXX_WARN(logger_, "Connection " << ConnectionHandle << " does not exist");
+DeviceAdapter::Error DeviceAdapterImpl::stopConnection(Connection* connection) {
+  assert(connection != 0);
+  if (false == connection->terminate_flag_) {
+    connection->terminate_flag_ = true;
+    if (-1 != connection->notification_pipe_fds_[1]) {
+      uint8_t c = 0;
+      if (1 != ::write(connection->notification_pipe_fds_[1], &c, 1)) {
+        LOG4CXX_ERROR_WITH_ERRNO(
+            logger_,
+            "Failed to wake up connection thread for connection " << connection->session_id());
+      }
+      return FAIL;
     }
 
-    pthread_mutex_unlock(&mConnectionsMutex);
+    LOG4CXX_INFO(
+        logger_,
+        "Connection " << connection->session_id() << "(device " << connection->device_handle() << ") has been marked for termination");
+  } else {
+    LOG4CXX_WARN(
+        logger_,
+        "Connection " << connection->session_id() << " is already terminating");
+  }
+  return OK;
 }
 
 bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanRequest(const time_t Timeout)
@@ -816,11 +750,6 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::updateClientDeviceLi
     mListener.onDeviceListUpdated(this, clientDeviceList);
 }
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::createConnection(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector<NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection *> & ConnectionsList)
-{
-    ConnectionsList.clear();
-}
-
 void * NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::mainThreadStartRoutine(void * Data)
 {
     CDeviceAdapter * deviceAdapter = static_cast<CDeviceAdapter*>(Data);
@@ -841,7 +770,7 @@ void* DeviceAdapterImpl::connectionThreadStartRoutine(void* data) {
     DeviceAdapterImpl* deviceAdapter(thread_params->device_adapter);
     delete thread_params;
     if (deviceAdapter) {
-      deviceAdapter->connectionThread(connectionHandle);
+      deviceAdapter->connectionThread(thread_params->connection);
     }
   }
 
@@ -860,27 +789,61 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(const DeviceHandle device_handle
 
   if (!is_device_valid) {
     LOG4CXX_ERROR(logger_, "Device handle " << device_handle << " is invalid");
-    return DeviceAdapter::BAD_PARAM;
+    return BAD_PARAM;
   }
 
   //TODO check app_handle validity???
 
   Connection* connection = 0;
   Error error = createConnection(device_handle, app_handle, session_id, &connection);
-  if(error != DeviceAdapter::OK) {
+  if(error != OK) {
     return error;
   }
 
   error = startConnection(connection);
-  if(error != DeviceAdapter::OK) {
+  if(error != OK) {
     deleteConnection(connection);
     return error;
   }
 
-  return DeviceAdapter::OK;
+  return OK;
 }
 
-void DeviceAdapterImpl::disconnectDevice(const DeviceHandle device_handle) {
+DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(
+    const DeviceHandle device_handle) {
+  //TODO check if initialized
+
+  pthread_mutex_lock(&devices_mutex_);
+  const bool is_device_valid = devices_.end() != devices_.find(device_handle);
+  pthread_mutex_unlock(&devices_mutex_);
+
+  if (!is_device_valid) {
+    LOG4CXX_ERROR(logger_, "Device handle " << device_handle << " is invalid");
+    return BAD_PARAM;
+  }
+
+  Error ret = OK;
+
+  std::vector<Connection*> connections_to_terminate;
+  pthread_mutex_lock(&connections_mutex_);
+  for (ConnectionMap::iterator it = connections_.begin();
+      it != connections_.end(); ++it) {
+    Connection* connection = it->second;
+    if (connection->device_handle() == device_handle) {
+      connections_to_terminate.push_back(connection);
+    }
+  }
+  pthread_mutex_unlock(&connections_mutex_);
+
+  for (std::vector<Connection*>::const_iterator it = connections_to_terminate
+      .begin(); it != connections_to_terminate.end(); ++it) {
+    Error error = stopConnection(*it);
+    if (error != OK) {
+      ret = error;
+    }
+  }
+
+  return ret;
 }
 
 } // namespace transport_manager
