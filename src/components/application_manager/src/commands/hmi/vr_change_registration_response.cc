@@ -75,8 +75,6 @@ void VRChangeRegistratioResponse::Run() {
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
       NsSmartDeviceLinkRPC::V2::FunctionID::eType::ChangeRegistrationID;
-  (*message_)[strings::msg_params][strings::trigger_source] =
-      NsSmartDeviceLinkRPC::V2::TriggerSource::TS_VR;
 
   SendResponseToMobile(message_);
 }
