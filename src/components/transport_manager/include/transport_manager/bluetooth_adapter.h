@@ -39,20 +39,20 @@
 #include "bluetooth_adapter.h"
 #include "device_adapter_impl.h"
 
-namespace transport_manager
-{
+namespace transport_manager {
 
-class BluetoothAdapter : public DeviceAdapterImpl
-{
-public:
+class BluetoothAdapter : public DeviceAdapterImpl {
+ public:
   BluetoothAdapter();
   virtual ~BluetoothAdapter();
 
-protected:
+ protected:
 
   virtual DeviceType GetDeviceType() const;
 
-  virtual Error init(DeviceAdapterListener* listener, DeviceHandleGenerator* handle_generator, Configuration* configuration);
+  virtual Error init(DeviceAdapterListener* listener,
+                     DeviceHandleGenerator* handle_generator,
+                     Configuration* configuration);
 
   virtual bool isSearchDevicesSupported() const;
   virtual Error searchDevices();
@@ -64,11 +64,15 @@ protected:
 
   virtual Error disconnectDevice(const DeviceHandle device_handle);
 
-  virtual Error sendData(const DeviceHandle device_handle, const DataContainerSptr data_container);
+  virtual Error sendData(const DeviceHandle device_handle,
+                         const DataContainerSptr data_container);
 
   virtual DeviceList getDeviceList() const;
 
   virtual void connectionThread(Connection* connection);
+
+  virtual ApplicationList getApplicationList(
+      const DeviceHandle device_handle) const;
 
   /**
    * @brief Get unique device ID.
@@ -80,11 +84,13 @@ protected:
    *
    * @return Unique device identifier.
    **/
-  static std::string getUniqueDeviceId(const bdaddr_t & DeviceAddress);
+  static std::string getUniqueDeviceId(const bdaddr_t& DeviceAddress);
 
-protected:
+ protected:
+  typedef std::vector<uint8_t> RfcommChannelVector;
+  typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
+
   class BluetoothDevice : public Device {
-    typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
    public:
     /**
      * @brief Constructor.
@@ -94,7 +100,7 @@ protected:
      * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
      **/
     BluetoothDevice(const bdaddr_t& address, const char* name,
-                    const RfcommChannels& rfcomm_channels);
+                    const RfcommChannelVector& rfcomm_channels);
 
     /**
      * @brief Compare devices.
@@ -126,16 +132,21 @@ protected:
      * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
      **/
     RfcommChannels rfcomm_channels_;
+
+    ApplicationHandle next_application_handle_;
   };
 
-private:
-  typedef std::map<std::pair<DeviceHandle, ApplicationHandle>, uint8_t> RfcommChannels;
-  RfcommChannels rfcomm_channels_;
+ protected:
+  void discoverSmartDeviceLinkRfcommChannels(const bdaddr_t& device_address,
+                                             RfcommChannelVector* channels);
 
+ private:
   bool initialized_;
   DeviceHandleGenerator* handle_generator_;
+
+  uuid_t smart_device_link_service_uuid_;
 };
 
-} // namespace transport_manager
+}  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER

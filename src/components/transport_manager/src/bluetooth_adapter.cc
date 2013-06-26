@@ -33,7 +33,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <errno.h>
 
 #include <bluetooth/bluetooth.h>
@@ -53,6 +52,12 @@ BluetoothAdapter::BluetoothAdapter()
     : initialized_(false),
       listener_(0),
       handle_generator_(0) {
+  LOG4CXX_INFO(logger_, "BluetoothAdapter constructed");
+
+  uint8_t smart_device_link_service_uuid_data[] = { 0x93, 0x6D, 0xA0, 0x1F,
+      0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8 };
+  sdp_uuid128_create(&smart_device_link_service_uuid_,
+                     smart_device_link_service_uuid_data);
 }
 
 BluetoothAdapter::~BluetoothAdapter() {
@@ -126,7 +131,7 @@ DeviceAdapter::Error BluetoothAdapter::disconnectDevice(
 }
 
 DeviceAdapter::Error BluetoothAdapter::sendData(
-    const DeviceHandle device_handle, const DataContainerSptr data_container) {
+    const DeviceHandle device_handle, const RawMessageSptr data_container) {
   if (!initialized_) {
     return DeviceAdapter::BAD_STATE;
   }
@@ -214,176 +219,339 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
   LOG4CXX_INFO(logger_, "Connection thread finished for session " << session_id);
 }
 
-void BluetoothAdapter::mainThread()
-{
-    LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized");
+void BluetoothAdapter::mainThread() {
+  LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized");
 
-    const size_t maxDevices = 256u;
-    inquiry_info* inquiryInfoList = new inquiry_info[maxDevices];
+  const size_t max_devices = 256u;
+  inquiry_info* inquiry_info_list = new inquiry_info[max_devices];
 
-    while (false == shutdown_flag_)
-    {
-        DeviceMap newDevices;
-        DeviceVector discoveredDevices;
+  while (false == shutdown_flag_) {
+    DeviceMap new_devices;
+    DeviceVector discovered_devices;
 
-        bool deviceScanRequested = waitForDeviceScanRequest(0);
+    bool device_scan_requested = waitForDeviceScanRequest(0);
 
-        if (deviceScanRequested)
-        {
-            int device_id = hci_get_route(0);
+    if (device_scan_requested) {
+      bool device_scan_succeeded = false;
+      int device_id = hci_get_route(0);
 
-            if (device_id >= 0)
-            {
-                int deviceHandle = hci_open_dev(device_id);
+      if (device_id >= 0) {
+        int device_handle = hci_open_dev(device_id);
 
-                if (deviceHandle >= 0)
-                {
-                    const uint8_t inquiry_time = 8u; // Time unit is 1.28 seconds
+        if (device_handle >= 0) {
+          const uint8_t inquiry_time = 8u;  // Time unit is 1.28 seconds
 
-                    LOG4CXX_INFO(logger_, "Starting hci_inquiry on device " << device_id);
+          LOG4CXX_INFO(logger_, "Starting hci_inquiry on device " << device_id);
 
-                    int numberOfDevices = hci_inquiry(device_id, inquiry_time, maxDevices, 0, &inquiryInfoList, IREQ_CACHE_FLUSH);
+          int number_of_devices = hci_inquiry(device_id, inquiry_time,
+                                              max_devices, 0,
+                                              &inquiry_info_list,
+                                              IREQ_CACHE_FLUSH);
 
-                    if (numberOfDevices >= 0)
-                    {
-                        LOG4CXX_INFO(logger_, "hci_inquiry: found " << numberOfDevices << " devices");
+          if (number_of_devices >= 0) {
+            LOG4CXX_INFO(
+                logger_,
+                "hci_inquiry: found " << number_of_devices << " devices");
 
-                        for (int i = 0; i < numberOfDevices; ++i)
-                        {
-                            RFCOMMChannelVector SmartDeviceLinkRFCOMMChannels;
-                            discoverSmartDeviceLinkRFCOMMChannels(inquiryInfoList[i].bdaddr, SmartDeviceLinkRFCOMMChannels);
+            device_scan_succeeded = true;
 
-                            if (false == SmartDeviceLinkRFCOMMChannels.empty())
-                            {
-                                char deviceName[256];
+            for (int i = 0; i < number_of_devices; ++i) {
+              RfcommChannelVector smart_device_link_rfcomm_channels;
+              discoverSmartDeviceLinkRfcommChannels(
+                  inquiry_info_list[i].bdaddr,
+                  &smart_device_link_rfcomm_channels);
 
-                                if (0 != hci_read_remote_name(deviceHandle, &inquiryInfoList[i].bdaddr, sizeof(deviceName) / sizeof(deviceName[0]), deviceName, 0))
-                                {
-                                    LOG4CXX_ERROR_WITH_ERRNO(logger_, "hci_read_remote_name failed");
-                                    strncpy(deviceName, getUniqueDeviceId(inquiryInfoList[i].bdaddr).c_str(), sizeof(deviceName) / sizeof(deviceName[0]));
-                                }
+              if (false == smart_device_link_rfcomm_channels.empty()) {
+                char deviceName[256];
 
-                                discoveredDevices.push_back(new SBluetoothDevice(inquiryInfoList[i].bdaddr, deviceName, SmartDeviceLinkRFCOMMChannels));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        LOG4CXX_ERROR(logger_, "hci_inquiry failed");
-                    }
-
-                    close(deviceHandle);
+                if (0
+                    != hci_read_remote_name(
+                        device_handle, &inquiry_info_list[i].bdaddr,
+                        sizeof(deviceName) / sizeof(deviceName[0]), deviceName,
+                        0)) {
+                  LOG4CXX_ERROR_WITH_ERRNO(logger_,
+                                           "hci_read_remote_name failed");
+                  strncpy(
+                      deviceName,
+                      getUniqueDeviceId(inquiry_info_list[i].bdaddr).c_str(),
+                      sizeof(deviceName) / sizeof(deviceName[0]));
                 }
+
+                Device* bluetooth_device = new BluetoothDevice(
+                    inquiry_info_list[i].bdaddr, deviceName,
+                    smart_device_link_rfcomm_channels);
+                if (bluetooth_device) {
+                  discovered_devices.push_back(bluetooth_device);
+                } else {
+                  //TODO
+                }
+              }
             }
+          } else {
+            LOG4CXX_ERROR(logger_, "hci_inquiry failed");
+          }
 
-            for (tDeviceVector::iterator discoveredDeviceIterator = discoveredDevices.begin(); discoveredDeviceIterator != discoveredDevices.end(); ++discoveredDeviceIterator)
-            {
-                SDevice * discoveredDevice = *discoveredDeviceIterator;
-
-                if (0 != discoveredDevice)
-                {
-                    tDeviceHandle deviceHandle = InvalidDeviceHandle;
-
-                    pthread_mutex_lock(&mDevicesMutex);
-
-                    for (tDeviceMap::iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
-                    {
-                        SDevice * exisingDevice = deviceIterator->second;
-
-                        if (true == discoveredDevice->isSameAs(exisingDevice))
-                        {
-                            deviceHandle = deviceIterator->first;
-                            break;
-                        }
-                    }
-
-                    pthread_mutex_unlock(&mDevicesMutex);
-
-                    if (InvalidDeviceHandle == deviceHandle)
-                    {
-                        deviceHandle = mHandleGenerator.generateNewDeviceHandle();
-
-                        LOG4CXX_INFO(logger_, "Adding new device " << deviceHandle << " (\"" << discoveredDevice->mName << "\")");
-                    }
-
-                    newDevices[deviceHandle] = discoveredDevice;
-                }
-            }
-
-            pthread_mutex_lock(&mConnectionsMutex);
-
-            std::set<tDeviceHandle> connectedDevices;
-
-            for (tConnectionMap::const_iterator connectionIterator = mConnections.begin(); connectionIterator != mConnections.end(); ++connectionIterator)
-            {
-                const SConnection * connection = connectionIterator->second;
-
-                if (0 != connection)
-                {
-                    if (connectedDevices.end() == connectedDevices.find(connection->mDeviceHandle))
-                    {
-                        connectedDevices.insert(connection->mDeviceHandle);
-                    }
-                }
-            }
-
-            pthread_mutex_unlock(&mConnectionsMutex);
-
-            pthread_mutex_lock(&mDevicesMutex);
-
-            for (tDeviceMap::iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
-            {
-                SDevice * device = deviceIterator->second;
-
-                if (0 != device)
-                {
-                    if (newDevices.end() == newDevices.find(deviceIterator->first))
-                    {
-                        if (connectedDevices.end() != connectedDevices.find(deviceIterator->first))
-                        {
-                            newDevices[deviceIterator->first] = device;
-                            device = 0;
-                        }
-                    }
-
-                    if (0 != device)
-                    {
-                        delete device;
-                    }
-                }
-            }
-
-            mDevices = newDevices;
-
-            pthread_mutex_unlock(&mDevicesMutex);
-
-            LOG4CXX_INFO(logger_, "Discovered " << newDevices.size() << " device" << ((1u == newDevices.size()) ? "" : "s") << " with SmartDeviceLink service. New devices map:");
-
-            for (tDeviceMap::iterator deviceIterator = newDevices.begin(); deviceIterator != newDevices.end(); ++deviceIterator)
-            {
-                SDevice * device = deviceIterator->second;
-
-                if (0 != device)
-                {
-                    LOG4CXX_INFO(logger_, std::setw(10) << deviceIterator->first << std::setw(0) << ": " << device->mUniqueDeviceId << ", " << device->mName.c_str());
-                }
-                else
-                {
-                    LOG4CXX_ERROR(logger_, std::setw(10) << deviceIterator->first << std::setw(0) << ": Device is null");
-                }
-            }
-
-            mDeviceScanRequested = false;
-
-            updateClientDeviceList();
+          close (deviceHandle);
         }
+      }
+
+      for (DeviceVector::iterator it = discovered_devices.begin();
+          it != discovered_devices.end(); ++it) {
+        Device* discovered_device = *it;
+
+        DeviceHandle device_handle;
+        bool device_found = false;
+
+        pthread_mutex_lock(&devices_mutex_);
+
+        for (DeviceMap::iterator it = devices_.begin(); it != devices_.end();
+            ++it) {
+          Device* existing_device = it->second;
+
+          if (true == discovered_device->isSameAs(existing_device)) {
+            device_handle = it->first;
+            device_found = true;
+            break;
+          }
+        }
+
+        pthread_mutex_unlock(&devices_mutex_);
+
+        if (!device_found) {
+          device_handle = handle_generator_->generate();
+
+          LOG4CXX_INFO(
+              logger_,
+              "Adding new device " << device_handle << " (\"" << discovered_device->name_ << "\")");
+        }
+
+        new_devices[device_handle] = discovered_devices;
+      }
+
+      pthread_mutex_lock(&connections_mutex_);
+
+      std::set<DeviceHandle> connected_devices;
+
+      for (ConnectionMap::const_iterator it = connections_.begin();
+          it != connections_.end(); ++it) {
+        const Connection* connection = it->second;
+
+        if (connected_devices.end()
+            == connected_devices.find(connection->device_handle())) {
+          connected_devices.insert(connection->device_handle());
+        }
+      }
+
+      pthread_mutex_unlock(&connections_mutex_);
+
+      pthread_mutex_lock(&devices_mutex_);
+
+      for (DeviceMap::iterator it = devices_.begin(); it != devices_.end();
+          ++it) {
+        Device* device = it->second;
+
+        if (new_devices.end() == new_devices.find(it->first)) {
+          if (connected_devices.end() != connected_devices.find(it->first)) {
+            new_devices[it->first] = device;
+            device = 0;
+          }
+        }
+
+        delete device;
+      }
+
+      devices_ = new_devices;
+
+      pthread_mutex_unlock(&devices_mutex_);
+
+      LOG4CXX_INFO(
+          logger_,
+          "Discovered " << new_devices.size() << " device" << ((1u == new_devices.size()) ? "" : "s") << " with SmartDeviceLink service. New devices map:");
+
+      for (DeviceMap::iterator it = new_devices.begin();
+          it != new_devices.end(); ++it) {
+        Device* device = it->second;
+
+        if (0 != device) {
+          LOG4CXX_INFO(
+              logger_,
+              std::setw(10) << it->first << std::setw(0) << ": " << device->unique_device_id_ << ", " << device->name_);
+        } else {
+          LOG4CXX_ERROR(
+              logger_,
+              std::setw(10) << it->first << std::setw(0) << ": Device is null");
+        }
+      }
+
+      device_scan_requested_ = false;
+
+      if (device_scan_succeeded) {
+        listener_.onSearchDeviceDone(this);
+      } else {
+        listener_.onSearchDeviceFailed(this, SearchDeviceError());
+      }
     }
+  }
 
-    delete [] inquiryInfoList;
+  delete[] inquiry_info_list;
 
-    LOG4CXX_INFO(logger_, "Bluetooth adapter main thread finished");
+  LOG4CXX_INFO(logger_, "Bluetooth adapter main thread finished");
 }
 
-} // namespace transport_manager
+ApplicationList BluetoothAdapter::getApplicationList(
+    const DeviceHandle device_handle) const {
+  ApplicationList result;
 
+  pthread_mutex_lock(&devices_mutex_);
+
+  DeviceMap::const_iterator it = devices_.find(device_handle);
+  if (it != devices_.end()) {
+    const Device* device = it->second;
+
+    const BluetoothDevice* bluetooth_device =
+        dynamic_cast<const BluetoothDevice*>(device);
+    if (bluetooth_device) {
+      const RfcommChannels& channels = bluetooth_device->rfcomm_channels();
+      for (RfcommChannels::const_iterator it = channels.begin();
+          it != channels.end(); ++it) {
+        result.push_back(it->first);
+      }
+    }
+  }
+
+  pthread_mutex_unlock(&devices_mutex_);
+
+  return result;
+}
+
+void BluetoothAdapter::discoverSmartDeviceLinkRfcommChannels(
+    const bdaddr_t& device_address, RfcommChannelVector* channels) {
+  channels->clear();
+
+  static bdaddr_t anyAddress = { { 0, 0, 0, 0, 0, 0 } };
+
+  sdp_session_t* sdp_session = sdp_connect(&anyAddress, &device_address,
+                                           SDP_RETRY_IF_BUSY);
+
+  if (0 != sdp_session) {
+    sdp_list_t* search_list = sdp_list_append(0,
+                                              &smart_device_link_service_uuid_);
+    uint32_t range = 0x0000ffff;
+    sdp_list_t* attr_list = sdp_list_append(0, &range);
+    sdp_list_t* response_list = 0;
+
+    if (0
+        == sdp_service_search_attr_req(sdp_session, search_list,
+                                       SDP_ATTR_REQ_RANGE, attr_list,
+                                       &response_list)) {
+      for (sdp_list_t* r = response_list; 0 != r; r = r->next) {
+        sdp_record_t* sdp_record = static_cast<sdp_record_t*>(r->data);
+        sdp_list_t* proto_list = 0;
+
+        if (0 == sdp_get_access_protos(sdp_record, &proto_list)) {
+          for (sdp_list_t* p = proto_list; 0 != p; p = p->next) {
+            sdp_list_t* pdsList = static_cast<sdp_list_t*>(p->data);
+
+            for (sdp_list_t* pds = pdsList; 0 != pds; pds = pds->next) {
+              sdp_data_t* sdpData = static_cast<sdp_data_t*>(pds->data);
+              int proto = 0;
+
+              for (sdp_data_t * d = sdpData; 0 != d; d = d->next) {
+                switch (d->dtd) {
+                  case SDP_UUID16:
+                  case SDP_UUID32:
+                  case SDP_UUID128:
+                    proto = sdp_uuid_to_proto(&d->val.uuid);
+                    break;
+
+                  case SDP_UINT8:
+                    if (RFCOMM_UUID == proto) {
+                      channels->push_back(d->val.uint8);
+                    }
+                    break;
+                }
+              }
+            }
+
+            sdp_list_free(pdsList, 0);
+          }
+
+          sdp_list_free(proto_list, 0);
+        }
+      }
+    }
+
+    sdp_list_free(search_list, 0);
+    sdp_list_free(attr_list, 0);
+    sdp_list_free(response_list, 0);
+    sdp_close(sdp_session);
+  } else {
+    LOG4CXX_ERROR(
+        logger_,
+        "Service discovery failed for " << getUniqueDeviceId(device_address));
+  }
+
+  if (!channels->empty()) {
+    std::stringstream rfcomm_channels_string;
+
+    for (RfcommChannelVector::const_iterator it = channels->begin();
+        it != channels->end(); ++it) {
+      if (it != channels->begin()) {
+        rfcomm_channels_string << ", ";
+      }
+
+      rfcomm_channels_string << static_cast<uint32_t>(*it);
+    }
+
+    LOG4CXX_INFO(
+        logger_,
+        "SmartDeviceLink service was discovered on device " << getUniqueDeviceId(device_address) << " at channel(s): " << rfcomm_channels_string.str().c_str());
+  } else {
+    LOG4CXX_INFO(
+        logger_,
+        "SmartDeviceLink service was not discovered on device " << getUniqueDeviceId(device_address));
+  }
+}
+
+std::string BluetoothAdapter::getUniqueDeviceId(
+    const bdaddr_t& device_address) {
+  char device_address_string[32];
+
+  ba2str(&device_address, device_address_string);
+
+  return std::string("BT-") + device_address_string;
+}
+
+BluetoothAdapter::BluetoothDevice::BluetoothDevice(
+    const bdaddr_t& address, const char* name,
+    const RfcommChannelVector& rfcomm_channels)
+    : Device(name),
+      address_(address),
+      next_application_handle_(1) {
+
+  unique_device_id_ = getUniqueDeviceId(address);
+  for (RfcommChannelVector::const_iterator it = rfcomm_channels.begin();
+      it != rfcomm_channels.end(); ++it) {
+    rfcomm_channels_[next_application_handle_++] = *it;
+  }
+}
+
+bool BluetoothAdapter::BluetoothDevice::isSameAs(const Device* other) const {
+  bool result = false;
+
+  if (Device::isSameAs(other)) {
+    const BluetoothDevice* other_bluetooth_device =
+        dynamic_cast<const BluetoothDevice*>(other);
+
+    if (0 != other_bluetooth_device) {
+      result = (0
+          == memcmp(&address_, &other_bluetooth_device->address_,
+                    sizeof(bdaddr_t)));
+    }
+  }
+
+  return result;
+}
+
+}  // namespace transport_manager
 

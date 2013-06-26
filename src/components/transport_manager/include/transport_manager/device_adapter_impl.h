@@ -436,7 +436,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_update_client_device_list
    **/
-  void updateClientDeviceList(void);
+  void updateClientDeviceList();
 
   /**
    * @brief Create list of connections possible for specified device.
@@ -473,6 +473,8 @@ class DeviceAdapterImpl : public DeviceAdapter {
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
    **/
   virtual void connectionThread(Connection* connection) = 0;
+
+  virtual DeviceList getDeviceList() const;
 
   /**
    * @brief Connections map.
