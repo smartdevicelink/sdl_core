@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
-
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -55,6 +55,9 @@ bool ResponseFromHMI::CleanUp() {
 void ResponseFromHMI::Run() {
 }
 
+void ResponseFromHMI::SendResponseToMobile(const MessageSharedPtr& message) {
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message);
+}
 
 }  // namespace commands
 

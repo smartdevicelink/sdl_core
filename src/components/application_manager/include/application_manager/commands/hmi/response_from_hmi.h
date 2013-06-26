@@ -46,6 +46,7 @@ class ResponseFromHMI : public CommandImpl {
     virtual bool Init();
     virtual bool CleanUp();
     virtual void Run();
+    void SendResponseToMobile(const MessageSharedPtr& message);
 };
 
 }  // namespace commands

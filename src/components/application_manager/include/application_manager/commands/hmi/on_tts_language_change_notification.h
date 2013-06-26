@@ -29,32 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_TTS_LANGUAGE_CHANGE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_TTS_LANGUAGE_CHANGE_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+/**
+ * @brief OnTTSLanguageChangeNotification command class
+ **/
+class OnTTSLanguageChangeNotification : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnTTSLanguageChangeNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnTTSLanguageChangeNotification(const MessageSharedPtr& message);
 
-UIShowResponse::UIShowResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+  /**
+   * @brief OnTTSLanguageChangeNotification class destructor
+   **/
+  virtual ~OnTTSLanguageChangeNotification();
 
-UIShowResponse::~UIShowResponse() {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-void UIShowResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIShowResponse::Run ");
-
-  (*message_)[strings::params][strings::function_id] = NsSmartDeviceLinkRPC::V2::FunctionID::eType::ShowID;
-
-  SendResponseToMobile(message_);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnTTSLanguageChangeNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_TTS_LANGUAGE_CHANGE_NOTIFICATION_H_

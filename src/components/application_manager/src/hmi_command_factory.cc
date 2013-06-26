@@ -76,6 +76,9 @@
 #include "application_manager/commands/hmi/ui_show_response.h"
 #include "application_manager/commands/hmi/exit_application_request.h"
 #include "application_manager/commands/hmi/exit_application_response.h"
+#include "application_manager/commands/hmi/on_ui_language_change_notification.h"
+#include "application_manager/commands/hmi/on_vr_language_change_notification.h"
+#include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 
 namespace application_manager {
 
@@ -247,6 +250,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppDeactivated: {
       command.reset(new commands::OnAppDeactivatedNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_OnLanguageChange: {
+      command.reset(new commands::OnUILanguageChangeNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::VR_OnLanguageChange: {
+      command.reset(new commands::OnVRLanguageChangeNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::TTS_OnLanguageChange: {
+      command.reset(new commands::OnTTSLanguageChangeNotification(message));
       break;
     }
   }

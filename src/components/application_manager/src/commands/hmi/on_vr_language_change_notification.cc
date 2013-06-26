@@ -29,8 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+
+#include "application_manager/commands/hmi/on_vr_language_change_notification.h"
+#include "application_manager/application_manager_impl.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -40,21 +41,34 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-UIShowResponse::UIShowResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+OnVRLanguageChangeNotification::OnVRLanguageChangeNotification(
+    const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
-UIShowResponse::~UIShowResponse() {
+OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {
 }
 
-void UIShowResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIShowResponse::Run ");
+void OnVRLanguageChangeNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnVRLanguageChangeNotification::Run ");
+  // TODO(VS): Set VR language in application manager
 
-  (*message_)[strings::params][strings::function_id] = NsSmartDeviceLinkRPC::V2::FunctionID::eType::ShowID;
+  // TODO(VS): Get hmi_display_language from  application manager
+  // (*message_)[strings::msg_params][strings::hmi_display_language]
 
-  SendResponseToMobile(message_);
+  (*message_)[strings::params][strings::function_id] =
+      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID;
+
+  std::set<Application*> applications = ApplicationManagerImpl::instance()
+      ->applications();
+
+  for (std::set<Application*>::iterator it = applications.begin();
+      applications.end() != it; ++it) {
+    (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
+    SendNotificationToMobile(message_);
+  }
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+
