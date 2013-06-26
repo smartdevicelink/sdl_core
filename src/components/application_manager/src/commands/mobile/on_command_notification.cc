@@ -91,13 +91,6 @@ void OnCommandNotification::SendOnMenuCommand(const ApplicationImpl* app) {
 
   (*on_menu_cmd)[strings::params][strings::message_type] =
     MessageType::kNotification;
-  (*on_menu_cmd)[strings::params][strings::correlation_id] =
-    correlation_id;
-
-  (*on_menu_cmd)[strings::params][strings::connection_key] =
-    connection_key;
-  (*on_menu_cmd)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
 
   (*on_menu_cmd)[strings::msg_params][strings::app_id] =
     app->app_id();
@@ -105,19 +98,11 @@ void OnCommandNotification::SendOnMenuCommand(const ApplicationImpl* app) {
   (*on_menu_cmd)[strings::msg_params][strings::cmd_id] =
     (*message_)[strings::msg_params][strings::cmd_id];
 
-  const int on_cmd_ui_id = 77;
-  const int on_cmd_id =
-    (*message_)[strings::params][strings::function_id].asInt();
-
-  // TODO (DK): shift logic for trigger source to HMI response
-  if (on_cmd_ui_id == on_cmd_id) {
-    (*on_menu_cmd)[strings::params][strings::trigger_source] =
-      CommandTriggerSource::TS_MENU;
-  }
-
   (*on_menu_cmd)[strings::msg_params][strings::success] = true;
   (*on_menu_cmd)[strings::msg_params][strings::result_code] =
     NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+
+  // msg trigger_source param is set in HMI notification
 
   message_.reset(on_menu_cmd);
   SendNotification();

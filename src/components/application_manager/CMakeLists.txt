@@ -137,6 +137,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/get_device_list_response.cc
 ./src/commands/hmi/exit_all_applications_request.cc
 ./src/commands/hmi/exit_all_applications_response.cc
+./src/commands/hmi/exit_application_request.cc
+./src/commands/hmi/exit_application_response.cc
 ./src/commands/hmi/vr_is_ready_request.cc
 ./src/commands/hmi/vr_is_ready_response.cc
 ./src/commands/hmi/vr_add_command_request.cc
@@ -153,6 +155,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_get_capabilities_response.cc
 ./src/commands/hmi/ui_change_registration_request.cc
 ./src/commands/hmi/ui_change_registration_response.cc
+./src/commands/hmi/ui_show_request.cc
+./src/commands/hmi/ui_show_response.cc
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
@@ -164,11 +168,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_vr_started_notification.cc
 ./src/commands/hmi/on_vr_stopped_notification.cc
 ./src/commands/hmi/on_vr_command_notification.cc
+./src/commands/hmi/on_ui_command_notification.cc
 ./src/commands/hmi/on_app_deactivated_notification.cc
-./src/commands/hmi/exit_application_request.cc
-./src/commands/hmi/exit_application_response.cc
-./src/commands/hmi/ui_show_request.cc
-./src/commands/hmi/ui_show_response.cc
 ./src/commands/hmi/on_tts_language_change_notification.cc
 ./src/commands/hmi/on_vr_language_change_notification.cc
 ./src/commands/hmi/on_ui_language_change_notification.cc

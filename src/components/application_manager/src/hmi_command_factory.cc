@@ -44,12 +44,16 @@
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 #include "application_manager/commands/hmi/exit_all_applications_request.h"
 #include "application_manager/commands/hmi/exit_all_applications_response.h"
+#include "application_manager/commands/hmi/exit_application_request.h"
+#include "application_manager/commands/hmi/exit_application_response.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/ui_get_capabilities_request.h"
 #include "application_manager/commands/hmi/ui_get_capabilities_response.h"
 #include "application_manager/commands/hmi/ui_change_registration_request.h"
 #include "application_manager/commands/hmi/ui_change_registration_response.h"
+#include "application_manager/commands/hmi/ui_show_request.h"
+#include "application_manager/commands/hmi/ui_show_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -73,11 +77,8 @@
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
 #include "application_manager/commands/hmi/on_vr_stopped_notification.h"
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
+#include "application_manager/commands/hmi/on_ui_command_notification.h"
 #include "application_manager/commands/hmi/on_app_deactivated_notification.h"
-#include "application_manager/commands/hmi/ui_show_request.h"
-#include "application_manager/commands/hmi/ui_show_response.h"
-#include "application_manager/commands/hmi/exit_application_request.h"
-#include "application_manager/commands/hmi/exit_application_response.h"
 #include "application_manager/commands/hmi/on_ui_language_change_notification.h"
 #include "application_manager/commands/hmi/on_vr_language_change_notification.h"
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
@@ -257,6 +258,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::VR_OnCommand: {
       command.reset(new commands::OnVRCommandNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_OnCommand: {
+      command.reset(new commands::OnUICommandNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated: {

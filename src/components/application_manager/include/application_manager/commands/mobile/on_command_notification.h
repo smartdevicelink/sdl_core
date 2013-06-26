@@ -43,14 +43,6 @@ class ApplicationImpl;
 
 namespace commands {
 
-/*
- * @brief Enum for HMI TriggerSource type
- */
-enum CommandTriggerSource {
-  TS_MENU              = 0,
-  TS_VR                = 1
-};
-
 /**
  * @brief OnCommandNotification class is used to send notification
  * to mobile device.
