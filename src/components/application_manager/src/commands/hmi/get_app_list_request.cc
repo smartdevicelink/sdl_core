@@ -55,11 +55,9 @@ void GetAppListRequest::Run() {
   int index = 0;
 
   if (applications.empty())  {
-    (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
           hmi_apis::Common_Result::eType::NO_APPS_REGISTERED;
   } else {
-    (*message_)[strings::msg_params][strings::success] = true;
     (*message_)[strings::msg_params][strings::result_code] =
           hmi_apis::Common_Result::eType::SUCCESS;
 
