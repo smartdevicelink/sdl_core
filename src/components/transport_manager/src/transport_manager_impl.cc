@@ -69,24 +69,7 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter) :
 	addDeviceAdapter(device_adapter);
 }
 
-/*todo:
- TransportManagerImpl::TransportManagerImpl(std::vector<DeviceAdapter *> device_adapter_list):
- queue_mutex_(),
- all_thread_active_(false),
- device_adapters_(),
- messsage_queue_thread_(),
- event_thread_(),
- event_thread_wakeup_(),
- transport_manager_listener_(),
- device_adapter_listener_()
- {
-
- pthread_mutex_init(&queue_mutex_, 0);
- pthread_mutex_init(&event_thread_mutex_, 0);
- pthread_cond_init(&event_thread_wakeup_, NULL);
- device_adapters_ = device_adapter_list;
- }
- */
+//todo: more constructors
 
 TransportManagerImpl::~TransportManagerImpl() {
 
@@ -145,8 +128,43 @@ void TransportManagerImpl::receiveEventFromDevice(const void *event) {
 			static_cast<transport_manager::DeviceAdapterListenerImpl::DeviceAdapterEvent>(*event);
 	this->postEvent(evt);
 }
-void TransportManagerImpl::removeDevice(DeviceHandle device){
+void TransportManagerImpl::removeDevice(DeviceHandle device) {
 	adapter_handler_.removeDevice(device);
+}
+
+void TransportManagerImpl::addDeviceAdapter(DeviceAdapter *device_adapter) {
+	adapter_handler_.addAdapter(device_adapter);
+}
+
+void TransportManagerImpl::searchDevices(void) {
+	for (AdapterHandler::AdapterList::iterator da =
+			adapter_handler_.device_adapters().begin();
+			da != adapter_handler_.device_adapters().end(); ++da) {
+		DeviceAdapter::Error err = (*da)->searchDevices();
+		if (DeviceAdapter::Error::OK != err) {
+			//todo: notify error
+		}
+	}
+}
+
+void TransportManagerImpl::init(void) {
+
+	int error_code = pthread_create(&messsage_queue_thread_, 0,
+			&messageQueueThread, 0);
+
+	if (0 == error_code) {
+	} else {
+		return;
+	}
+
+	int error_code = pthread_create(&device_listener_thread_, 0,
+			&eventListenerThread, 0);
+
+	if (0 == error_code) {
+	} else {
+		return;
+	}
+	all_thread_active_ = true;
 }
 
 void TransportManagerImpl::postMessage(
@@ -197,27 +215,7 @@ void TransportManagerImpl::set_transport_manager_listener(
 	transport_manager_listener_ = listener;
 }
 
-void TransportManagerImpl::init(void) {
-
-	int error_code = pthread_create(&messsage_queue_thread_, 0,
-			&messageQueueThread, 0);
-
-	if (0 == error_code) {
-	} else {
-		return;
-	}
-
-	int error_code = pthread_create(&device_listener_thread_, 0,
-			&deviceListenerThread, 0);
-
-	if (0 == error_code) {
-	} else {
-		return;
-	}
-	all_thread_active_ = true;
-}
-
-void *TransportManagerImpl::deviceListenerThread(void *) {
+void *TransportManagerImpl::eventListenerThread(void *) {
 
 	while (true == all_thread_active_) {
 
@@ -227,23 +225,36 @@ void *TransportManagerImpl::deviceListenerThread(void *) {
 
 		for (std::vector<DeviceAdapterListenerImpl::DeviceAdapterEvent>::iterator evt =
 				eventQueue_.begin(); evt != eventQueue_.end(); ++evt) {
+
+			const DeviceAdapter *da = (*evt).device_adapter();
+			const SessionID sid = (*evt).session_id;
+
 			switch ((*evt).event_type()) {
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE:
-				//todo: event must contain list of adapters, for each adapter - list of devices and for each device - list of apps
-				transport_manager_listener_->onSearchDeviceDone();
+				DeviceAdapter *da = (*evt).device_adapter();
+				DeviceList list = da->getDeviceList();
+				for (DeviceList::iterator item = list.begin();
+						item != list.end(); ++item) {
+					adapter_handler_.addDevice(da, (*item));
+					transport_manager_listener_->onSearchDeviceDone((*item),
+							da->getApplicationList((*item)));
+				}
 				break;
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL:
 				//error happened in real search process (external error)
-				transport_manager_listener_->onSearchDeviceFailed(
-						(*evt).device_adapter(), (*evt).error());
+				const SearchDeviceError err = (*evt).error();
+				transport_manager_listener_->onSearchDeviceFailed(da, err);
 				break;
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE:
-				adapter_handler_.addSession((*evt).device_adapter(), (*evt).session_id());
+				adapter_handler_.addSession((*evt).device_adapter(),
+						(*evt).session_id());
+				transport_manager_listener_->onConnectDone(da, sid);
 				break;
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:
 				break;
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE:
-					adapter_handler_.removeSession((*evt).device_adapter(), (*evt).session_id());
+				adapter_handler_.removeSession((*evt).device_adapter(),
+						(*evt).session_id());
 				break;
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL:
 				break;
@@ -255,12 +266,13 @@ void *TransportManagerImpl::deviceListenerThread(void *) {
 				//todo: start timer here to wait before notify caller and remove unsent messages
 				break;
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE:
-				transport_manager_listener_->onDataReceiveDone(
-						(*evt).device_adapter(), (*evt).session_id(),
-						(*evt).data());
+				const RawMessageSptr data = (*evt).data();
+				transport_manager_listener_->onDataReceiveDone(da, sid, data);
 				break;
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL:
-				transport_manager_listener_->onSearchDeviceDone(NULL);
+				const DataReceiveError d_err = (*evt).error();
+				transport_manager_listener_->onDataReceiveFailed(da, sid,
+						d_err);
 				break;
 			case DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR:
 				break;
@@ -278,20 +290,7 @@ void *TransportManagerImpl::deviceListenerThread(void *) {
 void *TransportManagerImpl::messageQueueThread(void *) {
 
 	while (true == all_thread_active_) {
-		/*
-		 //get higher priority messages
-		 u_int priority = 0;
-
-		 todo: add priority processing
-		 * std::queue highPriorityMsgs;
-		 for(std::deque<int>::iterator msg = queue_.c.begin(); msg != queue_.c.end(); ++msg){
-		 if(msg.priority >= priority){
-		 highPriorityMsgs.push(msg);
-		 priority = msg.priority;
-		 }
-		 }
-		 std::queue highSerialNumberMsgs;
-		 */
+		//todo: add priority processing
 
 		u_int serial_number = 0;
 		protocol_handler::RawMessage active_msg;
@@ -320,57 +319,67 @@ void *TransportManagerImpl::messageQueueThread(void *) {
 	return 0;
 }
 
-DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterBySession(SessionID session_id) {
+pthread_cond_t TransportManagerImpl::device_listener_thread_wakeup(void) {
+	return device_listener_thread_wakeup_;
+}
+
+DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterBySession(
+		SessionID session_id) {
 	std::map<SessionID, DeviceAdapter *>::iterator da =
-			session_to_device_map_.find(session_id);
-	if (da != session_to_device_map_.begin()) {
+			session_to_adapter_map_.find(session_id);
+	if (da != session_to_adapter_map_.begin()) {
 		return da;
 	}
 	return NULL;
 }
 
-DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterByDevice(DeviceHandle device_id) {
+DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterByDevice(
+		DeviceHandle device_id) {
 	std::map<DeviceHandle, DeviceAdapter *>::iterator da =
-			device_to_adapter_map_.find(device_id);
-	if (da != device_to_adapter_map_.begin()) {
+			device_to_adapter_multimap_.find(device_id);
+	if (da != device_to_adapter_multimap_.end()) {
 		return da;
 	}
 	return NULL;
 }
-void TransportManagerImpl::addDeviceAdapter(DeviceAdapter *device_adapter){
-	adapter_handler_.addAdapter(device_adapter);
-}
-
-void TransportManagerImpl::AdapterHandler::addAdapter(DeviceAdapter *device_adapter) {
+void TransportManagerImpl::AdapterHandler::addAdapter(
+		DeviceAdapter *device_adapter) {
 	device_adapters_.push_back(device_adapter);
 }
 
-TransportManagerImpl::AdapterList TransportManagerImpl::AdapterHandler::device_adapters(void) {
+TransportManagerImpl::AdapterHandler::AdapterList TransportManagerImpl::AdapterHandler::device_adapters(
+		void) {
 	return device_adapters_;
 }
-
-
-
-void TransportManagerImpl::searchDevices(void) const {
-
-	for (AdapterList::iterator da = adapter_handler_.device_adapters().begin();
-			da != adapter_handler_.device_adapters().end(); ++da) {
-		DeviceAdapterSearchResult &searchResult;
-		DeviceAdapter::Error err = (*da)->searchDevices(searchResult);
-		if (DeviceAdapter::Error::OK != err) {
-			//todo: notify error
-			continue;
-		}
-		for(std::vector<DeviceHandle *>::iterator dev = searchResult.begin(); dev != searchResult.end(); ++dev){
-			adapter_handler_.addDevice((*da), (*dev));
-		}
-		transport_manager_listener_->onSearchDeviceDone(searchResult);
+void TransportManagerImpl::AdapterHandler::addSession(DeviceAdapter *da,
+		SessionID sid) {
+	AdapterList::iterator item = std::find(device_adapters_.begin(),
+			device_adapters_.end(), da);
+	if (item == device_adapters_.end()) {
+		//todo: error case: unknown adapter
+		return;
 	}
-
+	session_to_adapter_map_.insert(std::make_pair(sid, da));
 }
 
-pthread_cond_t TransportManagerImpl::device_listener_thread_wakeup(void) {
-	return device_listener_thread_wakeup_;
+void TransportManagerImpl::AdapterHandler::removeSession(DeviceAdapter *da,
+		SessionID sid) {
+	session_to_adapter_map_.erase(sid);
+}
+
+void TransportManagerImpl::AdapterHandler::addDevice(DeviceAdapter *da,
+		DeviceHandle did) {
+	AdapterList::iterator item = std::find(device_adapters_.begin(),
+			device_adapters_.end(), da);
+	if (item == device_adapters_.end()) {
+		//todo: error case: unknown adapter
+		return;
+	}
+	device_to_adapter_multimap_.insert(std::make_pair(did, da));
+}
+
+void TransportManagerImpl::AdapterHandler::removeDevice(DeviceHandle device) {
+	device_to_adapter_multimap_.erase(device);
 }
 
 } //namespace

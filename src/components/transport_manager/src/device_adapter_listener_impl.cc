@@ -143,7 +143,7 @@ void DeviceAdapterListenerImpl::onConnectDone(
 
 void DeviceAdapterListenerImpl::onConnectFailed(
 		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id,
-		const ConnectDeviceError& error) {
+		const ConnectError& error) {
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
 			session_id, device_adapter, NULL, error);
@@ -166,9 +166,9 @@ void DeviceAdapterListenerImpl::onDisconnectDone(
 			&(transport_manager_impl_->device_listener_thread_wakeup()));
 }
 
-void DeviceAdapterListenerImpl::onDisconnectFailed(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id,
-		const DisconnectDeviceError& error) {
+void DeviceAdapterListenerImpl::onDisconnectFailed(const DeviceAdapter* device_adapter,
+                                  const SessionID session_id,
+                                  const DisconnectError& error){
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
 			session_id, device_adapter, NULL, error);
@@ -177,6 +177,17 @@ void DeviceAdapterListenerImpl::onDisconnectFailed(
 
 	pthread_cond_signal(
 			&(transport_manager_impl_->device_listener_thread_wakeup()));
+}
+
+void DeviceAdapterListenerImpl::onDisconnectDeviceDone(
+		const DeviceAdapter* device_adapter, const SessionID session_id) {
+
+}
+
+void DeviceAdapterListenerImpl::onDisconnectDeviceFailed(
+		const DeviceAdapter* device_adapter, const SessionID session_id,
+		const DisconnectDeviceError& error) {
+
 }
 
 void DeviceAdapterListenerImpl::onDataReceiveDone(

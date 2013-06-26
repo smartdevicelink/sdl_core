@@ -63,7 +63,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_device_management
 	 **/
-	virtual void searchDevices(void) const = 0;
+	virtual void searchDevices(void) = 0;
 
 	/**
 	 * @brief Start scanning for new devices.
@@ -74,21 +74,14 @@ public:
 	virtual void init(void) = 0;
 
 	/**
-	 * @brief Start scanning for new devices.
-	 *
-	 *
-	 * @see @ref components_transportmanager_client_device_management
-	 **/
-	virtual void searchDevices(void) const = 0;
-
-	/**
 	 * @brief Connect to all applications discovered on device.
 	 *
 	 * @param DeviceHandle Handle of device to connect to.
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void connectDevice(DeviceHandle device_id, ApplicationHandle app_id, SessionID session_id) = 0;
+	virtual void connectDevice(DeviceHandle device_id, ApplicationHandle app_id,
+			SessionID session_id) = 0;
 
 	/**
 	 * @brief Disconnect from all applications connected on device.

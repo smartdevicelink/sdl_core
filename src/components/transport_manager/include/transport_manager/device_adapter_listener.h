@@ -61,9 +61,8 @@ public:
 
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
                                 const SessionID session_id) = 0;
-  virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
-                                  const SessionID session_id,
-                                  const DisconnectError& error) = 0;
+	virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
+			const SessionID session_id, const DisconnectError& error) = 0;
 
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
                                       const SessionID session_id) = 0;

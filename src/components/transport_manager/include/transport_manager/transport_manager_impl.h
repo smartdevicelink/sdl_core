@@ -42,6 +42,7 @@
 #include "transport_manager/device_adapter_listener_impl.h"
 
 namespace transport_manager {
+
 /**
  * @brief Interface of transport manager.
  * @interface TransportManager
@@ -74,7 +75,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_device_management
 	 **/
-	virtual void searchDevices(void) const;
+	virtual void searchDevices(void);
 
 	/**
 	 * @brief Connect to all applications discovered on device.
@@ -83,7 +84,8 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void connectDevice(DeviceHandle device_id, ApplicationHandle app_id, SessionID session_id);
+	virtual void connectDevice(DeviceHandle device_id, ApplicationHandle app_id,
+			SessionID session_id);
 
 	/**
 	 * @brief Disconnect from all applications connected on device.
@@ -213,23 +215,26 @@ public:
 	void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
 
 protected:
-	typedef std::vector<DeviceAdapter *> AdapterList;
-
-	class AdapterHandler
-	{
+	class AdapterHandler {
 	public:
-		DeviceAdapter *getAdapterBySession(SessionID sid);
-		DeviceAdapter *getAdapterByDevice(DeviceHandle did);
-		void addSession(DeviceAdapter *da, SessionID sid);
-		void addDevice(DeviceAdapter *da, DeviceHandle did);
-		void addAdapter(DeviceAdapter *da);
-		void removeSession(DeviceAdapter *da, SessionID sid);
-		void removeDevice(DeviceHandle device);
+		typedef std::vector<transport_manager::DeviceAdapter *> AdapterList;
+		transport_manager::DeviceAdapter *getAdapterBySession(
+				transport_manager::SessionID sid);
+		transport_manager::DeviceAdapter *getAdapterByDevice(
+				transport_manager::DeviceHandle did);
+		void addSession(transport_manager::DeviceAdapter *da,
+				transport_manager::SessionID sid);
+		void addDevice(transport_manager::DeviceAdapter *da,
+				transport_manager::DeviceHandle did);
+		void addAdapter(transport_manager::DeviceAdapter *da);
+		void removeSession(transport_manager::DeviceAdapter *da,
+				transport_manager::SessionID sid);
+		void removeDevice(transport_manager::DeviceHandle device);
 		AdapterList device_adapters(void);
 
 		~AdapterHandler();
 
-	private:
+	protected:
 		/**
 		 * @brief Device adapters.
 		 **/
@@ -238,17 +243,20 @@ protected:
 		/**
 		 * @brief container that used to get device id by session id
 		 **/
-		std::map<SessionID, DeviceAdapter *> session_to_device_map_;
+		std::map<transport_manager::SessionID,
+				transport_manager::DeviceAdapter *> session_to_adapter_map_;
 
 		/**
 		 * @brief container that used to get adapter id by device id
 		 * filled after search process done and used in connect function
 		 **/
-		std::map<DeviceHandle, DeviceAdapter *> device_to_adapter_map_;
+		std::multimap<transport_manager::DeviceHandle,
+				transport_manager::DeviceAdapter *> device_to_adapter_multimap_;
 
 		AdapterHandler();
 
 	};
+
 	/**
 	 * @brief type for mesage queue
 	 *
@@ -317,7 +325,7 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 */
-	static void *deviceListenerThread(void *);
+	static void *eventListenerThread(void *);
 
 	/**
 	 * \brief For logging.
@@ -325,6 +333,7 @@ protected:
 	static log4cxx::LoggerPtr logger_;
 
 	AdapterHandler adapter_handler_;
+
 	/**
 	 * @brief store messages
 	 *
@@ -388,7 +397,8 @@ protected:
 	 **/
 	mutable pthread_mutex_t device_listener_thread_mutex_;
 
-}; //class
-} //namespace
+};
+//class
+}//namespace
 
 #endif
