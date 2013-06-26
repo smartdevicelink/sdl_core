@@ -175,6 +175,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_tts_language_change_notification.cc
 ./src/commands/hmi/on_vr_language_change_notification.cc
 ./src/commands/hmi/on_ui_language_change_notification.cc
+./src/commands/hmi/close_popup_request.cc
+./src/commands/hmi/close_popup_response.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})

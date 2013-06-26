@@ -84,6 +84,8 @@
 #include "application_manager/commands/hmi/on_ui_language_change_notification.h"
 #include "application_manager/commands/hmi/on_vr_language_change_notification.h"
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
+#include "application_manager/commands/hmi/close_popup_request.h"
+#include "application_manager/commands/hmi/close_popup_response.h"
 
 namespace application_manager {
 
@@ -227,7 +229,20 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+<<<<<<< HEAD
     case  hmi_apis::FunctionID::BasicCommunication_PlayTone: {
+=======
+    case  hmi_apis::FunctionID::eType::UI_ClosePopUp: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::ClosePopupResponse(message));
+      } else {
+        command.reset(new commands::ClosePopupRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_PlayTone: {
+>>>>>>> APPLINK-1773 UI.ClosePopUp request
       command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
