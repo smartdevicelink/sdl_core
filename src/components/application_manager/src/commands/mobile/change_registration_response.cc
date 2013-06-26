@@ -35,10 +35,14 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
+
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 ChangeRegistrationResponse::ChangeRegistrationResponse(
     const MessageSharedPtr& message): CommandResponseImpl(message) {
@@ -48,6 +52,7 @@ ChangeRegistrationResponse::~ChangeRegistrationResponse() {
 }
 
 void ChangeRegistrationResponse::Run() {
+  LOG4CXX_INFO(logger_, "ChangeRegistrationResponse::Run");
   if ((*message_)[strings::msg_params].keyExists(strings::success)) {
     SendResponse();
     return;
@@ -60,45 +65,42 @@ void ChangeRegistrationResponse::Run() {
   ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 
-  smart_objects::CSmartObject data = msg_chain->data();
-
-  // TODO(DK) : shift logic to HMI response
-  /*if (function_id == ui_request) {
-    msg_chain->set_ui_response_result(code);
-  }*/
-
   // we need to retrieve stored response code before message chain decrease
-  const bool result_ui = msg_chain->ui_response_result();
-  const bool result_vr = msg_chain->vr_response_result();
+  const mobile_api::Result::eType result_ui = msg_chain->ui_response_result();
+  const mobile_api::Result::eType result_vr = msg_chain->vr_response_result();
+
+  // get stored SmartObject
+  smart_objects::CSmartObject data = msg_chain->data();
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       correlation_id)) {
-
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application(data[strings::params][strings::connection_key]));
 
-    if (true == result_ui) {
+    if (mobile_api::Result::SUCCESS == result_ui) {
       application->set_language(
           static_cast<mobile_api::Language::eType>(
               data[strings::msg_params][strings::language].asInt()));
     }
 
-    if (true == result_vr) {
+    if (mobile_api::Result::SUCCESS == result_vr) {
       application->set_ui_language(
           static_cast<mobile_api::Language::eType>(
             data[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
-    if ((true == result_ui) && (true == result_vr)) {
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
+    if ((mobile_api::Result::SUCCESS == result_ui) &&
+        (mobile_api::Result::SUCCESS == result_vr)) {
+          (*message_)[strings::msg_params][strings::success] = true;
+          (*message_)[strings::msg_params][strings::result_code] =
           NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-      SendResponse();
+          SendResponse();
     } else {
       // TODO(VS): check ui and vr response code
     }

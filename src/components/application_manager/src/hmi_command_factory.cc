@@ -48,6 +48,8 @@
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/ui_get_capabilities_request.h"
 #include "application_manager/commands/hmi/ui_get_capabilities_response.h"
+#include "application_manager/commands/hmi/ui_change_registration_request.h"
+#include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -87,7 +89,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
   CommandSharedPtr command(NULL);
 
   switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case  hmi_apis::FunctionID::eType::BasicCommunication_GetDeviceList: {
+    case  hmi_apis::FunctionID::BasicCommunication_GetDeviceList: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::GetDeviceListResponse(message));
@@ -96,7 +98,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_MixingAudioSupported: {
+    case  hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::MixingAudioSupportedResponse(message));
@@ -105,7 +107,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_ExitAllApplications: {
+    case  hmi_apis::FunctionID::BasicCommunication_ExitAllApplications: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::ExitAllApplicationsResponse(message));
@@ -114,7 +116,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_GetSupportedLanguages: {
+    case  hmi_apis::FunctionID::UI_GetSupportedLanguages: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::UIGetSupportedLanguagesResponse(message));
@@ -123,7 +125,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_GetCapabilities: {
+    case  hmi_apis::FunctionID::UI_GetCapabilities: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::UIGetCapabilitiesResponse(message));
@@ -132,7 +134,16 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::VR_IsReady: {
+    case  hmi_apis::FunctionID::UI_ChangeRegistration: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIChangeRegistratioResponse(message));
+      } else {
+        command.reset(new commands::UIChangeRegistrationRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::VR_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::VRIsReadyResponse(message));
@@ -141,7 +152,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::VR_AddCommand: {
+    case  hmi_apis::FunctionID::VR_AddCommand: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::VRAddCommandResponse(message));
@@ -150,7 +161,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::VR_DeleteCommand: {
+    case  hmi_apis::FunctionID::VR_DeleteCommand: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::VRDeleteCommandResponse(message));
@@ -159,7 +170,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::VR_ChangeRegistration: {
+    case  hmi_apis::FunctionID::VR_ChangeRegistration: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::VRChangeRegistratioResponse(message));
@@ -168,7 +179,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::TTS_IsReady: {
+    case  hmi_apis::FunctionID::TTS_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::TTSIsReadyResponse(message));
@@ -177,7 +188,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_ActivateApp: {
+    case  hmi_apis::FunctionID::BasicCommunication_ActivateApp: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::ActivateAppResponse(message));
@@ -186,7 +197,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_ExitApplication: {
+    case  hmi_apis::FunctionID::BasicCommunication_ExitApplication: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::ExitApplicationResponse(message));
@@ -195,7 +206,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_Show: {
+    case  hmi_apis::FunctionID::UI_Show: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::UIShowResponse(message));
@@ -204,63 +215,63 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_PlayTone: {
+    case  hmi_apis::FunctionID::BasicCommunication_PlayTone: {
       command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_OnReady: {
+    case  hmi_apis::FunctionID::BasicCommunication_OnReady: {
       command.reset(new commands::OnReadyNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_OnDeviceChosen: {
+    case  hmi_apis::FunctionID::UI_OnDeviceChosen: {
       command.reset(new commands::OnDeviceChosenNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_OnSystemContext: {
+    case  hmi_apis::FunctionID::UI_OnSystemContext: {
       command.reset(new commands::OnSystemContextNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_OnDriverDistraction: {
+    case  hmi_apis::FunctionID::UI_OnDriverDistraction: {
       command.reset(new commands::OnDriverDistractionNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_OnDeviceListUpdated: {
+    case  hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated: {
       command.reset(new commands::OnDeviceListUpdatedNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppRegistered: {
+    case  hmi_apis::FunctionID::BasicCommunication_OnAppRegistered: {
       command.reset(new commands::OnAppRegisteredNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppUnregistered: {
+    case  hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered: {
       command.reset(new commands::OnAppUnregisteredNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::VR_Started: {
+    case  hmi_apis::FunctionID::VR_Started: {
       command.reset(new commands::OnVRStartedNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::VR_Stopped: {
+    case  hmi_apis::FunctionID::VR_Stopped: {
       command.reset(new commands::OnVRStoppedNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::VR_OnCommand: {
+    case  hmi_apis::FunctionID::VR_OnCommand: {
       command.reset(new commands::OnVRCommandNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_OnAppDeactivated: {
+    case  hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated: {
       command.reset(new commands::OnAppDeactivatedNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_OnLanguageChange: {
+    case  hmi_apis::FunctionID::UI_OnLanguageChange: {
       command.reset(new commands::OnUILanguageChangeNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::VR_OnLanguageChange: {
+    case  hmi_apis::FunctionID::VR_OnLanguageChange: {
       command.reset(new commands::OnVRLanguageChangeNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::TTS_OnLanguageChange: {
+    case  hmi_apis::FunctionID::TTS_OnLanguageChange: {
       command.reset(new commands::OnTTSLanguageChangeNotification(message));
       break;
     }

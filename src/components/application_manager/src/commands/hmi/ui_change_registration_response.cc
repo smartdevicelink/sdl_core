@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vr_change_registration_response.h"
+#include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
@@ -42,15 +42,15 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-VRChangeRegistratioResponse::VRChangeRegistratioResponse(
+UIChangeRegistratioResponse::UIChangeRegistratioResponse(
     const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-VRChangeRegistratioResponse::~VRChangeRegistratioResponse() {
+UIChangeRegistratioResponse::~UIChangeRegistratioResponse() {
 }
 
-void VRChangeRegistratioResponse::Run() {
-  LOG4CXX_INFO(logger_, "VRChangeRegistratioResponse::Run");
+void UIChangeRegistratioResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIChangeRegistratioResponse::Run");
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
@@ -70,13 +70,13 @@ void VRChangeRegistratioResponse::Run() {
       static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
       (*message_)[strings::msg_params][hmi_response::code].asInt());
 
-  msg_chain->set_vr_response_result(code);
+  msg_chain->set_ui_response_result(code);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
       NsSmartDeviceLinkRPC::V2::FunctionID::eType::ChangeRegistrationID;
   (*message_)[strings::msg_params][strings::trigger_source] =
-      NsSmartDeviceLinkRPC::V2::TriggerSource::TS_VR;
+      NsSmartDeviceLinkRPC::V2::TriggerSource::TS_MENU;
 
   SendResponseToMobile(message_);
 }

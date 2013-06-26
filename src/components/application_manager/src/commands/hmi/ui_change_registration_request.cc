@@ -29,10 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vr_change_registration_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+
+#include "application_manager/commands/hmi/ui_change_registration_request.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -42,45 +40,19 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-VRChangeRegistratioResponse::VRChangeRegistratioResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+UIChangeRegistrationRequest::UIChangeRegistrationRequest(
+    const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-VRChangeRegistratioResponse::~VRChangeRegistratioResponse() {
+UIChangeRegistrationRequest::~UIChangeRegistrationRequest() {
 }
 
-void VRChangeRegistratioResponse::Run() {
-  LOG4CXX_INFO(logger_, "VRChangeRegistratioResponse::Run");
-
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
-
-  MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
-
-  if (NULL == msg_chain) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  /* store received response code for to check it
-   * in corresponding Mobile response
-   */
-  const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
-      (*message_)[strings::msg_params][hmi_response::code].asInt());
-
-  msg_chain->set_vr_response_result(code);
-
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::ChangeRegistrationID;
-  (*message_)[strings::msg_params][strings::trigger_source] =
-      NsSmartDeviceLinkRPC::V2::TriggerSource::TS_VR;
-
-  SendResponseToMobile(message_);
+void UIChangeRegistrationRequest::Run() {
+  LOG4CXX_INFO(logger_, "UIChangeRegistrationRequest::Run ");
+  SendRequest();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

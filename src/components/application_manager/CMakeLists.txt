@@ -151,6 +151,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_get_supported_languages_response.cc
 ./src/commands/hmi/ui_get_capabilities_request.cc
 ./src/commands/hmi/ui_get_capabilities_response.cc
+./src/commands/hmi/ui_change_registration_request.cc
+./src/commands/hmi/ui_change_registration_response.cc
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
