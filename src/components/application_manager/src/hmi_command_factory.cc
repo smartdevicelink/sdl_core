@@ -229,10 +229,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-<<<<<<< HEAD
-    case  hmi_apis::FunctionID::BasicCommunication_PlayTone: {
-=======
-    case  hmi_apis::FunctionID::eType::UI_ClosePopUp: {
+    case  hmi_apis::FunctionID::UI_ClosePopUp: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::ClosePopupResponse(message));
@@ -241,8 +238,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_PlayTone: {
->>>>>>> APPLINK-1773 UI.ClosePopUp request
+    case  hmi_apis::FunctionID::BasicCommunication_PlayTone: {
       command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
