@@ -53,20 +53,8 @@ void ChangeRegistrationResponse::Run() {
     return;
   }
 
-  const int function_id =
-      (*message_)[strings::params][strings::function_id].asInt();
-
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
-
-  // TODO(DK): HMI code Id
-  const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
-      (*message_)[strings::msg_params][hmi_response::code].asInt());
-
-  // TODO(DK): HMI Request Id
-  const int ui_request = 210;
-  const int vr_request = 211;
 
   MessageChaining* msg_chain =
   ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -77,23 +65,18 @@ void ChangeRegistrationResponse::Run() {
 
   smart_objects::CSmartObject data = msg_chain->data();
 
-  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
-
-  if (function_id == ui_request) {
+  // TODO(DK) : shift logic to HMI response
+  /*if (function_id == ui_request) {
     msg_chain->set_ui_response_result(code);
-  } else if (function_id == vr_request) {
-    msg_chain->set_vr_response_result(code);
-  }
+  }*/
 
-  // we need to retrieve stored response code before message chain decrase
+  // we need to retrieve stored response code before message chain decrease
   const bool result_ui = msg_chain->ui_response_result();
   const bool result_vr = msg_chain->vr_response_result();
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       correlation_id)) {
-    smart_objects::CSmartObject data =
-        msg_chain->data();
 
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
