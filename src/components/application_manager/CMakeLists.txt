@@ -147,6 +147,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vr_delete_command_response.cc
 ./src/commands/hmi/vr_change_registration_request.cc
 ./src/commands/hmi/vr_change_registration_response.cc
+./src/commands/hmi/vr_get_supported_languages_request.cc
+./src/commands/hmi/vr_get_supported_languages_response.cc
 ./src/commands/hmi/tts_is_ready_request.cc
 ./src/commands/hmi/tts_is_ready_response.cc
 ./src/commands/hmi/ui_get_supported_languages_request.cc

@@ -62,6 +62,8 @@
 #include "application_manager/commands/hmi/vr_delete_command_response.h"
 #include "application_manager/commands/hmi/vr_change_registration_request.h"
 #include "application_manager/commands/hmi/vr_change_registration_response.h"
+#include "application_manager/commands/hmi/vr_get_supported_languages_request.h"
+#include "application_manager/commands/hmi/vr_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
@@ -177,6 +179,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::VRChangeRegistratioResponse(message));
       } else {
         command.reset(new commands::VRChangeRegistrationRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::VR_GetSupportedLanguages: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VRGetSupportedLanguagesResponse(message));
+      } else {
+        command.reset(new commands::VRGetSupportedLanguagesRequest(message));
       }
       break;
     }
