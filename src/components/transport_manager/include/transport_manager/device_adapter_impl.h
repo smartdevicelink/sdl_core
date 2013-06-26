@@ -81,7 +81,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
    **/
-  virtual void scanForNewDevices();
+  virtual Error searchDevices();
 
   /**
    * @brief Connect to the specified application discovered on device.

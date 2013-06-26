@@ -106,17 +106,6 @@ DeviceAdapterImpl::Connection::~Connection(void) {
   }
 }
 
-bool DeviceAdapterImpl::Connection::isSameAs(
-    const Connection* other_connection) const {
-  bool result = false;
-
-  if (0 != other_connection) {
-    result = (device_handle_ == other_connection->device_handle_);
-  }
-
-  return result;
-}
-
 DeviceAdapterImpl::DeviceAdapterImpl(
     DeviceAdapterListener& listener,
     DeviceHandleGenerator& handle_generator)
@@ -149,7 +138,7 @@ void DeviceAdapterImpl::run()
 {
     LOG4CXX_INFO(logger_, "Initializing device adapter");
 
-    int errorCode = pthread_create(&mMainThread, 0, &mainThreadStartRoutine, this);
+    int errorCode = pthread_create(&main_thread_, 0, &mainThreadStartRoutine, this);
 
     if (0 == errorCode)
     {
@@ -162,61 +151,26 @@ void DeviceAdapterImpl::run()
     }
 }
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(void)
-{
-    pthread_mutex_lock(&mDeviceScanRequestedMutex);
+DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
+  //TODO check if initialized and supported
 
-    if (false == mDeviceScanRequested)
-    {
-        LOG4CXX_INFO(logger_, "Requesting device scan");
+  Error ret = OK;
 
-        mDeviceScanRequested = true;
-        pthread_cond_signal(&mDeviceScanRequestedCond);
-    }
-    else
-    {
-        LOG4CXX_INFO(logger_, "Device scan is currently in progress");
-    }
+  pthread_mutex_lock(&device_scan_requested_mutex_);
 
-    pthread_mutex_unlock(&mDeviceScanRequestedMutex);
-}
+  if (false == device_scan_requested_) {
+    LOG4CXX_INFO(logger_, "Requesting device scan");
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
-{
-    bool isDeviceValid = false;
+    device_scan_requested_ = true;
+    pthread_cond_signal(&device_scan_requested_cond_);
+  } else {
+    ret = BAD_STATE;
+    LOG4CXX_INFO(logger_, "Device scan is currently in progress");
+  }
 
-    pthread_mutex_lock(&mDevicesMutex);
+  pthread_mutex_unlock(&device_scan_requested_mutex_);
 
-    if (mDevices.end() != mDevices.find(DeviceHandle))
-    {
-        isDeviceValid = true;
-    }
-    else
-    {
-        LOG4CXX_ERROR(logger_, "Device handle " << DeviceHandle << " is invalid");
-    }
-
-    pthread_mutex_unlock(&mDevicesMutex);
-
-    if (true == isDeviceValid)
-    {
-        std::vector<SConnection*> connections;
-        createConnectionsListForDevice(DeviceHandle, connections);
-
-        if (false == connections.empty())
-        {
-            LOG4CXX_INFO(logger_, "Connecting device " << DeviceHandle);
-
-            for (std::vector<SConnection*>::iterator connectionIterator = connections.begin(); connectionIterator != connections.end(); ++connectionIterator)
-            {
-                startConnection(*connectionIterator);
-            }
-        }
-        else
-        {
-            LOG4CXX_WARN(logger_, "No connections to establish on device " << DeviceHandle);
-        }
-    }
+  return ret;
 }
 
 void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::sendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData)
@@ -420,17 +374,17 @@ DeviceAdapter::Error DeviceAdapterImpl::stopConnection(Connection* connection) {
   return OK;
 }
 
-bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanRequest(const time_t Timeout)
+bool DeviceAdapterImpl::waitForDeviceScanRequest(const time_t Timeout)
 {
     bool deviceScanRequested = false;
 
-    pthread_mutex_lock(&mDeviceScanRequestedMutex);
+    pthread_mutex_lock(&device_scan_requested_mutex_);
 
-    if (false == mDeviceScanRequested)
+    if (false == device_scan_requested_)
     {
         if (0 == Timeout)
         {
-            if (0 != pthread_cond_wait(&mDeviceScanRequestedCond, &mDeviceScanRequestedMutex))
+            if (0 != pthread_cond_wait(&device_scan_requested_cond_, &device_scan_requested_mutex_))
             {
                 LOG4CXX_ERROR_WITH_ERRNO(logger_, "pthread_cond_wait failed");
             }
@@ -443,9 +397,9 @@ bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanReq
             {
                 timeoutTime.tv_sec += Timeout;
 
-                while (0 == pthread_cond_timedwait(&mDeviceScanRequestedCond, &mDeviceScanRequestedMutex, &timeoutTime))
+                while (0 == pthread_cond_timedwait(&device_scan_requested_cond_, &device_scan_requested_mutex_, &timeoutTime))
                 {
-                    if (true == mDeviceScanRequested)
+                    if (true == device_scan_requested_)
                     {
                         break;
                     }
@@ -460,9 +414,9 @@ bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanReq
         }
     }
 
-    deviceScanRequested = mDeviceScanRequested;
+    deviceScanRequested = device_scan_requested_;
 
-    pthread_mutex_unlock(&mDeviceScanRequestedMutex);
+    pthread_mutex_unlock(&device_scan_requested_mutex_);
 
     return deviceScanRequested;
 }
@@ -721,9 +675,9 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::updateClientDeviceLi
     mListener.onDeviceListUpdated(this, clientDeviceList);
 }
 
-void * NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::mainThreadStartRoutine(void * Data)
+void* DeviceAdapterImpl::mainThreadStartRoutine(void* data)
 {
-    CDeviceAdapter * deviceAdapter = static_cast<CDeviceAdapter*>(Data);
+    DeviceAdapterImpl* deviceAdapter = static_cast<DeviceAdapterImpl*>(data);
 
     if (0 != deviceAdapter)
     {
@@ -782,7 +736,7 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(const DeviceHandle device_handle
 
 DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(
     const DeviceHandle device_handle) {
-  //TODO check if initialized
+  //TODO check if initialized and supported
 
   pthread_mutex_lock(&devices_mutex_);
   const bool is_device_valid = devices_.end() != devices_.find(device_handle);
