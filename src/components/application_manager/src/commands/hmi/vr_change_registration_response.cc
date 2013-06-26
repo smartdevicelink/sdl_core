@@ -29,10 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/on_vr_command_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "application_manager/commands/hmi/vr_change_registration_response.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -42,25 +39,17 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
-OnVRCommandNotification::OnVRCommandNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
+VRChangeRegistratioResponse::VRChangeRegistratioResponse(
+    const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-OnVRCommandNotification::~OnVRCommandNotification() {
+VRChangeRegistratioResponse::~VRChangeRegistratioResponse() {
 }
 
-void OnVRCommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run ");
-
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
-
-  (*message_)[strings::params][strings::trigger_source] =
-      NsSmartDeviceLinkRPC::V2::TriggerSource::TS_VR;
-  SendNotificationToMobile(message_);
+void VRChangeRegistratioResponse::Run() {
+  LOG4CXX_INFO(logger_, "VRChangeRegistratioResponse::Run ");
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

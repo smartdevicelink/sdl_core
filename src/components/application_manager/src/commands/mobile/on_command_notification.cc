@@ -106,16 +106,13 @@ void OnCommandNotification::SendOnMenuCommand(const ApplicationImpl* app) {
     (*message_)[strings::msg_params][strings::cmd_id];
 
   const int on_cmd_ui_id = 77;
-  const int on_cmd_vr_id = 66;
   const int on_cmd_id =
     (*message_)[strings::params][strings::function_id].asInt();
 
+  // TODO (DK): shift logic for trigger source to HMI response
   if (on_cmd_ui_id == on_cmd_id) {
     (*on_menu_cmd)[strings::params][strings::trigger_source] =
       CommandTriggerSource::TS_MENU;
-  } else {
-    (*on_menu_cmd)[strings::params][strings::trigger_source] =
-      CommandTriggerSource::TS_VR;
   }
 
   (*on_menu_cmd)[strings::msg_params][strings::success] = true;

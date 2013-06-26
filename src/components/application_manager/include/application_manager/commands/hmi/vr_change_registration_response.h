@@ -30,37 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_vr_command_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VR_CHANGE_REGISTRATION_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VR_CHANGE_REGISTRATION_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+/**
+ * @brief VRChangeRegistratioResponse command class
+ **/
+class VRChangeRegistratioResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief VRChangeRegistratioResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VRChangeRegistratioResponse(const MessageSharedPtr& message);
 
-OnVRCommandNotification::OnVRCommandNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
-}
+  /**
+   * @brief VRChangeRegistratioResponse class destructor
+   **/
+  virtual ~VRChangeRegistratioResponse();
 
-OnVRCommandNotification::~OnVRCommandNotification() {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-void OnVRCommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run ");
-
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
-
-  (*message_)[strings::params][strings::trigger_source] =
-      NsSmartDeviceLinkRPC::V2::TriggerSource::TS_VR;
-  SendNotificationToMobile(message_);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VRChangeRegistratioResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VR_CHANGE_REGISTRATION_RESPONSE_H_

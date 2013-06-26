@@ -31,11 +31,14 @@
  */
 
 #include "application_manager/commands/hmi/vr_add_command_request.h"
-
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
+
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 VRAddCommandRequest::VRAddCommandRequest(
     const MessageSharedPtr& message): RequestToHMI(message) {
@@ -45,6 +48,7 @@ VRAddCommandRequest::~VRAddCommandRequest() {
 }
 
 void VRAddCommandRequest::Run() {
+  LOG4CXX_INFO(logger_, "VRAddCommandRequest::Run ");
   SendRequest();
 }
 

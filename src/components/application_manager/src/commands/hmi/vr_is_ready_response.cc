@@ -30,10 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
+
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 VRIsReadyResponse::VRIsReadyResponse(
     const MessageSharedPtr& message): ResponseFromHMI(message) {
@@ -43,6 +47,7 @@ VRIsReadyResponse::~VRIsReadyResponse() {
 }
 
 void VRIsReadyResponse::Run() {
+  LOG4CXX_INFO(logger_, "VRIsReadyResponse::Run ");
   // TODO(VS): Process response from HMI(field "available") and do something with SDL
 }
 

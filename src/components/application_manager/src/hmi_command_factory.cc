@@ -54,6 +54,8 @@
 #include "application_manager/commands/hmi/vr_add_command_response.h"
 #include "application_manager/commands/hmi/vr_delete_command_request.h"
 #include "application_manager/commands/hmi/vr_delete_command_response.h"
+#include "application_manager/commands/hmi/vr_change_registration_request.h"
+#include "application_manager/commands/hmi/vr_change_registration_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
@@ -151,6 +153,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::VRDeleteCommandResponse(message));
       } else {
         command.reset(new commands::VRDeleteCommandRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::VR_ChangeRegistration: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VRChangeRegistratioResponse(message));
+      } else {
+        command.reset(new commands::VRChangeRegistrationRequest(message));
       }
       break;
     }
