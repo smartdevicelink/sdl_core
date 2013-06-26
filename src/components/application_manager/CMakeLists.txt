@@ -161,6 +161,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_play_tone_notification.cc
 ./src/commands/hmi/on_vr_started_notification.cc
 ./src/commands/hmi/on_vr_stopped_notification.cc
+./src/commands/hmi/on_vr_command_notification.cc
 ./src/commands/hmi/on_app_deactivated_notification.cc
 )
 
