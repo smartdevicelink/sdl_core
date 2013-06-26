@@ -54,22 +54,17 @@ void ActivateAppRequest::Run() {
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
 
   if (!application) {
-    (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
           hmi_apis::Common_Result::eType::INVALID_DATA;
   } else {
     if (ApplicationManagerImpl::instance()->ActivateApplication(application))
     {
-      (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
                 hmi_apis::Common_Result::eType::SUCCESS;
     } else {
-      (*message_)[strings::msg_params][strings::success] = false;
       (*message_)[strings::msg_params][strings::result_code] =
                       hmi_apis::Common_Result::eType::GENERIC_ERROR;
     }
-
-
   }
 
   SendResponseToHMI();

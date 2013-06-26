@@ -30,53 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/get_device_list_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_
 
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/commands/hmi/request_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetDeviceListRequest::GetDeviceListRequest(
-    const MessageSharedPtr& message): RequestFromHMI(message) {
-}
+/**
+ * @brief ExitApplicationRequest command class
+ **/
+class ExitApplicationRequest : public RequestFromHMI {
+ public:
+  /**
+   * @brief ExitApplicationRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit ExitApplicationRequest(const MessageSharedPtr& message);
 
-GetDeviceListRequest::~GetDeviceListRequest() {
-}
+  /**
+   * @brief ExitApplicationRequest class destructor
+   **/
+  virtual ~ExitApplicationRequest();
 
-void GetDeviceListRequest::Run() {
-  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  const std::set<connection_handler::Device>& devices =
-      ApplicationManagerImpl::instance()->device_list();
-
-  int index = 0;
-
-  if (devices.empty())  {
-    (*message_)[strings::msg_params][strings::result_code] =
-          hmi_apis::Common_Result::eType::NO_DEVICES_CONNECTED;
-  } else {
-    (*message_)[strings::msg_params][strings::result_code] =
-          hmi_apis::Common_Result::eType::SUCCESS;
-
-    for (std::set<connection_handler::Device>::iterator it = devices.begin();
-        devices.end() != it; ++it) {
-      (*message_)[strings::msg_params]
-                  [strings::device_list]
-                   [index][strings::name] = (*it).user_friendly_name();
-      (*message_)[strings::msg_params]
-                  [strings::device_list]
-                   [index][strings::id] = (*it).device_handle();
-      ++index;
-    }
-  }
-
-  SendResponseToHMI();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ExitApplicationRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_

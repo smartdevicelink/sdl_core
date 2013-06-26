@@ -29,54 +29,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/get_device_list_request.h"
-
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/commands/hmi/ui_show_response.h"
+#include "application_manager/mobile_command_factory.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetDeviceListRequest::GetDeviceListRequest(
-    const MessageSharedPtr& message): RequestFromHMI(message) {
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+
+UIShowResponse::UIShowResponse(
+    const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-GetDeviceListRequest::~GetDeviceListRequest() {
+UIShowResponse::~UIShowResponse() {
 }
 
-void GetDeviceListRequest::Run() {
-  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
+void UIShowResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIShowResponse::Run ");
 
-  const std::set<connection_handler::Device>& devices =
-      ApplicationManagerImpl::instance()->device_list();
+  (*message_)[strings::params][strings::function_id] = NsSmartDeviceLinkRPC::V2::FunctionID::eType::ShowID;
 
-  int index = 0;
-
-  if (devices.empty())  {
-    (*message_)[strings::msg_params][strings::result_code] =
-          hmi_apis::Common_Result::eType::NO_DEVICES_CONNECTED;
-  } else {
-    (*message_)[strings::msg_params][strings::result_code] =
-          hmi_apis::Common_Result::eType::SUCCESS;
-
-    for (std::set<connection_handler::Device>::iterator it = devices.begin();
-        devices.end() != it; ++it) {
-      (*message_)[strings::msg_params]
-                  [strings::device_list]
-                   [index][strings::name] = (*it).user_friendly_name();
-      (*message_)[strings::msg_params]
-                  [strings::device_list]
-                   [index][strings::id] = (*it).device_handle();
-      ++index;
-    }
-  }
-
-  SendResponseToHMI();
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(message_);
+  command->Init();
+  command->Run();
+  command->CleanUp();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -34,10 +34,14 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
+
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 OnAppDeactivatedNotification::OnAppDeactivatedNotification(
     const MessageSharedPtr& message)
@@ -48,11 +52,15 @@ OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
 }
 
 void OnAppDeactivatedNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnAppDeactivatedNotification::Run ");
+
   ApplicationImpl* app =
       static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()
           ->active_application());
 
   if (NULL == app) {
+    LOG4CXX_ERROR_EXT(logger_,
+                      "NULL pointer application found as an active item!");
     return;
   }
 

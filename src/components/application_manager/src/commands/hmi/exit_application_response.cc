@@ -29,54 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/get_device_list_request.h"
-
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/commands/hmi/exit_application_response.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetDeviceListRequest::GetDeviceListRequest(
-    const MessageSharedPtr& message): RequestFromHMI(message) {
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+
+ExitApplicationResponse::ExitApplicationResponse(
+    const MessageSharedPtr& message): ResponseToHMI(message) {
 }
 
-GetDeviceListRequest::~GetDeviceListRequest() {
+ExitApplicationResponse::~ExitApplicationResponse() {
 }
 
-void GetDeviceListRequest::Run() {
-  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
-
-  const std::set<connection_handler::Device>& devices =
-      ApplicationManagerImpl::instance()->device_list();
-
-  int index = 0;
-
-  if (devices.empty())  {
-    (*message_)[strings::msg_params][strings::result_code] =
-          hmi_apis::Common_Result::eType::NO_DEVICES_CONNECTED;
-  } else {
-    (*message_)[strings::msg_params][strings::result_code] =
-          hmi_apis::Common_Result::eType::SUCCESS;
-
-    for (std::set<connection_handler::Device>::iterator it = devices.begin();
-        devices.end() != it; ++it) {
-      (*message_)[strings::msg_params]
-                  [strings::device_list]
-                   [index][strings::name] = (*it).user_friendly_name();
-      (*message_)[strings::msg_params]
-                  [strings::device_list]
-                   [index][strings::id] = (*it).device_handle();
-      ++index;
-    }
-  }
-
-  SendResponseToHMI();
+void ExitApplicationResponse::Run() {
+  LOG4CXX_INFO(logger_, "ExitApplicationResponse::Run");
+  SendResponse();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

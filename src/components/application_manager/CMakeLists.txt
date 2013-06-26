@@ -137,8 +137,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/get_device_list_response.cc
 ./src/commands/hmi/exit_all_applications_request.cc
 ./src/commands/hmi/exit_all_applications_response.cc
-./src/commands/hmi/activate_app_request.cc
-./src/commands/hmi/activate_app_response.cc
 ./src/commands/hmi/vr_is_ready_request.cc
 ./src/commands/hmi/vr_is_ready_response.cc
 ./src/commands/hmi/vr_add_command_request.cc
@@ -162,6 +160,10 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_vr_started_notification.cc
 ./src/commands/hmi/on_vr_stopped_notification.cc
 ./src/commands/hmi/on_app_deactivated_notification.cc
+./src/commands/hmi/exit_application_request.cc
+./src/commands/hmi/exit_application_response.cc
+./src/commands/hmi/ui_show_request.cc
+./src/commands/hmi/ui_show_response.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})

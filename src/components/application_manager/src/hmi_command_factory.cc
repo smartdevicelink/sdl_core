@@ -69,6 +69,10 @@
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
 #include "application_manager/commands/hmi/on_vr_stopped_notification.h"
 #include "application_manager/commands/hmi/on_app_deactivated_notification.h"
+#include "application_manager/commands/hmi/ui_show_request.h"
+#include "application_manager/commands/hmi/ui_show_response.h"
+#include "application_manager/commands/hmi/exit_application_request.h"
+#include "application_manager/commands/hmi/exit_application_response.h"
 
 namespace application_manager {
 
@@ -164,6 +168,24 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::ActivateAppResponse(message));
       } else {
         command.reset(new commands::ActivateAppRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_ExitApplication: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::ExitApplicationResponse(message));
+      } else {
+        command.reset(new commands::ExitApplicationRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_Show: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIShowResponse(message));
+      } else {
+        command.reset(new commands::UIShowRequest(message));
       }
       break;
     }

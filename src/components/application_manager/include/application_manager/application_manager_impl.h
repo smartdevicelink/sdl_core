@@ -110,6 +110,15 @@ class ApplicationManagerImpl : public ApplicationManager
         const hmi_apis::Common_ApplicationsCloseReason::eType& reason);
 
     /*
+     * @brief Closes application by id
+     *
+     * @param app_id Application id
+     *
+     * @return operation result
+     */
+     hmi_apis::Common_Result::eType& ExitApplication(int app_id);
+
+    /*
      * @brief Add to the chain amount of requests sent to hmi
      * from mobile request, to ensure that response to mobile
      * will be sent only after all hmi response were received.
