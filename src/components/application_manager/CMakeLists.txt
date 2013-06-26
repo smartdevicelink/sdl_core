@@ -74,7 +74,7 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/on_encoded_sync_pdata_notification.cc
 ./src/commands/mobile/on_hmi_status_notification.cc
 ./src/commands/mobile/on_language_change_notification.cc
-./src/commands/mobile/on_menu_entry_notification.cc
+./src/commands/mobile/on_command_notification.cc
 ./src/commands/mobile/on_permissions_change_notification.cc
 ./src/commands/mobile/on_tbt_client_state_notification.cc
 ./src/commands/mobile/on_vehicle_data_notification.cc

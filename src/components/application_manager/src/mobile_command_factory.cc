@@ -71,7 +71,7 @@
 #include "application_manager/commands/mobile/on_encoded_sync_pdata_notification.h"
 #include "application_manager/commands/mobile/on_hmi_status_notification.h"
 #include "application_manager/commands/mobile/on_language_change_notification.h"
-#include "application_manager/commands/mobile/on_menu_entry_notification.h"
+#include "application_manager/commands/mobile/on_command_notification.h"
 #include "application_manager/commands/mobile/on_permissions_change_notification.h"
 #include "application_manager/commands/mobile/on_tbt_client_state_notification.h"
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
@@ -420,7 +420,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID: {
-      command.reset(new commands::OnMenuEntryNotification(message));
+      command.reset(new commands::OnCommandNotification(message));
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnTBTClientStateID: {

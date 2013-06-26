@@ -50,6 +50,8 @@ OnVRCommandNotification::~OnVRCommandNotification() {
 
 void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run ");
+
+  SendNotificationToMobile(message_);
 }
 
 }  // namespace commands
