@@ -30,25 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/ui_get_language_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_ADD_COMMAND_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_ADD_COMMAND_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIGetLanguageRequest::UIGetLanguageRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+/**
+ * @brief UIAddCommandResponse command class
+ **/
+class UIAddCommandResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief UIAddCommandResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit UIAddCommandResponse(const MessageSharedPtr& message);
 
-UIGetLanguageRequest::~UIGetLanguageRequest() {
-}
+  /**
+   * @brief UIAddCommandResponse class destructor
+   **/
+  virtual ~UIAddCommandResponse();
 
-void UIGetLanguageRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIGetLanguageRequest::Run");
-  SendRequest();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UIAddCommandResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_ADD_COMMAND_RESPONSE_H_

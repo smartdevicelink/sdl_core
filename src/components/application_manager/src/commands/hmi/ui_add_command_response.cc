@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vr_add_command_response.h"
+#include "application_manager/commands/hmi/ui_add_command_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
@@ -39,15 +39,15 @@ namespace application_manager {
 
 namespace commands {
 
-VRAddCommandResponse::VRAddCommandResponse(
+UIAddCommandResponse::UIAddCommandResponse(
     const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-VRAddCommandResponse::~VRAddCommandResponse() {
+UIAddCommandResponse::~UIAddCommandResponse() {
 }
 
-void VRAddCommandResponse::Run() {
-  LOG4CXX_INFO(logger_, "VRAddCommandResponse::Run ");
+void UIAddCommandResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run ");
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
@@ -70,7 +70,7 @@ void VRAddCommandResponse::Run() {
       static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
         (*message_)[strings::msg_params][hmi_response::code].asInt());
 
-    msg_chain->set_vr_response_result(code);
+    msg_chain->set_ui_response_result(code);
 
     int app_id = (*message_)[strings::params][strings::connection_key];
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
@@ -83,7 +83,7 @@ void VRAddCommandResponse::Run() {
     }
 
     if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS != code) {
-      data[strings::msg_params].erase(strings::vr_commands);
+      data[strings::msg_params].erase(strings::menu_params);
     }
 
     app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),

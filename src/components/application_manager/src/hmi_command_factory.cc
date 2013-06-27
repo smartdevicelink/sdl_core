@@ -46,6 +46,8 @@
 #include "application_manager/commands/hmi/exit_all_applications_response.h"
 #include "application_manager/commands/hmi/exit_application_request.h"
 #include "application_manager/commands/hmi/exit_application_response.h"
+#include "application_manager/commands/hmi/ui_add_command_request.h"
+#include "application_manager/commands/hmi/ui_add_command_response.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/ui_get_language_request.h"
@@ -133,6 +135,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::ExitAllApplicationsResponse(message));
       } else {
         command.reset(new commands::ExitAllApplicationsRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_AddCommand: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIAddCommandResponse(message));
+      } else {
+        command.reset(new commands::UIAddCommandRequest(message));
       }
       break;
     }

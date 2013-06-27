@@ -30,21 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/ui_get_language_request.h"
+#include "application_manager/commands/hmi/ui_add_command_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIGetLanguageRequest::UIGetLanguageRequest(
+UIAddCommandRequest::UIAddCommandRequest(
   const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-UIGetLanguageRequest::~UIGetLanguageRequest() {
+UIAddCommandRequest::~UIAddCommandRequest() {
 }
 
-void UIGetLanguageRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIGetLanguageRequest::Run");
+void UIAddCommandRequest::Run() {
+  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run ");
   SendRequest();
 }
 
