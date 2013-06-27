@@ -115,5 +115,23 @@ void HMICapabilities::set_soft_button_capabilities(
     new smart_objects::CSmartObject(soft_button_capabilities);
 }
 
+void HMICapabilities::set_button_capabilities(
+    const smart_objects::CSmartObject& button_capabilities) {
+  if (button_capabilities_) {
+     delete button_capabilities_;
+   }
+  button_capabilities_ =
+     new smart_objects::CSmartObject(button_capabilities);
+}
+
+void HMICapabilities::set_preset_bank_capabilities(
+    const smart_objects::CSmartObject& preset_bank_capabilities) {
+  if (preset_bank_capabilities_) {
+     delete preset_bank_capabilities_;
+   }
+  preset_bank_capabilities_ =
+     new smart_objects::CSmartObject(preset_bank_capabilities);
+}
+
 
 }  //  namespace application_manager

@@ -178,6 +178,8 @@ struct HMICapabilities {
     smart_objects::CSmartObject* display_capabilities_;
     smart_objects::CSmartObject* hmi_zone_capabilities_;
     smart_objects::CSmartObject* soft_buttons_capabilities_;
+    smart_objects::CSmartObject* button_capabilities_;
+    smart_objects::CSmartObject* preset_bank_capabilities_;
 };
 }  //  namespace application_manager
 

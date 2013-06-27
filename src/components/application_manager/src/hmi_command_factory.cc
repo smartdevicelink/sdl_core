@@ -92,6 +92,14 @@
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
+#include "application_manager/commands/hmi/ui_show_request.h"
+#include "application_manager/commands/hmi/ui_show_response.h"
+#include "application_manager/commands/hmi/exit_application_request.h"
+#include "application_manager/commands/hmi/exit_application_response.h"
+#include "application_manager/commands/hmi/button_get_capabilities_request.h"
+#include "application_manager/commands/hmi/button_get_capabilities_response.h"
+#include "application_manager/commands/hmi/on_button_event_notification.h"
+#include "application_manager/commands/hmi/on_button_press_notification.h"
 
 namespace application_manager {
 
@@ -280,7 +288,16 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::BasicCommunication_PlayTone: {
+    case  hmi_apis::FunctionID::eType::Buttons_GetCapabilities: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::ButtonGetCapabilitiesResponse(message));
+      } else {
+        command.reset(new commands::ButtonGetCapabilitiesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_PlayTone: {
       command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
@@ -342,6 +359,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::TTS_OnLanguageChange: {
       command.reset(new commands::OnTTSLanguageChangeNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::Buttons_OnButtonEvent: {
+      command.reset(new commands::OnButtonEventNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::Buttons_OnButtonPress: {
+      command.reset(new commands::OnButtonPressNotification(message));
       break;
     }
   }
