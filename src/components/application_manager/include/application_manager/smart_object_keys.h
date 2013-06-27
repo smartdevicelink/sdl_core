@@ -163,6 +163,7 @@ namespace hmi_response {
   const char soft_button_capabilities[] = "softButtonCapabilities";
   const char button_capabilities[] = "buttonCapabilities";
   const char preset_bank_capabilities[] = "presetBankCapabilities";
+  const char allowed[] = "allowed";
 
 }  // namespace hmi_response
 

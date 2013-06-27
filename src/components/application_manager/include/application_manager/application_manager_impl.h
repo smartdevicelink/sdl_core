@@ -252,6 +252,20 @@ class ApplicationManagerImpl : public ApplicationManager
       const hmi_apis::Common_Language::eType& language);
 
     /*
+     * @brief Retrieves SDL access to all mobile apps
+     *
+     * @return Currently active state of the access
+     */
+    inline bool all_apps_allowed() const;
+
+    /*
+     * @brief Sets SDL access to all mobile apps
+     *
+     * @param allowed SDL access to all mobile apps
+     */
+    void set_all_apps_allowed(const bool& allowed);
+
+    /*
      * @brief Starts audio pass thru thread
      *
      * @param session_key     Session key of connection for Mobile side
@@ -351,6 +365,7 @@ class ApplicationManagerImpl : public ApplicationManager
     bool                                          is_distracting_driver_;
     bool                                          is_vr_session_strated_;
     bool                                          hmi_cooperating_;
+    bool                                          is_all_apps_allowed_;
     hmi_apis::Common_Language::eType              ui_language_;
     hmi_apis::Common_Language::eType              vr_language_;
     hmi_apis::Common_Language::eType              tts_language_;
@@ -388,6 +403,10 @@ inline const hmi_apis::Common_Language::eType&
   return tts_language_;
 }
 
+inline bool ApplicationManagerImpl::all_apps_allowed() const {
+  return is_all_apps_allowed_;
+
+}
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_

@@ -56,6 +56,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_distracting_driver_(false),
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
+    is_all_apps_allowed_(true),
     ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
     vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
     tts_language_(hmi_apis::Common_Language::INVALID_ENUM) {
@@ -140,6 +141,13 @@ bool ApplicationManagerImpl::RegisterApplication(Application* application) {
   if (NULL == application) {
     return false;
   }
+
+  if (false == is_all_apps_allowed_) {
+    LOG4CXX_INFO(logger_,
+                 "RegisterApplication: access to app's disabled by user");
+    return false;
+  }
+
   std::map<int, Application*>::iterator it = applications_.find(
         application->app_id());
   if (applications_.end() != it) {
@@ -283,6 +291,10 @@ void ApplicationManagerImpl::set_active_vr_language(
 void ApplicationManagerImpl::set_active_tts_language(
     const hmi_apis::Common_Language::eType& language) {
   tts_language_ = language;
+}
+
+void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
+  is_all_apps_allowed_ = allowed;
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
