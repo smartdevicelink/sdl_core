@@ -58,16 +58,17 @@ class RawMessage {
    * \param dataSize Message size
    */
   RawMessage(int connectionKey, unsigned int protocolVersion,
-                            unsigned char* data, unsigned int dataSize);
+             unsigned char* data, unsigned int dataSize);
 
   RawMessage(int connectionKey, unsigned int protocolVersion, int serialNumber,
-                            unsigned char* data, unsigned int dataSize);
+             unsigned char* data, unsigned int dataSize);
 
   /**
    * \brief Destructor
    */
   ~RawMessage();
 
+  bool operator ==(const RawMessage &other);
   /**
    * \brief Getter for connection identifier
    */

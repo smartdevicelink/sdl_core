@@ -41,18 +41,29 @@ RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
                        unsigned char* data, unsigned int dataSize)
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),
-      data_(data),
       serial_number_(0),
       data_size_(dataSize) {
+  if (data_size > 0) {
+    data_ = new unsigned char[data_size];
+    for (int i = 0; i < data_size; ++i)
+      data_[i] = data[i];
+  } else
+    data_ = 0;
 }
 
-RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion, int serialNumber,
-                       unsigned char* data, unsigned int dataSize)
+RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
+                       int serialNumber, unsigned char* data,
+                       unsigned int dataSize)
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),
-      data_(data),
       serial_number_(serialNumber),
       data_size_(dataSize) {
+  if (data_size > 0) {
+    data_ = new unsigned char[data_size];
+    for (int i = 0; i < data_size; ++i)
+      data_[i] = data[i];
+  } else
+    data_ = 0;
 }
 
 RawMessage::~RawMessage() {
@@ -76,5 +87,12 @@ unsigned int RawMessage::data_size() const {
 
 unsigned int RawMessage::protocol_version() const {
   return protocol_version_;
+}
+
+bool RawMessage::operator ==(const RawMessage &other) {
+  if (this->serial_number_ == other.serial_number_)
+    return true;
+  else
+    return false;
 }
 }  // namespace protocol_handler

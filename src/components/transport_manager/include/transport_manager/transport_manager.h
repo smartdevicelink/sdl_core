@@ -76,8 +76,8 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void connectDevice(DeviceHandle device_id, ApplicationHandle app_id,
-			SessionID session_id) = 0;
+	virtual void connectDevice(const DeviceHandle &device_id, const ApplicationHandle &app_id,
+			const SessionID &session_id) = 0;
 
 	/**
 	 * @brief Disconnect from all applications connected on device.
@@ -86,7 +86,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void disconnectDevice(const SessionID session_id) = 0;
+	virtual void disconnectDevice(const SessionID &session_id) = 0;
 
 	/**
 	 * @brief post new mesage into TM's queue
@@ -95,7 +95,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void sendMessageToDevice(protocol_handler::RawMessage message) = 0;
+	virtual void sendMessageToDevice(const protocol_handler::RawMessage &message) = 0;
 
 	/**
 	 * @brief receive event from device
@@ -104,7 +104,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void receiveEventFromDevice(DeviceAdapterListener::DeviceAdapterEvent event) = 0;
+	virtual void receiveEventFromDevice(const DeviceAdapterListener::DeviceAdapterEvent &event) = 0;
 
 	/**
 	 * @brief add new device adapter
@@ -140,7 +140,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void removeDevice(DeviceHandle device) = 0;
+	virtual void removeDevice(const DeviceHandle &device) = 0;
 
 };
 }

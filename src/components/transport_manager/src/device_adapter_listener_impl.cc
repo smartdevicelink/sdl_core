@@ -47,8 +47,7 @@ DeviceAdapterListener::DeviceAdapterEvent::DeviceAdapterEvent(int type,
 		transport_manager::SessionID session_id, DeviceAdapter *device_adapter, RawMessageSptr data,
 		DeviceAdapterError *error) :
 		event_type_(type), session_id_(session_id), device_adapter_(
-				device_adapter), event_data_(data), event_error_(error) {
-
+				device_adapter), event_error_(error) {
 }
 
 DeviceAdapterListener::DeviceAdapterEvent::~DeviceAdapterEvent() {
@@ -106,11 +105,15 @@ DeviceAdapterListenerImpl::DeviceAdapterListenerImpl(
 	transport_manager_impl_ = tm;
 }
 
+DeviceAdapterListenerImpl::~DeviceAdapterListenerImpl(){
+
+}
+
 void DeviceAdapterListenerImpl::onSearchDeviceDone(
 		const DeviceAdapter *device_adapter) {
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE, 0,
-			const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), NULL);
+			const_cast<DeviceAdapter *>(device_adapter), NULL, NULL);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
@@ -123,7 +126,7 @@ void DeviceAdapterListenerImpl::onSearchDeviceFailed(
 	SearchDeviceError *err = new SearchDeviceError(error);
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL, 0,
-			const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
+			const_cast<DeviceAdapter *>(device_adapter), NULL, err);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
@@ -135,7 +138,7 @@ void DeviceAdapterListenerImpl::onConnectDone(
 		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id) {
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), NULL);
+			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, NULL);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
@@ -149,7 +152,7 @@ void DeviceAdapterListenerImpl::onConnectFailed(
 	ConnectError *err = new ConnectError(error);
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
+			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, err);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
@@ -161,7 +164,7 @@ void DeviceAdapterListenerImpl::onDisconnectDone(
 		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id) {
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), NULL);
+			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, NULL);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
@@ -175,7 +178,7 @@ void DeviceAdapterListenerImpl::onDisconnectFailed(const DeviceAdapter* device_a
 	DisconnectError *err = new DisconnectError(error);
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
+			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, err);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
@@ -213,7 +216,7 @@ void DeviceAdapterListenerImpl::onDataReceiveFailed(
 	DataReceiveError *err = new DataReceiveError(error);
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
+			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, err);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
@@ -240,7 +243,7 @@ void DeviceAdapterListenerImpl::onDataSendFailed(
 	DataSendError *err = new DataSendError(error);
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL, session_id,
-			const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
+			const_cast<DeviceAdapter *>(device_adapter), NULL, err);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
@@ -252,7 +255,7 @@ void DeviceAdapterListenerImpl::onCommunicationError(
 		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id) {
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), NULL);
+			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, NULL);
 
 	transport_manager_impl_->receiveEventFromDevice(event);
 
