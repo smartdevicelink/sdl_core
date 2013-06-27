@@ -60,6 +60,8 @@
 #include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/commands/hmi/ui_show_request.h"
 #include "application_manager/commands/hmi/ui_show_response.h"
+#include "application_manager/commands/hmi/ui_slider_request.h"
+#include "application_manager/commands/hmi/ui_slider_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -298,6 +300,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIShowResponse(message));
       } else {
         command.reset(new commands::UIShowRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_Slider: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISliderResponse(message));
+      } else {
+        command.reset(new commands::UISliderRequest(message));
       }
       break;
     }
