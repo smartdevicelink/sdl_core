@@ -122,8 +122,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  virtual void sendFrame(ConnectionHandle connection_handle,
-                         const uint8_t* data, size_t data_size, int user_data);
+  virtual Error sendData(const int session_id, const RawMessageSptr data);
 
  protected:
   /**
@@ -170,7 +169,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Frame queue.
    **/
-  typedef std::queue<Frame*> FrameQueue;
+  typedef std::queue<RawMessageSptr> FrameQueue;
 
   /**
    * @brief Internal class describing device.
@@ -279,7 +278,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
     /**
      * @brief Session identifier.
      **/
-    const int session_id_;
+    const SessionID session_id_;
 
     /**
      * @brief Thread that handles connection.
@@ -439,22 +438,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
   void updateClientDeviceList();
 
   /**
-   * @brief Create list of connections possible for specified device.
-   *
-   * This method is called from connectDevice(). Device adapter may implement
-   * this method to provide list of connections that must be running on
-   * connected device.
-   *
-   * @param DeviceHandle Device handle.
-   * @param ConnectionsList Reference to connections list that must be filled.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
-   **/
-  virtual void createConnectionsListForDevice(
-      const DeviceHandle device_handle,
-      std::vector<Connection*>& connection_list);
-
-  /**
    * @brief Device adapter main thread.
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
@@ -479,7 +462,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Connections map.
    **/
-  typedef std::map<int, Connection*> ConnectionMap;
+  typedef std::map<SessionID, Connection*> ConnectionMap;
 
   /**
    * @brief Logger.

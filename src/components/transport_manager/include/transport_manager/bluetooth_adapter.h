@@ -62,11 +62,6 @@ class BluetoothAdapter : public DeviceAdapterImpl {
 
   virtual bool isClientOriginatedConnectSupported() const;
 
-  virtual Error disconnectDevice(const DeviceHandle device_handle);
-
-  virtual Error sendData(const DeviceHandle device_handle,
-                         const DataContainerSptr data_container);
-
   virtual DeviceList getDeviceList() const;
 
   virtual void connectionThread(Connection* connection);

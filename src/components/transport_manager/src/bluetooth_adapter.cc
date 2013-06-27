@@ -119,28 +119,6 @@ bool BluetoothAdapter::isClientOriginatedConnectSupported() const {
   return DeviceAdapter::OK;
 }
 
-DeviceAdapter::Error BluetoothAdapter::disconnectDevice(
-    const DeviceHandle device_handle) {
-  if (!initialized_) {
-    return DeviceAdapter::BAD_STATE;
-  }
-
-  //TODO
-
-  return DeviceAdapter::OK;
-}
-
-DeviceAdapter::Error BluetoothAdapter::sendData(
-    const DeviceHandle device_handle, const RawMessageSptr data_container) {
-  if (!initialized_) {
-    return DeviceAdapter::BAD_STATE;
-  }
-
-  //TODO
-
-  return DeviceAdapter::OK;
-}
-
 DeviceList BluetoothAdapter::getDeviceList() const {
   return DeviceList();
 }

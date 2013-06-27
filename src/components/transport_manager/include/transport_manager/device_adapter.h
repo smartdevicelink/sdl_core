@@ -82,7 +82,7 @@ public:
 	virtual Error disconnect(const int session_id) = 0;
 	virtual Error disconnectDevice(const DeviceHandle device_handle) = 0;
 
-	virtual void sendData(const int session_id, const RawMessageSptr data) = 0;
+	virtual Error sendData(const int session_id, const RawMessageSptr data) = 0;
 
 	virtual DeviceList getDeviceList() const = 0;
 	virtual ApplicationList getApplicationList(
