@@ -35,6 +35,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_conversion.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -49,7 +50,20 @@ EncodedSyncPDataResponse::~EncodedSyncPDataResponse() {
 }
 
 void EncodedSyncPDataResponse::Run() {
-  SendResponse();
+  if ((*message_)[strings::params][strings::success] == false) {
+      SendResponse();
+      return;
+    }
+
+    const int correlation_id = 104;
+
+    if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+        correlation_id)) {
+      (*message_)[strings::params][strings::success] = true;
+      (*message_)[strings::params][strings::result_code] =
+              NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+      SendResponse();
+    }
 }
 
 }  // namespace commands

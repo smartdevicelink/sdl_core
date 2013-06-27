@@ -52,7 +52,7 @@ class ButtonGetCapabilitiesResponse : public ResponseFromHMI {
   explicit ButtonGetCapabilitiesResponse(const MessageSharedPtr& message);
 
   /**
-   * @brief UIGetCapabilitiesResponse class destructor
+   * @brief ButtonGetCapabilitiesResponse class destructor
    **/
   virtual ~ButtonGetCapabilitiesResponse();
 
