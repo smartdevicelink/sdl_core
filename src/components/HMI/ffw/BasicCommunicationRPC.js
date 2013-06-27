@@ -86,6 +86,11 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.onAppRegisteredSubscribeRequestId = this.client.subscribeToNotification( this.onAppRegisteredNotification );
         this.onAppUnregisteredSubscribeRequestId = this.client.subscribeToNotification( this.onAppUnregisteredNotification );
         this.onDeviceListUpdatedNotificationId = this.client.subscribeToNotification( this.onDeviceListUpdatedNotification );
+        
+        
+        // notify other components that UI is ready
+        // main purpose is to nitofy SDLCore
+        this.onReady();
     },
 
     /**
@@ -175,6 +180,20 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this._super();
 
         // nothing to do, it is client
+    },
+    
+    /*
+     * notification that UI is ready BasicCommunication should be sunscribed to
+     * this notification
+     */
+    onReady: function() {
+        Em.Logger.log( "FFW.BasicCommunication.onReady" );
+
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "BasicCommunication.OnReady"
+        };
+        this.client.send( JSONMessage );
     },
 
     /**
