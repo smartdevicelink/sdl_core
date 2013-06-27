@@ -35,17 +35,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER
 
+
+#include "transport_manager/common.h"
 #include "transport_manager/device_adapter.h"
+#include "transport_manager/device_adapter_listener.h"
 #include "transport_manager/transport_manager_listener.h"
 
 namespace transport_manager {
-/**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
- **/
-typedef int SessionID;
-
 /**
  * @brief Interface of transport manager.
  * @interface TransportManager
@@ -99,7 +95,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void sendMessageToDevice(const void *message) = 0;
+	virtual void sendMessageToDevice(protocol_handler::RawMessage message) = 0;
 
 	/**
 	 * @brief receive event from device
@@ -108,7 +104,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void receiveEventFromDevice(const void *event) = 0;
+	virtual void receiveEventFromDevice(DeviceAdapterListener::DeviceAdapterEvent event) = 0;
 
 	/**
 	 * @brief add new device adapter
@@ -135,7 +131,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void registerAdapterListener(DeviceAdapterListener *listener) = 0;
+	virtual void registerAdapterListener(transport_manager::DeviceAdapterListener *listener) = 0;
 
 	/**
 	 * @brief remove device from internal storages

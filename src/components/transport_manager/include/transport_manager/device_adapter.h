@@ -36,8 +36,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
 
+#include <string>
+#include <vector>
 #include "utils/shared_ptr.h"
+#include "transport_manager/common.h"
 #include "protocol_handler/raw_message.h"
+#include "transport_manager/device_adapter_listener.h"
 
 namespace transport_manager {
 
@@ -48,8 +52,6 @@ typedef int DeviceHandle;
 typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
 typedef std::vector<DeviceHandle> DeviceList;
-
-typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 
 class DeviceAdapter {
 public:

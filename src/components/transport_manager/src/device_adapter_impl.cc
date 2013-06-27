@@ -42,7 +42,7 @@
 
 //#include "DeviceAdapterListener.h"
 //#include "HandleGenerator.h"
-#include "device_adapter_impl.h"
+#include "transport_manager/device_adapter_impl.h"
 #include "transport_manager/device_adapter_listener.h"
 
 namespace transport_manager {
@@ -106,16 +106,16 @@ DeviceAdapterImpl::Connection::~Connection(void) {
   }
 }
 
-bool DeviceAdapterImpl::Connection::isSameAs(
-    const Connection* other_connection) const {
-  bool result = false;
-
-  if (0 != other_connection) {
-    result = (device_handle_ == other_connection->device_handle_);
-  }
-
-  return result;
-}
+//bool DeviceAdapterImpl::Connection::isSameAs(
+//    const Connection* other_connection) const {
+//  bool result = false;
+//
+//  if (0 != other_connection) {
+//    result = (device_handle_ == other_connection->device_handle_);
+//  }
+//
+//  return result;
+//}
 
 DeviceAdapterImpl::DeviceAdapterImpl(
     DeviceAdapterListener& listener,
@@ -149,118 +149,118 @@ void DeviceAdapterImpl::run()
 {
     LOG4CXX_INFO(logger_, "Initializing device adapter");
 
-    int errorCode = pthread_create(&mMainThread, 0, &mainThreadStartRoutine, this);
-
-    if (0 == errorCode)
-    {
-        mMainThreadStarted = true;
-        LOG4CXX_INFO(logger_, "Device adapter main thread started");
-    }
-    else
-    {
-        LOG4CXX_ERROR(logger_, "Device adapter main thread start failed, error code " << errorCode);
-    }
+//    int errorCode = pthread_create(&mMainThread, 0, &mainThreadStartRoutine, this);
+//
+//    if (0 == errorCode)
+//    {
+//        mMainThreadStarted = true;
+//        LOG4CXX_INFO(logger_, "Device adapter main thread started");
+//    }
+//    else
+//    {
+//        LOG4CXX_ERROR(logger_, "Device adapter main thread start failed, error code " << errorCode);
+//    }
 }
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(void)
-{
-    pthread_mutex_lock(&mDeviceScanRequestedMutex);
+//void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(void)
+//{
+//    pthread_mutex_lock(&mDeviceScanRequestedMutex);
+//
+//    if (false == mDeviceScanRequested)
+//    {
+//        LOG4CXX_INFO(logger_, "Requesting device scan");
+//
+//        mDeviceScanRequested = true;
+//        pthread_cond_signal(&mDeviceScanRequestedCond);
+//    }
+//    else
+//    {
+//        LOG4CXX_INFO(logger_, "Device scan is currently in progress");
+//    }
+//
+//    pthread_mutex_unlock(&mDeviceScanRequestedMutex);
+//}
+//
+//void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
+//{
+//    bool isDeviceValid = false;
+//
+//    pthread_mutex_lock(&mDevicesMutex);
+//
+//    if (mDevices.end() != mDevices.find(DeviceHandle))
+//    {
+//        isDeviceValid = true;
+//    }
+//    else
+//    {
+//        LOG4CXX_ERROR(logger_, "Device handle " << DeviceHandle << " is invalid");
+//    }
+//
+//    pthread_mutex_unlock(&mDevicesMutex);
+//
+//    if (true == isDeviceValid)
+//    {
+//        std::vector<SConnection*> connections;
+//        createConnectionsListForDevice(DeviceHandle, connections);
+//
+//        if (false == connections.empty())
+//        {
+//            LOG4CXX_INFO(logger_, "Connecting device " << DeviceHandle);
+//
+//            for (std::vector<SConnection*>::iterator connectionIterator = connections.begin(); connectionIterator != connections.end(); ++connectionIterator)
+//            {
+//                startConnection(*connectionIterator);
+//            }
+//        }
+//        else
+//        {
+//            LOG4CXX_WARN(logger_, "No connections to establish on device " << DeviceHandle);
+//        }
+//    }
+//}
 
-    if (false == mDeviceScanRequested)
-    {
-        LOG4CXX_INFO(logger_, "Requesting device scan");
-
-        mDeviceScanRequested = true;
-        pthread_cond_signal(&mDeviceScanRequestedCond);
-    }
-    else
-    {
-        LOG4CXX_INFO(logger_, "Device scan is currently in progress");
-    }
-
-    pthread_mutex_unlock(&mDeviceScanRequestedMutex);
-}
-
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
-{
-    bool isDeviceValid = false;
-
-    pthread_mutex_lock(&mDevicesMutex);
-
-    if (mDevices.end() != mDevices.find(DeviceHandle))
-    {
-        isDeviceValid = true;
-    }
-    else
-    {
-        LOG4CXX_ERROR(logger_, "Device handle " << DeviceHandle << " is invalid");
-    }
-
-    pthread_mutex_unlock(&mDevicesMutex);
-
-    if (true == isDeviceValid)
-    {
-        std::vector<SConnection*> connections;
-        createConnectionsListForDevice(DeviceHandle, connections);
-
-        if (false == connections.empty())
-        {
-            LOG4CXX_INFO(logger_, "Connecting device " << DeviceHandle);
-
-            for (std::vector<SConnection*>::iterator connectionIterator = connections.begin(); connectionIterator != connections.end(); ++connectionIterator)
-            {
-                startConnection(*connectionIterator);
-            }
-        }
-        else
-        {
-            LOG4CXX_WARN(logger_, "No connections to establish on device " << DeviceHandle);
-        }
-    }
-}
-
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::sendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData)
-{
-    if (0u == DataSize)
-    {
-        LOG4CXX_WARN(logger_, "DataSize=0");
-    }
-    else if (0 == Data)
-    {
-        LOG4CXX_WARN(logger_, "Data is null");
-    }
-    else
-    {
-        pthread_mutex_lock(&mConnectionsMutex);
-
-        tConnectionMap::iterator connectionIterator = mConnections.find(ConnectionHandle);
-
-        if (mConnections.end() == connectionIterator)
-        {
-            LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " does not exist");
-        }
-        else
-        {
-            SConnection * connection = connectionIterator->second;
-
-            if (0 != connection)
-            {
-                connection->mFramesToSend.push(new SFrame(UserData, Data, DataSize));
-
-                if (-1 != connection->mNotificationPipeFds[1])
-                {
-                    uint8_t c = 0;
-                    if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
-                    {
-                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to wake up connection thread for connection " << connectionIterator->first);
-                    }
-                }
-            }
-        }
-
-        pthread_mutex_unlock(&mConnectionsMutex);
-    }
-}
+//void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::sendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData)
+//{
+//    if (0u == DataSize)
+//    {
+//        LOG4CXX_WARN(logger_, "DataSize=0");
+//    }
+//    else if (0 == Data)
+//    {
+//        LOG4CXX_WARN(logger_, "Data is null");
+//    }
+//    else
+//    {
+//        pthread_mutex_lock(&mConnectionsMutex);
+//
+//        tConnectionMap::iterator connectionIterator = mConnections.find(ConnectionHandle);
+//
+//        if (mConnections.end() == connectionIterator)
+//        {
+//            LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " does not exist");
+//        }
+//        else
+//        {
+//            SConnection * connection = connectionIterator->second;
+//
+//            if (0 != connection)
+//            {
+//                connection->mFramesToSend.push(new SFrame(UserData, Data, DataSize));
+//
+//                if (-1 != connection->mNotificationPipeFds[1])
+//                {
+//                    uint8_t c = 0;
+//                    if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
+//                    {
+//                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to wake up connection thread for connection " << connectionIterator->first);
+//                    }
+//                }
+//            }
+//        }
+//
+//        pthread_mutex_unlock(&mConnectionsMutex);
+//    }
+//}
 
 void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermination(void)
 {

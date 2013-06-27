@@ -36,6 +36,8 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGERLISTENER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGERLISTENER
 
+#include "transport_manager/device_adapter.h"
+
 namespace transport_manager {
 
 class TransportManagerListener {

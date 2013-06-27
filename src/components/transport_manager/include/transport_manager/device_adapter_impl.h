@@ -122,7 +122,8 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  virtual void sendFrame(ConnectionHandle connection_handle,
+  class Connection;
+  virtual void sendFrame(Connection connection_handle,
                          const uint8_t* data, size_t data_size, int user_data);
 
  protected:
