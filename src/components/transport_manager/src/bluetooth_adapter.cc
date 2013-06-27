@@ -61,66 +61,23 @@ BluetoothAdapter::BluetoothAdapter()
 }
 
 BluetoothAdapter::~BluetoothAdapter() {
+  waitForThreadsTermination();
 }
 
-DeviceType BluetoothAdapter::GetDeviceType() const {
+DeviceType BluetoothAdapter::getDeviceType() const {
   return "bluetooth-default";
-}
-
-DeviceAdapter::Error BluetoothAdapter::init(
-    DeviceAdapterListener* listener, DeviceHandleGenerator* handle_generator,
-    Configuration* configuration) {
-  assert(listener != 0);
-  assert(handle_generator != 0);
-
-  listener_ = listener;
-  handle_generator_ = handle_generator;
-  initialized_ = true;
-
-  return DeviceAdapter::OK;
 }
 
 bool BluetoothAdapter::isSearchDevicesSupported() const {
   return true;
 }
 
-DeviceAdapter::Error BluetoothAdapter::searchDevices() {
-  if (!initialized_) {
-    return DeviceAdapter::BAD_STATE;
-  }
-
-  //TODO
-
-  return DeviceAdapter::OK;
-}
-
 bool BluetoothAdapter::isServerOriginatedConnectSupported() const {
   return true;
 }
 
-DeviceAdapter::Error BluetoothAdapter::connectDevice(
-    const DeviceHandle device_handle) {
-  if (!initialized_) {
-    return DeviceAdapter::BAD_STATE;
-  }
-
-  //TODO
-
-  return DeviceAdapter::OK;
-}
-
 bool BluetoothAdapter::isClientOriginatedConnectSupported() const {
-  if (!initialized_) {
-    return DeviceAdapter::BAD_STATE;
-  }
-
-  //TODO
-
-  return DeviceAdapter::OK;
-}
-
-DeviceList BluetoothAdapter::getDeviceList() const {
-  return DeviceList();
+  return false;
 }
 
 void BluetoothAdapter::connectionThread(Connection* connection) {

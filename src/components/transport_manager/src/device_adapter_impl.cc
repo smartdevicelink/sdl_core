@@ -50,25 +50,6 @@ namespace transport_manager {
 log4cxx::LoggerPtr DeviceAdapterImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("TransportManager"));
 
-DeviceAdapterImpl::Frame::Frame(int user_data, const uint8_t* data,
-                                const size_t data_size)
-    : user_data_(user_data),
-      data_(0),
-      data_size_(0) {
-  if ((0 != data) && (0u != data_size)) {
-    data_ = new uint8_t[data_size];
-
-    if (0 != data_) {
-      data_size_ = data_size;
-      memcpy(data_, data, data_size_);
-    }
-  }
-}
-
-DeviceAdapterImpl::Frame::~Frame(void) {
-  delete[] data_;
-}
-
 DeviceAdapterImpl::Device::Device(const char* name)
     : name_(name),
       unique_device_id_() {
@@ -110,7 +91,8 @@ DeviceAdapterImpl::DeviceAdapterImpl(DeviceAdapterListener& listener,
       connections_mutex_(),
       shutdown_flag_(false),
       main_thread_(),
-      main_thread_started_(false) {
+      main_thread_started_(false),
+      initialized_(false) {
   pthread_cond_init(&device_scan_requested_cond_, 0);
   pthread_mutex_init(&device_scan_requested_mutex_, 0);
   pthread_mutex_init(&devices_mutex_, 0);
@@ -124,20 +106,34 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
   pthread_cond_destroy(&device_scan_requested_cond_);
 }
 
-void DeviceAdapterImpl::run() {
+DeviceAdapter::Error DeviceAdapterImpl::init(
+    DeviceAdapterListener* listener, DeviceHandleGenerator* handle_generator,
+    Configuration* configuration) {
+  if (listener == 0)
+    return BAD_PARAM;
+  if (handle_generator == 0)
+    return BAD_PARAM;
+
   LOG4CXX_INFO(logger_, "Initializing device adapter");
 
-  int errorCode = pthread_create(&main_thread_, 0, &mainThreadStartRoutine,
-                                 this);
+  listener_ = listener;
+  handle_generator_ = handle_generator;
+  initialized_ = true;
 
-  if (0 == errorCode) {
-    mMainThreadStarted = true;
+  const int thread_start_error = pthread_create(&main_thread_, 0,
+                                                &mainThreadStartRoutine, this);
+
+  if (0 == thread_start_error) {
+    main_thread_started_ = true;
     LOG4CXX_INFO(logger_, "Device adapter main thread started");
   } else {
     LOG4CXX_ERROR(
         logger_,
-        "Device adapter main thread start failed, error code " << errorCode);
+        "Device adapter main thread start failed, error code " << thread_start_error);
+    return DeviceAdapter::FAIL;
   }
+
+  return DeviceAdapter::OK;
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
@@ -162,50 +158,43 @@ DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
   return ret;
 }
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermination(
-    void) {
-  mShutdownFlag = true;
+void DeviceAdapterImpl::waitForThreadsTermination() {
+  shutdown_flag_ = true;
 
-  if (true == mMainThreadStarted) {
+  if (true == main_thread_started_) {
     LOG4CXX_INFO(logger_, "Waiting for device adapter main thread termination");
-    pthread_join(mMainThread, 0);
+    pthread_join(main_thread_, 0);
     LOG4CXX_INFO(logger_, "Device adapter main thread terminated");
   }
 
-  std::vector<pthread_t> connectionThreads;
+  std::vector<pthread_t> connection_threads;
 
-  pthread_mutex_lock(&mConnectionsMutex);
+  pthread_mutex_lock(&connections_mutex_);
 
-  for (tConnectionMap::iterator connectionIterator = mConnections.begin();
-      connectionIterator != mConnections.end(); ++connectionIterator) {
-    SConnection * connection = connectionIterator->second;
+  for (ConnectionMap::iterator it = connections_.begin();
+      it != connections_.end(); ++it) {
+    SessionID session_id = it->first;
+    Connection* connection = it->second;
 
-    if (0 != connection) {
-      connection->mTerminateFlag = true;
-      if (-1 != connection->mNotificationPipeFds[1]) {
-        uint8_t c = 0;
-        if (1 != write(connection->mNotificationPipeFds[1], &c, 1)) {
-          LOG4CXX_ERROR_WITH_ERRNO(
-              logger_,
-              "Failed to wake up connection thread for connection " << connectionIterator->first);
-        }
+    connection->terminate_flag_ = true;
+    if (-1 != connection->notification_pipe_fds_[1]) {
+      uint8_t c = 0;
+      if (1 != write(connection->notification_pipe_fds_[1], &c, 1)) {
+        LOG4CXX_ERROR_WITH_ERRNO(
+            logger_,
+            "Failed to wake up connection thread for connection " << session_id);
       }
-      connectionThreads.push_back(connection->mConnectionThread);
-    } else {
-      LOG4CXX_ERROR(logger_,
-                    "Connection " << connectionIterator->first << " is null");
     }
+    connection_threads.push_back(connection->connection_thread_);
   }
 
-  pthread_mutex_unlock(&mConnectionsMutex);
+  pthread_mutex_unlock(&connections_mutex_);
 
   LOG4CXX_INFO(logger_, "Waiting for connection threads termination");
 
-  for (std::vector<pthread_t>::iterator connectionThreadIterator =
-      connectionThreads.begin();
-      connectionThreadIterator != connectionThreads.end();
-      ++connectionThreadIterator) {
-    pthread_join(*connectionThreadIterator, 0);
+  for (std::vector<pthread_t>::iterator it = connection_threads.begin();
+      it != connection_threads.end(); ++it) {
+    pthread_join(*it, 0);
   }
 
   LOG4CXX_INFO(logger_, "Connection threads terminated");
@@ -451,15 +440,18 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                           logger_,
                           "Received " << bytes_read << " bytes for connection " << connection->session_id());
                       unsigned char* data = new data[bytes_read];
-                      if(data)
-                      {
+                      if (data) {
                         memcpy(data, buffer, bytes_read);
-                        RawMessageSptr frame(new protocol_handler::RawMessage(connection->session_id(), 0, data, bytes_read));
-                        listener_.onDataReceiveDone(this, connection->session_id(), frame);
-                      }
-                      else
-                      {
-                        listener_.onDataReceiveFailed(this, connection->session_id(), DataReceiveError());
+                        RawMessageSptr frame(
+                            new protocol_handler::RawMessage(
+                                connection->session_id(), 0, data, bytes_read));
+                        listener_.onDataReceiveDone(this,
+                                                    connection->session_id(),
+                                                    frame);
+                      } else {
+                        listener_.onDataReceiveFailed(this,
+                                                      connection->session_id(),
+                                                      DataReceiveError());
                       }
                     } else if (bytes_read < 0) {
                       if (EAGAIN != errno && EWOULDBLOCK != errno) {
@@ -521,10 +513,12 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                             "Send failed for connection " << connection->session_id());
                       }
                     }
-                    if(frame_sent) {
-                      listener_.onDataSendDone(this, connection->session_id(), frame);
+                    if (frame_sent) {
+                      listener_.onDataSendDone(this, connection->session_id(),
+                                               frame);
                     } else {
-                      listener_.onDataSendFailed(this, connection->session_id(), frame, DataSendError());
+                      listener_.onDataSendFailed(this, connection->session_id(),
+                                                 frame, DataSendError());
                     }
                   }
                 }

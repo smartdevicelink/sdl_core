@@ -48,21 +48,13 @@ class BluetoothAdapter : public DeviceAdapterImpl {
 
  protected:
 
-  virtual DeviceType GetDeviceType() const;
-
-  virtual Error init(DeviceAdapterListener* listener,
-                     DeviceHandleGenerator* handle_generator,
-                     Configuration* configuration);
+  virtual DeviceType getDeviceType() const;
 
   virtual bool isSearchDevicesSupported() const;
-  virtual Error searchDevices();
 
   virtual bool isServerOriginatedConnectSupported() const;
-  virtual Error connectDevice(const DeviceHandle device_handle);
 
   virtual bool isClientOriginatedConnectSupported() const;
-
-  virtual DeviceList getDeviceList() const;
 
   virtual void connectionThread(Connection* connection);
 
