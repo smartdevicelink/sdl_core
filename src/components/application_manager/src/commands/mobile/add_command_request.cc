@@ -36,17 +36,13 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 AddCommandRequest::AddCommandRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 AddCommandRequest::~AddCommandRequest() {
@@ -56,8 +52,8 @@ void AddCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "AddCommandRequest::Run ");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
@@ -73,11 +69,11 @@ void AddCommandRequest::Run() {
   }
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
-  MessageChaining * chain = NULL;
+  MessageChaining* chain = NULL;
   // check menu params
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
@@ -85,22 +81,22 @@ void AddCommandRequest::Run() {
     // TODO(DK): HMI Request Id
     const int ui_cmd_id = 1;
     (*p_smrt_ui)[strings::params][strings::function_id] =
-        ui_cmd_id;
+      ui_cmd_id;
 
     (*p_smrt_ui)[strings::params][strings::message_type] =
-        MessageType::kRequest;
+      MessageType::kRequest;
 
     (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-        (*message_)[strings::msg_params][strings::cmd_id];
+      (*message_)[strings::msg_params][strings::cmd_id];
 
     (*p_smrt_ui)[strings::msg_params][strings::menu_params] =
-        (*message_)[strings::msg_params][strings::menu_params];
+      (*message_)[strings::msg_params][strings::menu_params];
 
     (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-        app->app_id();
+      app->app_id();
 
     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, ui_cmd_id, &(*message_));
+            connection_key, correlation_id, ui_cmd_id, &(*message_));
 
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
   }
@@ -112,19 +108,19 @@ void AddCommandRequest::Run() {
     // TODO(DK): HMI Request Id
     const int vr_cmd_id = 2;
     (*p_smrt_vr)[strings::params][strings::function_id] =
-        vr_cmd_id;
+      vr_cmd_id;
 
     (*p_smrt_vr)[strings::params][strings::message_type] =
-        MessageType::kRequest;
+      MessageType::kRequest;
 
     (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
-        (*message_)[strings::msg_params][strings::cmd_id];
+      (*message_)[strings::msg_params][strings::cmd_id];
 
     (*p_smrt_vr)[strings::msg_params][strings::vr_commands] =
-        (*message_)[strings::msg_params][strings::vr_commands];
+      (*message_)[strings::msg_params][strings::vr_commands];
 
     (*p_smrt_vr)[strings::msg_params][strings::app_id] =
-        app->app_id();
+      app->app_id();
 
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
         connection_key, correlation_id, vr_cmd_id, &(*message_));

@@ -123,9 +123,17 @@ const char ecu_name[] = "ecuName";
 const char did_location[] = "didLocation";
 const char app_list[] = "appList";
 const char device_list[] = "deviceList";
+const char device_info[] = "deviceInfo";
 const char name[] = "name";
 const char id[] = "id";
+const char application[] = "application";
+const char icon[] = "icon";
+const char device_name[] = "deviceName";
 }  // namespace strings
+
+namespace mobile_notification {
+const char state[] = "state";
+}  // namespace mobile_notification
 
 namespace hmi_request {
   const char field_name[] = "fieldName";
@@ -136,6 +144,7 @@ namespace hmi_request {
   const char tts_chunks[] = "ttsChunks";
   const char audio_pass_display_texts[] = "audioPassThruDisplayTexts";
   const char max_duration[] = "maxDuration";
+  const char reason[] = "reason";
 }  // namespace hmi_request
 
 namespace hmi_response {
@@ -145,11 +154,18 @@ namespace hmi_response {
   const char custom_button_id[] = "customButtonID";
   const char button_name[] = "name";
   const char button_mode[] = "mode";
+  const char attenuated_supported[] = "attenuatedSupported";
+  const char languages[] = "languages";
+  const char display_capabilities[] = "displayCapabilities";
+  const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
+  const char soft_button_capabilities[] = "softButtonCapabilities";
 }  // namespace hmi_response
 
 namespace hmi_notification {
   const char prndl[] = "prndl";
   const char file_name[] = "file_name";
+  const char system_context[] = "systemContext";
+  const char state[] = "state";
 }  // namespace hmi_notification
 
 }  // namespace application_manager

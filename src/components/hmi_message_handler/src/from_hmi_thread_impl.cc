@@ -30,32 +30,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "from_hmi_thread_impl.h"
+#include "./from_hmi_thread_impl.h"
 
 namespace hmi_message_handler {
 
-FromHMIThreadImpl::FromHMIThreadImpl(HMIMessageHandler * handler)
-	: handler_(handler) {
-		DCHECK(handler_);
+log4cxx::LoggerPtr FromHMIThreadImpl::logger_   =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
+
+FromHMIThreadImpl::FromHMIThreadImpl(HMIMessageHandlerImpl* handler)
+  : handler_(handler) {
+  DCHECK(handler_);
 }
 
 
 FromHMIThreadImpl::~FromHMIThreadImpl() {
-	handler_ = NULL;
+  handler_ = NULL;
 }
 
 void FromHMIThreadImpl::threadMain() {
-	while (1) {
-    	while (!handler_->messages_from_hmi_.empty()) {
+  while (1) {
+    while (!handler_->messages_from_hmi_.empty()) {
+      LOG4CXX_INFO(logger_, "Received message from hmi");
+      MessageSharedPointer message =
+        handler_->messages_from_hmi_.pop();
 
-    		application_manager::Message * message = 
-    			handler_->messages_from_hmi_.pop();
+      if (!handler_->observer_) {
+        LOG4CXX_ERROR(logger_, "Observer is not set for HMIMessageHandler");
+        continue;
+      }
 
-    		observer_->onMessageReceived(message);
-		}
-		handler_->messages_from_hmi_.wait();
-	}
+      handler_->observer_->onMessageReceived(message);
+      LOG4CXX_INFO(logger_, "Message from hmi given away.");
+    }
+    handler_->messages_from_hmi_.wait();
+  }
 }
 
-
- } // namespace hmi_message_handler
+}  //  namespace hmi_message_handler

@@ -36,27 +36,31 @@
 #include <set>
 #include "hmi_message_handler/hmi_message_adapter.h"
 #include "hmi_message_handler/hmi_message_handler.h"
-#include "Utils/macro.h"
-#include "Utils/MessageQueue.h"
-#include "Utils/threads/thread.h"
+#include "utils/macro.h"
+#include "utils/message_queue.h"
+#include "utils/threads/thread.h"
 
 namespace hmi_message_handler {
+
+typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
 
 class ToHMIThreadImpl;
 class FromHMIThreadImpl;
 
 class HMIMessageHandlerImpl : public HMIMessageHandler {
   public:
-    HMIMessageHandlerImpl();
+    static HMIMessageHandlerImpl* instance();
     ~HMIMessageHandlerImpl();
-    void onMessageReceived(application_manager::Message* message);
-    void sendMessageToHMI(application_manager::Message* message);
+    void onMessageReceived(MessageSharedPointer message);
+    void sendMessageToHMI(MessageSharedPointer message);
     void setMessageObserver(HMIMessageObserver* observer);
-    void onErrorSending(application_manager::Message* message);
-    void addHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
+    void onErrorSending(MessageSharedPointer message);
+    void addHMIMessageAdapter(HMIMessageAdapter* adapter);
     void removeHMIMessageAdapter(HMIMessageAdapter* adapter);
 
   private:
+    HMIMessageHandlerImpl();
+
     HMIMessageObserver* observer_;
     std::set<HMIMessageAdapter* > message_adapters_;
 
@@ -66,11 +70,13 @@ class HMIMessageHandlerImpl : public HMIMessageHandler {
     threads::Thread* from_hmi_thread_;
     friend class FromHMIThreadImpl;
 
-    MessageQueue<application_manager::Message*> message_to_hmi_;
-    MessageQueue<application_manager::Message*> message_from_hmi_;
+    MessageQueue<MessageSharedPointer> messages_to_hmi_;
+    MessageQueue<MessageSharedPointer> messages_from_hmi_;
+
+    static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
 };
 }  // namespace hmi_message_handler
 
-#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL
+#endif  //  SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL

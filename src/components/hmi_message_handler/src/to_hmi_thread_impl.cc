@@ -30,37 +30,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
- #include "to_hmi_thread_impl.h"
+#include <set>
+#include "./to_hmi_thread_impl.h"
 
- namespace hmi_message_handler {
+namespace hmi_message_handler {
 
-ToHMIThreadImpl::ToHMIThreadImpl(HMIMessageHandler * handler)
-	: handler_(handler) {
-		DCHECK(handler_);
+ToHMIThreadImpl::ToHMIThreadImpl(HMIMessageHandlerImpl* handler)
+  : handler_(handler) {
+  DCHECK(handler_);
 }
 
 
 ToHMIThreadImpl::~ToHMIThreadImpl() {
-	handler_ = NULL;
+  handler_ = NULL;
 }
 
 void ToHMIThreadImpl::threadMain() {
-	while (1) {
-    	while (!handler_->messages_to_hmi_.empty()) {
+  while (1) {
+    while (!handler_->messages_to_hmi_.empty()) {
+      MessageSharedPointer message =
+        handler_->messages_to_hmi_.pop();
 
-    		application_manager::Message * message = 
-    			handler_->messages_to_hmi_.pop();
-
-    		for(std::set<HMIMessageAdapter* >::iterator it =
-    				handler_->message_adapters_.begin();
-					it != handler_->message_adapters_.end();
-					++ it) {
-				(*it)->sendMessageToHMI(message);
-			}
-		}
-		handler_->messages_to_hmi_.wait();
-	}
-
+      for (std::set<HMIMessageAdapter* >::iterator it =
+             handler_->message_adapters_.begin();
+           it != handler_->message_adapters_.end();
+           ++it) {
+        (*it)->sendMessageToHMI(message);
+      }
+    }
+    handler_->messages_to_hmi_.wait();
+  }
 }
 
- } // namespace hmi_message_handler
+}  //  namespace hmi_message_handler

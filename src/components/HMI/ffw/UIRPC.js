@@ -36,6 +36,13 @@
 
 FFW.UI = FFW.RPCObserver.create( {
 
+    /**
+     * If true then UI is present and ready to communicate with SDL.
+     *
+     * @type {Boolean}
+     */
+    isReady: false,
+    
     /*
      * access to basic RPC functionality
      */
@@ -153,9 +160,9 @@ FFW.UI = FFW.RPCObserver.create( {
                 SDL.TurnByTurnView.deactivate();
 
                 SDL.SDLController.getApplicationModel( request.params.appId ).onSDLUIShow( request.params );
-
-                this.sendUIResult( "SUCCESS", request.id, request.method );
-
+                
+                this.sendResponse(request.id, 0, 'Show');
+                
                 break;
             }
             case "UI.Alert": {
@@ -364,46 +371,25 @@ FFW.UI = FFW.RPCObserver.create( {
                             "textFields":
                                 [
                                     {
-                                        "name": "mainField1",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "mainField1"
                                     },
                                     {
-                                        "name": "mainField2",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "mainField2"
                                     },
                                     {
-                                        "name": "statusBar",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "statusBar"
                                     },
                                     {
-                                        "name": "mediaClock",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "mediaClock"
                                     },
                                     {
-                                        "name": "mediaTrack",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "mediaTrack"
                                     },
                                     {
-                                        "name": "alertText1",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "alertText1"
                                     },
                                     {
-                                        "name": "alertText2",
-                                        "characterSet": "TYPE2SET",
-                                        "width": 1,
-                                        "rows": 1
+                                        "fieldName": "alertText2"
                                     }
                                 ],
                             "mediaClockFormats":
@@ -413,7 +399,8 @@ FFW.UI = FFW.RPCObserver.create( {
                                     "CLOCKTEXT1",
                                     "CLOCKTEXT2",
                                     "CLOCKTEXT3"
-                                ]
+                                ],
+                            "graphicSupported": true
                         },
                         "hmiZoneCapabilities":
                             [
@@ -429,13 +416,31 @@ FFW.UI = FFW.RPCObserver.create( {
                                     "imageSupported": true
                                 }
                             ],
-                        "method": "UI.GetCapabilitiesResponse",
-                        "resultCode": "SUCCESS" // type (enum) from SDL protocol
+                        "code": 0,
+                        "method": "UI.GetCapabilities"
                     }
                 };
 
                 this.client.send( JSONMessage );
 
+                break;
+            }
+            
+            case "UI.IsReady": {
+                
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "available": this.get('isReady'),
+                        "code": 0,
+                        "method" : "UI.IsReady"
+                    }
+                };
+                
+                this.client.send( JSONMessage );
+                
                 break;
             }
 
@@ -444,6 +449,27 @@ FFW.UI = FFW.RPCObserver.create( {
                 break;
             }
         }
+    },
+    
+    /**
+     * Updated version of response
+     * with no additional params
+     *
+     * @param {Number} responseId
+     * @param {Number} codeId
+     * @param {String} responseMethod
+     */
+    sendResponse: function( responseId, codeId, responseMethod ) {
+        var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": responseId,
+                "result": {
+                    "code": codeId,
+                    "method" : "UI." + responseMethod
+            }
+        };
+                
+        this.client.send( JSONMessage );
     },
 
     /*

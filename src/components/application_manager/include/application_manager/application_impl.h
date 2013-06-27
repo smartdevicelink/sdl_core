@@ -224,6 +224,7 @@ class ApplicationImpl : public Application,
     bool is_media_application() const;
     const mobile_api::HMILevel::eType& hmi_level() const;
     const mobile_api::SystemContext::eType& system_context() const;
+    inline const mobile_api::AudioStreamingState::eType& audio_streaming_state() const;
     const std::string& app_icon_path() const;
 
     void set_version(const Version& version);
@@ -232,6 +233,8 @@ class ApplicationImpl : public Application,
     void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
     void set_system_context(
       const mobile_api::SystemContext::eType& system_context);
+    void set_audio_streaming_state(
+          const mobile_api::AudioStreamingState::eType& state);
     bool set_app_icon_path(const std::string& file_name);
 
     bool AddFile(const std::string& file_name, bool is_persistent);
@@ -259,6 +262,7 @@ class ApplicationImpl : public Application,
 
     mobile_api::HMILevel::eType hmi_level_;
     mobile_api::SystemContext::eType system_context_;
+    mobile_api::AudioStreamingState::eType audio_streaming_state_;
     std::string app_icon_path_;
 
     std::vector<AppFile> app_files_;
@@ -268,6 +272,11 @@ class ApplicationImpl : public Application,
 
 const CommandsMap& DynamicApplicationData::commands_map() const {
   return commands_;
+}
+
+const mobile_api::AudioStreamingState::eType&
+    ApplicationImpl::audio_streaming_state() const {
+  return audio_streaming_state_;
 }
 
 }  // namespace application_manager

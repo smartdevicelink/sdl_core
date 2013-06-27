@@ -28,7 +28,7 @@
 }
 
  LEFT MENU 
-*/#phone_menu{position:absolute;top:90px;left:0px;width:150px;height:300px;}
+*/#phone_menu{position:absolute;top:90px;left:0px;width:150px;height:300px;background: #333;}
 	.ls_border {z-index:201;position:absolute;top:-3px;left:0px;width:153px;height:306px;}
 	.ls-items{position:relative;width:150px;height:300px;}
 	.ls-item{

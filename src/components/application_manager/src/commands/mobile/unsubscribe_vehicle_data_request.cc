@@ -36,7 +36,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/Result.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -44,11 +43,8 @@ namespace commands {
 
 namespace str = strings;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 UnsubscribeVehicleDataRequest::UnsubscribeVehicleDataRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {
@@ -57,20 +53,21 @@ UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {
 void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run ");
 
+  int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[str::params][str::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application(app_id));
 
   std::string info = "";
   bool result = false;
   NsSmartDeviceLinkRPC::V2::Result::eType result_code =
-      NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;
+    NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;
 
   do {
     if (NULL == app) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
       result_code =
-          NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED;
+        NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED;
       break;
     }
 
@@ -78,7 +75,7 @@ void UnsubscribeVehicleDataRequest::Run() {
     int item_count = 0;
     for (int i = 0; i < length; ++i) {
       if (app->UnsubscribeFromIVI(static_cast<unsigned int>(
-          (*message_)[str::msg_params][str::data_type][i].asInt()))) {
+                                    (*message_)[str::msg_params][str::data_type][i].asInt()))) {
         ++item_count;
       }
     }

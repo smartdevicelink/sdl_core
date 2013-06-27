@@ -36,14 +36,10 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 EndAudioPassThruResponse::EndAudioPassThruResponse(
   const MessageSharedPtr& message): CommandResponseImpl(message) {
@@ -64,10 +60,10 @@ void EndAudioPassThruResponse::Run() {
 
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+    (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id)) {
+        correlation_id)) {
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
     SendResponse();
   }

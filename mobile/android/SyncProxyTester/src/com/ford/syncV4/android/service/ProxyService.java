@@ -648,7 +648,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		switch(notification.getCmdID())
 		{
 			case XML_TEST_COMMAND:
-				_testerMain.restart();
+				_testerMain.restart(null);
 				break;
 			case POLICIES_TEST_COMMAND:
 				PoliciesTest.runPoliciesTest();

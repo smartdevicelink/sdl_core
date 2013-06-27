@@ -32,22 +32,19 @@
  */
 
 #include <string>
+#include <vector>
 #include "application_manager/commands/mobile/on_encoded_sync_pdata_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 #include "encryption/Base64.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 OnEncodedSyncPDataNotification::OnEncodedSyncPDataNotification(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 OnEncodedSyncPDataNotification::~OnEncodedSyncPDataNotification() {
@@ -55,12 +52,12 @@ OnEncodedSyncPDataNotification::~OnEncodedSyncPDataNotification() {
 
 void OnEncodedSyncPDataNotification::Run() {
   const std::string fileName =
-      (*message_)[strings::params][hmi_notification::file_name];
+    (*message_)[strings::params][hmi_notification::file_name];
 
   if (!file_system::FileExists(fileName)) {
     (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
-                NsSmartDeviceLinkRPC::V2::Result::FILE_NOT_FOUND;
+      NsSmartDeviceLinkRPC::V2::Result::FILE_NOT_FOUND;
 
     SendResponse();
 
@@ -72,7 +69,7 @@ void OnEncodedSyncPDataNotification::Run() {
   file_system::ReadBinaryFile(fileName, pData);
 
   const std::string string_pdata = base64_decode(std::string(pData.begin(),
-                                                        pData.end()));
+                                   pData.end()));
 
   (*message_)[strings::params][strings::data] = string_pdata;
 

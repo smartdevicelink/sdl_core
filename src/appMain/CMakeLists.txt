@@ -1,9 +1,11 @@
 set(LIBRARIES
-  AppMgr
+  ApplicationManager
+  SmartObjects
   JSONHandler
   ProtocolHandler
   connectionHandler
   TransportManager
+  HMIMessageHandler
   MessageBroker
   MessageBrokerClient
   MessageBrokerServer
@@ -15,7 +17,7 @@ set(LIBRARIES
   rt
   ConfigProfile
   MobileMessageHandler
-  ApplicationManager
+  RequestWatchdog
 )
 
 include_directories (
@@ -30,8 +32,13 @@ include_directories (
   ../components/config_profile/include
   ../components/utils/include/
   ../components/connection_handler/include/
+  ../components/hmi_message_handler/include
+  ../components/request_watchdog/include
+  ../components/SmartObjects/include/
+  ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES

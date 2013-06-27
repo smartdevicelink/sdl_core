@@ -36,14 +36,17 @@
 #include <string>
 #include "mb_controller.hpp"
 #include "hmi_message_handler/hmi_message_adapter.h"
+#include "utils/logger.h"
 
 namespace hmi_message_handler {
+
 class MessageBrokerAdapter : public HMIMessageAdapter,
   public NsMessageBroker::CMessageBrokerController {
   public:
     explicit MessageBrokerAdapter(HMIMessageHandler* handler);
     ~MessageBrokerAdapter();
-    void sendMessageToHMI(application_manager::Message* message);
+    void sendMessageToHMI(
+      utils::SharedPtr<application_manager::Message> message);
 
     /*Methods from CMessageBrokerController*/
     /**
@@ -65,14 +68,17 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
      */
     void processNotification(Json::Value& root);
 
-  protected:
     void subscribeTo();
+
+  protected:
     void processRecievedfromMB(Json::Value& root);
 
   private:
     static const std::string ADDRESS;
     static const uint16_t PORT;
-};
-}  // namespace hmi_message_handler
 
-#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MB_MESSAGE_ADAPTER
+    static log4cxx::LoggerPtr logger_;
+};
+}  //  namespace hmi_message_handler
+
+#endif  //  SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MB_MESSAGE_ADAPTER

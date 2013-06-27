@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_MENU_ENTRY_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_MENU_ENTRY_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_COMMAND_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_COMMAND_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
@@ -43,31 +43,23 @@ class ApplicationImpl;
 
 namespace commands {
 
-/*
- * @brief Enum for HMI TriggerSource type
- */
-enum CommandTriggerSource {
-  TS_MENU              = 0,
-  TS_VR                = 1
-};
-
 /**
- * @brief OnMenuEntryNotification class is used to send notification
+ * @brief OnCommandNotification class is used to send notification
  * to mobile device.
  **/
-class OnMenuEntryNotification : public CommandNotificationImpl {
+class OnCommandNotification : public CommandNotificationImpl {
  public:
   /**
-   * @brief OnMenuEntryNotification class constructor
+   * @brief OnCommandNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnMenuEntryNotification(const MessageSharedPtr& message);
+  explicit OnCommandNotification(const MessageSharedPtr& message);
 
   /**
-   * @brief OnMenuEntryNotification class destructor
+   * @brief OnCommandNotification class destructor
    **/
-  virtual ~OnMenuEntryNotification();
+  virtual ~OnCommandNotification();
 
   /**
    * @brief Execute command
@@ -82,10 +74,10 @@ class OnMenuEntryNotification : public CommandNotificationImpl {
    */
   void SendOnMenuCommand(const ApplicationImpl* app);
 
-  DISALLOW_COPY_AND_ASSIGN(OnMenuEntryNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnCommandNotification);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_MENU_ENTRY_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_COMMAND_NOTIFICATION_H_

@@ -94,5 +94,15 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         if( !SDL.AlertPopUp.active ){
             FFW.UI.OnSystemContext( 'AUDIBLE' );
         }
+    },
+    
+    /**
+     * This event triggered when component is placed to
+     * document DOM structure
+     */
+    didInsertElement: function() {
+        this._super();
+        
+        FFW.TTS.set( 'isReady', true );
     }
 } );

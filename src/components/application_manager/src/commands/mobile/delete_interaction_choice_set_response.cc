@@ -36,14 +36,10 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 DeleteInteractionChoiceSetResponse::DeleteInteractionChoiceSetResponse(
   const MessageSharedPtr& message): CommandResponseImpl(message) {
@@ -63,7 +59,7 @@ void DeleteInteractionChoiceSetResponse::Run() {
 
   // TODO(DK): HMI Request Id
   const int correlation_id =
-        (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
 
   // TODO(DK): HMI code Id
   const int code =
@@ -82,9 +78,10 @@ void DeleteInteractionChoiceSetResponse::Run() {
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         (*message_)[strings::params]["function_id"].asInt())) {
     if (true == code) {
+      int app_id = (*message_)[strings::params][strings::connection_key];
       ApplicationImpl* app = static_cast<ApplicationImpl*>(
-          ApplicationManagerImpl::instance()->
-          application((*message_)[strings::params][strings::connection_key]));
+                               ApplicationManagerImpl::instance()->
+                               application(app_id));
 
       app->RemoveChoiceSet(
         data[strings::msg_params][strings::interaction_choice_set_id].asInt());

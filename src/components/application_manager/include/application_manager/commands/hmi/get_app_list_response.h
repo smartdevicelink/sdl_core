@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_RESPONSE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_RESPONSE_H_
 
-#include "application_manager/commands/hmi/hmi_command_response_impl.h"
+#include "application_manager/commands/hmi/response_to_hmi.h"
 
 namespace application_manager {
 
@@ -42,7 +42,7 @@ namespace commands {
 /**
  * @brief GetAppListResponse command class
  **/
-class GetAppListResponse : public HMICommandResponseImpl {
+class GetAppListResponse : public ResponseToHMI {
  public:
   /**
    * @brief GetAppListResponse class constructor

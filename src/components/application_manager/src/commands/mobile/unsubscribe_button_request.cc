@@ -36,7 +36,6 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/Result.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -44,11 +43,8 @@ namespace commands {
 
 namespace str = strings;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 UnsubscribeButtonRequest::UnsubscribeButtonRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
@@ -58,8 +54,8 @@ void UnsubscribeButtonRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeButtonRequest::Run ");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[str::params][str::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application((*message_)[str::params][str::connection_key]));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -69,7 +65,7 @@ void UnsubscribeButtonRequest::Run() {
   }
 
   const unsigned int btn_id = static_cast<unsigned int>
-      ((*message_)[str::params][str::button_name].asInt());
+                              ((*message_)[str::params][str::button_name].asInt());
   if (!app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);
     SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);

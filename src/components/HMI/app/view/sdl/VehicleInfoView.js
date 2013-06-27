@@ -166,5 +166,15 @@ SDL.VehicleInfo = Em.ContainerView.create( {
     toggleActivity: function() {
         this.set( 'active', !this.active );
         SDL.SDLController.onSystemContextChange();
+    },
+    
+    /**
+     * This event triggered when component is placed to
+     * document DOM structure
+     */
+    didInsertElement: function() {
+        this._super();
+        
+        FFW.VR.set( 'isReady', true );
     }
 } );

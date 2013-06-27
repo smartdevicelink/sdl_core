@@ -36,17 +36,13 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
@@ -55,9 +51,10 @@ SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
 void SetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run ");
 
+  int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application(app_id));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
@@ -67,45 +64,45 @@ void SetGlobalPropertiesRequest::Run() {
   }
 
   app->set_help_prompt(
-      (*message_)[strings::msg_params][strings::help_promt]);
+    (*message_)[strings::msg_params][strings::help_promt]);
   app->set_timeout_prompt(
-      (*message_)[strings::msg_params][strings::timeout_promt]);
+    (*message_)[strings::msg_params][strings::timeout_promt]);
   app->set_vr_help_title(
-      (*message_)[strings::msg_params][strings::vr_help_title]);
+    (*message_)[strings::msg_params][strings::vr_help_title]);
   app->set_vr_help(
-      (*message_)[strings::msg_params][strings::vr_help]);
+    (*message_)[strings::msg_params][strings::vr_help]);
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
   const unsigned int cmd_id = 14;
   ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, correlation_id),
-      connection_key, correlation_id, cmd_id);
+    new MessageChaining(connection_key, correlation_id),
+    connection_key, correlation_id, cmd_id);
 
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
   // TODO(DK) HMI Request Id
   const int ui_cmd_id = 1;
   (*p_smrt_ui)[strings::params][strings::function_id] =
-      ui_cmd_id;
+    ui_cmd_id;
 
   (*p_smrt_ui)[strings::params][strings::message_type] =
-      MessageType::kRequest;
+    MessageType::kRequest;
 
   (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
+    (*message_)[strings::msg_params][strings::cmd_id];
 
   (*p_smrt_ui)[strings::msg_params][strings::vr_help_title] =
-      app->vr_help_title();
+    app->vr_help_title();
 
   (*p_smrt_ui)[strings::msg_params][strings::vr_help] =
-      app->vr_help();
+    app->vr_help();
 
   (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-      app->app_id();
+    app->app_id();
   ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
 }
 

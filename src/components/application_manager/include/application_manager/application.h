@@ -65,7 +65,7 @@ struct Version {
 
 class Application {
   public:
-    virtual ~Application() = 0;
+    virtual ~Application() {}
     /**
      * @brief Processes received pre-validated message: creates
      * appropriate command, if required adds to/removes from watchod

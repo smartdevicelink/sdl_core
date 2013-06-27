@@ -48,17 +48,7 @@ OnLanguageChangeNotification::~OnLanguageChangeNotification() {
 }
 
 void OnLanguageChangeNotification::Run() {
-  (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
-
-  std::set<Application*> applications =
-      ApplicationManagerImpl::instance()->applications();
-
-  for (std::set<Application*>::iterator it = applications.begin();
-      applications.end() != it; ++it) {
-      (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
-      SendNotification();
-  }
+  SendNotification();
 }
 
 }  // namespace commands

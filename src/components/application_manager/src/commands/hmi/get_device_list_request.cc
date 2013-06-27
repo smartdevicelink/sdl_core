@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 GetDeviceListRequest::GetDeviceListRequest(
-    const MessageSharedPtr& message): HMICommandRequestImpl(message) {
+    const MessageSharedPtr& message): RequestFromHMI(message) {
 }
 
 GetDeviceListRequest::~GetDeviceListRequest() {
@@ -55,11 +55,9 @@ void GetDeviceListRequest::Run() {
   int index = 0;
 
   if (devices.empty())  {
-    (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
           hmi_apis::Common_Result::eType::NO_DEVICES_CONNECTED;
   } else {
-    (*message_)[strings::msg_params][strings::success] = true;
     (*message_)[strings::msg_params][strings::result_code] =
           hmi_apis::Common_Result::eType::SUCCESS;
 
@@ -75,7 +73,7 @@ void GetDeviceListRequest::Run() {
     }
   }
 
-  SendResponse();
+  SendResponseToHMI();
 }
 
 }  // namespace commands

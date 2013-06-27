@@ -35,14 +35,10 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 UnsubscribeVehicleDataResponse::UnsubscribeVehicleDataResponse(
   const MessageSharedPtr& message): CommandResponseImpl(message) {

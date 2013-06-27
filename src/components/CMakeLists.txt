@@ -32,7 +32,7 @@ add_subdirectory(./application_manager)
 add_subdirectory(./request_watchdog)
 
 # --- HMI Message Handler
-#add_subdirectory(./hmi_message_handler)
+add_subdirectory(./hmi_message_handler)
 
 # --- Config
 add_subdirectory(./config_profile)

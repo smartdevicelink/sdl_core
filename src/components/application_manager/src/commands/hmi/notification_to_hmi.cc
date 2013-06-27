@@ -30,37 +30,34 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/commands/hmi/notification_to_hmi.h"
+#include "application_manager/application_manager_impl.h"
 
-#include "application_manager/commands/hmi/hmi_command_request_impl.h"
-#include "application_manager/hmi_command_factory.h"
 
 namespace application_manager {
 
 namespace commands {
 
-HMICommandRequestImpl::HMICommandRequestImpl(const MessageSharedPtr& message)
-: CommandImpl(message) {
+NotificationToHMI::NotificationToHMI(const MessageSharedPtr& message)
+  : CommandImpl(message) {
 }
 
-HMICommandRequestImpl::~HMICommandRequestImpl() {
+NotificationToHMI::~NotificationToHMI() {
 }
 
-bool HMICommandRequestImpl::Init() {
+bool NotificationToHMI::Init() {
   return true;
 }
 
-bool HMICommandRequestImpl::CleanUp() {
+bool NotificationToHMI::CleanUp() {
   return true;
 }
 
-void HMICommandRequestImpl::Run() {
+void NotificationToHMI::Run() {
 }
 
-void HMICommandRequestImpl::SendResponse() {
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(message_);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+void NotificationToHMI::SendNotification() {
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands

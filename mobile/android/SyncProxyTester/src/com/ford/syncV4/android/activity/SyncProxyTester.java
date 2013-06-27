@@ -145,8 +145,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	private static final String ButtonSubscriptions = "ButtonSubscriptions";
 	private static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
-	/** Name of a fictional request. See {@link MakeMeFeelGoodRequest}. */
-	private static final String MakeMeFeelGood = "MakeMeFeelGood";
+	/** Name of a generic request. See {@link GenericRequest}. */
+	private static final String GenericRequest = "GenericRequest";
 
 	/**
 	 * The name of the file where all the data coming with
@@ -162,7 +162,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
 	private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
 
-	private static final int REQUEST_PUTFILE_OPEN = 42;
+	private static final int REQUEST_PUTFILE_OPEN = 50;
+	private final static int REQUEST_CHOOSE_XML_TEST = 51;
 	
 	private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
 
@@ -264,12 +265,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * A custom {@link RPCRequest} subclass that is not present in the
 	 * specification. Used to test that the response is {@link GenericResponse}.
 	 */
-	class MakeMeFeelGoodRequest extends RPCRequest {
-		public MakeMeFeelGoodRequest() {
-			super("MakeMeFeelGood");
+	class GenericRequest extends RPCRequest {
+		public GenericRequest() {
+			super("GenericRequest");
 		}
 		
-		public MakeMeFeelGoodRequest(Hashtable hash) {
+		public GenericRequest(Hashtable hash) {
 			super(hash);
 		}
 	}
@@ -781,14 +782,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			return true;
 
 		case XML_TEST:
-			if (_testerMain != null) {
-				_testerMain.restart();
-				Toast.makeText(getApplicationContext(), "start your engines", Toast.LENGTH_SHORT).show();
-			}else {
-				ProxyService.getInstance().startModuleTest();
-				_testerMain.restart();
-				Toast.makeText(getApplicationContext(), "Start the app on SYNC first", Toast.LENGTH_LONG).show();
-			}
+			xmlTest();
 			break;
 		case POLICIES_TEST:
 			if(PoliciesTesterActivity.getInstance() == null) {
@@ -880,6 +874,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		}
 		
 		return false;
+	}
+
+	private void xmlTest() {
+		openXmlFilePathDialog();
+	}
+	
+	private void xmlTestContinue(String filePath) {
+		if (_testerMain != null) {
+			_testerMain.restart(filePath);
+			Toast.makeText(getApplicationContext(), "start your engines", Toast.LENGTH_SHORT).show();
+		} else {
+			ProxyService.getInstance().startModuleTest();
+			_testerMain.restart(filePath);
+			Toast.makeText(getApplicationContext(), "Start the app on SYNC first", Toast.LENGTH_LONG).show();
+		}
 	}
 
 	/**
@@ -997,7 +1006,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				v1Functions.add(Names.UnsubscribeButton);
 				// it's the name of the menu item for the last two commands
 				v1Functions.add(ButtonSubscriptions);
-				v1Functions.add(MakeMeFeelGood);
+				v1Functions.add(GenericRequest);
 			}
 			
 			if (v1Functions.contains(functionName)) {
@@ -1047,7 +1056,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, protocolVersion, Names.AlertManeuver);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.UpdateTurnList);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.DialNumber);
-			addToFunctionsAdapter(adapter, protocolVersion, MakeMeFeelGood);
+			addToFunctionsAdapter(adapter, protocolVersion, GenericRequest);
 			
 			adapter.sort(new Comparator<String>() {
 				@Override
@@ -2105,8 +2114,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							sendUpdateTurnList();
 						} else if (adapter.getItem(which) == Names.DialNumber) {
 							sendDialNumber();
-						} else if (adapter.getItem(which) == MakeMeFeelGood) {
-							sendMakeMeFeelGood();
+						} else if (adapter.getItem(which) == GenericRequest) {
+							sendGenericRequest();
 						}
 						
 						String function = adapter.getItem(which);
@@ -3178,10 +3187,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 					}
 					
 					/**
-					 * Sends a MakeMeFeelGoodRequest message.
+					 * Sends a GenericRequest message.
 					 */
-					private void sendMakeMeFeelGood() {
-						MakeMeFeelGoodRequest msg = new MakeMeFeelGoodRequest();
+					private void sendGenericRequest() {
+						GenericRequest msg = new GenericRequest();
 						msg.setCorrelationID(autoIncCorrId++);
 						_msgAdapter.logMessage(msg, true);
 						try {
@@ -3579,6 +3588,15 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			}
 			break;
 			
+		case REQUEST_CHOOSE_XML_TEST:
+			if (resultCode == RESULT_OK) {
+				String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
+				if (filePath != null) {
+					xmlTestContinue(filePath);
+				}
+			}
+			break;
+			
 		default:
 			Log.i(logTag, "Unknown request code: " + requestCode);
 			break;
@@ -3635,6 +3653,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Opens a dialog so that the user can select an XML test or a directory
+	 * with XML tests. The result will come to onActivityResult method.
+	 */
+	public void openXmlFilePathDialog() {
+		Intent intent = new Intent(this, FileDialog.class);
+		String sdcardPath = Environment.getExternalStorageDirectory().getPath();
+		intent.putExtra(FileDialog.START_PATH, sdcardPath);
+		intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
+		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
+		intent.putExtra(FileDialog.FORMAT_FILTER, new String[] { "xml" });
+		startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
 	}
 }
 

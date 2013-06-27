@@ -34,7 +34,14 @@
  */
 
 FFW.VR = FFW.RPCObserver.create( {
-
+    
+    /**
+     * If true then VR is present and ready to communicate with SDL.
+     *
+     * @type {Boolean}
+     */
+    isReady: false,
+    
     /*
      * access to basic RPC functionality
      */
@@ -236,6 +243,23 @@ FFW.VR = FFW.RPCObserver.create( {
                 };
                 this.client.send( JSONMessage );
 
+                break;
+            }
+            case "VR.IsReady": {
+                
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "available": this.get('isReady'),
+                        "code": 0,
+                        "method" : "VR.IsReady"
+                    }
+                };
+                
+                this.client.send( JSONMessage );
+                
                 break;
             }
 

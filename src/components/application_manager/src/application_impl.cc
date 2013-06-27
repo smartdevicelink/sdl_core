@@ -43,7 +43,7 @@ InitialApplicationData::InitialApplicationData()
     tts_name_(NULL),
     ngn_media_screen_name_(NULL),
     language_(mobile_api::Language::INVALID_ENUM),
-    ui_language_(mobile_api::Language::INVALID_ENUM) {
+    ui_language_(mobile_api::Language::INVALID_ENUM){
 }
 
 InitialApplicationData::~InitialApplicationData() {
@@ -402,7 +402,8 @@ ApplicationImpl::ApplicationImpl(int app_id)
     is_media_(false),
     allowed_support_navigation_(false),
     hmi_level_(mobile_api::HMILevel::INVALID_ENUM),
-    system_context_(mobile_api::SystemContext::INVALID_ENUM) {
+    system_context_(mobile_api::SystemContext::INVALID_ENUM),
+    audio_streaming_state_(mobile_api::AudioStreamingState::INVALID_ENUM){
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -514,6 +515,10 @@ void ApplicationImpl::set_system_context(
   system_context_ = system_context;
 }
 
+void ApplicationImpl::set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) {
+  audio_streaming_state_ = state;
+}
 bool ApplicationImpl::set_app_icon_path(const std::string& file_name) {
   for (std::vector<AppFile>::iterator it = app_files_.begin();
        app_files_.end() != it;

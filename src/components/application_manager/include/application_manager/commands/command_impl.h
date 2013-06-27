@@ -34,10 +34,13 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_
 
 #include "application_manager/commands/command.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
+
+extern log4cxx::LoggerPtr logger_ ;
 
 /**
  * @brief Class is intended to encapsulate RPC as an object

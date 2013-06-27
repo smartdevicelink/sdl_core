@@ -36,14 +36,10 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 AlertResponse::AlertResponse(
   const MessageSharedPtr& message): CommandResponseImpl(message) {
@@ -68,7 +64,7 @@ void AlertResponse::Run() {
     (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id)) {
+        correlation_id)) {
     // TODO(DK): HMI code Id
     const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
