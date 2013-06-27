@@ -128,6 +128,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/response_from_hmi.cc
 ./src/commands/hmi/notification_to_hmi.cc
 ./src/commands/hmi/notification_from_hmi.cc
+./src/commands/hmi/allow_all_apps_request.cc
+./src/commands/hmi/allow_all_apps_response.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
 ./src/commands/hmi/get_app_list_request.cc

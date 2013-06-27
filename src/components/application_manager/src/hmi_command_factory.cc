@@ -40,6 +40,8 @@
 #include "application_manager/commands/hmi/get_device_list_response.h"
 #include "application_manager/commands/hmi/get_app_list_request.h"
 #include "application_manager/commands/hmi/get_app_list_response.h"
+#include "application_manager/commands/hmi/allow_all_apps_request.h"
+#include "application_manager/commands/hmi/allow_all_apps_response.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_request.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 #include "application_manager/commands/hmi/exit_all_applications_request.h"
@@ -125,6 +127,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::GetDeviceListResponse(message));
       } else {
         command.reset(new commands::GetDeviceListRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::BasicCommunication_AllowAllApps: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::AllowAllAppsResponse(message));
+      } else {
+        command.reset(new commands::AllowAllAppsRequest(message));
       }
       break;
     }

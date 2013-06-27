@@ -29,32 +29,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
+#include "application_manager/commands/hmi/allow_all_apps_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIGetSupportedLanguagesResponse::UIGetSupportedLanguagesResponse(
+AllowAllAppsResponse::AllowAllAppsResponse(
   const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {
+AllowAllAppsResponse::~AllowAllAppsResponse() {
 }
 
-void UIGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesResponse::Run ");
-
-  const NsSmartDeviceLinkRPC::V2::Result::eType code =
-    static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
-      (*message_)[strings::msg_params][hmi_response::code].asInt());
-
-  if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == code) {
-    ApplicationManagerImpl::instance()->set_ui_supported_languages(
-        (*message_)[strings::msg_params][hmi_response::languages]);
-  }
+void AllowAllAppsResponse::Run() {
+  LOG4CXX_INFO(logger_, "AllowAllAppsResponse::Run ");
 }
 
 }  // namespace commands

@@ -29,34 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ALLOW_ALL_APPS_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ALLOW_ALL_APPS_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIGetSupportedLanguagesResponse::UIGetSupportedLanguagesResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+/**
+ * @brief AllowAllAppsResponse command class
+ **/
+class AllowAllAppsResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief AllowAllAppsResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit AllowAllAppsResponse(const MessageSharedPtr& message);
 
-UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {
-}
+  /**
+   * @brief AllowAllAppsResponse class destructor
+   **/
+  virtual ~AllowAllAppsResponse();
 
-void UIGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesResponse::Run ");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  const NsSmartDeviceLinkRPC::V2::Result::eType code =
-    static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
-      (*message_)[strings::msg_params][hmi_response::code].asInt());
-
-  if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == code) {
-    ApplicationManagerImpl::instance()->set_ui_supported_languages(
-        (*message_)[strings::msg_params][hmi_response::languages]);
-  }
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AllowAllAppsResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ALLOW_ALL_APPS_RESPONSE_H_

@@ -31,7 +31,7 @@
  */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_MIXING_AUDIO_SUPPORTED_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BC_MIXING_AUDIO_SUPPORTED_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_MIXING_AUDIO_SUPPORTED_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
 
@@ -52,7 +52,7 @@ class MixingAudioSupportedResponse : public ResponseFromHMI {
   explicit MixingAudioSupportedResponse(const MessageSharedPtr& message);
 
   /**
-   * @brief BCMixingAudioSupportedResponse class destructor
+   * @brief MixingAudioSupportedResponse class destructor
    **/
   virtual ~MixingAudioSupportedResponse();
 
