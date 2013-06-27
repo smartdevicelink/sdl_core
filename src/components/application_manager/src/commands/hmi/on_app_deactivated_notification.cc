@@ -48,15 +48,16 @@ OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
 }
 
 void OnAppDeactivatedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnAppDeactivatedNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnAppDeactivatedNotification::Run");
 
   ApplicationImpl* app =
     static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()
                                   ->active_application());
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_,
-                      "NULL pointer application found as an active item!");
+    LOG4CXX_ERROR_EXT(
+        logger_,
+        "Memory allocation in OnAppDeactivatedNotification::Run failed!");
     return;
   }
 
@@ -70,27 +71,27 @@ void OnAppDeactivatedNotification::Run() {
   }
 
   switch ((*message_)[strings::msg_params][hmi_request::reason].asInt()) {
-    case hmi_apis::Common_DeactivateReason::eType::AUDIO:
-    case hmi_apis::Common_DeactivateReason::eType::PHONECALL: {
+    case hmi_apis::Common_DeactivateReason::AUDIO:
+    case hmi_apis::Common_DeactivateReason::PHONECALL: {
       if (app->is_media_application()) {
         app->set_audio_streaming_state(
           mobile_api::AudioStreamingState::NOT_AUDIBLE);
       }
-      app->set_hmi_level(mobile_api::HMILevel::eType::HMI_BACKGROUND);
+      app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;
     }
-    case hmi_apis::Common_DeactivateReason::eType::NAVIGATIONMAP:
-    case hmi_apis::Common_DeactivateReason::eType::PHONEMENU:
-    case hmi_apis::Common_DeactivateReason::eType::SYNCSETTINGS:
-    case hmi_apis::Common_DeactivateReason::eType::GENERAL: {
+    case hmi_apis::Common_DeactivateReason::NAVIGATIONMAP:
+    case hmi_apis::Common_DeactivateReason::PHONEMENU:
+    case hmi_apis::Common_DeactivateReason::SYNCSETTINGS:
+    case hmi_apis::Common_DeactivateReason::GENERAL: {
       if (app->is_media_application()) {
-        if (mobile_api::HMILevel::eType::HMI_FULL == app->hmi_level()) {
+        if (mobile_api::HMILevel::HMI_FULL == app->hmi_level()) {
           app->set_audio_streaming_state(
             mobile_api::AudioStreamingState::AUDIBLE);
-          app->set_hmi_level(mobile_api::HMILevel::eType::HMI_LIMITED);
+          app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
         }
       } else {
-        app->set_hmi_level(mobile_api::HMILevel::eType::HMI_BACKGROUND);
+        app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       }
       break;
     }

@@ -32,14 +32,11 @@
 
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 #include "application_manager/application_manager_impl.h"
-
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
 namespace commands {
-
-
-
 
 OnTTSLanguageChangeNotification::OnTTSLanguageChangeNotification(
   const MessageSharedPtr& message): NotificationFromHMI(message) {
@@ -50,13 +47,15 @@ OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {
 
 void OnTTSLanguageChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnTTSLanguageChangeNotification::Run ");
-  // TODO(VS): Set TTS language in application manager
+  ApplicationManagerImpl::instance()->set_active_tts_language(
+      static_cast<hmi_apis::Common_Language::eType>(
+          (*message_)[strings::msg_params][strings::language].asInt()));
 
-  // TODO(VS): Get hmi_display_language from  application manager
-  // (*message_)[strings::msg_params][strings::hmi_display_language]
+  (*message_)[strings::msg_params][strings::hmi_display_language] =
+      ApplicationManagerImpl::instance()->active_ui_language();
 
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID;
+    NsSmartDeviceLinkRPC::V2::FunctionID::OnLanguageChangeID;
 
   std::set<Application*> applications = ApplicationManagerImpl::instance()
                                         ->applications();
@@ -65,6 +64,15 @@ void OnTTSLanguageChangeNotification::Run() {
        applications.end() != it; ++it) {
     (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
     SendNotificationToMobile(message_);
+
+    if (static_cast<ApplicationImpl*>(*it)->language()
+        != (*message_)[strings::msg_params][strings::language].asInt()) {
+      static_cast<ApplicationImpl*>(*it)->set_hmi_level(
+          mobile_api::HMILevel::HMI_NONE);
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          (*it)->app_id(),
+          mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
+    }
   }
 }
 

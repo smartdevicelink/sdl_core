@@ -42,7 +42,7 @@ void MessageHelper::SendHMIStatusNotification(
   smart_objects::CSmartObject message;
 
   message[strings::params][strings::function_id] =
-                          mobile_api::FunctionID::eType::OnHMIStatusID;
+                          mobile_api::FunctionID::OnHMIStatusID;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
 
@@ -70,7 +70,7 @@ void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
   smart_objects::CSmartObject message;
 
   message[strings::params][strings::function_id] =
-           hmi_apis::FunctionID::eType::BasicCommunication_OnDeviceListUpdated;
+           hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
 
@@ -96,7 +96,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   smart_objects::CSmartObject message;
 
   message[strings::params][strings::function_id] =
-               hmi_apis::FunctionID::eType::BasicCommunication_OnAppRegistered;
+               hmi_apis::FunctionID::BasicCommunication_OnAppRegistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
 
@@ -134,6 +134,25 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 
   message[strings::msg_params][strings::application][strings::app_type] =
       application_impl.app_types();
+
+  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
+  command->Init();
+  command->Run();
+  command->CleanUp();
+}
+
+void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+    int connection_key, mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+  smart_objects::CSmartObject message;
+
+  message[strings::params][strings::function_id] =
+      mobile_api::FunctionID::OnAppInterfaceUnregisteredID;
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+
+  message[strings::msg_params][strings::connection_key] = connection_key;
+
+  message[strings::msg_params][strings::reason] = reason;
 
   CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
   command->Init();

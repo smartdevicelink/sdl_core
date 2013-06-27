@@ -17,4 +17,6 @@ set (SOURCES
   ./src/file_system_tests.cc
 )
 
+create_test("test_Utils" "${SOURCES}" "${LIBRARIES}")
+
 add_library("test_UtilsTest" "${SOURCES}")

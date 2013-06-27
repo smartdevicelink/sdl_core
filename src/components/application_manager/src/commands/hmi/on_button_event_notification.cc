@@ -29,29 +29,70 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+
+#include "application_manager/commands/hmi/on_button_event_notification.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIShowResponse::UIShowResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+
+OnButtonEventNotification::OnButtonEventNotification(
+    const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
-UIShowResponse::~UIShowResponse() {
+OnButtonEventNotification::~OnButtonEventNotification() {
 }
 
-void UIShowResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIShowResponse::Run");
+void OnButtonEventNotification::Run() {
 
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::ShowID;
+  if((*message_)[strings::msg_params].keyExists(
+      hmi_response::custom_button_id)) {
 
-  SendResponseToMobile(message_);
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(
+        ApplicationManagerImpl::instance()->active_application());
+
+    if (NULL == app) {
+      LOG4CXX_ERROR_EXT(logger_,
+                        "NULL pointer application found as an active item!");
+      return;
+    }
+
+    NotifyMobileApp(app);
+
+    return;
+  }
+
+  const unsigned int btn_id = static_cast<unsigned int>(
+      (*message_)[strings::msg_params]
+      [hmi_response::button_name].asInt());
+
+  std::vector<Application*> subscribedApps =
+      ApplicationManagerImpl::instance()->applications_by_button(btn_id);
+
+  std::vector<Application*>::const_iterator it = subscribedApps.begin();
+
+  for (; subscribedApps.end() != it; ++it) {
+    ApplicationImpl* subscribed_app = static_cast<ApplicationImpl*>(*it);
+
+    if (subscribed_app) {
+      NotifyMobileApp(subscribed_app);
+    }
+
+  }
+}
+
+void OnButtonEventNotification::NotifyMobileApp(ApplicationImpl* const app) {
+  MessageHelper::SendHMIStatusNotification(*app);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

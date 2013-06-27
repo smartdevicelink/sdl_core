@@ -29,29 +29,54 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_BUTTON_EVENT_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_BUTTON_EVENT_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
 
-UIShowResponse::UIShowResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+/**
+ * @brief OnButtonEventNotification command class
+ **/
+class OnButtonEventNotification : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnButtonEventNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnButtonEventNotification(const MessageSharedPtr& message);
 
-UIShowResponse::~UIShowResponse() {
-}
+  /**
+   * @brief OnButtonEventNotification class destructor
+   **/
+  virtual ~OnButtonEventNotification();
 
-void UIShowResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIShowResponse::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::ShowID;
+ private:
+  /*
+   * @brief Sends OnHMIStatus notification to mobile about changes
+   * in its HNI status ie in system context/hmi level/audio streaming state
+   *
+   * @param app Mobile app to be notified about changes
+   */
+  void NotifyMobileApp(ApplicationImpl* const app);
 
-  SendResponseToMobile(message_);
-}
+  DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_BUTTON_EVENT_NOTIFICATION_H_

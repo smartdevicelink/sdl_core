@@ -28,6 +28,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_SMARTOBJECTS_TSHAREDPTRTEST_H_
+#define TEST_COMPONENTS_SMARTOBJECTS_TSHAREDPTRTEST_H_
+
 #include <stdlib.h>
 #include <vector>
 
@@ -214,3 +217,6 @@ TEST(SharedPtrTest, StressTest)
 
     printf("%zu objects created, %zu pointers copied\n", objectCreated, pointersCopied);
 }
+
+
+#endif  // TEST_COMPONENTS_SMARTOBJECTS_TSHAREDPTRTEST_H_

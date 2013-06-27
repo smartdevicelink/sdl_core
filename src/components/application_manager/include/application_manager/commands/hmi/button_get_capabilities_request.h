@@ -29,29 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_GET_CAPABILITIES_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_GET_CAPABILITIES_REQUEST_H_
+
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIShowResponse::UIShowResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+/**
+ * @brief ButtonGetCapabilitiesRequest command class
+ **/
+class ButtonGetCapabilitiesRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief ButtonGetCapabilitiesRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit ButtonGetCapabilitiesRequest(const MessageSharedPtr& message);
 
-UIShowResponse::~UIShowResponse() {
-}
+  /**
+   * @brief ButtonGetCapabilitiesRequest class destructor
+   **/
+  virtual ~ButtonGetCapabilitiesRequest();
 
-void UIShowResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIShowResponse::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::ShowID;
-
-  SendResponseToMobile(message_);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ButtonGetCapabilitiesRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_GET_CAPABILITIES_REQUEST_H_

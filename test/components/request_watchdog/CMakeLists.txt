@@ -11,4 +11,14 @@ set (SOURCES
   ./src/request_watchdog_test.cc
 )
 
+set (LIBRARIES
+    gtest
+    gtest_main
+    gmock
+    gmock_main
+    RequestWatchdog
+)
+
+create_test("test_RequestWatchdog" "${SOURCES}" "${LIBRARIES}")
+
 add_library("test_RequestWatchdogTest" "${SOURCES}")

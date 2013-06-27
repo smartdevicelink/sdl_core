@@ -29,27 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "application_manager/commands/hmi/button_get_capabilities_response.h"
+#include "application_manager/application_manager_impl.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIShowResponse::UIShowResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
+    const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-UIShowResponse::~UIShowResponse() {
+ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {
 }
 
-void UIShowResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIShowResponse::Run");
+void ButtonGetCapabilitiesResponse::Run() {
+  LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesResponse::Run ");
+  ApplicationManagerImpl::instance()->set_button_capabilities(
+    (*message_)[strings::msg_params][hmi_response::button_capabilities]);
 
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::ShowID;
-
-  SendResponseToMobile(message_);
+  ApplicationManagerImpl::instance()->set_preset_bank_capabilities(
+    (*message_)[strings::msg_params][hmi_response::preset_bank_capabilities]);
 }
 
 }  // namespace commands

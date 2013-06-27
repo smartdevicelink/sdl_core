@@ -28,6 +28,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTCONVERTIONTIMETEST_H_
+#define TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTCONVERTIONTIMETEST_H_
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -652,7 +655,4 @@ NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::SmartObject
 }
 }
 
-int main(int argc, char** argv) {
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+#endif  // TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTCONVERTIONTIMETEST_H_

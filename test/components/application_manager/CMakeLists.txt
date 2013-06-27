@@ -25,3 +25,5 @@ set(LIBRARIES
 #create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")
 
 create_test("test_formatters_commands" "./formatters_commands.cc" "${LIBRARIES}")
+
+add_library("test_FormattersCommandsTest" "./formatters_commands.cc")

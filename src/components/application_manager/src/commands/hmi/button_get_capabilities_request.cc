@@ -29,29 +29,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+
+#include "application_manager/commands/hmi/button_get_capabilities_request.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIShowResponse::UIShowResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+ButtonGetCapabilitiesRequest::ButtonGetCapabilitiesRequest(
+    const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-UIShowResponse::~UIShowResponse() {
+ButtonGetCapabilitiesRequest::~ButtonGetCapabilitiesRequest() {
 }
 
-void UIShowResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIShowResponse::Run");
-
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::ShowID;
-
-  SendResponseToMobile(message_);
+void ButtonGetCapabilitiesRequest::Run() {
+  LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesRequest::Run ");
+  SendRequest();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

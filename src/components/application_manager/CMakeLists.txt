@@ -190,6 +190,10 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_show_response.cc
 ./src/commands/hmi/activate_app_request.cc
 ./src/commands/hmi/activate_app_response.cc
+./src/commands/hmi/button_get_capabilities_request.cc
+./src/commands/hmi/button_get_capabilities_response.cc
+./src/commands/hmi/on_button_event_notification.cc
+./src/commands/hmi/on_button_press_notification.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})

@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/on_vr_language_change_notification.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 
 
 namespace application_manager {
@@ -49,22 +50,33 @@ OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {
 }
 
 void OnVRLanguageChangeNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVRLanguageChangeNotification::Run ");
-  // TODO(VS): Set VR language in application manager
+  LOG4CXX_INFO(logger_, "OnVRLanguageChangeNotification::Run");
+  ApplicationManagerImpl::instance()->set_active_vr_language(
+      static_cast<hmi_apis::Common_Language::eType>(
+          (*message_)[strings::msg_params][strings::language].asInt()));
 
-  // TODO(VS): Get hmi_display_language from  application manager
-  // (*message_)[strings::msg_params][strings::hmi_display_language]
+  (*message_)[strings::msg_params][strings::hmi_display_language] =
+      ApplicationManagerImpl::instance()->active_ui_language();
 
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID;
+      NsSmartDeviceLinkRPC::V2::FunctionID::OnLanguageChangeID;
 
   std::set<Application*> applications = ApplicationManagerImpl::instance()
-                                        ->applications();
+      ->applications();
 
   for (std::set<Application*>::iterator it = applications.begin();
-       applications.end() != it; ++it) {
+      applications.end() != it; ++it) {
     (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
     SendNotificationToMobile(message_);
+
+    if (static_cast<ApplicationImpl*>(*it)->language()
+        != (*message_)[strings::msg_params][strings::language].asInt()) {
+      static_cast<ApplicationImpl*>(*it)->set_hmi_level(
+          mobile_api::HMILevel::HMI_NONE);
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          (*it)->app_id(),
+          mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
+    }
   }
 }
 

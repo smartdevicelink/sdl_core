@@ -89,10 +89,6 @@ FFW.UI = FFW.RPCObserver.create( {
 
         // subscribe to notifications
         this.onVRChoiseSubscribeRequestId = this.client.subscribeToNotification( this.onVRChoiseNotification );
-
-        // notify other components that UI is ready
-        // main purpose is to nitofy SDLCore
-        this.onReady();
     },
 
     /*
@@ -565,20 +561,6 @@ FFW.UI = FFW.RPCObserver.create( {
             JSONMessage.result.choiceID = commandId;
         }
 
-        this.client.send( JSONMessage );
-    },
-
-    /*
-     * notification that UI is ready BasicCommunication should be sunscribed to
-     * this notification
-     */
-    onReady: function() {
-        Em.Logger.log( "FFW.UI.onReady" );
-
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "BasicCommunication.OnReady"
-        };
         this.client.send( JSONMessage );
     },
 
