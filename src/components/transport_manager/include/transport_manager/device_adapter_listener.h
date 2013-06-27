@@ -78,6 +78,13 @@ public:
                                 const RawMessageSptr data_container,
                                 const DataSendError& error) = 0;
 
+  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,
+                                 const SessionID session_id,
+                                 const RawMessageSptr data_container) = 0;
+  virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter,
+                                   const SessionID session_id,
+                                   const DataReceiveError& error) = 0;
+
   virtual void onCommunicationError(const DeviceAdapter* device_adapter,
                                     const SessionID session_id) = 0;
 };

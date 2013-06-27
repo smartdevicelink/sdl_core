@@ -450,10 +450,17 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                       LOG4CXX_INFO(
                           logger_,
                           "Received " << bytes_read << " bytes for connection " << connection->session_id());
-                      /* TODO
-                       mListener.onFrameReceived(this, ConnectionHandle, buffer,
-                       static_cast<size_t>(bytesRead));
-                       */
+                      unsigned char* data = new data[bytes_read];
+                      if(data)
+                      {
+                        memcpy(data, buffer, bytes_read);
+                        RawMessageSptr frame(new protocol_handler::RawMessage(connection->session_id(), 0, data, bytes_read));
+                        listener_.onDataReceiveDone(this, connection->session_id(), frame);
+                      }
+                      else
+                      {
+                        listener_.onDataReceiveFailed(this, connection->session_id(), DataReceiveError());
+                      }
                     } else if (bytes_read < 0) {
                       if (EAGAIN != errno && EWOULDBLOCK != errno) {
                         LOG4CXX_ERROR_WITH_ERRNO(
