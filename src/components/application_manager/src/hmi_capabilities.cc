@@ -42,7 +42,9 @@ HMICapabilities::HMICapabilities()
     vr_supported_languages_(NULL),
     display_capabilities_(NULL),
     hmi_zone_capabilities_(NULL),
-    soft_buttons_capabilities_(NULL) {}
+    soft_buttons_capabilities_(NULL),
+    button_capabilities_(NULL),
+    preset_bank_capabilities_(NULL){}
 
 HMICapabilities::~HMICapabilities() {
   delete ui_supported_languages_;
@@ -51,6 +53,8 @@ HMICapabilities::~HMICapabilities() {
   delete display_capabilities_;
   delete hmi_zone_capabilities_;
   delete soft_buttons_capabilities_;
+  delete button_capabilities_;
+  delete preset_bank_capabilities_;
 }
 
 bool HMICapabilities::attenuated_supported() const {

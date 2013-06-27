@@ -170,6 +170,22 @@ struct HMICapabilities {
     void set_soft_button_capabilities(
       const smart_objects::CSmartObject& soft_button_capabilities);
 
+    /*
+     * @brief Sets supported Button's capabilities
+     *
+     * @param soft_button_capabilities supported Button's capabilities
+     */
+    void set_button_capabilities(
+        const smart_objects::CSmartObject& button_capabilities);
+
+    /*
+     * @brief Sets supported preset bank capabilities
+     *
+     * @param soft_button_capabilities supported preset bank capabilities
+     */
+    void set_preset_bank_capabilities(
+        const smart_objects::CSmartObject& preset_bank_capabilities);
+
   protected:
     bool attenuated_supported_;
     smart_objects::CSmartObject* ui_supported_languages_;
