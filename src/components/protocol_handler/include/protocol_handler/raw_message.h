@@ -60,6 +60,9 @@ class RawMessage {
   RawMessage(int connectionKey, unsigned int protocolVersion,
                             unsigned char* data, unsigned int dataSize);
 
+  RawMessage(int connectionKey, unsigned int protocolVersion, int serialNumber,
+                            unsigned char* data, unsigned int dataSize);
+
   /**
    * \brief Destructor
    */
