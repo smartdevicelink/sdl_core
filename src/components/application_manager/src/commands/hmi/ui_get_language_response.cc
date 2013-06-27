@@ -29,38 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/on_ui_command_notification.h"
+#include "application_manager/commands/hmi/ui_get_language_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
-
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-
-
-
-OnUICommandNotification::OnUICommandNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+UIGetLanguageResponse::UIGetLanguageResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-OnUICommandNotification::~OnUICommandNotification() {
+UIGetLanguageResponse::~UIGetLanguageResponse() {
 }
 
-void OnUICommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnUICommandNotification::Run");
-
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
-
-  (*message_)[strings::params][strings::trigger_source] =
-    NsSmartDeviceLinkRPC::V2::TriggerSource::TS_MENU;
-  SendNotificationToMobile(message_);
+void UIGetLanguageResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIGetLanguageResponse::Run ");
+  ApplicationManagerImpl::instance()->set_active_ui_language(
+      static_cast<hmi_apis::Common_Language::eType>(
+          (*message_)[strings::msg_params][hmi_response::language].asInt()));
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

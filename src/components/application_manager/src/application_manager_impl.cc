@@ -50,7 +50,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     perform_audio_thread_(NULL),
     is_distracting_driver_(false),
     is_vr_session_strated_(false),
-    hmi_cooperating_(false) {
+    hmi_cooperating_(false),
+    ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    tts_language_(hmi_apis::Common_Language::INVALID_ENUM) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -186,7 +189,7 @@ void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
 
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
-  //HMICommandFactory::CreateCommand
+  // HMICommandFactory::CreateCommand
 }
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
@@ -260,6 +263,21 @@ void ApplicationManagerImpl::set_driver_distraction(
 
 void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
   is_vr_session_strated_ = state;
+}
+
+void ApplicationManagerImpl::set_active_ui_language(
+    const hmi_apis::Common_Language::eType& language) {
+  ui_language_ = language;
+}
+
+void ApplicationManagerImpl::set_active_vr_language(
+    const hmi_apis::Common_Language::eType& language) {
+  vr_language_ = language;
+}
+
+void ApplicationManagerImpl::set_active_tts_language(
+    const hmi_apis::Common_Language::eType& language) {
+  tts_language_ = language;
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,

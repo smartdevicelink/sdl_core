@@ -30,37 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_ui_command_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_GET_LANGUAGE_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_GET_LANGUAGE_REQUEST_H_
 
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
+/**
+ * @brief UIGetLanguageRequest command class
+ **/
+class UIGetLanguageRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief UIGetLanguageRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit UIGetLanguageRequest(const MessageSharedPtr& message);
 
+  /**
+   * @brief UIGetLanguageRequest class destructor
+   **/
+  virtual ~UIGetLanguageRequest();
 
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-OnUICommandNotification::OnUICommandNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
-}
-
-OnUICommandNotification::~OnUICommandNotification() {
-}
-
-void OnUICommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnUICommandNotification::Run");
-
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
-
-  (*message_)[strings::params][strings::trigger_source] =
-    NsSmartDeviceLinkRPC::V2::TriggerSource::TS_MENU;
-  SendNotificationToMobile(message_);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UIGetLanguageRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_GET_LANGUAGE_REQUEST_H_

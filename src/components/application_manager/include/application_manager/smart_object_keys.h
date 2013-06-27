@@ -156,6 +156,7 @@ namespace hmi_response {
   const char button_mode[] = "mode";
   const char attenuated_supported[] = "attenuatedSupported";
   const char languages[] = "languages";
+  const char language[] = "language";
   const char display_capabilities[] = "displayCapabilities";
   const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
   const char soft_button_capabilities[] = "softButtonCapabilities";

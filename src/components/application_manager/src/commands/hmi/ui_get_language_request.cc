@@ -30,34 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_ui_command_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
-
+#include "application_manager/commands/hmi/ui_get_language_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-
-
-
-OnUICommandNotification::OnUICommandNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+UIGetLanguageRequest::UIGetLanguageRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-OnUICommandNotification::~OnUICommandNotification() {
+UIGetLanguageRequest::~UIGetLanguageRequest() {
 }
 
-void OnUICommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnUICommandNotification::Run");
-
-  (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
-
-  (*message_)[strings::params][strings::trigger_source] =
-    NsSmartDeviceLinkRPC::V2::TriggerSource::TS_MENU;
-  SendNotificationToMobile(message_);
+void UIGetLanguageRequest::Run() {
+  LOG4CXX_INFO(logger_, "UIGetLanguageRequest::Run ");
+  SendRequest();
 }
 
 }  // namespace commands

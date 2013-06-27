@@ -45,6 +45,7 @@
 #include "request_watchdog/watchdog_subscriber.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
+#include "interfaces/HMI_API.h"
 #include "application_manager/hmi_capabilities.h"
 
 namespace NsSmartDeviceLink {
@@ -202,6 +203,54 @@ class ApplicationManagerImpl : public ApplicationManager
     void set_vr_session_started(const bool& state);
 
     /*
+     * @brief Retrieves currently active UI language
+     *
+     * @return Currently active UI language
+     */
+    inline const hmi_apis::Common_Language::eType&
+    active_ui_language() const;
+
+    /*
+     * @brief Sets currently active UI language
+     *
+     * @param language Currently active UI language
+     */
+    void set_active_ui_language(
+      const hmi_apis::Common_Language::eType& language);
+
+    /*
+     * @brief Retrieves currently active VR language
+     *
+     * @return Currently active VR language
+     */
+    inline const hmi_apis::Common_Language::eType&
+    active_vr_language() const;
+
+    /*
+     * @brief Sets currently active VR language
+     *
+     * @param language Currently active VR language
+     */
+    void set_active_vr_language(
+      const hmi_apis::Common_Language::eType& language);
+
+    /*
+     * @brief Retrieves currently active TTS language
+     *
+     * @return Currently active TTS language
+     */
+    inline const hmi_apis::Common_Language::eType&
+    active_tts_language() const;
+
+    /*
+     * @brief Sets currently active TTS language
+     *
+     * @param language Currently active TTS language
+     */
+    void set_active_tts_language(
+      const hmi_apis::Common_Language::eType& language);
+
+    /*
      * @brief Starts audio pass thru thread
      *
      * @param session_key     Session key of connection for Mobile side
@@ -287,24 +336,27 @@ class ApplicationManagerImpl : public ApplicationManager
     /**
      * @brief Map of connection keys and associated applications
      */
-    std::map<int, Application*> applications_;
+    std::map<int, Application*>                   applications_;
     /**
      * @brief List of applications
      */
-    std::set<Application*> application_list_;
-    MessageChains message_chaining_;
-    bool audio_pass_thru_flag_;
-    threads::Thread* perform_audio_thread_;
-    bool is_distracting_driver_;
-    bool is_vr_session_strated_;
-    bool hmi_cooperating_;
+    std::set<Application*>                        application_list_;
+    MessageChains                                 message_chaining_;
+    bool                                          audio_pass_thru_flag_;
+    threads::Thread*                              perform_audio_thread_;
+    bool                                          is_distracting_driver_;
+    bool                                          is_vr_session_strated_;
+    bool                                          hmi_cooperating_;
+    hmi_apis::Common_Language::eType              ui_language_;
+    hmi_apis::Common_Language::eType              vr_language_;
+    hmi_apis::Common_Language::eType              tts_language_;
 
-    hmi_message_handler::HMIMessageHandler* hmi_handler_;
+    hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
-    connection_handler::ConnectionHandler* connection_handler_;
-    request_watchdog::Watchdog* watchdog_;
+    connection_handler::ConnectionHandler*        connection_handler_;
+    request_watchdog::Watchdog*                   watchdog_;
 
-    static log4cxx::LoggerPtr logger_;
+    static log4cxx::LoggerPtr                     logger_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
@@ -315,6 +367,21 @@ const std::set<Application*>& ApplicationManagerImpl::applications() const {
 
 bool ApplicationManagerImpl::driver_distraction() const {
   return is_distracting_driver_;
+}
+
+inline const hmi_apis::Common_Language::eType&
+    ApplicationManagerImpl::active_ui_language() const {
+  return ui_language_;
+}
+
+inline const hmi_apis::Common_Language::eType&
+    ApplicationManagerImpl::active_vr_language() const {
+  return vr_language_;
+}
+
+inline const hmi_apis::Common_Language::eType&
+    ApplicationManagerImpl::active_tts_language() const {
+  return tts_language_;
 }
 
 }  // namespace application_manager

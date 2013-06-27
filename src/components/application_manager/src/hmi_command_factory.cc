@@ -48,6 +48,8 @@
 #include "application_manager/commands/hmi/exit_application_response.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
+#include "application_manager/commands/hmi/ui_get_language_request.h"
+#include "application_manager/commands/hmi/ui_get_language_response.h"
 #include "application_manager/commands/hmi/ui_get_capabilities_request.h"
 #include "application_manager/commands/hmi/ui_get_capabilities_response.h"
 #include "application_manager/commands/hmi/ui_change_registration_request.h"
@@ -127,6 +129,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIGetSupportedLanguagesResponse(message));
       } else {
         command.reset(new commands::UIGetSupportedLanguagesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_GetLanguage: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIGetLanguageResponse(message));
+      } else {
+        command.reset(new commands::UIGetLanguageRequest(message));
       }
       break;
     }
