@@ -46,7 +46,6 @@
 #include "protocol_handler/protocol_observer.h"
 
 #include "mobile_message_handler/mobile_message_handler.h"
-#include "mobile_message_handler/messages_from_mobile_app_handler.h"
 
 namespace mobile_message_handler {
 class MobileMessageHandlerImpl : public MobileMessageHandler,

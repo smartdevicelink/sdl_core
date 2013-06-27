@@ -33,6 +33,12 @@
 #include "application_manager/message.h"
 #include "utils/macro.h"
 
+namespace {
+bool BinaryDataPredicate(unsigned char i, unsigned char j) {
+  return (i == j);
+}
+}
+
 namespace application_manager {
 
 Message::Message()
@@ -58,6 +64,22 @@ Message& Message::operator=(const Message& message) {
   set_protocol_version(message.protocol_version());
 
   return *this;
+}
+
+bool Message::operator==(const Message& message) {
+  bool function_id = function_id_ == message.function_id_;
+  bool correlation_id = correlation_id_ == message.correlation_id_;
+  bool connection_key = connection_key_ == message.connection_key_;
+  bool type = type_ == message.type_;
+  bool json_message = json_message_ == message.json_message_;
+  bool version = version_ == message.version_;
+
+  bool binary_data = std::equal(binary_data_->begin(), binary_data_->end(),
+                                message.binary_data_->begin(),
+                                BinaryDataPredicate);
+
+  return function_id && correlation_id && connection_key && type && binary_data
+      && json_message && version;
 }
 
 Message::~Message() {
