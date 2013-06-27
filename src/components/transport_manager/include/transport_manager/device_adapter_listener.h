@@ -98,14 +98,23 @@ public:
 	virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
 			const SessionID session_id, const DisconnectDeviceError& error) = 0;
 
-	virtual void onDataSendDone(const DeviceAdapter* device_adapter,
-			const SessionID session_id,
-			const RawMessageSptr data_container) = 0;
-	virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
-			const SessionID session_id, const DataSendError& error) = 0;
+  virtual void onDataSendDone(const DeviceAdapter* device_adapter,
+                              const SessionID session_id,
+                              const RawMessageSptr data_container) = 0;
+  virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
+                                const SessionID session_id,
+                                const RawMessageSptr data_container,
+                                const DataSendError& error) = 0;
 
-	virtual void onCommunicationError(const DeviceAdapter* device_adapter,
-			const SessionID session_id) = 0;
+  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,
+                                 const SessionID session_id,
+                                 const RawMessageSptr data_container) = 0;
+  virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter,
+                                   const SessionID session_id,
+                                   const DataReceiveError& error) = 0;
+
+  virtual void onCommunicationError(const DeviceAdapter* device_adapter,
+                                    const SessionID session_id) = 0;
 };
 } //namespace
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER

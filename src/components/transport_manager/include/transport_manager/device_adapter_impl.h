@@ -72,7 +72,9 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * Called from transport manager to start device adapter.
    **/
-  virtual void run();
+  virtual Error init(DeviceAdapterListener* listener,
+                     DeviceHandleGenerator* handle_generator,
+                     Configuration* configuration);
 
   /**
    * @brief Start scanning for new devices.
@@ -81,7 +83,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
    **/
-  virtual void scanForNewDevices();
+  virtual Error searchDevices();
 
   /**
    * @brief Connect to the specified application discovered on device.
@@ -122,56 +124,13 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  class Connection;
-  virtual void sendFrame(Connection connection_handle,
-                         const uint8_t* data, size_t data_size, int user_data);
+  virtual Error sendData(const int session_id, const RawMessageSptr data);
 
  protected:
   /**
-   * @brief Frame.
-   *
-   * Used to store data frames that must be sent to remote device.
-   **/
-  class Frame {
-   public:
-    /**
-     * @brief Constructor.
-     *
-     * @param UserData User data
-     * @param Data Frame data. SFrame stores a copy of this data,
-     *             i.e. data may be freed after SFrame object is constructed.
-     * @param DataSize Size of frame data in bytes.
-     **/
-    Frame(int user_data, const uint8_t* data, const size_t data_size);
-
-    /**
-     * @brief Destructor.
-     *
-     * Frees stored frame data.
-     **/
-    ~Frame(void);
-
-   private:
-    /**
-     * @brief User data
-     **/
-    int user_data_;
-
-    /**
-     * @brief Frame data.
-     **/
-    uint8_t * data_;
-
-    /**
-     * @brief Frame data size in bytes.
-     **/
-    size_t data_size_;
-  };
-
-  /**
    * @brief Frame queue.
    **/
-  typedef std::queue<Frame*> FrameQueue;
+  typedef std::queue<RawMessageSptr> FrameQueue;
 
   /**
    * @brief Internal class describing device.
@@ -280,7 +239,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
     /**
      * @brief Session identifier.
      **/
-    const int session_id_;
+    const SessionID session_id_;
 
     /**
      * @brief Thread that handles connection.
@@ -430,32 +389,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
   void handleCommunication(Connection* connection);
 
   /**
-   * @brief Update client device list.
-   *
-   * This method is called when list of devices is changed to
-   * notify device adapter listener about new list of devices.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_update_client_device_list
-   **/
-  void updateClientDeviceList(void);
-
-  /**
-   * @brief Create list of connections possible for specified device.
-   *
-   * This method is called from connectDevice(). Device adapter may implement
-   * this method to provide list of connections that must be running on
-   * connected device.
-   *
-   * @param DeviceHandle Device handle.
-   * @param ConnectionsList Reference to connections list that must be filled.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
-   **/
-  virtual void createConnectionsListForDevice(
-      const DeviceHandle device_handle,
-      std::vector<Connection*>& connection_list);
-
-  /**
    * @brief Device adapter main thread.
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
@@ -475,10 +408,12 @@ class DeviceAdapterImpl : public DeviceAdapter {
    **/
   virtual void connectionThread(Connection* connection) = 0;
 
+  virtual DeviceList getDeviceList() const;
+
   /**
    * @brief Connections map.
    **/
-  typedef std::map<int, Connection*> ConnectionMap;
+  typedef std::map<SessionID, Connection*> ConnectionMap;
 
   /**
    * @brief Logger.
@@ -598,6 +533,8 @@ class DeviceAdapterImpl : public DeviceAdapter {
    * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
    **/
   bool main_thread_started_;
+
+  bool initialized_;
 };
 
 } // namespace transport_manager

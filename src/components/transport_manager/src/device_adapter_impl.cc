@@ -47,43 +47,19 @@
 
 namespace transport_manager {
 
-log4cxx::LoggerPtr DeviceAdapterImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "TransportManager"));
-
-
-
-DeviceAdapterImpl::Frame::Frame(int user_data, const uint8_t* data, const size_t data_size)
-    : user_data_(user_data),
-      data_(0),
-      data_size_(0) {
-  if ((0 != data) && (0u != data_size)) {
-    data_ = new uint8_t[data_size];
-
-    if (0 != data_) {
-      data_size_ = data_size;
-      memcpy(data_, data, data_size_);
-    }
-  }
-}
-
-DeviceAdapterImpl::Frame::~Frame(void)
-{
-    delete[] data_;
-}
+log4cxx::LoggerPtr DeviceAdapterImpl::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("TransportManager"));
 
 DeviceAdapterImpl::Device::Device(const char* name)
     : name_(name),
-      unique_device_id_()
-{
+      unique_device_id_() {
 }
 
-DeviceAdapterImpl::Device::~Device(void)
-{
+DeviceAdapterImpl::Device::~Device(void) {
 }
 
-bool DeviceAdapterImpl::Device::isSameAs(const Device* other_device) const
-{
-    return true;
+bool DeviceAdapterImpl::Device::isSameAs(const Device* other_device) const {
+  return true;
 }
 
 DeviceAdapterImpl::Connection::Connection(const DeviceHandle device_handle,
@@ -100,26 +76,10 @@ DeviceAdapterImpl::Connection::Connection(const DeviceHandle device_handle,
 }
 
 DeviceAdapterImpl::Connection::~Connection(void) {
-  while (false == frames_to_send_.empty()) {
-    delete frames_to_send_.front();
-    frames_to_send_.pop();
-  }
 }
 
-//bool DeviceAdapterImpl::Connection::isSameAs(
-//    const Connection* other_connection) const {
-//  bool result = false;
-//
-//  if (0 != other_connection) {
-//    result = (device_handle_ == other_connection->device_handle_);
-//  }
-//
-//  return result;
-//}
-
-DeviceAdapterImpl::DeviceAdapterImpl(
-    DeviceAdapterListener& listener,
-    DeviceHandleGenerator& handle_generator)
+DeviceAdapterImpl::DeviceAdapterImpl(DeviceAdapterListener& listener,
+                                     DeviceHandleGenerator& handle_generator)
     : listener_(listener),
       handle_generator_(handle_generator),
       device_scan_requested_(false),
@@ -131,7 +91,8 @@ DeviceAdapterImpl::DeviceAdapterImpl(
       connections_mutex_(),
       shutdown_flag_(false),
       main_thread_(),
-      main_thread_started_(false) {
+      main_thread_started_(false),
+      initialized_(false) {
   pthread_cond_init(&device_scan_requested_cond_, 0);
   pthread_mutex_init(&device_scan_requested_mutex_, 0);
   pthread_mutex_init(&devices_mutex_, 0);
@@ -145,171 +106,98 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
   pthread_cond_destroy(&device_scan_requested_cond_);
 }
 
-void DeviceAdapterImpl::run()
-{
-    LOG4CXX_INFO(logger_, "Initializing device adapter");
+DeviceAdapter::Error DeviceAdapterImpl::init(
+    DeviceAdapterListener* listener, DeviceHandleGenerator* handle_generator,
+    Configuration* configuration) {
+  if (listener == 0)
+    return BAD_PARAM;
+  if (handle_generator == 0)
+    return BAD_PARAM;
 
-//    int errorCode = pthread_create(&mMainThread, 0, &mainThreadStartRoutine, this);
-//
-//    if (0 == errorCode)
-//    {
-//        mMainThreadStarted = true;
-//        LOG4CXX_INFO(logger_, "Device adapter main thread started");
-//    }
-//    else
-//    {
-//        LOG4CXX_ERROR(logger_, "Device adapter main thread start failed, error code " << errorCode);
-//    }
+  LOG4CXX_INFO(logger_, "Initializing device adapter");
+
+  listener_ = listener;
+  handle_generator_ = handle_generator;
+  initialized_ = true;
+
+  const int thread_start_error = pthread_create(&main_thread_, 0,
+                                                &mainThreadStartRoutine, this);
+
+  if (0 == thread_start_error) {
+    main_thread_started_ = true;
+    LOG4CXX_INFO(logger_, "Device adapter main thread started");
+  } else {
+    LOG4CXX_ERROR(
+        logger_,
+        "Device adapter main thread start failed, error code " << thread_start_error);
+    return DeviceAdapter::FAIL;
+  }
+
+  return DeviceAdapter::OK;
 }
 
-//void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(void)
-//{
-//    pthread_mutex_lock(&mDeviceScanRequestedMutex);
-//
-//    if (false == mDeviceScanRequested)
-//    {
-//        LOG4CXX_INFO(logger_, "Requesting device scan");
-//
-//        mDeviceScanRequested = true;
-//        pthread_cond_signal(&mDeviceScanRequestedCond);
-//    }
-//    else
-//    {
-//        LOG4CXX_INFO(logger_, "Device scan is currently in progress");
-//    }
-//
-//    pthread_mutex_unlock(&mDeviceScanRequestedMutex);
-//}
-//
-//void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle)
-//{
-//    bool isDeviceValid = false;
-//
-//    pthread_mutex_lock(&mDevicesMutex);
-//
-//    if (mDevices.end() != mDevices.find(DeviceHandle))
-//    {
-//        isDeviceValid = true;
-//    }
-//    else
-//    {
-//        LOG4CXX_ERROR(logger_, "Device handle " << DeviceHandle << " is invalid");
-//    }
-//
-//    pthread_mutex_unlock(&mDevicesMutex);
-//
-//    if (true == isDeviceValid)
-//    {
-//        std::vector<SConnection*> connections;
-//        createConnectionsListForDevice(DeviceHandle, connections);
-//
-//        if (false == connections.empty())
-//        {
-//            LOG4CXX_INFO(logger_, "Connecting device " << DeviceHandle);
-//
-//            for (std::vector<SConnection*>::iterator connectionIterator = connections.begin(); connectionIterator != connections.end(); ++connectionIterator)
-//            {
-//                startConnection(*connectionIterator);
-//            }
-//        }
-//        else
-//        {
-//            LOG4CXX_WARN(logger_, "No connections to establish on device " << DeviceHandle);
-//        }
-//    }
-//}
+DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
+  //TODO check if initialized and supported
 
-//void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::sendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData)
-//{
-//    if (0u == DataSize)
-//    {
-//        LOG4CXX_WARN(logger_, "DataSize=0");
-//    }
-//    else if (0 == Data)
-//    {
-//        LOG4CXX_WARN(logger_, "Data is null");
-//    }
-//    else
-//    {
-//        pthread_mutex_lock(&mConnectionsMutex);
-//
-//        tConnectionMap::iterator connectionIterator = mConnections.find(ConnectionHandle);
-//
-//        if (mConnections.end() == connectionIterator)
-//        {
-//            LOG4CXX_ERROR(logger_, "Connection " << ConnectionHandle << " does not exist");
-//        }
-//        else
-//        {
-//            SConnection * connection = connectionIterator->second;
-//
-//            if (0 != connection)
-//            {
-//                connection->mFramesToSend.push(new SFrame(UserData, Data, DataSize));
-//
-//                if (-1 != connection->mNotificationPipeFds[1])
-//                {
-//                    uint8_t c = 0;
-//                    if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
-//                    {
-//                        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to wake up connection thread for connection " << connectionIterator->first);
-//                    }
-//                }
-//            }
-//        }
-//
-//        pthread_mutex_unlock(&mConnectionsMutex);
-//    }
-//}
+  Error ret = OK;
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermination(void)
-{
-    mShutdownFlag = true;
+  pthread_mutex_lock(&device_scan_requested_mutex_);
 
-    if (true == mMainThreadStarted)
-    {
-        LOG4CXX_INFO(logger_, "Waiting for device adapter main thread termination");
-        pthread_join(mMainThread, 0);
-        LOG4CXX_INFO(logger_, "Device adapter main thread terminated");
+  if (false == device_scan_requested_) {
+    LOG4CXX_INFO(logger_, "Requesting device scan");
+
+    device_scan_requested_ = true;
+    pthread_cond_signal(&device_scan_requested_cond_);
+  } else {
+    ret = BAD_STATE;
+    LOG4CXX_INFO(logger_, "Device scan is currently in progress");
+  }
+
+  pthread_mutex_unlock(&device_scan_requested_mutex_);
+
+  return ret;
+}
+
+void DeviceAdapterImpl::waitForThreadsTermination() {
+  shutdown_flag_ = true;
+
+  if (true == main_thread_started_) {
+    LOG4CXX_INFO(logger_, "Waiting for device adapter main thread termination");
+    pthread_join(main_thread_, 0);
+    LOG4CXX_INFO(logger_, "Device adapter main thread terminated");
+  }
+
+  std::vector<pthread_t> connection_threads;
+
+  pthread_mutex_lock(&connections_mutex_);
+
+  for (ConnectionMap::iterator it = connections_.begin();
+      it != connections_.end(); ++it) {
+    SessionID session_id = it->first;
+    Connection* connection = it->second;
+
+    connection->terminate_flag_ = true;
+    if (-1 != connection->notification_pipe_fds_[1]) {
+      uint8_t c = 0;
+      if (1 != write(connection->notification_pipe_fds_[1], &c, 1)) {
+        LOG4CXX_ERROR_WITH_ERRNO(
+            logger_,
+            "Failed to wake up connection thread for connection " << session_id);
+      }
     }
+    connection_threads.push_back(connection->connection_thread_);
+  }
 
-    std::vector<pthread_t> connectionThreads;
+  pthread_mutex_unlock(&connections_mutex_);
 
-    pthread_mutex_lock(&mConnectionsMutex);
+  LOG4CXX_INFO(logger_, "Waiting for connection threads termination");
 
-    for (tConnectionMap::iterator connectionIterator = mConnections.begin(); connectionIterator != mConnections.end(); ++connectionIterator)
-    {
-        SConnection * connection = connectionIterator->second;
+  for (std::vector<pthread_t>::iterator it = connection_threads.begin();
+      it != connection_threads.end(); ++it) {
+    pthread_join(*it, 0);
+  }
 
-        if (0 != connection)
-        {
-            connection->mTerminateFlag = true;
-            if (-1 != connection->mNotificationPipeFds[1])
-            {
-                uint8_t c = 0;
-                if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
-                {
-                    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to wake up connection thread for connection " << connectionIterator->first);
-                }
-            }
-            connectionThreads.push_back(connection->mConnectionThread);
-        }
-        else
-        {
-            LOG4CXX_ERROR(logger_, "Connection " << connectionIterator->first << " is null");
-        }
-    }
-
-    pthread_mutex_unlock(&mConnectionsMutex);
-
-    LOG4CXX_INFO(logger_, "Waiting for connection threads termination");
-
-    for (std::vector<pthread_t>::iterator connectionThreadIterator = connectionThreads.begin(); connectionThreadIterator != connectionThreads.end(); ++connectionThreadIterator)
-    {
-        pthread_join(*connectionThreadIterator, 0);
-    }
-
-    LOG4CXX_INFO(logger_, "Connection threads terminated");
+  LOG4CXX_INFO(logger_, "Connection threads terminated");
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::createConnection(
@@ -318,7 +206,7 @@ DeviceAdapter::Error DeviceAdapterImpl::createConnection(
   assert(connection != 0);
   *connection = 0;
 
-  if(shutdown_flag_) {
+  if (shutdown_flag_) {
     return DeviceAdapter::BAD_STATE;
   }
 
@@ -326,21 +214,21 @@ DeviceAdapter::Error DeviceAdapterImpl::createConnection(
 
   pthread_mutex_lock(&connections_mutex_);
 
-    for (ConnectionMap::const_iterator it = connections_.begin();
-        it != connections_.end(); ++it) {
-      const Connection& existingConnection = *it;
-      if (existingConnection.application_handle() == app_handle
-          && existingConnection.device_handle() == device_handle) {
-        error = DeviceAdapter::ALREADY_EXIST;
-        break;
-      }
-      if (existingConnection.session_id() == session_id) {
-        error = DeviceAdapter::ALREADY_EXIST;
-        break;
-      }
+  for (ConnectionMap::const_iterator it = connections_.begin();
+      it != connections_.end(); ++it) {
+    const Connection& existingConnection = *it;
+    if (existingConnection.application_handle() == app_handle
+        && existingConnection.device_handle() == device_handle) {
+      error = DeviceAdapter::ALREADY_EXIST;
+      break;
     }
+    if (existingConnection.session_id() == session_id) {
+      error = DeviceAdapter::ALREADY_EXIST;
+      break;
+    }
+  }
 
-  if(error == DeviceAdapter::OK) {
+  if (error == DeviceAdapter::OK) {
     *connection = new Connection(device_handle, app_handle, session_id);
     connections_[session_id] = *connection;
   }
@@ -359,7 +247,8 @@ void DeviceAdapterImpl::deleteConnection(Connection* connection) {
   delete connection;
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::startConnection(Connection* connection) {
+DeviceAdapter::Error DeviceAdapterImpl::startConnection(
+    Connection* connection) {
   assert(connection != 0);
 
   if (shutdown_flag_) {
@@ -373,9 +262,9 @@ DeviceAdapter::Error DeviceAdapterImpl::startConnection(Connection* connection) 
     thread_params->device_adapter = this;
     thread_params->connection = connection;
 
-    int errorCode = pthread_create(
-        &connection->connection_thread_, 0, &connectionThreadStartRoutine,
-        static_cast<void*>(thread_params));
+    int errorCode = pthread_create(&connection->connection_thread_, 0,
+                                   &connectionThreadStartRoutine,
+                                   static_cast<void*>(thread_params));
 
     if (0 == errorCode) {
       LOG4CXX_INFO(
@@ -420,51 +309,45 @@ DeviceAdapter::Error DeviceAdapterImpl::stopConnection(Connection* connection) {
   return OK;
 }
 
-bool NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanRequest(const time_t Timeout)
-{
-    bool deviceScanRequested = false;
+bool DeviceAdapterImpl::waitForDeviceScanRequest(const time_t Timeout) {
+  bool deviceScanRequested = false;
 
-    pthread_mutex_lock(&mDeviceScanRequestedMutex);
+  pthread_mutex_lock(&device_scan_requested_mutex_);
 
-    if (false == mDeviceScanRequested)
-    {
-        if (0 == Timeout)
-        {
-            if (0 != pthread_cond_wait(&mDeviceScanRequestedCond, &mDeviceScanRequestedMutex))
-            {
-                LOG4CXX_ERROR_WITH_ERRNO(logger_, "pthread_cond_wait failed");
-            }
+  if (false == device_scan_requested_) {
+    if (0 == Timeout) {
+      if (0
+          != pthread_cond_wait(&device_scan_requested_cond_,
+                               &device_scan_requested_mutex_)) {
+        LOG4CXX_ERROR_WITH_ERRNO(logger_, "pthread_cond_wait failed");
+      }
+    } else {
+      timespec timeoutTime;
+
+      if (0 == clock_gettime(CLOCK_REALTIME, &timeoutTime)) {
+        timeoutTime.tv_sec += Timeout;
+
+        while (0
+            == pthread_cond_timedwait(&device_scan_requested_cond_,
+                                      &device_scan_requested_mutex_,
+                                      &timeoutTime)) {
+          if (true == device_scan_requested_) {
+            break;
+          }
         }
-        else
-        {
-            timespec timeoutTime;
+      } else {
+        LOG4CXX_ERROR_WITH_ERRNO(logger_, "clock_gettime failed");
 
-            if (0 == clock_gettime(CLOCK_REALTIME, &timeoutTime))
-            {
-                timeoutTime.tv_sec += Timeout;
-
-                while (0 == pthread_cond_timedwait(&mDeviceScanRequestedCond, &mDeviceScanRequestedMutex, &timeoutTime))
-                {
-                    if (true == mDeviceScanRequested)
-                    {
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                LOG4CXX_ERROR_WITH_ERRNO(logger_, "clock_gettime failed");
-
-                sleep(Timeout);
-            }
-        }
+        sleep(Timeout);
+      }
     }
+  }
 
-    deviceScanRequested = mDeviceScanRequested;
+  deviceScanRequested = device_scan_requested_;
 
-    pthread_mutex_unlock(&mDeviceScanRequestedMutex);
+  pthread_mutex_unlock(&device_scan_requested_mutex_);
 
-    return deviceScanRequested;
+  return deviceScanRequested;
 }
 
 void DeviceAdapterImpl::handleCommunication(Connection* connection) {
@@ -556,26 +439,37 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                       LOG4CXX_INFO(
                           logger_,
                           "Received " << bytes_read << " bytes for connection " << connection->session_id());
-                      /* TODO
-                       mListener.onFrameReceived(this, ConnectionHandle, buffer,
-                       static_cast<size_t>(bytesRead));
-                       */
+                      unsigned char* data = new data[bytes_read];
+                      if (data) {
+                        memcpy(data, buffer, bytes_read);
+                        RawMessageSptr frame(
+                            new protocol_handler::RawMessage(
+                                connection->session_id(), 0, data, bytes_read));
+                        listener_.onDataReceiveDone(this,
+                                                    connection->session_id(),
+                                                    frame);
+                      } else {
+                        listener_.onDataReceiveFailed(this,
+                                                      connection->session_id(),
+                                                      DataReceiveError());
+                      }
                     } else if (bytes_read < 0) {
-                      if ((EAGAIN != errno)&&
-                      (EWOULDBLOCK != errno)){
-                      LOG4CXX_ERROR_WITH_ERRNO(logger_, "recv() failed for connection " << connection->session_id());
+                      if (EAGAIN != errno && EWOULDBLOCK != errno) {
+                        LOG4CXX_ERROR_WITH_ERRNO(
+                            logger_,
+                            "recv() failed for connection " << connection->session_id());
+
+                        connection->terminate_flag_ = true;
+                      }
+                    } else {
+                      LOG4CXX_INFO(
+                          logger_,
+                          "Connection " << connection->session_id() << " closed by remote peer");
 
                       connection->terminate_flag_ = true;
                     }
-                  }
-                  else
-                  {
-                    LOG4CXX_INFO(logger_, "Connection " << connection->session_id() << " closed by remote peer");
-
-                    connection->terminate_flag_ = true;
-                  }
-                } while (bytes_read > 0);
-              }
+                  } while (bytes_read > 0);
+                }
 
                 if ((false == connection->terminate_flag_)
                     && (0 != poll_fds[1].revents)) {
@@ -591,59 +485,42 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
                     connection->terminate_flag_ = true;
                   }
-                  /*
-                   tFrameQueue framesToSend;
 
-                   pthread_mutex_lock (&mConnectionsMutex);
-                   framesToSend.swap(connection->mFramesToSend);
-                   pthread_mutex_unlock(&mConnectionsMutex);
+                  FrameQueue frames_to_send;
+                  pthread_mutex_lock(&connections_mutex_);
+                  std::swap(frames_to_send, connection->frames_to_send_);
+                  pthread_mutex_unlock(&connections_mutex_);
 
-                   for (; false == framesToSend.empty(); framesToSend.pop()) {
-                   SFrame * frame = framesToSend.front();
-                   ESendStatus frameSendStatus = SendStatusUnknownError;
+                  bool frame_sent = false;
+                  for (; false == frames_to_send.empty();
+                      frames_to_send.pop()) {
+                    RawMessageSptr frame = frames_to_send.front();
 
-                   if (0 != frame) {
-                   if ((0 != frame->mData) && (0u != frame->mDataSize)) {
-                   ssize_t bytesSent = send(connectionSocket, frame->mData,
-                   frame->mDataSize, 0);
+                    ssize_t bytes_sent = send(connection_socket, frame->data(),
+                                              frame->data_size(), 0);
 
-                   if (static_cast<size_t>(bytesSent) == frame->mDataSize) {
-                   frameSendStatus = SendStatusOK;
-                   } else {
-                   if (bytesSent >= 0) {
-                   LOG4CXX_ERROR(
-                   logger_,
-                   "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle);
-                   } else {
-                   LOG4CXX_ERROR_WITH_ERRNO(
-                   logger_,
-                   "Send failed for connection " << ConnectionHandle);
-                   }
-
-                   frameSendStatus = SendStatusFailed;
-                   }
-                   } else {
-                   LOG4CXX_ERROR(
-                   logger_,
-                   "Frame data is invalid for connection " << ConnectionHandle);
-
-                   frameSendStatus = SendStatusInternalError;
-                   }
-
-                   delete frame;
-                   } else {
-                   LOG4CXX_ERROR(
-                   logger_,
-                   "Frame data is null for connection " << ConnectionHandle);
-
-                   frameSendStatus = SendStatusInternalError;
-                   }
-
-                   mListener.onFrameSendCompleted(this, ConnectionHandle,
-                   frame->mUserData,
-                   frameSendStatus);
-                   }
-                   */
+                    if (static_cast<size_t>(bytes_sent) == frame->data_size()) {
+                      frame_sent = true;
+                    } else {
+                      if (bytes_sent >= 0) {
+                        //TODO isn't it OK?
+                        LOG4CXX_ERROR(
+                            logger_,
+                            "Sent " << bytes_sent << " bytes while " << frame->data_size() << " had been requested for connection " << connection->session_id());
+                      } else {
+                        LOG4CXX_ERROR_WITH_ERRNO(
+                            logger_,
+                            "Send failed for connection " << connection->session_id());
+                      }
+                    }
+                    if (frame_sent) {
+                      listener_.onDataSendDone(this, connection->session_id(),
+                                               frame);
+                    } else {
+                      listener_.onDataSendFailed(this, connection->session_id(),
+                                                 frame, DataSendError());
+                    }
+                  }
                 }
               }
             } else {
@@ -672,16 +549,17 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
     const int close_status = close(connection_socket);
 
-    if(is_connection_succeeded) {
-    if(close_status == 0) {
-      listener_.onDisconnectDone(this, connection->session_id());
-    } else {
-      listener_.onDisconnectFailed(this, connection->session_id(), DisconnectError());
-    }
+    if (is_connection_succeeded) {
+      if (close_status == 0) {
+        listener_.onDisconnectDone(this, connection->session_id());
+      } else {
+        listener_.onDisconnectFailed(this, connection->session_id(),
+                                     DisconnectError());
+      }
     }
   }
 
-  if(!is_connection_succeeded) {
+  if (!is_connection_succeeded) {
     listener_.onConnectFailed(this, connection->session_id(), ConnectError());
   }
 
@@ -698,39 +576,64 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
   }
 }
 
-void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::updateClientDeviceList(void )
-{
-    LOG4CXX_INFO(logger_, "Updating client device list");
+void* DeviceAdapterImpl::mainThreadStartRoutine(void* data) {
+  DeviceAdapterImpl* deviceAdapter = static_cast<DeviceAdapterImpl*>(data);
 
-    tInternalDeviceList clientDeviceList;
+  if (0 != deviceAdapter) {
+    deviceAdapter->mainThread();
+  }
 
-    pthread_mutex_lock(&mDevicesMutex);
-
-    for (tDeviceMap::const_iterator di = mDevices.begin(); di != mDevices.end(); ++di)
-    {
-        const SDevice * device = di->second;
-
-        if (0 != device)
-        {
-            clientDeviceList.push_back(SInternalDeviceInfo(di->first, device->mName, device->mUniqueDeviceId));
-        }
-    }
-
-    pthread_mutex_unlock(&mDevicesMutex);
-
-    mListener.onDeviceListUpdated(this, clientDeviceList);
+  return 0;
 }
 
-void * NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::mainThreadStartRoutine(void * Data)
-{
-    CDeviceAdapter * deviceAdapter = static_cast<CDeviceAdapter*>(Data);
+DeviceList DeviceAdapterImpl::getDeviceList() const {
+  DeviceList result;
 
-    if (0 != deviceAdapter)
-    {
-        deviceAdapter->mainThread();
+  pthread_mutex_lock(&devices_mutex_);
+  for (DeviceMap::const_iterator it = devices_.begin(); it != devices_.end();
+      ++it) {
+    result.push_back(it->first);
+  }
+  pthread_mutex_unlock(&devices_mutex_);
+
+  return result;
+}
+
+DeviceAdapter::Error DeviceAdapterImpl::sendData(const int session_id,
+                                                 const RawMessageSptr data) {
+//TODO check if initialized
+
+//TODO check 0
+  if (0u == data->data_size()) {
+    LOG4CXX_WARN(logger_, "DataSize=0");
+  } else if (0 == data->data()) {
+    LOG4CXX_WARN(logger_, "Data is null");
+  } else {
+    pthread_mutex_lock(&connections_mutex_);
+
+    ConnectionMap::iterator connection_it = connections_.find(session_id);
+
+    if (connections_.end() == connection_it) {
+      LOG4CXX_ERROR(logger_, "Connection " << session_id << " does not exist");
+    } else {
+      Connection* connection = connection_it->second;
+
+      connection->frames_to_send_.push(data);
+
+      if (-1 != connection->notification_pipe_fds_[1]) {
+        uint8_t c = 0;
+        if (1 != write(connection->notification_pipe_fds_[1], &c, 1)) {
+          LOG4CXX_ERROR_WITH_ERRNO(
+              logger_,
+              "Failed to wake up connection thread for connection " << session_id);
+        }
+      }
     }
 
-    return 0;
+    pthread_mutex_unlock(&connections_mutex_);
+  }
+
+  return OK;
 }
 
 void* DeviceAdapterImpl::connectionThreadStartRoutine(void* data) {
@@ -748,11 +651,11 @@ void* DeviceAdapterImpl::connectionThreadStartRoutine(void* data) {
   return 0;
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::connect(const DeviceHandle device_handle,
-                                const ApplicationHandle app_handle,
-                                const int session_id) {
+DeviceAdapter::Error DeviceAdapterImpl::connect(
+    const DeviceHandle device_handle, const ApplicationHandle app_handle,
+    const int session_id) {
 
-  //TODO check if initialized
+//TODO check if initialized
 
   pthread_mutex_lock(&devices_mutex_);
   const bool is_device_valid = devices_.end() != devices_.find(device_handle);
@@ -763,16 +666,17 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(const DeviceHandle device_handle
     return BAD_PARAM;
   }
 
-  //TODO check app_handle validity???
+//TODO check app_handle validity???
 
   Connection* connection = 0;
-  Error error = createConnection(device_handle, app_handle, session_id, &connection);
-  if(error != OK) {
+  Error error = createConnection(device_handle, app_handle, session_id,
+                                 &connection);
+  if (error != OK) {
     return error;
   }
 
   error = startConnection(connection);
-  if(error != OK) {
+  if (error != OK) {
     deleteConnection(connection);
     return error;
   }
@@ -780,9 +684,28 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(const DeviceHandle device_handle
   return OK;
 }
 
+DeviceAdapter::Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
+//TODO check if initialized and supported
+
+  Error error = OK;
+  Connection* connection = 0;
+  pthread_mutex_lock(&connections_mutex_);
+  ConnectionMap::const_iterator it = connections_.find(session_id);
+  if (it != connections_.end()) {
+    Connection* connection = it->second;
+  } else {
+    Error = BAD_PARAM;
+  }
+  pthread_mutex_unlock(&connections_mutex_);
+  if (error != OK) {
+    return error;
+  }
+  return stopConnection(connection);
+}
+
 DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(
     const DeviceHandle device_handle) {
-  //TODO check if initialized
+  //TODO check if initialized and supported
 
   pthread_mutex_lock(&devices_mutex_);
   const bool is_device_valid = devices_.end() != devices_.find(device_handle);
@@ -817,4 +740,4 @@ DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(
   return ret;
 }
 
-} // namespace transport_manager
+}  // namespace transport_manager
