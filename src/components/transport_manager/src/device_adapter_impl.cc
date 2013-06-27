@@ -455,21 +455,22 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                        static_cast<size_t>(bytesRead));
                        */
                     } else if (bytes_read < 0) {
-                      if ((EAGAIN != errno)&&
-                      (EWOULDBLOCK != errno)){
-                      LOG4CXX_ERROR_WITH_ERRNO(logger_, "recv() failed for connection " << connection->session_id());
+                      if (EAGAIN != errno && EWOULDBLOCK != errno) {
+                        LOG4CXX_ERROR_WITH_ERRNO(
+                            logger_,
+                            "recv() failed for connection " << connection->session_id());
+
+                        connection->terminate_flag_ = true;
+                      }
+                    } else {
+                      LOG4CXX_INFO(
+                          logger_,
+                          "Connection " << connection->session_id() << " closed by remote peer");
 
                       connection->terminate_flag_ = true;
                     }
-                  }
-                  else
-                  {
-                    LOG4CXX_INFO(logger_, "Connection " << connection->session_id() << " closed by remote peer");
-
-                    connection->terminate_flag_ = true;
-                  }
-                } while (bytes_read > 0);
-              }
+                  } while (bytes_read > 0);
+                }
 
                 if ((false == connection->terminate_flag_)
                     && (0 != poll_fds[1].revents)) {
@@ -485,59 +486,40 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
                     connection->terminate_flag_ = true;
                   }
-                  /*
-                   tFrameQueue framesToSend;
 
-                   pthread_mutex_lock (&mConnectionsMutex);
-                   framesToSend.swap(connection->mFramesToSend);
-                   pthread_mutex_unlock(&mConnectionsMutex);
+                  FrameQueue frames_to_send;
+                  pthread_mutex_lock(&connections_mutex_);
+                  std::swap(frames_to_send, connection->frames_to_send_);
+                  pthread_mutex_unlock(&connections_mutex_);
 
-                   for (; false == framesToSend.empty(); framesToSend.pop()) {
-                   SFrame * frame = framesToSend.front();
-                   ESendStatus frameSendStatus = SendStatusUnknownError;
+                  bool frame_sent = false;
+                  for (; false == frames_to_send.empty();
+                      frames_to_send.pop()) {
+                    RawMessageSptr frame = frames_to_send.front();
 
-                   if (0 != frame) {
-                   if ((0 != frame->mData) && (0u != frame->mDataSize)) {
-                   ssize_t bytesSent = send(connectionSocket, frame->mData,
-                   frame->mDataSize, 0);
+                    ssize_t bytes_sent = send(connection_socket, frame->data(),
+                                              frame->data_size(), 0);
 
-                   if (static_cast<size_t>(bytesSent) == frame->mDataSize) {
-                   frameSendStatus = SendStatusOK;
-                   } else {
-                   if (bytesSent >= 0) {
-                   LOG4CXX_ERROR(
-                   logger_,
-                   "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle);
-                   } else {
-                   LOG4CXX_ERROR_WITH_ERRNO(
-                   logger_,
-                   "Send failed for connection " << ConnectionHandle);
-                   }
-
-                   frameSendStatus = SendStatusFailed;
-                   }
-                   } else {
-                   LOG4CXX_ERROR(
-                   logger_,
-                   "Frame data is invalid for connection " << ConnectionHandle);
-
-                   frameSendStatus = SendStatusInternalError;
-                   }
-
-                   delete frame;
-                   } else {
-                   LOG4CXX_ERROR(
-                   logger_,
-                   "Frame data is null for connection " << ConnectionHandle);
-
-                   frameSendStatus = SendStatusInternalError;
-                   }
-
-                   mListener.onFrameSendCompleted(this, ConnectionHandle,
-                   frame->mUserData,
-                   frameSendStatus);
-                   }
-                   */
+                    if (static_cast<size_t>(bytes_sent) == frame->data_size()) {
+                      frame_sent = true;
+                    } else {
+                      if (bytes_sent >= 0) {
+                        //TODO isn't it OK?
+                        LOG4CXX_ERROR(
+                            logger_,
+                            "Sent " << bytes_sent << " bytes while " << frame->data_size() << " had been requested for connection " << connection->session_id());
+                      } else {
+                        LOG4CXX_ERROR_WITH_ERRNO(
+                            logger_,
+                            "Send failed for connection " << connection->session_id());
+                      }
+                    }
+                    if(frame_sent) {
+                      listener_.onDataSendDone(this, connection->session_id(), frame);
+                    } else {
+                      listener_.onDataSendFailed(this, connection->session_id(), frame, DataSendError());
+                    }
+                  }
                 }
               }
             } else {
@@ -618,9 +600,9 @@ DeviceList DeviceAdapterImpl::getDeviceList() const {
 
 DeviceAdapter::Error DeviceAdapterImpl::sendData(const int session_id,
                                                  const RawMessageSptr data) {
-  //TODO check if initialized
+//TODO check if initialized
 
-  //TODO check 0
+//TODO check 0
   if (0u == data->data_size()) {
     LOG4CXX_WARN(logger_, "DataSize=0");
   } else if (0 == data->data()) {
@@ -672,7 +654,7 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(
     const DeviceHandle device_handle, const ApplicationHandle app_handle,
     const int session_id) {
 
-  //TODO check if initialized
+//TODO check if initialized
 
   pthread_mutex_lock(&devices_mutex_);
   const bool is_device_valid = devices_.end() != devices_.find(device_handle);
@@ -683,7 +665,7 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(
     return BAD_PARAM;
   }
 
-  //TODO check app_handle validity???
+//TODO check app_handle validity???
 
   Connection* connection = 0;
   Error error = createConnection(device_handle, app_handle, session_id,
@@ -701,21 +683,20 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(
   return OK;
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::disconnect(
-    const SessionID session_id) {
-  //TODO check if initialized and supported
+DeviceAdapter::Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
+//TODO check if initialized and supported
 
   Error error = OK;
   Connection* connection = 0;
   pthread_mutex_lock(&connections_mutex_);
   ConnectionMap::const_iterator it = connections_.find(session_id);
-  if(it != connections_.end()) {
+  if (it != connections_.end()) {
     Connection* connection = it->second;
   } else {
     Error = BAD_PARAM;
   }
   pthread_mutex_unlock(&connections_mutex_);
-  if(error != OK) {
+  if (error != OK) {
     return error;
   }
   return stopConnection(connection);

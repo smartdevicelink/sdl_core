@@ -75,6 +75,7 @@ public:
                               const RawMessageSptr data_container) = 0;
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
                                 const SessionID session_id,
+                                const RawMessageSptr data_container,
                                 const DataSendError& error) = 0;
 
   virtual void onCommunicationError(const DeviceAdapter* device_adapter,
