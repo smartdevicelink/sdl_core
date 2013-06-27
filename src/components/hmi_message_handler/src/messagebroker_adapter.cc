@@ -30,94 +30,108 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <string>
 #include "hmi_message_handler/messagebroker_adapter.h"
 
 namespace hmi_message_handler {
-MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler)
-	: NsMessageBroker::CMessageBrokerController(std::string("127.0.0.1"), 8087, "SDL")
-	, HMIMessageAdapter(handler) {
 
+typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
+
+log4cxx::LoggerPtr MessageBrokerAdapter::logger_   =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
+
+MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler)
+  : MessageBrokerController(std::string("127.0.0.1"), 8087, "SDL")
+  , HMIMessageAdapter(handler) {
+  LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
 }
 
 MessageBrokerAdapter::~MessageBrokerAdapter() {
-
 }
 
 void MessageBrokerAdapter::sendMessageToHMI(
-		application_manager::Message * message) {
-	if (!message) {
-		//LOG
-		return;
-	}
+  utils::SharedPtr<application_manager::Message> message) {
 
-	Json::Reader reader;
-    Json::Value json_value;
-    if (!reader.parse(message->json_message(), json_value, false))
-    {
-        //LOG4CXX_ERROR(mLogger, "Received invalid json string.");
-        return;
-    }
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::sendMessageToHMI");
+  /*if (!message) {
+    // TODO(PV): LOG
+    return;
+  }*/
 
-	sendJsonMessage( json_value );
+  Json::Reader reader;
+  Json::Value json_value;
+  if (!reader.parse(message->json_message(), json_value, false)) {
+    // TODO(PV): LOG4CXX_ERROR(mLogger, "Received invalid json string.");
+    return;
+  }
+
+  sendJsonMessage(json_value);
 }
 
-void MessageBrokerAdapter::processResponse(std::string method, Json::Value& root) {
-	processRecievedfromMB(root);
+void MessageBrokerAdapter::processResponse(
+  std::string method, Json::Value& root) {
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processResponse");
+  processRecievedfromMB(root);
 }
 
 void MessageBrokerAdapter::processRequest(Json::Value& root) {
-	processRecievedfromMB(root);
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processRequest");
+  processRecievedfromMB(root);
 }
 
 void MessageBrokerAdapter::processNotification(Json::Value& root) {
-	processRecievedfromMB(root);
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processNotification");
+  processRecievedfromMB(root);
 }
 
 void MessageBrokerAdapter::subscribeTo() {
-	NsMessageBroker::CMessageBrokerController::subscribeTo("Buttons.OnButtonEvent");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("Buttons.OnButtonPress");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("UI.OnCommand");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("VR.OnCommand");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("UI.OnReady");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("UI.OnDriverDistraction");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("UI.OnSystemContext");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("UI.OnAppActivated");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("UI.OnDeviceChosen");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("UI.OnLanguageChange");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("VR.OnLanguageChange");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("TTS.OnLanguageChange");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
-    NsMessageBroker::CMessageBrokerController::subscribeTo("UI.OnTBTClientState");
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::subscribeTo");
+  MessageBrokerController::subscribeTo("Buttons.OnButtonEvent");
+  MessageBrokerController::subscribeTo("Buttons.OnButtonPress");
+  MessageBrokerController::subscribeTo("UI.OnCommand");
+  MessageBrokerController::subscribeTo("VR.OnCommand");
+  MessageBrokerController::subscribeTo("UI.OnReady");
+  MessageBrokerController::subscribeTo("UI.OnDriverDistraction");
+  MessageBrokerController::subscribeTo("UI.OnSystemContext");
+  MessageBrokerController::subscribeTo("UI.OnAppActivated");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
+  MessageBrokerController::subscribeTo("UI.OnDeviceChosen");
+  MessageBrokerController::subscribeTo("UI.OnLanguageChange");
+  MessageBrokerController::subscribeTo("VR.OnLanguageChange");
+  MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
+  MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
+  MessageBrokerController::subscribeTo("UI.OnTBTClientState");
 }
 
 void MessageBrokerAdapter::processRecievedfromMB(Json::Value& root) {
-	if (root.isNull()) {
-		//LOG
-		return;
-	}
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processRecievedfromMB");
+  if (root.isNull()) {
+    // LOG
+    return;
+  }
 
-	Json::FastWriter writer;
-	std::string message_string = writer.write(root);
+  Json::FastWriter writer;
+  std::string message_string = writer.write(root);
 
-	if (message_string.empty()) {
-		//LOG
-		return;
-	}
+  if (message_string.empty()) {
+    // LOG
+    return;
+  }
 
-	if (!handler()) {
-		//WARNING
-		return;
-	}
+  if (!handler()) {
+    // WARNING
+    return;
+  }
 
-	application_manager::Message * message = 
-		new application_manager::Message;
-	//message->set_message_type()
-	message->set_json_message(message_string);
-	message->set_protocol_version(
-		application_manager::ProtocolVersion::kHMI);
+  application_manager::Message* message =
+    new application_manager::Message;
+  // message->set_message_type()
+  message->set_json_message(message_string);
+  message->set_protocol_version(
+    application_manager::ProtocolVersion::kHMI);
 
-	handler()->onMessageReceived(message);
+  handler()->onMessageReceived(message);
+  LOG4CXX_INFO(logger_, "Successfully sent to observer");
 }
 
-}
+}  // namespace hmi_message_handler

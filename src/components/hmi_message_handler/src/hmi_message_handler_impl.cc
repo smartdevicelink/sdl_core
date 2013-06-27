@@ -31,83 +31,94 @@
  */
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
-#include "to_hmi_thread_impl.h"
-#include "from_hmi_thread_impl.h"
+#include "./to_hmi_thread_impl.h"
+#include "./from_hmi_thread_impl.h"
 
 namespace hmi_message_handler {
 
+log4cxx::LoggerPtr HMIMessageHandlerImpl::logger_   =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
+
+HMIMessageHandlerImpl* HMIMessageHandlerImpl::instance() {
+  static HMIMessageHandlerImpl instance;
+  return &instance;
+}
+
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()
-	: observer_(NULL)
-	, to_hmi_thread_(NULL)
-	, from_hmi_thread_(NULL) {
+  : observer_(NULL)
+  , to_hmi_thread_(NULL)
+  , from_hmi_thread_(NULL) {
+  to_hmi_thread_ = new threads::Thread(
+    "hmi_message_handler::ToHMIThreadImpl",
+    new ToHMIThreadImpl(this));
+  to_hmi_thread_->startWithOptions(
+    threads::ThreadOptions(threads::Thread::kMinStackSize));
 
-		to_hmi_thread_ = new threads::Thread(
-			"hmi_message_handler::ToHMIThreadImpl",
-			new ToHMIThreadImpl(this));
-		to_hmi_thread_->startWithOptions(
-      		threads::ThreadOptions(threads::Thread::kMinStackSize));
-
-		from_hmi_thread_ = new threads::Thread(
-			"hmi_message_handler::FromHMIThreadImpl",
-			new FromHMIThreadImpl(this));
-		from_hmi_thread_->startWithOptions(
-      		threads::ThreadOptions(threads::Thread::kMinStackSize));
+  from_hmi_thread_ = new threads::Thread(
+    "hmi_message_handler::FromHMIThreadImpl",
+    new FromHMIThreadImpl(this));
+  from_hmi_thread_->startWithOptions(
+    threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
-	observer_ = NULL;
-	message_adapters_.clear();
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~HMIMessageHandlerImpl()");
+  observer_ = NULL;
+  message_adapters_.clear();
 
-	if (to_hmi_thread_) {
-		to_hmi_thread_->stop();
-		delete to_hmi_thread_;
-		to_hmi_thread_ = NULL;
-	}
+  if (to_hmi_thread_) {
+    to_hmi_thread_->stop();
+    delete to_hmi_thread_;
+    to_hmi_thread_ = NULL;
+  }
 
-	if (from_hmi_thread_) {
-		from_hmi_thread_->stop();
-		delete from_hmi_thread_;
-		from_hmi_thread_ = NULL;
-	}
-	
+  if (from_hmi_thread_) {
+    from_hmi_thread_->stop();
+    delete from_hmi_thread_;
+    from_hmi_thread_ = NULL;
+  }
 }
 
 void HMIMessageHandlerImpl::onMessageReceived(
-			application_manager::Message * message) {
-
-	if (!observer_) {
-		//WARNING
-		return;
-	}
-	message_from_hmi_.push(message);
+  MessageSharedPointer message) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~onMessageReceived()");
+  if (!observer_) {
+    // TODO(PV): WARNING
+    return;
+  }
+  messages_from_hmi_.push(message);
 }
 
 void HMIMessageHandlerImpl::sendMessageToHMI(
-			application_manager::Message * message) {
-
-	message_to_hmi_.push(message);	
+  MessageSharedPointer message) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~sendMessageToHMI()");
+  messages_to_hmi_.push(message);
 }
 
 void HMIMessageHandlerImpl::setMessageObserver(HMIMessageObserver* observer) {
-	observer_ = observer;
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~setMessageObserver()");
+  observer_ = observer;
 }
 
 void HMIMessageHandlerImpl::onErrorSending(
-			application_manager::Message * message) {
-
-	if (!observer_) {
-		//WARNING
-		return;
-	}
-	observer_->onErrorSending(message);
+  MessageSharedPointer message) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~onErrorSending()");
+  if (!observer_) {
+    // TODO(PV): WARNING
+    return;
+  }
+  observer_->onErrorSending(message);
 }
 
-void HMIMessageHandlerImpl::addHMIMessageAdapter(HMIMessageAdapter * adapter) {
-	message_adapters_.insert(adapter);
+void HMIMessageHandlerImpl::addHMIMessageAdapter(HMIMessageAdapter* adapter) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~addHMIMessageAdapter()");
+  message_adapters_.insert(adapter);
 }
 
-void HMIMessageHandlerImpl::removeHMIMessageAdapter(HMIMessageAdapter * adapter) {
-	message_adapters_.erase(adapter);
+void HMIMessageHandlerImpl::removeHMIMessageAdapter(
+  HMIMessageAdapter* adapter) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~removeHMIMessageAdapter()");
+  message_adapters_.erase(adapter);
 }
 
-} // namespace hmi_handler
+}  //  namespace hmi_message_handler

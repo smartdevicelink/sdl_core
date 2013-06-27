@@ -30,36 +30,28 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/hmi_command_response_impl.h"
-#include "application_manager/application_manager_impl.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_REQUEST_FROM_HMI_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_REQUEST_FROM_HMI_H_
 
+#include "application_manager/commands/command_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-HMICommandResponseImpl::HMICommandResponseImpl(const MessageSharedPtr& message)
-  : CommandImpl(message) {
-}
 
-HMICommandResponseImpl::~HMICommandResponseImpl() {
-}
-
-bool HMICommandResponseImpl::Init() {
-  return true;
-}
-
-bool HMICommandResponseImpl::CleanUp() {
-  return true;
-}
-
-void HMICommandResponseImpl::Run() {
-}
-
-void HMICommandResponseImpl::SendResponse() {
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
-}
+class RequestFromHMI : public CommandImpl {
+  public:
+    explicit RequestFromHMI(const MessageSharedPtr& message);
+    virtual ~RequestFromHMI();
+    virtual bool Init();
+    virtual bool CleanUp();
+    virtual void Run();
+    void SendResponseToHMI();
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_REQUEST_FROM_HMI_H_

@@ -181,5 +181,15 @@ SDL.VRPopUp = Em.ContainerView.create( {
         if( this.VRActive ){
             this.set( 'VRActive', false );
         }
-    }.observes( 'SDL.TransitionIterator.ready' )
+    }.observes( 'SDL.TransitionIterator.ready' ),
+    
+    /**
+     * This event triggered when component is placed to
+     * document DOM structure
+     */
+    didInsertElement: function() {
+        this._super();
+        
+        FFW.VehicleInfo.set( 'isReady', true );
+    }
 } );

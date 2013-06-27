@@ -91,7 +91,7 @@ template<typename T> class MessageQueue {
     /**
      *\brief Queue
      */
-    std::queue<T> mQueue;
+    std::queue<T> queue_;
     /**
      *\brief Platform specific syncronisation variable
      */
@@ -99,37 +99,40 @@ template<typename T> class MessageQueue {
     /**
      *\brief Bool condition for waiting.
      */
-    bool mIsUp;
+    bool is_up_;
 };
 
 template<typename T> MessageQueue<T>::MessageQueue()
-  : mIsUp(false) {
-    sync_variable_.init();
+  : is_up_(false) {
+  sync_variable_.init();
 }
 
 template<typename T> MessageQueue<T>::MessageQueue(std::queue<T> queue) {
   sync_variable_.init();
   sync_variable_.lock();
-  mQueue = std::queue<T>(queue);
+  queue_ = std::queue<T>(queue);
   sync_variable_.unlock();
 }
 
 template<typename T> MessageQueue<T>::~MessageQueue() {
+  while (!queue_.empty()) {
+    queue_.pop();
+  }
 }
 
 template<typename T> void MessageQueue<T>::wait() {
   sync_variable_.lock();
-  while (!mIsUp) {
+  while (!is_up_) {
     sync_variable_.wait();
   }
-  mIsUp = false;
+  is_up_ = false;
   sync_variable_.unlock();
 }
 
 template<typename T> int MessageQueue<T>::size() const {
   int result = 0;
   sync_variable_.lock();
-  result = mQueue.size();
+  result = queue_.size();
   sync_variable_.unlock();
   return result;
 }
@@ -137,29 +140,29 @@ template<typename T> int MessageQueue<T>::size() const {
 template<typename T> bool MessageQueue<T>::empty() const {
   bool result = true;
   sync_variable_.lock();
-  result = mQueue.empty();
+  result = queue_.empty();
   sync_variable_.unlock();
   return result;
 }
 
 template<typename T> void MessageQueue<T>::push(const T& element) {
   sync_variable_.lock();
-  mQueue.push(element);
+  queue_.push(element);
 
   sync_variable_.signal();
-  mIsUp = true;
+  is_up_ = true;
 
   sync_variable_.unlock();
 }
 
 template<typename T> T MessageQueue<T>::pop() {
   sync_variable_.lock();
-  if (mQueue.empty()) {
+  if (queue_.empty()) {
     // error, TRACE
   }
 
-  T result = mQueue.front();
-  mQueue.pop();
+  T result = queue_.front();
+  queue_.pop();
 
   sync_variable_.unlock();
   return result;

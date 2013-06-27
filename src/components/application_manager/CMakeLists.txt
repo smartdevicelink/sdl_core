@@ -14,8 +14,6 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
-
-
 set (SOURCES
 ./src/application_manager_impl.cc
 ./src/message.cc
@@ -27,6 +25,7 @@ set (SOURCES
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
 ./src/message_conversion.cc
+./src/hmi_capabilities.cc
 )
 
 set (MOBILE_COMMANDS_SOURCES
@@ -74,7 +73,7 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/on_encoded_sync_pdata_notification.cc
 ./src/commands/mobile/on_hmi_status_notification.cc
 ./src/commands/mobile/on_language_change_notification.cc
-./src/commands/mobile/on_menu_entry_notification.cc
+./src/commands/mobile/on_command_notification.cc
 ./src/commands/mobile/on_permissions_change_notification.cc
 ./src/commands/mobile/on_tbt_client_state_notification.cc
 ./src/commands/mobile/on_vehicle_data_notification.cc
@@ -120,14 +119,70 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/unsubscribe_vehicle_data_response.cc
 ./src/commands/mobile/update_turn_list_request.cc
 ./src/commands/mobile/update_turn_list_response.cc
-./src/commands/hmi/hmi_command_request_impl.cc
-./src/commands/hmi/hmi_command_response_impl.cc
+)
+
+set (HMI_COMMANDS_SOURCES
+./src/commands/hmi/request_from_hmi.cc
+./src/commands/hmi/response_to_hmi.cc
+./src/commands/hmi/request_to_hmi.cc
+./src/commands/hmi/response_from_hmi.cc
+./src/commands/hmi/notification_to_hmi.cc
+./src/commands/hmi/notification_from_hmi.cc
+./src/commands/hmi/mixing_audio_supported_request.cc
+./src/commands/hmi/mixing_audio_supported_response.cc
 ./src/commands/hmi/get_app_list_request.cc
 ./src/commands/hmi/get_app_list_response.cc
 ./src/commands/hmi/get_device_list_request.cc
 ./src/commands/hmi/get_device_list_response.cc
+./src/commands/hmi/exit_all_applications_request.cc
+./src/commands/hmi/exit_all_applications_response.cc
+./src/commands/hmi/exit_application_request.cc
+./src/commands/hmi/exit_application_response.cc
+./src/commands/hmi/vr_is_ready_request.cc
+./src/commands/hmi/vr_is_ready_response.cc
+./src/commands/hmi/vr_add_command_request.cc
+./src/commands/hmi/vr_add_command_response.cc
+./src/commands/hmi/vr_delete_command_request.cc
+./src/commands/hmi/vr_delete_command_response.cc
+./src/commands/hmi/vr_change_registration_request.cc
+./src/commands/hmi/vr_change_registration_response.cc
+./src/commands/hmi/vr_get_supported_languages_request.cc
+./src/commands/hmi/vr_get_supported_languages_response.cc
+./src/commands/hmi/tts_is_ready_request.cc
+./src/commands/hmi/tts_is_ready_response.cc
+./src/commands/hmi/ui_get_supported_languages_request.cc
+./src/commands/hmi/ui_get_supported_languages_response.cc
+./src/commands/hmi/ui_get_capabilities_request.cc
+./src/commands/hmi/ui_get_capabilities_response.cc
+./src/commands/hmi/ui_change_registration_request.cc
+./src/commands/hmi/ui_change_registration_response.cc
+./src/commands/hmi/ui_show_request.cc
+./src/commands/hmi/ui_show_response.cc
+./src/commands/hmi/on_ready_notification.cc
+./src/commands/hmi/on_system_context_notification.cc
+./src/commands/hmi/on_device_chosen_notification.cc
+./src/commands/hmi/on_device_list_updated_notification.cc
+./src/commands/hmi/on_app_registered_notification.cc
+./src/commands/hmi/on_app_unregistered_notification.cc
+./src/commands/hmi/on_driver_distraction_notification.cc
+./src/commands/hmi/on_play_tone_notification.cc
+./src/commands/hmi/on_vr_started_notification.cc
+./src/commands/hmi/on_vr_stopped_notification.cc
+./src/commands/hmi/on_vr_command_notification.cc
+./src/commands/hmi/on_ui_command_notification.cc
+./src/commands/hmi/on_app_deactivated_notification.cc
+./src/commands/hmi/on_tts_language_change_notification.cc
+./src/commands/hmi/on_vr_language_change_notification.cc
+./src/commands/hmi/on_ui_language_change_notification.cc
+./src/commands/hmi/close_popup_request.cc
+./src/commands/hmi/close_popup_response.cc
+./src/commands/hmi/exit_application_request.cc
+./src/commands/hmi/exit_application_response.cc
+./src/commands/hmi/ui_show_request.cc
+./src/commands/hmi/ui_show_response.cc
+./src/commands/hmi/activate_app_request.cc
+./src/commands/hmi/activate_app_response.cc
 )
 
-
-add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES})
+add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})
 target_link_libraries ("ApplicationManager" log4cxx)

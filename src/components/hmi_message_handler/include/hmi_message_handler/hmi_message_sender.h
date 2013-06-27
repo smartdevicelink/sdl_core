@@ -38,9 +38,10 @@
 namespace hmi_message_handler {
 class HMIMessageSender {
   public:
-    virtual void sendMessageToHMI(application_manager::Message* message) = 0;
+    virtual void sendMessageToHMI(
+      utils::SharedPtr<application_manager::Message> message) = 0;
 };
 
 }
 
-#endif // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_SENDER
+#endif  //  SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_SENDER

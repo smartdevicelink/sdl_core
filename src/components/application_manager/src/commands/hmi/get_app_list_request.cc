@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 GetAppListRequest::GetAppListRequest(
-    const MessageSharedPtr& message): HMICommandRequestImpl(message) {
+    const MessageSharedPtr& message): RequestFromHMI(message) {
 }
 
 GetAppListRequest::~GetAppListRequest() {
@@ -55,11 +55,9 @@ void GetAppListRequest::Run() {
   int index = 0;
 
   if (applications.empty())  {
-    (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
           hmi_apis::Common_Result::eType::NO_APPS_REGISTERED;
   } else {
-    (*message_)[strings::msg_params][strings::success] = true;
     (*message_)[strings::msg_params][strings::result_code] =
           hmi_apis::Common_Result::eType::SUCCESS;
 
@@ -70,7 +68,7 @@ void GetAppListRequest::Run() {
     }
   }
 
-  SendResponse();
+  SendResponseToHMI();
 }
 
 }  // namespace commands

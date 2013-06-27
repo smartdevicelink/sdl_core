@@ -41,6 +41,8 @@
 #include "transport_manager/transport_manager_impl.h"
 
 namespace transport_manager {
+class TransportManagerImpl;
+
 class DeviceAdapterListenerImpl: public DeviceAdapterListener {
 public:
 	enum EventTypeEnum {
@@ -55,32 +57,6 @@ public:
 		ON_RECEIVED_DONE,
 		ON_RECEIVED_FAIL,
 		ON_COMMUNICATION_ERROR
-	};
-
-	class DeviceAdapterEvent {
-	public:
-		explicit DeviceAdapterEvent(int type, int session_id,
-				DeviceAdapter *device_adapter, RawMessageSptr *data,
-				DeviceAdapterError &error);
-		~DeviceAdapterEvent();
-		void set_event_type(int type);
-		void set_session_id(int id);
-		void set_device_adapter(DeviceAdapter *device_adapter);
-		void set_data(RawMessageSptr *data);
-		void set_error(DeviceAdapterError *error);
-
-		int event_type(void) const;
-		int session_id(void) const;
-		DeviceAdapter *device_adapter(void) const;
-		RawMessageSptr *data(void) const;
-		DeviceAdapterError *error(void) const;
-
-	private:
-		int event_type_;
-		int session_id_;
-		DeviceAdapter *device_adapter_;
-		RawMessageSptr *data_;
-		DeviceAdapterError *error_;
 	};
 
 	DeviceAdapterListenerImpl(transport_manager::TransportManagerImpl *tm);
@@ -127,7 +103,7 @@ private:
 	 * \brief For logging.
 	 */
 	static log4cxx::LoggerPtr logger_;
-	transport_manager::TransportManagerImpl *transport_manager_impl_;
+	TransportManagerImpl *transport_manager_impl_;
 
 };
 } // namespace transport_manager

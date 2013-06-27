@@ -35,17 +35,13 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 AddCommandResponse::AddCommandResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 AddCommandResponse::~AddCommandResponse() {
@@ -64,14 +60,14 @@ void AddCommandResponse::Run() {
 
   // TODO(DK): HMI Request Id
   const int function_id =
-      (*message_)[strings::params][strings::function_id].asInt();
+    (*message_)[strings::params][strings::function_id].asInt();
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+    (*message_)[strings::params][strings::correlation_id].asInt();
 
   // TODO(DK): HMI code Id
   const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+    static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
       (*message_)[strings::msg_params][hmi_response::code].asInt());
 
   // TODO(DK): HMI Request Id
@@ -79,14 +75,14 @@ void AddCommandResponse::Run() {
   const int vr_cmd_id = 2;
 
   MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     return;
   }
 
   smart_objects::CSmartObject data =
-      msg_chain->data();
+    msg_chain->data();
 
   // save received response code in message chain for further processing
   if (function_id == ui_cmd_id) {
@@ -101,7 +97,7 @@ void AddCommandResponse::Run() {
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id)) {
+        correlation_id)) {
     // add comand to application
     // TODO(DK): integrate SmartObject delete key
     if (false == result_ui) {
@@ -110,9 +106,10 @@ void AddCommandResponse::Run() {
       data[strings::msg_params].erase(strings::vr_commands);
     }
 
+    int app_id = (*message_)[strings::params][strings::connection_key];
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
-          ApplicationManagerImpl::instance()->
-          application((*message_)[strings::params][strings::connection_key]));
+                             ApplicationManagerImpl::instance()->
+                             application(app_id));
 
     app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),
                     data[strings::msg_params]);
@@ -120,7 +117,7 @@ void AddCommandResponse::Run() {
     if ((true == result_ui) && (true == result_vr)) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
       SendResponse();
     } else {
       // TODO(DK): check ui and vr response code

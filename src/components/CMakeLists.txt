@@ -2,7 +2,8 @@
 add_subdirectory(./interfaces)
 
 # --- TransportManager
-add_subdirectory(./TransportManager)
+#add_subdirectory(./TransportManager)
+add_subdirectory(./transport_manager)
 
 # --- AppMgr
 add_subdirectory(./AppMgr)
@@ -32,7 +33,7 @@ add_subdirectory(./application_manager)
 add_subdirectory(./request_watchdog)
 
 # --- HMI Message Handler
-#add_subdirectory(./hmi_message_handler)
+add_subdirectory(./hmi_message_handler)
 
 # --- Config
 add_subdirectory(./config_profile)

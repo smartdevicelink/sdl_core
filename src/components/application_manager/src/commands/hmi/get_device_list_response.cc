@@ -36,7 +36,7 @@ namespace application_manager {
 namespace commands {
 
 GetDeviceListResponse::GetDeviceListResponse(
-    const MessageSharedPtr& message): HMICommandResponseImpl(message) {
+    const MessageSharedPtr& message): ResponseToHMI(message) {
 }
 
 GetDeviceListResponse::~GetDeviceListResponse() {

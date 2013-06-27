@@ -42,7 +42,7 @@
 
 //#include "DeviceAdapterListener.h"
 //#include "HandleGenerator.h"
-#include "device_adapter_impl.h"
+#include "transport_manager/device_adapter_impl.h"
 #include "transport_manager/device_adapter_listener.h"
 
 namespace transport_manager {

@@ -40,7 +40,7 @@ namespace commands {
 
 void UnregisterAppInterfaceRequest::Run() {
   ApplicationManagerImpl* application_manager_impl =
-      ApplicationManagerImpl::instance();
+    ApplicationManagerImpl::instance();
   if (!application_manager_impl->
       application((*message_)[strings::params][strings::connection_key])) {
     SendResponse(false,
@@ -49,8 +49,7 @@ void UnregisterAppInterfaceRequest::Run() {
   }
 
   if (!application_manager_impl->
-      UnregisterApplication(application_manager_impl->
-      application((*message_)[strings::msg_params][strings::app_id]))) {
+      UnregisterApplication((*message_)[strings::msg_params][strings::app_id])) {
     SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
     return;
   }

@@ -35,14 +35,10 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 OnButtonEventNotification::OnButtonEventNotification(
   const MessageSharedPtr& message): CommandNotificationImpl(message) {
@@ -59,7 +55,7 @@ void OnButtonEventNotification::Run() {
     LOG4CXX_INFO_EXT(logger_, "No subscription for custom buttons requires");
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->active_application());
+                             ApplicationManagerImpl::instance()->active_application());
 
     if (NULL == app) {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent came but no app is active.");
@@ -86,7 +82,7 @@ void OnButtonEventNotification::Run() {
 
     if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level()) ||
         (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-            && NsSmartDeviceLinkRPC::V2::ButtonName::OK != btn_id)) {
+         && NsSmartDeviceLinkRPC::V2::ButtonName::OK != btn_id)) {
       SendButtonEvent(subscribed_app, false);
     } else {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");

@@ -36,6 +36,9 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL
 
 #include <queue>
+#include <map>
+
+#include "utils/logger.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/device_adapter.h"
@@ -103,7 +106,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void sendMessageToDevice(const void *message);
+	virtual void sendMessageToDevice(protocol_handler::RawMessage message);
 
 	/**
 	 * @brief receive event from device
@@ -112,7 +115,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	virtual void receiveEventFromDevice(const void *event);
+	virtual void receiveEventFromDevice(DeviceAdapterListenerImpl::DeviceAdapterEvent event);
 
 	/**
 	 * @brief register event listener
@@ -175,7 +178,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	pthread_cond_t device_listener_thread_wakeup(void);
+	pthread_cond_t *getDeviceListenerThreadWakeup(void);
 
 	/**
 	 * @brief post new mesage into TM's queue
@@ -202,9 +205,11 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	void removeMessage(const protocol_handler::RawMessage *message);
+	void removeMessage(protocol_handler::RawMessage message);
 
-	void updateMessage(const protocol_handler::RawMessage &message);
+
+	void removeEvent(DeviceAdapterListenerImpl::DeviceAdapterEvent event);
+
 	/**
 	 * @brief post new event from device
 	 *
@@ -212,7 +217,7 @@ public:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
+	void postEvent(DeviceAdapterListenerImpl::DeviceAdapterEvent event);
 
 protected:
 	class AdapterHandler {
@@ -234,7 +239,7 @@ protected:
 
 		~AdapterHandler();
 
-	protected:
+	private:
 		/**
 		 * @brief Device adapters.
 		 **/
@@ -252,8 +257,6 @@ protected:
 		 **/
 		std::multimap<transport_manager::DeviceHandle,
 				transport_manager::DeviceAdapter *> device_to_adapter_multimap_;
-
-		AdapterHandler();
 
 	};
 
@@ -297,7 +300,7 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter);
+	TransportManagerImpl(DeviceAdapter *device_adapter);
 
 	/**
 	 * @brief constructor used to create new TM with device adapter
@@ -306,9 +309,10 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 **/
-	TransportManagerImpl::TransportManagerImpl(
+	TransportManagerImpl(
 			std::vector<DeviceAdapter *> device_adapter_list);
 
+	static void *messageQueueStartThread(void *data);
 	/**
 	 * @brief scan message's queue and pull messages according to priority and serial number
 	 *
@@ -316,8 +320,9 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 */
-	static void *messageQueueThread(void *);
+	void *messageQueueThread(void);
 
+	static void *eventListenerStartThread(void *);
 	/**
 	 * @brief whait until event happens
 	 *
@@ -325,7 +330,7 @@ protected:
 	 *
 	 * @see @ref components_transportmanager_client_connection_management
 	 */
-	static void *eventListenerThread(void *);
+	void *eventListenerThread(void);
 
 	/**
 	 * \brief For logging.

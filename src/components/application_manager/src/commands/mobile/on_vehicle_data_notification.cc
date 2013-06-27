@@ -35,17 +35,13 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 OnVehicleDataNotification::OnVehicleDataNotification(
-    const MessageSharedPtr& message): CommandNotificationImpl(message) {
+  const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnVehicleDataNotification::~OnVehicleDataNotification() {
@@ -56,21 +52,21 @@ void OnVehicleDataNotification::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(hmi_notification::prndl)) {
     const unsigned int prndl = static_cast<unsigned int>(
-        (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
+                                 (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
 
     const std::vector<Application*>& applications =
-        ApplicationManagerImpl::instance()->applications_by_ivi(prndl);
+      ApplicationManagerImpl::instance()->applications_by_ivi(prndl);
 
     std::vector<Application*>::const_iterator it = applications.begin();
     for (; applications.end() != it; ++it) {
       ApplicationImpl* app = static_cast<ApplicationImpl*>(*it);
       if (!app) {
-          LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-          continue;
+        LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+        continue;
       }
 
       LOG4CXX_INFO(logger_, "Send OnVehicleData PRNDL notification to "
-                     << app->name() << " application id " << app->app_id());
+                   << app->name() << " application id " << app->app_id());
       SendVehicleData(app);
     }
   }
@@ -83,7 +79,7 @@ void OnVehicleDataNotification::SendVehicleData(const ApplicationImpl* app) {
   }
 
   smart_objects::CSmartObject* on_vehicle_data =
-      new smart_objects::CSmartObject();
+    new smart_objects::CSmartObject();
 
   if (!on_vehicle_data) {
     LOG4CXX_ERROR_EXT(logger_, "SendVehicleData NULL pointer");

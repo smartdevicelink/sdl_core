@@ -294,6 +294,12 @@
     <element name="MFD5" />
   </enum>
 
+<enum name="ImageType">
+  <description>Contains information about the type of image.</description>
+  <element name="STATIC" />
+  <element name="DYNAMIC" />
+</enum>
+
 <enum name="TextFieldName">
   <element name="mainField1">
     <description>The first line of first set of main fields of the persistent display; applies to "Show"</description>
@@ -357,6 +363,9 @@
   </element>
   <element name="sliderFooter">
     <description> Footer text for slider</description>
+  </element>
+  <element name="notificationText">
+    <description>Text of notification.</description>
   </element>
 </enum>
 
@@ -677,8 +686,11 @@
 </struct>
 
 <struct name="Image">
-  <param name="path" maxlength="65535" type="String" mandatory="true">
+  <param name="value" maxlength="65535" type="String" mandatory="true">
     <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
+  </param>
+  <param name="imageType" type="ImageType">
+    <description>Describes, whether it is a static or dynamic image.</description>
   </param>
 </struct>
 
@@ -787,19 +799,13 @@
   <param name="seconds" type="Integer" minvalue="0" maxvalue="59" />
 </struct>
 
-<struct name="TextField">
-  <param name="name" type="TextFieldName">
-    <description>The name that identifies the field. See TextFieldName.</description>
-  </param>
-</struct>
-
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
   <param name="displayType" type="Common.DisplayType">
     <description>The type of the display. See DisplayType</description>
   </param>
-  <param name="textFields" type="Common.TextField" minsize="1" maxsize="100" array="true">
-    <description>A set of all fields that support text data. See TextField</description>
+  <param name="textFields" type="Common.TextFieldName" minsize="1" maxsize="100" array="true">
+    <description>A set of all fields that support text data. See TextFieldName</description>
   </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
@@ -859,6 +865,11 @@
     <description>Trim of the vehicle</description>
     <description>e.g. SE</description>
   </param>
+</struct>
+
+<struct name="DeviceInfo">
+  <param name="name" type="String" mandatory="true"/>
+  <param name="id" type="Integer" mandatory="true"/>
 </struct>
 
 <!--IVI part-->
@@ -1120,7 +1131,13 @@
         <description>Request from HMI to SmartDeviceLink to get the list of devices</description>
     </function>
     <function name="GetDeviceList" messagetype="response">
-        <param name="deviceList" type="String" mandatory="false" array="true" minsize="1" maxsize="100"/>
+        <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
+    </function>
+    <function name="StartDeviceDiscovery" messagetype="request">
+      <description>Initiated by HMI user. In response optional list of found devices - if not provided, not were found.</description>
+    </function>
+    <function name="StartDeviceDiscovery" messagetype="response">
+      <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
     </function>
     <function name="OnDeviceListUpdated" messagetype="notification">
         <description>Notification from SmartDeviceLink to HMI about changes in device list.</description>
@@ -1133,7 +1150,7 @@
         <param name="appList" type="Common.HMIApplication" mandatory="false" array="true" minsize="1"/>
     </function>
     <function name="ActivateApp" messagetype="request">
-      <description>Invoked by UI component when user clicks on app in the list of registered apps. Application is shown on recieving successful response.</description>
+      <description>Invoked by UI component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action. Application is shown on recieving successful response.</description>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of selected application.</description>
       </param>
@@ -1183,6 +1200,22 @@
     </function>
     <function name="PlayTone" messagetype="notification">
       <description>Sent by SDL to HMI to notify that the tone should be played.</description>
+    </function>
+    <!-- Policies -->
+    <function name="AllowAllApps" messagetype="request">
+      <description>Initiated by SDL. Results by user/HMI allowing SDL functionality or disallowing access to all mobile apps.</description>
+    </function>
+    <function name="AllowAllApps" messagetype="response">
+      <param name="allowed" type="Boolean" mandatory="true"/>
+    </function>
+    <function name="AllowApp" messagetype="request">
+      <param name="app" type="Common.HMIApplication" mandatory="true"/>
+      <param name="appPermissions" type="String" array="true" minsize="1" maxsize="100" mandatory="false">
+        <description>List of permissions required by application.</description>
+      </param>
+    </function>
+    <function name="AllowApp" messagetype="response">
+      <param name="allowed" type="Boolean" mandatory="true"/>
     </function>
 </interface>
 
@@ -1342,7 +1375,12 @@
           The array must have at least one item.
         </description>
       </param>
-    </function>
+      <param name="appId" type="Integer" mandatory="true">
+        <description>Id of application requested this RPC.</description>
+      </param>
+  </function>
+  <function name="SetGlobalProperties" messagetype="response">
+  </function>
 </interface>
 
 <interface name="UI" version="1.0" date="2013-04-16">
@@ -1364,6 +1402,14 @@
     <function name="Alert" messagetype="response">
       <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="2000000000">
         <description>Amount of time (in seconds) that an app must wait before resending an alert.</description>
+      </param>
+    </function>
+    <function name="ShowNotification" messagetype="notification">
+      <description>Initiated by SDL in order to notify user about some actions, i.e. while waiting for updates from server etc.</description>
+      <param name="text" type="Common.TextFieldStruct" mandatory="true"/>
+      <param name="icon" type="Common.Image" mandatory="false"/>
+      <param name="timeout" type="Integer" mandatory="true">
+        <description>Pop-up is excpeted to be shown during timeout and then closed by HMI or closed using ClosePopUp request from SDL.</description>
       </param>
     </function>
     <function name="Show" messagetype="request">
@@ -1596,7 +1642,7 @@
     </function>
     <function name="OnDeviceChosen" messagetype="notification">
       <description>Notification is initiated by HMI on user selecting device in list of devices.</description>
-      <param name="deviceName" type="String" mandatory="true"/>
+      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true"/>
     </function>
     <function name="Slider" messagetype="request">
       <description>Creates a full screen or pop-up overlay (depending on platform) with a single user controlled slider.</description>
@@ -1868,6 +1914,9 @@
     </param>
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
+    </param>
+    <param name="appId" type="Integer" mandatory="true">
+      <description>Id of application requested this RPC.</description>
     </param>
   </function>
 

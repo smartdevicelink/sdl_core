@@ -45,12 +45,15 @@
 #include "request_watchdog/watchdog_subscriber.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
+#include "application_manager/hmi_capabilities.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class CSmartObject;
 }
 }
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace threads {
 class Thread;
@@ -72,7 +75,8 @@ typedef std::map<unsigned int, MessageChainPtr> MessageChains;
 class ApplicationManagerImpl : public ApplicationManager
   , public hmi_message_handler::HMIMessageObserver
   , public connection_handler::ConnectionHandlerObserver
-    , public request_watchdog::WatchdogSubscriber {
+  , public request_watchdog::WatchdogSubscriber
+    , public HMICapabilities {
   public:
     ~ApplicationManagerImpl();
     static ApplicationManagerImpl* instance();
@@ -80,7 +84,7 @@ class ApplicationManagerImpl : public ApplicationManager
     /////////////////////////////////////////////////////
 
     Application* application(int app_id);
-    const std::set<Application*>& applications() const;
+    inline const std::set<Application*>& applications() const;
     Application* active_application() const;
     std::vector<Application*> applications_by_button(unsigned int button);
     std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
@@ -91,11 +95,27 @@ class ApplicationManagerImpl : public ApplicationManager
     /////////////////////////////////////////////////////
 
     bool RegisterApplication(Application* application);
-    bool UnregisterApplication(Application* application);
-    void UnregisterAllApplications();
+    /*
+     * @brief Closes application by id
+     *
+     * @param app_id Application id
+     *
+     * @return operation result
+     */
+    bool UnregisterApplication(int app_id);
+
+    /*
+     * @brief Closes all registered applications
+     *
+     * @param hmi_off Describes if the reason for exiting
+     *  applications was HU switching off
+     */
+    void UnregisterAllApplications(bool hmi_off = false);
     bool RemoveAppDataFromHMI(Application* application);
     bool LoadAppDataToHMI(Application* application);
     bool ActivateApplication(Application* application);
+    void ConnectToDevice(unsigned int id);
+    void OnHMIStartedCooperation();
 
     /*
      * @brief Add to the chain amount of requests sent to hmi
@@ -113,11 +133,11 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return pointer to MessageChaining
      */
     MessageChaining* AddMessageChain(
-        MessageChaining* chain,
-        unsigned int connection_key,
-        unsigned int correlation_id,
-        unsigned int function_id,
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
+      MessageChaining* chain,
+      unsigned int connection_key,
+      unsigned int correlation_id,
+      unsigned int function_id,
+      const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
      * @brief Decrease chain for correlation ID
@@ -151,6 +171,35 @@ class ApplicationManagerImpl : public ApplicationManager
      * @param flag New state to be set
      */
     void set_audio_pass_thru_flag(bool flag);
+
+    /*
+     * @brief Retrieves driver distraction state
+     *
+     * @return Current state of the distraction state
+     */
+    inline bool driver_distraction() const;
+
+    /*
+     * @brief Sets state for driver distraction
+     *
+     * @param state New state to be set
+     */
+    void set_driver_distraction(
+      bool is_distracting);
+
+    /*
+     * @brief Retrieves if VR session has started
+     *
+     * @return Current VR session state (started, stopped)
+     */
+    inline bool vr_session_started() const;
+
+    /*
+     * @brief Sets VR session state
+     *
+     * @param state Current HMI VR session state
+     */
+    void set_vr_session_started(const bool& state);
 
     /*
      * @brief Starts audio pass thru thread
@@ -190,8 +239,10 @@ class ApplicationManagerImpl : public ApplicationManager
 
     /////////////////////////////////////////////////////////
 
-    void onMessageReceived(application_manager::Message* message);
-    void onErrorSending(application_manager::Message* message);
+    void onMessageReceived(
+      utils::SharedPtr<application_manager::Message> message);
+    void onErrorSending(
+      utils::SharedPtr<application_manager::Message> message);
 
     void OnDeviceListUpdated(
       const connection_handler::DeviceList& device_list);
@@ -240,14 +291,31 @@ class ApplicationManagerImpl : public ApplicationManager
     /**
      * @brief List of applications
      */
-    std::set<Application*>      application_list_;
-    MessageChains               message_chaining_;
-    bool                        hmi_deletes_commands_;
-    bool                        audio_pass_thru_flag_;
-    threads::Thread*            perform_audio_thread_;
+    std::set<Application*> application_list_;
+    MessageChains message_chaining_;
+    bool audio_pass_thru_flag_;
+    threads::Thread* perform_audio_thread_;
+    bool is_distracting_driver_;
+    bool is_vr_session_strated_;
+    bool hmi_cooperating_;
+
+    hmi_message_handler::HMIMessageHandler* hmi_handler_;
+    mobile_message_handler::MobileMessageHandler* mobile_handler_;
+    connection_handler::ConnectionHandler* connection_handler_;
+    request_watchdog::Watchdog* watchdog_;
+
+    static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
+
+const std::set<Application*>& ApplicationManagerImpl::applications() const {
+  return application_list_;
+}
+
+bool ApplicationManagerImpl::driver_distraction() const {
+  return is_distracting_driver_;
+}
 
 }  // namespace application_manager
 
