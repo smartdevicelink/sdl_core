@@ -129,6 +129,7 @@ const char id[] = "id";
 const char application[] = "application";
 const char icon[] = "icon";
 const char device_name[] = "deviceName";
+const char reason[] = "reason";
 }  // namespace strings
 
 namespace mobile_notification {

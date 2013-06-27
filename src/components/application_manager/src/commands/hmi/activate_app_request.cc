@@ -55,14 +55,14 @@ void ActivateAppRequest::Run() {
 
   if (!application) {
     (*message_)[strings::msg_params][strings::result_code] =
-      hmi_apis::Common_Result::eType::INVALID_DATA;
+      hmi_apis::Common_Result::INVALID_DATA;
   } else {
     if (ApplicationManagerImpl::instance()->ActivateApplication(application)) {
       (*message_)[strings::msg_params][strings::result_code] =
-        hmi_apis::Common_Result::eType::SUCCESS;
+        hmi_apis::Common_Result::SUCCESS;
     } else {
       (*message_)[strings::msg_params][strings::result_code] =
-        hmi_apis::Common_Result::eType::GENERIC_ERROR;
+        hmi_apis::Common_Result::GENERIC_ERROR;
     }
   }
 
