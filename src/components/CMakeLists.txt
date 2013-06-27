@@ -2,7 +2,8 @@
 add_subdirectory(./interfaces)
 
 # --- TransportManager
-add_subdirectory(./TransportManager)
+#add_subdirectory(./TransportManager)
+add_subdirectory(./transport_manager)
 
 # --- AppMgr
 add_subdirectory(./AppMgr)
