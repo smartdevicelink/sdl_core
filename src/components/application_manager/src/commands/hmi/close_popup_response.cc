@@ -36,9 +36,6 @@ namespace application_manager {
 
 namespace commands {
 
-
-
-
 ClosePopupResponse::ClosePopupResponse(
   const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
@@ -48,7 +45,7 @@ ClosePopupResponse::~ClosePopupResponse() {
 
 void ClosePopupResponse::Run() {
   LOG4CXX_INFO(logger_, "ClosePopupResponse::Run ");
-  // TODO(VS): Process response from HMI(field "available") and do something with SDL
+  // TODO(VS): Process response from HMI
 }
 
 }  // namespace commands

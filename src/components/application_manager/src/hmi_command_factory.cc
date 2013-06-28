@@ -82,6 +82,8 @@
 #include "application_manager/commands/hmi/tts_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/tts_get_language_request.h"
 #include "application_manager/commands/hmi/tts_get_language_response.h"
+#include "application_manager/commands/hmi/tts_stop_speaking_request.h"
+#include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
 #include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
@@ -286,6 +288,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::TTSGetSupportedLanguagesResponse(message));
       } else {
         command.reset(new commands::TTSGetSupportedLanguagesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_StopSpeaking: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSStopSpeakingResponse(message));
+      } else {
+        command.reset(new commands::TTSStopSpeakingRequest(message));
       }
       break;
     }

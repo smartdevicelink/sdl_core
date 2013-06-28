@@ -160,6 +160,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_get_language_response.cc
 ./src/commands/hmi/tts_get_supported_languages_request.cc
 ./src/commands/hmi/tts_get_supported_languages_response.cc
+./src/commands/hmi/tts_stop_speaking_request.cc
+./src/commands/hmi/tts_stop_speaking_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
 ./src/commands/hmi/ui_get_supported_languages_request.cc
