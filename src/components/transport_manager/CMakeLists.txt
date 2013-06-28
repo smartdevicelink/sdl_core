@@ -7,7 +7,7 @@ include_directories (
 set (SOURCES
 	./src/transport_manager_impl.cc
 	./src/device_adapter_listener_impl.cc
-#	./src/device_adapter_impl.cc
+	./src/device_adapter_impl.cc
 )
 
 add_library("TransportManager" ${SOURCES})

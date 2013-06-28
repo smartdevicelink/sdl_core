@@ -56,11 +56,8 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Constructor.
    *
-   * @param Listener Listener for device adapter notifications.
-   * @param HandleGenerator Handle generator implementation.
    **/
-  DeviceAdapterImpl(DeviceAdapterListener& listener,
-                 DeviceHandleGenerator & handle_generator);
+  DeviceAdapterImpl();
 
   /**
    * @brief Destructor.
@@ -94,7 +91,9 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
    **/
-  virtual Error connect(const DeviceHandle device_handle, const ApplicationHandle app_handle, const int session_id);
+  virtual Error connect(const DeviceHandle device_handle,
+                        const ApplicationHandle app_handle,
+                        const int session_id);
 
   /**
    * @brief Disconnect from specified session.
@@ -161,6 +160,10 @@ class DeviceAdapterImpl : public DeviceAdapter {
      **/
     virtual bool isSameAs(const Device* other_device) const;
 
+    const std::string& unique_device_id() const {
+      return unique_device_id_;
+    }
+
    private:
     /**
      * @brief Device user-friendly name.
@@ -223,6 +226,30 @@ class DeviceAdapterImpl : public DeviceAdapter {
 
     int connection_socket() const {
       return connection_socket_;
+    }
+
+    bool terminate_flag() const {
+      return terminate_flag_;
+    }
+
+    void set_terminate_flag(bool terminate_flag) {
+      terminate_flag_ = terminate_flag;
+    }
+
+    bool createNotificationPipe();
+    void closeNotificationPipe();
+
+    int getNotificationPipeReadFd() const;
+    int getNotificationPipeWriteFd() const;
+
+    pthread_t connection_thread() const {
+      return connection_thread_;
+    }
+
+    int start_connection_thread(DeviceAdapterImpl* device_adapter);
+
+    FrameQueue& frames_to_send() {
+      return frames_to_send_;
     }
 
    private:
@@ -304,7 +331,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
    **/
   void waitForThreadsTermination();
 
-
   /**
    * @brief Create connection.
    *
@@ -331,7 +357,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
    * @param connection Connection to delete.
    **/
   void deleteConnection(Connection* connection);
-
 
   /**
    * @brief Start connection.
@@ -423,12 +448,12 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Listener for device adapter notifications.
    **/
-  DeviceAdapterListener& listener_;
+  DeviceAdapterListener* listener_;
 
   /**
    * @brief Handle generator implementation.
    **/
-  DeviceHandleGenerator& handle_generator_;
+  DeviceHandleGenerator* handle_generator_;
 
   /**
    * @brief Flag indicating that device scan was requested.
@@ -537,7 +562,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
   bool initialized_;
 };
 
-} // namespace transport_manager
+}  // namespace transport_manager
 
 #endif // #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_IMPL_H_
-

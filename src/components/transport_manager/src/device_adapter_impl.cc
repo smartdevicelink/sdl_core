@@ -40,8 +40,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-//#include "DeviceAdapterListener.h"
-//#include "HandleGenerator.h"
 #include "transport_manager/device_adapter_impl.h"
 #include "transport_manager/device_adapter_listener.h"
 
@@ -78,10 +76,9 @@ DeviceAdapterImpl::Connection::Connection(const DeviceHandle device_handle,
 DeviceAdapterImpl::Connection::~Connection(void) {
 }
 
-DeviceAdapterImpl::DeviceAdapterImpl(DeviceAdapterListener& listener,
-                                     DeviceHandleGenerator& handle_generator)
-    : listener_(listener),
-      handle_generator_(handle_generator),
+DeviceAdapterImpl::DeviceAdapterImpl()
+    : listener_(0),
+      handle_generator_(0),
       device_scan_requested_(false),
       device_scan_requested_mutex_(),
       device_scan_requested_cond_(),
@@ -176,16 +173,16 @@ void DeviceAdapterImpl::waitForThreadsTermination() {
     SessionID session_id = it->first;
     Connection* connection = it->second;
 
-    connection->terminate_flag_ = true;
-    if (-1 != connection->notification_pipe_fds_[1]) {
+    connection->set_terminate_flag(true);
+    if (-1 != connection->getNotificationPipeWriteFd()) {
       uint8_t c = 0;
-      if (1 != write(connection->notification_pipe_fds_[1], &c, 1)) {
+      if (1 != write(connection->getNotificationPipeWriteFd(), &c, 1)) {
         LOG4CXX_ERROR_WITH_ERRNO(
             logger_,
             "Failed to wake up connection thread for connection " << session_id);
       }
     }
-    connection_threads.push_back(connection->connection_thread_);
+    connection_threads.push_back(connection->connection_thread());
   }
 
   pthread_mutex_unlock(&connections_mutex_);
@@ -216,13 +213,13 @@ DeviceAdapter::Error DeviceAdapterImpl::createConnection(
 
   for (ConnectionMap::const_iterator it = connections_.begin();
       it != connections_.end(); ++it) {
-    const Connection& existingConnection = *it;
-    if (existingConnection.application_handle() == app_handle
-        && existingConnection.device_handle() == device_handle) {
+    const Connection* existing_connection = it->second;
+    if (existing_connection->application_handle() == app_handle
+        && existing_connection->device_handle() == device_handle) {
       error = DeviceAdapter::ALREADY_EXIST;
       break;
     }
-    if (existingConnection.session_id() == session_id) {
+    if (existing_connection->session_id() == session_id) {
       error = DeviceAdapter::ALREADY_EXIST;
       break;
     }
@@ -258,15 +255,8 @@ DeviceAdapter::Error DeviceAdapterImpl::startConnection(
   bool is_thread_started = false;
 
   if (!shutdown_flag_) {
-    ConnectionThreadParameters* thread_params = new ConnectionThreadParameters;
-    thread_params->device_adapter = this;
-    thread_params->connection = connection;
-
-    int errorCode = pthread_create(&connection->connection_thread_, 0,
-                                   &connectionThreadStartRoutine,
-                                   static_cast<void*>(thread_params));
-
-    if (0 == errorCode) {
+    const int error_code = connection->start_connection_thread(this);
+    if (0 == error_code) {
       LOG4CXX_INFO(
           logger_,
           "Connection thread started for session " << connection->session_id() << " (device " << connection->device_handle() << ")");
@@ -276,8 +266,6 @@ DeviceAdapter::Error DeviceAdapterImpl::startConnection(
       LOG4CXX_ERROR(
           logger_,
           "Connection thread start failed for session " << connection->session_id() << " (device " << connection->device_handle() << ")");
-
-      delete thread_params;
     }
   }
 
@@ -286,11 +274,11 @@ DeviceAdapter::Error DeviceAdapterImpl::startConnection(
 
 DeviceAdapter::Error DeviceAdapterImpl::stopConnection(Connection* connection) {
   assert(connection != 0);
-  if (false == connection->terminate_flag_) {
-    connection->terminate_flag_ = true;
-    if (-1 != connection->notification_pipe_fds_[1]) {
+  if (!connection->terminate_flag()) {
+    connection->set_terminate_flag(true);
+    if (-1 != connection->getNotificationPipeWriteFd()) {
       uint8_t c = 0;
-      if (1 != ::write(connection->notification_pipe_fds_[1], &c, 1)) {
+      if (1 != ::write(connection->getNotificationPipeWriteFd(), &c, 1)) {
         LOG4CXX_ERROR_WITH_ERRNO(
             logger_,
             "Failed to wake up connection thread for connection " << connection->session_id());
@@ -354,8 +342,8 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
   assert(connection != 0);
 
   DeviceHandle device_handle = connection->device_handle();
-  const bool is_pipe_created = (0 == ::pipe(connection->notification_pipe_fds_));
-  const int notification_pipe_read_fd = connection->notification_pipe_fds_[0];
+  const bool is_pipe_created = connection->createNotificationPipe();
+  const int notification_pipe_read_fd = connection->getNotificationPipeReadFd();
   const int connection_socket = connection->connection_socket();
 
   bool is_connection_succeeded = false;
@@ -368,7 +356,7 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
     bool is_device_valid = false;
     //DeviceInfo clientDeviceInfo; TODO
 
-    pthread_mutex_lock (&mDevicesMutex);
+    pthread_mutex_lock(&devices_mutex_);
 
     DeviceMap::const_iterator device_it = devices_.find(device_handle);
 
@@ -399,18 +387,18 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                      fcntl(notification_pipe_read_fd, F_GETFL) | O_NONBLOCK)) {
           LOG4CXX_INFO(
               logger_,
-              "Connection " << connection->session_id << " to remote device " << device->unique_device_id_ << " established");
+              "Connection " << connection->session_id() << " to remote device " << device->unique_device_id() << " established");
 
-          listener_.onConnectDone(this, connection->session_id());
+          listener_->onConnectDone(this, connection->session_id());
           is_connection_succeeded = true;
 
           pollfd poll_fds[2];
           poll_fds[0].fd = connection_socket;
           poll_fds[0].events = POLLIN | POLLPRI;
-          poll_fds[1].fd = connection->notification_pipe_fds_[0];
+          poll_fds[1].fd = notification_pipe_read_fd;
           poll_fds[1].events = POLLIN | POLLPRI;
 
-          while (false == connection->terminate_flag_) {
+          while (!connection->terminate_flag()) {
             if (-1
                 != poll(poll_fds, sizeof(poll_fds) / sizeof(poll_fds[0]), -1)) {
               if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
@@ -418,14 +406,14 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                     logger_,
                     "Connection " << connection->session_id() << " terminated");
 
-                connection->terminate_flag_ = true;
+                connection->set_terminate_flag(true);
               } else if (0
                   != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
                 LOG4CXX_ERROR(
                     logger_,
                     "Notification pipe for connection " << connection->session_id() << " terminated");
 
-                connection->terminate_flag_ = true;
+                connection->set_terminate_flag(true);
               } else {
                 uint8_t buffer[4096];
                 ssize_t bytes_read = -1;
@@ -439,17 +427,17 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                       LOG4CXX_INFO(
                           logger_,
                           "Received " << bytes_read << " bytes for connection " << connection->session_id());
-                      unsigned char* data = new data[bytes_read];
+                      unsigned char* data = new unsigned char[bytes_read];
                       if (data) {
                         memcpy(data, buffer, bytes_read);
                         RawMessageSptr frame(
                             new protocol_handler::RawMessage(
                                 connection->session_id(), 0, data, bytes_read));
-                        listener_.onDataReceiveDone(this,
+                        listener_->onDataReceiveDone(this,
                                                     connection->session_id(),
                                                     frame);
                       } else {
-                        listener_.onDataReceiveFailed(this,
+                        listener_->onDataReceiveFailed(this,
                                                       connection->session_id(),
                                                       DataReceiveError());
                       }
@@ -459,19 +447,19 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                             logger_,
                             "recv() failed for connection " << connection->session_id());
 
-                        connection->terminate_flag_ = true;
+                        connection->set_terminate_flag(true);
                       }
                     } else {
                       LOG4CXX_INFO(
                           logger_,
                           "Connection " << connection->session_id() << " closed by remote peer");
 
-                      connection->terminate_flag_ = true;
+                      connection->set_terminate_flag(true);
                     }
                   } while (bytes_read > 0);
                 }
 
-                if ((false == connection->terminate_flag_)
+                if ((!connection->terminate_flag())
                     && (0 != poll_fds[1].revents)) {
                   do {
                     bytes_read = read(notification_pipe_read_fd, buffer,
@@ -483,12 +471,12 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                         logger_,
                         "Failed to clear notification pipe for connection " << connection->session_id());
 
-                    connection->terminate_flag_ = true;
+                    connection->set_terminate_flag(true);
                   }
 
                   FrameQueue frames_to_send;
                   pthread_mutex_lock(&connections_mutex_);
-                  std::swap(frames_to_send, connection->frames_to_send_);
+                  std::swap(frames_to_send, connection->frames_to_send());
                   pthread_mutex_unlock(&connections_mutex_);
 
                   bool frame_sent = false;
@@ -514,10 +502,10 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                       }
                     }
                     if (frame_sent) {
-                      listener_.onDataSendDone(this, connection->session_id(),
+                      listener_->onDataSendDone(this, connection->session_id(),
                                                frame);
                     } else {
-                      listener_.onDataSendFailed(this, connection->session_id(),
+                      listener_->onDataSendFailed(this, connection->session_id(),
                                                  frame, DataSendError());
                     }
                   }
@@ -528,7 +516,7 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                   logger_,
                   "poll() failed for connection " << connection->session_id());
 
-              connection->terminate_flag_ = true;
+              connection->set_terminate_flag(true);
             }
           }
         } else {
@@ -551,27 +539,21 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
     if (is_connection_succeeded) {
       if (close_status == 0) {
-        listener_.onDisconnectDone(this, connection->session_id());
+        listener_->onDisconnectDone(this, connection->session_id());
       } else {
-        listener_.onDisconnectFailed(this, connection->session_id(),
+        listener_->onDisconnectFailed(this, connection->session_id(),
                                      DisconnectError());
       }
     }
   }
 
   if (!is_connection_succeeded) {
-    listener_.onConnectFailed(this, connection->session_id(), ConnectError());
+    listener_->onConnectFailed(this, connection->session_id(), ConnectError());
   }
 
   if (true == is_pipe_created) {
     pthread_mutex_lock(&connections_mutex_);
-
-    close(connection->notification_pipe_fds_[0]);
-    close(connection->notification_pipe_fds_[1]);
-
-    connection->notification_pipe_fds_[0] =
-        connection->notification_pipe_fds_[1] = -1;
-
+    connection->closeNotificationPipe();
     pthread_mutex_unlock(&connections_mutex_);
   }
 }
@@ -618,11 +600,11 @@ DeviceAdapter::Error DeviceAdapterImpl::sendData(const int session_id,
     } else {
       Connection* connection = connection_it->second;
 
-      connection->frames_to_send_.push(data);
+      connection->frames_to_send().push(data);
 
-      if (-1 != connection->notification_pipe_fds_[1]) {
+      if (-1 != connection->getNotificationPipeWriteFd()) {
         uint8_t c = 0;
-        if (1 != write(connection->notification_pipe_fds_[1], &c, 1)) {
+        if (1 != write(connection->getNotificationPipeWriteFd(), &c, 1)) {
           LOG4CXX_ERROR_WITH_ERRNO(
               logger_,
               "Failed to wake up connection thread for connection " << session_id);
@@ -694,7 +676,7 @@ DeviceAdapter::Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
   if (it != connections_.end()) {
     Connection* connection = it->second;
   } else {
-    Error = BAD_PARAM;
+    error = BAD_PARAM;
   }
   pthread_mutex_unlock(&connections_mutex_);
   if (error != OK) {
@@ -738,6 +720,40 @@ DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(
   }
 
   return ret;
+}
+
+bool DeviceAdapterImpl::Connection::createNotificationPipe() {
+  return (0 == pipe(notification_pipe_fds_));
+}
+
+void DeviceAdapterImpl::Connection::closeNotificationPipe() {
+  close(notification_pipe_fds_[0]);
+  close(notification_pipe_fds_[1]);
+
+  notification_pipe_fds_[0] = -1;
+  notification_pipe_fds_[1] = -1;
+}
+
+int DeviceAdapterImpl::Connection::getNotificationPipeReadFd() const {
+  return notification_pipe_fds_[0];
+}
+
+int DeviceAdapterImpl::Connection::getNotificationPipeWriteFd() const {
+  return notification_pipe_fds_[1];
+}
+
+int DeviceAdapterImpl::Connection::start_connection_thread(
+    DeviceAdapterImpl* device_adapter) {
+  ConnectionThreadParameters* thread_params = new ConnectionThreadParameters;
+  thread_params->device_adapter = device_adapter;
+  thread_params->connection = this;
+
+  const int error_code = pthread_create(&connection_thread_, 0,
+                                        &connectionThreadStartRoutine,
+                                        static_cast<void*>(thread_params));
+  if (error_code != 0)
+    delete thread_params;
+  return error_code;
 }
 
 }  // namespace transport_manager
