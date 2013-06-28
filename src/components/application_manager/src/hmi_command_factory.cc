@@ -76,6 +76,8 @@
 #include "application_manager/commands/hmi/vr_get_language_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
+#include "application_manager/commands/hmi/tts_change_registration_request.h"
+#include "application_manager/commands/hmi/tts_change_registration_response.h"
 #include "application_manager/commands/hmi/tts_get_supported_languages_request.h"
 #include "application_manager/commands/hmi/tts_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/tts_get_language_request.h"
@@ -266,6 +268,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::TTSIsReadyResponse(message));
       } else {
         command.reset(new commands::TTSIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_ChangeRegistration: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSChangeRegistratioResponse(message));
+      } else {
+        command.reset(new commands::TTSChangeRegistrationRequest(message));
       }
       break;
     }
