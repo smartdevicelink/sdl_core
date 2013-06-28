@@ -61,6 +61,12 @@ class BluetoothAdapter : public DeviceAdapterImpl {
   virtual ApplicationList getApplicationList(
       const DeviceHandle device_handle) const;
 
+  virtual void mainThread();
+
+  typedef std::vector<uint8_t> RfcommChannelVector;
+  void discoverSmartDeviceLinkRfcommChannels(const bdaddr_t& device_address,
+                                             RfcommChannelVector* channels);
+
   /**
    * @brief Get unique device ID.
    *
@@ -74,7 +80,6 @@ class BluetoothAdapter : public DeviceAdapterImpl {
   static std::string getUniqueDeviceId(const bdaddr_t& DeviceAddress);
 
  protected:
-  typedef std::vector<uint8_t> RfcommChannelVector;
   typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
 
   class BluetoothDevice : public Device {
@@ -123,13 +128,8 @@ class BluetoothAdapter : public DeviceAdapterImpl {
     ApplicationHandle next_application_handle_;
   };
 
- protected:
-  void discoverSmartDeviceLinkRfcommChannels(const bdaddr_t& device_address,
-                                             RfcommChannelVector* channels);
-
  private:
   bool initialized_;
-  DeviceHandleGenerator* handle_generator_;
 
   uuid_t smart_device_link_service_uuid_;
 };

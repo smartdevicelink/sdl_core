@@ -35,23 +35,27 @@
 
 #include <errno.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+
+#include <iomanip>
+#include <set>
 
 #include "transport_manager/bluetooth_adapter.h"
+#include "transport_manager/device_adapter_listener.h"
+#include "transport_manager/device_handle_generator.h"
 
 namespace transport_manager {
 
 BluetoothAdapter::BluetoothAdapter()
-    : initialized_(false),
-      listener_(0),
-      handle_generator_(0) {
+    : DeviceAdapterImpl() {
   LOG4CXX_INFO(logger_, "BluetoothAdapter constructed");
 
   uint8_t smart_device_link_service_uuid_data[] = { 0x93, 0x6D, 0xA0, 0x1F,
@@ -118,15 +122,15 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
              sizeof(bdaddr_t));
       remoteSocketAddress.rc_channel = rfcomm_channels_it->second;
 
-      const int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM,
+      const int rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM,
                                       BTPROTO_RFCOMM);
 
-      if (-1 != rfcommSocket) {
+      if (-1 != rfcomm_socket) {
         const int connect_status = ::connect(
-            rfcommSocket, static_cast<struct sockaddr*>(&remoteSocketAddress),
+            rfcomm_socket, (struct sockaddr*) &remoteSocketAddress,
             sizeof(remoteSocketAddress));
         if (0 == connect_status) {
-          connection->set_connection_socket(rfcommSocket);
+          connection->set_connection_socket(rfcomm_socket);
           handleCommunication(connection);
         } else {
           LOG4CXX_ERROR_WITH_ERRNO(
@@ -226,7 +230,7 @@ void BluetoothAdapter::mainThread() {
             LOG4CXX_ERROR(logger_, "hci_inquiry failed");
           }
 
-          close (deviceHandle);
+          close (device_handle);
         }
       }
 
@@ -257,10 +261,10 @@ void BluetoothAdapter::mainThread() {
 
           LOG4CXX_INFO(
               logger_,
-              "Adding new device " << device_handle << " (\"" << discovered_device->name_ << "\")");
+              "Adding new device " << device_handle << " (\"" << discovered_device->name() << "\")");
         }
 
-        new_devices[device_handle] = discovered_devices;
+        new_devices[device_handle] = discovered_device;
       }
 
       pthread_mutex_lock(&connections_mutex_);
@@ -310,7 +314,7 @@ void BluetoothAdapter::mainThread() {
         if (0 != device) {
           LOG4CXX_INFO(
               logger_,
-              std::setw(10) << it->first << std::setw(0) << ": " << device->unique_device_id_ << ", " << device->name_);
+              std::setw(10) << it->first << std::setw(0) << ": " << device->unique_device_id() << ", " << device->name());
         } else {
           LOG4CXX_ERROR(
               logger_,
@@ -321,9 +325,9 @@ void BluetoothAdapter::mainThread() {
       device_scan_requested_ = false;
 
       if (device_scan_succeeded) {
-        listener_.onSearchDeviceDone(this);
+        listener_->onSearchDeviceDone(this);
       } else {
-        listener_.onSearchDeviceFailed(this, SearchDeviceError());
+        listener_->onSearchDeviceFailed(this, SearchDeviceError());
       }
     }
   }
@@ -464,7 +468,7 @@ BluetoothAdapter::BluetoothDevice::BluetoothDevice(
       address_(address),
       next_application_handle_(1) {
 
-  unique_device_id_ = getUniqueDeviceId(address);
+  set_unique_device_id(getUniqueDeviceId(address));
   for (RfcommChannelVector::const_iterator it = rfcomm_channels.begin();
       it != rfcomm_channels.end(); ++it) {
     rfcomm_channels_[next_application_handle_++] = *it;

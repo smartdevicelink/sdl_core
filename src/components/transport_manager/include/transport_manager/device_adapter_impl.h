@@ -164,6 +164,16 @@ class DeviceAdapterImpl : public DeviceAdapter {
       return unique_device_id_;
     }
 
+    const std::string& name() const {
+      return name_;
+    }
+
+   protected:
+
+    void set_unique_device_id(const std::string& unique_device_id) {
+      unique_device_id_ = unique_device_id;
+    }
+
    private:
     /**
      * @brief Device user-friendly name.
