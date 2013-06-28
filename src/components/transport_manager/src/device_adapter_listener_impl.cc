@@ -239,7 +239,7 @@ void DeviceAdapterListenerImpl::onDataSendDone(
 
 void DeviceAdapterListenerImpl::onDataSendFailed(
 		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id,
-		const DataSendError& error) {
+		const RawMessageSptr data_container, const DataSendError& error) {
 	DataSendError *err = new DataSendError(error);
 	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
 			DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL, session_id,

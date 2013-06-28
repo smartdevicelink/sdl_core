@@ -96,6 +96,7 @@ class DeviceAdapterListenerImpl : public DeviceAdapterListener {
                               const RawMessageSptr data_container);
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
                                 const transport_manager::SessionID session_id,
+                                const RawMessageSptr data_container,
                                 const DataSendError& error);
 
   virtual void onCommunicationError(

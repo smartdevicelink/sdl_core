@@ -41,12 +41,11 @@
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
 #include "protocol_handler/raw_message.h"
-#include "transport_manager/device_adapter_listener.h"
 
 namespace transport_manager {
 
-class DataContainer;
 class Configuration;
+class DeviceAdapterListener;
 typedef std::string DeviceType;
 typedef int DeviceHandle;
 typedef int ApplicationHandle;

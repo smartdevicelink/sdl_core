@@ -40,13 +40,6 @@
 #include "transport_manager/device_adapter.h"
 
 namespace transport_manager {
-class DeviceAdapter;
-class DeviceAdapterError;
-class SearchDeviceError;
-class ConnectError;
-class DisconnectDeviceError;
-class DataSendError;
-class DisconnectError;
 
 class DeviceAdapterListener {
 public:
