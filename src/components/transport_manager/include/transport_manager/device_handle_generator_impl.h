@@ -1,6 +1,6 @@
 /**
  * \file handle_generator.h
- * \brief HandleGenerator class header file.
+ * \brief HandleGeneratorImpl class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,26 +33,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR_IMPL
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR_IMPL
 
-namespace transport_manager
-{
+#include <pthread.h>
 
-typedef int DeviceHandle;
+#include "device_handle_generator.h"
+
+namespace transport_manager {
 
 /**
  * @brief Interface for device handle generator.
  * @interface DeviceHandleGenerator
  **/
-class DeviceHandleGenerator
-{
-public:
+class DeviceHandleGeneratorImpl : public DeviceHandleGenerator {
+ public:
+
+  DeviceHandleGeneratorImpl();
 
   /**
    * @brief Destructor.
    **/
-  virtual ~DeviceHandleGenerator();
+  virtual ~DeviceHandleGeneratorImpl();
 
   /**
    * @brief Generate new device handle.
@@ -61,9 +63,23 @@ public:
    *
    * @return New device handle.
    **/
-  virtual DeviceHandle generate() = 0;
+  virtual DeviceHandle generate();
+
+ private:
+  /**
+   * @brief Mutex restricting access to new device handle generation
+   **/
+  mutable pthread_mutex_t device_handle_generation_mutex_;
+
+  /**
+   * @brief Last used device handle
+   *
+   * Used during device handle generation
+   **/
+  DeviceHandle last_used_device_handle_;
+
 };
 
-} // namespace transport_manager
+}  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR_IMPL

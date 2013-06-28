@@ -40,6 +40,7 @@
 #include <vector>
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
+#include "transport_manager/device_handle_generator.h"
 #include "protocol_handler/raw_message.h"
 
 namespace transport_manager {
@@ -47,7 +48,6 @@ namespace transport_manager {
 class Configuration;
 class DeviceAdapterListener;
 typedef std::string DeviceType;
-typedef int DeviceHandle;
 typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
 typedef std::vector<DeviceHandle> DeviceList;
