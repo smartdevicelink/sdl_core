@@ -57,12 +57,10 @@ TransportManagerImpl::TransportManagerImpl()
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
       device_adapter_listener_(),
-      is_initialized_(false),
-      terminated_threard_count_(0) {
+      is_initialized_(false) {
 
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
-  pthread_mutex_init(&terminate_thread_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
   device_adapter_listener_ = new DeviceAdapterListenerImpl(this);
 //todo: uncoment when adapter is ready
@@ -82,12 +80,10 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
       device_adapter_listener_(),
-      is_initialized_(false),
-      terminated_threard_count_(0) {
+      is_initialized_(false) {
 
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
-  pthread_mutex_init(&terminate_thread_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
   device_adapter_listener_ = new DeviceAdapterListenerImpl(this);
   device_adapter->init(device_adapter_listener_, NULL);
@@ -99,14 +95,11 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
 TransportManagerImpl::~TransportManagerImpl() {
 
   all_thread_active_ = false;
-  while (terminated_threard_count_ < MAX_TM_THREADS)
-    ;
 
   pthread_join(messsage_queue_thread_, 0);
   pthread_join(event_queue_thread_, 0);
   pthread_mutex_destroy(&message_queue_mutex_);
   pthread_mutex_destroy(&event_queue_mutex_);
-  pthread_mutex_destroy(&terminate_thread_mutex_);
   pthread_cond_destroy(&device_listener_thread_wakeup_);
   delete transport_manager_listener_;
   delete device_adapter_listener_;
@@ -357,9 +350,6 @@ void TransportManagerImpl::eventListenerThread(void) {
   }  //end while true
 
   event_queue_.clear();
-  pthread_mutex_lock(&terminate_thread_mutex_);
-  terminated_threard_count_++;
-  pthread_mutex_unlock(&terminate_thread_mutex_);
 }
 
 void *TransportManagerImpl::messageQueueStartThread(void *data) {
@@ -404,9 +394,6 @@ void TransportManagerImpl::messageQueueThread(void) {
 
   message_queue_.clear();
 
-  pthread_mutex_lock(&terminate_thread_mutex_);
-  terminated_threard_count_++;
-  pthread_mutex_unlock(&terminate_thread_mutex_);
 }
 
 pthread_cond_t *TransportManagerImpl::getDeviceListenerThreadWakeup(void) {

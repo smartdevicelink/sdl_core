@@ -403,11 +403,7 @@ class TransportManagerImpl : public TransportManager {
    **/
   mutable pthread_mutex_t event_queue_mutex_;
 
-  mutable pthread_mutex_t terminate_thread_mutex_;
-
   bool is_initialized_;
-
-  uint terminated_threard_count_;
 
 };
 //class
