@@ -64,9 +64,6 @@ void AddSubMenuResponse::Run() {
         ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::connection_key]));
 
-    app->AddSubMenu(data[strings::msg_params][strings::menu_id].asInt(),
-                   data[strings::msg_params]);
-
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =
         NsSmartDeviceLinkRPC::V2::Result::SUCCESS;

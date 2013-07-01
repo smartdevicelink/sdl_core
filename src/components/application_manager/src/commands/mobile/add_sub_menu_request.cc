@@ -78,7 +78,7 @@ void AddSubMenuRequest::Run() {
   const int connection_key =
         (*message_)[strings::params][strings::connection_key];
   // TODO(VS): HMI Request Id
-  const int hmi_request_id = 200;
+  const int hmi_request_id = hmi_apis::FunctionID::UI_AddSubMenu;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, corellation_id, hmi_request_id, &(*message_));
