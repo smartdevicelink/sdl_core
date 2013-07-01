@@ -116,6 +116,12 @@
 #include "application_manager/commands/hmi/button_get_capabilities_response.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
+#include "application_manager/commands/hmi/navigation_is_ready_request.h"
+#include "application_manager/commands/hmi/navigation_is_ready_response.h"
+#include "application_manager/commands/hmi/vehicle_info_is_ready_request.h"
+#include "application_manager/commands/hmi/vehicle_info_is_ready_response.h"
+#include "application_manager/commands/hmi/on_show_notification.h"
+
 
 namespace application_manager {
 
@@ -376,6 +382,24 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::VehicleInfo_IsReady: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VehicleInfoIsReadyResponse(message));
+      } else {
+        command.reset(new commands::VehicleInfoIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_IsReady: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::NavigationIsReadyResponse(message));
+      } else {
+        command.reset(new commands::NavigationIsReadyRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::eType::Buttons_GetCapabilities: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
@@ -455,6 +479,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::eType::Buttons_OnButtonPress: {
       command.reset(new commands::OnButtonPressNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_ShowNotification: {
+      command.reset(new commands::OnShowNotification(message));
       break;
     }
   }
