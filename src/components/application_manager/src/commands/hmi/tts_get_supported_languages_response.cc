@@ -29,27 +29,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/close_popup_request.h"
-
+#include "application_manager/commands/hmi/tts_get_supported_languages_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+TTSGetSupportedLanguagesResponse::TTSGetSupportedLanguagesResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
-  SendRequest();
+void TTSGetSupportedLanguagesResponse::Run() {
+  LOG4CXX_INFO(logger_, "TTSGetSupportedLanguagesResponse::Run");
+
+  const NsSmartDeviceLinkRPC::V2::Result::eType code =
+      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>((*message_)[strings::msg_params][hmi_response::code]
+          .asInt());
+
+  if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == code) {
+    ApplicationManagerImpl::instance()->set_tts_supported_languages(
+        (*message_)[strings::msg_params][hmi_response::languages]);
+  }
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

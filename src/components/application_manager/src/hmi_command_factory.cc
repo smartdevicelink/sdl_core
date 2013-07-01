@@ -61,7 +61,11 @@
 #include "application_manager/commands/hmi/ui_change_registration_request.h"
 #include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/commands/hmi/ui_show_request.h"
+#include "application_manager/commands/hmi/ui_is_ready_request.h"
+#include "application_manager/commands/hmi/ui_is_ready_response.h"
 #include "application_manager/commands/hmi/ui_show_response.h"
+#include "application_manager/commands/hmi/ui_slider_request.h"
+#include "application_manager/commands/hmi/ui_slider_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -76,8 +80,14 @@
 #include "application_manager/commands/hmi/vr_get_language_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
+#include "application_manager/commands/hmi/tts_change_registration_request.h"
+#include "application_manager/commands/hmi/tts_change_registration_response.h"
+#include "application_manager/commands/hmi/tts_get_supported_languages_request.h"
+#include "application_manager/commands/hmi/tts_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/tts_get_language_request.h"
 #include "application_manager/commands/hmi/tts_get_language_response.h"
+#include "application_manager/commands/hmi/tts_stop_speaking_request.h"
+#include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
 #include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
@@ -276,6 +286,33 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::TTS_ChangeRegistration: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSChangeRegistratioResponse(message));
+      } else {
+        command.reset(new commands::TTSChangeRegistrationRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_GetSupportedLanguages: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSGetSupportedLanguagesResponse(message));
+      } else {
+        command.reset(new commands::TTSGetSupportedLanguagesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_StopSpeaking: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSStopSpeakingResponse(message));
+      } else {
+        command.reset(new commands::TTSStopSpeakingRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::TTS_GetLanguage: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
@@ -312,12 +349,30 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::UI_Slider: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISliderResponse(message));
+      } else {
+        command.reset(new commands::UISliderRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::UI_ClosePopUp: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::ClosePopupResponse(message));
       } else {
         command.reset(new commands::ClosePopupRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_IsReady: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIIsReadyResponse(message));
+      } else {
+        command.reset(new commands::UIIsReadyRequest(message));
       }
       break;
     }

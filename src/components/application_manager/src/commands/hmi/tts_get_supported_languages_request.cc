@@ -30,22 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/close_popup_request.h"
-
+#include "application_manager/commands/hmi/tts_get_supported_languages_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
+TTSGetSupportedLanguagesRequest::TTSGetSupportedLanguagesRequest(
   const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+TTSGetSupportedLanguagesRequest::~TTSGetSupportedLanguagesRequest() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
+void TTSGetSupportedLanguagesRequest::Run() {
+  LOG4CXX_INFO(logger_, "TTSGetSupportedLanguagesRequest::Run");
   SendRequest();
 }
 

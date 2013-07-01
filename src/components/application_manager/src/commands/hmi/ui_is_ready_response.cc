@@ -29,27 +29,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/close_popup_request.h"
-
+#include "application_manager/commands/hmi/ui_is_ready_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UIIsReadyResponse::UIIsReadyResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+UIIsReadyResponse::~UIIsReadyResponse() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
-  SendRequest();
+void UIIsReadyResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIIsReadyResponse::Run ");
+  // TODO(VS): Process response from HMI(field "available") and do something with SDL
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

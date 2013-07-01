@@ -30,26 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/close_popup_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_CHANGE_REGISTRATION_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_CHANGE_REGISTRATION_RESPONSE_H_
 
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+/**
+ * @brief TTSChangeRegistratioResponse command class
+ **/
+class TTSChangeRegistratioResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief TTSChangeRegistratioResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit TTSChangeRegistratioResponse(const MessageSharedPtr& message);
 
-ClosePopupRequest::~ClosePopupRequest() {
-}
+  /**
+   * @brief TTSChangeRegistratioResponse class destructor
+   **/
+  virtual ~TTSChangeRegistratioResponse();
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
-  SendRequest();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TTSChangeRegistratioResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_CHANGE_REGISTRATION_RESPONSE_H_

@@ -30,26 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/close_popup_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_GET_SUPPORTED_LANGUAGES_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_GET_SUPPORTED_LANGUAGES_REQUEST_H_
 
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+/**
+ * @brief TTSGetSupportedLanguagesRequest command class
+ **/
+class TTSGetSupportedLanguagesRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief TTSGetSupportedLanguagesRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit TTSGetSupportedLanguagesRequest(const MessageSharedPtr& message);
 
-ClosePopupRequest::~ClosePopupRequest() {
-}
+  /**
+   * @brief TTSGetSupportedLanguagesRequest class destructor
+   **/
+  virtual ~TTSGetSupportedLanguagesRequest();
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
-  SendRequest();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TTSGetSupportedLanguagesRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_GET_SUPPORTED_LANGUAGES_REQUEST_H_

@@ -29,27 +29,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/close_popup_request.h"
+#include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+TTSStopSpeakingResponse::TTSStopSpeakingResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
-  SendRequest();
+void TTSStopSpeakingResponse::Run() {
+  LOG4CXX_INFO(logger_, "TTSStopSpeakingResponse::Run ");
+  // TODO(VS): Process response from HMI
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

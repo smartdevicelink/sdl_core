@@ -30,22 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/close_popup_request.h"
-
+#include "application_manager/commands/hmi/ui_slider_request.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UISliderRequest::UISliderRequest(
+    const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+UISliderRequest::~UISliderRequest() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
+void UISliderRequest::Run() {
+  LOG4CXX_INFO(logger_, "UISliderRequest::Run ");
   SendRequest();
 }
 

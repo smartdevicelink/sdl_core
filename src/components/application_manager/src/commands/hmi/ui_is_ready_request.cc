@@ -30,22 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/close_popup_request.h"
-
+#include "application_manager/commands/hmi/ui_is_ready_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
+UIIsReadyRequest::UIIsReadyRequest(
   const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+UIIsReadyRequest::~UIIsReadyRequest() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
+void UIIsReadyRequest::Run() {
+  LOG4CXX_INFO(logger_, "UIIsReadyRequest::Run ");
   SendRequest();
 }
 

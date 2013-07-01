@@ -30,22 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/close_popup_request.h"
+#include "application_manager/commands/hmi/tts_stop_speaking_request.h"
 
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
+TTSStopSpeakingRequest::TTSStopSpeakingRequest(
   const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+TTSStopSpeakingRequest::~TTSStopSpeakingRequest() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
+void TTSStopSpeakingRequest::Run() {
+  LOG4CXX_INFO(logger_, "TTSStopSpeakingRequest::Run ");
   SendRequest();
 }
 

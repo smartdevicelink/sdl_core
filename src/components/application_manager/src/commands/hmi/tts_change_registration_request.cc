@@ -30,22 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/close_popup_request.h"
-
+#include "application_manager/commands/hmi/tts_change_registration_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
+TTSChangeRegistrationRequest::TTSChangeRegistrationRequest(
   const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+TTSChangeRegistrationRequest::~TTSChangeRegistrationRequest() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
+void TTSChangeRegistrationRequest::Run() {
+  LOG4CXX_INFO(logger_, "TTSChangeRegistrationRequest::Run ");
   SendRequest();
 }
 

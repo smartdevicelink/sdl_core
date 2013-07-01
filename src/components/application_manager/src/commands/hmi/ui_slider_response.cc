@@ -29,27 +29,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/close_popup_request.h"
-
+#include "application_manager/commands/hmi/ui_slider_response.h"
+#include "application_manager/application_manager_impl.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UISliderResponse::UISliderResponse(
+    const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-ClosePopupRequest::~ClosePopupRequest() {
+UISliderResponse::~UISliderResponse() {
 }
 
-void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
-  SendRequest();
+void UISliderResponse::Run() {
+  LOG4CXX_INFO(logger_, "UISliderResponse::Run ");
+
+  (*message_)[strings::params][strings::function_id] =
+    NsSmartDeviceLinkRPC::V2::FunctionID::SliderID;
+
+  SendResponseToMobile(message_);
+
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-
