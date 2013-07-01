@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_add_submenu_response.h"
+#include "application_manager/commands/hmi/ui_delete_submenu_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
@@ -39,15 +39,15 @@ namespace application_manager {
 
 namespace commands {
 
-UIAddSubmenuResponse::UIAddSubmenuResponse(
+UIDeleteSubmenuResponse::UIDeleteSubmenuResponse(
     const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-UIAddSubmenuResponse::~UIAddSubmenuResponse() {
+UIDeleteSubmenuResponse::~UIDeleteSubmenuResponse() {
 }
 
-void UIAddSubmenuResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIAddSubmenuResponse::Run ");
+void UIDeleteSubmenuResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIDeleteSubmenuResponse::Run ");
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
@@ -83,13 +83,12 @@ void UIAddSubmenuResponse::Run() {
     }
 
     if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == code) {
-      app->AddSubMenu(data[strings::msg_params][strings::menu_id].asInt(),
-                      data[strings::msg_params]);
+      app->RemoveSubMenu(data[strings::msg_params][strings::menu_id].asInt());
     }
 
     // prepare SmartObject for mobile factory
     (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::AddSubMenuID;
+      NsSmartDeviceLinkRPC::V2::FunctionID::DeleteSubMenuID;
 
     SendResponseToMobile(message_);
 }

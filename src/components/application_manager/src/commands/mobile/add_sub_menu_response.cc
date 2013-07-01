@@ -53,7 +53,8 @@ void AddSubMenuResponse::Run() {
     return;
   }
 
-  const int hmi_correlation_id = 200;
+  const int hmi_correlation_id = (*message_)[strings::params]
+                                 [strings::correlation_id];
 
   smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
     GetMessageChain(hmi_correlation_id)->data();

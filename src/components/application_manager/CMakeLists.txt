@@ -169,6 +169,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_add_submenu_request.cc
 ./src/commands/hmi/ui_add_submenu_response.cc
 ./src/commands/hmi/ui_delete_submenu_request.cc
+./src/commands/hmi/ui_delete_submenu_response.cc
 ./src/commands/hmi/ui_get_supported_languages_request.cc
 ./src/commands/hmi/ui_get_supported_languages_response.cc
 ./src/commands/hmi/ui_get_language_request.cc
