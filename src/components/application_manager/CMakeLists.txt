@@ -188,6 +188,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/navigation_is_ready_response.cc
 ./src/commands/hmi/vehicle_info_is_ready_request.cc
 ./src/commands/hmi/vehicle_info_is_ready_response.cc
+./src/commands/hmi/ui_set_icon_request.cc
 ./src/commands/hmi/ui_set_media_clock_timer_request.cc
 ./src/commands/hmi/ui_set_media_clock_timer_response.cc
 ./src/commands/hmi/on_ready_notification.cc
