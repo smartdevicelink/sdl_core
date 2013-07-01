@@ -55,10 +55,11 @@ void SetMediaClockTimerResponse::Run() {
       return;
     }
 
-    const int correlation_id = 103;
+    const int hmi_correlation_id = (*message_)[strings::params]
+                                     [strings::correlation_id];
 
     if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
+        hmi_correlation_id)) {
       (*message_)[strings::params][strings::success] = true;
       (*message_)[strings::params][strings::result_code] =
               NsSmartDeviceLinkRPC::V2::Result::SUCCESS;

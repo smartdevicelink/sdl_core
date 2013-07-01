@@ -73,8 +73,7 @@ void SetIconRequest::Run() {
     return;
   }
 
-  // TODO(VS): HMI Request Id
-    const int hmi_request_id = 208;
+  const int hmi_request_id = hmi_apis::FunctionID::UI_SetAppIcon;
 
   smart_objects::CSmartObject* set_app_icon_hmi_request  =
       new smart_objects::CSmartObject();

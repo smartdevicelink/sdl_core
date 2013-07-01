@@ -54,6 +54,10 @@
 #include "application_manager/commands/hmi/start_device_discovery_response.h"
 #include "application_manager/commands/hmi/ui_add_command_request.h"
 #include "application_manager/commands/hmi/ui_add_command_response.h"
+#include "application_manager/commands/hmi/ui_add_submenu_request.h"
+#include "application_manager/commands/hmi/ui_add_submenu_response.h"
+#include "application_manager/commands/hmi/ui_delete_submenu_request.h"
+#include "application_manager/commands/hmi/ui_delete_submenu_response.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/ui_get_language_request.h"
@@ -67,6 +71,9 @@
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
 #include "application_manager/commands/hmi/ui_show_response.h"
 #include "application_manager/commands/hmi/ui_slider_request.h"
+#include "application_manager/commands/hmi/ui_slider_response.h"
+#include "application_manager/commands/hmi/ui_set_media_clock_timer_request.h"
+#include "application_manager/commands/hmi/ui_set_media_clock_timer_response.h"
 #include "application_manager/commands/hmi/ui_slider_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
@@ -201,6 +208,33 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIAddCommandResponse(message));
       } else {
         command.reset(new commands::UIAddCommandRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_AddSubMenu: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIAddSubmenuResponse(message));
+      } else {
+        command.reset(new commands::UIAddSubmenuRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_DeleteSubMenu: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIDeleteSubmenuResponse(message));
+      } else {
+        command.reset(new commands::UIDeleteSubmenuRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_SetMediaClockTimer: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISetMediaClockTimerResponse(message));
+      } else {
+        command.reset(new commands::UISetMediaClockTimerRequest(message));
       }
       break;
     }
