@@ -403,7 +403,8 @@ ApplicationImpl::ApplicationImpl(int app_id)
     allowed_support_navigation_(false),
     hmi_level_(mobile_api::HMILevel::INVALID_ENUM),
     system_context_(mobile_api::SystemContext::INVALID_ENUM),
-    audio_streaming_state_(mobile_api::AudioStreamingState::INVALID_ENUM){
+    audio_streaming_state_(mobile_api::AudioStreamingState::INVALID_ENUM),
+    is_app_allowed_(true) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -529,6 +530,10 @@ bool ApplicationImpl::set_app_icon_path(const std::string& file_name) {
     }
   }
   return false;
+}
+
+void ApplicationImpl::set_app_allowed(const bool& allowed) {
+  is_app_allowed_ = allowed;
 }
 
 bool ApplicationImpl::AddFile(

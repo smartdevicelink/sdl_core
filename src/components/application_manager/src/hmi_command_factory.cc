@@ -253,7 +253,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case  hmi_apis::FunctionID::VR_ChangeRegistration: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
-        command.reset(new commands::VRChangeRegistratioResponse(message));
+        command.reset(new commands::VRChangeRegistrationResponse(message));
       } else {
         command.reset(new commands::VRChangeRegistrationRequest(message));
       }
