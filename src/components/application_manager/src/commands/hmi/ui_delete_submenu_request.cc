@@ -30,43 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_ADD_SUBMENU_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_ADD_SUBMENU_RESPONSE_H_
-
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/hmi/ui_delete_submenu_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief UIAddSubmenuResponse command class
- **/
-class UIAddSubmenuResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief UIAddSubmenuResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UIAddSubmenuResponse(const MessageSharedPtr& message);
+UIDeleteSubmenuRequest::UIDeleteSubmenuRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
+}
 
-  /**
-   * @brief UIAddSubmenuResponse class destructor
-   **/
-  virtual ~UIAddSubmenuResponse();
+UIDeleteSubmenuRequest::~UIDeleteSubmenuRequest() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(UIAddSubmenuResponse);
-};
+void UIDeleteSubmenuRequest::Run() {
+  LOG4CXX_INFO(logger_, "UIDeleteSubmenuRequest::Run ");
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_ADD_SUBMENU_RESPONSE_H_
