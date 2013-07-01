@@ -32,6 +32,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
+#include "connection_handler/connection_handler_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/message_chaining.h"
@@ -351,6 +352,7 @@ void ApplicationManagerImpl::onErrorSending(
 
 void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
+  // TODO (DK): HMI StartDeviceDiscovery response
 }
 void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
@@ -386,6 +388,11 @@ void ApplicationManagerImpl::set_connection_handler(
 void ApplicationManagerImpl::set_watchdog(
   request_watchdog::Watchdog* watchdog) {
   watchdog_ = watchdog;
+}
+
+void ApplicationManagerImpl::StartDevicesDiscovery() {
+  connection_handler::ConnectionHandlerImpl::getInstance()->
+      StartDevicesDiscovery();
 }
 
 void ApplicationManagerImpl::SendMessageToMobile(

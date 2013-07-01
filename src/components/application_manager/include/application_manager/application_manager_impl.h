@@ -296,6 +296,7 @@ class ApplicationManagerImpl : public ApplicationManager
 
     ///////////////////////////////////////////////////////
 
+    void StartDevicesDiscovery();
     void SendMessageToMobile(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
     void SendMessageToHMI(

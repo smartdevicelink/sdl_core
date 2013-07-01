@@ -142,6 +142,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/exit_all_applications_response.cc
 ./src/commands/hmi/exit_application_request.cc
 ./src/commands/hmi/exit_application_response.cc
+./src/commands/hmi/start_device_discovery_request.cc
+./src/commands/hmi/start_device_discovery_response.cc
 ./src/commands/hmi/vr_is_ready_request.cc
 ./src/commands/hmi/vr_is_ready_response.cc
 ./src/commands/hmi/vr_add_command_request.cc

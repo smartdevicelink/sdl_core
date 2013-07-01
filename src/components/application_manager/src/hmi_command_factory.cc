@@ -50,6 +50,8 @@
 #include "application_manager/commands/hmi/exit_all_applications_response.h"
 #include "application_manager/commands/hmi/exit_application_request.h"
 #include "application_manager/commands/hmi/exit_application_response.h"
+#include "application_manager/commands/hmi/start_device_discovery_request.h"
+#include "application_manager/commands/hmi/start_device_discovery_response.h"
 #include "application_manager/commands/hmi/ui_add_command_request.h"
 #include "application_manager/commands/hmi/ui_add_command_response.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
@@ -139,6 +141,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
                (*message)[strings::params][strings::function_id].asInt());
 
   switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
+    case  hmi_apis::FunctionID::BasicCommunication_StartDeviceDiscovery: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::StartDeviceDiscoveryResponse(message));
+      } else {
+        command.reset(new commands::StartDeviceDiscoveryRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::BasicCommunication_GetDeviceList: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
