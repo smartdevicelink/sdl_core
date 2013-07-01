@@ -212,6 +212,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/button_get_capabilities_response.cc
 ./src/commands/hmi/on_button_event_notification.cc
 ./src/commands/hmi/on_button_press_notification.cc
+./src/commands/hmi/on_show_notification.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})

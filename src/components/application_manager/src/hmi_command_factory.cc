@@ -120,6 +120,7 @@
 #include "application_manager/commands/hmi/navigation_is_ready_response.h"
 #include "application_manager/commands/hmi/vehicle_info_is_ready_request.h"
 #include "application_manager/commands/hmi/vehicle_info_is_ready_response.h"
+#include "application_manager/commands/hmi/on_show_notification.h"
 
 
 namespace application_manager {
@@ -478,6 +479,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::eType::Buttons_OnButtonPress: {
       command.reset(new commands::OnButtonPressNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_ShowNotification: {
+      command.reset(new commands::OnShowNotification(message));
       break;
     }
   }
