@@ -95,4 +95,8 @@ bool RawMessage::operator ==(const RawMessage &other) {
   else
     return false;
 }
+
+unsigned int RawMessage::serial_number() const{
+  return serial_number_;
+}
 }  // namespace protocol_handler
