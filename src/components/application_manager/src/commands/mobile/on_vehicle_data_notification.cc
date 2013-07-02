@@ -48,12 +48,13 @@ OnVehicleDataNotification::~OnVehicleDataNotification() {
 }
 
 void OnVehicleDataNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVehicleDataNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnVehicleDataNotification::Run");
 
   if ((*message_)[strings::msg_params].keyExists(hmi_notification::prndl)) {
     const unsigned int prndl = static_cast<unsigned int>(
                                  (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
 
+    // TODO(DK) : need to create enum for vehicleData
     const std::vector<Application*>& applications =
       ApplicationManagerImpl::instance()->applications_by_ivi(prndl);
 
