@@ -44,7 +44,7 @@ class TransportManagerListener {
   //todo: define interface of tm listener.
 
  public:
-  virtual ~TransportManagerListener() {};
+  virtual ~TransportManagerListener();
 
   virtual void onSearchDeviceDone(const DeviceHandle device,
                                   const ApplicationList app_list) = 0;

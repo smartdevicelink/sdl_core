@@ -48,6 +48,9 @@ namespace transport_manager {
 log4cxx::LoggerPtr TransportManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("TransportManager"));
 
+TransportManager::~TransportManager(){};
+TransportManagerListener::~TransportManagerListener(){};
+
 TransportManagerImpl::TransportManagerImpl()
     : message_queue_mutex_(),
       all_thread_active_(false),
