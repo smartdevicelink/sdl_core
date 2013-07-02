@@ -186,6 +186,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_slider_response.cc
 ./src/commands/hmi/ui_is_ready_request.cc
 ./src/commands/hmi/ui_is_ready_response.cc
+./src/commands/hmi/ui_perform_audio_pass_thru_request.cc
+./src/commands/hmi/ui_perform_audio_pass_thru_response.cc
 ./src/commands/hmi/navigation_is_ready_request.cc
 ./src/commands/hmi/navigation_is_ready_response.cc
 ./src/commands/hmi/vehicle_info_is_ready_request.cc

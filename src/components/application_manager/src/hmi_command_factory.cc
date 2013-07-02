@@ -67,14 +67,15 @@
 #include "application_manager/commands/hmi/ui_change_registration_request.h"
 #include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/commands/hmi/ui_show_request.h"
+#include "application_manager/commands/hmi/ui_show_response.h"
 #include "application_manager/commands/hmi/ui_is_ready_request.h"
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
-#include "application_manager/commands/hmi/ui_show_response.h"
 #include "application_manager/commands/hmi/ui_slider_request.h"
 #include "application_manager/commands/hmi/ui_slider_response.h"
 #include "application_manager/commands/hmi/ui_set_media_clock_timer_request.h"
 #include "application_manager/commands/hmi/ui_set_media_clock_timer_response.h"
-#include "application_manager/commands/hmi/ui_slider_response.h"
+#include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
+#include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -117,8 +118,6 @@
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
-#include "application_manager/commands/hmi/ui_show_request.h"
-#include "application_manager/commands/hmi/ui_show_response.h"
 #include "application_manager/commands/hmi/exit_application_request.h"
 #include "application_manager/commands/hmi/exit_application_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
@@ -271,6 +270,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIChangeRegistratioResponse(message));
       } else {
         command.reset(new commands::UIChangeRegistrationRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_PerformAudioPassThru: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIPerformAudioPassThruResponse(message));
+      } else {
+        command.reset(new commands::UIPerformAudioPassThruRequest(message));
       }
       break;
     }
