@@ -453,7 +453,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::Buttons_GetCapabilities: {
+    case  hmi_apis::FunctionID::Buttons_GetCapabilities: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::ButtonGetCapabilitiesResponse(message));
@@ -462,7 +462,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_PlayTone: {
+    case  hmi_apis::FunctionID::BasicCommunication_PlayTone: {
       command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
