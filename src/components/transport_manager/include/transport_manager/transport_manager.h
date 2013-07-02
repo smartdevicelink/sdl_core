@@ -51,7 +51,7 @@ public:
 	/**
 	 * @brief Destructor.
 	 **/
-	virtual ~TransportManager(void);
+	virtual ~TransportManager(void) {};
 
 	/**
 	 * @brief Start scanning for new devices.
