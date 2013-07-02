@@ -100,8 +100,6 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
 
-
-
   message[strings::msg_params][strings::application][strings::app_name] =
       application_impl.name();
 

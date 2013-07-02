@@ -55,10 +55,10 @@ void GetDeviceListRequest::Run() {
   int index = 0;
 
   if (devices.empty())  {
-    (*message_)[strings::msg_params][strings::result_code] =
+    (*message_)[strings::msg_params][hmi_response::code] =
           hmi_apis::Common_Result::eType::NO_DEVICES_CONNECTED;
   } else {
-    (*message_)[strings::msg_params][strings::result_code] =
+    (*message_)[strings::msg_params][hmi_response::code] =
           hmi_apis::Common_Result::eType::SUCCESS;
 
     for (std::set<connection_handler::Device>::iterator it = devices.begin();
