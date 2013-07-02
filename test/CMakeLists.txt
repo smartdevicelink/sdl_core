@@ -10,6 +10,7 @@ include_directories (
   ../src/thirdPartyLibs/gmock-1.6.0/include
   ../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../src/components/application_manager/include
+  ../src/components/mobile_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/protocol_handler/include
   ../src/components/TransportManager/include
@@ -19,6 +20,7 @@ include_directories (
   ../src/thirdPartyLibs/jsoncpp/include/
   ../src/thirdPartyLibs/logger/include/
   ../src/components/utils/include/
+  ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
@@ -41,6 +43,8 @@ set(LIBRARIES
     HMI_API
     SmartObjects
     ApplicationManager
+    MobileMessageHandler
+    ProtocolHandler
     #test_JSONHandler_v4_protocol_v2_0_revP
     #test_JSONHandlerTest
     test_SmartObjectTest
@@ -52,8 +56,8 @@ set(LIBRARIES
     test_MobileMessageHandlerTest
     v4_protocol_v2_0_revT
     jsoncpp
-    rt
     Utils
+    rt
 )
 
 add_executable("test_suit" "./test_suit.cc")

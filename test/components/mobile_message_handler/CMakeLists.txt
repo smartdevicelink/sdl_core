@@ -6,6 +6,7 @@ include_directories (
   ../../../src/components/mobile_message_handler/include/
   ../../../src/components/TransportManager/include/
   ../../../src/components/utils/include/
+  ../../../test/components/mobile_message_handler/include
 )
 
 set(LIBRARIES
@@ -21,11 +22,12 @@ set(LIBRARIES
 )
 
 create_test("test_mobile_message_handler"
-	"./mobile_message_handler_test.cc"
+	"./src/mobile_message_handler_test.cc"
 	"${LIBRARIES}")
 
 target_link_libraries ("test_mobile_message_handler"
 	log4cxx)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-add_library("test_MobileMessageHandlerTest" "./mobile_message_handler_test.cc")
+
+add_library("test_MobileMessageHandlerTest" "./src/mobile_message_handler_test.cc")
