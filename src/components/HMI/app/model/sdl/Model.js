@@ -535,7 +535,7 @@ SDL.SDLModel = Em.Object.create( {
         SDL.VRPopUp.DeleteCommand( commandId );
     },
 
-    onDeactivateApp: function( target, appId, appName ) {
+    onDeactivateApp: function( target, appId ) {
         
         /**
          * Close Options menu if opened
@@ -569,6 +569,6 @@ SDL.SDLModel = Em.Object.create( {
             }
         }
 
-        FFW.BasicCommunication.DeactivateApp( appName, reason, appId );
+        FFW.BasicCommunication.DeactivateApp( reason, appId );
     }
 } );
