@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_ready_notification.h"
+#include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
@@ -51,7 +51,7 @@ void OnVIVehicleDataNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
     NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnVehicleDataID;
 
-  SendResponseToMobile(message_);
+  SendNotificationToMobile(message_);
 }
 
 }  // namespace commands
