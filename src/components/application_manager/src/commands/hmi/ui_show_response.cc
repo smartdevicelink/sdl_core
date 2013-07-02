@@ -44,10 +44,10 @@ UIShowResponse::~UIShowResponse() {
 }
 
 void UIShowResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIShowResponse::Run ");
+  LOG4CXX_INFO(logger_, "UIShowResponse::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::ShowID;
+    NsSmartDeviceLinkRPC::V2::FunctionID::ShowID;
 
   SendResponseToMobile(message_);
 }

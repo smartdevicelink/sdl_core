@@ -40,21 +40,21 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief VRChangeRegistratioResponse command class
+ * @brief VRChangeRegistrationResponse command class
  **/
-class VRChangeRegistratioResponse : public ResponseFromHMI {
+class VRChangeRegistrationResponse : public ResponseFromHMI {
  public:
   /**
-   * @brief VRChangeRegistratioResponse class constructor
+   * @brief VRChangeRegistrationResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRChangeRegistratioResponse(const MessageSharedPtr& message);
+  explicit VRChangeRegistrationResponse(const MessageSharedPtr& message);
 
   /**
-   * @brief VRChangeRegistratioResponse class destructor
+   * @brief VRChangeRegistrationResponse class destructor
    **/
-  virtual ~VRChangeRegistratioResponse();
+  virtual ~VRChangeRegistrationResponse();
 
   /**
    * @brief Execute command
@@ -62,7 +62,7 @@ class VRChangeRegistratioResponse : public ResponseFromHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(VRChangeRegistratioResponse);
+  DISALLOW_COPY_AND_ASSIGN(VRChangeRegistrationResponse);
 };
 
 }  // namespace commands

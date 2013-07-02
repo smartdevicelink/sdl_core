@@ -52,9 +52,7 @@ class CommandImpl : public Command {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit CommandImpl(const MessageSharedPtr& message)
-      : message_(message) {
-    }
+    explicit CommandImpl(const MessageSharedPtr& message);
 
     /**
      * @brief CommandImpl class destructor

@@ -28,6 +28,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTINVALIDTEST_H_
+#define TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTINVALIDTEST_H_
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -171,8 +174,4 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     }
 }}}}
 
-int main(int argc, char **argv) {
-    //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
-    ::testing::InitGoogleMock(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#endif  // TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTINVALIDTEST_H_

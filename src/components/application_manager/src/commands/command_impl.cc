@@ -36,8 +36,12 @@ namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_   =
+log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+
+CommandImpl::CommandImpl(const MessageSharedPtr& message)
+: message_(message) {
+}
 
 CommandImpl::~CommandImpl() {
 }

@@ -32,25 +32,35 @@
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
+#include "connection_handler/connection_handler_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/hmi_command_factory.h"
-#include "application_manager/message_conversion.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/audio_pass_thru_thread_impl.h"
-#include "utils/macro.h"
 #include "utils/threads/thread.h"
+#include "JSONHandler/formatters/formatter_json_rpc.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/HMI_API_schema.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
 log4cxx::LoggerPtr ApplicationManagerImpl::logger_   =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
 
+namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
+
 ApplicationManagerImpl::ApplicationManagerImpl()
   : audio_pass_thru_flag_(false),
     perform_audio_thread_(NULL),
     is_distracting_driver_(false),
     is_vr_session_strated_(false),
-    hmi_cooperating_(false) {
+    hmi_cooperating_(false),
+    is_all_apps_allowed_(true),
+    ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    tts_language_(hmi_apis::Common_Language::INVALID_ENUM) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -132,6 +142,13 @@ bool ApplicationManagerImpl::RegisterApplication(Application* application) {
   if (NULL == application) {
     return false;
   }
+
+  if (false == is_all_apps_allowed_) {
+    LOG4CXX_INFO(logger_,
+                 "RegisterApplication: access to app's disabled by user");
+    return false;
+  }
+
   std::map<int, Application*>::iterator it = applications_.find(
         application->app_id());
   if (applications_.end() != it) {
@@ -186,7 +203,7 @@ void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
 
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
-  //HMICommandFactory::CreateCommand
+  // HMICommandFactory::CreateCommand
 }
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
@@ -262,6 +279,25 @@ void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
   is_vr_session_strated_ = state;
 }
 
+void ApplicationManagerImpl::set_active_ui_language(
+    const hmi_apis::Common_Language::eType& language) {
+  ui_language_ = language;
+}
+
+void ApplicationManagerImpl::set_active_vr_language(
+    const hmi_apis::Common_Language::eType& language) {
+  vr_language_ = language;
+}
+
+void ApplicationManagerImpl::set_active_tts_language(
+    const hmi_apis::Common_Language::eType& language) {
+  tts_language_ = language;
+}
+
+void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
+  is_all_apps_allowed_ = allowed;
+}
+
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int correlation_id, int max_duration, int sampling_rate,
     int bits_per_sample, int audio_type) {
@@ -295,12 +331,18 @@ void ApplicationManagerImpl::onMessageReceived(
     return;
   }
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject smart_object =
-    MessageToSmartObject(*message);
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(&smart_object);
-  command->Init();
+  utils::SharedPtr<smart_objects::CSmartObject> smart_object(
+    new smart_objects::CSmartObject);
+  if (!ConvertMessageToSO(*message, *smart_object)) {
+    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+    return;
+  }
+
+  LOG4CXX_INFO(logger_, "Converted message, trying to create command");
+  CommandSharedPtr command = HMICommandFactory::CreateCommand(smart_object);
+  /*command->Init();
   command->Run();
-  command->CleanUp();
+  command->CleanUp();*/
 }
 
 void ApplicationManagerImpl::onErrorSending(
@@ -310,6 +352,7 @@ void ApplicationManagerImpl::onErrorSending(
 
 void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
+  // TODO (DK): HMI StartDeviceDiscovery response
 }
 void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
@@ -347,6 +390,11 @@ void ApplicationManagerImpl::set_watchdog(
   watchdog_ = watchdog;
 }
 
+void ApplicationManagerImpl::StartDevicesDiscovery() {
+  connection_handler::ConnectionHandlerImpl::getInstance()->
+      StartDevicesDiscovery();
+}
+
 void ApplicationManagerImpl::SendMessageToMobile(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
   return;
@@ -370,6 +418,34 @@ bool ApplicationManagerImpl::CheckPolicies(smart_objects::CSmartObject* message,
 
 bool ApplicationManagerImpl::CheckHMIMatrix(
   smart_objects::CSmartObject* message) {
+  return true;
+}
+
+bool ApplicationManagerImpl::ConvertMessageToSO(
+  const Message& message, smart_objects::CSmartObject& output) {
+  LOG4CXX_INFO(logger_, "Message to convert: protocol " <<
+               message.protocol_version() <<
+               "; json " << message.json_message());
+
+  switch (message.protocol_version()) {
+    case ProtocolVersion::kHMI: {
+      int result = formatters::FormatterJsonRpc::FromString <
+                   hmi_apis::FunctionID::eType, hmi_apis::messageType::eType > (
+                     message.json_message(),
+                     output);
+      LOG4CXX_INFO(logger_, "Convertion result: " <<
+                   result << " function id " <<
+                   output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+      /*hmi_apis::HMI_API factory;
+      factory.attachSchema(output);
+      LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());*/
+      break;
+    }
+    default:
+      NOTREACHED();
+      return false;
+  }
+  LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
   return true;
 }
 

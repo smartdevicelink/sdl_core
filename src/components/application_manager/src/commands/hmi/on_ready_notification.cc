@@ -39,6 +39,7 @@ namespace commands {
 
 OnReadyNotification::OnReadyNotification(
   const MessageSharedPtr& message): NotificationFromHMI(message) {
+  LOG4CXX_INFO(logger_, "OnReadyNotification::OnReadyNotification");
 }
 
 OnReadyNotification::~OnReadyNotification() {

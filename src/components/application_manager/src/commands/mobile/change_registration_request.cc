@@ -36,6 +36,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -50,24 +51,37 @@ ChangeRegistrationRequest::~ChangeRegistrationRequest() {
 }
 
 void ChangeRegistrationRequest::Run() {
+  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
+
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  // TODO(VS): Check supported languages in ApllicationManager
+  const int hmi_language =
+      (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
+
+  const int language =
+      (*message_)[strings::msg_params][strings::language].asInt();
+
+  if (false == IsLanguageSupportedByUI(hmi_language) ||
+      false == IsLanguageSupportedByVR(language)     ||
+      false == IsLanguageSupportedByTTS(language)) {
+        return;
+  }
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  MessageChaining * chain = NULL;
+  MessageChaining* chain = NULL;
 
   bool has_actually_changed = false;
   if (app->ui_language() !=
@@ -75,8 +89,12 @@ void ChangeRegistrationRequest::Run() {
     smart_objects::CSmartObject* ui_request  =
         new smart_objects::CSmartObject();
 
-    // TODO(VS): HMI Request Id
-    const int ui_hmi_request_id = 210;
+    if (NULL == ui_request) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+
+    const int ui_hmi_request_id = hmi_apis::FunctionID::UI_ChangeRegistration;
     (*ui_request)[strings::params][strings::function_id] =
         ui_hmi_request_id;
 
@@ -102,8 +120,12 @@ void ChangeRegistrationRequest::Run() {
     smart_objects::CSmartObject* vr_request  =
         new smart_objects::CSmartObject();
 
-    // TODO(VS): HMI Request Id
-    const int vr_hmi_request_id = 211;
+    if (NULL == vr_request) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+
+    const int vr_hmi_request_id = hmi_apis::FunctionID::VR_ChangeRegistration;
     (*vr_request)[strings::params][strings::function_id] =
         vr_hmi_request_id;
 
@@ -127,6 +149,75 @@ void ChangeRegistrationRequest::Run() {
   if (!has_actually_changed) {
     SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
   }
+}
+
+bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
+    const int& hmi_display_lang) {
+
+  const smart_objects::CSmartObject* ui_languages =
+      ApplicationManagerImpl::instance()->ui_supported_languages();
+
+  bool is_language_supported = false;
+  for (size_t i = 0; i < ui_languages->length(); ++i) {
+    if (hmi_display_lang == ui_languages->getElement(i).asInt()) {
+      is_language_supported = true;
+      break;
+    }
+  }
+
+  if (false == is_language_supported) {
+    LOG4CXX_ERROR(logger_,
+                  "ChangeRegistrationRequest language isn't supported by UI");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+  }
+  return is_language_supported;
+}
+
+bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
+    const int& hmi_display_lang) {
+
+  const smart_objects::CSmartObject* vr_languages =
+      ApplicationManagerImpl::instance()->vr_supported_languages();
+
+  bool is_language_supported = false;
+  for (size_t i = 0; i < vr_languages->length(); ++i) {
+    if (hmi_display_lang == vr_languages->getElement(i).asInt()) {
+      is_language_supported = true;
+      break;
+    }
+  }
+
+  if (false == is_language_supported) {
+    LOG4CXX_ERROR(logger_,
+                  "ChangeRegistrationRequest language isn't supported by VR");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+  }
+  return is_language_supported;
+}
+
+bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
+    const int& hmi_display_lang) {
+
+  const smart_objects::CSmartObject* tts_languages =
+      ApplicationManagerImpl::instance()->tts_supported_languages();
+
+  bool is_language_supported = false;
+  for (size_t i = 0; i < tts_languages->length(); ++i) {
+    if (hmi_display_lang == tts_languages->getElement(i).asInt()) {
+      is_language_supported = true;
+      break;
+    }
+  }
+
+  if (false == is_language_supported) {
+    LOG4CXX_ERROR(logger_,
+                  "ChangeRegistrationRequest language isn't supported by TTS");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+  }
+  return is_language_supported;
 }
 
 }  // namespace commands

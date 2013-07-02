@@ -53,7 +53,8 @@ void AddSubMenuResponse::Run() {
     return;
   }
 
-  const int hmi_correlation_id = 200;
+  const int hmi_correlation_id = (*message_)[strings::params]
+                                 [strings::correlation_id];
 
   smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
     GetMessageChain(hmi_correlation_id)->data();
@@ -63,9 +64,6 @@ void AddSubMenuResponse::Run() {
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
         ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::connection_key]));
-
-    app->AddSubMenu(data[strings::msg_params][strings::menu_id].asInt(),
-                   data[strings::msg_params]);
 
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =

@@ -64,6 +64,27 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+  /*
+   * @brief Search for requested language in HMI UI supported languages
+   *
+   * @return true if language supported by UI, otherwise false
+   */
+  bool IsLanguageSupportedByUI(const int& hmi_display_lang);
+
+  /*
+   * @brief Search for requested language in HMI VR supported languages
+   *
+   * @return true if language supported by VR, otherwise false
+   */
+  bool IsLanguageSupportedByVR(const int& hmi_display_lang);
+
+  /*
+   * @brief Search for requested language in HMI TTS supported languages
+   *
+   * @return true if language supported by TTS, otherwise false
+   */
+  bool IsLanguageSupportedByTTS(const int& hmi_display_lang);
+
   DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
 };
 

@@ -18,3 +18,6 @@ add_subdirectory(./protocol_handler)
 
 # --- Utils
 add_subdirectory(./utils)
+
+# --- Mobile Message Handler
+add_subdirectory(./mobile_message_handler)

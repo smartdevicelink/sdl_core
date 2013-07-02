@@ -40,20 +40,42 @@
 #include "application_manager/commands/hmi/get_device_list_response.h"
 #include "application_manager/commands/hmi/get_app_list_request.h"
 #include "application_manager/commands/hmi/get_app_list_response.h"
+#include "application_manager/commands/hmi/allow_all_apps_request.h"
+#include "application_manager/commands/hmi/allow_all_apps_response.h"
+#include "application_manager/commands/hmi/allow_app_request.h"
+#include "application_manager/commands/hmi/allow_app_response.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_request.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 #include "application_manager/commands/hmi/exit_all_applications_request.h"
 #include "application_manager/commands/hmi/exit_all_applications_response.h"
 #include "application_manager/commands/hmi/exit_application_request.h"
 #include "application_manager/commands/hmi/exit_application_response.h"
+#include "application_manager/commands/hmi/start_device_discovery_request.h"
+#include "application_manager/commands/hmi/start_device_discovery_response.h"
+#include "application_manager/commands/hmi/ui_add_command_request.h"
+#include "application_manager/commands/hmi/ui_add_command_response.h"
+#include "application_manager/commands/hmi/ui_add_submenu_request.h"
+#include "application_manager/commands/hmi/ui_add_submenu_response.h"
+#include "application_manager/commands/hmi/ui_delete_submenu_request.h"
+#include "application_manager/commands/hmi/ui_delete_submenu_response.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_request.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
+#include "application_manager/commands/hmi/ui_get_language_request.h"
+#include "application_manager/commands/hmi/ui_get_language_response.h"
 #include "application_manager/commands/hmi/ui_get_capabilities_request.h"
 #include "application_manager/commands/hmi/ui_get_capabilities_response.h"
 #include "application_manager/commands/hmi/ui_change_registration_request.h"
 #include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/commands/hmi/ui_show_request.h"
 #include "application_manager/commands/hmi/ui_show_response.h"
+#include "application_manager/commands/hmi/ui_is_ready_request.h"
+#include "application_manager/commands/hmi/ui_is_ready_response.h"
+#include "application_manager/commands/hmi/ui_slider_request.h"
+#include "application_manager/commands/hmi/ui_slider_response.h"
+#include "application_manager/commands/hmi/ui_set_media_clock_timer_request.h"
+#include "application_manager/commands/hmi/ui_set_media_clock_timer_response.h"
+#include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
+#include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -64,8 +86,18 @@
 #include "application_manager/commands/hmi/vr_change_registration_response.h"
 #include "application_manager/commands/hmi/vr_get_supported_languages_request.h"
 #include "application_manager/commands/hmi/vr_get_supported_languages_response.h"
+#include "application_manager/commands/hmi/vr_get_language_request.h"
+#include "application_manager/commands/hmi/vr_get_language_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
+#include "application_manager/commands/hmi/tts_change_registration_request.h"
+#include "application_manager/commands/hmi/tts_change_registration_response.h"
+#include "application_manager/commands/hmi/tts_get_supported_languages_request.h"
+#include "application_manager/commands/hmi/tts_get_supported_languages_response.h"
+#include "application_manager/commands/hmi/tts_get_language_request.h"
+#include "application_manager/commands/hmi/tts_get_language_response.h"
+#include "application_manager/commands/hmi/tts_stop_speaking_request.h"
+#include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
 #include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
@@ -86,20 +118,68 @@
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
+#include "application_manager/commands/hmi/exit_application_request.h"
+#include "application_manager/commands/hmi/exit_application_response.h"
+#include "application_manager/commands/hmi/button_get_capabilities_request.h"
+#include "application_manager/commands/hmi/button_get_capabilities_response.h"
+#include "application_manager/commands/hmi/on_button_event_notification.h"
+#include "application_manager/commands/hmi/on_button_press_notification.h"
+#include "application_manager/commands/hmi/navigation_is_ready_request.h"
+#include "application_manager/commands/hmi/navigation_is_ready_response.h"
+#include "application_manager/commands/hmi/vehicle_info_is_ready_request.h"
+#include "application_manager/commands/hmi/vehicle_info_is_ready_response.h"
+#include "application_manager/commands/hmi/on_show_notification.h"
+
 
 namespace application_manager {
 
+log4cxx::LoggerPtr HMICommandFactory::logger_   =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
+
 CommandSharedPtr HMICommandFactory::CreateCommand(
   const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+  LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand function_id: " <<
+               (*message)[strings::params][strings::function_id].asInt());
+
+  CommandSharedPtr command(new application_manager::commands::CommandImpl(message));
+
+  LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand function_id: " <<
+               (*message)[strings::params][strings::function_id].asInt());
 
   switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
+    case  hmi_apis::FunctionID::BasicCommunication_StartDeviceDiscovery: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::StartDeviceDiscoveryResponse(message));
+      } else {
+        command.reset(new commands::StartDeviceDiscoveryRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::BasicCommunication_GetDeviceList: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::GetDeviceListResponse(message));
       } else {
         command.reset(new commands::GetDeviceListRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::BasicCommunication_AllowAllApps: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::AllowAllAppsResponse(message));
+      } else {
+        command.reset(new commands::AllowAllAppsRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::BasicCommunication_AllowApp: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::AllowAppResponse(message));
+      } else {
+        command.reset(new commands::AllowAppRequest(message));
       }
       break;
     }
@@ -121,12 +201,57 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::UI_AddCommand: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIAddCommandResponse(message));
+      } else {
+        command.reset(new commands::UIAddCommandRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_AddSubMenu: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIAddSubmenuResponse(message));
+      } else {
+        command.reset(new commands::UIAddSubmenuRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_DeleteSubMenu: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIDeleteSubmenuResponse(message));
+      } else {
+        command.reset(new commands::UIDeleteSubmenuRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_SetMediaClockTimer: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISetMediaClockTimerResponse(message));
+      } else {
+        command.reset(new commands::UISetMediaClockTimerRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::UI_GetSupportedLanguages: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::UIGetSupportedLanguagesResponse(message));
       } else {
         command.reset(new commands::UIGetSupportedLanguagesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_GetLanguage: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIGetLanguageResponse(message));
+      } else {
+        command.reset(new commands::UIGetLanguageRequest(message));
       }
       break;
     }
@@ -145,6 +270,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIChangeRegistratioResponse(message));
       } else {
         command.reset(new commands::UIChangeRegistrationRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_PerformAudioPassThru: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIPerformAudioPassThruResponse(message));
+      } else {
+        command.reset(new commands::UIPerformAudioPassThruRequest(message));
       }
       break;
     }
@@ -178,7 +312,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case  hmi_apis::FunctionID::VR_ChangeRegistration: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
-        command.reset(new commands::VRChangeRegistratioResponse(message));
+        command.reset(new commands::VRChangeRegistrationResponse(message));
       } else {
         command.reset(new commands::VRChangeRegistrationRequest(message));
       }
@@ -193,12 +327,57 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::VR_GetLanguage: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VRGetLanguageResponse(message));
+      } else {
+        command.reset(new commands::VRGetLanguageRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::TTS_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::TTSIsReadyResponse(message));
       } else {
         command.reset(new commands::TTSIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_ChangeRegistration: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSChangeRegistratioResponse(message));
+      } else {
+        command.reset(new commands::TTSChangeRegistrationRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_GetSupportedLanguages: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSGetSupportedLanguagesResponse(message));
+      } else {
+        command.reset(new commands::TTSGetSupportedLanguagesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_StopSpeaking: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSStopSpeakingResponse(message));
+      } else {
+        command.reset(new commands::TTSStopSpeakingRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_GetLanguage: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSGetLanguageResponse(message));
+      } else {
+        command.reset(new commands::TTSGetLanguageRequest(message));
       }
       break;
     }
@@ -229,6 +408,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::UI_Slider: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISliderResponse(message));
+      } else {
+        command.reset(new commands::UISliderRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::UI_ClosePopUp: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
@@ -238,7 +426,43 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::BasicCommunication_PlayTone: {
+    case  hmi_apis::FunctionID::UI_IsReady: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIIsReadyResponse(message));
+      } else {
+        command.reset(new commands::UIIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::VehicleInfo_IsReady: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VehicleInfoIsReadyResponse(message));
+      } else {
+        command.reset(new commands::VehicleInfoIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_IsReady: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::NavigationIsReadyResponse(message));
+      } else {
+        command.reset(new commands::NavigationIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::Buttons_GetCapabilities: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::ButtonGetCapabilitiesResponse(message));
+      } else {
+        command.reset(new commands::ButtonGetCapabilitiesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::BasicCommunication_PlayTone: {
       command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
@@ -300,6 +524,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::TTS_OnLanguageChange: {
       command.reset(new commands::OnTTSLanguageChangeNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::Buttons_OnButtonEvent: {
+      command.reset(new commands::OnButtonEventNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::Buttons_OnButtonPress: {
+      command.reset(new commands::OnButtonPressNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::eType::UI_ShowNotification: {
+      command.reset(new commands::OnShowNotification(message));
       break;
     }
   }

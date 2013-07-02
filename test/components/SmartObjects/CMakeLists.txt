@@ -22,9 +22,21 @@ set (LIBRARIES
     rt
 )
 
-create_test("test_SmartObject_DraftTest" "./SmartObjectDraftTest.cpp" "${LIBRARIES}")
-create_test("test_SmartObject_UnitTest" "./SmartObjectUnitTest.cpp" "${LIBRARIES}")
-create_test("test_SmartObject_StressTest" "./SmartObjectStressTest.cpp" "${LIBRARIES}")
-create_test("test_SmartObject_InvalidTest" "./SmartObjectInvalidTest.cpp" "${LIBRARIES}")
-create_test("test_SmartObject_ConvertionTimeTest" "./SmartObjectConvertionTimeTest.cpp" "${LIBRARIES}")
-create_test("test_TSharedPtrTest" "./TSharedPtrTest.cpp" "${LIBRARIES}")
+set (SOURCES
+  ./SmartObjectConvertionTimeTest.cc
+  ./SmartObjectDraftTest.cc
+  ./SmartObjectInvalidTest.cc
+  ./SmartObjectStressTest.cc
+  ./SmartObjectUnitTest.cc
+  ./TSharedPtrTest.cc
+)
+
+add_library("test_SmartObjectTest" ${SOURCES})
+
+create_test("test_SmartObject_DraftTest" "./SmartObjectDraftTest.cc" "${LIBRARIES}")
+create_test("test_SmartObject_UnitTest" "./SmartObjectUnitTest.cc" "${LIBRARIES}")
+create_test("test_SmartObject_StressTest" "./SmartObjectStressTest.cc" "${LIBRARIES}")
+create_test("test_SmartObject_InvalidTest" "./SmartObjectInvalidTest.cc" "${LIBRARIES}")
+create_test("test_SmartObject_ConvertionTimeTest" "./SmartObjectConvertionTimeTest.cc" "${LIBRARIES}")
+create_test("test_TSharedPtrTest" "./TSharedPtrTest.cc" "${LIBRARIES}")
+

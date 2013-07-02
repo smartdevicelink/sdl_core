@@ -48,9 +48,6 @@ OnAppInterfaceUnregisteredNotification::
 }
 
 void OnAppInterfaceUnregisteredNotification::Run() {
-  (*message_)[strings::params][strings::message_type] =
-    MessageType::kNotification;
-
   SendNotification();
 }
 

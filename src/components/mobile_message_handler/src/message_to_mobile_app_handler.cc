@@ -64,7 +64,6 @@ void MessagesToMobileAppHandler::threadMain() {
       }
 
       handler->protocol_handler_->sendMessageToMobileApp(rawMessage);
-      delete message;
     }
     handler->messages_to_mobile_app_.wait();
   }

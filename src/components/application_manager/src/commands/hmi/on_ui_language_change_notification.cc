@@ -32,14 +32,12 @@
 
 #include "application_manager/commands/hmi/on_ui_language_change_notification.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 
 
 namespace application_manager {
 
 namespace commands {
-
-
-
 
 OnUILanguageChangeNotification::OnUILanguageChangeNotification(
   const MessageSharedPtr& message): NotificationFromHMI(message) {
@@ -49,27 +47,38 @@ OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {
 }
 
 void OnUILanguageChangeNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnUILanguageChangeNotification::Run ");
-  // TODO(VS): Set UI language in application manager
+  LOG4CXX_INFO(logger_, "OnUILanguageChangeNotification::Run");
+  ApplicationManagerImpl::instance()->set_active_ui_language(
+      static_cast<hmi_apis::Common_Language::eType>(
+          (*message_)[strings::msg_params][strings::language].asInt()));
 
   (*message_)[strings::msg_params][strings::hmi_display_language] =
-    (*message_)[strings::msg_params][strings::language];
+      (*message_)[strings::msg_params][strings::language];
 
-  // TODO(VS): Get language from  application manager
-  // (*message_)[strings::msg_params][strings::language]
+  (*message_)[strings::msg_params][strings::language] =
+      ApplicationManagerImpl::instance()->active_vr_language();
 
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnLanguageChangeID;
+    NsSmartDeviceLinkRPC::V2::FunctionID::OnLanguageChangeID;
 
   std::set<Application*> applications = ApplicationManagerImpl::instance()
                                         ->applications();
 
   for (std::set<Application*>::iterator it = applications.begin();
        applications.end() != it; ++it) {
-    if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE
+    if (NsSmartDeviceLinkRPC::V2::HMILevel::HMI_NONE
         != static_cast<ApplicationImpl*>(*it)->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
       SendNotificationToMobile(message_);
+
+      if (static_cast<ApplicationImpl*>(*it)->ui_language()
+          != (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
+        static_cast<ApplicationImpl*>(*it)->set_hmi_level(
+            mobile_api::HMILevel::HMI_NONE);
+        MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+            (*it)->app_id(),
+            mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
+      }
     }
   }
 }

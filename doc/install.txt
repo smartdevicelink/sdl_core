@@ -71,3 +71,6 @@
 
   4. If You built configuration with tests (see 2.3 above), then You can run all project tests and see overall result with:
   make test
+
+  5. For creating the doxygen documentation run:
+  make doxygen

@@ -28,6 +28,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTUNITTEST_H_
+#define TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTUNITTEST_H_
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -592,13 +594,6 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     // TODO: Add a test to check accessing an array at strange indexes.
 
-
-
-    int main(int argc, char **argv)
-    {
-        ::testing::InitGoogleTest(&argc, argv);
-        return RUN_ALL_TESTS();
-    }
-
 }}}}
 
+#endif  // TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTUNITTEST_H_

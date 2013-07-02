@@ -28,6 +28,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTSTRESSTEST_H_
+#define TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTSTRESSTEST_H_
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -346,10 +349,6 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_TRUE(static_cast<bool>(get_object(obj, "A6 A4 M1 M0 M0 A0")));
     }
 
-    int main(int argc, char **argv)
-    {
-        ::testing::InitGoogleTest(&argc, argv);
-        return RUN_ALL_TESTS();
-    }
-
 }}}}
+
+#endif  // TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTSTRESSTEST_H_

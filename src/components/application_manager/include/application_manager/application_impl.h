@@ -75,8 +75,8 @@ class InitialApplicationData {
     smart_objects::CSmartObject* mobile_app_id_;
     smart_objects::CSmartObject* tts_name_;
     smart_objects::CSmartObject* ngn_media_screen_name_;
-    mobile_api::Language::eType language_;
-    mobile_api::Language::eType ui_language_;
+    mobile_api::Language::eType  language_;
+    mobile_api::Language::eType  ui_language_;
 };
 
 /*
@@ -183,7 +183,7 @@ class DynamicApplicationData {
     smart_objects::CSmartObject* timeout_promt_;
     smart_objects::CSmartObject* vr_help_title_;
     smart_objects::CSmartObject* vr_help_;
-    mobile_api::TBTState::eType tbt_state_;
+    mobile_api::TBTState::eType  tbt_state_;
     smart_objects::CSmartObject* show_command_;
     smart_objects::CSmartObject* tbt_show_command_;
 
@@ -226,6 +226,7 @@ class ApplicationImpl : public Application,
     const mobile_api::SystemContext::eType& system_context() const;
     inline const mobile_api::AudioStreamingState::eType& audio_streaming_state() const;
     const std::string& app_icon_path() const;
+    inline bool app_allowed() const;
 
     void set_version(const Version& version);
     void set_name(const std::string& name);
@@ -236,6 +237,7 @@ class ApplicationImpl : public Application,
     void set_audio_streaming_state(
           const mobile_api::AudioStreamingState::eType& state);
     bool set_app_icon_path(const std::string& file_name);
+    void set_app_allowed(const bool& allowed);
 
     bool AddFile(const std::string& file_name, bool is_persistent);
     bool DeleteFile(const std::string& file_name);
@@ -252,22 +254,23 @@ class ApplicationImpl : public Application,
     void CleanupFiles();
 
   private:
-    smart_objects::CSmartObject* active_message_;
+    smart_objects::CSmartObject*           active_message_;
 
-    Version version_;
-    int app_id_;
-    std::string app_name_;
-    bool is_media_;
-    bool allowed_support_navigation_;
+    Version                                version_;
+    int                                    app_id_;
+    std::string                            app_name_;
+    bool                                   is_media_;
+    bool                                   allowed_support_navigation_;
+    bool                                   is_app_allowed_;
 
-    mobile_api::HMILevel::eType hmi_level_;
-    mobile_api::SystemContext::eType system_context_;
+    mobile_api::HMILevel::eType            hmi_level_;
+    mobile_api::SystemContext::eType       system_context_;
     mobile_api::AudioStreamingState::eType audio_streaming_state_;
-    std::string app_icon_path_;
+    std::string                            app_icon_path_;
 
-    std::vector<AppFile> app_files_;
-    std::set<unsigned int> subscribed_buttons_;
-    std::set<unsigned int> subscribed_vehicle_info_;
+    std::vector<AppFile>                   app_files_;
+    std::set<unsigned int>                 subscribed_buttons_;
+    std::set<unsigned int>                 subscribed_vehicle_info_;
 };
 
 const CommandsMap& DynamicApplicationData::commands_map() const {
@@ -277,6 +280,10 @@ const CommandsMap& DynamicApplicationData::commands_map() const {
 const mobile_api::AudioStreamingState::eType&
     ApplicationImpl::audio_streaming_state() const {
   return audio_streaming_state_;
+}
+
+bool ApplicationImpl::app_allowed() const {
+  return is_app_allowed_;
 }
 
 }  // namespace application_manager

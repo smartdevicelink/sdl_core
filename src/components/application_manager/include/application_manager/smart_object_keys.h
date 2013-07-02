@@ -129,6 +129,7 @@ const char id[] = "id";
 const char application[] = "application";
 const char icon[] = "icon";
 const char device_name[] = "deviceName";
+const char reason[] = "reason";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -156,9 +157,14 @@ namespace hmi_response {
   const char button_mode[] = "mode";
   const char attenuated_supported[] = "attenuatedSupported";
   const char languages[] = "languages";
+  const char language[] = "language";
   const char display_capabilities[] = "displayCapabilities";
   const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
   const char soft_button_capabilities[] = "softButtonCapabilities";
+  const char button_capabilities[] = "buttonCapabilities";
+  const char preset_bank_capabilities[] = "presetBankCapabilities";
+  const char allowed[] = "allowed";
+
 }  // namespace hmi_response
 
 namespace hmi_notification {

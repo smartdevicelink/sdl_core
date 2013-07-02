@@ -61,6 +61,7 @@ class Message {
   Message();
   Message(const Message& message);
   Message& operator=(const Message& message);
+  bool operator== (const Message& message);
   ~Message();
 
   //! --------------------------------------------------------------------------

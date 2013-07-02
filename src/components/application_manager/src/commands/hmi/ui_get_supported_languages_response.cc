@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
 #include "application_manager/application_manager_impl.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
@@ -45,8 +46,15 @@ UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {
 
 void UIGetSupportedLanguagesResponse::Run() {
   LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesResponse::Run ");
-  ApplicationManagerImpl::instance()->set_ui_supported_languages(
-    (*message_)[strings::msg_params][hmi_response::languages]);
+
+  const NsSmartDeviceLinkRPC::V2::Result::eType code =
+    static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+      (*message_)[strings::msg_params][hmi_response::code].asInt());
+
+  if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == code) {
+    ApplicationManagerImpl::instance()->set_ui_supported_languages(
+        (*message_)[strings::msg_params][hmi_response::languages]);
+  }
 }
 
 }  // namespace commands

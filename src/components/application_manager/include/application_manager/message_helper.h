@@ -74,6 +74,17 @@ class MessageHelper {
   static void SendOnAppRegisteredNotificationToHMI(
       const ApplicationImpl& application_impl);
 
+  /**
+   * @brief Sends OnAppInterfaceUnregistered notification to mobile
+   *
+   *@param connection_key Connection key
+   *@param reason Reason
+   *
+   **/
+  static void SendOnAppInterfaceUnregisteredNotificationToMobile(
+      int connection_key,
+      NsSmartDeviceLinkRPC::V2::AppInterfaceUnregisteredReason::eType reason);
+
  private:
    MessageHelper();
    DISALLOW_COPY_AND_ASSIGN(MessageHelper);

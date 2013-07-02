@@ -38,14 +38,14 @@ namespace application_manager {
 
 namespace commands {
 
-VRChangeRegistratioResponse::VRChangeRegistratioResponse(
+VRChangeRegistrationResponse::VRChangeRegistrationResponse(
   const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-VRChangeRegistratioResponse::~VRChangeRegistratioResponse() {
+VRChangeRegistrationResponse::~VRChangeRegistrationResponse() {
 }
 
-void VRChangeRegistratioResponse::Run() {
+void VRChangeRegistrationResponse::Run() {
   LOG4CXX_INFO(logger_, "VRChangeRegistratioResponse::Run");
 
   const int correlation_id =

@@ -50,7 +50,7 @@ OnUICommandNotification::~OnUICommandNotification() {
 }
 
 void OnUICommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnUICommandNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnUICommandNotification::Run");
 
   (*message_)[strings::params][strings::function_id] =
     NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;

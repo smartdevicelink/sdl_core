@@ -37,9 +37,6 @@ namespace application_manager {
 
 namespace commands {
 
-
-
-
 ClosePopupRequest::ClosePopupRequest(
   const MessageSharedPtr& message): RequestToHMI(message) {
 }

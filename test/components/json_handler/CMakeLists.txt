@@ -30,5 +30,7 @@ set (SOURCES
   ./src/formatters/formatter_json_rpc2_test.cc
 )
 
+create_test("test_JSONHandler" "${SOURCES}" "${LIBRARIES}")
+
 add_library("test_JSONHandlerTest" ${SOURCES})
 

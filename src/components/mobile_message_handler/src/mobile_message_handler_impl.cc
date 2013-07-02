@@ -37,6 +37,9 @@
 #include "utils/macro.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 
+#include "mobile_message_handler/messages_from_mobile_app_handler.h"
+#include "mobile_message_handler/message_to_mobile_app_handler.h"
+
 namespace {
 const unsigned char kRequest = 0x0;
 const unsigned char kResponse = 0x1;
@@ -65,7 +68,7 @@ MobileMessageHandlerImpl::MobileMessageHandlerImpl()
 
   handle_messages_to_mobile_app_ = new threads::Thread(
       "MobileMessageHandler::MessagesToMobileAppHandler",
-      new MessagesFromMobileAppHandler());
+      new MessagesToMobileAppHandler());
 
   handle_messages_to_mobile_app_->startWithOptions(
       threads::ThreadOptions(threads::Thread::kMinStackSize));
@@ -115,11 +118,7 @@ void MobileMessageHandlerImpl::SendMessageToMobileApp(
   LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl SendMessageToMobileApp()");
   DCHECK(message.valid());
 
-  std::vector<MobileMessageObserver*>::const_iterator i =
-      mobile_message_listeners_.begin();
-  for (; i != mobile_message_listeners_.end(); ++i) {
-    (*i)->OnMobileMessageReceived(message);
-  }
+  messages_to_mobile_app_.push(&(*message));
 }
 
 application_manager::Message*
@@ -217,6 +216,7 @@ MobileMessageHandlerImpl::HandleIncomingMessageProtocolV2(
       static_cast<application_manager::MessageType>(rpcType));
   outgoing_message->set_correlation_id(correlationId);
   outgoing_message->set_connection_key(message->connection_key());
+  outgoing_message->set_protocol_version(static_cast<application_manager::ProtocolVersion>(message->protocol_version()));
 
   if (message->data_size() > (offset + jsonSize)) {
     application_manager::BinaryData* binaryData =
@@ -323,7 +323,7 @@ MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
   }
 
   const uint MAX_HEADER_SIZE = 12;
-  unsigned int jsonSize = message->json_message().length() + 1;
+  unsigned int jsonSize = message->json_message().length();
   unsigned int binarySize = 0;
   if (message->has_binary_data()) {
     binarySize = message->binary_data()->size();
@@ -396,7 +396,7 @@ void MobileMessageHandlerImpl::AddMobileMessageListener(
       mobile_message_listeners_.begin(), mobile_message_listeners_.end(),
       listener);
 
-  if (mobile_message_listeners_.end() != i)
+  if (mobile_message_listeners_.end() == i)
     mobile_message_listeners_.push_back(listener);
 }
 
