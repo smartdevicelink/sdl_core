@@ -391,7 +391,7 @@ void ApplicationManagerImpl::set_watchdog(
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
-  connection_handler::ConnectionHandlerImpl::getInstance()->
+  connection_handler::ConnectionHandlerImpl::instance()->
       StartDevicesDiscovery();
 }
 
