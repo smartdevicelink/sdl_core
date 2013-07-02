@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
@@ -45,6 +46,11 @@ UIPerformAudioPassThruResponse::~UIPerformAudioPassThruResponse() {
 void UIPerformAudioPassThruResponse::Run() {
   LOG4CXX_INFO(logger_, "UIPerformAudioPassThruResponse::Run");
 
+  // prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+    NsSmartDeviceLinkRPC::V2::FunctionID::PerformAudioPassThruID;
+
+  SendResponseToMobile(message_);
 }
 
 }  // namespace commands

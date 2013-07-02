@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,7 +51,7 @@ PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
 }
 
 void PerformAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::Run ");
+  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::Run");
 
   if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
     LOG4CXX_ERROR_EXT(logger_, "TOO_MANY_PENDING_REQUESTS");
@@ -72,12 +72,25 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
+  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
+    LOG4CXX_ERROR_EXT(logger_, "application isn't activated");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+    return;
+  }
+
   SendSpeakRequest();
 
-  // crate HMI TTS speak request
+  // crate HMI request
   smart_objects::CSmartObject* ui_audio = new smart_objects::CSmartObject();
-  // TODO(DK): HMI tts request Id
-  const int audio_cmd_id = 61;
+  if (NULL == ui_audio) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    return;
+  }
+
+  ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(true);
+
+  const int audio_cmd_id = hmi_apis::FunctionID::UI_PerformAudioPassThru;
   (*ui_audio)[str::params][str::function_id] = audio_cmd_id;
   (*ui_audio)[str::params][str::message_type] = MessageType::kRequest;
 
@@ -128,8 +141,12 @@ void PerformAudioPassThruRequest::Run() {
 void PerformAudioPassThruRequest::SendSpeakRequest() const {
   // crate HMI TTS speak request
   smart_objects::CSmartObject* tts_speak = new smart_objects::CSmartObject();
-  // TODO(DK): HMI tts request Id
-  const int tts_cmd_id = 51;
+  if (NULL == tts_speak) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    return;
+  }
+
+  const int tts_cmd_id = hmi_apis::FunctionID::TTS_Speak;
   (*tts_speak)[str::params][str::function_id] = tts_cmd_id;
   (*tts_speak)[str::params][str::message_type] = MessageType::kRequest;
 

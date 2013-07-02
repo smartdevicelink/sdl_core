@@ -49,7 +49,7 @@ PerformAudioPassThruResponse::~PerformAudioPassThruResponse() {
 }
 
 void PerformAudioPassThruResponse::Run() {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruResponse::Run ");
+  LOG4CXX_INFO(logger_, "PerformAudioPassThruResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
@@ -59,8 +59,19 @@ void PerformAudioPassThruResponse::Run() {
     return;
   }
 
-  // TODO(DK): Some logic
-  SendResponse();
+  const int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asInt();
+
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+         correlation_id)) {
+    ApplicationManagerImpl::instance()->StopAudioPassThruThread();
+    ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
+
+    (*message_)[strings::msg_params][strings::success] = true;
+    (*message_)[strings::msg_params][strings::result_code] =
+      NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    SendResponse();
+  }
 }
 
 }  // namespace commands
