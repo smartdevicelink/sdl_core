@@ -82,7 +82,6 @@ void CommandRequestImpl::SendResponse(const bool success,
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
-
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(&response);
   command->Init();
   command->Run();

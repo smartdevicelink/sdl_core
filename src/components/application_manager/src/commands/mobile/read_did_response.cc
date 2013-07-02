@@ -39,15 +39,15 @@ namespace application_manager {
 
 namespace commands {
 
-ReadDIDResponse::ReadDIDResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+ReadDIDResponse::ReadDIDResponse(const MessageSharedPtr& message)
+  : CommandResponseImpl(message) {
 }
 
 ReadDIDResponse::~ReadDIDResponse() {
 }
 
 void ReadDIDResponse::Run() {
-  LOG4CXX_INFO(logger_, "ReadDIDResponse::Run ");
+  LOG4CXX_INFO(logger_, "ReadDIDResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
@@ -57,10 +57,11 @@ void ReadDIDResponse::Run() {
     return;
   }
 
-  const int hmi_correlation_id = 205;
+  const int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        hmi_correlation_id)) {
+      correlation_id)) {
     // TODO(DK): HMI code Id
     const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
