@@ -47,7 +47,7 @@ UIAddSubmenuResponse::~UIAddSubmenuResponse() {
 }
 
 void UIAddSubmenuResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIAddSubmenuResponse::Run ");
+  LOG4CXX_INFO(logger_, "UIAddSubmenuResponse::Run");
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();

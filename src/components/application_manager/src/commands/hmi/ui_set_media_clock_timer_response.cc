@@ -47,7 +47,7 @@ UISetMediaClockTimerResponse::~UISetMediaClockTimerResponse() {
 }
 
 void UISetMediaClockTimerResponse::Run() {
-  LOG4CXX_INFO(logger_, "UISetMediaClockTimerResponse::Run ");
+  LOG4CXX_INFO(logger_, "UISetMediaClockTimerResponse::Run");
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
@@ -59,9 +59,6 @@ void UISetMediaClockTimerResponse::Run() {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }
-
-    smart_objects::CSmartObject data =
-      msg_chain->data();
 
     /* store received response code for to check it
      * in corresponding Mobile response
@@ -76,11 +73,6 @@ void UISetMediaClockTimerResponse::Run() {
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
                              ApplicationManagerImpl::instance()->
                              application(app_id));
-
-    if (NULL == app) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
 
     // prepare SmartObject for mobile factory
     (*message_)[strings::params][strings::function_id] =

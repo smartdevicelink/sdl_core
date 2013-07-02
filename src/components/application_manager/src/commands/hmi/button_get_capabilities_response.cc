@@ -45,7 +45,7 @@ ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {
 }
 
 void ButtonGetCapabilitiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesResponse::Run ");
+  LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesResponse::Run");
   ApplicationManagerImpl::instance()->set_button_capabilities(
     (*message_)[strings::msg_params][hmi_response::button_capabilities]);
 

@@ -47,7 +47,7 @@ UIDeleteSubmenuResponse::~UIDeleteSubmenuResponse() {
 }
 
 void UIDeleteSubmenuResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIDeleteSubmenuResponse::Run ");
+  LOG4CXX_INFO(logger_, "UIDeleteSubmenuResponse::Run");
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();

@@ -32,16 +32,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTDEVICELINKMAINAPP_H
-#define SMARTDEVICELINKMAINAPP_H
+#ifndef SRC_APPMAIN_APPMAIN_H_
+#define SRC_APPMAIN_APPMAIN_H_
 
 /**
  * \namespace NsSmartDeviceLink
  * \brief SmartDeviceLink main Application related functions.
  */
-namespace NsSmartDeviceLink
-{
+namespace NsSmartDeviceLink {
 
-} /* namespace NsSmartDeviceLink */
+}  // namespace NsSmartDeviceLink
 
-#endif /* SMARTDEVICELINKMAINAPP_H */
+#endif  // SRC_APPMAIN_APPMAIN_H_

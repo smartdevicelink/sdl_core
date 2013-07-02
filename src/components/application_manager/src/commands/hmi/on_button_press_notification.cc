@@ -40,9 +40,6 @@ namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 OnButtonPressNotification::OnButtonPressNotification(
     const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
@@ -51,6 +48,7 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 }
 
 void OnButtonPressNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
   if((*message_)[strings::msg_params].keyExists(
       hmi_response::custom_button_id)) {
 

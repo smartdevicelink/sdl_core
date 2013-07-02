@@ -49,6 +49,7 @@ set(LIBRARIES
     test_RequestWatchdogTest
     test_ProtocolHandlerTest
     test_JSONCPPTest
+    test_MobileMessageHandlerTest
     v4_protocol_v2_0_revT
     jsoncpp
     rt
