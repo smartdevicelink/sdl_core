@@ -63,6 +63,7 @@ TransportManagerImpl::TransportManagerImpl()
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
       device_adapter_listener_(),
+      device_handle_generator_(0),
       is_initialized_(false) {
 
   pthread_mutex_init(&message_queue_mutex_, 0);
@@ -94,7 +95,8 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
   device_adapter_listener_ = new DeviceAdapterListenerImpl(this);
   device_handle_generator_ = new DeviceHandleGeneratorImpl();
-  device_adapter->init(device_adapter_listener_, device_handle_generator_, NULL);
+  device_adapter->init(device_adapter_listener_, device_handle_generator_,
+                       NULL);
   addDeviceAdapter(device_adapter);
 }
 
@@ -102,8 +104,8 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
 
 TransportManagerImpl::~TransportManagerImpl() {
 
+  pthread_cond_signal(&device_listener_thread_wakeup_);
   all_thread_active_ = false;
-
   pthread_join(messsage_queue_thread_, 0);
   pthread_join(event_queue_thread_, 0);
   pthread_mutex_destroy(&message_queue_mutex_);
@@ -116,7 +118,9 @@ TransportManagerImpl::~TransportManagerImpl() {
 
 TransportManagerImpl* TransportManagerImpl::instance() {
   static TransportManagerImpl instance;
-  instance.init();
+  if (false == instance.is_initialized_) {
+    instance.init();
+  }
   return &instance;
 }
 
@@ -353,7 +357,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
       }
       this->removeEvent((*it));
-    }
+    }  //for
     pthread_mutex_unlock(&event_queue_mutex_);
 
   }  //end while true
@@ -487,14 +491,12 @@ void TransportManagerImpl::AdapterHandler::removeDevice(
 
 void TransportManagerImpl::acceptConnect(const DeviceHandle &device_id,
                                          const ApplicationHandle &app_id,
-                                         const SessionID &session_id)
-{
+                                         const SessionID &session_id) {
 //todo: implement it
 }
 
 void TransportManagerImpl::declineConnect(const DeviceHandle &device_id,
-                                         const ApplicationHandle &app_id)
-{
+                                          const ApplicationHandle &app_id) {
 //todo: implement it
 
 }
