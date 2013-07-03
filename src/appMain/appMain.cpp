@@ -73,9 +73,6 @@
 
 namespace {
 
-const char kTcpServerIp[] = "0.0.0.0";
-const unsigned short kTcpServerPort = 8087;
-
 const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
@@ -87,7 +84,6 @@ const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("appMain"));
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
   NsMessageBroker::CMessageBroker* message_broker =
       NsMessageBroker::CMessageBroker::getInstance();
@@ -97,8 +93,10 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
   }
 
   NsMessageBroker::TcpServer* message_broker_server =
-      new NsMessageBroker::TcpServer(std::string(kTcpServerIp), kTcpServerPort,
-                                     message_broker);
+      new NsMessageBroker::TcpServer(
+          profile::Profile::instance()->server_address(),
+          profile::Profile::instance()->server_port(),
+          message_broker);
   if (!message_broker_server) {
     LOG4CXX_INFO(logger, " Wrong pJSONRPC20Server pointer!");
     return false;
@@ -169,7 +167,6 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
 bool InitHmi() {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("appMain"));
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
   pid_t pid_hmi = 0;
   struct stat sb;
@@ -315,9 +312,12 @@ int main(int argc, char** argv) {
   if (!InitMessageBroker()) {
     exit(EXIT_FAILURE);
   }
+  LOG4CXX_INFO(logger, "InitMessageBroker successful");
+
   if (!InitHmi()) {
     exit(EXIT_FAILURE);
   }
+  LOG4CXX_INFO(logger, "InitHmi successful");
 
   // --------------------------------------------------------------------------
 

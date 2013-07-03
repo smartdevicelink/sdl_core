@@ -199,7 +199,7 @@ SDL.SDLController = Em.Object.create( {
      * @param {Number} alertRequestId
      */
     alertResponse: function( result, alertRequestId ) {
-        FFW.UI.sendUIResult( result, alertRequestId, 'UI.Alert' );
+        FFW.UI.alertResponse( result, alertRequestId );
     },
 
     /**

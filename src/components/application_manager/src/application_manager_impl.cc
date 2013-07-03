@@ -206,6 +206,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   // HMICommandFactory::CreateCommand
 }
 
+// TODO(VS) : Remove function_id from function parameters(it isn't used)
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     unsigned int connection_key,
     unsigned int correlation_id,
