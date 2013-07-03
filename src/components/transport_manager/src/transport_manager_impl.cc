@@ -42,6 +42,7 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/device_adapter_listener_impl.h"
+#include "transport_manager/device_handle_generator_impl.h"
 
 namespace transport_manager {
 
@@ -83,13 +84,15 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
       device_adapter_listener_(),
+      device_handle_generator_(0),
       is_initialized_(false) {
 
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
   device_adapter_listener_ = new DeviceAdapterListenerImpl(this);
-  device_adapter->init(device_adapter_listener_, NULL);
+  device_handle_generator_ = new DeviceHandleGeneratorImpl();
+  device_adapter->init(device_adapter_listener_, device_handle_generator_, NULL);
   addDeviceAdapter(device_adapter);
 }
 
@@ -106,6 +109,7 @@ TransportManagerImpl::~TransportManagerImpl() {
   pthread_cond_destroy(&device_listener_thread_wakeup_);
   delete transport_manager_listener_;
   delete device_adapter_listener_;
+  delete device_handle_generator_;
 }
 
 TransportManagerImpl* TransportManagerImpl::instance() {
