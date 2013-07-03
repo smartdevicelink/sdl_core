@@ -42,7 +42,13 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 
 /**
- * @brief Messagechaining class is intended to
+ * @brief Messagechaining class
+ *
+ * Class used to store temporary Mobile request data, connection key,
+ * because of HMI response doesn't contain it, but it is required for
+ * Mobile response and correlation Id.
+ * Class provides also possibility to store intermediate HMI response
+ * results required by Mobile response.
  */
 class MessageChaining {
  public:

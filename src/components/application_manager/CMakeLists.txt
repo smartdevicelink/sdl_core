@@ -199,6 +199,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_set_media_clock_timer_response.cc
 ./src/commands/hmi/vi_read_did_request.cc
 ./src/commands/hmi/vi_read_did_response.cc
+./src/commands/hmi/vi_get_vehicle_data_request.cc
+./src/commands/hmi/vi_get_vehicle_data_response.cc
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc

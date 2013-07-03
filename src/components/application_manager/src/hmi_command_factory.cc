@@ -102,6 +102,8 @@
 #include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
 #include "application_manager/commands/hmi/vi_read_did_response.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
 #include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
@@ -467,6 +469,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VIReadDIDResponse(message));
+      } else {
+        command.reset(new commands::VIReadDIDRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::Navigation_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
@@ -549,19 +560,19 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnTTSLanguageChangeNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::Buttons_OnButtonEvent: {
+    case  hmi_apis::FunctionID::Buttons_OnButtonEvent: {
       command.reset(new commands::OnButtonEventNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::Buttons_OnButtonPress: {
+    case  hmi_apis::FunctionID::Buttons_OnButtonPress: {
       command.reset(new commands::OnButtonPressNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::VehicleInfo_OnVehicleData: {
+    case  hmi_apis::FunctionID::VehicleInfo_OnVehicleData: {
       command.reset(new commands::OnVIVehicleDataNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_ShowNotification: {
+    case  hmi_apis::FunctionID::UI_ShowNotification: {
       command.reset(new commands::OnShowNotification(message));
       break;
     }
