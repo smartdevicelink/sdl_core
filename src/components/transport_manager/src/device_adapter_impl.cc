@@ -39,6 +39,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <assert.h>
 
 #include "transport_manager/device_adapter_impl.h"
 #include "transport_manager/device_adapter_listener.h"
@@ -126,7 +127,8 @@ DeviceAdapter::Error DeviceAdapterImpl::init(
   } else {
     LOG4CXX_ERROR(
         logger_,
-        "Device adapter main thread start failed, error code " << thread_start_error);
+        "Device adapter main thread start failed, error code "
+            << thread_start_error);
     return DeviceAdapter::FAIL;
   }
 
@@ -179,7 +181,8 @@ void DeviceAdapterImpl::waitForThreadsTermination() {
       if (1 != write(connection->getNotificationPipeWriteFd(), &c, 1)) {
         LOG4CXX_ERROR_WITH_ERRNO(
             logger_,
-            "Failed to wake up connection thread for connection " << session_id);
+            "Failed to wake up connection thread for connection "
+                << session_id);
       }
     }
     connection_threads.push_back(connection->connection_thread());
@@ -259,13 +262,16 @@ DeviceAdapter::Error DeviceAdapterImpl::startConnection(
     if (0 == error_code) {
       LOG4CXX_INFO(
           logger_,
-          "Connection thread started for session " << connection->session_id() << " (device " << connection->device_handle() << ")");
+          "Connection thread started for session " << connection->session_id()
+              << " (device " << connection->device_handle() << ")");
 
       is_thread_started = true;
     } else {
       LOG4CXX_ERROR(
           logger_,
-          "Connection thread start failed for session " << connection->session_id() << " (device " << connection->device_handle() << ")");
+          "Connection thread start failed for session "
+              << connection->session_id() << " (device "
+              << connection->device_handle() << ")");
     }
   }
 
@@ -281,14 +287,17 @@ DeviceAdapter::Error DeviceAdapterImpl::stopConnection(Connection* connection) {
       if (1 != ::write(connection->getNotificationPipeWriteFd(), &c, 1)) {
         LOG4CXX_ERROR_WITH_ERRNO(
             logger_,
-            "Failed to wake up connection thread for connection " << connection->session_id());
+            "Failed to wake up connection thread for connection "
+                << connection->session_id());
       }
       return FAIL;
     }
 
     LOG4CXX_INFO(
         logger_,
-        "Connection " << connection->session_id() << "(device " << connection->device_handle() << ") has been marked for termination");
+        "Connection " << connection->session_id() << "(device "
+            << connection->device_handle()
+            << ") has been marked for termination");
   } else {
     LOG4CXX_WARN(
         logger_,
@@ -302,11 +311,12 @@ bool DeviceAdapterImpl::waitForDeviceScanRequest(const time_t Timeout) {
 
   pthread_mutex_lock(&device_scan_requested_mutex_);
 
-  if (false == device_scan_requested_) {
+  if (false == device_scan_requested_)
+  {
     if (0 == Timeout) {
-      if (0
-          != pthread_cond_wait(&device_scan_requested_cond_,
-                               &device_scan_requested_mutex_)) {
+      if (0 != pthread_cond_wait(&device_scan_requested_cond_,
+                               &device_scan_requested_mutex_))
+      {
         LOG4CXX_ERROR_WITH_ERRNO(logger_, "pthread_cond_wait failed");
       }
     } else {
@@ -351,7 +361,8 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
   if (-1 == connection_socket) {
     LOG4CXX_ERROR(
         logger_,
-        "Socket is invalid for connection session " << connection->session_id());
+        "Socket is invalid for connection session "
+            << connection->session_id());
   } else {
     bool is_device_valid = false;
     //DeviceInfo clientDeviceInfo; TODO
@@ -387,7 +398,8 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                      fcntl(notification_pipe_read_fd, F_GETFL) | O_NONBLOCK)) {
           LOG4CXX_INFO(
               logger_,
-              "Connection " << connection->session_id() << " to remote device " << device->unique_device_id() << " established");
+              "Connection " << connection->session_id() << " to remote device "
+                  << device->unique_device_id() << " established");
 
           listener_->onConnectDone(this, connection->session_id());
           is_connection_succeeded = true;
@@ -411,7 +423,8 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                   != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
                 LOG4CXX_ERROR(
                     logger_,
-                    "Notification pipe for connection " << connection->session_id() << " terminated");
+                    "Notification pipe for connection "
+                        << connection->session_id() << " terminated");
 
                 connection->set_terminate_flag(true);
               } else {
@@ -426,7 +439,8 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                     if (bytes_read > 0) {
                       LOG4CXX_INFO(
                           logger_,
-                          "Received " << bytes_read << " bytes for connection " << connection->session_id());
+                          "Received " << bytes_read << " bytes for connection "
+                              << connection->session_id());
                       unsigned char* data = new unsigned char[bytes_read];
                       if (data) {
                         memcpy(data, buffer, bytes_read);
@@ -434,25 +448,27 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                             new protocol_handler::RawMessage(
                                 connection->session_id(), 0, data, bytes_read));
                         listener_->onDataReceiveDone(this,
-                                                    connection->session_id(),
-                                                    frame);
+                                                     connection->session_id(),
+                                                     frame);
                       } else {
                         listener_->onDataReceiveFailed(this,
-                                                      connection->session_id(),
-                                                      DataReceiveError());
+                                                       connection->session_id(),
+                                                       DataReceiveError());
                       }
                     } else if (bytes_read < 0) {
                       if (EAGAIN != errno && EWOULDBLOCK != errno) {
                         LOG4CXX_ERROR_WITH_ERRNO(
                             logger_,
-                            "recv() failed for connection " << connection->session_id());
+                            "recv() failed for connection "
+                                << connection->session_id());
 
                         connection->set_terminate_flag(true);
                       }
                     } else {
                       LOG4CXX_INFO(
                           logger_,
-                          "Connection " << connection->session_id() << " closed by remote peer");
+                          "Connection " << connection->session_id()
+                              << " closed by remote peer");
 
                       connection->set_terminate_flag(true);
                     }
@@ -469,7 +485,8 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                   if ((bytes_read < 0) && (EAGAIN != errno)) {
                     LOG4CXX_ERROR_WITH_ERRNO(
                         logger_,
-                        "Failed to clear notification pipe for connection " << connection->session_id());
+                        "Failed to clear notification pipe for connection "
+                            << connection->session_id());
 
                     connection->set_terminate_flag(true);
                   }
@@ -494,19 +511,24 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                         //TODO isn't it OK?
                         LOG4CXX_ERROR(
                             logger_,
-                            "Sent " << bytes_sent << " bytes while " << frame->data_size() << " had been requested for connection " << connection->session_id());
+                            "Sent " << bytes_sent << " bytes while "
+                                << frame->data_size()
+                                << " had been requested for connection "
+                                << connection->session_id());
                       } else {
                         LOG4CXX_ERROR_WITH_ERRNO(
                             logger_,
-                            "Send failed for connection " << connection->session_id());
+                            "Send failed for connection "
+                                << connection->session_id());
                       }
                     }
                     if (frame_sent) {
                       listener_->onDataSendDone(this, connection->session_id(),
-                                               frame);
+                                                frame);
                     } else {
-                      listener_->onDataSendFailed(this, connection->session_id(),
-                                                 frame, DataSendError());
+                      listener_->onDataSendFailed(this,
+                                                  connection->session_id(),
+                                                  frame, DataSendError());
                     }
                   }
                 }
@@ -522,17 +544,20 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
         } else {
           LOG4CXX_ERROR_WITH_ERRNO(
               logger_,
-              "Failed to set O_NONBLOCK for notification pipe for connection " << connection->session_id());
+              "Failed to set O_NONBLOCK for notification pipe for connection "
+                  << connection->session_id());
         }
       } else {
         LOG4CXX_ERROR_WITH_ERRNO(
             logger_,
-            "Failed to create notification pipe for connection " << connection->session_id());
+            "Failed to create notification pipe for connection "
+                << connection->session_id());
       }
     } else {
       LOG4CXX_ERROR(
           logger_,
-          "Device for connection " << connection->session_id() << " is invalid");
+          "Device for connection " << connection->session_id()
+              << " is invalid");
     }
 
     const int close_status = close(connection_socket);
@@ -542,7 +567,7 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
         listener_->onDisconnectDone(this, connection->session_id());
       } else {
         listener_->onDisconnectFailed(this, connection->session_id(),
-                                     DisconnectError());
+                                      DisconnectError());
       }
     }
   }
@@ -607,7 +632,8 @@ DeviceAdapter::Error DeviceAdapterImpl::sendData(const int session_id,
         if (1 != write(connection->getNotificationPipeWriteFd(), &c, 1)) {
           LOG4CXX_ERROR_WITH_ERRNO(
               logger_,
-              "Failed to wake up connection thread for connection " << session_id);
+              "Failed to wake up connection thread for connection "
+                  << session_id);
         }
       }
     }

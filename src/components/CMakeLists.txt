@@ -4,6 +4,7 @@ add_subdirectory(./interfaces)
 # --- TransportManager
 if(BUILD_ONLY_TM)
 add_subdirectory(./transport_manager)
+add_subdirectory(./protocol_handler)
 else()
 add_subdirectory(./TransportManager)
 endif()

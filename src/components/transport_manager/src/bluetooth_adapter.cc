@@ -114,7 +114,8 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
     if (device->rfcomm_channels().end() == rfcomm_channels_it) {
       LOG4CXX_ERROR(
           logger_,
-          "Device " << device_handle << " with application " << app_handle << " not found");
+          "Device " << device_handle << " with application " << app_handle
+              << " not found");
     } else {
       struct sockaddr_rc remoteSocketAddress = { 0 };
       remoteSocketAddress.rc_family = AF_BLUETOOTH;
@@ -123,7 +124,7 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
       remoteSocketAddress.rc_channel = rfcomm_channels_it->second;
 
       const int rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM,
-                                      BTPROTO_RFCOMM);
+                                       BTPROTO_RFCOMM);
 
       if (-1 != rfcomm_socket) {
         const int connect_status = ::connect(
@@ -135,7 +136,9 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
         } else {
           LOG4CXX_ERROR_WITH_ERRNO(
               logger_,
-              "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << session_id);
+              "Failed to connect to remote device "
+                  << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr)
+                  << " for session " << session_id);
         }
       } else {
         LOG4CXX_ERROR_WITH_ERRNO(
@@ -147,7 +150,8 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
 
   LOG4CXX_INFO(
       logger_,
-      "Removing connection for session " << session_id << " from connection map");
+      "Removing connection for session " << session_id
+          << " from connection map");
 
   pthread_mutex_lock(&connections_mutex_);
   connections_.erase(connection->session_id());
@@ -155,7 +159,8 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
 
   delete connection;
 
-  LOG4CXX_INFO(logger_, "Connection thread finished for session " << session_id);
+  LOG4CXX_INFO(logger_,
+               "Connection thread finished for session " << session_id);
 }
 
 void BluetoothAdapter::mainThread() {
@@ -230,7 +235,7 @@ void BluetoothAdapter::mainThread() {
             LOG4CXX_ERROR(logger_, "hci_inquiry failed");
           }
 
-          close (device_handle);
+          close(device_handle);
         }
       }
 
@@ -261,7 +266,8 @@ void BluetoothAdapter::mainThread() {
 
           LOG4CXX_INFO(
               logger_,
-              "Adding new device " << device_handle << " (\"" << discovered_device->name() << "\")");
+              "Adding new device " << device_handle << " (\""
+                  << discovered_device->name() << "\")");
         }
 
         new_devices[device_handle] = discovered_device;
@@ -305,7 +311,9 @@ void BluetoothAdapter::mainThread() {
 
       LOG4CXX_INFO(
           logger_,
-          "Discovered " << new_devices.size() << " device" << ((1u == new_devices.size()) ? "" : "s") << " with SmartDeviceLink service. New devices map:");
+          "Discovered " << new_devices.size() << " device"
+              << ((1u == new_devices.size()) ? "" : "s")
+              << " with SmartDeviceLink service. New devices map:");
 
       for (DeviceMap::iterator it = new_devices.begin();
           it != new_devices.end(); ++it) {
@@ -314,7 +322,8 @@ void BluetoothAdapter::mainThread() {
         if (0 != device) {
           LOG4CXX_INFO(
               logger_,
-              std::setw(10) << it->first << std::setw(0) << ": " << device->unique_device_id() << ", " << device->name());
+              std::setw(10) << it->first << std::setw(0) << ": "
+                  << device->unique_device_id() << ", " << device->name());
         } else {
           LOG4CXX_ERROR(
               logger_,
@@ -444,11 +453,14 @@ void BluetoothAdapter::discoverSmartDeviceLinkRfcommChannels(
 
     LOG4CXX_INFO(
         logger_,
-        "SmartDeviceLink service was discovered on device " << getUniqueDeviceId(device_address) << " at channel(s): " << rfcomm_channels_string.str().c_str());
+        "SmartDeviceLink service was discovered on device "
+            << getUniqueDeviceId(device_address) << " at channel(s): "
+            << rfcomm_channels_string.str().c_str());
   } else {
     LOG4CXX_INFO(
         logger_,
-        "SmartDeviceLink service was not discovered on device " << getUniqueDeviceId(device_address));
+        "SmartDeviceLink service was not discovered on device "
+            << getUniqueDeviceId(device_address));
   }
 }
 

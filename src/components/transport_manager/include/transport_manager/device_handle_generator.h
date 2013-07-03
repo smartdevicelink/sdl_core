@@ -52,7 +52,7 @@ public:
   /**
    * @brief Destructor.
    **/
-  virtual ~DeviceHandleGenerator();
+  virtual ~DeviceHandleGenerator() { };
 
   /**
    * @brief Generate new device handle.

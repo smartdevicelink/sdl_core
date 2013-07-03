@@ -5,7 +5,6 @@
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
 
-
 if(BUILD_ONLY_TM)
 add_definitions(-DBUILD_ONLY_TM)
 include_directories (
@@ -79,8 +78,8 @@ set(LIBRARIES
     rt
     Utils
 )
-endif()
-
 add_executable("test_suit" "./test_suit.cc")
 target_link_libraries("test_suit" ${LIBRARIES})
+endif()
+
 
