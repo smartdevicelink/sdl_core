@@ -138,7 +138,7 @@ class ApplicationManagerImpl : public ApplicationManager
       MessageChaining* chain,
       unsigned int connection_key,
       unsigned int correlation_id,
-      unsigned int function_id,
+      unsigned int function_id = 0, // TODO(VS): delete this param
       const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
