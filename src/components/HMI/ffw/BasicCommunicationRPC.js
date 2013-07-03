@@ -182,7 +182,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         // nothing to do, it is client
     },
     
-    /*
+    /**
      * notification that UI is ready BasicCommunication should be sunscribed to
      * this notification
      */
@@ -197,7 +197,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
     },
 
     /**
-     * Request for list of avaliable applications
+     * This methos is request to get list of registered apps.
      */
     getAppList: function() {
         this.getAppListRequestId = this.client.generateId();
@@ -210,24 +210,24 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /**
-     * send notification when version of protocol vas changed
-     * 
-     * @params {Number}
-     */
-    OnVersionChanged: function( version ) {
-        Em.Logger.log( "FFW.BasicCommunication.OnVersionChanged" );
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "BasicCommunication.OnVersionChanged",
-            "params": {
-                "versionNumber": version
-            }
-        };
-        this.client.send( JSONMessage );
-    },
+//    /**
+//     * send notification when version of protocol vas changed
+//     * 
+//     * @params {Number}
+//     */
+//    OnVersionChanged: function( version ) {
+//        Em.Logger.log( "FFW.BasicCommunication.OnVersionChanged" );
+//
+//        // send repsonse
+//        var JSONMessage = {
+//            "jsonrpc": "2.0",
+//            "method": "BasicCommunication.OnVersionChanged",
+//            "params": {
+//                "versionNumber": version
+//            }
+//        };
+//        this.client.send( JSONMessage );
+//    },
 
     /**
      * Request for list of avaliable devices
@@ -243,38 +243,41 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /**
-     * Sending data from HMI for processing in BasicCommunication
-     * 
-     * @params {Array}
-     */
-    SendData: function( data ) {
-        Em.Logger.log( "FFW.BasicCommunication.SendData" );
-
-        if( !data ){
-            data =
-                [
-                    "Data for sending from HMI to Mobile application."
-                ];
-        }
-
-        // send request
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "id": this.client.idStart,
-            "method": "BasicCommunication.SendData",
-            "params": {
-                "data": data
-            }
-        };
-
-        if( SDL.SDLModel.sendDataExtend ){
-            JSONMessage.params["url"] = "ftp://ford-applink.luxoft.com";
-            JSONMessage.params["timeout"] = 10000;
-        }
-
-        this.client.send( JSONMessage );
-    },
+//    /**
+//     * Sending data from HMI for processing in BasicCommunication
+//     * 
+//     * @params {Array}
+//     */
+//    SendData: function( data ) {
+//        Em.Logger.log( "FFW.BasicCommunication.SendData" );
+//
+//        if( !data ){
+//            data =
+//                [
+//                    "Data for sending from HMI to Mobile application."
+//                ];
+//        }
+//
+//        // send request
+//        var JSONMessage = {
+//            "jsonrpc": "2.0",
+//            "id": this.client.idStart,
+//            "result":{
+//                "code": 0,
+//                "method": "BasicCommunication.SendData",
+//                "params": {
+//                    "data": data
+//                }
+//            }
+//        };
+//
+//        if( SDL.SDLModel.sendDataExtend ){
+//            JSONMessage.result.params["url"] = "ftp://ford-applink.luxoft.com";
+//            JSONMessage.result.params["timeout"] = 10000;
+//        }
+//
+//        this.client.send( JSONMessage );
+//    },
 
     /**
      * Notification when user returned to application
@@ -291,7 +294,6 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
             "id": this.client.idStart,
             "method": "BasicCommunication.ActivateApp",
             "params": {
-                "appName": SDL.SDLController.getApplicationModel( appId ).appName,
                 "appId": appId
             }
         };
@@ -299,13 +301,12 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
     },
 
     /**
-     * Sent notification that user was turned off the app and the reason why
+     * Invoked by UI component when user switches to any functionality which is not other mobile application.
      * 
-     * @params {String}
      * @params {String}
      * @params {Number}
      */
-    DeactivateApp: function( appName, reason, appId ) {
+    DeactivateApp: function( reason, appId ) {
         Em.Logger.log( "FFW.BasicCommunication.OnAppDeactivated" );
 
         // send request
@@ -314,12 +315,91 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
             "jsonrpc": "2.0",
             "method": "BasicCommunication.OnAppDeactivated",
             "params": {
-                "appName": appName,
                 "appId": appId,
                 "reason": reason
             }
         };
         this.client.send( JSONMessage );
+    },
+    
+    /**
+     * Initiated by HMI user. In response optional list of found devices - if not provided, not were found.
+     */
+    StartDeviceDiscovery: function() {
+        Em.Logger.log( "FFW.BasicCommunication.StartDeviceDiscovery" );
+
+        // send request
+
+        var JSONMessage = {
+            "id": this.client.idStart,
+            "jsonrpc": "2.0",
+            "method": "BasicCommunication.StartDeviceDiscovery"
+        };
+        this.client.send( JSONMessage );
+    },
+
+    /**
+     * Used by HMI when User chooses to exit application.
+     * 
+     * @params {Number}
+     */
+    ExitApplication: function( appId ) {
+        Em.Logger.log( "FFW.BasicCommunication.ExitApplication" );
+
+        // send request
+
+        var JSONMessage = {
+            "id": this.client.idStart,
+            "jsonrpc": "2.0",
+            "method": "BasicCommunication.ExitApplication",
+            "params": {
+                "appId": appId
+            }
+        };
+        this.client.send( JSONMessage );
+    },
+
+    /**
+     * Sent by HMI to SDL to close all registered applications.
+     * 
+     * @params {String}
+     */
+    ExitAllApplications: function( reason ) {
+        Em.Logger.log( "FFW.BasicCommunication.ExitAllApplications" );
+
+        // send request
+
+        var JSONMessage = {
+            "id": this.client.idStart,
+            "jsonrpc": "2.0",
+            "method": "BasicCommunication.ExitAllApplications",
+            "params": {
+                "reason": reason
+            }
+        };
+        this.client.send( JSONMessage );
+    },
+
+    /**
+     * Response with params of the last one supports mixing audio (ie recording TTS command and playing audio).
+     * 
+     * @params {Number}
+     */
+    MixingAudioSupported: function( attenuatedSupported ) {
+        Em.Logger.log( "FFW.BasicCommunication.MixingAudioSupported" );
+
+        // send request
+
+        var JSONMessage = {
+            "id": this.client.idStart,
+            "jsonrpc": "2.0",
+            "method": "BasicCommunication.MixingAudioSupported",
+            "params": {
+                "attenuatedSupported": attenuatedSupported
+            }
+        };
+        this.client.send( JSONMessage );
     }
+    
 
 } )
