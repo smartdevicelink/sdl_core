@@ -34,6 +34,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
+#include "config_profile/profile.h"
 
 namespace application_manager {
 
@@ -63,6 +64,9 @@ void OnAppDeactivatedNotification::Run() {
 
   if ((*message_)[strings::msg_params][strings::app_id].asInt()
       != app->app_id()) {
+    LOG4CXX_ERROR_EXT(
+        logger_,
+        "Wrong application id!");
     return;
   }
 
@@ -74,8 +78,13 @@ void OnAppDeactivatedNotification::Run() {
     case hmi_apis::Common_DeactivateReason::AUDIO:
     case hmi_apis::Common_DeactivateReason::PHONECALL: {
       if (app->is_media_application()) {
-        app->set_audio_streaming_state(
-          mobile_api::AudioStreamingState::NOT_AUDIBLE);
+        if (profile::Profile::instance()->is_mixing_audio_supported()) {
+          app->set_audio_streaming_state(
+                    mobile_api::AudioStreamingState::ATTENUATED);
+        } else {
+          app->set_audio_streaming_state(
+                    mobile_api::AudioStreamingState::NOT_AUDIBLE);
+        }
       }
       app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;
@@ -86,8 +95,6 @@ void OnAppDeactivatedNotification::Run() {
     case hmi_apis::Common_DeactivateReason::GENERAL: {
       if (app->is_media_application()) {
         if (mobile_api::HMILevel::HMI_FULL == app->hmi_level()) {
-          app->set_audio_streaming_state(
-            mobile_api::AudioStreamingState::AUDIBLE);
           app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
         }
       } else {
