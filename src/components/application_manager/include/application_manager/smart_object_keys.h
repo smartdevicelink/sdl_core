@@ -105,7 +105,6 @@ const char hmi_display_language[] = "hmiDisplayLanguage";
 const char language[] = "language";
 const char data[] = "data";
 const char trigger_source[] = "triggerSource";
-const char prndl[] = "prndl";
 const char hmi_level[] = "hmiLevel";
 const char audio_streaming_state[] = "audioStreamingState";
 const char system_context[] = "systemContext";
@@ -130,6 +129,32 @@ const char application[] = "application";
 const char icon[] = "icon";
 const char device_name[] = "deviceName";
 const char reason[] = "reason";
+
+// vehicle info
+const char gps[] = "gps";
+const char speed[] = "speed";
+const char rpm[] = "rpm";
+const char fuel_level[] = "fuelLevel";
+const char fuel_level_state[] = "fuelLevel_State";
+const char instant_fuel_consumption[] = "instantFuelConsumption";
+const char external_temp[] = "externalTemperature";
+const char prndl[] = "prndl";
+const char tire_pressure[] = "tirePressure";
+const char odometer[] = "odometer";
+const char belt_status[] = "beltStatus";
+const char body_information[] = "bodyInformation";
+const char device_status[] = "deviceStatus";
+const char driver_braking[] = "driverBraking";
+const char wiper_status[] = "wiperStatus";
+const char head_lamp_status[] = "headLampStatus";
+const char engine_torque[] = "engineTorque";
+const char acc_pedal_pos[] = "accPedalPosition";
+const char steering_wheel_angle[] = "steeringWheelAngle";
+const char e_call_info[] = "eCallInfo";
+const char airbag_status[] = "airbagStatus";
+const char emergency_event[] = "emergencyEvent";
+const char cluster_mode_status[] = "clusterModeStatus";
+const char my_key[] = "myKey";
 }  // namespace strings
 
 namespace mobile_notification {

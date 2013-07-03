@@ -37,6 +37,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -52,7 +53,7 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 }
 
 void GetVehicleDataRequest::Run() {
-  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run ");
+  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
@@ -60,47 +61,49 @@ void GetVehicleDataRequest::Run() {
                            application(app_id));
 
   if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+    LOG4CXX_ERROR(logger_, "app in HMI level HMI_NONE");
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::REJECTED);
     return;
   }
 
-  smart_objects::CSmartObject* p_smrt_vr  =
+  smart_objects::CSmartObject* get_vehicle_data  =
     new smart_objects::CSmartObject();
 
-  if (!p_smrt_vr) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+  if (NULL == get_vehicle_data) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
     return;
   }
 
   // copy entirely smart object
-  (*p_smrt_vr) = (*message_);
+  (*get_vehicle_data) = (*message_);
 
   const int correlation_id =
-    (*p_smrt_vr)[strings::params][strings::correlation_id];
+    (*get_vehicle_data)[strings::params][strings::correlation_id];
   const int connection_key =
-    (*p_smrt_vr)[strings::params][strings::connection_key];
+    (*get_vehicle_data)[strings::params][strings::connection_key];
 
-  // TODO(DK) HMI Request Id
-  const int vr_cmd_id = 92;
-  (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
+  const int vr_cmd_id = hmi_apis::FunctionID::VehicleInfo_GetVehicleData;
+  (*get_vehicle_data)[strings::params][strings::function_id] = vr_cmd_id;
 
-  (*p_smrt_vr)[strings::params][strings::message_type] =
+  (*get_vehicle_data)[strings::msg_params][strings::app_id] =
+    app->app_id();
+
+  (*get_vehicle_data)[strings::params][strings::message_type] =
     MessageType::kRequest;
 
 
-  MessageChaining* chain = NULL;
-  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, vr_cmd_id, p_smrt_vr);
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+          connection_key, correlation_id, vr_cmd_id, get_vehicle_data);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
+  ApplicationManagerImpl::instance()->SendMessageToHMI(get_vehicle_data);
 }
 
 }  // namespace commands

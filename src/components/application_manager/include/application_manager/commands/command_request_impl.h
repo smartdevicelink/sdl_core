@@ -47,32 +47,64 @@ namespace application_manager {
 namespace commands {
 
 /*
- * @brief Enum for HMI TextFieldName type
+ * @brief Typedef for HMI TextFieldName type
  */
-enum TextFieldName {
+typedef enum {
   MAIN_FILED1              = 0,
-  MAIN_FILED2              = 1,
-  MAIN_FILED3              = 2,
-  MAIN_FILED4              = 3,
-  STATUS_BAR               = 4,
-  MEDIA_CLOCK              = 5,
-  MEDIA_TRACK              = 6,
-  ALERT_TEXT1              = 7,
-  ALERT_TEXT2              = 8,
-  ALERT_TEXT3              = 9,
-  SCROLLABLE_MSG_BODY      = 10,
-  INITIAL_INTERACTION_TEXT = 11,
-  NAVI_TEXT1               = 12,
-  NAVI_TEXT2               = 13,
-  ETA                      = 14,
-  TOTAL_DISTANCE           = 15,
-  NAVI_TEXT                = 16,
-  AUDIO_DISPLAY_TEXT1      = 17,
-  AUDIO_DISPLAY_TEXT2      = 18,
-  SLIDER_HADER             = 19,
-  SLIDER_FOOTEER           = 20
-};
+  MAIN_FILED2,
+  MAIN_FILED3,
+  MAIN_FILED4,
+  STATUS_BAR,
+  MEDIA_CLOCK,
+  MEDIA_TRACK,
+  ALERT_TEXT1,
+  ALERT_TEXT2,
+  ALERT_TEXT3,
+  SCROLLABLE_MSG_BODY,
+  INITIAL_INTERACTION_TEXT,
+  NAVI_TEXT1,
+  NAVI_TEXT2,
+  ETA,
+  TOTAL_DISTANCE,
+  NAVI_TEXT,
+  AUDIO_DISPLAY_TEXT1,
+  AUDIO_DISPLAY_TEXT2,
+  SLIDER_HADER,
+  SLIDER_FOOTEER
+} TextFieldName;
 
+/*
+ * @brief Typedef for the vehicle data types that can
+ * be published and subscribed to
+ */
+typedef enum {
+  GPS                      = 0,
+  SPEED,
+  RPM,
+  FUELLEVEL,
+  FUELLEVEL_STATE,
+  FUELCONSUMPTION,
+  EXTERNTEMP,
+  VIN,
+  PRNDL,
+  TIREPRESSURE,
+  ODOMETER,
+  BELTSTATUS,
+  BODYINFO,
+  DEVICESTATUS,
+  ECALLINFO,
+  AIRBAGSTATUS,
+  EMERGENCYEVENT,
+  CLUSTERMODESTATUS,
+  MYKEY,
+  BRAKING,
+  WIPERSTATUS,
+  HEADLAMPSTATUS,
+  BATTVOLTAGE,
+  ENGINETORQUE,
+  ACCPEDAL,
+  STEERINGWHEEL
+} VehicleDataType;
 
 class CommandRequestImpl : public CommandImpl {
   public:
