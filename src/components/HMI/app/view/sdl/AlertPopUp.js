@@ -120,7 +120,7 @@ SDL.AlertPopUp = Em.ContainerView.create( {
         this.set( 'active', false );
         clearTimeout( this.timer );
 
-        SDL.SDLController.alertResponse( ABORTED ? 'ABORTED' : 'SUCCESS', this.alertRequestId );
+        SDL.SDLController.alertResponse( ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId );
 
         SDL.SDLController.onSystemContextChange();
     },
@@ -190,20 +190,15 @@ SDL.AlertPopUp = Em.ContainerView.create( {
     AlertActive: function( message, alertRequestId ) {
         var self = this;
 
-        // play audio alert
-        if( message.playTone ){
-            SDL.Audio.play( 'audio/alert.wav' );
-        }
-
         this.set( 'alertRequestId', alertRequestId );
 
         this.addSoftButtons( message.softButtons, message.appId );
 
         this.set( 'appName', SDL.SDLController.getApplicationModel( message.appId ).appName );
 
-        this.set( 'content1', message.AlertText1 );
-        this.set( 'content2', message.AlertText2 );
-        this.set( 'content3', message.AlertText3 );
+        this.set( 'content1', message.alertStrings[0].fieldText );
+        this.set( 'content2', message.alertStrings[1].fieldText );
+        this.set( 'content3', message.alertStrings[2].fieldText );
         this.set( 'active', true );
         SDL.SDLController.onSystemContextChange();
 
@@ -211,9 +206,5 @@ SDL.AlertPopUp = Em.ContainerView.create( {
         this.timer = setTimeout( function() {
             self.deactivate();
         }, message.duration );
-
-        if( message.ttsChunks ){
-            SDL.SDLModel.onPrompt( message.ttsChunks, message.duration - 100 );
-        }
     }
 } );

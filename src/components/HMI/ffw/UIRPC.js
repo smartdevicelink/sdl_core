@@ -136,7 +136,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this._super();
 
         if( notification.method == this.onVRChoiseNotification ){
-            this.interactionResponse( "SUCCESS", notification.params.choiceId );
+            this.interactionResponse( SDL.SDLModel.resultCode["SUCCESS"], notification.params.choiceId );
         }
     },
 
@@ -171,7 +171,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.setProperties( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -180,7 +180,7 @@ FFW.UI = FFW.RPCObserver.create( {
                 // reset all requested properties
                 SDL.SDLModel.resetProperties( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -188,7 +188,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLController.getApplicationModel( request.params.appId ).addCommand( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -196,7 +196,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLController.getApplicationModel( request.params.appId ).deleteCommand( request.params.cmdId );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -204,7 +204,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLController.getApplicationModel( request.params.appId ).addSubMenu( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -220,7 +220,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLController.getApplicationModel( request.params.appId ).onCreateInteraction( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -228,7 +228,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLController.getApplicationModel( request.params.appId ).onDeleteInteraction( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -266,7 +266,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.changeRegistrationUI( request.params.hmiDisplayLanguage );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -298,7 +298,7 @@ FFW.UI = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
                                                     // protocol
                         "method": "UI.GetSupportedLanguagesResponse",
                         "languages": SDL.SDLModel.sdlLanguagesList
@@ -314,7 +314,7 @@ FFW.UI = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
                                                     // protocol
                         "method": "UI.GetLanguageResponse",
                         "hmiDisplayLanguage": SDL.SDLModel.hmiUILanguage
@@ -328,7 +328,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.tbtActivate( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -336,7 +336,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.tbtTurnListUpdate( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -344,7 +344,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.onUIAlertManeuver( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -352,7 +352,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.dialNumber( request.params );
 
-                this.sendUIResult( "SUCCESS", request.id, request.method );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -482,8 +482,30 @@ FFW.UI = FFW.RPCObserver.create( {
                 "jsonrpc": "2.0",
                 "id": id,
                 "result": {
-                    "resultCode": resultCode, // type (enum) from SDL protocol
-                    "method": method + "Response"
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "method": method
+                }
+            };
+            this.client.send( JSONMessage );
+        }
+    },
+
+    /**
+     * send response from onRPCRequest
+     */
+    alertResponse: function( resultCode, id ) {
+
+        Em.Logger.log( "FFW.UI.AlertResponse" );
+
+        if( resultCode ){
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "method": 'UI.Alert'
                 }
             };
             this.client.send( JSONMessage );
@@ -495,7 +517,7 @@ FFW.UI = FFW.RPCObserver.create( {
             "jsonrpc": "2.0",
             "id": sliderRequestId,
             "result": {
-                "resultCode": resultCode, // type (enum) from SDL protocol
+                "code": resultCode, // type (enum) from SDL protocol
                 "method": "UI.SliderResponse"
             }
         };
@@ -552,7 +574,7 @@ FFW.UI = FFW.RPCObserver.create( {
             "jsonrpc": "2.0",
             "id": performInteractionRequestId,
             "result": {
-                "resultCode": resultCode,
+                "code": resultCode,
                 "method": "UI.PerformInteractionResponse"
             }
         };
