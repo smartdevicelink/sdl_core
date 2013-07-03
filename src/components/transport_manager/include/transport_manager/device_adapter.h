@@ -52,12 +52,11 @@ typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
 typedef std::vector<DeviceHandle> DeviceList;
 
-class DeviceAdapter {
-public:
-	enum Error {
-		OK, FAIL, NOT_SUPPORTED, ALREADY_EXIST, BAD_STATE, BAD_PARAM
-	};
+enum Error {
+  OK, FAIL, NOT_SUPPORTED, ALREADY_EXIST, BAD_STATE, BAD_PARAM
+};
 
+class DeviceAdapter {
 public:
 	virtual ~DeviceAdapter();
 

@@ -105,6 +105,8 @@ class Device {
   std::string unique_device_id_;
 };
 
+typedef utils::SharedPtr<Device> DeviceSptr;
+
 /**
  * @brief Frame queue.
  **/
@@ -144,9 +146,8 @@ class Connection {
     return session_id_;
   }
 
-  FrameQueue& frames_to_send() {
-    return frames_to_send_;
-  }
+  void pushFrame(RawMessageSptr frame);
+  RawMessageSptr popFrame();
 
  private:
   /**
@@ -168,15 +169,21 @@ class Connection {
    * @brief Frames that must be sent to remote device.
    **/
   FrameQueue frames_to_send_;
+
+  mutable pthread_mutex_t frames_to_send_mutex_;
 };
+
+typedef utils::SharedPtr<Connection> ConnectionSptr;
 
 class DeviceAdapterFunctional {
  public:
-  virtual void init() = 0;
+  virtual Error init() = 0;
   virtual void terminate() = 0;
   virtual ~DeviceAdapterFunctional() {
   }
 };
+
+typedef utils::SharedPtr<DeviceAdapterFunctional> DeviceAdapterFunctionalSptr
 
 class DeviceScanner : virtual public DeviceAdapterFunctional {
  public:
@@ -185,14 +192,18 @@ class DeviceScanner : virtual public DeviceAdapterFunctional {
   }
 };
 
+typedef utils::SharedPtr<DeviceScanner> DeviceScannerSptr;
+
 class DataTransmitter : virtual public DeviceAdapterFunctional {
  public:
-  virtual void registerConnection(Connection*) = 0;
-  virtual void unregisterConnection(Connection*) = 0;
-  virtual void notifyDataAvailable(Connection*) = 0;
+  virtual void registerConnection(ConnectionSptr) = 0;
+  virtual void unregisterConnection(ConnectionSptr) = 0;
+  virtual void notifyDataAvailable(ConnectionSptr) = 0;
   virtual ~DataTransmitter() {
   }
 };
+
+typedef utils::SharedPtr<DataTransmitter> DataTransmitterSptr;
 
 class ServerConnectionProcessor : virtual public DeviceAdapterFunctional {
  public:
@@ -201,6 +212,8 @@ class ServerConnectionProcessor : virtual public DeviceAdapterFunctional {
   }
 };
 
+typedef utils::SharedPtr<ServerConnectionProcessor> ServerConnectionProcessorSptr;
+
 class ClientConnectionListener : virtual public DeviceAdapterFunctional {
  public:
   virtual void createConnection(DeviceHandle, ApplicationHandle, SessionID) = 0;
@@ -208,16 +221,21 @@ class ClientConnectionListener : virtual public DeviceAdapterFunctional {
   }
 };
 
+typedef utils::SharedPtr<ClientConnectionListener> ClientConnectionListenerSptr;
+
 class Disconnector : virtual public DeviceAdapterFunctional {
  public:
-  virtual void disconnect(Connection*) = 0;
+  virtual void disconnect(ConnectionSptr) = 0;
   virtual ~Disconnector() {
   }
 };
 
+typedef utils::SharedPtr<Disconnector> DisconnectorSptr;
+
 class DeviceAdapterInternals {
-public:
-  virtual ~DeviceAdapterInternals() {}
+ public:
+  virtual ~DeviceAdapterInternals() {
+  }
 
   virtual DeviceAdapterListener* getListener() = 0;
   virtual DeviceHandleGenerator* getDeviceHandleGenerator() = 0;
@@ -231,7 +249,7 @@ public:
   virtual void removeConnection(Connection*) = 0;
 };
 
- /*
+/*
  * @brief Base class for @link components_transportmanager_internal_design_device_adapters device adapters @endlink.
  **/
 class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
@@ -276,7 +294,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    **/
   virtual Error connect(const DeviceHandle device_handle,
                         const ApplicationHandle app_handle,
-                        const int session_id);
+                        const SessionID session_id);
 
   /**
    * @brief Disconnect from specified session.
@@ -285,7 +303,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
-  virtual Error disconnect(const int session_id);
+  virtual Error disconnect(const SessionID session_id);
 
   /**
    * @brief Disconnect from all sessions on specified device.
@@ -306,26 +324,15 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  virtual Error sendData(const int session_id, const RawMessageSptr data);
+  virtual Error sendData(const SessionID session_id, const RawMessageSptr data);
 
  protected:
-  /**
-   * @brief Create connection.
-   *
-   * Check if connection is not in connection map
-   * and if it's not, add it to map.
-   *
-   * @param device_handle Device handle.
-   * @param app_handle Application handle.
-   * @param session_id Session identifier.
-   * @param connection Output pointer created connection or 0 in case of error.
-   *
-   * @return Status.
-   **/
-  DeviceAdapter::Error createConnection(const DeviceHandle device_handle,
-                                        const ApplicationHandle app_handle,
-                                        const int session_id,
-                                        Connection** connection);
+
+  void setDeviceScanner(DeviceScannerSptr device_scanner);
+  void setDataTransmitter(DataTransmitterSptr data_transmitter);
+  void setServerConnectionProcessor(ServerConnectionProcessorSptr server_connection_processor);
+  void setClientConnectionListener(ClientConnectionListenerSptr client_connection_listener);
+  void setDisconnector(DisconnectorSptr disconnector);
 
   /**
    * @brief Delete connection.
@@ -334,7 +341,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    *
    * @param connection Connection to delete.
    **/
-  void deleteConnection(Connection* connection);
+  void deleteConnection(ConnectionSptr connection);
 
   /**
    * @brief Start connection.
@@ -345,7 +352,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    *
    * @return true if connection thread has been started, false otherwise.
    **/
-  Error startConnection(Connection* connection);
+  Error startConnection(ConnectionSptr connection);
 
   /**
    * @brief Stop connection.
@@ -355,25 +362,29 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    *
    * @param connection Connection to stop.
    **/
-  Error stopConnection(Connection* connection);
+  Error stopConnection(ConnectionSptr connection);
 
   virtual DeviceList getDeviceList() const;
 
   virtual DeviceAdapterListener* getListener();
   virtual DeviceHandleGenerator* getDeviceHandleGenerator();
 
-  virtual DeviceHandle addDevice(Device*);
-  virtual std::vector<DeviceHandle> addDevices(const std::vector<Device>&);
-  virtual bool isDeviceExist(Device*);
-  virtual Device* findDevice(DeviceHandle);
+  virtual DeviceHandle addDevice(DeviceSptr device);
+  virtual std::vector<DeviceHandle> addDevices(const std::vector<Device>& devices);
+  virtual bool isDeviceExist(Device* device);
+  virtual Device* findDevice(DeviceHandle device_handle);
 
-  virtual void addConnection(Connection*);
-  virtual void removeConnection(Connection*);
+  virtual void addConnection(ConnectionSptr connection);
+  virtual void removeConnection(ConnectionSptr connection);
 
   /**
    * @brief Logger.
    **/
   static log4cxx::LoggerPtr logger_;
+
+ private:
+
+  ConnectionSptr findConnection(const SessionID session_id);
 
   /**
    * @brief Listener for device adapter notifications.
@@ -385,16 +396,17 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    **/
   DeviceHandleGenerator* handle_generator_;
 
- private:
+  bool initialised_;
+
   /**
    * @brief Devices map.
    **/
-  typedef std::map<DeviceHandle, Device*> DeviceMap;
+  typedef std::map<DeviceHandle, DeviceSptr> DeviceMap;
 
   /**
    * @brief Connections map.
    **/
-  typedef std::map<SessionID, Connection*> ConnectionMap;
+  typedef std::map<SessionID, ConnectionSptr> ConnectionMap;
 
   /**
    * @brief Map of device handle to device.
@@ -425,10 +437,19 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connections_map
    **/
   mutable pthread_mutex_t connections_mutex_;
+
+  DeviceScannerSptr device_scanner_;
+  DataTransmitterSptr data_transmitter_;
+  ServerConnectionProcessorSptr server_connection_processor_;
+  ClientConnectionListenerSptr client_connection_listener_;
+  DisconnectorSptr disconnector_;
+
+  typedef std::set<DeviceAdapterFunctionalSptr> DeviceAdapterFunctionals;
+  DeviceAdapterFunctionals functionals_;
 };
 
-} // namespace device_adapter
+}  // namespace device_adapter
 
-} // namespace transport_manager
+}  // namespace transport_manager
 
 #endif // #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_IMPL_H_
