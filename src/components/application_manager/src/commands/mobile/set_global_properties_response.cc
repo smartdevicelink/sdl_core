@@ -33,6 +33,8 @@
 
 #include "application_manager/commands/mobile/set_global_properties_response.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
+#include "application_manager/message_chaining.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -54,10 +56,34 @@ void SetGlobalPropertiesResponse::Run() {
     return;
   }
 
-  (*message_)[strings::msg_params][strings::success] = true;
-  (*message_)[strings::msg_params][strings::result_code] =
-    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-  SendResponse();
+  const int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asInt();
+
+  MessageChaining* msg_chain =
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+
+  if (NULL == msg_chain) {
+    return;
+  }
+
+    // we need to retrieve stored response code before message chain decrase
+  const bool result_ui = msg_chain->ui_response_result();
+  const bool result_tts = msg_chain->tts_response_result();
+
+  // sending response
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+        correlation_id)) {
+
+    if ((NsSmartDeviceLinkRPC::V2::Result::SUCCESS == result_ui) &&
+            (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == result_tts)) {
+      (*message_)[strings::msg_params][strings::success] = true;
+      (*message_)[strings::msg_params][strings::result_code] =
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+      SendResponse();
+    } else {
+      // TODO: check ui and tts response code
+    }
+  }
 }
 
 }  // namespace commands

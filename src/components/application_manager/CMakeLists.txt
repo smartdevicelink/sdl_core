@@ -188,6 +188,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_slider_request.cc
 ./src/commands/hmi/ui_scrollable_message_request.cc
 ./src/commands/hmi/ui_scrollable_message_response.cc
+./src/commands/hmi/ui_set_global_properties_request.cc
+./src/commands/hmi/ui_set_global_properties_response.cc
 ./src/commands/hmi/ui_slider_response.cc
 ./src/commands/hmi/ui_is_ready_request.cc
 ./src/commands/hmi/ui_is_ready_response.cc
