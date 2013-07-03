@@ -32,7 +32,7 @@
  * @version 1.0
  */
 
-SDL.AlertPopUp = Em.ContainerView.create( {
+SDL.AlertPopUp = Em.ContainerView.create({
 
     elementId: 'AlertPopUp',
 
@@ -71,56 +71,56 @@ SDL.AlertPopUp = Em.ContainerView.create( {
     /**
      * Wagning image on Alert PopUp
      */
-    image: Em.View.extend( {
+    image: Em.View.extend({
         elementId: 'alertPopUpImage',
 
         classNames: 'alertPopUpImage'
-    } ),
+    }),
 
-    applicationName: SDL.Label.extend( {
+    applicationName: SDL.Label.extend({
 
         elementId: 'applicationName',
 
         classNames: 'applicationName',
 
         contentBinding: 'parentView.appName'
-    } ),
+    }),
 
-    message1: SDL.Label.extend( {
+    message1: SDL.Label.extend({
 
         elementId: 'message1',
 
         classNames: 'message1',
 
         contentBinding: 'parentView.content1'
-    } ),
+    }),
 
-    message2: SDL.Label.extend( {
+    message2: SDL.Label.extend({
 
         elementId: 'message2',
 
         classNames: 'message2',
 
         contentBinding: 'parentView.content2'
-    } ),
+    }),
 
-    message3: SDL.Label.extend( {
+    message3: SDL.Label.extend({
 
         elementId: 'message3',
 
         classNames: 'message3',
 
         contentBinding: 'parentView.content3'
-    } ),
+    }),
 
     /**
      * Deactivate PopUp
      */
-    deactivate: function( ABORTED ) {
-        this.set( 'active', false );
-        clearTimeout( this.timer );
+    deactivate: function(ABORTED) {
+        this.set('active', false);
+        clearTimeout(this.timer);
 
-        SDL.SDLController.alertResponse( ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId );
+        SDL.SDLController.alertResponse(ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
 
         SDL.SDLController.onSystemContextChange();
     },
@@ -128,35 +128,35 @@ SDL.AlertPopUp = Em.ContainerView.create( {
     /**
      * Container for softbuttons
      */
-    softbuttons: Em.ContainerView.extend( {
+    softbuttons: Em.ContainerView.extend({
 
         childViews:
             [
                 'buttons'
             ],
 
-        buttons: Em.ContainerView.extend( {
+        buttons: Em.ContainerView.extend({
             elementId: 'alertSoftButtons',
 
             classNames: 'alertSoftButtons'
-        } )
-    } ),
+        })
+    }),
 
     /**
      * @desc Function creates Soft Buttons on AlertPoUp
      * @param {Object} params
      */
-    addSoftButtons: function( params, appId ) {
+    addSoftButtons: function(params, appId) {
 
-        var count = this.get( 'softbuttons.buttons.childViews' ).length - 1;
-        for( var i = count; i >= 0; i-- ){
-            this.get( 'softbuttons.buttons.childViews' ).removeObject( this.get( 'softbuttons.buttons.childViews' )[0] );
+        var count = this.get('softbuttons.buttons.childViews').length - 1;
+        for(var i = count; i >= 0; i--){
+            this.get('softbuttons.buttons.childViews').removeObject(this.get('softbuttons.buttons.childViews')[0]);
         }
 
-        if( params ){
+        if(params){
 
             var softButtonsClass;
-            switch( params.length ){
+            switch(params.length){
                 case 1:
                     softButtonsClass = 'one';
                     break;
@@ -171,8 +171,8 @@ SDL.AlertPopUp = Em.ContainerView.create( {
                     break;
             }
 
-            for( var i = 0; i < params.length; i++ ){
-                this.get( 'softbuttons.buttons.childViews' ).pushObject( SDL.Button.create( SDL.PresetEventsCustom, {
+            for(var i = 0; i < params.length; i++){
+                this.get('softbuttons.buttons.childViews').pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
                     systemAction: params[i].systemAction,
                     groupName: "AlertPopUp",
                     softButtonID: params[i].softButtonID,
@@ -182,29 +182,43 @@ SDL.AlertPopUp = Em.ContainerView.create( {
                     elementId: 'softButton' + i,
                     templateName: params[i].image ? 'rightIcon' : 'text',
                     appId: appId
-                } ) );
+                }));
             }
         }
     },
 
-    AlertActive: function( message, alertRequestId ) {
+    AlertActive: function(message, alertRequestId) {
         var self = this;
 
-        this.set( 'alertRequestId', alertRequestId );
+        this.set('alertRequestId', alertRequestId);
 
-        this.addSoftButtons( message.softButtons, message.appId );
+        this.addSoftButtons(message.softButtons, message.appId);
 
-        this.set( 'appName', SDL.SDLController.getApplicationModel( message.appId ).appName );
+        this.set('appName', SDL.SDLController.getApplicationModel(message.appId).appName);
 
-        this.set( 'content1', message.alertStrings[0].fieldText );
-        this.set( 'content2', message.alertStrings[1].fieldText );
-        this.set( 'content3', message.alertStrings[2].fieldText );
-        this.set( 'active', true );
+        for (var i = 0; i < params.alertStrings.length; i++) {
+            switch (params.alertStrings[key]) {
+                case 'alertText1': {
+                    this.appInfo.set('content1', params.alertStrings[key].fieldText);
+                    break;
+                }
+                case 'alertText2': {
+                    this.appInfo.set('content2', params.alertStrings[key].fieldText);
+                    break;
+                }
+                case 'alertText3': {
+                    this.appInfo.set('content3', params.alertStrings[key].fieldText);
+                    break;
+                }
+            }
+        }
+        
+        this.set('active', true);
         SDL.SDLController.onSystemContextChange();
 
-        clearTimeout( this.timer );
-        this.timer = setTimeout( function() {
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function() {
             self.deactivate();
-        }, message.duration );
+        }, message.duration);
     }
-} );
+});
