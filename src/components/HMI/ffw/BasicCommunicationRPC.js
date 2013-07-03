@@ -43,15 +43,20 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
     getAppListRequestId: -1,
     getDeviceListRequestId: -1,
     activateAppRequestId: -1,
+    
     onAppRegisteredSubscribeRequestId: -1,
     onAppUnregisteredSubscribeRequestId: -1,
+    onPlayToneSubscribeRequestId: -1,
+    
     onAppRegisteredUnsubscribeRequestId: -1,
     onAppUnregisteredUnsubscribeRequestId: -1,
+    onPlayToneUnsubscribeRequestId: -1,
 
     // const
     onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
     onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
     onDeviceListUpdatedNotification: "BasicCommunication.OnDeviceListUpdated",
+    onPlayToneNotification: "BasicCommunication.PlayTone",
 
     /**
      * init object
@@ -86,6 +91,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.onAppRegisteredSubscribeRequestId = this.client.subscribeToNotification( this.onAppRegisteredNotification );
         this.onAppUnregisteredSubscribeRequestId = this.client.subscribeToNotification( this.onAppUnregisteredNotification );
         this.onDeviceListUpdatedNotificationId = this.client.subscribeToNotification( this.onDeviceListUpdatedNotification );
+        this.onPlayToneNotificationId = this.client.subscribeToNotification( this.onPlayToneNotification );
         
         
         // notify other components that UI is ready
@@ -104,6 +110,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.onAppRegusteredUnsubscribeRequestId = this.client.unsubscribeFromNotification( this.onAppRegisteredNotification );
         this.onAppUnregusteredUnsubscribeRequestId = this.client.unsubscribeFromNotification( this.onAppUnregisteredNotification );
         this.onDeviceListUpdatedNotificationId = this.client.unsubscribeFromNotification( this.onDeviceListUpdatedNotification );
+        this.onPlayToneUpdatedNotificationId = this.client.unsubscribeFromNotification( this.onPlayToneUpdatedNotification );
     },
 
     /**
@@ -131,7 +138,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
             }
         }
 
-        if( response.result.method == "BasicCommunication.GetDeviceList" ){
+        if( response.result.method == "BasicCommunication.GetDeviceList" || response.result.method == "BasicCommunication.StartDeviceDiscovery" ){
             if( SDL.States.info.active ){
                 SDL.SDLModel.onGetDeviceList( response.result );
             }
@@ -170,6 +177,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         if( notification.method == this.onDeviceListUpdatedNotification ){
             SDL.SDLModel.onGetDeviceList( notification.params );
         }
+
+        if( notification.method == this.onPlayToneNotification ){
+            // to do play tone
+        }
     },
 
     /**
@@ -179,7 +190,17 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         Em.Logger.log( "FFW.BasicCommunicationRPC.onRPCRequest" );
         this._super();
 
-        // nothing to do, it is client
+        if( request.method == "BasicCommunication.MixingAudioSupported" ){
+            this.MixingAudioSupported( true );
+        }
+        
+        if( request.method == "BasicCommunication.AllowAllApps" ){
+            this.AllowAllApps( true );
+        }
+        
+        if( request.method == "BasicCommunication.AllowApp" ){
+            this.AllowApp( true );
+        }
     },
     
     /**
@@ -393,13 +414,57 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         var JSONMessage = {
             "id": this.client.idStart,
             "jsonrpc": "2.0",
-            "method": "BasicCommunication.MixingAudioSupported",
-            "params": {
-                "attenuatedSupported": attenuatedSupported
+            "result": {
+                "code": 0,
+                "attenuatedSupported": attenuatedSupported,
+                "method": "BasicCommunication.MixingAudioSupported"
+            }
+        };
+        this.client.send( JSONMessage );
+    },
+
+    /**
+     * Response with Results by user/HMI allowing SDL functionality or disallowing access to all mobile apps.
+     * 
+     * @params {Number}
+     */
+    AllowAllApps: function( allowed ) {
+        Em.Logger.log( "FFW.BasicCommunication.AllowAllApps" );
+
+        // send request
+
+        var JSONMessage = {
+            "id": this.client.idStart,
+            "jsonrpc": "2.0",
+            "result": {
+                "code": 0,
+                "method": "BasicCommunication.AllowAllApps",
+                "allowed": allowed
+            }
+        };
+        this.client.send( JSONMessage );
+    },
+
+    /**
+     * Response with result of allowed application
+     * 
+     * @params {Number}
+     */
+    AllowApp: function( allowed ) {
+        Em.Logger.log( "FFW.BasicCommunication.AllowApp" );
+
+        // send request
+
+        var JSONMessage = {
+            "id": this.client.idStart,
+            "jsonrpc": "2.0",
+            "result": {
+                "code": 0,
+                "method": "BasicCommunication.AllowApp",
+                "allowed": allowed
             }
         };
         this.client.send( JSONMessage );
     }
-    
 
-} )
+})

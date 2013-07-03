@@ -392,7 +392,7 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Object} params
      */
     onGetDeviceList: function( params ) {
-        if( null == params.resultCode || ( null != params.resultCode && "SUCCESS" == params.resultCode ) ){
+        if( 0 == params.code || null == params.code ){
             if( SDL.States.info.devicelist.active && params.deviceList && params.deviceList.length ){
                 SDL.DeviceListView.ShowDeviceList( params );
             }
