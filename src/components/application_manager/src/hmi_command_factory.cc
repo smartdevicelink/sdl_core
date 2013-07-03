@@ -76,6 +76,8 @@
 #include "application_manager/commands/hmi/ui_set_media_clock_timer_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
+#include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
+#include "application_manager/commands/hmi/ui_end_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -282,6 +284,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIPerformAudioPassThruResponse(message));
       } else {
         command.reset(new commands::UIPerformAudioPassThruRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_EndAudioPassThru: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIEndAudioPassThruResponse(message));
+      } else {
+        command.reset(new commands::UIEndAudioPassThruRequest(message));
       }
       break;
     }

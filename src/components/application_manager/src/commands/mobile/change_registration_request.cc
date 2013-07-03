@@ -91,6 +91,7 @@ void ChangeRegistrationRequest::Run() {
 
     if (NULL == ui_request) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
       return;
     }
 
@@ -122,6 +123,7 @@ void ChangeRegistrationRequest::Run() {
 
     if (NULL == vr_request) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
       return;
     }
 

@@ -49,7 +49,7 @@ EndAudioPassThruResponse::~EndAudioPassThruResponse() {
 }
 
 void EndAudioPassThruResponse::Run() {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruResponse::Run ");
+  LOG4CXX_INFO(logger_, "EndAudioPassThruResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
@@ -57,7 +57,6 @@ void EndAudioPassThruResponse::Run() {
     SendResponse();
     return;
   }
-
 
   const int correlation_id =
     (*message_)[strings::params][strings::correlation_id].asInt();
