@@ -66,7 +66,7 @@ void ShowResponse::Run() {
       (*message_)[strings::params][strings::result_code] =
         NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
     } else {
-      // TODO(DK): Some logic
+      // TODO(VS): Some logic
     }
     SendResponse();
   }

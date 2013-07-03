@@ -100,6 +100,8 @@
 #include "application_manager/commands/hmi/tts_get_language_response.h"
 #include "application_manager/commands/hmi/tts_stop_speaking_request.h"
 #include "application_manager/commands/hmi/tts_stop_speaking_response.h"
+#include "application_manager/commands/hmi/tts_speak_request.h"
+#include "application_manager/commands/hmi/tts_speak_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
@@ -394,6 +396,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::TTSGetLanguageResponse(message));
       } else {
         command.reset(new commands::TTSGetLanguageRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_Speak: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSSpeakResponse(message));
+      } else {
+        command.reset(new commands::TTSSpeakRequest(message));
       }
       break;
     }

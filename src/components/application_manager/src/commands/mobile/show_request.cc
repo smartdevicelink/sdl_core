@@ -35,6 +35,7 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -66,6 +67,9 @@ void ShowRequest::Run() {
     (*message_)[strings::params][strings::correlation_id];
   const int connectionKey =
     (*message_)[strings::params][strings::connection_key];
+
+  (*message_)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::UI_Show;
 
   ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, correlationId),
