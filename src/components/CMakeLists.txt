@@ -2,20 +2,31 @@
 add_subdirectory(./interfaces)
 
 # --- TransportManager
-#add_subdirectory(./TransportManager)
+if(BUILD_ONLY_TM)
 add_subdirectory(./transport_manager)
+else()
+add_subdirectory(./TransportManager)
+endif()
 
 # --- AppMgr
+if(NOT BUILD_ONLY_TM)
 add_subdirectory(./AppMgr)
+endif()
 
 # --- JSONHandler
+if(NOT BUILD_ONLY_TM)
 add_subdirectory(./JSONHandler)
+endif()
 
 # --- ProtocolHandler
+if(NOT BUILD_ONLY_TM)
 add_subdirectory(./protocol_handler)
+endif()
 
 # --- ConnectionHandler
+if(NOT BUILD_ONLY_TM)
 add_subdirectory(./connection_handler)
+endif()
 
 # --- Utils
 add_subdirectory(./utils)
