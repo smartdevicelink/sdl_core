@@ -379,6 +379,11 @@ class TransportManagerImpl : public TransportManager {
   DeviceAdapterListener *device_adapter_listener_;
 
   /**
+   * @brief Device adapter listener.
+   **/
+  DeviceHandleGenerator *device_handle_generator_;
+
+  /**
    * @brief listener that would be called when TM's event happened.
    **/
   TransportManagerListener *transport_manager_listener_;

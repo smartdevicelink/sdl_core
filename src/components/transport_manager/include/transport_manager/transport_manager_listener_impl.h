@@ -33,60 +33,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
 
 #include "transport_manager/device_adapter.h"
+#include "transport_manager/transport_manager_listener.h"
 
 namespace transport_manager {
 
-class TransportManagerListener {
+class TransportManagerListenerImpl: public TransportManagerListener {
   //todo: define interface of tm listener.
 
  public:
-  virtual ~TransportManagerListener();
+
+  virtual ~TransportManagerListenerImpl(){};
 
   virtual void onSearchDeviceDone(const DeviceHandle device,
-                                  const ApplicationList app_list) = 0;
+                                  const ApplicationList app_list){};
   virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
-                                    const SearchDeviceError& error) = 0;
+                                    const SearchDeviceError& error){};
 
   virtual void onConnectDone(const DeviceAdapter* device_adapter,
-                             const transport_manager::SessionID session_id) = 0;
+                             const transport_manager::SessionID session_id){};
   virtual void onConnectFailed(const DeviceAdapter* device_adapter,
                                const transport_manager::SessionID session_id,
-                               const ConnectError& error) = 0;
+                               const ConnectError& error) {};
 
   virtual void onDisconnectDone(
       const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id) = 0;
+      const transport_manager::SessionID session_id) {};
   virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
                                   const transport_manager::SessionID session_id,
-                                  const DisconnectDeviceError& error) = 0;
+                                  const DisconnectDeviceError& error){};
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id) = 0;
+                                      const SessionID session_id){};
   virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
                                         const SessionID session_id,
-                                        const DisconnectDeviceError& error) = 0;
+                                        const DisconnectDeviceError& error){};
 
   virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,
                                  const transport_manager::SessionID session_id,
-                                 const RawMessageSptr data_container) = 0;
+                                 const RawMessageSptr data_container){};
   virtual void onDataReceiveFailed(
       const DeviceAdapter* device_adapter,
       const transport_manager::SessionID session_id,
-      const DataReceiveError& error) = 0;
+      const DataReceiveError& error) {};
 
   virtual void onDataSendDone(const DeviceAdapter* device_adapter,
                               const transport_manager::SessionID session_id,
-                              const RawMessageSptr data_container) = 0;
+                              const RawMessageSptr data_container){};
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
                                 const transport_manager::SessionID session_id,
-                                const DataSendError& error) = 0;
+                                const DataSendError& error){};
 
   virtual void onCommunicationError(
       const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id) = 0;
+      const transport_manager::SessionID session_id) {};
 };
 }  //namespace
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
+#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL

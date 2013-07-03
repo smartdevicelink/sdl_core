@@ -42,6 +42,8 @@ namespace transport_manager {
 
 log4cxx::LoggerPtr DeviceAdapterListenerImpl::logger_ = log4cxx::LoggerPtr(
 		log4cxx::Logger::getLogger("DeviceAdapterListener"));
+DeviceAdapterListener::~DeviceAdapterListener(){};
+DeviceAdapterListenerImpl::~DeviceAdapterListenerImpl(){};
 
 DeviceAdapterListener::DeviceAdapterEvent::DeviceAdapterEvent(int type,
 		transport_manager::SessionID session_id, DeviceAdapter *device_adapter, RawMessageSptr data,
@@ -103,10 +105,6 @@ DeviceAdapterError *DeviceAdapterListener::DeviceAdapterEvent::error(
 DeviceAdapterListenerImpl::DeviceAdapterListenerImpl(
 		transport_manager::TransportManagerImpl *tm) {
 	transport_manager_impl_ = tm;
-}
-
-DeviceAdapterListenerImpl::~DeviceAdapterListenerImpl(){
-
 }
 
 void DeviceAdapterListenerImpl::onSearchDeviceDone(
