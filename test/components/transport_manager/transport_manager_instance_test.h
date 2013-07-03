@@ -68,7 +68,7 @@ namespace test /*{ namespace components { namespace transport_manager*/ { namesp
 TEST(test_transport_manager_instance, test_transport_manager_instance)
 {
   transport_manager::TransportManager *instance1 = transport_manager::TransportManagerImpl::instance();
-  //ASSERT_EQ(instance1, transport_manager::TransportManagerImpl::instance());
+  ASSERT_EQ(instance1, transport_manager::TransportManagerImpl::instance());
 }
 //
 //    // ---------------- TEST DATA ---------------- //
