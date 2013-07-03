@@ -54,10 +54,14 @@ FFW.UI = FFW.RPCObserver.create( {
     appId: 1,
 
     onVRChoiseSubscribeRequestId: -1,
+    onShowNotificationSubscribeRequestId: -1,
+    
     onVRChoiseUnsubscribeRequestId: -1,
+    onShowNotificationUnsubscribeRequestId: -1,
 
     // const
     onVRChoiseNotification: "VR.OnChoise",
+    onShowNotificationNotification: "UI.ShowNotification",
 
     /*
      * ids for requests AudioPassThru
@@ -89,6 +93,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
         // subscribe to notifications
         this.onVRChoiseSubscribeRequestId = this.client.subscribeToNotification( this.onVRChoiseNotification );
+        this.onShowNotificationSubscribeRequestId = this.client.subscribeToNotification( this.onShowNotificationNotification );
     },
 
     /*
@@ -100,6 +105,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
         // unsubscribe from notifications
         this.onVRChoiseUnsubscribeRequestId = this.client.unsubscribeFromNotification( this.onVRChoiseNotification );
+        this.onShowNotificationUnsubscribeRequestId = this.client.unsubscribeFromNotification( this.onShowNotificationNotification );
     },
 
     /*
@@ -137,6 +143,10 @@ FFW.UI = FFW.RPCObserver.create( {
 
         if( notification.method == this.onVRChoiseNotification ){
             this.interactionResponse( SDL.SDLModel.resultCode["SUCCESS"], notification.params.choiceId );
+        }
+        
+        if( notification.method == this.onShowNotificationNotification ){
+            // to do
         }
     },
 
