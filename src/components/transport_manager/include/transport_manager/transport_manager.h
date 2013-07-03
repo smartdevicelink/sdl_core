@@ -35,7 +35,6 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER
 
-
 #include "transport_manager/common.h"
 #include "transport_manager/device_adapter.h"
 #include "transport_manager/device_adapter_listener.h"
@@ -47,100 +46,125 @@ namespace transport_manager {
  * @interface TransportManager
  **/
 class TransportManager {
-public:
-	/**
-	 * @brief Destructor.
-	 **/
-	virtual ~TransportManager(void);
+ public:
+  /**
+   * @brief Destructor.
+   **/
+  virtual ~TransportManager(void);
 
-	/**
-	 * @brief Start scanning for new devices.
-	 *
-	 *
-	 * @see @ref components_transportmanager_client_device_management
-	 **/
-	virtual void searchDevices(void) = 0;
+  /**
+   * @brief Start scanning for new devices.
+   *
+   *
+   * @see @ref components_transportmanager_client_device_management
+   **/
+  virtual void searchDevices(void) = 0;
 
-	/**
-	 * @brief Start scanning for new devices.
-	 *
-	 *
-	 * @see @ref components_transportmanager_client_device_management
-	 **/
-	virtual void init(void) = 0;
+  /**
+   * @brief Start scanning for new devices.
+   *
+   *
+   * @see @ref components_transportmanager_client_device_management
+   **/
+  virtual void init(void) = 0;
 
-	/**
-	 * @brief Connect to all applications discovered on device.
-	 *
-	 * @param DeviceHandle Handle of device to connect to.
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void connectDevice(const DeviceHandle &device_id, const ApplicationHandle &app_id,
-			const SessionID &session_id) = 0;
+  /**
+   * @brief Connect to all applications discovered on device.
+   *
+   * @param DeviceHandle Handle of device to connect to.
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void connectDevice(const DeviceHandle &device_id,
+                             const ApplicationHandle &app_id,
+                             const SessionID &session_id) = 0;
 
-	/**
-	 * @brief Disconnect from all applications connected on device.
-	 *
-	 * @param DeviceHandle Handle of device to disconnect from.
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void disconnectDevice(const SessionID &session_id) = 0;
+  /**
+   * @brief Disconnect from all applications connected on device.
+   *
+   * @param DeviceHandle Handle of device to disconnect from.
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void disconnectDevice(const SessionID &session_id) = 0;
 
-	/**
-	 * @brief post new mesage into TM's queue
-	 *
-	 * @param new message container
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void sendMessageToDevice(const protocol_handler::RawMessage &message) = 0;
+  /**
+   * @brief post new mesage into TM's queue
+   *
+   * @param new message container
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void sendMessageToDevice(
+      const protocol_handler::RawMessage &message) = 0;
 
-	/**
-	 * @brief receive event from device
-	 *
-	 * @param new event
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void receiveEventFromDevice(const DeviceAdapterListener::DeviceAdapterEvent &event) = 0;
+  /**
+   * @brief receive event from device
+   *
+   * @param new event
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void receiveEventFromDevice(
+      const DeviceAdapterListener::DeviceAdapterEvent &event) = 0;
 
-	/**
-	 * @brief add new device adapter
-	 *
-	 * @param device adapter
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void addDeviceAdapter(DeviceAdapter *device_adapter) = 0;
+  /**
+   * @brief add new device adapter
+   *
+   * @param device adapter
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void addDeviceAdapter(DeviceAdapter *device_adapter) = 0;
 
-	/**
-	 * @brief register event listener that would be called when something happened in TM
-	 *
-	 * @param event listener
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void registerEventListener(TransportManagerListener *listener) = 0;
+  /**
+   * @brief register event listener that would be called when something happened in TM
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void registerEventListener(TransportManagerListener *listener) = 0;
 
-	/**
-	 * @brief register listener that would be used to catch adapter's events
-	 *
-	 * @param event listener
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void registerAdapterListener(transport_manager::DeviceAdapterListener *listener) = 0;
+  /**
+   * @brief register listener that would be used to catch adapter's events
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void registerAdapterListener(
+      transport_manager::DeviceAdapterListener *listener) = 0;
 
-	/**
-	 * @brief remove device from internal storages
-	 *
-	 * @param event device id
-	 *
-	 * @see @ref components_transportmanager_client_connection_management
-	 **/
-	virtual void removeDevice(const DeviceHandle &device) = 0;
+  /**
+   * @brief remove device from internal storages
+   *
+   * @param event device id
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void removeDevice(const DeviceHandle &device) = 0;
+
+  /**
+   * @brief accept device originated connection
+   *
+   * @param
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void acceptConnect(const DeviceHandle &device_id,
+                             const ApplicationHandle &app_id,
+                             const SessionID &session_id) = 0;
+
+  /**
+   * @brief decline device originated connection
+   *
+   * @param
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void declineConnect(const DeviceHandle &device_id,
+                              const ApplicationHandle &app_id) = 0;
 
 };
 }

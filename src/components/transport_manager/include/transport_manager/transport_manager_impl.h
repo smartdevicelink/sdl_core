@@ -160,6 +160,27 @@ class TransportManagerImpl : public TransportManager {
   virtual void removeDevice(const DeviceHandle &device);
 
   /**
+   * @brief accept device originated connection
+   *
+   * @param
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void acceptConnect(const DeviceHandle &device_id,
+                             const ApplicationHandle &app_id,
+                             const SessionID &session_id);
+
+  /**
+   * @brief decline device originated connection
+   *
+   * @param
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void declineConnect(const DeviceHandle &device_id,
+                              const ApplicationHandle &app_id);
+
+  /**
    * @brief set new listener
    *
    * @param listener
@@ -377,6 +398,11 @@ class TransportManagerImpl : public TransportManager {
    * @brief Device adapter listener.
    **/
   DeviceAdapterListener *device_adapter_listener_;
+
+  /**
+   * @brief Device handle generator.
+   **/
+  DeviceHandleGenerator *device_handle_generator_;
 
   /**
    * @brief listener that would be called when TM's event happened.
