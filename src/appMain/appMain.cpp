@@ -45,6 +45,7 @@
 
 #include "appMain.hpp"
 
+#ifndef BUILD_ONLY_TM
 #include "protocol_handler/protocol_handler_impl.h"
 
 #include "JSONHandler/JSONHandler.h"
@@ -72,7 +73,7 @@
 
 #include "TransportManager/ITransportManager.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
-
+#endif
 /*class CTransportManagerListener : public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener
 {
 public:
@@ -132,6 +133,7 @@ void CTransportManagerListener::onDeviceListUpdated(const NsSmartDeviceLink::NsT
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int main(int argc, char** argv) {
+#ifndef BUILD_ONLY_TM
   pid_t pid_hmi = 0;
   /*** Components instance section***/
   /**********************************/
@@ -312,6 +314,7 @@ int main(int argc, char** argv) {
       }
     }
   }
+#endif
   /**********************************/
 
   while (true) {
