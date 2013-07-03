@@ -7,6 +7,7 @@ include_directories (
   ../hmi_message_handler/include
   ../mobile_message_handler/include
   ../connection_handler/include/
+  ../config_profile/include/
   ../request_watchdog/include/
   ../TransportManager/include/
   ../../thirdPartyLibs/jsoncpp/include/

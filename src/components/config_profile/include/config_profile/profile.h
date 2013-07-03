@@ -83,6 +83,11 @@ class Profile {
    */
   const uint64_t& thread_min_stach_size() const;
 
+  /**
+    * @brief Returns true if audio mixing is supported
+    */
+   bool is_mixing_audio_supported() const;
+
   // Members section
 
   protected:
@@ -137,6 +142,7 @@ class Profile {
   std::string  server_address_;
   uint16_t     server_port_;
   uint64_t     min_tread_stack_size_;
+  bool         is_mixing_audio_supported_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };
