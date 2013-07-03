@@ -41,6 +41,7 @@
 #include "protocol_handler/raw_message.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
+#include "transport_manager/transport_manager_listener_impl.h"
 #include "transport_manager/device_adapter_listener_impl.h"
 #include "transport_manager/device_handle_generator_impl.h"
 
