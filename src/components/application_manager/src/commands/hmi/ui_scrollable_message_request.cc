@@ -30,43 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
-
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/hmi/ui_scrollable_message_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief UISetMediaClockTimerResponse command class
- **/
-class UISetMediaClockTimerResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief UISetMediaClockTimerResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UISetMediaClockTimerResponse(const MessageSharedPtr& message);
+UIScrollableMessageRequest::UIScrollableMessageRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
+}
 
-  /**
-   * @brief UISetMediaClockTimerResponse class destructor
-   **/
-  virtual ~UISetMediaClockTimerResponse();
+UIScrollableMessageRequest::~UIScrollableMessageRequest() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(UISetMediaClockTimerResponse);
-};
+void UIScrollableMessageRequest::Run() {
+  LOG4CXX_INFO(logger_, "UIScrollableMessageRequest::Run");
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_

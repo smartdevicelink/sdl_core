@@ -51,8 +51,9 @@ OnEncodedSyncPDataNotification::~OnEncodedSyncPDataNotification() {
 }
 
 void OnEncodedSyncPDataNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnEncodedSyncPDataNotification::Run ");
   const std::string fileName =
-    (*message_)[strings::params][hmi_notification::file_name];
+    (*message_)[strings::params][hmi_notification::file_name].asString();
 
   if (!file_system::FileExists(fileName)) {
     (*message_)[strings::msg_params][strings::success] = false;
