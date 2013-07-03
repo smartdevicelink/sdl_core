@@ -379,7 +379,7 @@ class TransportManagerImpl : public TransportManager {
   DeviceAdapterListener *device_adapter_listener_;
 
   /**
-   * @brief Device adapter listener.
+   * @brief Device handle generator.
    **/
   DeviceHandleGenerator *device_handle_generator_;
 
