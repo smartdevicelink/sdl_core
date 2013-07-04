@@ -225,8 +225,8 @@ void TransportManagerImpl::postMessage(
     const protocol_handler::RawMessage &message) {
   //todo: check data copying
   protocol_handler::RawMessage msg(message.connection_key(),
-                                   msg.protocol_version(), msg.serial_number(),
-                                   msg.data(), msg.data_size());
+                                   message.protocol_version(), message.serial_number(),
+                                   message.data(), message.data_size());
   pthread_mutex_lock(&message_queue_mutex_);
   message_queue_.push_back(msg);
   pthread_mutex_unlock(&message_queue_mutex_);
