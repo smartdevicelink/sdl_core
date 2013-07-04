@@ -70,6 +70,8 @@
 #include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/commands/hmi/ui_show_request.h"
 #include "application_manager/commands/hmi/ui_show_response.h"
+#include "application_manager/commands/hmi/ui_alert_request.h"
+#include "application_manager/commands/hmi/ui_alert_response.h"
 #include "application_manager/commands/hmi/ui_is_ready_request.h"
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
 #include "application_manager/commands/hmi/ui_slider_request.h"
@@ -345,6 +347,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIEndAudioPassThruResponse(message));
       } else {
         command.reset(new commands::UIEndAudioPassThruRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_Alert: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIAlertResponse(message));
+      } else {
+        command.reset(new commands::UIAlertRequest(message));
       }
       break;
     }

@@ -29,51 +29,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_set_global_properties_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
+#include "application_manager/commands/hmi/ui_alert_response.h"
 #include "interfaces/v4_protocol_v2_0_revT.h"
-#include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
 
 namespace commands {
 
-UISetGlobalPropertiesResponse::UISetGlobalPropertiesResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+UIAlertResponse::UIAlertResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-UISetGlobalPropertiesResponse::~UISetGlobalPropertiesResponse() {
+UIAlertResponse::~UIAlertResponse() {
 }
 
-void UISetGlobalPropertiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "UISetGlobalPropertiesResponse::Run");
+void UIAlertResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIAlertResponse::Run");
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+  (*message_)[strings::params][strings::function_id] =
+    NsSmartDeviceLinkRPC::V2::FunctionID::AlertID;
 
-    MessageChaining* msg_chain =
-      ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
-
-    if (NULL == msg_chain) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
-
-    /* store received response code for to check it
-     * in corresponding Mobile response
-     */
-    const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
-        (*message_)[strings::msg_params][hmi_response::code].asInt());
-
-    msg_chain->set_ui_response_result(code);
-
-    // prepare SmartObject for mobile factory
-    (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::SetGlobalPropertiesID;
-
-    SendResponseToMobile(message_);
+  SendResponseToMobile(message_);
 }
 
 }  // namespace commands

@@ -48,7 +48,7 @@ SetGlobalPropertiesResponse::~SetGlobalPropertiesResponse() {
 }
 
 void SetGlobalPropertiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "SetGlobalPropertiesResponse::Run ");
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesResponse::Run");
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {

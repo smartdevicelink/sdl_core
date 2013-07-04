@@ -46,7 +46,7 @@ TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {
 }
 
 void TTSSetGlobalPropertiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSSetGlobalPropertiesResponse::Run ");
+  LOG4CXX_INFO(logger_, "TTSSetGlobalPropertiesResponse::Run");
 
    const int correlation_id =
        (*message_)[strings::params][strings::correlation_id].asInt();
