@@ -31,11 +31,12 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <map>
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/Result.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
 
@@ -65,72 +66,49 @@ void UnsubscribeVehicleDataRequest::Run() {
     return;
   }
 
-  std::map<const char*, VehicleDataType> vehicle_data =
-  {
-      {str::gps,                      VehicleDataType::GPS},
-      {str::speed,                    VehicleDataType::SPEED},
-      {str::rpm,                      VehicleDataType::RPM},
-      {str::fuel_level,               VehicleDataType::FUELLEVEL},
-      {str::fuel_level_state,         VehicleDataType::FUELLEVEL_STATE},
-      {str::instant_fuel_consumption, VehicleDataType::FUELCONSUMPTION},
-      {str::external_temp,            VehicleDataType::EXTERNTEMP},
-      /*
-      NOT USED IN THE REQUEST
-      {str::gps,                      VehicleDataType::VIN},
-      */
-      {str::prndl,                    VehicleDataType::PRNDL},
-      {str::tire_pressure,            VehicleDataType::TIREPRESSURE},
-      {str::odometer,                 VehicleDataType::ODOMETER},
-      {str::belt_status,              VehicleDataType::BELTSTATUS},
-      {str::body_information,         VehicleDataType::BODYINFO},
-      {str::device_status,            VehicleDataType::DEVICESTATUS},
-      {str::e_call_info,              VehicleDataType::ECALLINFO},
-      {str::airbag_status,            VehicleDataType::AIRBAGSTATUS},
-      {str::emergency_event,          VehicleDataType::EMERGENCYEVENT},
-      {str::cluster_mode_status,      VehicleDataType::CLUSTERMODESTATUS},
-      {str::my_key,                   VehicleDataType::MYKEY},
-      {str::driver_braking,           VehicleDataType::BRAKING},
-      {str::wiper_status,             VehicleDataType::WIPERSTATUS},
-      {str::head_lamp_status,         VehicleDataType::HEADLAMPSTATUS},
-      /*
-      NOT USED IN THE REQUEST
-      {str::gps,                      VehicleDataType::BATTVOLTAGE},
-      */
-      {str::engine_torque,            VehicleDataType::ENGINETORQUE},
-      {str::acc_pedal_pos,            VehicleDataType::ACCPEDAL},
-      {str::steering_wheel_angle,     VehicleDataType::STEERINGWHEEL},
-  };
-
   // counter for items to subscribe
   int items_to_unsubscribe = 0;
   // counter for subscribed items by application
   int unsubscribed_items = 0;
+  // response params
+  namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
+  NsSmart::CSmartObject response_params;
 
-  std::map<const char*, VehicleDataType>::const_iterator it =
-      vehicle_data.begin();
+  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
+  VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[str::msg_params].keyExists(it->first) &&
         true == (*message_)[str::msg_params][it->first].asBool()) {
       ++items_to_unsubscribe;
+      response_params[it->first][strings::data_type] = it->second;
 
       if (app->UnsubscribeFromIVI(static_cast<unsigned int>(it->second))) {
         ++unsubscribed_items;
+        response_params[it->first][strings::result_code] = NsSmartDeviceLinkRPC
+            ::V2::VehicleDataResultCode::VDRC_SUCCESS;
+      } else {
+        response_params[it->first][strings::result_code] = NsSmartDeviceLinkRPC
+            ::V2::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
       }
     }
   }
 
   if (unsubscribed_items == items_to_unsubscribe) {
     SendResponse(true,
-                 NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+                 NsSmartDeviceLinkRPC::V2::Result::SUCCESS,
+                 "Unsubscribed on all VehicleData",
+                 &response_params);
   } else if (0 == unsubscribed_items) {
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::REJECTED,
-                 "Was not subscribed on any VehicleData");
+                 "Was not subscribed on any VehicleData",
+                 &response_params);
   } else if (unsubscribed_items < items_to_unsubscribe) {
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::WARNINGS,
-                 "Was subscribed not to all VehicleData");
+                 "Was subscribed not to all VehicleData",
+                 &response_params);
   } else {
     LOG4CXX_ERROR(logger_, "Unknown command sequence!");
     return;

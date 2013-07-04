@@ -36,6 +36,7 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 

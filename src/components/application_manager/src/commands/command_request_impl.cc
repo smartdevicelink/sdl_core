@@ -60,7 +60,7 @@ void CommandRequestImpl::Run() {
 
 void CommandRequestImpl::SendResponse(const bool success,
     const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
-    const char* info) {
+    const char* info, const NsSmart::CSmartObject* response_params) {
 
   NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
 
@@ -77,6 +77,10 @@ void CommandRequestImpl::SendResponse(const bool success,
   response[strings::msg_params][strings::success] = success;
   response[strings::msg_params][strings::result_code] =
       result_code;
+
+  if (response_params) {
+    response[strings::msg_params]= response_params;
+  }
 
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);

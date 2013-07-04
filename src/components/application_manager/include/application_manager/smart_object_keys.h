@@ -138,6 +138,7 @@ const char fuel_level[] = "fuelLevel";
 const char fuel_level_state[] = "fuelLevel_State";
 const char instant_fuel_consumption[] = "instantFuelConsumption";
 const char external_temp[] = "externalTemperature";
+const char vin[] = "vin";
 const char prndl[] = "prndl";
 const char tire_pressure[] = "tirePressure";
 const char odometer[] = "odometer";

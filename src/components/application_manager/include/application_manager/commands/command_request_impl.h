@@ -46,76 +46,19 @@ namespace application_manager {
 
 namespace commands {
 
-/*
- * @brief Typedef for HMI TextFieldName type
- */
-typedef enum {
-  MAIN_FILED1              = 0,
-  MAIN_FILED2,
-  MAIN_FILED3,
-  MAIN_FILED4,
-  STATUS_BAR,
-  MEDIA_CLOCK,
-  MEDIA_TRACK,
-  ALERT_TEXT1,
-  ALERT_TEXT2,
-  ALERT_TEXT3,
-  SCROLLABLE_MSG_BODY,
-  INITIAL_INTERACTION_TEXT,
-  NAVI_TEXT1,
-  NAVI_TEXT2,
-  ETA,
-  TOTAL_DISTANCE,
-  NAVI_TEXT,
-  AUDIO_DISPLAY_TEXT1,
-  AUDIO_DISPLAY_TEXT2,
-  SLIDER_HADER,
-  SLIDER_FOOTEER
-} TextFieldName;
-
-/*
- * @brief Typedef for the vehicle data types that can
- * be published and subscribed to
- */
-typedef enum {
-  GPS                      = 0,
-  SPEED,
-  RPM,
-  FUELLEVEL,
-  FUELLEVEL_STATE,
-  FUELCONSUMPTION,
-  EXTERNTEMP,
-  VIN,
-  PRNDL,
-  TIREPRESSURE,
-  ODOMETER,
-  BELTSTATUS,
-  BODYINFO,
-  DEVICESTATUS,
-  ECALLINFO,
-  AIRBAGSTATUS,
-  EMERGENCYEVENT,
-  CLUSTERMODESTATUS,
-  MYKEY,
-  BRAKING,
-  WIPERSTATUS,
-  HEADLAMPSTATUS,
-  BATTVOLTAGE,
-  ENGINETORQUE,
-  ACCPEDAL,
-  STEERINGWHEEL
-} VehicleDataType;
+namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
 class CommandRequestImpl : public CommandImpl {
-  public:
-    explicit CommandRequestImpl(const MessageSharedPtr& message);
-    virtual ~CommandRequestImpl();
-    virtual bool Init();
-    virtual bool CleanUp();
-    virtual void Run();
-    void SendResponse(const bool success,
-                      const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
-                      const char* info = NULL);
+ public:
+  explicit CommandRequestImpl(const MessageSharedPtr& message);
+  virtual ~CommandRequestImpl();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void SendResponse(const bool success,
+                    const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
+                    const char* info = NULL,
+                    const NsSmart::CSmartObject* response_params = NULL);
 };
 
 }  // namespace commands
