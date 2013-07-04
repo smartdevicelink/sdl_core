@@ -30,31 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_GLOBAL_PROPERTIES_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_GLOBAL_PROPERTIES_REQUEST_H_
 
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief UISetMediaClockTimerResponse command class
+ * @brief UISetGlobalPropertiesRequest command class
  **/
-class UISetMediaClockTimerResponse : public ResponseFromHMI {
+class UISetGlobalPropertiesRequest : public RequestToHMI {
  public:
   /**
-   * @brief UISetMediaClockTimerResponse class constructor
+   * @brief UISetGlobalPropertiesRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetMediaClockTimerResponse(const MessageSharedPtr& message);
+  explicit UISetGlobalPropertiesRequest(const MessageSharedPtr& message);
 
   /**
-   * @brief UISetMediaClockTimerResponse class destructor
+   * @brief UIShowRequest class destructor
    **/
-  virtual ~UISetMediaClockTimerResponse();
+  virtual ~UISetGlobalPropertiesRequest();
 
   /**
    * @brief Execute command
@@ -62,11 +62,11 @@ class UISetMediaClockTimerResponse : public ResponseFromHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(UISetMediaClockTimerResponse);
+  DISALLOW_COPY_AND_ASSIGN(UISetGlobalPropertiesRequest);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_GLOBAL_PROPERTIES_REQUEST_H_

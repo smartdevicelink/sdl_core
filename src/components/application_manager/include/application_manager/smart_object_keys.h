@@ -156,6 +156,8 @@ const char airbag_status[] = "airbagStatus";
 const char emergency_event[] = "emergencyEvent";
 const char cluster_mode_status[] = "clusterModeStatus";
 const char my_key[] = "myKey";
+const char help_prompt[] = "helpPrompt";
+const char timeout_prompt[] = "timeoutPrompt";
 }  // namespace strings
 
 namespace mobile_notification {

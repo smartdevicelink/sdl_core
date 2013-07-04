@@ -29,44 +29,63 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
-
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/hmi/ui_set_icon_response.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/message_chaining.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief UISetMediaClockTimerResponse command class
- **/
-class UISetMediaClockTimerResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief UISetMediaClockTimerResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UISetMediaClockTimerResponse(const MessageSharedPtr& message);
+UISetIconResponse::UISetIconResponse(
+    const MessageSharedPtr& message): ResponseFromHMI(message) {
+}
 
-  /**
-   * @brief UISetMediaClockTimerResponse class destructor
-   **/
-  virtual ~UISetMediaClockTimerResponse();
+UISetIconResponse::~UISetIconResponse() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void UISetIconResponse::Run() {
+  LOG4CXX_INFO(logger_, "UISetIconResponse::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(UISetMediaClockTimerResponse);
-};
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
+
+    MessageChaining* msg_chain =
+      ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+
+    if (NULL == msg_chain) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+
+    /* store received response code for to check it
+     * in corresponding Mobile response
+     */
+    const NsSmartDeviceLinkRPC::V2::Result::eType code =
+      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+        (*message_)[strings::msg_params][hmi_response::code].asInt());
+
+    msg_chain->set_ui_response_result(code);
+
+    int app_id = (*message_)[strings::params][strings::connection_key];
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(
+                             ApplicationManagerImpl::instance()->
+                             application(app_id));
+
+    if (NULL == app) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+
+    // prepare SmartObject for mobile factory
+    (*message_)[strings::params][strings::function_id] =
+      NsSmartDeviceLinkRPC::V2::FunctionID::SetAppIconID;
+
+    SendResponseToMobile(message_);
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_

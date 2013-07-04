@@ -96,10 +96,40 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend( {
      * @param {Object}
      */
     onSDLUIShow: function( params ) {
-        this.appInfo.set( 'field1', params.mainField1 );
-        this.appInfo.set( 'field2', params.mainField2 );
-        this.appInfo.set( 'field3', params.mainField3 );
-        this.appInfo.set( 'field4', params.mainField4 );
+        
+        for (var i = 0; i < params.alertStrings.length; i++) {
+            switch (params.alertStrings[key]) {
+                case 'mainField1': {
+                    this.appInfo.set('field1', params.alertStrings[key].fieldText);
+                    break;
+                }
+                case 'mainField2': {
+                    this.appInfo.set('field2', params.alertStrings[key].fieldText);
+                    break;
+                }
+                case 'mainField3': {
+                    this.appInfo.set('field3', params.alertStrings[key].fieldText);
+                    break;
+                }
+                case 'mainField4': {
+                    this.appInfo.set('field4', params.alertStrings[key].fieldText);
+                    break;
+                }
+                case 'statusBar': {
+                    this.appInfo.set('statusText', params.alertStrings[key].fieldText);
+                    break;
+                }
+                case 'mediaClock': {
+                    this.appInfo.set('mediaClock', params.alertStrings[key].fieldText);
+                    break;
+                }
+                case 'mediaTrack': {
+                    this.appInfo.set('mediaTrack', params.alertStrings[key].fieldText);
+                    break;
+                }
+            }
+        }
+
         if( params.graphic ){
             this.appInfo.set( 'mainImage', params.graphic );
         }else{

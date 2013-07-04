@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_ICON_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_ICON_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
 
@@ -40,21 +40,21 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief UISetMediaClockTimerResponse command class
+ * @brief UISetIconResponse command class
  **/
-class UISetMediaClockTimerResponse : public ResponseFromHMI {
+class UISetIconResponse : public ResponseFromHMI {
  public:
   /**
-   * @brief UISetMediaClockTimerResponse class constructor
+   * @brief UISetIconResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetMediaClockTimerResponse(const MessageSharedPtr& message);
+  explicit UISetIconResponse(const MessageSharedPtr& message);
 
   /**
-   * @brief UISetMediaClockTimerResponse class destructor
+   * @brief UISetIconResponse class destructor
    **/
-  virtual ~UISetMediaClockTimerResponse();
+  virtual ~UISetIconResponse();
 
   /**
    * @brief Execute command
@@ -62,11 +62,11 @@ class UISetMediaClockTimerResponse : public ResponseFromHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(UISetMediaClockTimerResponse);
+  DISALLOW_COPY_AND_ASSIGN(UISetIconResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_ICON_RESPONSE_H_

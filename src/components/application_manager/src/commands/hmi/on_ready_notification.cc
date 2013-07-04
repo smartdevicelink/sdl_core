@@ -46,6 +46,7 @@ OnReadyNotification::~OnReadyNotification() {
 }
 
 void OnReadyNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnReadyNotification::Run()");
   ApplicationManagerImpl::instance()->OnHMIStartedCooperation();
 }
 

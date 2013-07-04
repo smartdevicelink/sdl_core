@@ -30,43 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_
-
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/hmi/ui_set_global_properties_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief UISetMediaClockTimerResponse command class
- **/
-class UISetMediaClockTimerResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief UISetMediaClockTimerResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UISetMediaClockTimerResponse(const MessageSharedPtr& message);
+UISetGlobalPropertiesRequest::UISetGlobalPropertiesRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
+}
 
-  /**
-   * @brief UISetMediaClockTimerResponse class destructor
-   **/
-  virtual ~UISetMediaClockTimerResponse();
+UISetGlobalPropertiesRequest::~UISetGlobalPropertiesRequest() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(UISetMediaClockTimerResponse);
-};
+void UISetGlobalPropertiesRequest::Run() {
+  LOG4CXX_INFO(logger_, "UISetGlobalPropertiesRequest::Run");
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_MEDIA_CLOCK_TIMER_RESPONSE_H_

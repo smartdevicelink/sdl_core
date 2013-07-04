@@ -47,7 +47,9 @@
 #include "JSONHandler/formatters/formatter_json_rpc.h"
 
 #include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT_schema.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/HMI_API_schema.h"
 
 namespace test_command {
 
@@ -55,7 +57,6 @@ namespace test_command {
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 
 TEST(add_command, general) {
   std::string incoming_string =
@@ -68,12 +69,30 @@ TEST(add_command, general) {
     incoming_string,
     incoming_message,
     mobile_api::FunctionID::AddCommandID,
-    mobile_api::messageType::request);
+    mobile_api::messageType::request,
+    258);
+
+  NsSmartDeviceLinkRPC::V2::v4_protocol_v2_0_revT factory;
+  std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
+
+  std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
+
+  std::cout << "Internal message parameters: " << std::endl;
+  std::set<std::string> internal_params = incoming_message["params"].enumerate();
+  for (std::set<std::string>::const_iterator i = internal_params.begin(); i != internal_params.end(); ++i) {
+    std::cout << (*i) << " : " << incoming_message["params"][*i].asString() << std::endl;
+  }
+
+  std::cout << "API parameters:" << std::endl;
+
+  std::set<std::string> elements = incoming_message["msg_params"].enumerate();
+  for (std::set<std::string>::const_iterator i = elements.begin(); i != elements.end(); ++i) {
+    std::cout << (*i) << std::endl;
+  }
 
   std::string str;
   formatters::CFormatterJsonSDLRPCv2::toString(incoming_message, str);
   std::cout << str << std::endl;
-
 }
 
 TEST(json2_command, notification) {
@@ -83,6 +102,11 @@ TEST(json2_command, notification) {
   formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
     incoming_string,
     incoming_message);
+
+  hmi_apis::HMI_API factory;
+  std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
+
+  std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
 
   std::cout << "Internal message parameters: " << std::endl;
   std::set<std::string> internal_params = incoming_message["params"].enumerate();
@@ -116,6 +140,11 @@ TEST(json2_command, request_no_params) {
   formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
     incoming_string,
     incoming_message);
+
+  hmi_apis::HMI_API factory;
+  std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
+
+  std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
 
   std::cout << "Internal message parameters: " << std::endl;
   std::set<std::string> internal_params = incoming_message["params"].enumerate();
@@ -170,6 +199,11 @@ TEST(json2_command, response_params) {
     incoming_string,
     incoming_message);
 
+  hmi_apis::HMI_API factory;
+  std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
+
+  std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
+
   std::cout << "Internal message parameters: " << std::endl;
   std::set<std::string> internal_params = incoming_message["params"].enumerate();
   for (std::set<std::string>::const_iterator i = internal_params.begin(); i != internal_params.end(); ++i) {
@@ -197,6 +231,69 @@ TEST(json2_command, response_params) {
 
   std::string str;
   formatters::FormatterJsonRpc::ToString(incoming_message, str);
+  std::cout << str << std::endl;
+}
+
+TEST(json2_command, response_error_params) {
+  std::string incoming_string = "{\
+  \"id\" : 35,\
+  \"jsonrpc\" : \"2.0\",\
+  \"error\" : \
+  {\
+    \"code\" : 12,\
+    \"message\" : \"File with this name is not available\",\
+    \"data\" : {\
+      \"method\" : \"Buttons.GetCapabilities\"\
+    }\
+  }\
+}";
+
+  smart_objects::CSmartObject incoming_message;
+
+  formatters::FormatterJsonRpc::
+  FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
+    incoming_string,
+    incoming_message);
+
+  hmi_apis::HMI_API factory;
+  std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
+
+  std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
+
+  std::cout << "Internal message parameters: " << std::endl;
+  std::set<std::string> internal_params = incoming_message["params"].enumerate();
+  for (std::set<std::string>::const_iterator i = internal_params.begin(); i != internal_params.end(); ++i) {
+    std::cout << (*i) << " : " << incoming_message["params"][*i].asString() << std::endl;
+  }
+
+  std::cout << "API parameters:" << std::endl;
+
+  std::set<std::string> elements = incoming_message["msg_params"].enumerate();
+  for (std::set<std::string>::const_iterator i = elements.begin(); i != elements.end(); ++i) {
+    std::cout << (*i) << std::endl;
+  }
+
+  std::cout << "Formatted message string: " << std::endl;
+
+  std::string str;
+  formatters::FormatterJsonRpc::ToString(incoming_message, str);
+  std::cout << str << std::endl;
+}
+
+TEST(json2_command, create_object) {
+  hmi_apis::HMI_API factory;
+  smart_objects::CSmartObject object = factory.CreateSmartObject(
+                                         hmi_apis::FunctionID::VR_IsReady,
+                                         hmi_apis::messageType::request);
+
+  smart_objects::CSmartObject is_vr_ready =
+    factory.CreateSmartObject(hmi_apis::FunctionID::VR_IsReady,
+                              hmi_apis::messageType::request);
+
+  ASSERT_EQ(smart_objects::SmartType_Map, is_vr_ready.getType());
+
+  std::string str;
+  formatters::FormatterJsonRpc::ToString(is_vr_ready, str);
   std::cout << str << std::endl;
 }
 

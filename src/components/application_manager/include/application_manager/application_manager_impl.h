@@ -138,7 +138,7 @@ class ApplicationManagerImpl : public ApplicationManager
       MessageChaining* chain,
       unsigned int connection_key,
       unsigned int correlation_id,
-      unsigned int function_id = 0, // TODO(VS): delete this param
+      unsigned int function_id = 0,  // TODO(VS): delete this param
       const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
@@ -299,7 +299,11 @@ class ApplicationManagerImpl : public ApplicationManager
     void StartDevicesDiscovery();
     void SendMessageToMobile(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
+    bool ManageCommandToMobile(
+      const utils::SharedPtr<smart_objects::CSmartObject>& message);
     void SendMessageToHMI(
+      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+    bool ManageCommandToHMI(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
 
     /////////////////////////////////////////////////////////
@@ -390,23 +394,22 @@ bool ApplicationManagerImpl::driver_distraction() const {
 }
 
 inline const hmi_apis::Common_Language::eType&
-    ApplicationManagerImpl::active_ui_language() const {
+ApplicationManagerImpl::active_ui_language() const {
   return ui_language_;
 }
 
 inline const hmi_apis::Common_Language::eType&
-    ApplicationManagerImpl::active_vr_language() const {
+ApplicationManagerImpl::active_vr_language() const {
   return vr_language_;
 }
 
 inline const hmi_apis::Common_Language::eType&
-    ApplicationManagerImpl::active_tts_language() const {
+ApplicationManagerImpl::active_tts_language() const {
   return tts_language_;
 }
 
 inline bool ApplicationManagerImpl::all_apps_allowed() const {
   return is_all_apps_allowed_;
-
 }
 }  // namespace application_manager
 

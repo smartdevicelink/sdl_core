@@ -43,33 +43,35 @@
 #include "JSONHandler/CSmartFactory.hpp"
 
 namespace test {
-  namespace components {
-    namespace application_mngr {
-      namespace APIVersionConverterV1Test {
+namespace components {
+namespace application_mngr {
+namespace APIVersionConverterV1Test {
 
-          class CAPIVersionConverterV1Test{
-          public:
-             /**
-              * Class constructor
-              */
-             CAPIVersionConverterV1Test() {}
+class CAPIVersionConverterV1Test {
+  public:
+    /**
+     * Class constructor
+     */
+    CAPIVersionConverterV1Test() {}
 
-             /**
-              * Class destructor
-              */
-             virtual ~CAPIVersionConverterV1Test() { destructor();}
+    /**
+     * Class destructor
+     */
+    virtual ~CAPIVersionConverterV1Test() {
+      destructor();
+    }
 
-             /**
-              *
-              */
-             MOCK_METHOD0(destructor, void());
+    /**
+     *
+     */
+    MOCK_METHOD0(destructor, void());
 
-          private:
-          };
+  private:
+};
 
-      }  // namespace ApplicationCoreTest
-    }  // namespace AppMgr
-  }  // namespace components
+}  // namespace ApplicationCoreTest
+}  // namespace AppMgr
+}  // namespace components
 }  // namespace test
 
 TEST(CAPIVersionConverterV1Test, Constructor) {
@@ -113,12 +115,9 @@ TEST(CAPIVersionConverterV1Test, convertJSON) {
   bool result;
   result = CFormatterJsonSDLRPCv1::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj);
 
-  if (false == result)
-  {
+  if (false == result) {
     printf("Formatter result is FALSE\n");
-  }
-  else
-  {
+  } else {
     printf("Formatter result is TRUE\n");
   }
 
@@ -132,7 +131,7 @@ TEST(CAPIVersionConverterV1Test, convertJSON) {
   */
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   ::testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }

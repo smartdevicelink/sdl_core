@@ -74,6 +74,12 @@
 #include "application_manager/commands/hmi/ui_slider_response.h"
 #include "application_manager/commands/hmi/ui_set_media_clock_timer_request.h"
 #include "application_manager/commands/hmi/ui_set_media_clock_timer_response.h"
+#include "application_manager/commands/hmi/ui_set_global_properties_request.h"
+#include "application_manager/commands/hmi/ui_set_global_properties_response.h"
+#include "application_manager/commands/hmi/ui_scrollable_message_request.h"
+#include "application_manager/commands/hmi/ui_scrollable_message_response.h"
+#include "application_manager/commands/hmi/ui_set_icon_request.h"
+#include "application_manager/commands/hmi/ui_set_icon_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
@@ -243,6 +249,33 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UISetMediaClockTimerResponse(message));
       } else {
         command.reset(new commands::UISetMediaClockTimerRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_SetGlobalProperties: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISetGlobalPropertiesResponse(message));
+      } else {
+        command.reset(new commands::UISetGlobalPropertiesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_ScrollableMessage: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIScrollableMessageResponse(message));
+      } else {
+        command.reset(new commands::UIScrollableMessageRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_SetAppIcon: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISetIconResponse(message));
+      } else {
+        command.reset(new commands::UISetIconRequest(message));
       }
       break;
     }
