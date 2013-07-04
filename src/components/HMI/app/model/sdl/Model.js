@@ -393,8 +393,8 @@ SDL.SDLModel = Em.Object.create( {
      */
     setProperties: function( message ) {
 
-        this.set( 'globalProperties.helpPrompt', message.helpPrompt );
-        this.set( 'globalProperties.timeoutPrompt', message.timeoutPrompt );
+        //this.set( 'globalProperties.helpPrompt', message.helpPrompt );
+        //this.set( 'globalProperties.timeoutPrompt', message.timeoutPrompt );
 
     },
 

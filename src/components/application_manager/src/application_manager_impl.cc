@@ -352,10 +352,9 @@ void ApplicationManagerImpl::onMessageReceived(
   }
 
   LOG4CXX_INFO(logger_, "Converted message, trying to create command");
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(smart_object);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  if (!ManageHMICommand(smart_object)) {
+    LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
+  }
 }
 
 void ApplicationManagerImpl::onErrorSending(
@@ -413,19 +412,40 @@ void ApplicationManagerImpl::SendMessageToMobile(
   return;
 }
 
-bool ApplicationManagerImpl::ManageCommandToMobile(
+bool ApplicationManagerImpl::ManageMobileCommand(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
   return true;
 }
 
 void ApplicationManagerImpl::SendMessageToHMI(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
-  return;
+  if (!hmi_handler_) {
+    LOG4CXX_WARN(logger_, "No HMI Handler set");
+    return;
+  }
+  utils::SharedPtr<Message> message_to_send(new Message);
+  if (!ConvertSOtoMessage(*message, *message_to_send)) {
+    LOG4CXX_WARN(logger_,
+                 "Cannot send message to HMI: failed to create string");
+  }
+  hmi_handler_->sendMessageToHMI(message_to_send);
 }
 
-bool ApplicationManagerImpl::ManageCommandToHMI(
+bool ApplicationManagerImpl::ManageHMICommand(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
-  return true;
+  CommandSharedPtr command = HMICommandFactory::CreateCommand(message);
+
+  if (!command) {
+    LOG4CXX_WARN(logger_, "Failed to create command from smart object");
+  }
+
+  if (command->Init()) {
+    command->Run();
+    if (command->CleanUp()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
@@ -462,6 +482,57 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       /*hmi_apis::HMI_API factory;
       factory.attachSchema(output);
       LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());*/
+      break;
+    }
+    default:
+      NOTREACHED();
+      return false;
+  }
+  LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
+  return true;
+}
+
+bool ApplicationManagerImpl::ConvertSOtoMessage(
+  const smart_objects::CSmartObject& message, Message& output) {
+  LOG4CXX_INFO(logger_, "Message to convert");
+
+  if (smart_objects::SmartType_Null == message.getType() ||
+      smart_objects::SmartType_Invalid == message.getType()) {
+    LOG4CXX_WARN(logger_, "Invalid smart object received.");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "Message with protocol: " <<
+               message.getElement(
+                 jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt());
+
+  std::string output_string;
+  switch (message.getElement(
+            jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt()) {
+    case 1: {
+      if (!formatters::FormatterJsonRpc::ToString(
+            message,
+            output_string)) {
+        LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+        return false;
+      }
+
+      LOG4CXX_INFO(logger_, "Convertion result: " <<
+                   output_string);
+
+      output.set_function_id(message.getElement(
+                               jhs::S_PARAMS).getElement(
+                               jhs::S_FUNCTION_ID).asInt());
+      output.set_correlation_id(
+        message.getElement(jhs::S_PARAMS).getElement(
+          jhs::S_CORRELATION_ID).asInt());
+      output.set_message_type(
+        static_cast<MessageType>(
+          message.getElement(jhs::S_PARAMS).getElement(
+            jhs::S_MESSAGE_TYPE).asInt()));
+      output.set_json_message(output_string);
+      output.set_protocol_version(application_manager::kHMI);
+
       break;
     }
     default:

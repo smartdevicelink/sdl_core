@@ -220,7 +220,7 @@ FFW.UI = FFW.RPCObserver.create( {
             }
             case "UI.DeleteSubMenu": {
 
-                var resultCode = SDL.SDLController.getApplicationModel( request.params.appId ).deleteSubMenu( request.params.menuId );
+                var resultCode = SDL.SDLController.getApplicationModel( request.params.appId ).deleteSubMenu( request.params.menuID );
 
                 this.sendUIResult( resultCode, request.id, request.method );
 
@@ -374,37 +374,39 @@ FFW.UI = FFW.RPCObserver.create( {
                     "result": {
                         "displayCapabilities": {
                             "displayType": "GEN2_8_DMA",
-                            "textFields":
-                                [
-                                    {
-                                        "fieldName": "mainField1"
-                                    },
-                                    {
-                                        "fieldName": "mainField2"
-                                    },
-                                    {
-                                        "fieldName": "statusBar"
-                                    },
-                                    {
-                                        "fieldName": "mediaClock"
-                                    },
-                                    {
-                                        "fieldName": "mediaTrack"
-                                    },
-                                    {
-                                        "fieldName": "alertText1"
-                                    },
-                                    {
-                                        "fieldName": "alertText2"
-                                    }
-                                ],
+                            "textFields":[
+                                "mainField1",
+                                "mainField2",
+                                "mainField1",
+                                "mainField2",
+                                "statusBar",
+                                "mediaClock",
+                                "mediaTrack",
+                                "alertText1",
+                                "alertText2",
+                                "alertText3",
+                                "scrollableMessageBody",
+                                "initialInteractionText",
+                                "navigationText1",
+                                "navigationText2",
+                                "ETA",
+                                "totalDistance",
+                                "navigationText",
+                                "audioPassThruDisplayText1",
+                                "audioPassThruDisplayText2",
+                                "sliderHeader",
+                                "sliderFooter",
+                                "notificationText"
+                            ],
                             "mediaClockFormats":
                                 [
                                     "CLOCK1",
                                     "CLOCK2",
+                                    "CLOCK3",
                                     "CLOCKTEXT1",
                                     "CLOCKTEXT2",
-                                    "CLOCKTEXT3"
+                                    "CLOCKTEXT3",
+                                    "CLOCKTEXT4"
                                 ],
                             "graphicSupported": true
                         },
@@ -549,7 +551,7 @@ FFW.UI = FFW.RPCObserver.create( {
             "jsonrpc": "2.0",
             "method": "UI.OnCommand",
             "params": {
-                "commandId": commandId,
+                "cmdID": commandId,
                 "appId": appId
             }
         };

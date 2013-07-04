@@ -299,11 +299,11 @@ class ApplicationManagerImpl : public ApplicationManager
     void StartDevicesDiscovery();
     void SendMessageToMobile(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
-    bool ManageCommandToMobile(
+    bool ManageMobileCommand(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
     void SendMessageToHMI(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
-    bool ManageCommandToHMI(
+    bool ManageHMICommand(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
 
     /////////////////////////////////////////////////////////
@@ -355,6 +355,8 @@ class ApplicationManagerImpl : public ApplicationManager
 
     bool ConvertMessageToSO(const Message& message,
                             smart_objects::CSmartObject& output);
+    bool ConvertSOtoMessage(
+      const smart_objects::CSmartObject& message, Message& output);
 
     /**
      * @brief Map of connection keys and associated applications
