@@ -197,17 +197,17 @@ SDL.AlertPopUp = Em.ContainerView.create({
         this.set('appName', SDL.SDLController.getApplicationModel(message.appId).appName);
 
         for (var i = 0; i < params.alertStrings.length; i++) {
-            switch (params.alertStrings[key]) {
+            switch (params.alertStrings[i]) {
                 case 'alertText1': {
-                    this.appInfo.set('content1', params.alertStrings[key].fieldText);
+                    this.appInfo.set('content1', params.alertStrings[i].fieldText);
                     break;
                 }
                 case 'alertText2': {
-                    this.appInfo.set('content2', params.alertStrings[key].fieldText);
+                    this.appInfo.set('content2', params.alertStrings[i].fieldText);
                     break;
                 }
                 case 'alertText3': {
-                    this.appInfo.set('content3', params.alertStrings[key].fieldText);
+                    this.appInfo.set('content3', params.alertStrings[i].fieldText);
                     break;
                 }
             }

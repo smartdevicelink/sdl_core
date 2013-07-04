@@ -43,7 +43,7 @@ FFW.UI = FFW.RPCObserver.create( {
      */
     isReady: false,
 
-    /*
+    /**
      * access to basic RPC functionality
      */
     client: FFW.RPCClient.create( {
@@ -63,27 +63,27 @@ FFW.UI = FFW.RPCObserver.create( {
     onVRChoiseNotification: "VR.OnChoise",
     onShowNotificationNotification: "UI.ShowNotification",
 
-    /*
+    /**
      * ids for requests AudioPassThru
      */
     performAudioPassThruRequestId: -1,
     endAudioPassThruRequestId: -1,
 
-    /*
+    /**
      * connect to RPC bus
      */
     connect: function() {
         this.client.connect( this, 400 );
     },
 
-    /*
+    /**
      * disconnect from RPC bus
      */
     disconnect: function() {
         this.client.disconnect();
     },
 
-    /*
+    /**
      * Client is registered - we can send request starting from this point of
      * time
      */
@@ -96,7 +96,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this.onShowNotificationSubscribeRequestId = this.client.subscribeToNotification( this.onShowNotificationNotification );
     },
 
-    /*
+    /**
      * Client is unregistered - no more requests
      */
     onRPCUnregistered: function() {
@@ -108,14 +108,14 @@ FFW.UI = FFW.RPCObserver.create( {
         this.onShowNotificationUnsubscribeRequestId = this.client.unsubscribeFromNotification( this.onShowNotificationNotification );
     },
 
-    /*
+    /**
      * Client disconnected.
      */
     onRPCDisconnected: function() {
 
     },
 
-    /*
+    /**
      * when result is received from RPC component this function is called It is
      * the propriate place to check results of request execution Please use
      * previously store reuqestID to determine to which request repsonse belongs
@@ -126,7 +126,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this._super();
     },
 
-    /*
+    /**
      * handle RPC erros here
      */
     onRPCError: function( error ) {
@@ -134,7 +134,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this._super();
     },
 
-    /*
+    /**
      * handle RPC notifications here
      */
     onRPCNotification: function( notification ) {
@@ -150,7 +150,7 @@ FFW.UI = FFW.RPCObserver.create( {
         }
     },
 
-    /*
+    /**
      * handle RPC requests here
      */
     onRPCRequest: function( request ) {
@@ -274,7 +274,7 @@ FFW.UI = FFW.RPCObserver.create( {
             }
             case "UI.ChangeRegistration": {
 
-                SDL.SDLModel.changeRegistrationUI( request.params.hmiDisplayLanguage );
+                SDL.SDLModel.changeRegistrationUI( request.params.language );
 
                 this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
@@ -305,12 +305,11 @@ FFW.UI = FFW.RPCObserver.create( {
             case "UI.GetSupportedLanguages": {
 
                 var JSONMessage = {
-                    "jsonrpc": "2.0",
                     "id": request.id,
+                    "jsonrpc": "2.0",
                     "result": {
-                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                                                    // protocol
-                        "method": "UI.GetSupportedLanguagesResponse",
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": "UI.GetSupportedLanguages",
                         "languages": SDL.SDLModel.sdlLanguagesList
                     }
                 };
@@ -324,10 +323,10 @@ FFW.UI = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
                                                     // protocol
                         "method": "UI.GetLanguageResponse",
-                        "hmiDisplayLanguage": SDL.SDLModel.hmiUILanguage
+                        "language": SDL.SDLModel.hmiUILanguage
                     }
                 };
                 this.client.send( JSONMessage );
@@ -424,7 +423,7 @@ FFW.UI = FFW.RPCObserver.create( {
                                     "imageSupported": true
                                 }
                             ],
-                        "code": 0,
+                        "code": SDL.SDLModel.resultCode["SUCCESS"],
                         "method": "UI.GetCapabilities"
                     }
                 };
@@ -433,7 +432,6 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 break;
             }
-
             case "UI.IsReady": {
 
                 // send repsonse
@@ -442,7 +440,7 @@ FFW.UI = FFW.RPCObserver.create( {
                     "id": request.id,
                     "result": {
                         "available": this.get('isReady'),
-                        "code": 0,
+                        "code": SDL.SDLModel.resultCode["SUCCESS"],
                         "method" : "UI.IsReady"
                     }
                 };
@@ -451,7 +449,22 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 break;
             }
+            case "UI.ClosePopUp": {
 
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "code": SDL.SDLModel.resultCode["SUCCESS"],
+                        "method" : "UI.ClosePopUp"
+                    }
+                };
+
+                this.client.send( JSONMessage );
+
+                break;
+            }
             default: {
                 // statements_def
                 break;
@@ -480,7 +493,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * send response from onRPCRequest
      */
     sendUIResult: function( resultCode, id, method ) {
@@ -541,7 +554,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * send notification when command was triggered
      */
     onCommand: function( commandId, appId ) {
@@ -558,7 +571,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * send notification when command was triggered
      */
     onCommandSoftButton: function( softButtonID, appId ) {
@@ -575,7 +588,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * send notification when command was triggered
      */
     interactionResponse: function( resultCode, performInteractionRequestId, commandId ) {
@@ -598,7 +611,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * send notification when DriverDistraction PopUp is visible
      */
     onDriverDistraction: function( driverDistractionState ) {
@@ -609,14 +622,13 @@ FFW.UI = FFW.RPCObserver.create( {
             "jsonrpc": "2.0",
             "method": "UI.OnDriverDistraction",
             "params": {
-                "state": driverDistractionState,
-                "appId": 0
+                "state": driverDistractionState
             }
         };
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * Notifies if system context is changed
      */
     OnSystemContext: function( systemContextValue ) {
@@ -633,7 +645,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * Notifies if application was activated
      */
     OnAppActivated: function( appName ) {
@@ -650,10 +662,10 @@ FFW.UI = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * Notifies if device was choosed
      */
-    OnDeviceChosen: function( deviceName ) {
+    OnDeviceChosen: function(deviceName, appId) {
         Em.Logger.log( "FFW.UI.OnDeviceChosen" );
 
         // send repsonse
@@ -661,13 +673,16 @@ FFW.UI = FFW.RPCObserver.create( {
             "jsonrpc": "2.0",
             "method": "UI.OnDeviceChosen",
             "params": {
-                "deviceName": deviceName
+                "deviceInfo": {
+                    "name": deviceName,
+                    "id": appId
+                }
             }
         };
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * Notifies if sdl UI components language was changed
      */
     OnLanguageChange: function( lang ) {
@@ -684,7 +699,7 @@ FFW.UI = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * Notifies if TBTClientState was activated
      */
     onTBTClientState: function( state, appId ) {

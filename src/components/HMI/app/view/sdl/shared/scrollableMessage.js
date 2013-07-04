@@ -74,18 +74,23 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create( {
         clearTimeout( this.timer );
         this.set( 'active', false );
 
-        SDL.SDLController.scrollableMessageResponse( ABORTED ? 'ABORTED' : 'SUCCESS', this.messageRequestId );
+        SDL.SDLController.scrollableMessageResponse(ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.messageRequestId);
     },
 
-    activate: function( appName, params, messageRequestId ) {
+    activate: function(appName, params, messageRequestId) {
         if( appName ){
 
             var self = this;
 
+            for (var i = 0; i < params.messageText.length; i++) {
+                if (params.messageText[i].fieldName == "scrollableMessageBody"){
+                    this.set( 'listOfCommands.items', params.messageText[i].fieldText );
+                }
+            }
+
             this.set( 'messageRequestId', messageRequestId );
             this.set( 'captionText.content', appName );
             this.softButtons.addItems( params.softButtons, params.appId );
-            this.set( 'listOfCommands.items', params.scrollableMessageBody );
             this.set( 'active', true );
             clearTimeout( this.timer );
             this.timer = setTimeout( function() {
