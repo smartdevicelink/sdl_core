@@ -1,6 +1,7 @@
 /**
- * \file device_handle_generator_impl.cpp
- * \brief Class DeviceHandleGeneratorImpl.
+ * \file transport_manager_listener.h
+ * \brief interface for TransportManagerListener header file.
+ *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,32 +33,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/device_handle_generator_impl.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
+
+#include "transport_manager/transport_manager_listener.h"
+#include "transport_manager/transport_manager_listener_impl.h"
 
 namespace transport_manager {
 
-DeviceHandleGenerator::~DeviceHandleGenerator() {
+TransportManagerListener::~TransportManagerListener() {
+}
 }
 
-DeviceHandleGeneratorImpl::DeviceHandleGeneratorImpl()
-    : last_used_device_handle_(0) {
-  pthread_mutex_init(&device_handle_generation_mutex_, 0);
-}
-
-DeviceHandleGeneratorImpl::~DeviceHandleGeneratorImpl() {
-  pthread_mutex_destroy(&device_handle_generation_mutex_);
-}
-
-DeviceHandle DeviceHandleGeneratorImpl::generate() {
-  DeviceHandle output_device_handle;
-
-  pthread_mutex_lock(&device_handle_generation_mutex_);
-  ++last_used_device_handle_;
-  output_device_handle = last_used_device_handle_;
-  pthread_mutex_unlock(&device_handle_generation_mutex_);
-
-  return output_device_handle;
-}
-
-}  // namespace transport_manager
-
+#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL

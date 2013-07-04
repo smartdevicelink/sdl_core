@@ -75,7 +75,7 @@ class DeviceAdapter {
 
   virtual Error init(DeviceAdapterListener* listener,
                      DeviceHandleGenerator* handle_generator,
-                     Configuration* configuration);
+                     Configuration* configuration) = 0;
 
   virtual bool isSearchDevicesSupported() const = 0;
   virtual Error searchDevices() = 0;
