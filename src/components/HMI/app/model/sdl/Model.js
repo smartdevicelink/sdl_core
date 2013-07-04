@@ -254,7 +254,7 @@ SDL.SDLModel = Em.Object.create( {
             'ZH-CN',
             'ZH-TW',
             'JA-JP',
-            'AR',
+            'AR-SA',
             'KO-KR'
         ],
 
@@ -440,11 +440,11 @@ SDL.SDLModel = Em.Object.create( {
         img.onload = function() {
             // code to set the src on success
             SDL.SDLController.getApplicationModel( message.appId ).set( 'appIcon', message.syncFileName );
-            FFW.UI.sendUIResult( "SUCCESS", id, method );
+            FFW.UI.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], id, method );
         };
         img.onerror = function( event ) {
             // doesn't exist or error loading
-            FFW.UI.sendUIResult( "INVALID_DATA", id, method );
+            FFW.UI.sendUIResult( SDL.SDLModel.resultCode["INVALID_DATA"], id, method );
             return false;
         };
 
@@ -520,10 +520,10 @@ SDL.SDLModel = Em.Object.create( {
      */
     UIEndAudioPassThru: function() {
         if( this.AudioPassThruState ){
-            FFW.UI.sendUIResult( "SUCCESS", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
-            SDL.SDLController.performAudioPassThruResponse( "SUCCESS" );
+            FFW.UI.sendUIResult( this.resultCode["SUCCESS"], FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
+            SDL.SDLController.performAudioPassThruResponse( this.resultCode["SUCCESS"] );
         }else{
-            FFW.UI.sendUIResult( "GENERIC_ERROR", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
+            FFW.UI.sendUIResult( this.resultCode["GENERIC_ERROR"], FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
         }
     },
 

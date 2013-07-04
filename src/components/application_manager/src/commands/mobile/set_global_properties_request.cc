@@ -57,7 +57,7 @@ void SetGlobalPropertiesRequest::Run() {
                            application(app_id));
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -80,6 +80,13 @@ void SetGlobalPropertiesRequest::Run() {
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
   if (NULL == p_smrt_ui) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    return;
+  }
+
+  if (!p_smrt_ui) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
     return;

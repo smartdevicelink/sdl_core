@@ -189,6 +189,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_change_registration_response.cc
 ./src/commands/hmi/ui_show_request.cc
 ./src/commands/hmi/ui_show_response.cc
+./src/commands/hmi/ui_alert_request.cc
+./src/commands/hmi/ui_alert_response.cc
 ./src/commands/hmi/ui_slider_request.cc
 ./src/commands/hmi/ui_scrollable_message_request.cc
 ./src/commands/hmi/ui_scrollable_message_response.cc

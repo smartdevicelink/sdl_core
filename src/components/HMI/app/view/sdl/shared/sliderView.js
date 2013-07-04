@@ -67,7 +67,7 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
      */
     deactivate: function() {
         this._super();
-        FFW.UI.sendSliderResult( "SUCCESS", this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+        FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["SUCCESS"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
     },
 
     adjustControl: Em.ContainerView.extend( {

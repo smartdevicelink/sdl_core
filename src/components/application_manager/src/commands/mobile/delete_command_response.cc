@@ -48,6 +48,8 @@ DeleteCommandResponse::~DeleteCommandResponse() {
 }
 
 void DeleteCommandResponse::Run() {
+  LOG4CXX_INFO(logger_, "DeleteCommandResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false)
   {
     SendResponse();
@@ -76,16 +78,11 @@ void DeleteCommandResponse::Run() {
   ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     return;
   }
 
   smart_objects::CSmartObject data = msg_chain->data();
-
-  if (function_id == ui_cmd_id) {
-    msg_chain->set_ui_response_result(code);
-  } else if (function_id == vr_cmd_id) {
-    msg_chain->set_vr_response_result(code);
-  }
 
   // we need to retrieve stored response code before message chain decrase
   const bool result_ui = msg_chain->ui_response_result();
