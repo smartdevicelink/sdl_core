@@ -38,9 +38,14 @@
 
 #include <transport_manager/transport_manager_impl.h>
 #include <transport_manager/mock_device_adapter.h>
+#include <transport_manager/mock_device_adapter_listener.h>
+#include <protocol_handler/raw_message.h>
 
 using namespace transport_manager;
 using namespace test::components::transport_manager;
+using protocol_handler::RawMessage;
+
+using testing::_;
 
 TEST(TransportManagerImpl, instance)
 {
@@ -55,5 +60,15 @@ TEST(TransportManagerImpl, connect)
   MockDeviceAdapter *mock_da = new MockDeviceAdapter();
   impl->addDeviceAdapter(mock_da);
 
-  delete mock_da;
+  MockDeviceAdapterListener *mdal = new MockDeviceAdapterListener();
+
+  impl->registerAdapterListener(mdal);
+
+  unsigned char buf[10] = { 0 };
+
+  RawMessage msg(10, 1, buf, 10);
+
+  impl->sendMessageToDevice(msg);
+
+  EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(0);
 }
