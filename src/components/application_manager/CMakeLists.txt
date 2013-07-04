@@ -169,8 +169,12 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_stop_speaking_response.cc
 ./src/commands/hmi/tts_speak_request.cc
 ./src/commands/hmi/tts_speak_response.cc
+./src/commands/hmi/tts_set_global_properties_request.cc
+./src/commands/hmi/tts_set_global_properties_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
+./src/commands/hmi/ui_delete_command_request.cc
+./src/commands/hmi/ui_delete_command_response.cc
 ./src/commands/hmi/ui_add_submenu_request.cc
 ./src/commands/hmi/ui_add_submenu_response.cc
 ./src/commands/hmi/ui_delete_submenu_request.cc

@@ -54,6 +54,8 @@
 #include "application_manager/commands/hmi/start_device_discovery_response.h"
 #include "application_manager/commands/hmi/ui_add_command_request.h"
 #include "application_manager/commands/hmi/ui_add_command_response.h"
+#include "application_manager/commands/hmi/ui_delete_command_request.h"
+#include "application_manager/commands/hmi/ui_delete_command_response.h"
 #include "application_manager/commands/hmi/ui_add_submenu_request.h"
 #include "application_manager/commands/hmi/ui_add_submenu_response.h"
 #include "application_manager/commands/hmi/ui_delete_submenu_request.h"
@@ -108,6 +110,8 @@
 #include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 #include "application_manager/commands/hmi/tts_speak_request.h"
 #include "application_manager/commands/hmi/tts_speak_response.h"
+#include "application_manager/commands/hmi/tts_set_global_properties_request.h"
+#include "application_manager/commands/hmi/tts_set_global_properties_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
@@ -222,6 +226,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIAddCommandResponse(message));
       } else {
         command.reset(new commands::UIAddCommandRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_DeleteCommand: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIDeleteCommandResponse(message));
+      } else {
+        command.reset(new commands::UIDeleteCommandRequest(message));
       }
       break;
     }
@@ -438,6 +451,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::TTSSpeakResponse(message));
       } else {
         command.reset(new commands::TTSSpeakRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_SetGlobalProperties: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSSetGlobalPropertiesResponse(message));
+      } else {
+        command.reset(new commands::TTSSetGlobalPropertiesRequest(message));
       }
       break;
     }

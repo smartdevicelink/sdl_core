@@ -69,8 +69,8 @@ void DeleteCommandResponse::Run() {
       (*message_)[strings::msg_params][hmi_response::code].asInt());
 
   // TODO(VS) HMI Request Id
-  const int ui_cmd_id = 202;
-  const int vr_cmd_id = 203;
+  const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
+  const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
 
   MessageChaining* msg_chain =
   ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -119,6 +119,9 @@ void DeleteCommandResponse::Run() {
         (*message_)[strings::msg_params][strings::result_code] =
             NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
         SendResponse();
+      }
+      else {
+       // TODO(VS): check ui and vr response code
       }
     }
   }

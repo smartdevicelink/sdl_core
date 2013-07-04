@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/delete_command_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
 
 
 namespace application_manager {
@@ -77,9 +78,11 @@ void DeleteCommandRequest::Run() {
       smart_objects::CSmartObject* p_smrt_ui  =
           new smart_objects::CSmartObject();
 
-      // TODO(DK) HMI Request Id
-      const int ui_cmd_id = 202;
+      const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
       (*p_smrt_ui)[strings::params][strings::function_id] = ui_cmd_id;
+
+      (*p_smrt_ui)[strings::msg_params][strings::correlation_id] =
+          correlation_id;
 
       (*p_smrt_ui)[strings::params][strings::message_type] =
           MessageType::kRequest;
@@ -102,17 +105,17 @@ void DeleteCommandRequest::Run() {
           new smart_objects::CSmartObject();
 
       // TODO(DK) HMI Request Id
-      const int vr_cmd_id = 203;
+      const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
       (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
+
+      (*p_smrt_vr)[strings::msg_params][strings::correlation_id] =
+          correlation_id;
 
       (*p_smrt_vr)[strings::params][strings::message_type] =
           MessageType::kRequest;
 
       (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];
-
-      (*p_smrt_vr)[strings::msg_params][strings::vr_commands] =
-          (*message_)[strings::msg_params][strings::vr_commands];
 
       (*p_smrt_vr)[strings::msg_params][strings::app_id] =
                application->app_id();
