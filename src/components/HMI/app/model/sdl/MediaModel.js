@@ -190,7 +190,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             this.set('pause', false);
         }
 
-        return 'SUCCESS';
+        return SDL.SDLModel.resultCode['SUCCESS'];
     },
 
     /**
