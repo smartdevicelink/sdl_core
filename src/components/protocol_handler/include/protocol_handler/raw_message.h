@@ -44,14 +44,14 @@
 namespace protocol_handler {
 /**
  * \class SmartDeviceLinkRawMessage
- * \brief Class-wraper for information about message for interchanging
+ * \brief Class-wrapper for information about message for interchanging
  * between components.
  */
 class RawMessage {
  public:
   /**
    * \brief Constructor
-   * \param connectionKey Identifier of connection within wich message
+   * \param connectionKey Identifier of connection within which message
    * is transferred
    * \param protocolVersion Version of protocol of the message
    * \param data Message string
@@ -113,7 +113,7 @@ class RawMessage {
 
   /**
    * \brief Version of SmartDeviceLink protocol (currently 1,2)
-   * used for tranferring message.
+   * used for transferring message.
    */
   unsigned int protocol_version_;
   /**

@@ -298,14 +298,14 @@ void BluetoothAdapter::mainThread() {
         if (new_devices.end() == new_devices.find(it->first)) {
           if (connected_devices.end() != connected_devices.find(it->first)) {
             new_devices[it->first] = device;
-            device = 0;
+            device = nullptr;
           }
         }
 
         delete device;
       }
 
-      devices_ = new_devices;
+      std::swap(devices_, new_devices);
 
       pthread_mutex_unlock(&devices_mutex_);
 

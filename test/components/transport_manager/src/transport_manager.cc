@@ -1,6 +1,6 @@
-/**
- * \file handle_generator.h
- * \brief HandleGenerator class header file.
+/*
+ * \file transport_manager.cc
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,37 +33,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-namespace transport_manager
+#include <transport_manager/transport_manager_impl.h>
+#include <transport_manager/mock_device_adapter.h>
+
+using namespace transport_manager;
+using namespace test::components::transport_manager;
+
+TEST(TransportManagerImpl, instance)
 {
+	TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
+	ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
+}
 
-typedef int DeviceHandle;
-
-/**
- * @brief Interface for device handle generator.
- * @interface DeviceHandleGenerator
- **/
-class DeviceHandleGenerator
+TEST(TransportManagerImpl, connect)
 {
-public:
+  TransportManagerImpl* impl = TransportManagerImpl::instance();
 
-  /**
-   * @brief Destructor.
-   **/
-  virtual ~DeviceHandleGenerator();
+  MockDeviceAdapter *mock_da = new MockDeviceAdapter();
+  impl->addDeviceAdapter(mock_da);
 
-  /**
-   * @brief Generate new device handle.
-   *
-   * Method used for generation of unique device handle.
-   *
-   * @return New device handle.
-   **/
-  virtual DeviceHandle generate() = 0;
-};
-
-} // namespace transport_manager
-
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+  delete mock_da;
+}

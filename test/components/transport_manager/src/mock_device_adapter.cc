@@ -1,6 +1,6 @@
-/**
- * \file handle_generator.h
- * \brief HandleGenerator class header file.
+/*
+ * \file mock_device_adapter.cc
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,37 +33,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#include "transport_manager/mock_device_adapter.h"
 
-namespace transport_manager
+#include <list>
+
+namespace test {
+namespace components {
+namespace transport_manager {
+
+DeviceType MockDeviceAdapter::getDeviceType() const
 {
+  return "mock-adapter";
+}
 
-typedef int DeviceHandle;
-
-/**
- * @brief Interface for device handle generator.
- * @interface DeviceHandleGenerator
- **/
-class DeviceHandleGenerator
+bool MockDeviceAdapter::isSearchDevicesSupported() const
 {
-public:
+  return true;
+}
 
-  /**
-   * @brief Destructor.
-   **/
-  virtual ~DeviceHandleGenerator();
+bool MockDeviceAdapter::isServerOriginatedConnectSupported() const
+{
+  return true;
+}
 
-  /**
-   * @brief Generate new device handle.
-   *
-   * Method used for generation of unique device handle.
-   *
-   * @return New device handle.
-   **/
-  virtual DeviceHandle generate() = 0;
-};
+bool MockDeviceAdapter::isClientOriginatedConnectSupported() const
+{
+  return true;
+}
 
-} // namespace transport_manager
+ApplicationList MockDeviceAdapter::getApplicationList(const DeviceHandle device_handle) const
+{
+  ApplicationList rc;
+  rc.push_back(100);
+  return rc;
+}
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+void MockDeviceAdapter::connectionThread(Connection *connection)
+{
+  sleep(5);
+}
+
+void MockDeviceAdapter::mainThread()
+{
+  while (false == shutdown_flag_) {
+      DeviceMap new_devices;
+      DeviceVector discovered_devices;
+
+      bool device_scan_requested = waitForDeviceScanRequest(0);
+
+      listener_->onSearchDeviceDone(this);
+  }
+}
+
+MockDeviceAdapter::~MockDeviceAdapter()
+{ }
+
+}
+}
+}

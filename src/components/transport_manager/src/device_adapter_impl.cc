@@ -311,12 +311,11 @@ bool DeviceAdapterImpl::waitForDeviceScanRequest(const time_t Timeout) {
 
   pthread_mutex_lock(&device_scan_requested_mutex_);
 
-  if (false == device_scan_requested_)
-  {
+  if (false == device_scan_requested_) {
     if (0 == Timeout) {
-      if (0 != pthread_cond_wait(&device_scan_requested_cond_,
-                               &device_scan_requested_mutex_))
-      {
+      if (0
+          != pthread_cond_wait(&device_scan_requested_cond_,
+                               &device_scan_requested_mutex_)) {
         LOG4CXX_ERROR_WITH_ERRNO(logger_, "pthread_cond_wait failed");
       }
     } else {

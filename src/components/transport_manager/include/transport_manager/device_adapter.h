@@ -64,7 +64,7 @@ class DeviceAdapter {
   };
 
  public:
-  virtual ~DeviceAdapter();
+  virtual ~DeviceAdapter() { }
 
   virtual DeviceType getDeviceType() const = 0;
 

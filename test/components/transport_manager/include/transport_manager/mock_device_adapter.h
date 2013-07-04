@@ -1,6 +1,6 @@
-/**
- * \file handle_generator.h
- * \brief HandleGenerator class header file.
+/*
+ * \file MockDeviceAdapter.h
+ * \brief MockDeviceAdapter
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,37 +33,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#ifndef MOCKDEVICEADAPTER_H_
+#define MOCKDEVICEADAPTER_H_
 
-namespace transport_manager
+#include <map>
+
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include <transport_manager/transport_manager.h>
+#include <transport_manager/device_adapter_impl.h>
+#include <transport_manager/transport_manager_impl.h>
+
+using namespace transport_manager;
+
+namespace test  {
+namespace components  {
+namespace transport_manager {
+
+class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl
 {
+ public:
+  virtual ~MockDeviceAdapter();
 
-typedef int DeviceHandle;
+ protected:
 
-/**
- * @brief Interface for device handle generator.
- * @interface DeviceHandleGenerator
- **/
-class DeviceHandleGenerator
-{
-public:
+   virtual DeviceType getDeviceType() const;
 
-  /**
-   * @brief Destructor.
-   **/
-  virtual ~DeviceHandleGenerator();
+   virtual bool isSearchDevicesSupported() const;
 
-  /**
-   * @brief Generate new device handle.
-   *
-   * Method used for generation of unique device handle.
-   *
-   * @return New device handle.
-   **/
-  virtual DeviceHandle generate() = 0;
+   virtual bool isServerOriginatedConnectSupported() const;
+
+   virtual bool isClientOriginatedConnectSupported() const;
+
+   virtual void connectionThread(Connection* connection);
+
+   virtual ApplicationList getApplicationList(
+       const DeviceHandle device_handle) const;
+
+   virtual void mainThread();
 };
 
-} // namespace transport_manager
+}}}
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+
+#endif /* MOCKDEVICEADAPTER_H_ */
