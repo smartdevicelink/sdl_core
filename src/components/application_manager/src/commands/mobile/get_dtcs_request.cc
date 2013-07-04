@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/get_dtcs_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -48,27 +48,61 @@ GetDTCsRequest::~GetDTCsRequest() {
 }
 
 void GetDTCsRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetDTCsRequest::Run");
+
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  const int corellation_id =
+  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
+    LOG4CXX_ERROR(logger_, "App has not been activated");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+    return;
+  }
+
+  smart_objects::CSmartObject* vi_request  =
+          new smart_objects::CSmartObject();
+
+  if (NULL == vi_request) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    return;
+  }
+
+  const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
+  const int hmi_request_id = hmi_apis::FunctionID::VehicleInfo_GetDTCs;
 
-  // TODO(VS): HMI Request Id
-  const int hmi_request_id = 212;
-  (*message_)[strings::params][strings::function_id] = hmi_request_id;
+  (*vi_request)[strings::params][strings::correlation_id] =
+      correlation_id;
+
+  (*vi_request)[strings::params][strings::function_id] =
+      hmi_request_id;
+
+  (*vi_request)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+
+  (*vi_request)[strings::msg_params][strings::ecu_name] =
+      (*message_)[strings::msg_params][strings::ecu_name];
+
+  (*vi_request)[strings::msg_params][strings::dtc_mask] =
+      (*message_)[strings::msg_params][strings::dtc_mask];
+
+  (*vi_request)[strings::msg_params][strings::app_id] =
+      app->app_id();
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, corellation_id, hmi_request_id, &(*message_));
+        connection_key, correlation_id, hmi_request_id, &(*vi_request));
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }

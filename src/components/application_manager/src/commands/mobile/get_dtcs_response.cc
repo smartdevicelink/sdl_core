@@ -49,20 +49,24 @@ GetDTCsResponse::~GetDTCsResponse() {
 }
 
 void GetDTCsResponse::Run() {
+  LOG4CXX_INFO(logger_, "GetDTCsResponse::Run");
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
     return;
   }
 
-  const int hmi_request_id = (*message_)[strings::params][strings::function_id];
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id];
 
   if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(hmi_request_id)) {
-    if ((*message_)[strings::msg_params][hmi_response::code].asInt()) {
-      (*message_)[strings::params][strings::success] = true;
-      (*message_)[strings::params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-      SendResponse();
+      DecreaseMessageChain(correlation_id)) {
+    if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS ==
+        (*message_)[strings::msg_params][hmi_response::code].asInt()) {
+
+        (*message_)[strings::params][strings::success] = true;
+        (*message_)[strings::params][strings::result_code] =
+            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        SendResponse();
     } else {
       // TODO(VS): Some logic
     }

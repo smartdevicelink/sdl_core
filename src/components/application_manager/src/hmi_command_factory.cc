@@ -112,6 +112,8 @@
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
+#include "application_manager/commands/hmi/vi_get_dtcs_request.h"
+#include "application_manager/commands/hmi/vi_get_dtcs_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
 #include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
@@ -519,6 +521,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::VIReadDIDResponse(message));
       } else {
         command.reset(new commands::VIReadDIDRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VIGetDTCsRequest(message));
+      } else {
+        command.reset(new commands::VIGetDTCsResponse(message));
       }
       break;
     }
