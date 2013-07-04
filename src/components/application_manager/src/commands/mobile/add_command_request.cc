@@ -35,7 +35,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -49,14 +50,14 @@ AddCommandRequest::~AddCommandRequest() {
 }
 
 void AddCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "AddCommandRequest::Run ");
+  LOG4CXX_INFO(logger_, "AddCommandRequest::Run");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
                            ApplicationManagerImpl::instance()->
                            application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -64,6 +65,7 @@ void AddCommandRequest::Run() {
 
   if (app->
       FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt())) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
     SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
     return;
   }
@@ -78,8 +80,14 @@ void AddCommandRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
+    if (NULL == p_smrt_ui) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+      return;
+    }
+
     // TODO(DK): HMI Request Id
-    const int ui_cmd_id = 1;
+    const int ui_cmd_id = hmi_apis::FunctionID::UI_AddCommand;
     (*p_smrt_ui)[strings::params][strings::function_id] =
       ui_cmd_id;
 
@@ -105,8 +113,14 @@ void AddCommandRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
     smart_objects::CSmartObject* p_smrt_vr  = new smart_objects::CSmartObject();
 
+    if (NULL == p_smrt_vr) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+      return;
+    }
+
     // TODO(DK): HMI Request Id
-    const int vr_cmd_id = 2;
+    const int vr_cmd_id = hmi_apis::FunctionID::VR_AddCommand;
     (*p_smrt_vr)[strings::params][strings::function_id] =
       vr_cmd_id;
 

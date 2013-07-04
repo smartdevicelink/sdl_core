@@ -30,21 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/vr_add_command_request.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_type_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VRAddCommandRequest::VRAddCommandRequest(
+VIGetVehicleTypeRequest::VIGetVehicleTypeRequest(
   const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-VRAddCommandRequest::~VRAddCommandRequest() {
+VIGetVehicleTypeRequest::~VIGetVehicleTypeRequest() {
 }
 
-void VRAddCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "VRAddCommandRequest::Run");
+void VIGetVehicleTypeRequest::Run() {
+  LOG4CXX_INFO(logger_, "VIGetVehicleTypeRequest::Run");
   SendRequest();
 }
 

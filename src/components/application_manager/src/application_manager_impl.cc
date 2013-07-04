@@ -60,12 +60,14 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_all_apps_allowed_(true),
     ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
     vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
-    tts_language_(hmi_apis::Common_Language::INVALID_ENUM) {
+    tts_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    vehicle_type_(NULL) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
   delete perform_audio_thread_;
+  delete vehicle_type_;
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -309,6 +311,16 @@ void ApplicationManagerImpl::set_active_tts_language(
 
 void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
   is_all_apps_allowed_ = allowed;
+}
+
+void ApplicationManagerImpl::set_vehicle_type(
+  const smart_objects::CSmartObject& vehicle_type) {
+  if (vehicle_type_) {
+      delete vehicle_type_;
+  }
+
+  vehicle_type_ =
+      new smart_objects::CSmartObject(vehicle_type);
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,

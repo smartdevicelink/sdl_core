@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/set_display_layout_request.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -46,6 +45,7 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 }
 
 void SetDisplayLayoutRequest::Run() {
+  LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
   SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::UNSUPPORTED_REQUEST);
 }
 

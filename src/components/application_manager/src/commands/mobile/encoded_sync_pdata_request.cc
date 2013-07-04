@@ -32,9 +32,9 @@
  */
 
 #include "application_manager/commands/mobile/encoded_sync_pdata_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/file_system.h"
 #include "encryption/Base64.h"
 
@@ -56,27 +56,18 @@ EncodedSyncPDataRequest::~EncodedSyncPDataRequest() {
 }
 
 void EncodedSyncPDataRequest::Run() {
+  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
+
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
         (application_manager::ApplicationManagerImpl::instance()->
         application((*message_)[strings::msg_params][strings::app_id]));
 
     if (NULL == application_impl) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
       SendResponse(false, NsSmartDeviceLinkRPC::V2::
                    Result::APPLICATION_NOT_REGISTERED);
       return;
     }
-
-    const int correlationId =
-      (*message_)[strings::params][strings::correlation_id];
-    const int connectionKey =
-      (*message_)[strings::params][strings::connection_key];
-
-    const unsigned int cmd_id = 104;
-      ApplicationManagerImpl::instance()->AddMessageChain(
-        new MessageChaining(connectionKey, correlationId),
-        connectionKey, correlationId, cmd_id);
-
-    ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 
     uint64_t free_space = file_system::AvailableSpace();
 

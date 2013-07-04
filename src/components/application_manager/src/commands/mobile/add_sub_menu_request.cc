@@ -35,7 +35,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -48,26 +47,29 @@ AddSubMenuRequest::~AddSubMenuRequest() {
 }
 
 void AddSubMenuRequest::Run() {
+  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
+
   ApplicationImpl* application =
       static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (!application) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-
   if (application->FindSubMenu(
       (*message_)[strings::msg_params][strings::menu_id].asInt())) {
+    LOG4CXX_ERROR(logger_, "INVALID_ID");
     SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
-
     return;
   }
 
   if (application->IsSubMenuNameAlreadyExist(
       (*message_)[strings::msg_params][strings::menu_name].asString())) {
+    LOG4CXX_ERROR(logger_, "DUPLICATE_NAME");
     SendResponse(false,
                  NsSmartDeviceLinkRPC::V2::Result::DUPLICATE_NAME);
     return;

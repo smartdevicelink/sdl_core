@@ -47,53 +47,40 @@ VRAddCommandResponse::~VRAddCommandResponse() {
 }
 
 void VRAddCommandResponse::Run() {
-  LOG4CXX_INFO(logger_, "VRAddCommandResponse::Run ");
+  LOG4CXX_INFO(logger_, "VRAddCommandResponse::Run");
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
 
-    MessageChaining* msg_chain =
-      ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain =
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
-    if (NULL == msg_chain) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
+  if (NULL == msg_chain) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
 
-    smart_objects::CSmartObject data =
-      msg_chain->data();
+  smart_objects::CSmartObject data =
+    msg_chain->data();
 
-    /* store received response code for to check it
-     * in corresponding Mobile response
-     */
-    const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
-        (*message_)[strings::msg_params][hmi_response::code].asInt());
+  /* store received response code for to check it
+   * in corresponding Mobile response
+   */
+  const NsSmartDeviceLinkRPC::V2::Result::eType code =
+    static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+      (*message_)[strings::msg_params][hmi_response::code].asInt());
 
-    msg_chain->set_vr_response_result(code);
+  msg_chain->set_vr_response_result(code);
 
-    int app_id = (*message_)[strings::params][strings::connection_key];
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                             ApplicationManagerImpl::instance()->
-                             application(app_id));
+  if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS != code) {
+    data[strings::msg_params].erase(strings::vr_commands);
+  }
 
-    if (NULL == app) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
+  // prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+    NsSmartDeviceLinkRPC::V2::FunctionID::AddCommandID;
 
-    if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS != code) {
-      data[strings::msg_params].erase(strings::vr_commands);
-    }
-
-    app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),
-                    data[strings::msg_params]);
-
-    // prepare SmartObject for mobile factory
-    (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::AddCommandID;
-
-    SendResponseToMobile(message_);
+  SendResponseToMobile(message_);
 }
 
 }  // namespace commands

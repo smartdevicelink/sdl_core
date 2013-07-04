@@ -30,25 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/vr_add_command_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_TYPE_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_TYPE_REQUEST_H_
+
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VRAddCommandRequest::VRAddCommandRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+/**
+ * @brief VIGetVehicleTypeRequest command class
+ **/
+class VIGetVehicleTypeRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief VIGetVehicleTypeRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VIGetVehicleTypeRequest(const MessageSharedPtr& message);
 
-VRAddCommandRequest::~VRAddCommandRequest() {
-}
+  /**
+   * @brief VIGetVehicleTypeRequest class destructor
+   **/
+  virtual ~VIGetVehicleTypeRequest();
 
-void VRAddCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "VRAddCommandRequest::Run");
-  SendRequest();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VIGetVehicleTypeRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_TYPE_REQUEST_H_

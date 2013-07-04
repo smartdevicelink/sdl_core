@@ -49,7 +49,7 @@ SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
 }
 
 void SetGlobalPropertiesRequest::Run() {
-  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run ");
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
@@ -78,6 +78,12 @@ void SetGlobalPropertiesRequest::Run() {
     (*message_)[strings::params][strings::connection_key];
 
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
+  if (NULL == p_smrt_ui) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false,
+                 NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    return;
+  }
 
   // check TTS params
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&

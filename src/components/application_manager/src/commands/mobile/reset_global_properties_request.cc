@@ -49,7 +49,7 @@ ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
 }
 
 void ResetGlobalPropertiesRequest::Run() {
-  LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run ");
+  LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(

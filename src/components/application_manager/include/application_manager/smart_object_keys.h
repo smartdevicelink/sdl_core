@@ -193,6 +193,7 @@ namespace hmi_response {
   const char button_capabilities[] = "buttonCapabilities";
   const char preset_bank_capabilities[] = "presetBankCapabilities";
   const char allowed[] = "allowed";
+  const char vehicle_type[] = "vehicleType";
 
 }  // namespace hmi_response
 

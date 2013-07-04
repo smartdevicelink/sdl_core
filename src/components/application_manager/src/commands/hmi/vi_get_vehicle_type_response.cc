@@ -29,26 +29,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/vr_add_command_request.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_type_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VRAddCommandRequest::VRAddCommandRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+VIGetVehicleTypeResponse::VIGetVehicleTypeResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-VRAddCommandRequest::~VRAddCommandRequest() {
+VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {
 }
 
-void VRAddCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "VRAddCommandRequest::Run");
-  SendRequest();
+void VIGetVehicleTypeResponse::Run() {
+  LOG4CXX_INFO(logger_, "VIGetVehicleTypeResponse::Run");
+
+  ApplicationManagerImpl::instance()->set_vehicle_type(
+      (*message_)[strings::msg_params][hmi_response::vehicle_type]);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-
