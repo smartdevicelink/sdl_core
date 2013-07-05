@@ -42,6 +42,7 @@ RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),
       serial_number_(0),
+      waiting_(false),
       data_size_(data_size) {
   if (data_size > 0) {
     data_ = new unsigned char[data_size];
@@ -57,6 +58,7 @@ RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),
       serial_number_(serialNumber),
+      waiting_(false),
       data_size_(data_size) {
   if (data_size > 0) {
     data_ = new unsigned char[data_size];
@@ -96,5 +98,14 @@ unsigned int RawMessage::serial_number() const {
 bool RawMessage::operator ==(RawMessage &other) const {
   return (serial_number_ == other.serial_number_);
 }
+
+bool RawMessage::isWaiting() const{
+  return waiting_;
+}
+
+void RawMessage::set_waiting(bool v){
+  waiting_ = v;
+}
+
 
 }  // namespace protocol_handler

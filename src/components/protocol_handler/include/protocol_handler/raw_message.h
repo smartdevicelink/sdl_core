@@ -95,6 +95,10 @@ class RawMessage {
    */
   unsigned int serial_number() const;
 
+  bool isWaiting() const;
+
+  void set_waiting(bool v) ;
+
  private:
   /**
    * \brief Connection Identifier
@@ -122,6 +126,13 @@ class RawMessage {
    *
    */
   unsigned int serial_number_;
+
+  /**
+   * specifies current state of message in queue. if false message is "ready to be processed"
+   * otherwise it is "waiting for response"
+   *
+   */
+  bool waiting_;
 };
 }  // namespace protocol_handler
 

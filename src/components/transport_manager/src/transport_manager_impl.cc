@@ -126,7 +126,7 @@ TransportManagerImpl* TransportManagerImpl::instance() {
   if (false == instance.is_initialized_) {
     instance.init();
   }
-  LOG4CXX_INFO(logger_, "TM instance returned.");
+  LOG4CXX_INFO(logger_, "TM instance returned " << &instance);
   return &instance;
 }
 
@@ -153,7 +153,7 @@ void TransportManagerImpl::connectDevice(const DeviceHandle &device_id,
     //error case
     return;
   }
-    LOG4CXX_INFO(logger_, "Connect complete");
+  LOG4CXX_INFO(logger_, "Connect complete");
 }
 
 void TransportManagerImpl::disconnectDevice(const SessionID &session_id) {
@@ -178,7 +178,9 @@ void TransportManagerImpl::registerAdapterListener(
 }
 
 void TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {
-  LOG4CXX_INFO(logger_, "Send message to device called with arguments msg serial number" << message->serial_number());
+  LOG4CXX_INFO(
+      logger_,
+      "Send message to device called with arguments serial number " << message->serial_number());
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
     //todo: log error
@@ -223,7 +225,7 @@ void TransportManagerImpl::searchDevices(void) {
       //todo: notify error
     }
   }
-    LOG4CXX_INFO(logger_, "Search complete");
+  LOG4CXX_INFO(logger_, "Search complete");
 }
 
 void TransportManagerImpl::init(void) {
@@ -231,9 +233,12 @@ void TransportManagerImpl::init(void) {
   int error_code = pthread_create(&messsage_queue_thread_, 0,
                                   &messageQueueStartThread, this);
 
+  all_thread_active_ = true;
   if (0 == error_code) {
   } else {
-    LOG4CXX_ERROR(logger_, "Message queue thread is not created exit with error code " << error_code);
+    LOG4CXX_ERROR(
+        logger_,
+        "Message queue thread is not created exit with error code " << error_code);
     return;
   }
 
@@ -242,59 +247,47 @@ void TransportManagerImpl::init(void) {
 
   if (0 == error_code) {
   } else {
-    LOG4CXX_ERROR(logger_, "Event queue thread is not created exit with error code " << error_code);
+    LOG4CXX_ERROR(
+        logger_,
+        "Event queue thread is not created exit with error code " << error_code);
     return;
   }
-  all_thread_active_ = true;
   is_initialized_ = true;
   LOG4CXX_INFO(logger_, "Init complete");
 }
 
 void TransportManagerImpl::postMessage(const RawMessageSptr message) {
   //todo: check data copying
-  LOG4CXX_INFO(logger_, "Post message called serial number " << message->serial_number());
+  LOG4CXX_INFO(logger_,
+               "Post message called serial number " << message->serial_number());
   pthread_mutex_lock(&message_queue_mutex_);
+  //todo: check that same message is not posted again
   message_queue_.push_back(message);
   pthread_mutex_unlock(&message_queue_mutex_);
   LOG4CXX_INFO(logger_, "Post message complete");
 }
 
-void TransportManagerImpl::updateMessage(const RawMessageSptr message) {
+/* not clear when this function shall be used
+void TransportManagerImpl::updateMessage(const RawMessageSptr old_message, const RawMessageSptr new_message) {
   pthread_mutex_lock(&message_queue_mutex_);
-  //todo: define and implement
   pthread_mutex_unlock(&message_queue_mutex_);
 
 }
+*/
 
 void TransportManagerImpl::removeMessage(const RawMessageSptr message) {
   LOG4CXX_INFO(logger_, "Remove message called " << message->serial_number());
   pthread_mutex_lock(&message_queue_mutex_);
-  for (MessageQueue::iterator it = message_queue_.begin();
-      it != message_queue_.begin(); ++it) {
-
-    LOG4CXX_INFO(logger_, "Iterating message queue serial number " << (*it)->serial_number());
-    RawMessageSptr tmp = (*it);
-    if (tmp == message) {
-      LOG4CXX_INFO(logger_, "Here shall be remove of selected message ");
-      //todo: add correct removing
-    }
-  }
+  std::remove(message_queue_.begin(), message_queue_.end(), message);
   pthread_mutex_unlock(&message_queue_mutex_);
-    LOG4CXX_INFO(logger_, "Remove message from queue complete");
+  LOG4CXX_INFO(logger_, "Remove message from queue complete");
 }
 
 void TransportManagerImpl::removeEvent(
     const DeviceAdapterListenerImpl::DeviceAdapterEvent &event) {
   LOG4CXX_INFO(logger_, "Remove event from queue called");
   pthread_mutex_lock(&event_queue_mutex_);
-  for (EventQueue::iterator it = event_queue_.begin();
-      it != event_queue_.begin(); ++it) {
-    LOG4CXX_INFO(logger_, "Iterating event queue session id" << (*it).session_id());
-    if ((*it) == event) {
-      //todo: add correct removing
-      LOG4CXX_INFO(logger_, "Here shall be remove of selected event");
-    }
-  }
+  std::remove(event_queue_.begin(), event_queue_.end(), event);
   pthread_mutex_unlock(&event_queue_mutex_);
   LOG4CXX_INFO(logger_, "Remove event from queue complete");
 }
@@ -336,7 +329,7 @@ void TransportManagerImpl::eventListenerThread(void) {
     pthread_mutex_lock(&event_queue_mutex_);
     pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
 
-    for (std::vector<DeviceAdapterListenerImpl::DeviceAdapterEvent>::iterator it =
+    for (EventQueue::iterator it =
         event_queue_.begin(); it != event_queue_.end(); ++it) {
 
       //todo: check that data is copied correctly here
@@ -346,10 +339,13 @@ void TransportManagerImpl::eventListenerThread(void) {
       DeviceList dev_list;
       RawMessageSptr data;
       DataReceiveError *d_err;
-      LOG4CXX_INFO(logger_, "Iterating over event queue items session id" << sid << "type " << (*it).event_type());
+      LOG4CXX_INFO(
+          logger_,
+          "Iterating over event queue items session id" << sid << "type " << (*it).event_type());
       switch ((*it).event_type()) {
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE:
-          LOG4CXX_INFO(logger_, "Get device list for adapter " << da);
+          LOG4CXX_INFO(logger_, "Get device list for adapter " << da)
+          ;
           dev_list = da->getDeviceList();
           for (DeviceList::iterator item = dev_list.begin();
               item != dev_list.end(); ++item) {
@@ -384,6 +380,9 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL:
           //todo: start timer here to wait before notify caller and remove unsent messages
+          LOG4CXX_ERROR(logger_, "Device adapter failed to send data");
+          //todo: potential error case -> thread unsafe update of message content
+          data->set_waiting(true);//mark message for re-send
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE:
           data = (*it).data();
@@ -396,7 +395,8 @@ void TransportManagerImpl::eventListenerThread(void) {
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR:
           break;
       }
-      this->removeEvent((*it));
+      //todo:
+      event_queue_.remove((*it));
     }  //for
     pthread_mutex_unlock(&event_queue_mutex_);
 
@@ -422,25 +422,37 @@ void TransportManagerImpl::messageQueueThread(void) {
     u_int serial_number = std::numeric_limits<unsigned int>::max();
     RawMessageSptr active_msg;
     pthread_mutex_lock(&message_queue_mutex_);
-    for (std::vector<RawMessageSptr>::iterator it = message_queue_.begin();
+    for (MessageQueue::iterator it = message_queue_.begin();
         it != message_queue_.end(); ++it) {
-      LOG4CXX_INFO(logger_, "Iterating over message queue " << (*it)->serial_number());
+      LOG4CXX_INFO(logger_,
+                   "Iterating over message queue " << (*it)->serial_number());
       if ((*it)->serial_number() < serial_number) {
-        LOG4CXX_INFO(logger_, "Found message with min serial number" );
+        LOG4CXX_INFO(logger_, "Found message with min serial number");
         active_msg = (*it);
         serial_number = (*it)->serial_number();
       }
     }
-    if (active_msg.valid()) {
+    if (active_msg.valid() && false == active_msg->isWaiting()) {
       DeviceAdapter *device_adapter = adapter_handler_.getAdapterBySession(
           active_msg->connection_key());
-          LOG4CXX_INFO(logger_, "Got adapter " << device_adapter << " by session id " << active_msg->connection_key());
+      LOG4CXX_INFO(
+          logger_,
+          "Got adapter " << device_adapter << " by session id " << active_msg->connection_key());
 
       if (NULL == device_adapter) {
         //probably error no device adapters found
+        //todo: define shall we remove message or send it back to upper level
+        message_queue_.remove(active_msg);
+          LOG4CXX_ERROR(logger_, "Device adapter is not found remove message");
       } else {
-        device_adapter->sendData(active_msg->connection_key(), active_msg);
-        LOG4CXX_INFO(logger_, "Data sent to adapter");
+        if (DeviceAdapter::Error::OK
+            == device_adapter->sendData(active_msg->connection_key(),
+                                        active_msg)) {
+          LOG4CXX_INFO(logger_, "Data sent to adapter");
+          active_msg->set_waiting(true);
+        } else {
+          LOG4CXX_ERROR(logger_, "Data sent error");
+        }
       }
     }
     pthread_mutex_unlock(&message_queue_mutex_);
@@ -460,10 +472,10 @@ DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterBySession(
   std::map<SessionID, DeviceAdapter *>::iterator da = session_to_adapter_map_
       .find(session_id);
   if (da != session_to_adapter_map_.begin()) {
-    LOG4CXX_INFO(logger_, "Device adapter found" );
+    LOG4CXX_INFO(logger_, "Device adapter found");
     return (*da).second;
   }
-  LOG4CXX_INFO(logger_, "Device adapter was not found" );
+  LOG4CXX_INFO(logger_, "Device adapter was not found");
   return NULL;
 }
 
@@ -506,7 +518,8 @@ TransportManagerImpl::AdapterHandler::AdapterList TransportManagerImpl::AdapterH
 }
 void TransportManagerImpl::AdapterHandler::addSession(DeviceAdapter *da,
                                                       SessionID sid) {
-  LOG4CXX_INFO(logger_, "Add session called with sid " << sid << " adapter " << da);
+  LOG4CXX_INFO(logger_,
+               "Add session called with sid " << sid << " adapter " << da);
   AdapterList::iterator item = std::find(device_adapters_.begin(),
                                          device_adapters_.end(), da);
   if (item == device_adapters_.end()) {
@@ -520,7 +533,8 @@ void TransportManagerImpl::AdapterHandler::addSession(DeviceAdapter *da,
 
 void TransportManagerImpl::AdapterHandler::removeSession(DeviceAdapter *da,
                                                          SessionID sid) {
-  LOG4CXX_INFO(logger_, "Remove session called with sid " << sid << " adapter " << da);
+  LOG4CXX_INFO(logger_,
+               "Remove session called with sid " << sid << " adapter " << da);
   session_to_adapter_map_.erase(sid);
 }
 
