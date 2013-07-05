@@ -59,10 +59,6 @@ Device::Device(const char* name)
 Device::~Device(void) {
 }
 
-bool Device::isSameAs(const Device* other_device) const {
-  return true;
-}
-
 Connection::Connection(const DeviceHandle device_handle,
                        const ApplicationHandle app_handle, const int session_id)
     : device_handle_(device_handle),
@@ -219,7 +215,8 @@ Error DeviceAdapterImpl::sendData(const int session_id,
 DeviceList DeviceAdapterImpl::getDeviceList() const {
   DeviceList devices;
   pthread_mutex_lock(&devices_mutex_);
-  for(DeviceMap::const_iterator it = devices_.begin(); it != devices_.end(); ++it) {
+  for (DeviceMap::const_iterator it = devices_.begin(); it != devices_.end();
+      ++it) {
     devices.push_back(it->first);
   }
   pthread_mutex_unlock(&devices_mutex_);
@@ -235,7 +232,7 @@ DeviceHandleGenerator* DeviceAdapterImpl::getDeviceHandleGenerator() {
 }
 
 DeviceHandle DeviceAdapterImpl::addDevice(DeviceSptr device) {
-  DeviceHandle handle
+  DeviceHandle handle;
 
   bool same_device_found = false;
   pthread_mutex_lock(&devices_mutex_);
@@ -255,20 +252,74 @@ DeviceHandle DeviceAdapterImpl::addDevice(DeviceSptr device) {
   return handle;
 }
 
-std::vector<DeviceHandle> DeviceAdapterImpl::addDevices(
-    const std::vector<Device>&) {
+void DeviceAdapterImpl::setDevices(const DeviceVector& devices) {
+  DeviceMap new_devices;
+  for (DeviceVector::iterator it = devices.begin(); it != devices.end(); ++it) {
+    DeviceSptr device = *it;
+    DeviceHandle device_handle;
+    bool device_found = false;
+
+    pthread_mutex_lock(&devices_mutex_);
+    for (DeviceMap::iterator it = devices_.begin(); it != devices_.end();
+        ++it) {
+      Device* existing_device = it->second;
+      if (device->isSameAs(existing_device)) {
+        device_handle = it->first;
+        device_found = true;
+        break;
+      }
+    }
+    pthread_mutex_unlock(&devices_mutex_);
+
+    if (!device_found) {
+      device_handle = handle_generator_->generate();
+      LOG4CXX_INFO(
+          logger_,
+          "Adding new device " << device_handle << " (\"" << device->name() << "\")");
+    }
+
+    new_devices[device_handle] = device;
+  }
+
+  pthread_mutex_lock(&connections_mutex_);
+  std::set<DeviceHandle> connected_devices;
+  for (ConnectionMap::const_iterator it = connections_.begin();
+      it != connections_.end(); ++it) {
+    const Connection* connection = it->second;
+    connected_devices.insert(connection->device_handle());
+  }
+  pthread_mutex_unlock(&connections_mutex_);
+
+  pthread_mutex_lock(&devices_mutex_);
+  for (DeviceMap::iterator it = devices_.begin(); it != devices_.end(); ++it) {
+    DeviceSptr existing_device = it->second;
+
+    if (new_devices.end() == new_devices.find(it->first)) {
+      if (connected_devices.end() != connected_devices.find(it->first)) {
+        new_devices[it->first] = existing_device;
+      }
+    }
+  }
+  devices_ = new_devices;
+  pthread_mutex_unlock(&devices_mutex_);
 }
 
-bool DeviceAdapterImpl::isDeviceExist(Device*) {
+void DeviceAdapterImpl::addConnection(ConnectionSptr connection) {
+  pthread_mutex_lock(&connections_mutex_);
+  connections_[connection->session_id()] = connection;
+  pthread_mutex_unlock(&connections_mutex_);
+  if (data_transmitter_ != 0) {
+    data_transmitter_->registerConnection(connection);
+  }
 }
 
-Device* DeviceAdapterImpl::findDevice(DeviceHandle int1) {
-}
-
-void DeviceAdapterImpl::addConnection(ConnectionSptr) {
-}
-
-void DeviceAdapterImpl::removeConnection(ConnectionSptr) {
+void DeviceAdapterImpl::removeConnection(ConnectionSptr connection) {
+  pthread_mutex_lock(&connections_mutex_);
+  connections_.erase(connection->session_id());
+  pthread_mutex_unlock(&connections_mutex_);
+  if (data_transmitter_ != 0) {
+    data_transmitter_->unregisterConnection(connection);
+  }
 }
 
 void DeviceAdapterImpl::setDeviceScanner(DeviceScannerSptr device_scanner) {
@@ -302,6 +353,18 @@ void DeviceAdapterImpl::setDisconnector(DisconnectorSptr disconnector) {
   functionals_.erase(disconnector);
   disconnector_ = disconnector;
   functionals_.insert(disconnector_);
+}
+
+bool DeviceAdapterImpl::isSearchDevicesSupported() const {
+  return device_scanner_ != 0;
+}
+
+bool DeviceAdapterImpl::isServerOriginatedConnectSupported() const {
+  return server_connection_processor_ != 0;
+}
+
+bool DeviceAdapterImpl::isClientOriginatedConnectSupported() const {
+  return client_connection_listener_ != 0;
 }
 
 ConnectionSptr DeviceAdapterImpl::findConnection(const SessionID session_id) {

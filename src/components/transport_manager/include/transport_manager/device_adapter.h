@@ -52,6 +52,8 @@ typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
 typedef std::vector<DeviceHandle> DeviceList;
 
+namespace device_adapter {
+
 enum Error {
   OK, FAIL, NOT_SUPPORTED, ALREADY_EXIST, BAD_STATE, BAD_PARAM
 };
@@ -113,13 +115,10 @@ class DataSendError: public DeviceAdapterError {
 
 class CommunicationError: public DeviceAdapterError {
 };
-/*
- class DataContainer
- {
- public:
- DataContainer(void* data, int data_size);
- };
- */
+
+
+} // namespace device_adapter
+
 } // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER

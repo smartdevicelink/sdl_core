@@ -45,10 +45,10 @@
 
 namespace transport_manager {
 
-namespace device_adapter {
-
 class DeviceAdapterListener;
 class DeviceHandleGenerator;
+
+namespace device_adapter {
 
 /**
  * @brief Internal class describing device.
@@ -77,7 +77,7 @@ class Device {
    *
    * @return true if devices are equal, false otherwise.
    **/
-  virtual bool isSameAs(const Device* other_device) const;
+  virtual bool isSameAs(const Device* other_device) const = 0;
 
   const std::string& unique_device_id() const {
     return unique_device_id_;
@@ -183,11 +183,11 @@ class DeviceAdapterFunctional {
   }
 };
 
-typedef utils::SharedPtr<DeviceAdapterFunctional> DeviceAdapterFunctionalSptr
+typedef utils::SharedPtr<DeviceAdapterFunctional> DeviceAdapterFunctionalSptr;
 
 class DeviceScanner : virtual public DeviceAdapterFunctional {
  public:
-  virtual void scan() = 0;
+  virtual Error scan() = 0;
   virtual ~DeviceScanner() {
   }
 };
@@ -216,7 +216,6 @@ typedef utils::SharedPtr<ServerConnectionProcessor> ServerConnectionProcessorSpt
 
 class ClientConnectionListener : virtual public DeviceAdapterFunctional {
  public:
-  virtual void createConnection(DeviceHandle, ApplicationHandle, SessionID) = 0;
   virtual ~ClientConnectionListener() {
   }
 };
@@ -232,28 +231,30 @@ class Disconnector : virtual public DeviceAdapterFunctional {
 
 typedef utils::SharedPtr<Disconnector> DisconnectorSptr;
 
-class DeviceAdapterInternals {
+typedef std::vector<DeviceSptr> DeviceVector;
+
+class DeviceAdapterController {
  public:
-  virtual ~DeviceAdapterInternals() {
+  virtual ~DeviceAdapterController() {
   }
 
   virtual DeviceAdapterListener* getListener() = 0;
   virtual DeviceHandleGenerator* getDeviceHandleGenerator() = 0;
 
-  virtual DeviceHandle addDevice(Device*) = 0;
-  virtual std::vector<DeviceHandle> addDevices(const std::vector<Device>&) = 0;
-  virtual bool isDeviceExist(Device*) = 0;
-  virtual Device* findDevice(DeviceHandle) = 0;
+  virtual DeviceHandle addDevice(Device* device) = 0;
+  virtual void setDevices(const DeviceVector&devices) = 0;
+  virtual bool isDeviceExist(Device* device) = 0;
+  virtual Device* findDevice(DeviceHandle device_handle) = 0;
 
-  virtual void addConnection(Connection*) = 0;
-  virtual void removeConnection(Connection*) = 0;
+  virtual void addConnection(Connection* connection) = 0;
+  virtual void removeConnection(Connection* connection) = 0;
 };
 
 /*
  * @brief Base class for @link components_transportmanager_internal_design_device_adapters device adapters @endlink.
  **/
-class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
- public:
+class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
+ protected:
   /**
    * @brief Constructor.
    *
@@ -326,56 +327,27 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterInternals {
    **/
   virtual Error sendData(const SessionID session_id, const RawMessageSptr data);
 
- protected:
-
-  void setDeviceScanner(DeviceScannerSptr device_scanner);
-  void setDataTransmitter(DataTransmitterSptr data_transmitter);
-  void setServerConnectionProcessor(ServerConnectionProcessorSptr server_connection_processor);
-  void setClientConnectionListener(ClientConnectionListenerSptr client_connection_listener);
-  void setDisconnector(DisconnectorSptr disconnector);
-
-  /**
-   * @brief Delete connection.
-   *
-   * Destroy connection object and remove it from map.
-   *
-   * @param connection Connection to delete.
-   **/
-  void deleteConnection(ConnectionSptr connection);
-
-  /**
-   * @brief Start connection.
-   *
-   * Start connection thread.
-   *
-   * @param connection Connection to start.
-   *
-   * @return true if connection thread has been started, false otherwise.
-   **/
-  Error startConnection(ConnectionSptr connection);
-
-  /**
-   * @brief Stop connection.
-   *
-   * This method only initiates connection termination. It returns immediately
-   * without waiting for actual termination of the connection.
-   *
-   * @param connection Connection to stop.
-   **/
-  Error stopConnection(ConnectionSptr connection);
+  virtual bool isSearchDevicesSupported() const;
+  virtual bool isServerOriginatedConnectSupported() const;
+  virtual bool isClientOriginatedConnectSupported() const;
 
   virtual DeviceList getDeviceList() const;
 
   virtual DeviceAdapterListener* getListener();
   virtual DeviceHandleGenerator* getDeviceHandleGenerator();
 
-  virtual DeviceHandle addDevice(DeviceSptr device);
-  virtual std::vector<DeviceHandle> addDevices(const std::vector<Device>& devices);
-  virtual bool isDeviceExist(Device* device);
-  virtual Device* findDevice(DeviceHandle device_handle);
+  virtual void setDevices(const DeviceVector&devices);
+  virtual void addDevice(DeviceSptr device);
+  virtual void removeDevice(DeviceSptr device);
 
   virtual void addConnection(ConnectionSptr connection);
   virtual void removeConnection(ConnectionSptr connection);
+
+  void setDeviceScanner(DeviceScannerSptr device_scanner);
+  void setDataTransmitter(DataTransmitterSptr data_transmitter);
+  void setServerConnectionProcessor(ServerConnectionProcessorSptr server_connection_processor);
+  void setClientConnectionListener(ClientConnectionListenerSptr client_connection_listener);
+  void setDisconnector(DisconnectorSptr disconnector);
 
   /**
    * @brief Logger.

@@ -41,6 +41,8 @@
 
 namespace transport_manager {
 
+namespace device_adapter {
+
 class DeviceAdapterListener {
 public:
 	class DeviceAdapterEvent {
@@ -109,5 +111,8 @@ public:
   virtual void onCommunicationError(const DeviceAdapter* device_adapter,
                                     const SessionID session_id) = 0;
 };
+
+} // namespace
+
 } //namespace
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER
