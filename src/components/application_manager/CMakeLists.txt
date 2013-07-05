@@ -233,10 +233,12 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_get_dtcs_response.cc
 ./src/commands/hmi/vi_get_vehicle_type_request.cc
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
-./src/commands/hmi/navi_alert_maneuver_request.cc
-./src/commands/hmi/navi_alert_maneuver_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
+./src/commands/hmi/navi_alert_maneuver_request.cc
+./src/commands/hmi/navi_alert_maneuver_response.cc
+./src/commands/hmi/navi_update_turn_list_request.cc
+./src/commands/hmi/navi_update_turn_list_response.cc
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc

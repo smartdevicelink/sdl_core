@@ -46,12 +46,20 @@
 #include "application_manager/commands/hmi/allow_app_response.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_request.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
+#include "application_manager/commands/hmi/activate_app_request.h"
+#include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/exit_all_applications_request.h"
 #include "application_manager/commands/hmi/exit_all_applications_response.h"
 #include "application_manager/commands/hmi/exit_application_request.h"
 #include "application_manager/commands/hmi/exit_application_response.h"
 #include "application_manager/commands/hmi/start_device_discovery_request.h"
 #include "application_manager/commands/hmi/start_device_discovery_response.h"
+#include "application_manager/commands/hmi/close_popup_request.h"
+#include "application_manager/commands/hmi/close_popup_response.h"
+#include "application_manager/commands/hmi/exit_application_request.h"
+#include "application_manager/commands/hmi/exit_application_response.h"
+#include "application_manager/commands/hmi/button_get_capabilities_request.h"
+#include "application_manager/commands/hmi/button_get_capabilities_response.h"
 #include "application_manager/commands/hmi/ui_add_command_request.h"
 #include "application_manager/commands/hmi/ui_add_command_response.h"
 #include "application_manager/commands/hmi/ui_delete_command_request.h"
@@ -134,8 +142,8 @@
 #include "application_manager/commands/hmi/navi_is_ready_response.h"
 #include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
 #include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
-#include "application_manager/commands/hmi/activate_app_request.h"
-#include "application_manager/commands/hmi/activate_app_response.h"
+#include "application_manager/commands/hmi/navi_update_turn_list_request.h"
+#include "application_manager/commands/hmi/navi_update_turn_list_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
@@ -153,12 +161,6 @@
 #include "application_manager/commands/hmi/on_vr_language_change_notification.h"
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
-#include "application_manager/commands/hmi/close_popup_request.h"
-#include "application_manager/commands/hmi/close_popup_response.h"
-#include "application_manager/commands/hmi/exit_application_request.h"
-#include "application_manager/commands/hmi/exit_application_response.h"
-#include "application_manager/commands/hmi/button_get_capabilities_request.h"
-#include "application_manager/commands/hmi/button_get_capabilities_response.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
 #include "application_manager/commands/hmi/on_show_notification.h"
@@ -628,6 +630,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::NaviAlertManeuverResponse(message));
       } else {
         command.reset(new commands::NaviAlertManeuverRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_UpdateTurnList: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::NaviUpdateTurnListResponse(message));
+      } else {
+        command.reset(new commands::NaviUpdateTurnListRequest(message));
       }
       break;
     }
