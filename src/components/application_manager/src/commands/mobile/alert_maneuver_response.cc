@@ -47,12 +47,15 @@ AlertManeuverResponse::~AlertManeuverResponse() {
 }
 
 void AlertManeuverResponse::Run() {
+  LOG4CXX_INFO(logger_, "AlertManeuverResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
     return;
   }
 
-  const int correlation_id = 207;
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       correlation_id)) {

@@ -114,6 +114,8 @@
 #include "application_manager/commands/hmi/tts_speak_response.h"
 #include "application_manager/commands/hmi/tts_set_global_properties_request.h"
 #include "application_manager/commands/hmi/tts_set_global_properties_response.h"
+#include "application_manager/commands/hmi/vi_is_ready_request.h"
+#include "application_manager/commands/hmi/vi_is_ready_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
@@ -122,6 +124,10 @@
 #include "application_manager/commands/hmi/vi_get_dtcs_response.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_type_request.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_type_response.h"
+#include "application_manager/commands/hmi/navi_is_ready_request.h"
+#include "application_manager/commands/hmi/navi_is_ready_response.h"
+#include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
+#include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
 #include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
@@ -149,10 +155,6 @@
 #include "application_manager/commands/hmi/button_get_capabilities_response.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
-#include "application_manager/commands/hmi/navigation_is_ready_request.h"
-#include "application_manager/commands/hmi/navigation_is_ready_response.h"
-#include "application_manager/commands/hmi/vehicle_info_is_ready_request.h"
-#include "application_manager/commands/hmi/vehicle_info_is_ready_response.h"
 #include "application_manager/commands/hmi/on_show_notification.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 
@@ -536,9 +538,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case  hmi_apis::FunctionID::VehicleInfo_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
-        command.reset(new commands::VehicleInfoIsReadyResponse(message));
+        command.reset(new commands::VIIsReadyResponse(message));
       } else {
-        command.reset(new commands::VehicleInfoIsReadyRequest(message));
+        command.reset(new commands::VIIsReadyRequest(message));
       }
       break;
     }
@@ -581,9 +583,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case  hmi_apis::FunctionID::Navigation_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
-        command.reset(new commands::NavigationIsReadyResponse(message));
+        command.reset(new commands::NaviIsReadyResponse(message));
       } else {
-        command.reset(new commands::NavigationIsReadyRequest(message));
+        command.reset(new commands::NaviIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_AlertManeuver: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::NaviAlertManeuverResponse(message));
+      } else {
+        command.reset(new commands::NaviAlertManeuverRequest(message));
       }
       break;
     }

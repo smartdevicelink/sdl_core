@@ -30,31 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVIGATION_IS_READY_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVIGATION_IS_READY_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_ALERT_MANEUVER_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_ALERT_MANEUVER_REQUEST_H_
 
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief NavigationIsReadyResponse command class
+ * @brief NaviAlertManeuverRequest command class
  **/
-class NavigationIsReadyResponse : public ResponseFromHMI {
+class NaviAlertManeuverRequest : public RequestToHMI {
  public:
   /**
-   * @brief NavigationIsReadyResponse class constructor
+   * @brief NaviAlertManeuverRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NavigationIsReadyResponse(const MessageSharedPtr& message);
+  explicit NaviAlertManeuverRequest(const MessageSharedPtr& message);
 
   /**
-   * @brief NavigationIsReadyResponse class destructor
+   * @brief NaviAlertManeuverRequest class destructor
    **/
-  virtual ~NavigationIsReadyResponse();
+  virtual ~NaviAlertManeuverRequest();
 
   /**
    * @brief Execute command
@@ -62,11 +62,11 @@ class NavigationIsReadyResponse : public ResponseFromHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(NavigationIsReadyResponse);
+  DISALLOW_COPY_AND_ASSIGN(NaviAlertManeuverRequest);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVIGATION_IS_READY_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_ALERT_MANEUVER_REQUEST_H_

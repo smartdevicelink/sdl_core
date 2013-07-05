@@ -30,21 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/vehicle_info_is_ready_request.h"
+#include "application_manager/commands/hmi/navi_is_ready_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VehicleInfoIsReadyRequest::VehicleInfoIsReadyRequest(
+NaviIsReadyRequest::NaviIsReadyRequest(
   const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-VehicleInfoIsReadyRequest::~VehicleInfoIsReadyRequest() {
+NaviIsReadyRequest::~NaviIsReadyRequest() {
 }
 
-void VehicleInfoIsReadyRequest::Run() {
-  LOG4CXX_INFO(logger_, "VehicleInfoIsReadyRequest::Run ");
+void NaviIsReadyRequest::Run() {
+  LOG4CXX_INFO(logger_, "NaviIsReadyRequest::Run");
   SendRequest();
 }
 

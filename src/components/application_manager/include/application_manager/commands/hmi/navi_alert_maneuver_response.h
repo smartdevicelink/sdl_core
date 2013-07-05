@@ -30,25 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/navigation_is_ready_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_ALERT_MANEUVER_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_ALERT_MANEUVER_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NavigationIsReadyRequest::NavigationIsReadyRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+/**
+ * @brief NaviAlertManeuverResponse command class
+ **/
+class NaviAlertManeuverResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief NaviAlertManeuverResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit NaviAlertManeuverResponse(const MessageSharedPtr& message);
 
-NavigationIsReadyRequest::~NavigationIsReadyRequest() {
-}
+  /**
+   * @brief NaviAlertManeuverResponse class destructor
+   **/
+  virtual ~NaviAlertManeuverResponse();
 
-void NavigationIsReadyRequest::Run() {
-  LOG4CXX_INFO(logger_, "NavigationIsReadyRequest::Run ");
-  SendRequest();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NaviAlertManeuverResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_ALERT_MANEUVER_RESPONSE_H_

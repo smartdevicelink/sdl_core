@@ -29,24 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vehicle_info_is_ready_response.h"
+
+#include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VehicleInfoIsReadyResponse::VehicleInfoIsReadyResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+NaviAlertManeuverRequest::NaviAlertManeuverRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-VehicleInfoIsReadyResponse::~VehicleInfoIsReadyResponse() {
+NaviAlertManeuverRequest::~NaviAlertManeuverRequest() {
 }
 
-void VehicleInfoIsReadyResponse::Run() {
-  LOG4CXX_INFO(logger_, "VehicleInfonIsReadyResponse::Run ");
-  // TODO(VS): Process response from HMI(field "available") and do something with SDL
+void NaviAlertManeuverRequest::Run() {
+  LOG4CXX_INFO(logger_, "NaviAlertManeuverRequest::Run");
+  SendRequest();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -29,22 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/navigation_is_ready_response.h"
+#include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NavigationIsReadyResponse::NavigationIsReadyResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+NaviAlertManeuverResponse::NaviAlertManeuverResponse(
+    const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-NavigationIsReadyResponse::~NavigationIsReadyResponse() {
+NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {
 }
 
-void NavigationIsReadyResponse::Run() {
-  LOG4CXX_INFO(logger_, "NavigationIsReadyResponse::Run ");
-  // TODO(VS): Process response from HMI(field "available") and do something with SDL
+void NaviAlertManeuverResponse::Run() {
+  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run");
+
+  // prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+    NsSmartDeviceLinkRPC::V2::FunctionID::AlertManeuverID;
+
+  SendResponseToMobile(message_);
 }
 
 }  // namespace commands

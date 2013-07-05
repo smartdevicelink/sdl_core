@@ -35,6 +35,7 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -48,6 +49,8 @@ AlertManeuverRequest::~AlertManeuverRequest() {
 }
 
 void AlertManeuverRequest::Run() {
+  LOG4CXX_INFO(logger_, "AlertManeuverRequest::Run");
+
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
@@ -63,8 +66,7 @@ void AlertManeuverRequest::Run() {
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  // TODO(VS): HMI Request Id
-  const int hmi_request_id = 207;
+  const int hmi_request_id = hmi_apis::FunctionID::Navigation_AlertManeuver;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));

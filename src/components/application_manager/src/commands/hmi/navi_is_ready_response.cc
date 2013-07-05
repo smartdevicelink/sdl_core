@@ -29,44 +29,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VEHICLE_INFO_IS_READY_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VEHICLE_INFO_IS_READY_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/navi_is_ready_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief VehicleInfoIsReadyRequest command class
- **/
-class VehicleInfoIsReadyRequest : public RequestToHMI {
- public:
-  /**
-   * @brief VehicleInfoIsReadyRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit VehicleInfoIsReadyRequest(const MessageSharedPtr& message);
+NaviIsReadyResponse::NaviIsReadyResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
+}
 
-  /**
-   * @brief VehicleInfoIsReadyRequest class destructor
-   **/
-  virtual ~VehicleInfoIsReadyRequest();
+NaviIsReadyResponse::~NaviIsReadyResponse() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(VehicleInfoIsReadyRequest);
-};
+void NaviIsReadyResponse::Run() {
+  LOG4CXX_INFO(logger_, "NaviIsReadyResponse::Run");
+  // TODO(VS): Process response from HMI(field "available") and do something with SDL
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VEHICLE_INFO_IS_READY_REQUEST_H_

@@ -30,31 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVIGATION_IS_READY_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVIGATION_IS_READY_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_IS_READY_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_IS_READY_RESPONSE_H_
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief NavigationIsReadyRequest command class
+ * @brief NaviIsReadyResponse command class
  **/
-class NavigationIsReadyRequest : public RequestToHMI {
+class NaviIsReadyResponse : public ResponseFromHMI {
  public:
   /**
-   * @brief NavigationIsReadyRequest class constructor
+   * @brief NaviIsReadyResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NavigationIsReadyRequest(const MessageSharedPtr& message);
+  explicit NaviIsReadyResponse(const MessageSharedPtr& message);
 
   /**
-   * @brief NavigationIsReadyRequest class destructor
+   * @brief NaviIsReadyResponse class destructor
    **/
-  virtual ~NavigationIsReadyRequest();
+  virtual ~NaviIsReadyResponse();
 
   /**
    * @brief Execute command
@@ -62,11 +62,11 @@ class NavigationIsReadyRequest : public RequestToHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(NavigationIsReadyRequest);
+  DISALLOW_COPY_AND_ASSIGN(NaviIsReadyResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVIGATION_IS_READY_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_IS_READY_RESPONSE_H_
