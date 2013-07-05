@@ -54,20 +54,11 @@ void CreateInteractionChoiceSetResponse::Run() {
     return;
   }
 
-  const int hmi_correlation_id = 204;
+  const int hmi_correlation_id = (*message_)[strings::params]
+                                 [strings::correlation_id];;
 
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(hmi_correlation_id)) {
-      smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
-        GetMessageChain(hmi_correlation_id)->data();
-
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->
-        application(data[strings::params][strings::connection_key]));
-
-    app->AddChoiceSet(data[strings::msg_params]
-                           [strings::interaction_choice_set_id].asInt(),
-                           data[strings::msg_params]);
 
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =

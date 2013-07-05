@@ -149,7 +149,6 @@ void SetGlobalPropertiesRequest::Run() {
         new MessageChaining(connection_key, correlation_id),
         connection_key, correlation_id, ui_cmd_id);
   }
-
 }
 
 }  // namespace commands

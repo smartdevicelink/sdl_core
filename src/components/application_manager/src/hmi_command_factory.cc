@@ -88,6 +88,12 @@
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_request.h"
+#include "application_manager/commands/hmi/ui_create_interaction_choice_set_request.h"
+#include "application_manager/commands/hmi/ui_create_interaction_choice_set_response.h"
+#include "application_manager/commands/hmi/ui_delete_interaction_choice_set_request.h"
+#include "application_manager/commands/hmi/ui_delete_interaction_choice_set_response.h"
+#include "application_manager/commands/hmi/ui_perform_interaction_request.h"
+#include "application_manager/commands/hmi/ui_perform_interaction_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -271,6 +277,33 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UISetMediaClockTimerResponse(message));
       } else {
         command.reset(new commands::UISetMediaClockTimerRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_CreateInteractionChoiceSet: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UICreateInteractionChoiceSetResponse(message));
+      } else {
+        command.reset(new commands::UICreateInteractionChoiceSetRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIDeleteInteractionChoiceSetResponse(message));
+      } else {
+        command.reset(new commands::UIDeleteInteractionChoiceSetRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_PerformInteraction: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIPerformInteractionResponse(message));
+      } else {
+        command.reset(new commands::UIPerformInteractionRequest(message));
       }
       break;
     }

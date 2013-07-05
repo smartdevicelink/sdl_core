@@ -54,7 +54,8 @@ void PerformInteractionResponse::Run() {
      return;
   }
 
-  const int hmi_request_id = 205;
+  const int hmi_request_id = (*message_)[strings::params]
+                                [strings::correlation_id];
 
   if (ApplicationManagerImpl::instance()->
        DecreaseMessageChain(hmi_request_id)) {
