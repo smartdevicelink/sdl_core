@@ -111,7 +111,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void sendMessageToDevice(const protocol_handler::RawMessage &message);
+  virtual void sendMessageToDevice(const RawMessageSptr message);
 
   /**
    * @brief receive event from device
@@ -216,7 +216,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  void postMessage(const protocol_handler::RawMessage &message);
+  void postMessage(const RawMessageSptr message);
 
   /**
    * @brief update message in queue
@@ -225,7 +225,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  void updateMessage(const protocol_handler::RawMessage &message);
+  void updateMessage(const RawMessageSptr message);
 
   /**
    * @brief remove mesage from TM's queue
@@ -234,7 +234,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  void removeMessage(const protocol_handler::RawMessage &message);
+  void removeMessage(const RawMessageSptr message);
 
   void removeEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
 
@@ -292,7 +292,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  typedef std::vector<protocol_handler::RawMessage> MessageQueue;
+  typedef std::vector<RawMessageSptr> MessageQueue;
 
   /**
    * @brief type for mesage queue

@@ -96,7 +96,7 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void sendMessageToDevice(
-      const protocol_handler::RawMessage &message) = 0;
+      const RawMessageSptr message) = 0;
 
   /**
    * @brief receive event from device

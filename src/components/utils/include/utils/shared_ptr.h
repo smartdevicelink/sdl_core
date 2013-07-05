@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
@@ -50,163 +50,165 @@ namespace utils {
  **/
 template<typename ObjectType>
 class SharedPtr {
-  public:
-    /**
-     * @brief Constructor.
-     *
-     * Initialize shared pointer with wrapped object.
-     * Reference counter will be initialized to 1.
-     *
-     * @param Object Wrapped object.
-     **/
-    SharedPtr(ObjectType* Object);
+ public:
+  /**
+   * @brief Constructor.
+   *
+   * Initialize shared pointer with wrapped object.
+   * Reference counter will be initialized to 1.
+   *
+   * @param Object Wrapped object.
+   **/
+  SharedPtr(ObjectType* Object);
 
-    SharedPtr();
+  SharedPtr();
 
-    /**
-     * @brief Copy constructor.
-     *
-     * Initialize shared pointer with another shared pointer.
-     * Reference counter will be incremented.
-     *
-     * @param Other Other shared pointer.
-     **/
-    SharedPtr(const SharedPtr<ObjectType>& Other);
+  /**
+   * @brief Copy constructor.
+   *
+   * Initialize shared pointer with another shared pointer.
+   * Reference counter will be incremented.
+   *
+   * @param Other Other shared pointer.
+   **/
+  SharedPtr(const SharedPtr<ObjectType>& Other);
 
-    /**
-     * @brief Copy constructor.
-     *
-     * Initialize shared pointer with another shared pointer.
-     * Reference counter will be incremented.
-     *
-     * @tparam OtherObjectType Type of other object pointer. This
-     *                         allows creating a shared pointer to an
-     *                         intstance of a base class from a shared
-     *                         pointer to an instance of a class
-     *                         inherited from this base class.
-     *                         If OtherObjectType is not implicitly
-     *                         convertible to ObjectType it will
-     *                         cause a compile error.
-     *
-     * @param Other Other shared pointer.
-     **/
-    template<typename OtherObjectType>
-    SharedPtr(const SharedPtr<OtherObjectType>& Other);
+  /**
+   * @brief Copy constructor.
+   *
+   * Initialize shared pointer with another shared pointer.
+   * Reference counter will be incremented.
+   *
+   * @tparam OtherObjectType Type of other object pointer. This
+   *                         allows creating a shared pointer to an
+   *                         intstance of a base class from a shared
+   *                         pointer to an instance of a class
+   *                         inherited from this base class.
+   *                         If OtherObjectType is not implicitly
+   *                         convertible to ObjectType it will
+   *                         cause a compile error.
+   *
+   * @param Other Other shared pointer.
+   **/
+  template<typename OtherObjectType>
+  SharedPtr(const SharedPtr<OtherObjectType>& Other);
 
-    /**
-     * @brief Destructor.
-     *
-     * Decrement reference counter and destroy wrapped object
-     * if reference counter reaches zero.
-     **/
-    ~SharedPtr(void);
+  /**
+   * @brief Destructor.
+   *
+   * Decrement reference counter and destroy wrapped object
+   * if reference counter reaches zero.
+   **/
+  ~SharedPtr(void);
 
-    /**
-     * @brief Assignment operator.
-     *
-     * Drop reference to currently referenced object and add
-     * reference to assigned object.
-     *
-     * @param Other Shared pointer to an object
-     *              that must be referenced.
-     *
-     * @return Reference to this shared pointer.
-     **/
-    SharedPtr<ObjectType>& operator =(const SharedPtr<ObjectType>& Other);
+  /**
+   * @brief Assignment operator.
+   *
+   * Drop reference to currently referenced object and add
+   * reference to assigned object.
+   *
+   * @param Other Shared pointer to an object
+   *              that must be referenced.
+   *
+   * @return Reference to this shared pointer.
+   **/
+  SharedPtr<ObjectType>& operator =(const SharedPtr<ObjectType>& Other);
 
-    /**
-     * @brief Assignment operator.
-     *
-     * Drop reference to currently referenced object and add
-     * reference to assigned object.
-     *
-     * @tparam OtherObjectType Type of other object pointer. This
-     *                         allows creating a shared pointer to an
-     *                         intstance of a base class from a shared
-     *                         pointer to an instance of a class
-     *                         inherited from this base class.
-     *                         If OtherObjectType is not implicitly
-     *                         convertible to ObjectType it will
-     *                         cause a compile error.
-     *
-     * @param Other Shared pointer to an object
-     *              that must be referenced.
-     *
-     * @return Reference to this shared pointer.
-     **/
-    template<typename OtherObjectType>
-    SharedPtr<ObjectType>& operator =(const SharedPtr<OtherObjectType>& Other);
+  bool operator ==(const SharedPtr<ObjectType>& Other) const;
 
-    /**
-     * @brief Member access operator.
-     *
-     * @return Wrapped object.
-     **/
-    ObjectType* operator->(void) const;
+  /**
+   * @brief Assignment operator.
+   *
+   * Drop reference to currently referenced object and add
+   * reference to assigned object.
+   *
+   * @tparam OtherObjectType Type of other object pointer. This
+   *                         allows creating a shared pointer to an
+   *                         intstance of a base class from a shared
+   *                         pointer to an instance of a class
+   *                         inherited from this base class.
+   *                         If OtherObjectType is not implicitly
+   *                         convertible to ObjectType it will
+   *                         cause a compile error.
+   *
+   * @param Other Shared pointer to an object
+   *              that must be referenced.
+   *
+   * @return Reference to this shared pointer.
+   **/
+  template<typename OtherObjectType>
+  SharedPtr<ObjectType>& operator =(const SharedPtr<OtherObjectType>& Other);
 
-    ObjectType& operator*() const;
-    explicit operator bool() const;
-    void reset();
-    void reset(ObjectType* other);
+  /**
+   * @brief Member access operator.
+   *
+   * @return Wrapped object.
+   **/
+  ObjectType* operator->(void) const;
 
-    /**
-     * @return true if mObject not NULL
-     */
-    bool valid() const;
+  ObjectType& operator*() const;
+  explicit operator bool() const;
+  void reset();
+  void reset(ObjectType* other);
 
-  private:
-    // TSharedPtr needs access to other TSharedPtr private members
-    // for shared pointers type casts.
-    template<typename OtherObjectType>
-    friend class SharedPtr;
+  /**
+   * @return true if mObject not NULL
+   */
+  bool valid() const;
 
-    /**
-     * @brief Drop reference to wrapped object.
-     *
-     * If reference counter reaches zero object and its reference
-     * counter will be deallocated.
-     **/
-    void dropReference(void);
+ private:
+  // TSharedPtr needs access to other TSharedPtr private members
+  // for shared pointers type casts.
+  template<typename OtherObjectType>
+  friend class SharedPtr;
 
-    /**
-     * @brief Wrapped object.
-     **/
-    ObjectType* mObject;
+  /**
+   * @brief Drop reference to wrapped object.
+   *
+   * If reference counter reaches zero object and its reference
+   * counter will be deallocated.
+   **/
+  void dropReference(void);
 
-    /**
-     * @brief Pointer to reference counter.
-     **/
-    unsigned int* mReferenceCounter;
+  /**
+   * @brief Wrapped object.
+   **/
+  ObjectType* mObject;
+
+  /**
+   * @brief Pointer to reference counter.
+   **/
+  unsigned int* mReferenceCounter;
 };
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType* Object)
-  : mObject(NULL),
-    mReferenceCounter(new unsigned int(1)) {
+    : mObject(NULL),
+      mReferenceCounter(new unsigned int(1)) {
   DCHECK(Object);
   mObject = Object;
 }
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr()
-  : mObject(0),
-    mReferenceCounter(0) {
+    : mObject(0),
+      mReferenceCounter(0) {
 }
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(
-  const SharedPtr<ObjectType>& Other)
-  : mObject(0),
-    mReferenceCounter(0) {
+    const SharedPtr<ObjectType>& Other)
+    : mObject(0),
+      mReferenceCounter(0) {
   *this = Other;
 }
 
 template<typename ObjectType>
 template<typename OtherObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(
-  const SharedPtr<OtherObjectType>& Other)
-  : mObject(0),
-    mReferenceCounter(0) {
+    const SharedPtr<OtherObjectType>& Other)
+    : mObject(0),
+      mReferenceCounter(0) {
   *this = Other;
 }
 
@@ -222,10 +224,16 @@ utils::SharedPtr<ObjectType>::operator=(const SharedPtr<ObjectType>& Other) {
 }
 
 template<typename ObjectType>
+inline bool utils::SharedPtr<ObjectType>::operator ==(
+    const SharedPtr<ObjectType>& Other) const {
+  return (mObject == Other.mObject);
+}
+
+template<typename ObjectType>
 template<typename OtherObjectType>
 inline utils::SharedPtr<ObjectType>&
 utils::SharedPtr<ObjectType>::operator=(
-  const SharedPtr<OtherObjectType>& Other) {
+    const SharedPtr<OtherObjectType>& Other) {
   dropReference();
 
   mObject = Other.mObject;
@@ -255,13 +263,12 @@ utils::SharedPtr<ObjectType>::operator bool() const {
   return 0 != mObject;
 }
 
-template<typename ObjectType> void
-utils::SharedPtr<ObjectType>::reset() {
+template<typename ObjectType> void utils::SharedPtr<ObjectType>::reset() {
   reset(0);
 }
 
-template<typename ObjectType> void
-utils::SharedPtr<ObjectType>::reset(ObjectType* other) {
+template<typename ObjectType> void utils::SharedPtr<ObjectType>::reset(
+    ObjectType* other) {
   DCHECK(other);
   dropReference();
   mObject = other;

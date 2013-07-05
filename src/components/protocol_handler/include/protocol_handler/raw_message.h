@@ -63,12 +63,13 @@ class RawMessage {
   RawMessage(int connectionKey, unsigned int protocolVersion, int serialNumber,
              unsigned char* data, unsigned int dataSize);
 
+  bool operator ==(RawMessage &other)const;
+
   /**
    * \brief Destructor
    */
   ~RawMessage();
 
-  bool operator ==(const RawMessage &other);
   /**
    * \brief Getter for connection identifier
    */
