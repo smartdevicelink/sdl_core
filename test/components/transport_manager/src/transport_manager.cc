@@ -66,9 +66,10 @@ TEST(TransportManagerImpl, connect)
 
   unsigned char buf[10] = { 0 };
 
-  RawMessage msg(10, 1, buf, 10);
+  RawMessageSptr msg(new RawMessage(10, 1, 1, buf, 10));
 
   impl->sendMessageToDevice(msg);
 
-  EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(0);
+  EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(1);
+  EXPECT_CALL(*mdal, onDataSendFailed(_, _, _, _)).Times(1);
 }

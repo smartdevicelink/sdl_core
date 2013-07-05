@@ -89,14 +89,12 @@ unsigned int RawMessage::protocol_version() const {
   return protocol_version_;
 }
 
-bool RawMessage::operator ==(const RawMessage &other) {
-  if (this->serial_number_ == other.serial_number_)
-    return true;
-  else
-    return false;
-}
-
-unsigned int RawMessage::serial_number() const{
+unsigned int RawMessage::serial_number() const {
   return serial_number_;
 }
+
+bool RawMessage::operator ==(RawMessage &other) const {
+  return (serial_number_ == other.serial_number_);
+}
+
 }  // namespace protocol_handler

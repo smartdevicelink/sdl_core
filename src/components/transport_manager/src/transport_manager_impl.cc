@@ -161,7 +161,7 @@ void TransportManagerImpl::registerAdapterListener(
 }
 
 void TransportManagerImpl::sendMessageToDevice(
-    const protocol_handler::RawMessage &message) {
+    const RawMessageSptr message) {
   if (false == this->is_initialized_) {
     //todo: log error
     return;
@@ -222,18 +222,15 @@ void TransportManagerImpl::init(void) {
 }
 
 void TransportManagerImpl::postMessage(
-    const protocol_handler::RawMessage &message) {
+    const RawMessageSptr message) {
   //todo: check data copying
-  protocol_handler::RawMessage msg(message.connection_key(),
-                                   message.protocol_version(), message.serial_number(),
-                                   message.data(), message.data_size());
   pthread_mutex_lock(&message_queue_mutex_);
-  message_queue_.push_back(msg);
+  message_queue_.push_back(message);
   pthread_mutex_unlock(&message_queue_mutex_);
 }
 
 void TransportManagerImpl::updateMessage(
-    const protocol_handler::RawMessage &message) {
+    const RawMessageSptr message) {
   pthread_mutex_lock(&message_queue_mutex_);
   //todo: define and implement
   pthread_mutex_unlock(&message_queue_mutex_);
@@ -241,11 +238,12 @@ void TransportManagerImpl::updateMessage(
 }
 
 void TransportManagerImpl::removeMessage(
-    const protocol_handler::RawMessage &message) {
+    const RawMessageSptr message) {
   pthread_mutex_lock(&message_queue_mutex_);
   for (MessageQueue::iterator it = message_queue_.begin();
       it != message_queue_.begin(); ++it) {
-    if ((*it) == message) {
+    RawMessageSptr tmp = (*it);
+    if (tmp == message) {
       //todo: add correct removing
     }
   }
@@ -340,7 +338,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE:
           data = ((*it).data());
-          this->removeMessage(*data);
+          this->removeMessage(data);
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL:
           //todo: start timer here to wait before notify caller and remove unsent messages
@@ -378,30 +376,23 @@ void TransportManagerImpl::messageQueueThread(void) {
     //todo: add priority processing
 
     u_int serial_number = 0;
-    protocol_handler::RawMessage *active_msg = NULL;
+    RawMessageSptr active_msg = NULL;
     pthread_mutex_lock(&message_queue_mutex_);
-    for (std::vector<protocol_handler::RawMessage>::iterator msg =
-        message_queue_.begin(); msg != message_queue_.end(); ++msg) {
-      if ((*msg).serial_number() > serial_number) {
-        active_msg = &(*msg);
-        serial_number = (*msg).serial_number();
+    for (std::vector<RawMessageSptr>::iterator it =
+        message_queue_.begin(); it != message_queue_.end(); ++it) {
+      if ((*it)->serial_number() > serial_number) {
+        active_msg = (*it);
+        serial_number = (*it)->serial_number();
       }
     }
-    if (NULL != active_msg) {
-      RawMessageSptr msg_to_send(
-          new protocol_handler::RawMessage(active_msg->connection_key(),
-                                           active_msg->protocol_version(),
-                                           active_msg->serial_number(),
-                                           active_msg->data(),
-                                           active_msg->data_size()));
-
+    if (active_msg.valid()) {
       DeviceAdapter *device_adapter = adapter_handler_.getAdapterBySession(
           active_msg->connection_key());
 
       if (NULL == device_adapter) {
         //probably error no device adapters found
       } else {
-        device_adapter->sendData(active_msg->connection_key(), msg_to_send);
+        device_adapter->sendData(active_msg->connection_key(), active_msg);
       }
     }
     pthread_mutex_unlock(&message_queue_mutex_);
