@@ -31,8 +31,7 @@
  */
 
 #include "application_manager/message_helper.h"
-#include "application_manager/mobile_command_factory.h"
-#include "application_manager/hmi_command_factory.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
 
@@ -93,11 +92,7 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
       application_impl.system_context();
 
-  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&message);
-  command->Init();
-  // TODO(VS): run must return bool, so SendHMIStatusNotification must also return bool
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
 }
 
 void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
@@ -120,10 +115,7 @@ void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
     ++index;
   }
 
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
@@ -168,10 +160,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   message[strings::msg_params][strings::application][strings::app_type] =
       application_impl.app_types();
 
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -187,10 +176,7 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
 
   message[strings::msg_params][strings::reason] = reason;
 
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
 const VehicleData& MessageHelper::vehicle_data() {

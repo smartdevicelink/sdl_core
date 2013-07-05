@@ -46,7 +46,7 @@ OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {
 }
 
 void OnTTSLanguageChangeNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnTTSLanguageChangeNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnTTSLanguageChangeNotification::Run");
   ApplicationManagerImpl::instance()->set_active_tts_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));

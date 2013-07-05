@@ -32,9 +32,8 @@
 
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/mobile_command_factory.h"
+#include "application_manager/application_manager_impl.h"
 #include "SmartObjects/CSmartObject.hpp"
-#include "application_manager/message.h"
 
 namespace application_manager {
 
@@ -86,10 +85,7 @@ void CommandRequestImpl::SendResponse(const bool success,
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
-  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&response);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageMobileCommand(message_);
 }
 
 }  // namespace commands

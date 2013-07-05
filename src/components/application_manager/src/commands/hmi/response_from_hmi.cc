@@ -56,7 +56,7 @@ void ResponseFromHMI::Run() {
 }
 
 void ResponseFromHMI::SendResponseToMobile(const MessageSharedPtr& message) {
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message);
+  ApplicationManagerImpl::instance()->ManageMobileCommand(message);
 }
 
 }  // namespace commands
