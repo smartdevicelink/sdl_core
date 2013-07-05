@@ -376,7 +376,7 @@ void TransportManagerImpl::messageQueueThread(void) {
     //todo: add priority processing
 
     u_int serial_number = 0;
-    RawMessageSptr active_msg = NULL;
+    RawMessageSptr active_msg;
     pthread_mutex_lock(&message_queue_mutex_);
     for (std::vector<RawMessageSptr>::iterator it =
         message_queue_.begin(); it != message_queue_.end(); ++it) {
