@@ -203,6 +203,12 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_perform_audio_pass_thru_response.cc
 ./src/commands/hmi/ui_end_audio_pass_thru_request.cc
 ./src/commands/hmi/ui_end_audio_pass_thru_response.cc
+./src/commands/hmi/ui_create_interaction_choice_set_request.cc
+./src/commands/hmi/ui_create_interaction_choice_set_response.cc
+./src/commands/hmi/ui_delete_interaction_choice_set_request.cc
+./src/commands/hmi/ui_delete_interaction_choice_set_response.cc
+./src/commands/hmi/ui_perform_interaction_request.cc
+./src/commands/hmi/ui_perform_interaction_response.cc
 ./src/commands/hmi/navigation_is_ready_request.cc
 ./src/commands/hmi/navigation_is_ready_response.cc
 ./src/commands/hmi/vehicle_info_is_ready_request.cc
