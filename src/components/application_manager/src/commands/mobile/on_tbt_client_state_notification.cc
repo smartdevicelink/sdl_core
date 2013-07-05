@@ -48,6 +48,8 @@ OnTBTClientStateNotification::~OnTBTClientStateNotification() {
 }
 
 void OnTBTClientStateNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnTBTClientStateNotification::Run");
+
   (*message_)[strings::params][strings::message_type] =
     MessageType::kNotification;
 

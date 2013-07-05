@@ -140,6 +140,7 @@
 #include "application_manager/commands/hmi/on_ui_language_change_notification.h"
 #include "application_manager/commands/hmi/on_vr_language_change_notification.h"
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
+#include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
 #include "application_manager/commands/hmi/exit_application_request.h"
@@ -673,6 +674,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::UI_ShowNotification: {
       command.reset(new commands::OnShowNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_OnTBTClientState: {
+      command.reset(new commands::OnNaviTBTClientStateNotification(message));
       break;
     }
   }

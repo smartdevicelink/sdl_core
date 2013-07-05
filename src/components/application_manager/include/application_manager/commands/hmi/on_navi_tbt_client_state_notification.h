@@ -29,52 +29,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/tts_set_global_properties_response.h"
-#include "application_manager/message_chaining.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_TBT_CLIENT_STATE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_TBT_CLIENT_STATE_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
-TTSSetGlobalPropertiesResponse::TTSSetGlobalPropertiesResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+/**
+ * @brief OnNaviTBTClientStateNotification command class
+ **/
+class OnNaviTBTClientStateNotification : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnNaviTBTClientStateNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnNaviTBTClientStateNotification(const MessageSharedPtr& message);
 
-TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {
-}
+    /**
+     * @brief OnNaviTBTClientStateNotification class destructor
+     **/
+    virtual ~OnNaviTBTClientStateNotification();
 
-void TTSSetGlobalPropertiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSSetGlobalPropertiesResponse::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-   const int correlation_id =
-       (*message_)[strings::params][strings::correlation_id].asInt();
-
-     MessageChaining* msg_chain =
-       ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
-
-     if (NULL == msg_chain) {
-       LOG4CXX_ERROR(logger_, "NULL pointer");
-       return;
-     }
-
-     /* store received response code for to check it
-      * in corresponding Mobile response
-      */
-     const NsSmartDeviceLinkRPC::V2::Result::eType code =
-       static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
-         (*message_)[strings::msg_params][hmi_response::code].asInt());
-
-     msg_chain->set_tts_response_result(code);
-
-     // prepare SmartObject for mobile factory
-     (*message_)[strings::params][strings::function_id] =
-       NsSmartDeviceLinkRPC::V2::FunctionID::SetGlobalPropertiesID;
-
-     SendResponseToMobile(message_);
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnNaviTBTClientStateNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_TBT_CLIENT_STATE_NOTIFICATION_H_

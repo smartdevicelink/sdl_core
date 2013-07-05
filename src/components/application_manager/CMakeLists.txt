@@ -231,6 +231,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_vr_stopped_notification.cc
 ./src/commands/hmi/on_vr_command_notification.cc
 ./src/commands/hmi/on_ui_command_notification.cc
+./src/commands/hmi/on_navi_tbt_client_state_notification.cc
 ./src/commands/hmi/on_app_deactivated_notification.cc
 ./src/commands/hmi/on_tts_language_change_notification.cc
 ./src/commands/hmi/on_vr_language_change_notification.cc
