@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/update_turn_list_response.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -47,12 +48,15 @@ UpdateTurnListResponse::~UpdateTurnListResponse() {
 }
 
 void UpdateTurnListResponse::Run() {
+  LOG4CXX_INFO(logger_, "UpdateTurnListResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
     return;
   }
 
-  const int hmi_correlation_id = 209;
+  const int hmi_correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       hmi_correlation_id)) {

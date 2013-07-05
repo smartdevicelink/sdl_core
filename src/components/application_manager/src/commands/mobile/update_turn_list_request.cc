@@ -35,6 +35,7 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -49,6 +50,8 @@ UpdateTurnListRequest::~UpdateTurnListRequest() {
 }
 
 void UpdateTurnListRequest::Run() {
+  LOG4CXX_INFO(logger_, "UpdateTurnListRequest::Run");
+
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
@@ -85,7 +88,7 @@ void UpdateTurnListRequest::Run() {
       (*message_)[strings::params][strings::connection_key];
 
   // TODO(VS): HMI Request Id
-  const int hmi_request_id = 209;
+  const int hmi_request_id = hmi_apis::FunctionID::Navigation_UpdateTurnList;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));
