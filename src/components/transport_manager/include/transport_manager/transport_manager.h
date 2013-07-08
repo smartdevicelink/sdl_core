@@ -133,7 +133,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void addAdapterListener(
+  virtual void addAdapterListener(DeviceAdapter *adapter,
       transport_manager::DeviceAdapterListener *listener) = 0;
 
   /**

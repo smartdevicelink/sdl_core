@@ -81,7 +81,7 @@ void MockDeviceAdapter::mainThread()
 
       bool device_scan_requested = waitForDeviceScanRequest(0);
 
-      for(DeviceAdapterListenerList::iterator it = listener_->begin(); it != listener_->end(); ++it){
+      for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
         (*it)->onSearchDeviceDone(this);
       }
   }

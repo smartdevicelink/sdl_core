@@ -75,10 +75,10 @@ class DeviceAdapter {
    virtual void SaveState(DeviceAdapterState* state) = 0;
    */
 
-  virtual Error init(DeviceAdapterListenerList *listener,
-                     DeviceHandleGenerator* handle_generator,
+  virtual Error init(DeviceHandleGenerator* handle_generator,
                      Configuration* configuration) = 0;
 
+  virtual void addListener(DeviceAdapterListener *listener) = 0;
   virtual bool isSearchDevicesSupported() const = 0;
   virtual Error searchDevices() = 0;
 

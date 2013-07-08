@@ -149,7 +149,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void addAdapterListener(DeviceAdapterListener *listener);
+  virtual void addAdapterListener(DeviceAdapter *adapter, DeviceAdapterListener *listener);
 
   /**
    * @brief remove device from internal storages
@@ -180,24 +180,6 @@ class TransportManagerImpl : public TransportManager {
    **/
   virtual void declineConnect(const DeviceHandle &device_id,
                               const ApplicationHandle &app_id);
-
-  /**
-   * @brief set new listener
-   *
-   * @param listener
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  void addDeviceAdapterListener(DeviceAdapterListener *listener);
-
-  /**
-   * @brief set tm's event listener
-   *
-   * @param event type, function address
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  void addTransportManagerListener(TransportManagerListener *listener);
 
   /**
    * @brief interface function to wake up adapter listener thread
@@ -395,16 +377,6 @@ class TransportManagerImpl : public TransportManager {
    * if it is false then threads exist main loop
    **/
   mutable bool all_thread_active_;
-
-  /**
-   * @brief Device adapter listener.
-   **/
-  DeviceAdapterListenerList device_adapter_listener_;
-
-  /**
-   * @brief Device handle generator.
-   **/
-  DeviceHandleGenerator *device_handle_generator_;
 
   typedef std::list<TransportManagerListener *> TransportManagerListenerList;
   /**

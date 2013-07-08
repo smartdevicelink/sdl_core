@@ -69,8 +69,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * Called from transport manager to start device adapter.
    **/
-  virtual Error init(DeviceAdapterListenerList* listener,
-                     DeviceHandleGenerator* handle_generator,
+  virtual Error init(DeviceHandleGenerator* handle_generator,
                      Configuration* configuration);
 
   /**
@@ -124,6 +123,8 @@ class DeviceAdapterImpl : public DeviceAdapter {
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
   virtual Error sendData(const int session_id, const RawMessageSptr data);
+
+  virtual void addListener(DeviceAdapterListener *listener);
 
  protected:
   /**
@@ -458,7 +459,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Listener for device adapter notifications.
    **/
-  DeviceAdapterListenerList* listener_;
+  DeviceAdapterListenerList listener_;
 
   /**
    * @brief Handle generator implementation.

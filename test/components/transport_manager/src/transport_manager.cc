@@ -62,7 +62,7 @@ TEST(TransportManagerImpl, connect)
 
   MockDeviceAdapterListener *mdal = new MockDeviceAdapterListener();
 
-  impl->addAdapterListener(mdal);
+  impl->addAdapterListener(mock_da, mdal);
 
   impl->searchDevices();
   EXPECT_CALL(*mdal, onSearchDeviceDone(_)).Times(1);

@@ -63,15 +63,12 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
-      device_adapter_listener_(),
-      device_handle_generator_(0),
       is_initialized_(false) {
 
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
-  device_adapter_listener_.push_back(new DeviceAdapterListenerImpl(this));
 //todo: uncoment when adapter is ready
 //	DeviceAdapter *d = new BluetoothAdapter();
 //	d->init(device_adapter_listener_, NULL);
@@ -88,17 +85,14 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
-      device_adapter_listener_(),
-      device_handle_generator_(0),
       is_initialized_(false) {
 
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
-  device_adapter_listener_.push_back(new DeviceAdapterListenerImpl(this));
-  device_handle_generator_ = new DeviceHandleGeneratorImpl();
-  device_adapter->init(&device_adapter_listener_, device_handle_generator_,
+  device_adapter->addListener(new DeviceAdapterListenerImpl(this));
+  device_adapter->init(new DeviceHandleGeneratorImpl(),
                        NULL);
   addDeviceAdapter(device_adapter);
   LOG4CXX_INFO(logger_, "TM object with device adapter created.");
@@ -117,7 +111,6 @@ TransportManagerImpl::~TransportManagerImpl() {
   pthread_cond_destroy(&device_listener_thread_wakeup_);
   //delete transport_manager_listener_;
   //delete device_adapter_listener_;
-  delete device_handle_generator_;
   LOG4CXX_INFO(logger_, "TM object destroyed.");
 }
 
@@ -169,11 +162,7 @@ void TransportManagerImpl::disconnectDevice(const SessionID &session_id) {
 
 void TransportManagerImpl::addEventListener(
     TransportManagerListener *listener) {
-  this->addTransportManagerListener(listener);
-}
-
-void TransportManagerImpl::addAdapterListener(DeviceAdapterListener *listener) {
-  this->addDeviceAdapterListener(listener);
+  transport_manager_listener_.push_back(listener);
 }
 
 void TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {
@@ -205,6 +194,18 @@ void TransportManagerImpl::removeDevice(const DeviceHandle &device) {
 void TransportManagerImpl::addDeviceAdapter(DeviceAdapter *device_adapter) {
   LOG4CXX_INFO(logger_, "Add device adapter " << device_adapter);
   adapter_handler_.addAdapter(device_adapter);
+}
+void TransportManagerImpl::addAdapterListener(DeviceAdapter *adapter, DeviceAdapterListener *listener){
+  LOG4CXX_INFO(logger_, "Add device adapter listener is called for adapter " << adapter << " listener " << listener);
+  AdapterHandler::AdapterList al = const_cast<AdapterHandler::AdapterList &>(adapter_handler_.device_adapters());
+  AdapterHandler::AdapterList::iterator it = std::find(al.begin(), al.end(), adapter);
+  if(NULL == (*it)){
+    LOG4CXX_ERROR(logger_, "Device adapter is not known");
+    return;
+  }
+  (*it)->addListener(listener);
+  LOG4CXX_INFO(logger_, "Add device adapter listener call complete");
+
 }
 
 void TransportManagerImpl::searchDevices(void) {
@@ -300,16 +301,6 @@ void TransportManagerImpl::postEvent(
   pthread_mutex_lock(&event_queue_mutex_);
   event_queue_.push_back(evt);
   pthread_mutex_unlock(&event_queue_mutex_);
-}
-
-void TransportManagerImpl::addDeviceAdapterListener(
-    DeviceAdapterListener *listener) {
-  device_adapter_listener_.push_back(listener);
-}
-
-void TransportManagerImpl::addTransportManagerListener(
-    TransportManagerListener *listener) {
-  transport_manager_listener_.push_back(listener);
 }
 
 void *TransportManagerImpl::eventListenerStartThread(void *data) {
