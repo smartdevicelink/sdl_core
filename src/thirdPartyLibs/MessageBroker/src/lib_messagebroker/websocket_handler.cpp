@@ -178,9 +178,9 @@ namespace NsMessageBroker
 
    void CWebSocketHandler::sha1_step(struct sha1_ctxt *ctxt)
    {
-      unsigned long   a, b, c, d, e;
+      unsigned int   a, b, c, d, e;
       size_t t, s;
-      unsigned long   tmp;
+      unsigned int   tmp;
 
       struct sha1_ctxt tctxt;
 
