@@ -5,7 +5,7 @@ add_subdirectory(./interfaces)
 add_subdirectory(./TransportManager)
 
 # --- AppMgr
-add_subdirectory(./AppMgr)
+#add_subdirectory(./AppMgr)
 
 # --- JSONHandler
 add_subdirectory(./JSONHandler)

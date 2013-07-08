@@ -35,7 +35,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
 
 namespace application_manager {
 
@@ -88,12 +87,12 @@ void SetGlobalPropertiesRequest::Run() {
 
   // check TTS params
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
-      (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)){
+      (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
 
     const int tts_cmd_id = hmi_apis::FunctionID::TTS_SetGlobalProperties;
 
     (*p_smrt_ui)[strings::params][strings::function_id] =
-        tts_cmd_id;
+      tts_cmd_id;
 
     (*p_smrt_ui)[strings::params][strings::message_type] =
       MessageType::kRequest;
@@ -112,12 +111,12 @@ void SetGlobalPropertiesRequest::Run() {
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
 
     ApplicationManagerImpl::instance()->AddMessageChain(
-        new MessageChaining(connection_key, correlation_id),
-        connection_key, correlation_id, tts_cmd_id);
+      new MessageChaining(connection_key, correlation_id),
+      connection_key, correlation_id, tts_cmd_id);
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
-      (*message_)[strings::msg_params].keyExists(strings::vr_help)){
+      (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
 
     const int ui_cmd_id = hmi_apis::FunctionID::UI_SetGlobalProperties;
     (*p_smrt_ui)[strings::params][strings::function_id] =
@@ -140,8 +139,8 @@ void SetGlobalPropertiesRequest::Run() {
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
 
     ApplicationManagerImpl::instance()->AddMessageChain(
-        new MessageChaining(connection_key, correlation_id),
-        connection_key, correlation_id, ui_cmd_id);
+      new MessageChaining(connection_key, correlation_id),
+      connection_key, correlation_id, ui_cmd_id);
   }
 }
 

@@ -39,6 +39,7 @@
 #include "application_manager/audio_pass_thru_thread_impl.h"
 #include "utils/threads/thread.h"
 #include "JSONHandler/formatters/formatter_json_rpc.h"
+#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 #include "utils/logger.h"
@@ -104,7 +105,7 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_button(
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
-    if ((*it)->IsSubscribedToButton(static_cast<mobile_api::ButtonName::eType>(
+    if ((*it)->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(
                                       button))) {
       result.push_back(*it);
     }
@@ -432,7 +433,19 @@ void ApplicationManagerImpl::SendMessageToMobile(
 
 bool ApplicationManagerImpl::ManageMobileCommand(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
-  return true;
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
+
+  if (!command) {
+    LOG4CXX_WARN(logger_, "Failed to create mobile command from smart object");
+  }
+
+  if (command->Init()) {
+    command->Run();
+    if (command->CleanUp()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void ApplicationManagerImpl::SendMessageToHMI(
@@ -489,6 +502,22 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
                "; json " << message.json_message());
 
   switch (message.protocol_version()) {
+    case ProtocolVersion::kV2: {
+      if (!formatters::CFormatterJsonSDLRPCv2::fromString(
+            message.json_message(),
+            output,
+            message.function_id(),
+            message.type(),
+            message.correlation_id())) {
+        LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
+        return false;
+      }
+
+      LOG4CXX_INFO(logger_, "Convertion result for sdl object is true" <<
+                   " function_id " <<
+                   output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+      break;
+    }
     case ProtocolVersion::kHMI: {
       int result = formatters::FormatterJsonRpc::FromString <
                    hmi_apis::FunctionID::eType, hmi_apis::messageType::eType > (
@@ -527,6 +556,15 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   std::string output_string;
   switch (message.getElement(
             jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt()) {
+    case 0: {
+      if (!formatters::CFormatterJsonSDLRPCv2::toString(
+            message,
+            output_string)) {
+        LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+        return false;
+      }
+      break;
+    }
     case 1: {
       if (!formatters::FormatterJsonRpc::ToString(
             message,
@@ -534,29 +572,29 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }
-
-      LOG4CXX_INFO(logger_, "Convertion result: " <<
-                   output_string);
-
-      output.set_function_id(message.getElement(
-                               jhs::S_PARAMS).getElement(
-                               jhs::S_FUNCTION_ID).asInt());
-      output.set_correlation_id(
-        message.getElement(jhs::S_PARAMS).getElement(
-          jhs::S_CORRELATION_ID).asInt());
-      output.set_message_type(
-        static_cast<MessageType>(
-          message.getElement(jhs::S_PARAMS).getElement(
-            jhs::S_MESSAGE_TYPE).asInt()));
-      output.set_json_message(output_string);
-      output.set_protocol_version(application_manager::kHMI);
-
       break;
     }
     default:
       NOTREACHED();
       return false;
   }
+
+  LOG4CXX_INFO(logger_, "Convertion result: " <<
+               output_string);
+
+  output.set_function_id(message.getElement(
+                           jhs::S_PARAMS).getElement(
+                           jhs::S_FUNCTION_ID).asInt());
+  output.set_correlation_id(
+    message.getElement(jhs::S_PARAMS).getElement(
+      jhs::S_CORRELATION_ID).asInt());
+  output.set_message_type(
+    static_cast<MessageType>(
+      message.getElement(jhs::S_PARAMS).getElement(
+        jhs::S_MESSAGE_TYPE).asInt()));
+  output.set_json_message(output_string);
+  output.set_protocol_version(application_manager::kHMI);
+
   LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
   return true;
 }

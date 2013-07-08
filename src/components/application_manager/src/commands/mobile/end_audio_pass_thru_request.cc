@@ -35,7 +35,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -82,7 +81,7 @@ void EndAudioPassThruRequest::Run() {
   (*ui_audio)[str::params][str::connection_key] = connection_key;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-          connection_key, correlation_id, audio_cmd_id);
+      connection_key, correlation_id, audio_cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
 }
