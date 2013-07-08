@@ -48,43 +48,50 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 
 void OnSystemContextNotification::Run() {
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->active_application());
+      ApplicationManagerImpl::instance()->active_application());
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_,
-                      "NULL pointer application found as an active item!");
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     return;
   }
 
-  const int system_context_ = (*message_)[strings::msg_params]
-                              [hmi_notification::system_context].asInt();
-  // TODO(DK): paste correct enum ID
-  if (mobile_api::SystemContext::INVALID_ENUM == system_context_) {
-    if (mobile_api::AudioStreamingState::AUDIBLE ==
-        app->audio_streaming_state()) {
-      app->set_audio_streaming_state(
-        mobile_api::AudioStreamingState::NOT_AUDIBLE);
-      NotifyMobileApp(app);
-    }
-    return;
-  } else {
-    app->set_system_context(
-      static_cast<mobile_api::SystemContext::eType>(system_context_));
-    app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
-    NotifyMobileApp(app);
-    return;
+  mobile_api::SystemContext::eType system_context =
+    static_cast<mobile_api::SystemContext::eType>((*message_)
+    [strings::msg_params][hmi_notification::system_context].asInt());
+
+  if ((mobile_api::SystemContext::SYSCTXT_VRSESSION != system_context) &&
+      (true == ApplicationManagerImpl::instance()->vr_session_started()) &&
+      app->is_media_application()) {
+       app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
+       ApplicationManagerImpl::instance()->set_vr_session_started(false);
+  } else if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) &&
+         (false == ApplicationManagerImpl::instance()->vr_session_started()) &&
+      app->is_media_application()) {
+      if (true == ApplicationManagerImpl::instance()->attenuated_supported()) {
+        app->set_audio_streaming_state(
+            mobile_api::AudioStreamingState::ATTENUATED);
+      } else {
+        app->set_audio_streaming_state(
+            mobile_api::AudioStreamingState::NOT_AUDIBLE);
+      }
+      ApplicationManagerImpl::instance()->set_vr_session_started(true);
   }
 
-  if (system_context_ != app->system_context()) {
-    app->set_system_context(
-      static_cast<mobile_api::SystemContext::eType>(system_context_));
+  if (mobile_api::SystemContext::SYSCTXT_ALERT == system_context) {
+    // TODO(DK): Find initiator of alert.
+    system_context = mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED;
+  }
 
-    if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context_
+  if (system_context != app->system_context()) {
+    app->set_system_context(system_context);
+
+    // If main we need to activate application and send HMI level notification
+    if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context
         && mobile_api::HMILevel::HMI_FULL != app->hmi_level()) {
       ApplicationManagerImpl::instance()->ActivateApplication(app);
+    } else {
+      NotifyMobileApp(app);
     }
-  } else {
-    NotifyMobileApp(app);
   }
 }
 

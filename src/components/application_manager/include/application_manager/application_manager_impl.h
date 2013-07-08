@@ -408,6 +408,10 @@ const std::set<Application*>& ApplicationManagerImpl::applications() const {
   return application_list_;
 }
 
+bool ApplicationManagerImpl::vr_session_started() const {
+  return is_vr_session_strated_;
+}
+
 bool ApplicationManagerImpl::driver_distraction() const {
   return is_distracting_driver_;
 }
