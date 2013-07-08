@@ -47,6 +47,7 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 }
 
 void OnSystemContextNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnSystemContextNotification::Run");
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->active_application());
 

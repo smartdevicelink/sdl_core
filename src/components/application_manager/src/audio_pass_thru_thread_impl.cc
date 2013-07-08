@@ -35,12 +35,12 @@
 #endif
 
 #include <string>
-#include "application_manager/mobile_command_factory.h"
-#include "application_manager/application_manager_impl.h"
-#include "SmartObjects/CSmartObject.hpp"
-#include "application_manager/application_impl.h"
-
 #include "application_manager/audio_pass_thru_thread_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/mobile_command_factory.h"
+#include "application_manager/application_impl.h"
+#include "SmartObjects/CSmartObject.hpp"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/timer.h"
 
@@ -98,19 +98,18 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
       (*error_response)[strings::params][strings::connection_key] =
         static_cast<int>(session_key_);
       (*error_response)[strings::params][strings::function_id] =
-        mobile_apis::FunctionID::eType::PerformAudioPassThruID;
+        mobile_apis::FunctionID::PerformAudioPassThruID;
 
-      // TODO(DK): need to be changed
-      /*(*error_response)[strings::msg_params][strings::success] = false;
+      (*error_response)[strings::msg_params][strings::success] = false;
       (*error_response)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY;*/
+          mobile_apis::Result::OUT_OF_MEMORY;
       FactoryCreateCommand(error_response);
     }
     return false;
   }
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->application(session_key_));
+      ApplicationManagerImpl::instance()->application(session_key_));
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -125,11 +124,11 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
   (*end_audio)[strings::params][strings::connection_key] =
     static_cast<int>(session_key_);
   (*end_audio)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::EndAudioPassThruID;
-  // TODO(DK): need to be changed
-  /*(*end_audio)[strings::msg_params][strings::success] = true;
+    mobile_apis::FunctionID::EndAudioPassThruID;
+
+  (*end_audio)[strings::msg_params][strings::success] = true;
   (*end_audio)[strings::msg_params][strings::result_code] =
-    NsSmartDeviceLinkRPCV2::Result::SUCCESS;*/
+    mobile_apis::Result::SUCCESS;
 
   // app_id
   (*end_audio)[strings::msg_params][strings::app_id] = app->app_id();
@@ -258,14 +257,14 @@ void AudioPassThruThreadImpl::threadMain() {
     (*on_audio_pass)[strings::params][strings::connection_key] =
       static_cast<int>(session_key_);
     (*on_audio_pass)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::eType::OnAudioPassThruID;
+      mobile_apis::FunctionID::OnAudioPassThruID;
 
-    // TODO(DK): need to be changed
-    /*(*on_audio_pass)[strings::msg_params][strings::success] = true;
+    (*on_audio_pass)[strings::msg_params][strings::success] = true;
     (*on_audio_pass)[strings::msg_params][strings::result_code] =
-      NsSmartDeviceLinkRPCV2::Result::SUCCESS;*/
-    // TODO(DK): key for binary data
-    (*on_audio_pass)[strings::msg_params][strings::success] =
+      mobile_apis::Result::SUCCESS;
+
+    // binary data
+    (*on_audio_pass)[strings::binary_data] =
       smart_objects::CSmartObject(std::vector<unsigned char>(from, to));
 
 #if defined(OS_POSIX) && defined(OS_LINUX)

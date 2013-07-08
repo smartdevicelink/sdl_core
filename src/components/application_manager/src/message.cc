@@ -83,6 +83,7 @@ bool Message::operator==(const Message& message) {
 }
 
 Message::~Message() {
+  delete binary_data_;
 }
 
 int Message::function_id() const {
@@ -138,6 +139,10 @@ void Message::set_binary_data(BinaryData* data) {
     // Please, don't add NOTREACHED() here.
     // We can copy object without binary data using copy ctor and operator=
     return;
+  }
+
+  if (binary_data_) {
+    delete binary_data_;
   }
 
   binary_data_ = data;

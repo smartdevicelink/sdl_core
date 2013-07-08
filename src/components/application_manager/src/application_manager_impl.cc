@@ -35,6 +35,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/hmi_command_factory.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/audio_pass_thru_thread_impl.h"
 #include "utils/threads/thread.h"
@@ -355,8 +356,34 @@ void ApplicationManagerImpl::StopAudioPassThruThread() {
   perform_audio_thread_ = NULL;
 }
 
+void ApplicationManagerImpl::OnMobileMessageReceived(
+    const MobileMessage& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageReceived");
+
+  DCHECK(message);
+  if (!message) {
+    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    return;
+  }
+
+  utils::SharedPtr<smart_objects::CSmartObject> smart_object(
+    new smart_objects::CSmartObject);
+
+  if (!ConvertMessageToSO(*message, *smart_object)) {
+    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+    return;
+  }
+
+  LOG4CXX_INFO(logger_, "Converted message, trying to create mobile command");
+  if (!ManageMobileCommand(smart_object)) {
+    LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
+  }
+}
+
 void ApplicationManagerImpl::onMessageReceived(
   utils::SharedPtr<application_manager::Message> message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::onMessageReceived");
+
   DCHECK(message);
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
@@ -370,7 +397,7 @@ void ApplicationManagerImpl::onMessageReceived(
     return;
   }
 
-  LOG4CXX_INFO(logger_, "Converted message, trying to create command");
+  LOG4CXX_INFO(logger_, "Converted message, trying to create hmi command");
   if (!ManageHMICommand(smart_object)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
@@ -385,6 +412,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
   // TODO(DK): HMI StartDeviceDiscovery response
 }
+
 void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
@@ -428,7 +456,25 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 
 void ApplicationManagerImpl::SendMessageToMobile(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
-  return;
+
+  DCHECK(message);
+  if (!message) {
+    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    return;
+  }
+
+  if (!mobile_handler_) {
+    LOG4CXX_WARN(logger_, "No Mobile Handler set");
+    return;
+  }
+
+  utils::SharedPtr<Message> message_to_send(new Message);
+  if (!ConvertSOtoMessage((*message), (*message_to_send))) {
+    LOG4CXX_WARN(logger_,
+                 "Cannot send message to Mobile: failed to create string");
+  }
+
+  mobile_handler_->SendMessageToMobileApp(message_to_send);
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
@@ -594,6 +640,13 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
         jhs::S_MESSAGE_TYPE).asInt()));
   output.set_json_message(output_string);
   output.set_protocol_version(application_manager::kHMI);
+
+  if (message.keyExists(strings::binary_data)) {
+    application_manager::BinaryData* binaryData =
+        new application_manager::BinaryData(
+        message.getElement(strings::binary_data).asBinary());
+    output.set_binary_data(binaryData);
+  }
 
   LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
   return true;

@@ -40,6 +40,7 @@
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+#include "mobile_message_handler/mobile_message_observer.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "request_watchdog/watchdog_subscriber.h"
@@ -76,6 +77,7 @@ typedef std::map<unsigned int, MessageChainPtr> MessageChains;
 
 class ApplicationManagerImpl : public ApplicationManager
   , public hmi_message_handler::HMIMessageObserver
+  , public mobile_message_handler::MobileMessageObserver
   , public connection_handler::ConnectionHandlerObserver
   , public request_watchdog::WatchdogSubscriber
     , public HMICapabilities {
@@ -312,6 +314,14 @@ class ApplicationManagerImpl : public ApplicationManager
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
 
     /////////////////////////////////////////////////////////
+    /*
+     * @brief Overridden mobile message handler method
+     * for incoming mobile messages
+     *
+     * @param message Incoming mobile message
+     *
+     */
+    virtual void OnMobileMessageReceived(const MobileMessage& message);
 
     void onMessageReceived(
       utils::SharedPtr<application_manager::Message> message);
