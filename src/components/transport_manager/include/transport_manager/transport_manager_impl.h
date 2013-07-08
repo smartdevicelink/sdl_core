@@ -37,6 +37,7 @@
 
 #include <queue>
 #include <map>
+#include <list>
 
 #include "utils/logger.h"
 #include "transport_manager/transport_manager.h"
@@ -225,7 +226,8 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  void updateMessage(const RawMessageSptr message);
+  /*not clear when this function shall be used
+   * void updateMessage(const RawMessageSptr old_message, const RawMessageSptr new_message);*/
 
   /**
    * @brief remove mesage from TM's queue
@@ -292,14 +294,14 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  typedef std::vector<RawMessageSptr> MessageQueue;
+  typedef std::list<RawMessageSptr> MessageQueue;
 
   /**
    * @brief type for mesage queue
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  typedef std::vector<DeviceAdapterListenerImpl::DeviceAdapterEvent> EventQueue;
+  typedef std::list<DeviceAdapterListenerImpl::DeviceAdapterEvent> EventQueue;
 
   /**
    * @brief type for
