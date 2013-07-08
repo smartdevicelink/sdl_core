@@ -55,12 +55,12 @@ void ListFilesResponse::Run() {
   if (!application) {
     (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED;
+        mobile_apis::Result::APPLICATION_NOT_REGISTERED;
   } else {
     if (!file_system::DirectoryExists(application->name())) {
       (*message_)[strings::msg_params][strings::success] = false;
       (*message_)[strings::msg_params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR;
+          mobile_apis::Result::GENERIC_ERROR;
     } else {
       const std::string full_directory_path =
           file_system::FullPath(application->name());
@@ -76,7 +76,7 @@ void ListFilesResponse::Run() {
       } else {
         (*message_)[strings::msg_params][strings::success] = false;
         (*message_)[strings::msg_params][strings::result_code] =
-            NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR;
+            mobile_apis::Result::GENERIC_ERROR;
       }
     }
   }

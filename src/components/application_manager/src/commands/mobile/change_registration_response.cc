@@ -95,7 +95,7 @@ void ChangeRegistrationResponse::Run() {
         (mobile_api::Result::SUCCESS == result_vr)) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        mobile_apis::Result::SUCCESS;
       SendResponse();
     } else {
       // TODO(VS): check ui and vr response code

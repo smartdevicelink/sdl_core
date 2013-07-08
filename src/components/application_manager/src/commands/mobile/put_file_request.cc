@@ -54,7 +54,7 @@ void PutFileRequest::Run() {
 
   if (!application) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -82,12 +82,12 @@ void PutFileRequest::Run() {
                            file_data)) {
       application->AddFile(sync_file_name, is_persistent_file);
 
-      SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+      SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
-      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   }
 }
 

@@ -239,6 +239,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/navi_alert_maneuver_response.cc
 ./src/commands/hmi/navi_update_turn_list_request.cc
 ./src/commands/hmi/navi_update_turn_list_response.cc
+./src/commands/hmi/navi_show_constant_tbt_request.cc
+./src/commands/hmi/navi_show_constant_tbt_response.cc
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc

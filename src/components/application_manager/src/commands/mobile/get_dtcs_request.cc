@@ -57,14 +57,14 @@ void GetDTCsRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
     LOG4CXX_ERROR(logger_, "App has not been activated");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+                 mobile_apis::Result::REJECTED);
     return;
   }
 
@@ -73,7 +73,7 @@ void GetDTCsRequest::Run() {
 
   if (NULL == vi_request) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 

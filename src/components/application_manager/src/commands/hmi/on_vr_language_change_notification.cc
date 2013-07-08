@@ -59,7 +59,7 @@ void OnVRLanguageChangeNotification::Run() {
       ApplicationManagerImpl::instance()->active_ui_language();
 
   (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::OnLanguageChangeID;
+      mobile_apis::FunctionID::OnLanguageChangeID;
 
   std::set<Application*> applications = ApplicationManagerImpl::instance()
       ->applications();

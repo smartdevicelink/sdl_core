@@ -32,7 +32,7 @@
 #include "application_manager/commands/hmi/ui_create_interaction_choice_set_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
@@ -66,8 +66,8 @@ void UICreateInteractionChoiceSetResponse::Run() {
     /* store received response code for to check it
      * in corresponding Mobile response
      */
-    const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+    const mobile_apis::Result::eType code =
+      static_cast<mobile_apis::Result::eType>(
         (*message_)[strings::msg_params][hmi_response::code].asInt());
 
     msg_chain->set_ui_response_result(code);
@@ -82,7 +82,7 @@ void UICreateInteractionChoiceSetResponse::Run() {
       return;
     }
 
-    if (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == code) {
+    if (mobile_apis::Result::SUCCESS == code) {
       app->AddChoiceSet(data[strings::msg_params]
                         [strings::interaction_choice_set_id].asInt(),
                         data[strings::msg_params]);
@@ -90,7 +90,7 @@ void UICreateInteractionChoiceSetResponse::Run() {
 
     // prepare SmartObject for mobile factory
     (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::CreateInteractionChoiceSetID;
+      mobile_apis::FunctionID::CreateInteractionChoiceSetID;
 
     SendResponseToMobile(message_);
 }

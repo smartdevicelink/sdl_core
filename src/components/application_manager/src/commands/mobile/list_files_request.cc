@@ -46,7 +46,7 @@ ListFilesRequest::~ListFilesRequest() {
 }
 
 void ListFilesRequest::Run() {
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands

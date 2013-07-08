@@ -54,7 +54,7 @@ set(LIBRARIES
     test_ProtocolHandlerTest
     test_JSONCPPTest
     test_MobileMessageHandlerTest
-    v4_protocol_v2_0_revT
+    MOBILE_API
     jsoncpp
     Utils
     rt

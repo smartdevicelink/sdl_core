@@ -58,7 +58,7 @@ void ShowRequest::Run() {
   if (!application_impl) {
     LOG4CXX_ERROR_EXT(logger_, "An application "
                           << application_impl->name() << " is not registered.");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::
+    SendResponse(false, mobile_apis::
                  Result::APPLICATION_NOT_REGISTERED);
     return;
   }

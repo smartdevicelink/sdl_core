@@ -58,7 +58,7 @@ void OnEncodedSyncPDataNotification::Run() {
   if (!file_system::FileExists(fileName)) {
     (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
-      NsSmartDeviceLinkRPC::V2::Result::FILE_NOT_FOUND;
+      mobile_apis::Result::FILE_NOT_FOUND;
 
     SendResponse();
 

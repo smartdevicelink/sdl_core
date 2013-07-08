@@ -59,7 +59,7 @@ void SetGlobalPropertiesRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -81,14 +81,14 @@ void SetGlobalPropertiesRequest::Run() {
   if (NULL == p_smrt_ui) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+                 mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 
   if (!p_smrt_ui) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+                 mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 

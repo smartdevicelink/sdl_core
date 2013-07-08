@@ -100,7 +100,7 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
       (*error_response)[strings::params][strings::connection_key] =
           static_cast<int>(session_key_);
       (*error_response)[strings::params][strings::function_id] =
-          NsSmartDeviceLinkRPC::V2::FunctionID::eType::PerformAudioPassThruID;
+          mobile_apis::FunctionID::eType::PerformAudioPassThruID;
 
       (*error_response)[strings::msg_params][strings::success] = false;
       (*error_response)[strings::msg_params][strings::result_code] =
@@ -126,7 +126,7 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
   (*end_audio)[strings::params][strings::connection_key] =
       static_cast<int>(session_key_);
   (*end_audio)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::EndAudioPassThruID;
+      mobile_apis::FunctionID::eType::EndAudioPassThruID;
   (*end_audio)[strings::msg_params][strings::success] = true;
   (*end_audio)[strings::msg_params][strings::result_code] =
       NsSmartDeviceLinkRPCV2::Result::SUCCESS;
@@ -258,7 +258,7 @@ void AudioPassThruThreadImpl::threadMain() {
     (*on_audio_pass)[strings::params][strings::connection_key] =
         static_cast<int>(session_key_);
     (*on_audio_pass)[strings::params][strings::function_id] =
-        NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAudioPassThruID;
+        mobile_apis::FunctionID::eType::OnAudioPassThruID;
 
     (*on_audio_pass)[strings::msg_params][strings::success] = true;
     (*on_audio_pass)[strings::msg_params][strings::result_code] =

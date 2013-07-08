@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/set_global_properties_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 
@@ -74,11 +74,11 @@ void SetGlobalPropertiesResponse::Run() {
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
 
-    if ((NsSmartDeviceLinkRPC::V2::Result::SUCCESS == result_ui) &&
-            (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == result_tts)) {
+    if ((mobile_apis::Result::SUCCESS == result_ui) &&
+            (mobile_apis::Result::SUCCESS == result_tts)) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        mobile_apis::Result::SUCCESS;
       SendResponse();
     } else {
       // TODO: check ui and tts response code

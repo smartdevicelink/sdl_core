@@ -32,7 +32,7 @@
 #include "application_manager/commands/hmi/tts_set_global_properties_response.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -62,15 +62,15 @@ void TTSSetGlobalPropertiesResponse::Run() {
      /* store received response code for to check it
       * in corresponding Mobile response
       */
-     const NsSmartDeviceLinkRPC::V2::Result::eType code =
-       static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+     const mobile_apis::Result::eType code =
+       static_cast<mobile_apis::Result::eType>(
          (*message_)[strings::msg_params][hmi_response::code].asInt());
 
      msg_chain->set_tts_response_result(code);
 
      // prepare SmartObject for mobile factory
      (*message_)[strings::params][strings::function_id] =
-       NsSmartDeviceLinkRPC::V2::FunctionID::SetGlobalPropertiesID;
+       mobile_apis::FunctionID::SetGlobalPropertiesID;
 
      SendResponseToMobile(message_);
 }

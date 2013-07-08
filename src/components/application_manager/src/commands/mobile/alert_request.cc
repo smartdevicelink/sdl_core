@@ -62,7 +62,7 @@ void AlertRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 

@@ -34,14 +34,14 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 
 #include <map>
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "application_manager/application_impl.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 
 namespace application_manager {
 
-namespace mobile_api = NsSmartDeviceLinkRPC::V2;
+namespace mobile_api = mobile_apis;
 
 /*
  * @brief Typedef for HMI TextFieldName type
@@ -152,7 +152,7 @@ class MessageHelper {
    **/
   static void SendOnAppInterfaceUnregisteredNotificationToMobile(
       int connection_key,
-      NsSmartDeviceLinkRPC::V2::AppInterfaceUnregisteredReason::eType reason);
+      mobile_apis::AppInterfaceUnregisteredReason::eType reason);
 
   /*
    * @brief Retrieve vehicle data map for param name in mobile request

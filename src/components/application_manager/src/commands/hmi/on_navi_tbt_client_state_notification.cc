@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,7 +49,7 @@ void OnNaviTBTClientStateNotification::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::OnTBTClientStateID;
+    mobile_apis::FunctionID::OnTBTClientStateID;
 
   SendNotificationToMobile(message_);
 }

@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -56,7 +56,7 @@ class CommandRequestImpl : public CommandImpl {
   virtual bool CleanUp();
   virtual void Run();
   void SendResponse(const bool success,
-                    const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
+                    const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
                     const NsSmart::CSmartObject* response_params = NULL);
 };

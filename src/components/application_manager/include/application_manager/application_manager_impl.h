@@ -251,6 +251,11 @@ class ApplicationManagerImpl : public ApplicationManager
     void set_active_tts_language(
       const hmi_apis::Common_Language::eType& language);
 
+    void set_vehicle_type(
+      const smart_objects::CSmartObject& vehicle_type);
+
+    const smart_objects::CSmartObject* vehicle_type() const;
+
     /*
      * @brief Retrieves SDL access to all mobile apps
      *
@@ -265,22 +270,6 @@ class ApplicationManagerImpl : public ApplicationManager
      */
     void set_all_apps_allowed(const bool& allowed);
 
-    /*
-     * @brief Provides information about the vehicle
-     *
-     * @return VehicleType
-     */
-    inline const smart_objects::CSmartObject*
-    vehicle_type() const;
-
-    /*
-     * @brief Sets information about the vehicle
-     *
-     * @param vehicle_type Vehicle info recieved from
-     * corresponding car component
-     */
-    void set_vehicle_type(
-      const smart_objects::CSmartObject& vehicle_type);
     /*
      * @brief Starts audio pass thru thread
      *
@@ -392,12 +381,12 @@ class ApplicationManagerImpl : public ApplicationManager
     hmi_apis::Common_Language::eType              ui_language_;
     hmi_apis::Common_Language::eType              vr_language_;
     hmi_apis::Common_Language::eType              tts_language_;
+    smart_objects::CSmartObject* vehicle_type_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler*        connection_handler_;
     request_watchdog::Watchdog*                   watchdog_;
-    smart_objects::CSmartObject*                  vehicle_type_;
 
     static log4cxx::LoggerPtr                     logger_;
 
@@ -434,12 +423,6 @@ ApplicationManagerImpl::active_tts_language() const {
 inline bool ApplicationManagerImpl::all_apps_allowed() const {
   return is_all_apps_allowed_;
 }
-
-inline const smart_objects::CSmartObject*
-  ApplicationManagerImpl::vehicle_type() const {
-  return vehicle_type_;
-}
-
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_

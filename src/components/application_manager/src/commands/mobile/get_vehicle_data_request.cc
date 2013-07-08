@@ -36,7 +36,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -63,13 +63,13 @@ void GetVehicleDataRequest::Run() {
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
     LOG4CXX_ERROR(logger_, "app in HMI level HMI_NONE");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
@@ -78,7 +78,7 @@ void GetVehicleDataRequest::Run() {
 
   if (NULL == get_vehicle_data) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 

@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -103,13 +103,13 @@ void OnVehicleDataNotification::SendVehicleData(const ApplicationImpl* app) {
   (*on_vehicle_data)[strings::params][strings::connection_key] =
     connection_key;
   (*on_vehicle_data)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnVehicleDataID;
+    mobile_apis::FunctionID::eType::OnVehicleDataID;
   (*on_vehicle_data)[strings::msg_params][strings::prndl] =
     (*message_)[strings::msg_params][hmi_notification::prndl];
 
   (*on_vehicle_data)[strings::msg_params][strings::success] = true;
   (*on_vehicle_data)[strings::msg_params][strings::result_code] =
-    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    mobile_apis::Result::SUCCESS;
 
   message_.reset(on_vehicle_data);
   SendNotification();

@@ -31,7 +31,7 @@
  */
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,7 +49,7 @@ void VIReadDIDResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::ReadDIDID;
+    mobile_apis::FunctionID::ReadDIDID;
 
   SendResponseToMobile(message_);
 }

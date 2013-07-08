@@ -57,7 +57,7 @@ void PerformAudioPassThruRequest::Run() {
   if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
     LOG4CXX_ERROR_EXT(logger_, "TOO_MANY_PENDING_REQUESTS");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::TOO_MANY_PENDING_REQUESTS);
+                 mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
     return;
   }
 
@@ -69,14 +69,14 @@ void PerformAudioPassThruRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
     LOG4CXX_ERROR_EXT(logger_, "application isn't activated");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+                 mobile_apis::Result::REJECTED);
     return;
   }
 

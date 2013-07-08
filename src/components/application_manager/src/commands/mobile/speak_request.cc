@@ -58,7 +58,7 @@ void SpeakRequest::Run() {
     LOG4CXX_ERROR_EXT(logger_, "An application "
                           << application_impl->name() << " is not registered.");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -67,7 +67,7 @@ void SpeakRequest::Run() {
 
   if (!speak_request) {
     LOG4CXX_INFO(logger_, "NULL pointer!");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 

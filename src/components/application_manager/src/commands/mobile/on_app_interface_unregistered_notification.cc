@@ -33,7 +33,7 @@
 
 #include "application_manager/commands/mobile/on_app_interface_unregistered_notification.h"
 #include "application_manager/message.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 

@@ -64,7 +64,7 @@ void ShowResponse::Run() {
     if (true == code) {
       (*message_)[strings::params][strings::success] = true;
       (*message_)[strings::params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        mobile_apis::Result::SUCCESS;
     } else {
       // TODO(VS): Some logic
     }

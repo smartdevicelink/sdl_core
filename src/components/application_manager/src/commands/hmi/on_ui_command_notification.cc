@@ -32,7 +32,7 @@
 
 #include "application_manager/commands/hmi/on_ui_command_notification.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 
 namespace application_manager {
@@ -53,10 +53,10 @@ void OnUICommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnUICommandNotification::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
+    mobile_apis::FunctionID::eType::OnCommandID;
 
   (*message_)[strings::params][strings::trigger_source] =
-    NsSmartDeviceLinkRPC::V2::TriggerSource::TS_MENU;
+    mobile_apis::TriggerSource::TS_MENU;
   SendNotificationToMobile(message_);
 }
 

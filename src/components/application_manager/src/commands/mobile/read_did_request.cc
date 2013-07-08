@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -62,13 +62,13 @@ void ReadDIDRequest::Run() {
     LOG4CXX_ERROR_EXT(logger_, "An application "
                       << app->name() << " is not registered.");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::REJECTED);
+                 mobile_apis::Result::REJECTED);
     return;
   }
 
@@ -77,7 +77,7 @@ void ReadDIDRequest::Run() {
 
   if (!p_vi_read_did) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+                 mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 

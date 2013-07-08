@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -70,7 +70,7 @@ void GetVehicleDataResponse::Run() {
     if (code) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        mobile_apis::Result::SUCCESS;
 
     } else {
       // TODO(DK): Some logic

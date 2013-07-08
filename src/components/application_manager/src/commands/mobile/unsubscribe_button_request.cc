@@ -60,7 +60,7 @@ void UnsubscribeButtonRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -68,12 +68,12 @@ void UnsubscribeButtonRequest::Run() {
                               ((*message_)[str::params][str::button_name].asInt());
   if (!app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
   app->UnsubscribeFromButton(btn_id);
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands

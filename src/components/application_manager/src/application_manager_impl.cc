@@ -67,7 +67,9 @@ ApplicationManagerImpl::ApplicationManagerImpl()
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
   delete perform_audio_thread_;
-  delete vehicle_type_;
+  if (vehicle_type_) {
+    delete vehicle_type_;
+  }
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -207,11 +209,12 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
 
-  /*hmi_apis::HMI_API factory;
+  hmi_apis::HMI_API factory;
+  LOG4CXX_INFO(logger_, "factory");
   smart_objects::CSmartObject is_vr_ready =
     factory.CreateSmartObject(hmi_apis::FunctionID::VR_IsReady,
                               hmi_apis::messageType::request);
-  */
+
   LOG4CXX_INFO(logger_, "Sending vr is ready");
 
   /*CommandSharedPtr command = HMICommandFactory::CreateCommand(is_vr_ready);
@@ -309,18 +312,21 @@ void ApplicationManagerImpl::set_active_tts_language(
   tts_language_ = language;
 }
 
-void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
-  is_all_apps_allowed_ = allowed;
-}
-
 void ApplicationManagerImpl::set_vehicle_type(
   const smart_objects::CSmartObject& vehicle_type) {
   if (vehicle_type_) {
-      delete vehicle_type_;
+    delete vehicle_type_;
   }
+  vehicle_type_ = new smart_objects::CSmartObject(vehicle_type);
+}
 
-  vehicle_type_ =
-      new smart_objects::CSmartObject(vehicle_type);
+const smart_objects::CSmartObject*
+ApplicationManagerImpl::vehicle_type() const {
+  return vehicle_type_;
+}
+
+void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
+  is_all_apps_allowed_ = allowed;
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,

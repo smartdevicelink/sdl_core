@@ -55,7 +55,7 @@ void SetIconRequest::Run() {
 
   if (NULL == app) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -69,7 +69,7 @@ void SetIconRequest::Run() {
   std::string full_file_path = file_system::FullPath(relative_file_path);
 
   if (!file_system::FileExists(full_file_path)) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 

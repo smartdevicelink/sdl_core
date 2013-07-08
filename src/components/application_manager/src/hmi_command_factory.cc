@@ -139,6 +139,8 @@
 #include "application_manager/commands/hmi/vi_get_vehicle_type_request.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_type_response.h"
 #include "application_manager/commands/hmi/navi_is_ready_request.h"
+#include "application_manager/commands/hmi/navi_show_constant_tbt_request.h"
+#include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
 #include "application_manager/commands/hmi/navi_is_ready_response.h"
 #include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
 #include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
@@ -639,6 +641,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::NaviUpdateTurnListResponse(message));
       } else {
         command.reset(new commands::NaviUpdateTurnListRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::NaviShowConstantTBTResponse(message));
+      } else {
+        command.reset(new commands::NaviShowConstantTBTRequest(message));
       }
       break;
     }
