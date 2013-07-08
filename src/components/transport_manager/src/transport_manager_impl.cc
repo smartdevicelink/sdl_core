@@ -71,7 +71,7 @@ TransportManagerImpl::TransportManagerImpl()
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
-  device_adapter_listener_ = new DeviceAdapterListenerImpl(this);
+  device_adapter_listener_.push_back(new DeviceAdapterListenerImpl(this));
 //todo: uncoment when adapter is ready
 //	DeviceAdapter *d = new BluetoothAdapter();
 //	d->init(device_adapter_listener_, NULL);
@@ -96,9 +96,9 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
-  device_adapter_listener_ = new DeviceAdapterListenerImpl(this);
+  device_adapter_listener_.push_back(new DeviceAdapterListenerImpl(this));
   device_handle_generator_ = new DeviceHandleGeneratorImpl();
-  device_adapter->init(device_adapter_listener_, device_handle_generator_,
+  device_adapter->init(&device_adapter_listener_, device_handle_generator_,
                        NULL);
   addDeviceAdapter(device_adapter);
   LOG4CXX_INFO(logger_, "TM object with device adapter created.");
@@ -115,8 +115,8 @@ TransportManagerImpl::~TransportManagerImpl() {
   pthread_mutex_destroy(&message_queue_mutex_);
   pthread_mutex_destroy(&event_queue_mutex_);
   pthread_cond_destroy(&device_listener_thread_wakeup_);
-  delete transport_manager_listener_;
-  delete device_adapter_listener_;
+  //delete transport_manager_listener_;
+  //delete device_adapter_listener_;
   delete device_handle_generator_;
   LOG4CXX_INFO(logger_, "TM object destroyed.");
 }
@@ -167,14 +167,13 @@ void TransportManagerImpl::disconnectDevice(const SessionID &session_id) {
   LOG4CXX_INFO(logger_, "Disconnected");
 }
 
-void TransportManagerImpl::registerEventListener(
+void TransportManagerImpl::addEventListener(
     TransportManagerListener *listener) {
-  this->set_transport_manager_listener(listener);
+  this->addTransportManagerListener(listener);
 }
 
-void TransportManagerImpl::registerAdapterListener(
-    DeviceAdapterListener *listener) {
-  this->set_device_adapter_listener(listener);
+void TransportManagerImpl::addAdapterListener(DeviceAdapterListener *listener) {
+  this->addDeviceAdapterListener(listener);
 }
 
 void TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {
@@ -215,12 +214,11 @@ void TransportManagerImpl::searchDevices(void) {
     //todo: log error
     return;
   }
-  for (AdapterHandler::AdapterList::iterator da = adapter_handler_
+  for (AdapterHandler::AdapterList::const_iterator it = adapter_handler_
       .device_adapters().begin();
-      da != adapter_handler_.device_adapters().end(); ++da) {
+      it != adapter_handler_.device_adapters().end(); ++it) {
     LOG4CXX_INFO(logger_, "Iterating over device adapters");
-    DeviceAdapter::Error err = (*da)->searchDevices();
-    if (DeviceAdapter::Error::OK != err) {
+    if (DeviceAdapter::Error::OK != (*it)->searchDevices()) {
       LOG4CXX_ERROR(logger_, "Device adapter search failed");
       //todo: notify error
     }
@@ -268,12 +266,12 @@ void TransportManagerImpl::postMessage(const RawMessageSptr message) {
 }
 
 /* not clear when this function shall be used
-void TransportManagerImpl::updateMessage(const RawMessageSptr old_message, const RawMessageSptr new_message) {
-  pthread_mutex_lock(&message_queue_mutex_);
-  pthread_mutex_unlock(&message_queue_mutex_);
+ void TransportManagerImpl::updateMessage(const RawMessageSptr old_message, const RawMessageSptr new_message) {
+ pthread_mutex_lock(&message_queue_mutex_);
+ pthread_mutex_unlock(&message_queue_mutex_);
 
-}
-*/
+ }
+ */
 
 void TransportManagerImpl::removeMessage(const RawMessageSptr message) {
   LOG4CXX_INFO(logger_, "Remove message called " << message->serial_number());
@@ -304,14 +302,14 @@ void TransportManagerImpl::postEvent(
   pthread_mutex_unlock(&event_queue_mutex_);
 }
 
-void TransportManagerImpl::set_device_adapter_listener(
+void TransportManagerImpl::addDeviceAdapterListener(
     DeviceAdapterListener *listener) {
-  device_adapter_listener_ = listener;
+  device_adapter_listener_.push_back(listener);
 }
 
-void TransportManagerImpl::set_transport_manager_listener(
+void TransportManagerImpl::addTransportManagerListener(
     TransportManagerListener *listener) {
-  transport_manager_listener_ = listener;
+  transport_manager_listener_.push_back(listener);
 }
 
 void *TransportManagerImpl::eventListenerStartThread(void *data) {
@@ -329,8 +327,8 @@ void TransportManagerImpl::eventListenerThread(void) {
     pthread_mutex_lock(&event_queue_mutex_);
     pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
 
-    for (EventQueue::iterator it =
-        event_queue_.begin(); it != event_queue_.end(); ++it) {
+    for (EventQueue::iterator it = event_queue_.begin();
+        it != event_queue_.end(); ++it) {
 
       //todo: check that data is copied correctly here
       DeviceAdapter *da = (*it).device_adapter();
@@ -351,20 +349,32 @@ void TransportManagerImpl::eventListenerThread(void) {
               item != dev_list.end(); ++item) {
             LOG4CXX_INFO(logger_, "Iterating over device list " << (*item));
             adapter_handler_.addDevice(da, (*item));
-            transport_manager_listener_->onSearchDeviceDone(
-                (*item), da->getApplicationList((*item)));
+            for (TransportManagerListenerList::iterator dal_it =
+                transport_manager_listener_.begin();
+                dal_it != transport_manager_listener_.end(); ++dal_it) {
+              (*dal_it)->onSearchDeviceDone((*item),
+                                            da->getApplicationList((*item)));
+            }
             LOG4CXX_INFO(logger_, "Callback called");
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL:
           //error happened in real search process (external error)
           srch_err = static_cast<SearchDeviceError *>((*it).error());
-          transport_manager_listener_->onSearchDeviceFailed(da, *srch_err);
+          for (TransportManagerListenerList::iterator dal_it =
+              transport_manager_listener_.begin();
+              dal_it != transport_manager_listener_.end(); ++dal_it) {
+            (*dal_it)->onSearchDeviceFailed(da, *srch_err);
+          }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE:
           adapter_handler_.addSession((*it).device_adapter(),
                                       (*it).session_id());
-          transport_manager_listener_->onConnectDone(da, sid);
+          for (TransportManagerListenerList::iterator dal_it =
+              transport_manager_listener_.begin();
+              dal_it != transport_manager_listener_.end(); ++dal_it) {
+            (*dal_it)->onConnectDone(da, sid);
+          }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:
           break;
@@ -380,17 +390,26 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL:
           //todo: start timer here to wait before notify caller and remove unsent messages
-          LOG4CXX_ERROR(logger_, "Device adapter failed to send data");
+          LOG4CXX_ERROR(logger_, "Device adapter failed to send data")
+          ;
           //todo: potential error case -> thread unsafe update of message content
-          data->set_waiting(true);//mark message for re-send
+          data->set_waiting(true);  //mark message for re-send
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE:
           data = (*it).data();
-          transport_manager_listener_->onDataReceiveDone(da, sid, data);
+          for (TransportManagerListenerList::iterator dal_it =
+              transport_manager_listener_.begin();
+              dal_it != transport_manager_listener_.end(); ++dal_it) {
+            (*dal_it)->onDataReceiveDone(da, sid, data);
+          }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL:
           d_err = static_cast<DataReceiveError *>((*it).error());
-          transport_manager_listener_->onDataReceiveFailed(da, sid, *d_err);
+          for (TransportManagerListenerList::iterator dal_it =
+              transport_manager_listener_.begin();
+              dal_it != transport_manager_listener_.end(); ++dal_it) {
+            (*dal_it)->onDataReceiveFailed(da, sid, *d_err);
+          }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR:
           break;
@@ -443,7 +462,7 @@ void TransportManagerImpl::messageQueueThread(void) {
         //probably error no device adapters found
         //todo: define shall we remove message or send it back to upper level
         message_queue_.remove(active_msg);
-          LOG4CXX_ERROR(logger_, "Device adapter is not found remove message");
+        LOG4CXX_ERROR(logger_, "Device adapter is not found remove message");
       } else {
         if (DeviceAdapter::Error::OK
             == device_adapter->sendData(active_msg->connection_key(),
@@ -512,7 +531,7 @@ void TransportManagerImpl::AdapterHandler::addAdapter(
   device_adapters_.push_back(device_adapter);
 }
 
-TransportManagerImpl::AdapterHandler::AdapterList TransportManagerImpl::AdapterHandler::device_adapters(
+const TransportManagerImpl::AdapterHandler::AdapterList &TransportManagerImpl::AdapterHandler::device_adapters(
     void) {
   return device_adapters_;
 }

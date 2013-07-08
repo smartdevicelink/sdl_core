@@ -62,16 +62,22 @@ TEST(TransportManagerImpl, connect)
 
   MockDeviceAdapterListener *mdal = new MockDeviceAdapterListener();
 
-  impl->registerAdapterListener(mdal);
+  impl->addAdapterListener(mdal);
+
+  impl->searchDevices();
+  EXPECT_CALL(*mdal, onSearchDeviceDone(_)).Times(1);
+  EXPECT_CALL(*mdal, onSearchDeviceFailed(_, _)).Times(1);
+
+  impl->connectDevice(1, 1, 1);
+  EXPECT_CALL(*mdal, onConnectDone(_, _)).Times(1);
+  EXPECT_CALL(*mdal, onConnectFailed(_, _, _)).Times(1);
 
   unsigned char buf[10] = { 0 };
 
   RawMessageSptr msg(new RawMessage(10, 1, 1, buf, 10));
 
   impl->sendMessageToDevice(msg);
-  sleep(2);
 
   EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(1);
   EXPECT_CALL(*mdal, onDataSendFailed(_, _, _, _)).Times(1);
-  sleep(2);
 }

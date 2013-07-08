@@ -124,7 +124,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void registerEventListener(TransportManagerListener *listener) = 0;
+  virtual void addEventListener(TransportManagerListener *listener) = 0;
 
   /**
    * @brief register listener that would be used to catch adapter's events
@@ -133,7 +133,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void registerAdapterListener(
+  virtual void addAdapterListener(
       transport_manager::DeviceAdapterListener *listener) = 0;
 
   /**
