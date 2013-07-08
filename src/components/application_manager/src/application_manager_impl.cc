@@ -63,14 +63,33 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
     vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
     tts_language_(hmi_apis::Common_Language::INVALID_ENUM),
-    vehicle_type_(NULL) {
+    vehicle_type_(NULL),
+    hmi_handler_(NULL),
+    mobile_handler_(NULL),
+    connection_handler_(NULL),
+    watchdog_(NULL) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
-  delete perform_audio_thread_;
+  if (perform_audio_thread_) {
+    delete perform_audio_thread_;
+  }
   if (vehicle_type_) {
     delete vehicle_type_;
+  }
+  if (hmi_handler_) {
+    delete hmi_handler_;
+  }
+  if (mobile_handler_) {
+    delete mobile_handler_;
+  }
+  if (connection_handler_) {
+    /* TODO (DK) : destructor is protected
+    delete connection_handler_;*/
+  }
+  if (watchdog_) {
+    delete watchdog_;
   }
 }
 
@@ -369,6 +388,11 @@ void ApplicationManagerImpl::OnMobileMessageReceived(
   utils::SharedPtr<smart_objects::CSmartObject> smart_object(
     new smart_objects::CSmartObject);
 
+  if (!smart_object) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return;
+  }
+
   if (!ConvertMessageToSO(*message, *smart_object)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
@@ -392,6 +416,12 @@ void ApplicationManagerImpl::onMessageReceived(
 
   utils::SharedPtr<smart_objects::CSmartObject> smart_object(
     new smart_objects::CSmartObject);
+
+  if (!smart_object) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return;
+  }
+
   if (!ConvertMessageToSO(*message, *smart_object)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
@@ -456,7 +486,6 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 
 void ApplicationManagerImpl::SendMessageToMobile(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
-
   DCHECK(message);
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
@@ -501,6 +530,11 @@ void ApplicationManagerImpl::SendMessageToHMI(
     return;
   }
   utils::SharedPtr<Message> message_to_send(new Message);
+  if (!message_to_send) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return;
+  }
+
   if (!ConvertSOtoMessage(*message, *message_to_send)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
@@ -645,6 +679,11 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
     application_manager::BinaryData* binaryData =
         new application_manager::BinaryData(
         message.getElement(strings::binary_data).asBinary());
+
+    if (NULL == binaryData) {
+      LOG4CXX_ERROR(logger_, "Null pointer");
+      return false;
+    }
     output.set_binary_data(binaryData);
   }
 
