@@ -251,6 +251,11 @@ class ApplicationManagerImpl : public ApplicationManager
     void set_active_tts_language(
       const hmi_apis::Common_Language::eType& language);
 
+    void set_vehicle_type(
+      const smart_objects::CSmartObject& vehicle_type);
+
+    const smart_objects::CSmartObject* vehicle_type() const;
+
     /*
      * @brief Retrieves SDL access to all mobile apps
      *
@@ -376,6 +381,7 @@ class ApplicationManagerImpl : public ApplicationManager
     hmi_apis::Common_Language::eType              ui_language_;
     hmi_apis::Common_Language::eType              vr_language_;
     hmi_apis::Common_Language::eType              tts_language_;
+    smart_objects::CSmartObject* vehicle_type_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
