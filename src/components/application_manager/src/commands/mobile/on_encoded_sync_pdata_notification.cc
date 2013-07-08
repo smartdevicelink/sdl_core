@@ -61,7 +61,7 @@ void OnEncodedSyncPDataNotification::Run() {
       mobile_apis::Result::FILE_NOT_FOUND;
 
     SendResponse();
-
+    LOG4CXX_ERROR(logger_, "File not found");
     return;
   }
 

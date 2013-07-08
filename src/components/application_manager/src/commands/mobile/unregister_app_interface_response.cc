@@ -38,7 +38,8 @@ namespace application_manager  {
 
 namespace commands  {
 
-void UnregisterAppInterfaceResponse::Run()  {
+void UnregisterAppInterfaceResponse::Run() {
+  LOG4CXX_INFO(logger_, "UnregisterAppInterfaceResponse::Run");
   SendResponse();
 }
 

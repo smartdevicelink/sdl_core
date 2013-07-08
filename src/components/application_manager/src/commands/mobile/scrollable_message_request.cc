@@ -42,6 +42,7 @@ namespace application_manager {
 namespace commands {
 
 void ScrollabeMessageRequest::Run() {
+  LOG4CXX_INFO(logger_, "ScrollabeMessageRequest::Run");
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id]));
@@ -49,6 +50,7 @@ void ScrollabeMessageRequest::Run() {
   if (NULL == application_impl) {
     SendResponse(false, mobile_apis::
                  Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 

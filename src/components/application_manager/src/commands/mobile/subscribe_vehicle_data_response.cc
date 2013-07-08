@@ -55,6 +55,7 @@ void SubscribeVehicleDataResponse::Run() {
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 

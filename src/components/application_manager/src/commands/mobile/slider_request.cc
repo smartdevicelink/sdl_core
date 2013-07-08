@@ -49,6 +49,7 @@ SliderRequest::~SliderRequest() {
 }
 
 void SliderRequest::Run() {
+  LOG4CXX_INFO(logger_, "SliderRequest::Run");
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id]));
@@ -56,6 +57,7 @@ void SliderRequest::Run() {
   if (NULL == application_impl) {
     SendResponse(false, mobile_apis::
                  Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 

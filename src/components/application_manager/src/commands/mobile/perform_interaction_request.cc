@@ -48,6 +48,7 @@ PerformInteractionRequest::~PerformInteractionRequest() {
 }
 
 void PerformInteractionRequest::Run() {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::Run");
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
@@ -55,6 +56,7 @@ void PerformInteractionRequest::Run() {
   if (NULL == app) {
     SendResponse(false,
                  mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -63,6 +65,7 @@ void PerformInteractionRequest::Run() {
 
   if (!app->FindChoiceSet(choise_set_id)) {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
+    LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
   }
 

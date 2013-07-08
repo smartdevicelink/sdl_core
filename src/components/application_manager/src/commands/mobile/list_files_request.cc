@@ -46,6 +46,7 @@ ListFilesRequest::~ListFilesRequest() {
 }
 
 void ListFilesRequest::Run() {
+  LOG4CXX_INFO(logger_, "ListFilesRequest::Run");
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 

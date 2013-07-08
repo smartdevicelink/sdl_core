@@ -39,18 +39,21 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceRequest::Run() {
+  LOG4CXX_INFO(logger_, "UnregisterAppInterfaceRequest::Run");
   ApplicationManagerImpl* application_manager_impl =
     ApplicationManagerImpl::instance();
   if (!application_manager_impl->
       application((*message_)[strings::params][strings::connection_key])) {
     SendResponse(false,
                  mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
   if (!application_manager_impl->
       UnregisterApplication((*message_)[strings::msg_params][strings::app_id])) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+    LOG4CXX_ERROR(logger_, "Generic error");
     return;
   }
 

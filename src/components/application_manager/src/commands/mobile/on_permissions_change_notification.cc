@@ -47,6 +47,7 @@ OnPermissionsChangeNotification::~OnPermissionsChangeNotification() {
 }
 
 void OnPermissionsChangeNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnPermissionsChangeNotification::Run");
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 

@@ -48,8 +48,10 @@ DeleteSubMenuResponse::~DeleteSubMenuResponse() {
 }
 
 void DeleteSubMenuResponse::Run() {
+  LOG4CXX_INFO(logger_, "DeleteSubMenuResponse::Run");
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 

@@ -48,6 +48,7 @@ ShowConstantTBTRequest::~ShowConstantTBTRequest() {
 }
 
 void ShowConstantTBTRequest::Run() {
+  LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::Run");
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
@@ -55,6 +56,7 @@ void ShowConstantTBTRequest::Run() {
   if (NULL == app) {
     SendResponse(false,
                  mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 

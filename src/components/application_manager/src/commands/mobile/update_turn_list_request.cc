@@ -59,6 +59,7 @@ void UpdateTurnListRequest::Run() {
   if (NULL == app) {
     SendResponse(false,
                  mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -75,6 +76,7 @@ void UpdateTurnListRequest::Run() {
 
     if (!file_system::FileExists(file_path)) {
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      LOG4CXX_ERROR(logger_, "File is not exists");
       return;
     }
 
@@ -87,7 +89,6 @@ void UpdateTurnListRequest::Run() {
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  // TODO(VS): HMI Request Id
   const int hmi_request_id = hmi_apis::FunctionID::Navigation_UpdateTurnList;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,

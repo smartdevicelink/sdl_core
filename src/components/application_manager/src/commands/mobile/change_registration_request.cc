@@ -73,7 +73,9 @@ void ChangeRegistrationRequest::Run() {
   if (false == IsLanguageSupportedByUI(hmi_language) ||
       false == IsLanguageSupportedByVR(language)     ||
       false == IsLanguageSupportedByTTS(language)) {
-        return;
+
+    LOG4CXX_ERROR(logger_, "Language is not supported by any of modules");
+    return;
   }
 
   const int correlation_id =
