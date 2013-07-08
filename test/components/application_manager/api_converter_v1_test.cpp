@@ -38,7 +38,7 @@
 
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
-#include "v4_protocol_v2_0_revT.h"
+#include "MOBILE_API.h"
 #include "v4_protocol_v1_2_no_extra.h"
 #include "JSONHandler/CSmartFactory.hpp"
 

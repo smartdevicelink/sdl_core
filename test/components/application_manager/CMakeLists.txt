@@ -17,7 +17,7 @@ set(LIBRARIES
     ApplicationManager
     JSONHandler
     jsoncpp
-    v4_protocol_v2_0_revT
+    MOBILE_API
     HMI_API
     SmartObjects
 )
