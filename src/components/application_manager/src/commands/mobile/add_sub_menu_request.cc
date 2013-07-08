@@ -56,14 +56,14 @@ void AddSubMenuRequest::Run() {
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (application->FindSubMenu(
       (*message_)[strings::msg_params][strings::menu_id].asInt())) {
     LOG4CXX_ERROR(logger_, "INVALID_ID");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
@@ -71,7 +71,7 @@ void AddSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_name].asString())) {
     LOG4CXX_ERROR(logger_, "DUPLICATE_NAME");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::DUPLICATE_NAME);
+                 mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
 

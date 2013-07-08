@@ -48,7 +48,7 @@ DialNumberRequest::~DialNumberRequest() {
 }
 
 void DialNumberRequest::Run() {
-  SendResponse(false, NsSmartDeviceLinkRPC::V2::
+  SendResponse(false, mobile_apis::
                    Result::UNSUPPORTED_REQUEST);
 }
 

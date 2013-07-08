@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,7 +49,7 @@ void OnVIVehicleDataNotification::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnVehicleDataID;
+    mobile_apis::FunctionID::eType::OnVehicleDataID;
 
   SendNotificationToMobile(message_);
 }

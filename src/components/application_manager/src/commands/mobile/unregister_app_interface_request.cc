@@ -44,17 +44,17 @@ void UnregisterAppInterfaceRequest::Run() {
   if (!application_manager_impl->
       application((*message_)[strings::params][strings::connection_key])) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (!application_manager_impl->
       UnregisterApplication((*message_)[strings::msg_params][strings::app_id])) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     return;
   }
 
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands

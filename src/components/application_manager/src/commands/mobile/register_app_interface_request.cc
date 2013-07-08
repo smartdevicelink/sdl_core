@@ -44,7 +44,7 @@ void RegisterAppInterfaceRequest::Run() {
   if (ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key])) {
     SendResponse(false,
-             NsSmartDeviceLinkRPC::V2::Result::APPLICATION_REGISTERED_ALREADY);
+             mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
   } else {
     ApplicationImpl* application_impl = new ApplicationImpl(
         (*message_)[strings::params][strings::connection_key]);
@@ -104,9 +104,9 @@ void RegisterAppInterfaceRequest::Run() {
 
     if (!register_application_result) {
       SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+                 mobile_apis::Result::GENERIC_ERROR);
     } else {
-      SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+      SendResponse(true, mobile_apis::Result::SUCCESS);
     }
 
     // TODO(VS): Send notification to hmi

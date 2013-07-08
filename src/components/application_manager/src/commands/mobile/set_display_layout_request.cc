@@ -46,7 +46,7 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
-  SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::UNSUPPORTED_REQUEST);
+  SendResponse(false, mobile_apis::Result::UNSUPPORTED_REQUEST);
 }
 
 }  // namespace commands

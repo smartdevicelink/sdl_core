@@ -55,14 +55,14 @@ void DeleteCommandRequest::Run() {
 
   if (!application) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
   smart_objects::CSmartObject* command = application->
         FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!command) {
-      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
       return;
   }
 

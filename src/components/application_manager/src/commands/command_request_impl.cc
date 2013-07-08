@@ -58,7 +58,7 @@ void CommandRequestImpl::Run() {
 }
 
 void CommandRequestImpl::SendResponse(const bool success,
-    const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
+    const mobile_apis::Result::eType& result_code,
     const char* info, const NsSmart::CSmartObject* response_params) {
 
   NsSmartDeviceLink::NsSmartObjects::CSmartObject response;

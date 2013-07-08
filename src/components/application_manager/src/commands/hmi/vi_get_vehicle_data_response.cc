@@ -31,7 +31,7 @@
  */
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,7 +49,7 @@ void VIGetVehicleDataResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::GetVehicleDataID;
+    mobile_apis::FunctionID::GetVehicleDataID;
 
   SendResponseToMobile(message_);
 }

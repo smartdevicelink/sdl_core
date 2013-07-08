@@ -32,7 +32,7 @@
 
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,10 +49,10 @@ void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run ");
 
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnCommandID;
+    mobile_apis::FunctionID::eType::OnCommandID;
 
   (*message_)[strings::params][strings::trigger_source] =
-    NsSmartDeviceLinkRPC::V2::TriggerSource::TS_VR;
+    mobile_apis::TriggerSource::TS_VR;
   SendNotificationToMobile(message_);
 }
 

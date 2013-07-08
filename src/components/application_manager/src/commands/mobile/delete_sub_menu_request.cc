@@ -54,13 +54,13 @@ void DeleteSubMenuRequest::Run() {
 
   if (!application) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (!application->FindSubMenu(
       (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 

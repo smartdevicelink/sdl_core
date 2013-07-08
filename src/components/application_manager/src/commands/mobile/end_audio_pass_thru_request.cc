@@ -62,7 +62,7 @@ void EndAudioPassThruRequest::Run() {
   if (NULL == ui_audio) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 

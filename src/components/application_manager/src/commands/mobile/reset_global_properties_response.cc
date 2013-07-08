@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/reset_global_properties_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -56,7 +56,7 @@ void ResetGlobalPropertiesResponse::Run() {
 
   (*message_)[strings::msg_params][strings::success] = true;
   (*message_)[strings::msg_params][strings::result_code] =
-    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    mobile_apis::Result::SUCCESS;
   SendResponse();
 }
 

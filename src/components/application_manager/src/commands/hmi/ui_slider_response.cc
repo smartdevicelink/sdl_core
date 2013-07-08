@@ -48,7 +48,7 @@ void UISliderResponse::Run() {
   LOG4CXX_INFO(logger_, "UISliderResponse::Run ");
 
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::SliderID;
+    mobile_apis::FunctionID::SliderID;
 
   SendResponseToMobile(message_);
 

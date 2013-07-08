@@ -61,7 +61,7 @@ void SubscribeButtonRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -70,12 +70,12 @@ void SubscribeButtonRequest::Run() {
   if (app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button " << btn_id);
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::SUBSCRIBED_ALREADY);
+                 mobile_apis::Result::SUBSCRIBED_ALREADY);
     return;
   }
 
   app->SubscribeToButton(btn_id);
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands

@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
@@ -55,13 +55,13 @@ void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-        application((*message_)[str::params][str::connection_key]));
+                           ApplicationManagerImpl::instance()->
+                           application((*message_)[str::params][str::connection_key]));
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -85,28 +85,28 @@ void SubscribeVehicleDataRequest::Run() {
 
       if (app->SubscribeToIVI(static_cast<unsigned int>(it->second))) {
         ++subscribed_items;
-        response_params[it->first][strings::result_code] = NsSmartDeviceLinkRPC
-            ::V2::VehicleDataResultCode::VDRC_SUCCESS;
+        response_params[it->first][strings::result_code] =
+          mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
       } else {
-        response_params[it->first][strings::result_code] = NsSmartDeviceLinkRPC
-            ::V2::VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
+        response_params[it->first][strings::result_code] =
+          mobile_apis::VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
       }
     }
   }
 
   if (subscribed_items == items_to_subscribe) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::SUCCESS,
+                 mobile_apis::Result::SUCCESS,
                  "Subscribed on all VehicleData",
                  &response_params);
   } else if (0 == subscribed_items) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::REJECTED,
+                 mobile_apis::Result::REJECTED,
                  "Already subscribed on all VehicleData",
                  &response_params);
   } else if (subscribed_items < items_to_subscribe) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::WARNINGS,
+                 mobile_apis::Result::WARNINGS,
                  "Already subscribed on some VehicleData",
                  &response_params);
   } else {

@@ -33,7 +33,7 @@
 
 #include "application_manager/commands/mobile/read_did_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -68,7 +68,7 @@ void ReadDIDResponse::Run() {
     if (true == code) {
       (*message_)[strings::params][strings::success] = true;
       (*message_)[strings::params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        mobile_apis::Result::SUCCESS;
     } else {
       // TODO(DK): Some logic
     }

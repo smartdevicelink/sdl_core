@@ -62,7 +62,7 @@ void SetMediaClockTimerResponse::Run() {
         hmi_correlation_id)) {
       (*message_)[strings::params][strings::success] = true;
       (*message_)[strings::params][strings::result_code] =
-              NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+              mobile_apis::Result::SUCCESS;
       SendResponse();
     }
 }

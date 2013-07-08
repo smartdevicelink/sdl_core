@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -58,7 +58,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -67,7 +67,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 
   if (app->FindChoiceSet(choise_set_id)) {
     LOG4CXX_ERROR(logger_, "Invalid ID");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 

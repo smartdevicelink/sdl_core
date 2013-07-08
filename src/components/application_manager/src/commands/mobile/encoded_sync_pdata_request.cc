@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/encoded_sync_pdata_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "encryption/Base64.h"
 
@@ -64,7 +64,7 @@ void EncodedSyncPDataRequest::Run() {
 
     if (NULL == application_impl) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, NsSmartDeviceLinkRPC::V2::
+      SendResponse(false, mobile_apis::
                    Result::APPLICATION_NOT_REGISTERED);
       return;
     }
@@ -87,12 +87,12 @@ void EncodedSyncPDataRequest::Run() {
 
       if (file_system::Write(file_system::FullPath(relative_file_path),
                              char_vector_pdata)) {
-        SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+        SendResponse(true, mobile_apis::Result::SUCCESS);
       } else {
-        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+        SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       }
     } else {
-      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
 }
 

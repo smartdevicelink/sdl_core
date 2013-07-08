@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -94,11 +94,11 @@ void AddCommandResponse::Run() {
                               data[strings::msg_params]);
       }
 
-      if ((NsSmartDeviceLinkRPC::V2::Result::SUCCESS == result_ui) &&
-          (NsSmartDeviceLinkRPC::V2::Result::SUCCESS == result_vr)) {
+      if ((mobile_apis::Result::SUCCESS == result_ui) &&
+          (mobile_apis::Result::SUCCESS == result_vr)) {
             (*message_)[strings::msg_params][strings::success] = true;
             (*message_)[strings::msg_params][strings::result_code] =
-                NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+                mobile_apis::Result::SUCCESS;
                 SendResponse();
     } else {
       // TODO(DK): check ui and vr response code

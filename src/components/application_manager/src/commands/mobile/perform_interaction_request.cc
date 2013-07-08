@@ -54,7 +54,7 @@ void PerformInteractionRequest::Run() {
 
   if (NULL == app) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -62,7 +62,7 @@ void PerformInteractionRequest::Run() {
     (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
 
   if (!app->FindChoiceSet(choise_set_id)) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 

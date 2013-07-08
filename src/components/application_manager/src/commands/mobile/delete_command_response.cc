@@ -66,8 +66,8 @@ void DeleteCommandResponse::Run() {
       (*message_)[strings::params][strings::correlation_id].asInt();
 
   // TODO(DK): HMI code Id
-  const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+  const mobile_apis::Result::eType code =
+      static_cast<mobile_apis::Result::eType>(
       (*message_)[strings::msg_params][hmi_response::code].asInt());
 
   // TODO(VS) HMI Request Id
@@ -114,7 +114,7 @@ void DeleteCommandResponse::Run() {
             data[strings::msg_params][strings::cmd_id].asInt());
         (*message_)[strings::msg_params][strings::success] = true;
         (*message_)[strings::msg_params][strings::result_code] =
-            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+            mobile_apis::Result::SUCCESS;
         SendResponse();
       }
       else {

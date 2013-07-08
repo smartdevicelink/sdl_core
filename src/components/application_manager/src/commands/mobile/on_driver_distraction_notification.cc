@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/on_driver_distraction_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -56,7 +56,7 @@ void OnDriverDistractionNotification::Run() {
 
   for (std::set<Application*>::iterator it = applications.begin();
       applications.end() != it; ++it) {
-    if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE !=
+    if (mobile_apis::HMILevel::eType::HMI_NONE !=
         static_cast<ApplicationImpl*>(*it)->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
       SendNotification();

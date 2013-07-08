@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -59,7 +59,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -68,7 +68,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
 
   if (!app->FindChoiceSet(choise_set_id)) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
@@ -82,7 +82,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
 
   if (NULL == p_smrt_ui) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 

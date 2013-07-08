@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/navi_update_turn_list_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -48,7 +48,7 @@ void NaviUpdateTurnListResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::UpdateTurnListID;
+    mobile_apis::FunctionID::UpdateTurnListID;
 
   SendResponseToMobile(message_);
 }

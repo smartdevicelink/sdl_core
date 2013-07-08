@@ -57,7 +57,7 @@ void AlertManeuverRequest::Run() {
 
   if (NULL == app) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 

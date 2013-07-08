@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/on_command_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -101,7 +101,7 @@ void OnCommandNotification::SendOnMenuCommand(const ApplicationImpl* app) {
 
   (*on_menu_cmd)[strings::msg_params][strings::success] = true;
   (*on_menu_cmd)[strings::msg_params][strings::result_code] =
-    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    mobile_apis::Result::SUCCESS;
 
   // msg trigger_source param is set in HMI notification
 

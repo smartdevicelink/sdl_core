@@ -46,8 +46,8 @@
 #include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "JSONHandler/formatters/formatter_json_rpc.h"
 
-#include "interfaces/v4_protocol_v2_0_revT.h"
-#include "interfaces/v4_protocol_v2_0_revT_schema.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/MOBILE_API_schema.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 
@@ -55,24 +55,25 @@ namespace test_command {
 
 }
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
-namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 TEST(add_command, general) {
   std::string incoming_string =
-    "{\"parameters\": \
-    {\"cmdID\": 1, \"menuParams\" : \
-    {\"menuName\":\"Vasya\" }}}";
+    "{\
+    \"menuID\" : 1000,\
+    \"menuName\" : \"SubmenuName\"\
+}";
+
   smart_objects::CSmartObject incoming_message;
 
-  formatters::CFormatterJsonSDLRPCv2::fromString<mobile_api::FunctionID::eType, mobile_api::messageType::eType>(
+  formatters::CFormatterJsonSDLRPCv2::fromString<mobile_apis::FunctionID::eType, mobile_apis::messageType::eType>(
     incoming_string,
     incoming_message,
-    mobile_api::FunctionID::AddCommandID,
-    mobile_api::messageType::request,
+    mobile_apis::FunctionID::AddSubMenuID,
+    mobile_apis::messageType::request,
     258);
 
-  NsSmartDeviceLinkRPC::V2::v4_protocol_v2_0_revT factory;
+  mobile_apis::MOBILE_API factory;
   std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
 
   std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
@@ -133,7 +134,7 @@ TEST(json2_command, notification) {
 }
 
 TEST(json2_command, request_no_params) {
-  std::string incoming_string = "{\"id\" : 19,\"jsonrpc\" : \"2.0\",\"method\" : \"Buttons.GetCapabilities\"}";
+  std::string incoming_string = "{\"id\":5005,\"jsonrpc\":\"2.0\",\"method\":\"BasicCommunication.GetAppList\"}";
 
   smart_objects::CSmartObject incoming_message;
 

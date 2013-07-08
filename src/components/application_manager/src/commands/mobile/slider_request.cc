@@ -54,7 +54,7 @@ void SliderRequest::Run() {
       application((*message_)[strings::msg_params][strings::app_id]));
 
   if (NULL == application_impl) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::
+    SendResponse(false, mobile_apis::
                  Result::APPLICATION_NOT_REGISTERED);
     return;
   }

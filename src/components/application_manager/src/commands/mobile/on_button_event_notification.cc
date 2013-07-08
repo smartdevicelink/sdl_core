@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/on_button_event_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -82,7 +82,7 @@ void OnButtonEventNotification::Run() {
 
     if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level()) ||
         (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-         && NsSmartDeviceLinkRPC::V2::ButtonName::OK != btn_id)) {
+         && mobile_apis::ButtonName::OK != btn_id)) {
       SendButtonEvent(subscribed_app, false);
     } else {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
@@ -122,7 +122,7 @@ void OnButtonEventNotification::SendButtonEvent(const ApplicationImpl* app,
   (*on_btn_event)[strings::params][strings::connection_key] =
     connection_key;
   (*on_btn_event)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnButtonEventID;
+    mobile_apis::FunctionID::eType::OnButtonEventID;
   (*on_btn_event)[strings::msg_params][strings::button_name] =
     (*message_)[strings::msg_params][hmi_response::button_name];
   (*on_btn_event)[strings::msg_params][strings::button_event_mode] =
@@ -137,7 +137,7 @@ void OnButtonEventNotification::SendButtonEvent(const ApplicationImpl* app,
 
   (*on_btn_event)[strings::msg_params][strings::success] = true;
   (*on_btn_event)[strings::msg_params][strings::result_code] =
-    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    mobile_apis::Result::SUCCESS;
 
   message_.reset(on_btn_event);
   SendNotification();

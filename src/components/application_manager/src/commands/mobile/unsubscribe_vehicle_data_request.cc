@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
@@ -62,7 +62,7 @@ void UnsubscribeVehicleDataRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -85,28 +85,28 @@ void UnsubscribeVehicleDataRequest::Run() {
 
       if (app->UnsubscribeFromIVI(static_cast<unsigned int>(it->second))) {
         ++unsubscribed_items;
-        response_params[it->first][strings::result_code] = NsSmartDeviceLinkRPC
-            ::V2::VehicleDataResultCode::VDRC_SUCCESS;
+        response_params[it->first][strings::result_code] =
+          mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
       } else {
-        response_params[it->first][strings::result_code] = NsSmartDeviceLinkRPC
-            ::V2::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
+        response_params[it->first][strings::result_code] =
+          mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
       }
     }
   }
 
   if (unsubscribed_items == items_to_unsubscribe) {
     SendResponse(true,
-                 NsSmartDeviceLinkRPC::V2::Result::SUCCESS,
+                 mobile_apis::Result::SUCCESS,
                  "Unsubscribed on all VehicleData",
                  &response_params);
   } else if (0 == unsubscribed_items) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::REJECTED,
+                 mobile_apis::Result::REJECTED,
                  "Was not subscribed on any VehicleData",
                  &response_params);
   } else if (unsubscribed_items < items_to_unsubscribe) {
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::WARNINGS,
+                 mobile_apis::Result::WARNINGS,
                  "Was subscribed not to all VehicleData",
                  &response_params);
   } else {
