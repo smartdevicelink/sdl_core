@@ -90,11 +90,10 @@ void PerformInteractionRequest::Run() {
       MessageType::kRequest;
   (*hmi_request)[strings::msg_params][strings::app_id] = app->app_id();
 
-
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(hmi_request);
+  ApplicationManagerImpl::instance()->ManageHMICommand(hmi_request);
 }
 
 }  // namespace commands

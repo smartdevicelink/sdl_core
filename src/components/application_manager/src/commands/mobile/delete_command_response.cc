@@ -69,7 +69,6 @@ void DeleteCommandResponse::Run() {
       static_cast<mobile_apis::Result::eType>(
       (*message_)[strings::msg_params][hmi_response::code].asInt());
 
-  // TODO(VS) HMI Request Id
   const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
   const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
 

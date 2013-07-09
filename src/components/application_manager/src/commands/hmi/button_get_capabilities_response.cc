@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {
@@ -48,10 +49,10 @@ void ButtonGetCapabilitiesResponse::Run() {
   LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesResponse::Run");
 
   ApplicationManagerImpl::instance()->set_button_capabilities(
-    (*message_)[strings::msg_params][hmi_response::button_capabilities]);
+      (*message_)[strings::msg_params][hmi_response::button_capabilities]);
 
   ApplicationManagerImpl::instance()->set_preset_bank_capabilities(
-    (*message_)[strings::msg_params][hmi_response::preset_bank_capabilities]);
+      (*message_)[strings::msg_params][hmi_response::preset_bank_capabilities]);
 }
 
 }  // namespace commands

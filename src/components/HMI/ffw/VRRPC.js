@@ -204,25 +204,25 @@ FFW.VR = FFW.RPCObserver.create( {
 
                 break;
             }
-            case "VR.GetCapabilities": {
-
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "capabilities":
-                            [
-                                "TEXT"
-                            ],
-                        "method": "VR.GetCapabilities",
-                        "resultCode": "SUCCESS" // type (enum) from SDL protocol
-                    }
-                };
-                this.client.send( JSONMessage );
-
-                break;
-            }
+//            case "VR.GetCapabilities": {
+//
+//                // send repsonse
+//                var JSONMessage = {
+//                    "jsonrpc": "2.0",
+//                    "id": request.id,
+//                    "result": {
+//                        "capabilities":
+//                            [
+//                                "TEXT"
+//                            ],
+//                        "method": "VR.GetCapabilities",
+//                        "resultCode": "SUCCESS" // type (enum) from SDL protocol
+//                    }
+//                };
+//                this.client.send( JSONMessage );
+//
+//                break;
+//            }
             case "VR.ChangeRegistration": {
 
                 SDL.SDLModel.changeRegistrationTTSVR( request.params.language );

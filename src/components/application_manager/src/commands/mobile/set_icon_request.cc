@@ -108,8 +108,8 @@ void SetIconRequest::Run() {
         connection_key, correlation_id,
         hmi_request_id, &(*set_app_icon_hmi_request));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(
-      set_app_icon_hmi_request);
+  ApplicationManagerImpl::instance()->ManageHMICommand(
+        set_app_icon_hmi_request);
 }
 
 }  // namespace commands

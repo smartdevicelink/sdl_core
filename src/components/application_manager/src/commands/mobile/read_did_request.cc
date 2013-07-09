@@ -101,7 +101,7 @@ void ReadDIDRequest::Run() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
           connection_key, correlation_id, vi_read_did, p_vi_read_did);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(p_vi_read_did);
+  ApplicationManagerImpl::instance()->ManageHMICommand(p_vi_read_did);
 }
 
 }  // namespace commands

@@ -133,7 +133,7 @@ void AlertRequest::SendAlertRequest() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
       connection_key, correlation_id, ui_cmd_id);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(ui_alert);
+  ApplicationManagerImpl::instance()->ManageHMICommand(ui_alert);
 }
 
 void AlertRequest::SendSpeekRequest() {
@@ -159,7 +159,7 @@ void AlertRequest::SendSpeekRequest() {
         MessageType::kRequest;
       (*tts_speak)[strings::msg_params][hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
-      ApplicationManagerImpl::instance()->SendMessageToHMI(tts_speak);
+      ApplicationManagerImpl::instance()->ManageHMICommand(tts_speak);
     }
   }
 }
@@ -185,7 +185,7 @@ void AlertRequest::SendPlayToneRequest() {
 
       (*bc_play)[strings::params][strings::message_type] =
         MessageType::kNotification;
-      ApplicationManagerImpl::instance()->SendMessageToHMI(bc_play);
+      ApplicationManagerImpl::instance()->ManageHMICommand(bc_play);
     }
   }
 }

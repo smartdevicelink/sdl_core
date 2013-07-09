@@ -105,7 +105,7 @@ void SetGlobalPropertiesRequest::Run() {
 
     (*p_smrt_ui)[strings::msg_params][strings::app_id] =
       app->app_id();
-    ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
 
     ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connection_key, correlation_id),
@@ -133,7 +133,7 @@ void SetGlobalPropertiesRequest::Run() {
 
     (*p_smrt_ui)[strings::msg_params][strings::app_id] =
       app->app_id();
-    ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
 
     ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connection_key, correlation_id),

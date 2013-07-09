@@ -87,7 +87,7 @@ void SliderRequest::Run() {
       new MessageChaining(connectionKey, correlationId),
       connectionKey, correlationId, hmi_request_id);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->ManageHMICommand(hmi_request);
 }
 
 }  // namespace commands

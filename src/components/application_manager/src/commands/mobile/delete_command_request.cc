@@ -106,7 +106,7 @@ void DeleteCommandRequest::Run() {
      chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
           connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
 
-      ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+      ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
     }
 
     // check vr params
@@ -139,7 +139,7 @@ void DeleteCommandRequest::Run() {
       ApplicationManagerImpl::instance()->AddMessageChain(chain,
           connection_key, correlation_id, vr_cmd_id, p_smrt_vr);
 
-      ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
+      ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
     }
 }
 

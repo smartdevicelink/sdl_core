@@ -112,7 +112,7 @@ void ChangeRegistrationRequest::Run() {
     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
         connection_key, correlation_id, ui_hmi_request_id, &(*message_));
 
-    ApplicationManagerImpl::instance()->SendMessageToHMI(ui_request);
+    ApplicationManagerImpl::instance()->ManageHMICommand(ui_request);
 
     has_actually_changed = true;
   }
@@ -144,7 +144,7 @@ void ChangeRegistrationRequest::Run() {
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
         connection_key, correlation_id, vr_hmi_request_id, &(*message_));
 
-    ApplicationManagerImpl::instance()->SendMessageToHMI(vr_request);
+    ApplicationManagerImpl::instance()->ManageHMICommand(vr_request);
 
     has_actually_changed = true;
   }

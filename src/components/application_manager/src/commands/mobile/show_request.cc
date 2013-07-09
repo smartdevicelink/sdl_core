@@ -80,7 +80,7 @@ void ShowRequest::Run() {
 
   application_impl->set_show_command(*persistentData);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
 }
 
 }  // namespace commands

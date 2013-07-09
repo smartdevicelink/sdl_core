@@ -44,6 +44,7 @@ TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {
 
 void TTSStopSpeakingResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSStopSpeakingResponse::Run");
+
   // TODO(VS): Process response from HMI
 }
 

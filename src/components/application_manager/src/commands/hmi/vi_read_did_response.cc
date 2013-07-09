@@ -45,7 +45,7 @@ VIReadDIDResponse::~VIReadDIDResponse() {
 }
 
 void VIReadDIDResponse::Run() {
-  LOG4CXX_INFO(logger_, "VIReadDIDResponse::Run ");
+  LOG4CXX_INFO(logger_, "VIReadDIDResponse::Run");
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
