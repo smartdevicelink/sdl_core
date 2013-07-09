@@ -320,8 +320,9 @@ void TransportManagerImpl::eventListenerThread(void) {
     pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
 
     LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
+    int s = event_queue_.size();
     for (EventQueue::iterator it = event_queue_.begin();
-        it != event_queue_.end(); ++it) {
+        it != event_queue_.end(); ) {
 
       //todo: check that data is copied correctly here
       DeviceAdapter *da = (*it).device_adapter();
@@ -408,7 +409,8 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
       }
       //todo:
-      event_queue_.remove((*it));
+      it = event_queue_.erase(it);
+//      event_queue_.remove((*it));
     }  //for
     pthread_mutex_unlock(&event_queue_mutex_);
 

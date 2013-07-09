@@ -376,7 +376,7 @@ class TransportManagerImpl : public TransportManager {
    * @brief flag that indicates that thread is active
    * if it is false then threads exist main loop
    **/
-  mutable bool all_thread_active_;
+  volatile bool all_thread_active_;
 
   typedef std::list<TransportManagerListener *> TransportManagerListenerList;
   /**

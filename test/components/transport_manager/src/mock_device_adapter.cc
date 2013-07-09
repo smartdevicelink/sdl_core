@@ -34,6 +34,7 @@
  */
 
 #include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/device_adapter_impl.h"
 
 #include <list>
 
@@ -81,8 +82,12 @@ void MockDeviceAdapter::mainThread()
 
       bool device_scan_requested = waitForDeviceScanRequest(0);
 
-      for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
-        (*it)->onSearchDeviceDone(this);
+      if(device_scan_requested){
+        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+          devices_[1] = new Device("my_device");
+          (*it)->onSearchDeviceDone(this);
+          device_scan_requested_ = false;
+        }
       }
   }
 }
