@@ -81,7 +81,7 @@ void MockDeviceAdapter::mainThread()
 
       bool device_scan_requested = waitForDeviceScanRequest(0);
 
-      listener_->raiseSearchDeviceDone(this);
+      listener_->onSearchDeviceDone(this);
   }
 }
 
