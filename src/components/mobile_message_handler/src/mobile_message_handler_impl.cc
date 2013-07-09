@@ -318,7 +318,7 @@ MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
 //  }
 
   if (message->json_message().length() == 0) {
-    LOG4CXX_ERROR(logger_, "json string is empty.")
+    LOG4CXX_ERROR(logger_, "json string is empty.");
     return NULL;
   }
 

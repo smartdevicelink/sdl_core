@@ -8,7 +8,7 @@ set (SOURCES
     ./src/synchronisation_primitives_posix.cc
     ./src/timer_linux.cc
     ./src/date_time.cc
+    ./src/logger.cc
 )
 
 add_library("Utils" ${SOURCES})
-target_link_libraries ("Utils" log4cxx)

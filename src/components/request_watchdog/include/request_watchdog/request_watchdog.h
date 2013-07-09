@@ -80,7 +80,7 @@ class RequestWatchdog : public Watchdog {
   static std::list<WatchdogSubscriber*> subscribers_;
   static sync_primitives::SynchronisationPrimitives subscribersListMutex_;
 
-  static std::map<RequestInfo, struct timeval> requests_;
+  static std::map<RequestInfo, TimeStamp> requests_;
   static sync_primitives::SynchronisationPrimitives requestsMapMutex_;
 
   class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {

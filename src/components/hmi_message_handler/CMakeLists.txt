@@ -5,6 +5,7 @@ include_directories (
   ../config_profile/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
+  ../config_profile/include
   ${CMAKE_BINARY_DIR}/src/components/Interfaces/
 )
 
@@ -18,4 +19,3 @@ set (SOURCES
 
 
 add_library("HMIMessageHandler" ${SOURCES} )
-target_link_libraries ("HMIMessageHandler" log4cxx)

@@ -13,9 +13,10 @@ set(LIBRARIES
   Utils
   encryption
   jsoncpp
-  bluetooth
-  pthread
-  rt
+  #bluetooth
+  #pthread
+  #rt
+  socket
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
@@ -61,4 +62,5 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CU
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
 
 install (TARGETS ${PROJECT} DESTINATION bin)
+#target_link_libraries ("ApplicationManager" log4cxx)
 

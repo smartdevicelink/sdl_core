@@ -145,7 +145,7 @@ class SharedPtr {
     ObjectType* operator->(void) const;
 
     ObjectType& operator*() const;
-    explicit operator bool() const;
+    operator bool() const;
     void reset();
     void reset(ObjectType* other);
 

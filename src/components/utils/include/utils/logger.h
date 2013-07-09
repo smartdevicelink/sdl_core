@@ -35,11 +35,42 @@
  */
 
 #ifndef LOG4CXXLOGGER_HPP_
-  #include <log4cxx/logger.h>
-  #include <log4cxx/propertyconfigurator.h>
+ // #include <log4cxx/logger.h>
+ // #include <log4cxx/propertyconfigurator.h>
+#include <iostream>
+#include <map>
+#include <cerrno>
 
 namespace log4cxx
 {
+class LoggerPtr {
+public:
+	LoggerPtr(const std::string & name):
+		name_(name){
+	}
+	const std::string & name() const {
+		return name_;
+	}
+
+private:
+	std::string name_;
+};
+
+
+class Logger {
+	public:
+	static LoggerPtr getLogger(std::string name);
+	
+	private:
+	static std::map<std::string, LoggerPtr*> loggers_;
+};
+
+#define LOG4CXX_INFO(logger, string) std::cout << "INFO: " << logger.name() << ": " << string << std::endl
+#define LOG4CXX_ERROR(logger, string) std::cout << "ERROR: " << logger.name() << ": " << string << std::endl
+#define LOG4CXX_TRACE(logger, string) std::cout << "TRACE: " << logger.name() << ": " << string << std::endl
+#define LOG4CXX_WARN(logger, string) std::cout << "WARNING: " << logger.name() << ": " << string << std::endl
+#define LOG4CXX_FATAL(logger, string) std::cout << "FATAL: " << logger.name() << ": " << string << std::endl
+
     #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_INFO_STR_EXT(logger, logEvent) LOG4CXX_INFO_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 

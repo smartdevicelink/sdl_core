@@ -13,4 +13,3 @@ set (SOURCES
 
 
 add_library("MobileMessageHandler" ${SOURCES} )
-target_link_libraries ("MobileMessageHandler" log4cxx)

@@ -894,6 +894,8 @@ namespace NsSmartDeviceLink
                 SmartBinary* binary_value;
             } SmartData;
 
+            static std::string OperatorToTransform(const SmartMap::value_type &pair);
+
             /**
              * @brief Current internal object data
              **/

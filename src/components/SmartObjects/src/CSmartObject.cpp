@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <iterator>
 
 NsSmartDeviceLink::NsSmartObjects::CSmartObject::CSmartObject(void)
 : m_type(SmartType_Null)
@@ -544,7 +545,8 @@ std::string NsSmartDeviceLink::NsSmartObjects::CSmartObject::convert_string(void
         case SmartType_String :
             return *(m_data.str_value);
         case SmartType_Integer:
-            return std::to_string(m_data.long_value);
+            char val[20];
+            return itoa(m_data.long_value, val, 10);
             break;
         case SmartType_Character:
             return std::string(1, m_data.char_value);
@@ -942,6 +944,10 @@ NsSmartDeviceLink::NsSmartObjects::SmartType NsSmartDeviceLink::NsSmartObjects::
     return m_type;
 }
 
+std::string NsSmartDeviceLink::NsSmartObjects::CSmartObject::OperatorToTransform(const SmartMap::value_type &pair) {
+    return pair.first;
+}
+
 std::set<std::string> NsSmartDeviceLink::NsSmartObjects::CSmartObject::enumerate() const
 {
     std::set<std::string> keys;
@@ -952,7 +958,8 @@ std::set<std::string> NsSmartDeviceLink::NsSmartObjects::CSmartObject::enumerate
             m_data.map_value->begin(),
             m_data.map_value->end(),
             std::inserter(keys, keys.end()),
-            [](const SmartMap::value_type &pair){return pair.first;}
+            //operator[](const SmartMap::value_type &pair){return pair.first;}
+            &NsSmartDeviceLink::NsSmartObjects::CSmartObject::OperatorToTransform
         );
     }
 

@@ -1362,7 +1362,7 @@ class CodeGenerator(object):
         u'''using namespace NsSmartDeviceLink::NsSmartObjects;\n'''
         u'''\n'''
         u'''$namespace::$class_name::$class_name()\n'''
-        u''' : CSmartFactory<FunctionID::eType, '''
+        u''' : NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::eType, '''
         u'''messageType::eType, StructIdentifiers::eType>() {\n'''
         u'''  TStructsSchemaItems struct_schema_items;\n'''
         u'''  InitStructSchemes(struct_schema_items);\n'''

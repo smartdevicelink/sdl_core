@@ -50,7 +50,7 @@ log4cxx::LoggerPtr RequestWatchdog::logger_ =
 RequestWatchdog* RequestWatchdog::sInstance_ = 0;
 
 std::list<WatchdogSubscriber*> RequestWatchdog::subscribers_;
-std::map<RequestInfo, struct timeval> RequestWatchdog::requests_;
+std::map<RequestInfo, TimeStamp> RequestWatchdog::requests_;
 sync_primitives::SynchronisationPrimitives RequestWatchdog::instanceMutex_;
 sync_primitives::SynchronisationPrimitives
 RequestWatchdog::subscribersListMutex_;
@@ -147,7 +147,7 @@ void RequestWatchdog::addRequest(RequestInfo requestInfo) {
 
   requestsMapMutex_.lock();
 
-  requests_.insert(std::pair<RequestInfo, struct timeval>(requestInfo,
+  requests_.insert(std::pair<RequestInfo, TimeStamp>(requestInfo,
                    date_time::DateTime::getCurrentTime()));
 
   LOG4CXX_INFO(logger_, "Add request "
@@ -228,11 +228,11 @@ RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate()
 void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
   std::vector<RequestInfo> expiredRequests = std::vector<RequestInfo>();
-  std::map<RequestInfo, struct timeval>::iterator it;
+  std::map<RequestInfo, TimeStamp>::iterator it;
 
   int cycleSleepInterval = DEFAULT_CYCLE_TIMEOUT;
   int cycleDuration;
-  struct timeval cycleStartTime;
+  TimeStamp cycleStartTime;
 
   while (true) {
     usleep(cycleSleepInterval);

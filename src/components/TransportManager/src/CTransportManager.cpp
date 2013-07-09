@@ -32,12 +32,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
+#include <algorithm>
+
 #include "CTransportManager.hpp"
-#include "CBluetoothAdapter.hpp"
+#include "CDeviceAdapter.hpp"
 #include "CTCPAdapter.hpp"
 #include "TransportManagerLoggerHelpers.hpp"
-
-#include <algorithm>
 
 using namespace NsSmartDeviceLink::NsTransportManager;
 
@@ -1010,7 +1011,7 @@ void CTransportManager::removeDeviceAdapter(IDeviceAdapter* DeviceAdapter)
 
 void CTransportManager::initializeDeviceAdapters()
 {
-    addDeviceAdapter(new CBluetoothAdapter(*this, *this));
+    //addDeviceAdapter(new CBluetoothAdapter(*this, *this));
     addDeviceAdapter(new CTCPAdapter(*this, *this));
     LOG4CXX_INFO(logger_, "Device adapters initialized");
 }

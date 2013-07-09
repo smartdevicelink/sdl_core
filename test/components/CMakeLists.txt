@@ -1,23 +1,23 @@
 # --- RequestWatchdog
-add_subdirectory(./request_watchdog)
+#add_subdirectory(./request_watchdog)
 
 # --- TransportManager
-# add_subdirectory(./TransportManager)
+add_subdirectory(./transport_manager)
 
 # --- JSONHandler
 # add_subdirectory(./json_handler)
 
 # --- SmartObjects
-add_subdirectory(./SmartObjects)
+#add_subdirectory(./SmartObjects)
 
 # --- AppMgr
- add_subdirectory(./application_manager)
+# add_subdirectory(./application_manager)
 
 # --- ProtocolHandler
-add_subdirectory(./protocol_handler)
+#add_subdirectory(./protocol_handler)
 
 # --- Utils
-add_subdirectory(./utils)
+#add_subdirectory(./utils)
 
 # --- Mobile Message Handler
-add_subdirectory(./mobile_message_handler)
+#add_subdirectory(./mobile_message_handler)

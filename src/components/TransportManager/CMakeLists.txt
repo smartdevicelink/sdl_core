@@ -9,7 +9,6 @@ set (SOURCES
     ./src/IDeviceAdapterListener.cpp
     ./src/IHandleGenerator.cpp
     ./src/ITransportManager.cpp
-    ./src/CBluetoothAdapter.cpp
     ./src/CDeviceAdapter.cpp
     ./src/CTransportManager.cpp
     ./src/CTCPAdapter.cpp
@@ -19,4 +18,3 @@ set (SOURCES
 )
 
 add_library("TransportManager" ${SOURCES})
-target_link_libraries ("TransportManager" log4cxx)

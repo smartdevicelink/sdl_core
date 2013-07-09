@@ -18,4 +18,3 @@ set (SOURCES
 )
 
 add_library("SmartObjects" ${SOURCES})
-target_link_libraries ("SmartObjects" log4cxx)

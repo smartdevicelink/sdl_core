@@ -255,10 +255,10 @@ int main(int argc, char** argv) {
   // --------------------------------------------------------------------------
   // Logger initialization
 
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-  LOG4CXX_INFO(logger, " Application started!");
+  /*log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                log4cxx::Logger::getLogger("appMain"));*/
+  //log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+  /*LOG4CXX_INFO(logger, " Application started!");*/
 
   // --------------------------------------------------------------------------
   // Components initialization
@@ -312,12 +312,12 @@ int main(int argc, char** argv) {
   if (!InitMessageBroker()) {
     exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
+  /*LOG4CXX_INFO(logger, "InitMessageBroker successful");*/
 
-  if (!InitHmi()) {
+ /* if (!InitHmi()) {
     exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitHmi successful");
+  }*/
+  /*LOG4CXX_INFO(logger, "InitHmi successful");*/
 
   // --------------------------------------------------------------------------
 
