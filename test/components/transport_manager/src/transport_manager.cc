@@ -55,23 +55,34 @@ TEST(TransportManagerImpl, instance)
 
 TEST(TransportManagerImpl, connect)
 {
-  TransportManagerImpl* impl = TransportManagerImpl::instance();
+  TransportManagerImpl* tm = TransportManagerImpl::instance();
 
   MockDeviceAdapter *mock_da = new MockDeviceAdapter();
-  impl->addDeviceAdapter(mock_da);
+  tm->addDeviceAdapter(mock_da);
 
   MockDeviceAdapterListener *mdal = new MockDeviceAdapterListener();
 
-  impl->registerAdapterListener(mdal);
+  tm->registerAdapterListener(mdal);
+
+  //tm->init();
+
+  tm->searchDevices();
+  //tm->searchDevices();
+
+  EXPECT_CALL(*mdal, onSearchDeviceDone(_)).Times(1);
+
 
   unsigned char buf[10] = { 0 };
 
   RawMessageSptr msg(new RawMessage(10, 1, 1, buf, 10));
 
-  impl->sendMessageToDevice(msg);
-  sleep(2);
+  tm->sendMessageToDevice(msg);
 
   EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(1);
-  EXPECT_CALL(*mdal, onDataSendFailed(_, _, _, _)).Times(1);
-  sleep(2);
+  EXPECT_CALL(*mdal, onDataSendFailed(_, _, _, _)).Times(0);
+
+  tm->unregisterAdapterListener(mdal);
+  tm->removeDeviceAdapter(mock_da);
+  delete mdal;
+  delete mock_da;
 }

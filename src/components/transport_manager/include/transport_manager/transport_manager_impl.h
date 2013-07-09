@@ -134,6 +134,15 @@ class TransportManagerImpl : public TransportManager {
   virtual void registerEventListener(TransportManagerListener *listener);
 
   /**
+   * @brief unregister event listener
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void unregisterEventListener(TransportManagerListener *listener);
+
+  /**
    * @brief add new device adapter
    *
    * @param device adapter
@@ -143,6 +152,15 @@ class TransportManagerImpl : public TransportManager {
   virtual void addDeviceAdapter(DeviceAdapter *device_adapter);
 
   /**
+   * @brief remove device adapter
+   *
+   * @param device adapter
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void removeDeviceAdapter(const DeviceAdapter *device_adapter);
+
+  /**
    * @brief register listener that would be used to catch adapter's events
    *
    * @param event listener
@@ -150,6 +168,15 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void registerAdapterListener(DeviceAdapterListener *listener);
+
+  /**
+   * @brief unregister adapter listener
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void unregisterAdapterListener(DeviceAdapterListener *listener);
 
   /**
    * @brief remove device from internal storages
@@ -261,9 +288,12 @@ class TransportManagerImpl : public TransportManager {
     void addDevice(transport_manager::DeviceAdapter *da,
                    transport_manager::DeviceHandle did);
     void addAdapter(transport_manager::DeviceAdapter *da);
+
+
     void removeSession(transport_manager::DeviceAdapter *da,
                        transport_manager::SessionID sid);
     void removeDevice(const transport_manager::DeviceHandle &device);
+    void removeAdapter(const transport_manager::DeviceAdapter *da);
     AdapterList device_adapters(void);
 
     ~AdapterHandler();
@@ -394,7 +424,7 @@ class TransportManagerImpl : public TransportManager {
    * @brief flag that indicates that thread is active
    * if it is false then threads exist main loop
    **/
-  mutable bool all_thread_active_;
+  volatile bool all_thread_active_;
 
   /**
    * @brief Device adapter listener.

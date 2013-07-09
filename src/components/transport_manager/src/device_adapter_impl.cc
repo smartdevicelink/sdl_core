@@ -400,7 +400,7 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
               "Connection " << connection->session_id() << " to remote device "
                   << device->unique_device_id() << " established");
 
-          listener_->onConnectDone(this, connection->session_id());
+          listener_->raiseConnectDone(this, connection->session_id());
           is_connection_succeeded = true;
 
           pollfd poll_fds[2];
@@ -446,11 +446,11 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                         RawMessageSptr frame(
                             new protocol_handler::RawMessage(
                                 connection->session_id(), 0, data, bytes_read));
-                        listener_->onDataReceiveDone(this,
+                        listener_->raiseDataReceiveDone(this,
                                                      connection->session_id(),
                                                      frame);
                       } else {
-                        listener_->onDataReceiveFailed(this,
+                        listener_->raiseDataReceiveFailed(this,
                                                        connection->session_id(),
                                                        DataReceiveError());
                       }
@@ -522,10 +522,10 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                       }
                     }
                     if (frame_sent) {
-                      listener_->onDataSendDone(this, connection->session_id(),
+                      listener_->raiseDataSendDone(this, connection->session_id(),
                                                 frame);
                     } else {
-                      listener_->onDataSendFailed(this,
+                      listener_->raiseDataSendFailed(this,
                                                   connection->session_id(),
                                                   frame, DataSendError());
                     }
@@ -563,16 +563,16 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
     if (is_connection_succeeded) {
       if (close_status == 0) {
-        listener_->onDisconnectDone(this, connection->session_id());
+        listener_->raiseDisconnectDone(this, connection->session_id());
       } else {
-        listener_->onDisconnectFailed(this, connection->session_id(),
+        listener_->raiseDisconnectFailed(this, connection->session_id(),
                                       DisconnectError());
       }
     }
   }
 
   if (!is_connection_succeeded) {
-    listener_->onConnectFailed(this, connection->session_id(), ConnectError());
+    listener_->raiseConnectFailed(this, connection->session_id(), ConnectError());
   }
 
   if (true == is_pipe_created) {

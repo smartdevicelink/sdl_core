@@ -1,0 +1,1043 @@
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [05 Jul 2013 18:26:51,063] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:205 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9377720
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:499 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9377720
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:210 TransportManagerImpl::searchDevices: Search device called
+INFO  [05 Jul 2013 18:26:51,071] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:219 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 09:47:29,361] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 09:47:29,375] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:205 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8304670
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:499 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8304670
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:210 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 09:47:29,381] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:219 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 12:15:42,308] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:42,308] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:42,308] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:42,308] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:42,308] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:42,308] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:42,309] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:42,309] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:42,309] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:42,309] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:42,309] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:42,309] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:205 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9bb2670
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:499 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9bb2670
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:181 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments msg serial number1
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:255 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:42,316] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:259 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:188 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:42,317] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:46,049] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:46,049] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:46,049] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:46,050] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:46,050] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:46,050] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:46,050] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:46,050] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:46,050] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:46,052] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:46,052] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:46,052] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:205 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x82e4720
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:499 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x82e4720
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:181 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments msg serial number1
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:255 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:259 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:15:46,058] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:188 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:46,059] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:47,528] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:47,532] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:47,532] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:47,532] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:205 TransportManagerImpl::addDeviceAdapter: Add device adapter 0xa094670
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:499 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0xa094670
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:181 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments msg serial number1
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:255 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:259 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:188 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:47,533] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:47,906] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:47,906] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:47,906] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:47,906] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:47,906] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,906] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,907] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:47,907] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:47,907] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:47,907] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:47,907] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:47,907] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:205 TransportManagerImpl::addDeviceAdapter: Add device adapter 0xa164670
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:499 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0xa164670
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:181 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments msg serial number1
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:255 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:259 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:188 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:47,911] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:47,912] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:47,912] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:47,912] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:47,912] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:48,194] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:15:48,199] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:15:48,199] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:15:48,199] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:230 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:15:48,199] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:250 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:15:48,199] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:48,199] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:48,199] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned.
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:205 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8f5d670
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:499 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8f5d670
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:333 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:181 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments msg serial number1
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:255 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:259 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:188 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:427 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:429 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:459 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:466 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:437 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:450 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:15:48,200] /home/dchmerev/AppLink/git/src/components/transport_manager/src/transport_manager_impl.cc:482 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:19:58,539] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:19:58,539] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:19:58,539] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:19:58,539] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:19:58,539] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:19:58,539] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:19:58,539] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:19:58,539] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:19:58,539] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:19:58,539] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:19:58,539] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:19:58,539] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:19:58,546] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:19:58,546] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:19:58,546] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:19:58,546] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:19:58,546] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:19:58,546] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:19:58,546] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:19:58,546] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:19:58,546] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8596620
+INFO  [08 Jul 2013 12:19:58,546] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8596620
+INFO  [08 Jul 2013 12:19:58,546] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 12:19:58,546] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:19:58,546] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:19:58,546] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:19:58,546] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:19:58,546] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:19:58,546] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:19:58,546] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:19:58,546] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:19:58,546] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 12:19:58,546] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 12:20:05,609] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:20:05,609] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:20:05,609] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:20:05,609] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:20:05,609] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:20:05,609] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:20:05,609] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:20:05,609] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:20:05,609] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:20:05,609] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:20:05,610] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:20:05,610] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:20:05,616] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:20:05,617] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:20:05,617] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:20:05,617] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:20:05,617] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:20:05,617] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:05,617] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:05,617] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:05,617] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x86c8620
+INFO  [08 Jul 2013 12:20:05,617] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x86c8620
+INFO  [08 Jul 2013 12:20:05,617] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 12:20:05,617] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:20:05,617] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:20:05,617] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:20:05,617] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:20:05,617] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:20:05,617] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:20:05,617] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:20:05,617] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:20:05,617] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 12:20:05,617] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 12:20:07,234] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:20:07,234] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:20:07,234] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:20:07,234] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:20:07,234] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:20:07,234] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:20:07,234] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:20:07,234] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:20:07,234] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:20:07,235] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:20:07,235] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:20:07,235] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:20:07,240] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:20:07,240] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:20:07,240] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:20:07,240] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:20:07,240] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:20:07,240] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:20:07,240] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:07,240] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:07,240] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:07,240] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9922620
+INFO  [08 Jul 2013 12:20:07,240] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9922620
+INFO  [08 Jul 2013 12:20:07,240] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 12:20:07,240] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:20:07,240] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:20:07,241] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:20:07,241] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:20:07,241] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:20:07,241] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:20:07,241] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:20:07,241] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 12:20:07,241] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 12:20:08,537] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:20:08,537] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:20:08,537] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:20:08,537] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:20:08,537] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:20:08,537] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:20:08,537] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:20:08,537] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:20:08,537] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:20:08,537] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:20:08,537] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:20:08,537] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:20:08,542] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:20:08,542] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:20:08,542] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:20:08,542] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:20:08,542] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:08,542] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:20:08,542] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:20:08,542] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:08,542] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:20:08,542] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9fa7620
+INFO  [08 Jul 2013 12:20:08,542] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9fa7620
+INFO  [08 Jul 2013 12:20:08,542] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 12:20:08,542] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:20:08,542] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:20:08,542] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:20:08,542] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:20:08,542] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:20:08,542] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:20:08,542] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:20:08,543] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 12:20:08,543] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 12:22:53,548] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:22:53,548] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:22:53,548] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:22:53,548] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:22:53,548] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:22:53,548] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:22:53,548] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:22:53,548] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:22:53,548] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:22:53,548] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:22:53,548] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:22:53,548] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:22:53,556] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:22:53,556] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:22:53,556] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:22:53,556] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:22:53,556] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:22:53,556] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:22:53,556] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:22:53,556] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:22:53,556] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:22:53,556] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x875d620
+INFO  [08 Jul 2013 12:22:53,556] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x875d620
+INFO  [08 Jul 2013 12:22:53,556] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 12:22:53,556] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:22:53,556] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:22:53,556] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:22:53,556] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:22:53,556] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:22:53,556] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:22:53,556] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:22:53,556] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 12:22:53,556] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 12:22:57,556] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:22:57,556] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:22:57,557] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:22:57,557] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:23:12,014] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:23:12,014] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:23:12,014] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:23:12,014] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:23:12,016] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:23:12,016] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:23:12,016] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:23:12,016] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:23:12,016] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:23:12,016] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:23:12,016] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:23:12,016] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:23:12,021] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:23:12,021] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:23:12,021] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:23:12,021] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:23:12,021] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:23:12,021] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:23:12,022] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:23:12,022] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:23:12,022] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:23:12,022] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9331720
+INFO  [08 Jul 2013 12:23:12,022] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9331720
+INFO  [08 Jul 2013 12:23:12,022] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 12:23:12,022] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:23:12,022] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:23:12,022] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:23:12,022] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:23:12,022] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:23:12,022] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:23:12,022] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:23:12,022] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 12:23:12,022] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 12:23:16,022] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:23:16,022] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:23:16,022] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:23:16,022] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:23:51,750] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:23:51,750] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:23:51,750] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:23:51,750] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:23:51,750] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:23:51,750] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:23:51,750] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:23:51,750] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:23:51,751] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:23:51,751] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:23:51,751] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:23:51,751] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:23:51,755] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:23:51,755] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:23:51,755] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:23:51,755] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:23:51,755] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:23:51,755] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:23:51,755] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:23:51,755] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:23:51,755] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:23:51,755] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8b23620
+INFO  [08 Jul 2013 12:23:51,755] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8b23620
+INFO  [08 Jul 2013 12:23:51,755] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 12:23:51,755] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:23:51,755] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:23:51,755] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:23:51,755] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:23:51,756] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:23:51,756] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:23:51,756] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:23:51,756] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 12:23:51,756] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 12:23:55,756] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:23:55,756] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:23:55,756] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:23:55,756] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:24:54,492] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:24:54,492] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:24:54,492] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:24:54,492] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:24:54,492] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:24:54,492] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 12:24:54,492] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:24:54,492] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:24:54,492] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:24:54,492] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:24:54,492] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:24:54,492] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 12:24:54,499] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 12:24:54,499] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 12:24:54,499] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 12:24:54,499] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 12:24:54,499] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 12:24:54,499] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:24:54,499] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:24:54,499] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 12:24:54,499] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x87a1620
+INFO  [08 Jul 2013 12:24:54,499] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x87a1620
+INFO  [08 Jul 2013 12:24:54,499] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 12:24:54,499] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 12:24:54,499] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 12:24:54,499] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 12:24:54,499] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 12:24:54,499] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 12:24:54,499] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 12:24:54,499] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 12:24:54,499] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 12:24:54,499] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 12:24:54,500] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 12:24:54,500] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 12:24:54,500] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 12:24:54,500] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 12:24:54,500] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 13:34:40,013] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 13:34:40,013] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 13:34:40,013] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 13:34:40,013] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 13:34:40,013] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 13:34:40,013] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 13:34:40,013] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 13:34:40,013] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 13:34:40,013] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 13:34:40,013] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 13:34:40,013] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 13:34:40,013] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 13:34:40,018] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 13:34:40,018] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 13:34:40,018] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 13:34:40,018] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 13:34:40,018] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 13:34:40,022] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 13:34:40,022] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 13:34:40,022] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 13:34:40,022] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 13:34:40,022] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x878e720
+INFO  [08 Jul 2013 13:34:40,022] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x878e720
+INFO  [08 Jul 2013 13:34:40,022] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 13:34:40,022] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 13:34:40,022] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 13:34:40,022] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 13:34:40,022] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 13:34:40,022] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 13:34:40,022] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 13:34:40,022] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 13:34:40,022] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 13:34:40,022] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 13:34:40,022] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 13:34:40,022] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 13:34:40,022] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 13:34:40,022] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 13:42:43,545] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 13:42:43,545] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 13:42:43,545] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 13:42:43,545] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 13:42:43,545] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 13:42:43,545] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f56a0
+INFO  [08 Jul 2013 13:42:43,545] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 13:42:43,545] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 13:42:43,546] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 13:42:43,546] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 13:42:43,546] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 13:42:43,546] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 13:42:43,552] :70 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 13:42:43,552] :80 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 13:42:43,552] :232 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 13:42:43,552] :256 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 13:42:43,552] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 13:42:43,552] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 13:42:43,552] :418 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 13:42:43,552] :129 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x818f780
+INFO  [08 Jul 2013 13:42:43,552] :207 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9b91620
+INFO  [08 Jul 2013 13:42:43,552] :511 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9b91620
+INFO  [08 Jul 2013 13:42:43,552] :183 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 13:42:43,552] :262 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 13:42:43,552] :267 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 13:42:43,552] :428 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 13:42:43,552] :430 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 13:42:43,552] :471 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 13:42:43,552] :190 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 13:42:43,552] :478 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 13:42:43,552] :440 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 13:42:43,552] :446 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 13:42:43,553] :326 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 13:42:47,552] :462 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 13:42:47,552] :406 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 13:42:47,553] :121 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 13:42:47,553] :494 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 15:46:00,691] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 15:46:00,691] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 15:46:00,692] :257 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 15:46:00,692] :281 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 15:46:00,692] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f76a0
+INFO  [08 Jul 2013 15:46:00,692] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f76a0
+INFO  [08 Jul 2013 15:46:00,692] :341 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 15:46:00,692] :433 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 15:46:00,692] :421 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 15:46:00,692] :477 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 15:46:00,692] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 15:46:00,692] :509 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 15:46:00,696] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 15:46:00,696] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 15:46:00,696] :257 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 15:46:00,696] :281 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 15:46:00,697] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:46:00,697] :341 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 15:46:00,697] :433 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 15:46:00,697] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:46:00,697] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:46:00,697] :232 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8340620
+INFO  [08 Jul 2013 15:46:00,697] :526 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8340620
+INFO  [08 Jul 2013 15:49:20,061] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 15:49:20,061] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 15:49:20,061] :257 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 15:49:20,061] :281 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 15:49:20,061] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f76a0
+INFO  [08 Jul 2013 15:49:20,061] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f76a0
+INFO  [08 Jul 2013 15:49:20,061] :341 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 15:49:20,061] :433 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 15:49:20,061] :421 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 15:49:20,061] :477 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 15:49:20,061] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 15:49:20,061] :509 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 15:49:20,067] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 15:49:20,067] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 15:49:20,067] :257 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 15:49:20,067] :281 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 15:49:20,067] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:49:20,067] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:49:20,067] :433 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 15:49:20,067] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:49:20,067] :341 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 15:49:20,067] :232 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8699720
+INFO  [08 Jul 2013 15:49:20,067] :526 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8699720
+INFO  [08 Jul 2013 15:49:27,399] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 15:49:27,399] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 15:49:27,399] :259 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 15:49:27,399] :283 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 15:49:27,399] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f76a0
+INFO  [08 Jul 2013 15:49:27,399] :343 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 15:49:27,399] :435 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 15:49:27,399] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f76a0
+INFO  [08 Jul 2013 15:49:27,399] :479 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 15:49:27,399] :423 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 15:49:27,399] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 15:49:27,399] :511 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 15:49:27,407] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 15:49:27,407] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 15:49:27,407] :259 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 15:49:27,407] :283 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 15:49:27,407] :435 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 15:49:27,407] :343 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 15:49:27,407] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:49:27,407] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:49:27,408] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:49:27,408] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9b88620
+INFO  [08 Jul 2013 15:49:27,408] :528 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9b88620
+INFO  [08 Jul 2013 15:49:27,408] :210 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 15:49:27,408] :289 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 15:49:27,408] :294 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 15:49:27,408] :445 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 15:49:27,408] :447 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 15:49:27,408] :217 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 15:49:27,408] :488 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 15:49:27,408] :495 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 15:49:27,408] :457 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 15:49:27,408] :463 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 15:49:31,408] :423 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 15:49:31,408] :479 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 15:49:31,408] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 15:49:31,409] :511 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 15:51:45,940] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 15:51:45,940] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 15:51:45,940] :259 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 15:51:45,940] :283 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 15:51:45,940] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f76a0
+INFO  [08 Jul 2013 15:51:45,940] :343 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 15:51:45,940] :435 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 15:51:45,940] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f76a0
+INFO  [08 Jul 2013 15:51:45,940] :479 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 15:51:45,940] :423 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 15:51:45,940] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 15:51:45,940] :511 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 15:51:45,945] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 15:51:45,945] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 15:51:45,945] :259 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 15:51:45,945] :283 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 15:51:45,945] :435 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 15:51:45,945] :343 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 15:51:45,945] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:51:45,945] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:51:45,945] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8191780
+INFO  [08 Jul 2013 15:51:45,945] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9942620
+INFO  [08 Jul 2013 15:51:45,945] :528 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9942620
+INFO  [08 Jul 2013 15:51:45,945] :210 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 15:51:45,946] :289 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 15:51:45,946] :294 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 15:51:45,946] :217 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 15:51:45,946] :445 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 15:51:45,946] :447 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 15:51:45,946] :488 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 15:51:45,946] :495 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 15:51:45,946] :457 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 15:51:45,946] :463 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 15:51:45,946] :479 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 15:51:45,946] :423 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 15:51:45,946] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:01:08,930] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:01:08,930] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:01:08,930] :264 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:01:08,930] :288 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:01:08,930] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:01:08,930] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:01:08,930] :348 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:01:08,930] :440 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:01:08,930] :428 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:01:08,930] :484 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:01:08,930] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:01:08,930] :516 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:01:08,938] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:01:08,938] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:01:08,938] :264 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:01:08,938] :288 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:01:08,938] :348 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:01:08,938] :440 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:01:08,938] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8192780
+INFO  [08 Jul 2013 16:01:08,938] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8192780
+INFO  [08 Jul 2013 16:01:08,938] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8192780
+INFO  [08 Jul 2013 16:01:08,938] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9a0d620
+INFO  [08 Jul 2013 16:01:08,938] :533 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9a0d620
+INFO  [08 Jul 2013 16:01:08,938] :210 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 16:01:08,938] :294 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 16:01:08,938] :299 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 16:01:08,938] :450 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 16:01:08,938] :217 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 16:01:08,938] :452 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 16:01:08,939] :493 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 16:01:08,939] :500 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 16:01:08,939] :462 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 16:01:08,939] :468 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 16:01:08,939] :239 TransportManagerImpl::removeDeviceAdapter: Remove device adapter 0x9a0d620
+INFO  [08 Jul 2013 16:01:08,939] :538 TransportManagerImpl::AdapterHandler::removeAdapter: Remove device adapter called 0x9a0d620
+INFO  [08 Jul 2013 16:01:08,939] :484 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:01:08,939] :428 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:01:08,939] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:01:08,939] :516 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:04:03,635] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:04:03,635] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:04:03,635] :264 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:04:03,636] :288 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:04:03,636] :440 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:04:03,636] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:04:03,636] :348 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:04:03,636] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:04:03,636] :484 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:04:03,636] :428 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:04:03,636] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:04:03,636] :516 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:04:03,641] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:04:03,641] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:04:03,641] :264 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:04:03,641] :288 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:04:03,641] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:04:03,641] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:04:03,641] :440 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:04:03,641] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:04:03,641] :348 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:04:03,641] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x93a9620
+INFO  [08 Jul 2013 16:04:03,641] :533 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x93a9620
+INFO  [08 Jul 2013 16:04:03,641] :244 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 16:04:03,641] :253 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 16:06:36,611] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:06:36,611] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:06:36,611] :264 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:06:36,611] :288 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:06:36,612] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:06:36,612] :348 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:06:36,612] :440 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:06:36,612] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:06:36,612] :484 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:06:36,612] :428 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:06:36,612] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:06:36,612] :516 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:06:36,618] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:06:36,618] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:06:36,618] :264 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:06:36,618] :288 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:06:36,618] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:06:36,618] :348 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:06:36,618] :440 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:06:36,618] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:06:36,618] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:06:36,618] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9451620
+INFO  [08 Jul 2013 16:06:36,618] :533 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9451620
+INFO  [08 Jul 2013 16:06:36,618] :244 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 16:06:36,618] :253 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 16:06:48,257] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:06:48,257] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:06:48,257] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:06:48,257] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:06:48,258] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:06:48,258] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:06:48,258] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:06:48,258] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:06:48,258] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:06:48,258] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:06:48,258] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:06:48,258] :518 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:06:48,263] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:06:48,263] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:06:48,263] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:06:48,263] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:06:48,263] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:06:48,263] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:06:48,263] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:06:48,263] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:06:48,263] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:06:48,263] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8aa2620
+INFO  [08 Jul 2013 16:06:48,263] :535 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8aa2620
+INFO  [08 Jul 2013 16:06:48,263] :245 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 16:06:48,263] :254 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 16:06:48,263] :146 DeviceAdapter::Error transport_manager::DeviceAdapterImpl::searchDevices: Requesting device scan
+INFO  [08 Jul 2013 16:06:48,263] :261 TransportManagerImpl::searchDevices: Search complete
+INFO  [08 Jul 2013 16:06:48,264] :210 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 16:06:48,264] :295 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 16:06:48,264] :300 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 16:06:48,264] :217 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 16:06:48,264] :452 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 16:06:48,264] :454 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 16:06:48,264] :495 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 16:06:48,264] :240 TransportManagerImpl::removeDeviceAdapter: Remove device adapter 0x8aa2620
+INFO  [08 Jul 2013 16:06:48,264] :502 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 16:06:48,264] :540 TransportManagerImpl::AdapterHandler::removeAdapter: Remove device adapter called 0x8aa2620
+INFO  [08 Jul 2013 16:06:48,264] :464 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 16:06:48,264] :470 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 16:06:48,264] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:06:48,264] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:06:48,264] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:06:48,264] :518 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:17:29,389] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:17:29,389] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:17:29,389] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:17:29,389] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:17:29,389] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:17:29,389] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:17:29,389] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:17:29,389] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:17:29,390] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:17:29,390] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:17:29,390] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:17:29,390] :518 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:17:29,395] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:17:29,395] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:17:29,395] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:17:29,395] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:17:29,395] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:17:29,395] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:17:29,395] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:17:29,395] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:17:29,395] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:17:29,395] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8f89620
+INFO  [08 Jul 2013 16:17:29,395] :535 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8f89620
+INFO  [08 Jul 2013 16:17:29,395] :245 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 16:17:29,395] :254 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 16:17:29,395] :146 DeviceAdapter::Error transport_manager::DeviceAdapterImpl::searchDevices: Requesting device scan
+INFO  [08 Jul 2013 16:17:29,395] :261 TransportManagerImpl::searchDevices: Search complete
+INFO  [08 Jul 2013 16:17:29,395] :245 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 16:17:29,395] :254 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 16:17:29,395] :152 DeviceAdapter::Error transport_manager::DeviceAdapterImpl::searchDevices: Device scan is currently in progress
+ERROR [08 Jul 2013 16:17:29,395] :257 TransportManagerImpl::searchDevices: Device adapter search failed
+INFO  [08 Jul 2013 16:17:29,395] :261 TransportManagerImpl::searchDevices: Search complete
+INFO  [08 Jul 2013 16:17:29,395] :210 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 16:17:29,395] :295 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 16:17:29,395] :300 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 16:17:29,395] :452 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 16:17:29,395] :217 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 16:17:29,395] :454 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 16:17:29,395] :495 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 16:17:29,395] :502 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 16:17:29,395] :240 TransportManagerImpl::removeDeviceAdapter: Remove device adapter 0x8f89620
+INFO  [08 Jul 2013 16:17:29,395] :464 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 16:17:29,395] :540 TransportManagerImpl::AdapterHandler::removeAdapter: Remove device adapter called 0x8f89620
+ERROR [08 Jul 2013 16:17:29,395] :470 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 16:17:29,396] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:17:29,396] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:17:29,396] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:17:29,396] :518 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:34:18,191] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:34:18,191] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:34:18,191] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:34:18,191] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:34:18,191] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:34:18,191] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:34:18,191] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:34:18,191] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:34:18,191] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:34:18,191] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:34:18,191] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:34:18,191] :518 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:34:18,196] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:34:18,196] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:34:18,196] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:34:18,196] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:34:18,196] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:34:18,196] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:34:18,196] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:34:18,196] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:34:18,196] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:34:18,196] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x8990620
+INFO  [08 Jul 2013 16:34:18,196] :535 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x8990620
+INFO  [08 Jul 2013 16:34:18,196] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:34:18,196] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:34:18,196] :245 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 16:34:18,196] :254 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 16:34:18,196] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:34:18,196] :146 DeviceAdapter::Error transport_manager::DeviceAdapterImpl::searchDevices: Requesting device scan
+INFO  [08 Jul 2013 16:34:18,196] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:34:18,196] :261 TransportManagerImpl::searchDevices: Search complete
+INFO  [08 Jul 2013 16:34:18,196] :210 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 16:34:18,196] :295 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 16:34:18,196] :300 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 16:34:18,196] :452 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 16:34:18,196] :217 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 16:34:18,196] :454 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 16:34:18,196] :495 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 16:34:18,196] :502 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 16:34:18,196] :240 TransportManagerImpl::removeDeviceAdapter: Remove device adapter 0x8990620
+INFO  [08 Jul 2013 16:34:18,196] :464 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 16:34:18,196] :540 TransportManagerImpl::AdapterHandler::removeAdapter: Remove device adapter called 0x8990620
+ERROR [08 Jul 2013 16:34:18,196] :470 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 16:34:18,196] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:34:18,196] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:34:18,196] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:55:01,558] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:55:01,558] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:55:01,558] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:55:01,558] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:55:01,558] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:55:01,558] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:55:01,558] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:55:01,558] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:55:01,558] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:55:01,558] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:55:01,558] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:55:01,558] :518 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:55:01,565] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:55:01,565] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:55:01,565] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:55:01,566] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:55:01,566] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:55:01,566] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:55:01,566] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:55:01,568] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:55:01,568] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:55:01,568] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9242620
+INFO  [08 Jul 2013 16:55:01,568] :535 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9242620
+INFO  [08 Jul 2013 16:55:01,568] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:55:01,568] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:55:01,568] :245 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 16:55:01,568] :254 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 16:55:01,568] :146 DeviceAdapter::Error transport_manager::DeviceAdapterImpl::searchDevices: Requesting device scan
+INFO  [08 Jul 2013 16:55:01,568] :261 TransportManagerImpl::searchDevices: Search complete
+INFO  [08 Jul 2013 16:55:01,568] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:55:01,568] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:55:01,568] :210 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 16:55:01,568] :295 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 16:55:01,568] :300 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 16:55:01,568] :452 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 16:55:01,568] :217 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 16:55:01,569] :454 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 16:55:01,569] :495 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 16:55:01,569] :502 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 16:55:01,569] :240 TransportManagerImpl::removeDeviceAdapter: Remove device adapter 0x9242620
+INFO  [08 Jul 2013 16:55:01,569] :464 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+INFO  [08 Jul 2013 16:55:01,569] :540 TransportManagerImpl::AdapterHandler::removeAdapter: Remove device adapter called 0x9242620
+ERROR [08 Jul 2013 16:55:01,569] :470 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 16:55:01,569] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:55:01,569] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:55:01,569] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:55:13,639] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:55:13,639] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:55:13,639] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:55:13,640] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:55:13,640] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:55:13,640] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x80f86a0
+INFO  [08 Jul 2013 16:55:13,640] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:55:13,640] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:55:13,640] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:55:13,640] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:55:13,640] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:55:13,640] :518 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
+INFO  [08 Jul 2013 16:55:13,647] :68 TransportManagerImpl::TransportManagerImpl: ==============================================
+INFO  [08 Jul 2013 16:55:13,647] :79 TransportManagerImpl::TransportManagerImpl: TM object created.
+INFO  [08 Jul 2013 16:55:13,647] :265 TransportManagerImpl::init: Init is called
+INFO  [08 Jul 2013 16:55:13,647] :289 TransportManagerImpl::init: Init complete
+INFO  [08 Jul 2013 16:55:13,647] :442 TransportManagerImpl::messageQueueThread: Message queue thread started
+INFO  [08 Jul 2013 16:55:13,647] :349 TransportManagerImpl::eventListenerThread: Event listener thread started
+INFO  [08 Jul 2013 16:55:13,647] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:55:13,647] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:55:13,647] :126 TransportManagerImpl* transport_manager::TransportManagerImpl::instance: TM instance returned 0x8195780
+INFO  [08 Jul 2013 16:55:13,647] :234 TransportManagerImpl::addDeviceAdapter: Add device adapter 0x9a5b620
+INFO  [08 Jul 2013 16:55:13,647] :535 TransportManagerImpl::AdapterHandler::addAdapter: Add device adapter called 0x9a5b620
+INFO  [08 Jul 2013 16:55:13,647] :245 TransportManagerImpl::searchDevices: Search device called
+INFO  [08 Jul 2013 16:55:13,647] :254 TransportManagerImpl::searchDevices: Iterating over device adapters
+INFO  [08 Jul 2013 16:55:13,648] :146 DeviceAdapter::Error transport_manager::DeviceAdapterImpl::searchDevices: Requesting device scan
+INFO  [08 Jul 2013 16:55:13,648] :261 TransportManagerImpl::searchDevices: Search complete
+INFO  [08 Jul 2013 16:55:13,648] :210 TransportManagerImpl::sendMessageToDevice: Send message to device called with arguments serial number 1
+INFO  [08 Jul 2013 16:55:13,648] :295 TransportManagerImpl::postMessage: Post message called serial number 1
+INFO  [08 Jul 2013 16:55:13,648] :300 TransportManagerImpl::postMessage: Post message complete
+INFO  [08 Jul 2013 16:55:13,648] :452 TransportManagerImpl::messageQueueThread: Iterating over message queue 1
+INFO  [08 Jul 2013 16:55:13,648] :217 TransportManagerImpl::sendMessageToDevice: Message posted
+INFO  [08 Jul 2013 16:55:13,648] :454 TransportManagerImpl::messageQueueThread: Found message with min serial number
+INFO  [08 Jul 2013 16:55:13,648] :495 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Add adapter by session called 10
+INFO  [08 Jul 2013 16:55:13,648] :240 TransportManagerImpl::removeDeviceAdapter: Remove device adapter 0x9a5b620
+INFO  [08 Jul 2013 16:55:13,648] :502 DeviceAdapter* transport_manager::TransportManagerImpl::AdapterHandler::getAdapterBySession: Device adapter was not found
+INFO  [08 Jul 2013 16:55:13,648] :540 TransportManagerImpl::AdapterHandler::removeAdapter: Remove device adapter called 0x9a5b620
+INFO  [08 Jul 2013 16:55:13,648] :464 TransportManagerImpl::messageQueueThread: Got adapter 0 by session id 10
+ERROR [08 Jul 2013 16:55:13,648] :470 TransportManagerImpl::messageQueueThread: Device adapter is not found remove message
+INFO  [08 Jul 2013 16:55:13,648] :486 TransportManagerImpl::messageQueueThread: Message queue thread finished
+INFO  [08 Jul 2013 16:55:13,648] :430 TransportManagerImpl::eventListenerThread: Event listener thread finished
+INFO  [08 Jul 2013 16:55:13,648] :118 TransportManagerImpl::~TransportManagerImpl: TM object destroyed.
+INFO  [08 Jul 2013 16:55:13,648] :518 TransportManagerImpl::AdapterHandler::~AdapterHandler: Adapter handler destroyed
