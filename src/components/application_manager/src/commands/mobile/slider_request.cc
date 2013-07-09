@@ -66,7 +66,8 @@ void SliderRequest::Run() {
   const int connectionKey =
     (*message_)[strings::params][strings::connection_key];
 
-  const unsigned int cmd_id = 105;
+  const unsigned int cmd_id = hmi_apis::FunctionID::UI_Slider;
+
     ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, correlationId),
       connectionKey, correlationId, cmd_id);
