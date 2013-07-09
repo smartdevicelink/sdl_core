@@ -45,14 +45,14 @@
 
 namespace transport_manager {
 
+namespace device_adapter {
+
 class Configuration;
 class DeviceAdapterListener;
 typedef std::string DeviceType;
 typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
 typedef std::vector<DeviceHandle> DeviceList;
-
-namespace device_adapter {
 
 enum Error {
   OK, FAIL, NOT_SUPPORTED, ALREADY_EXIST, BAD_STATE, BAD_PARAM

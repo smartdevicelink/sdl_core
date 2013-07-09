@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
 
 #include "bluetooth_adapter.h"
+#include "device_adapter_socket_communication.h"
 #include "device_adapter_impl.h"
 
 namespace transport_manager {
@@ -45,8 +46,9 @@ namespace device_adapter {
 
 class BluetoothDeviceScanner : public DeviceScanner {
  public:
-  BluetoothDeviceScanner(DeviceAdapter* device_adapter, DeviceAdapterController* controller);
+  BluetoothDeviceScanner();
   ~BluetoothDeviceScanner();
+  void thread();
  protected:
   virtual Error init();
   virtual void terminate();
@@ -55,16 +57,12 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
   typedef std::vector<uint8_t> RfcommChannelVector;
 
-  void thread();
   bool waitForDeviceScanRequest();
   RfcommChannelVector discoverSmartDeviceLinkRfcommChannels(
       const bdaddr_t& device_address);
-  static std::string getUniqueDeviceId(const bdaddr_t& device_address);
-  SearchDeviceError* BluetoothDeviceScanner::doInquiry(
+  SearchDeviceError* doInquiry(
       DeviceVector* discovered_devices);
 
-  DeviceAdapter* device_adapter_;
-  DeviceAdapterController* device_adapter_controller_;
   pthread_t thread_;
   bool thread_started_;
   bool shutdown_requested_;
@@ -124,6 +122,14 @@ class BluetoothDevice : public Device {
   RfcommChannels rfcomm_channels_;
 
   ApplicationHandle next_application_handle_;
+};
+
+class BluetoothDeviceAdapter : public DeviceAdapterImpl {
+ public:
+  BluetoothDeviceAdapter() {
+    setDeviceScanner(new BluetoothDeviceScanner);
+    setDataTransmitter(new SocketDataTransmitter);
+  }
 };
 
 }  // namespace device_adapter
