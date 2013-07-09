@@ -55,6 +55,11 @@ class MockTransportManagerListener : public ::transport_manager::TransportManage
                                          const ApplicationList app_list));
   MOCK_METHOD2(onSearchDeviceFailed, void (const DeviceAdapter* device_adapter,
       const SearchDeviceError& error));
+  MOCK_METHOD2(onConnectDone, void(const DeviceAdapter* device_adapter,
+                             const SessionID session_id));
+  MOCK_METHOD3(onDataReceiveDone, void(const DeviceAdapter* device_adapter,
+                                 const SessionID session_id,
+                                 const RawMessageSptr data_container));
   ~MockTransportManagerListener() { }
 
 };
