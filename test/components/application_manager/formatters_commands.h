@@ -43,8 +43,8 @@
 #include "application_manager/mobile_command_factory.h"
 #include "utils/shared_ptr.h"
 
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
-#include "JSONHandler/formatters/formatter_json_rpc.h"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/formatter_json_rpc.h"
 
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/MOBILE_API_schema.h"

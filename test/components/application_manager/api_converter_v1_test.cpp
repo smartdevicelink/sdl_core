@@ -36,11 +36,11 @@
 #include "gmock/gmock.h"
 //#include "application_manager/api_version_converter_v1.h"
 
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "MOBILE_API.h"
 #include "v4_protocol_v1_2_no_extra.h"
-#include "JSONHandler/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.hpp"
 
 namespace test {
 namespace components {

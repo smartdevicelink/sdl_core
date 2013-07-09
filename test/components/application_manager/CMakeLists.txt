@@ -3,7 +3,7 @@ include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/components/application_manager/include
   ../../../src/components/SmartObjects/include
-  ../../../src/components/JSONHandler/include/
+  ../../../src/components/formatters/include/
   ../../../src/components/utils/include/
   ../../../src//thirdPartyLibs/jsoncpp/include/
     ${CMAKE_BINARY_DIR}/src/components/
