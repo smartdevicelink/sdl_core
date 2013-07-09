@@ -70,7 +70,7 @@ void SetMediaClockRequest::Run() {
       new MessageChaining(connectionKey, correlationId),
       connectionKey, correlationId, cmd_id);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
 }
 
 }  // namespace commands

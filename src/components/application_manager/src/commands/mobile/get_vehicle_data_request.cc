@@ -103,7 +103,7 @@ void GetVehicleDataRequest::Run() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
           connection_key, correlation_id, vr_cmd_id, get_vehicle_data);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(get_vehicle_data);
+  ApplicationManagerImpl::instance()->ManageHMICommand(get_vehicle_data);
 }
 
 }  // namespace commands

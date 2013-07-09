@@ -94,7 +94,7 @@ void UpdateTurnListRequest::Run() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }
 
 }  // namespace commands

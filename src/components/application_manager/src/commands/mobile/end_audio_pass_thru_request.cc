@@ -83,7 +83,7 @@ void EndAudioPassThruRequest::Run() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
       connection_key, correlation_id, audio_cmd_id);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
+  ApplicationManagerImpl::instance()->ManageHMICommand(ui_audio);
 }
 
 }  // namespace commands

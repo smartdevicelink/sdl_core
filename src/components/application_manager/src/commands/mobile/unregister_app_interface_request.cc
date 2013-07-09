@@ -70,8 +70,6 @@ void UnregisterAppInterfaceRequest::Run() {
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 
-  //Mobile notification???????
-
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 

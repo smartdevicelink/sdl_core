@@ -119,7 +119,6 @@ void AddCommandRequest::Run() {
       return;
     }
 
-    // TODO(DK): HMI Request Id
     const int vr_cmd_id = hmi_apis::FunctionID::VR_AddCommand;
     (*p_smrt_vr)[strings::params][strings::function_id] =
       vr_cmd_id;
@@ -139,7 +138,7 @@ void AddCommandRequest::Run() {
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
         connection_key, correlation_id, vr_cmd_id, &(*message_));
 
-    ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
+    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
   }
 }
 

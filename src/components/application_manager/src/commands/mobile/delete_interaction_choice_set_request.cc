@@ -86,7 +86,6 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  // TODO(DK): HMI Request Id
   const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet;
   (*p_smrt_ui)[strings::params][strings::function_id] =
     ui_cmd_id;
@@ -106,7 +105,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
           connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+  ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
 }
 
 }  // namespace commands

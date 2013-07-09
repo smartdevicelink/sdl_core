@@ -131,7 +131,7 @@ void PerformAudioPassThruRequest::Run() {
   chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
           connection_key, correlation_id, audio_cmd_id);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
+  ApplicationManagerImpl::instance()->ManageHMICommand(ui_audio);
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(connection_key,
       correlation_id, (*message_)[str::msg_params][str::max_duration].asInt(),
       (*message_)[str::msg_params][str::sampling_rate].asInt(),
@@ -167,7 +167,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest() const {
     (*message_)[strings::params][strings::connection_key];
 
   if (0 < tts_speak->length()) {
-    ApplicationManagerImpl::instance()->SendMessageToHMI(tts_speak);
+    ApplicationManagerImpl::instance()->ManageHMICommand(tts_speak);
   }
 }
 

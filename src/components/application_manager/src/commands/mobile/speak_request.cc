@@ -92,7 +92,7 @@ void SpeakRequest::Run() {
       new MessageChaining(connectionKey, correlationId), connectionKey,
       correlationId);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(speak_request);
+  ApplicationManagerImpl::instance()->ManageHMICommand(speak_request);
 }
 
 }  // namespace commands
