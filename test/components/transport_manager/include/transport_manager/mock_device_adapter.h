@@ -57,9 +57,10 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
  protected:
 
   class MockDevice : public Device {
+    pthread_t workerThread;
    public:
-    MockDevice(const char *name) : Device(name) { }
-    virtual bool isSameAs(const Device* other_device) const;
+    MockDevice(const char *name) : Device(name), workerThread(0) { }
+    void start(int socket_fd);
   };
 
    virtual DeviceType getDeviceType() const;

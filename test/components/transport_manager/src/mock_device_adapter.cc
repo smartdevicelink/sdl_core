@@ -32,91 +32,96 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#include <list>
 
 #include "transport_manager/mock_device_adapter.h"
 #include "transport_manager/device_adapter_impl.h"
-
-#include <list>
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-DeviceType MockDeviceAdapter::getDeviceType() const
-{
+static void *mockDeviceWorker(void* p) {
+  int socket_fd = *static_cast<int*>(p);
+  delete static_cast<int*>(p);
+
+  unsigned char *buf = new unsigned char[4096];
+
+  size_t len = recv(socket_fd, buf, 4096, 0);
+  send(socket_fd, buf, len, 0);
+
+  return NULL;
+}
+
+void MockDeviceAdapter::MockDevice::start(int socket_fd) {
+  pthread_create(&workerThread, NULL, mockDeviceWorker, new int(socket_fd));
+}
+
+DeviceType MockDeviceAdapter::getDeviceType() const {
   return "mock-adapter";
 }
 
-bool MockDeviceAdapter::isSearchDevicesSupported() const
-{
+bool MockDeviceAdapter::isSearchDevicesSupported() const {
   return true;
 }
 
-bool MockDeviceAdapter::isServerOriginatedConnectSupported() const
-{
+bool MockDeviceAdapter::isServerOriginatedConnectSupported() const {
   return true;
 }
 
-bool MockDeviceAdapter::isClientOriginatedConnectSupported() const
-{
+bool MockDeviceAdapter::isClientOriginatedConnectSupported() const {
   return true;
 }
 
-ApplicationList MockDeviceAdapter::getApplicationList(const DeviceHandle device_handle) const
-{
+ApplicationList MockDeviceAdapter::getApplicationList(const DeviceHandle device_handle) const {
   ApplicationList rc;
   rc.push_back(100);
   return rc;
 }
 
-void MockDeviceAdapter::connectionThread(Connection *connection)
-{
+void MockDeviceAdapter::connectionThread(Connection *connection) {
   assert(connection != 0);
   LOG4CXX_INFO(
       logger_,
       "Connection thread started for session " << connection->session_id());
 
-  int my_socket;
+  int fd[2];
 
   const DeviceHandle device_handle = connection->device_handle();
   const ApplicationHandle app_handle = connection->application_handle();
   const int session_id = connection->session_id();
 
-  connection->set_connection_socket(my_socket);
+  socketpair(AF_UNIX, SOCK_STREAM, 0, fd);
+
+  MockDevice *device = dynamic_cast<MockDevice*>(devices_[device_handle]);
+  device->start(fd[0]);
+  connection->set_connection_socket(fd[1]);
   handleCommunication(connection);
 }
 
-void MockDeviceAdapter::mainThread()
-{
+void MockDeviceAdapter::mainThread() {
   while (!shutdown_flag_) {
       DeviceMap new_devices;
       DeviceVector discovered_devices;
 
       bool device_scan_requested = waitForDeviceScanRequest(0);
 
-      if(device_scan_requested){
-        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
-          devices_[1] = new Device("my_device");
-          (*it)->onSearchDeviceDone(this);
-          device_scan_requested_ = false;
+      if(device_scan_requested) {
+        if (devices_.empty()) {
+          devices_[1] = new MockDevice("my_device");
         }
+        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+          (*it)->onSearchDeviceDone(this);
+        }
+        device_scan_requested_ = false;
       }
   }
 }
 
-void MockDeviceAdapter::addDevice(const char *name) {
-  pthread_mutex_lock(&devices_mutex_);
-  MockDevice *device = new MockDevice(name);
-  devices_.insert(std::make_pair( handle_generator_->generate(), device));
-  pthread_mutex_unlock(&devices_mutex_);
-}
-
-bool MockDeviceAdapter::MockDevice::isSameAs(const Device *dev) {
-  return dev->unique_device_id_ == unique_device_id_;
-}
-
-MockDeviceAdapter::~MockDeviceAdapter()
-{ }
+MockDeviceAdapter::~MockDeviceAdapter() { }
 
 }
 }
