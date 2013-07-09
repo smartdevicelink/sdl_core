@@ -49,7 +49,7 @@ macro (GenerateInterface arg_xml_name arg_namespace parser_type)
 
     include_directories (
         ../../../src/components/SmartObjects/include
-        ../../../src/components/JSONHandler/include/
+        ../../../src/components/formatters/include/
         ${CMAKE_BINARY_DIR}
     )
 

@@ -1,7 +1,6 @@
 /**
- * @file meta_fromatter.cc
- * @brief implementation of class CMetaFormatter which is designed to format
- *        the smart object against given schema for given formatter
+ * @file CSmartFactory.cpp
+ * @brief CSmartFactory source file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -31,30 +30,17 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.auto
+// POSSIBILITY OF SUCH DAMAGE.
 
-#include <set>
-#include <string>
+#include "formatters/CSmartFactory.hpp"
 
-#include "JSONHandler/formatters/meta_formatter.h"
-
-namespace formatter_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
-
-//---------------------------------------------------------------
-
-bool formatter_ns::CMetaFormatter::CreateObjectByPattern(
-    const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
-    const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
-
-  if (smart_objects_ns::SmartType_Invalid == result_object.getType()) {
-    return false;
-  }
-  
-  schema.BuildObjectBySchema(object, result_object);
-
-  result_object.setSchema(schema);
-
-  return true;
-}  
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS("msg_params");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS("params");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID("function_id");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE("message_type");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION("protocol_version");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE("protocol_type");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID("correlation_id");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::kCode("code");
+const std::string NsSmartDeviceLink::NsJSONHandler::strings::kMessage(
+    "message");

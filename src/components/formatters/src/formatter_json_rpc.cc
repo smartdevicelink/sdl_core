@@ -32,7 +32,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "JSONHandler/formatters/formatter_json_rpc.h"
+#include "formatters/formatter_json_rpc.h"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {

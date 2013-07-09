@@ -32,8 +32,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
-#include "JSONHandler/formatters/meta_formatter.h"
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "formatters/meta_formatter.h"
 
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace SmartObjects = NsSmartDeviceLink::NsSmartObjects;

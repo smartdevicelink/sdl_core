@@ -1,7 +1,7 @@
 include_directories (
   ./include/
   ../utils/include/
-  ../JSONHandler/include/
+  ../formatters/include/
   ../protocol_handler/include/
   ../SmartObjects/include/
   ../hmi_message_handler/include

@@ -39,7 +39,7 @@
 #include "json/json.h"
 
 #include "CFormatterJsonBase.hpp"
-#include "JSONHandler/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.hpp"
 
 namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 

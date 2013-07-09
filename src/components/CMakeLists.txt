@@ -7,8 +7,8 @@ add_subdirectory(./TransportManager)
 # --- AppMgr
 #add_subdirectory(./AppMgr)
 
-# --- JSONHandler
-add_subdirectory(./JSONHandler)
+# --- formatters
+add_subdirectory(./formatters)
 
 # --- ProtocolHandler
 add_subdirectory(./protocol_handler)

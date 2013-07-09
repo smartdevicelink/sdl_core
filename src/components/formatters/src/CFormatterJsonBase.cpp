@@ -34,7 +34,7 @@
 
 #include "json/json.h"
 
-#include "JSONHandler/formatters/CFormatterJsonBase.hpp"
+#include "formatters/CFormatterJsonBase.hpp"
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValueToObj(
     const Json::Value& value,

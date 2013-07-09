@@ -14,11 +14,11 @@ set (SOURCES
 )
 
 set (FORMATTER_SOURCES
-    ./src/formatters/CFormatterJsonBase.cpp
-    ./src/formatters/CFormatterJsonSDLRPCv1.cpp
-    ./src/formatters/CFormatterJsonSDLRPCv2.cpp
-    ./src/formatters/formatter_json_rpc.cc
-    ./src/formatters/meta_formatter.cc
+    ./src/CFormatterJsonBase.cpp
+    ./src/CFormatterJsonSDLRPCv1.cpp
+    ./src/CFormatterJsonSDLRPCv2.cpp
+    ./src/formatter_json_rpc.cc
+    ./src/meta_formatter.cc
 )
 
 add_library("JSONHandler" ${SOURCES}

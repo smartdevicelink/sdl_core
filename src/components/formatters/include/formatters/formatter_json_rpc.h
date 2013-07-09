@@ -42,8 +42,8 @@
 #include <SmartObjects/TEnumSchemaItem.hpp>
 #include "json/json.h"
 
-#include "CFormatterJsonBase.hpp"
-#include "JSONHandler/CSmartFactory.hpp"
+#include "formatters/CFormatterJsonBase.hpp"
+#include "formatters/CSmartFactory.hpp"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {

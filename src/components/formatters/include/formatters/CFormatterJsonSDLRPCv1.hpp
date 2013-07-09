@@ -39,9 +39,9 @@
 
 #include "CFormatterJsonBase.hpp"
 
-#include "JSONHandler/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.hpp"
 #include "SmartObjects/TEnumSchemaItem.hpp"
-#include "JSONHandler/formatters/meta_formatter.h"
+#include "formatters/meta_formatter.h"
 
 namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 
