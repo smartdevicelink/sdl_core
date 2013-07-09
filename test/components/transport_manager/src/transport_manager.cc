@@ -39,13 +39,18 @@
 #include <transport_manager/transport_manager_impl.h>
 #include <transport_manager/mock_device_adapter.h>
 #include <transport_manager/mock_device_adapter_listener.h>
+#include <transport_manager/mock_transport_manager_listener.h>
 #include <protocol_handler/raw_message.h>
+#include "transport_manager/device_handle_generator_impl.h"
+#include "transport_manager/device_adapter_listener_impl.h"
+#include "transport_manager/transport_manager_listener_impl.h"
 
 using namespace transport_manager;
 using namespace test::components::transport_manager;
 using protocol_handler::RawMessage;
 
 using testing::_;
+using ::testing::AtLeast;
 
 TEST(TransportManagerImpl, instance)
 {
@@ -53,25 +58,37 @@ TEST(TransportManagerImpl, instance)
 	ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
 }
 
-TEST(TransportManagerImpl, connect)
+TEST(TransportManagerImpl, searchDevice)
 {
   TransportManagerImpl* impl = TransportManagerImpl::instance();
 
   MockDeviceAdapter *mock_da = new MockDeviceAdapter();
   impl->addDeviceAdapter(mock_da);
 
-  MockDeviceAdapterListener *mdal = new MockDeviceAdapterListener();
+  MockTransportManagerListener *tml = new MockTransportManagerListener();
+  impl->addEventListener(tml);
+  impl->addAdapterListener(mock_da, new DeviceAdapterListenerImpl(impl));
 
-  impl->registerAdapterListener(mdal);
+  //MockDeviceAdapterListener *mdal = new MockDeviceAdapterListener();
 
-  unsigned char buf[10] = { 0 };
+  //impl->addAdapterListener(mock_da, mdal);
 
-  RawMessageSptr msg(new RawMessage(10, 1, 1, buf, 10));
+  mock_da->init(new DeviceHandleGeneratorImpl(),
+                NULL);
+  EXPECT_CALL(*tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
+  EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
+  impl->searchDevices();
 
-  impl->sendMessageToDevice(msg);
-  sleep(2);
-
-  EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(1);
-  EXPECT_CALL(*mdal, onDataSendFailed(_, _, _, _)).Times(1);
-  sleep(2);
+//  EXPECT_CALL(*mdal, onConnectDone(_, _)).Times(1);
+//  EXPECT_CALL(*mdal, onConnectFailed(_, _, _)).Times(1);
+//
+//  impl->connectDevice(1, 1, 1);
+//  unsigned char buf[10] = { 0 };
+//
+//  RawMessageSptr msg(new RawMessage(10, 1, 1, buf, 10));
+//
+//  impl->sendMessageToDevice(msg);
+//
+//  EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(1);
+//  EXPECT_CALL(*mdal, onDataSendFailed(_, _, _, _)).Times(1);
 }

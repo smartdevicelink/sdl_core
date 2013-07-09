@@ -131,7 +131,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void registerEventListener(TransportManagerListener *listener);
+  virtual void addEventListener(TransportManagerListener *listener);
 
   /**
    * @brief add new device adapter
@@ -149,7 +149,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void registerAdapterListener(DeviceAdapterListener *listener);
+  virtual void addAdapterListener(DeviceAdapter *adapter, DeviceAdapterListener *listener);
 
   /**
    * @brief remove device from internal storages
@@ -180,24 +180,6 @@ class TransportManagerImpl : public TransportManager {
    **/
   virtual void declineConnect(const DeviceHandle &device_id,
                               const ApplicationHandle &app_id);
-
-  /**
-   * @brief set new listener
-   *
-   * @param listener
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  void set_device_adapter_listener(DeviceAdapterListener *listener);
-
-  /**
-   * @brief set tm's event listener
-   *
-   * @param event type, function address
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  void set_transport_manager_listener(TransportManagerListener *listener);
 
   /**
    * @brief interface function to wake up adapter listener thread
@@ -264,7 +246,7 @@ class TransportManagerImpl : public TransportManager {
     void removeSession(transport_manager::DeviceAdapter *da,
                        transport_manager::SessionID sid);
     void removeDevice(const transport_manager::DeviceHandle &device);
-    AdapterList device_adapters(void);
+    const AdapterList &device_adapters(void);
 
     ~AdapterHandler();
     AdapterHandler();
@@ -396,20 +378,11 @@ class TransportManagerImpl : public TransportManager {
    **/
   mutable bool all_thread_active_;
 
-  /**
-   * @brief Device adapter listener.
-   **/
-  DeviceAdapterListener *device_adapter_listener_;
-
-  /**
-   * @brief Device handle generator.
-   **/
-  DeviceHandleGenerator *device_handle_generator_;
-
+  typedef std::list<TransportManagerListener *> TransportManagerListenerList;
   /**
    * @brief listener that would be called when TM's event happened.
    **/
-  TransportManagerListener *transport_manager_listener_;
+  TransportManagerListenerList transport_manager_listener_;
 
   /**
    * @brief ID of message queue processing thread

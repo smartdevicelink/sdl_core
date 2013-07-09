@@ -1,5 +1,5 @@
 /*
- * \file mock_device_adapter.cc
+ * \file mock_device_adapter_listener.h
  * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -33,63 +33,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/mock_device_adapter.h"
+#ifndef MOCK_TRANSPORT_MANAGER_LISTENER_H
+#define MOCK_TRANSPORT_MANAGER_LISTENER_H
 
-#include <list>
+#include <gmock/gmock.h>
+#include <transport_manager/common.h>
+#include <transport_manager/device_adapter.h>
+#include <transport_manager/device_handle_generator.h>
+#include <transport_manager/transport_manager_listener_impl.h>
 
-namespace test {
-namespace components {
+using namespace transport_manager;
+
+namespace test  {
+namespace components  {
 namespace transport_manager {
 
-DeviceType MockDeviceAdapter::getDeviceType() const
+class MockTransportManagerListener : public ::transport_manager::TransportManagerListenerImpl
 {
-  return "mock-adapter";
-}
+  public:
+  MOCK_METHOD2(onSearchDeviceDone, void (const DeviceHandle device,
+                                         const ApplicationList app_list));
+  MOCK_METHOD2(onSearchDeviceFailed, void (const DeviceAdapter* device_adapter,
+      const SearchDeviceError& error));
+  ~MockTransportManagerListener() { }
 
-bool MockDeviceAdapter::isSearchDevicesSupported() const
-{
-  return true;
-}
+};
 
-bool MockDeviceAdapter::isServerOriginatedConnectSupported() const
-{
-  return true;
-}
+}}}
 
-bool MockDeviceAdapter::isClientOriginatedConnectSupported() const
-{
-  return true;
-}
 
-ApplicationList MockDeviceAdapter::getApplicationList(const DeviceHandle device_handle) const
-{
-  ApplicationList rc;
-  rc.push_back(100);
-  return rc;
-}
-
-void MockDeviceAdapter::connectionThread(Connection *connection)
-{
-  sleep(5);
-}
-
-void MockDeviceAdapter::mainThread()
-{
-  while (false == shutdown_flag_) {
-      DeviceMap new_devices;
-      DeviceVector discovered_devices;
-
-      bool device_scan_requested = waitForDeviceScanRequest(0);
-
-      for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
-        (*it)->onSearchDeviceDone(this);
-      }
-  }
-}
-
-MockDeviceAdapter::~MockDeviceAdapter()
-{ }
-
-}
-}
-}
+#endif /* MOCK_TRANSPORT_MANAGER_LISTENER_H */

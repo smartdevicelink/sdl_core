@@ -41,15 +41,20 @@
 namespace transport_manager {
 
 log4cxx::LoggerPtr DeviceAdapterListenerImpl::logger_ = log4cxx::LoggerPtr(
-		log4cxx::Logger::getLogger("DeviceAdapterListener"));
-DeviceAdapterListener::~DeviceAdapterListener(){};
-DeviceAdapterListenerImpl::~DeviceAdapterListenerImpl(){};
+    log4cxx::Logger::getLogger("DeviceAdapterListener"));
+DeviceAdapterListener::~DeviceAdapterListener() {
+}
+;
+DeviceAdapterListenerImpl::~DeviceAdapterListenerImpl() {
+}
+;
 
-DeviceAdapterListener::DeviceAdapterEvent::DeviceAdapterEvent(int type,
-		transport_manager::SessionID session_id, DeviceAdapter *device_adapter, RawMessageSptr data,
-		DeviceAdapterError *error) :
-		event_type_(type), session_id_(session_id), device_adapter_(
-				device_adapter), event_error_(error) {
+DeviceAdapterListener::DeviceAdapterEvent::DeviceAdapterEvent(int type, int session_id, DeviceAdapter *adapter, RawMessageSptr data, DeviceAdapterError *error)
+     : event_type_(type),
+      session_id_(session_id),
+      device_adapter_(adapter),
+      event_error_(error) {
+
 }
 
 DeviceAdapterListener::DeviceAdapterEvent::~DeviceAdapterEvent() {
@@ -57,217 +62,224 @@ DeviceAdapterListener::DeviceAdapterEvent::~DeviceAdapterEvent() {
 }
 
 void DeviceAdapterListener::DeviceAdapterEvent::set_event_type(int type) {
-	event_type_ = type;
+  event_type_ = type;
 }
 
-void DeviceAdapterListener::DeviceAdapterEvent::set_session_id(transport_manager::SessionID id) {
-	session_id_ = id;
+void DeviceAdapterListener::DeviceAdapterEvent::set_session_id(
+    transport_manager::SessionID id) {
+  session_id_ = id;
 }
 
 void DeviceAdapterListener::DeviceAdapterEvent::set_device_adapter(
-		DeviceAdapter *device_adapter) {
-	device_adapter_ = device_adapter;
+    DeviceAdapter *device_adapter) {
+  device_adapter_ = device_adapter;
 }
-void DeviceAdapterListener::DeviceAdapterEvent::set_data(
-		RawMessageSptr data) {
-	event_data_ = data;
+void DeviceAdapterListener::DeviceAdapterEvent::set_data(RawMessageSptr data) {
+  event_data_ = data;
 }
 
 void DeviceAdapterListener::DeviceAdapterEvent::set_error(
-		DeviceAdapterError *error) {
-	//todo: add copy data
-	event_error_ = error;
+    DeviceAdapterError *error) {
+  //todo: add copy data
+  event_error_ = error;
 }
 
 int DeviceAdapterListener::DeviceAdapterEvent::event_type(void) const {
-	return event_type_;
+  return event_type_;
 }
 
-transport_manager::SessionID DeviceAdapterListener::DeviceAdapterEvent::session_id(void) const {
-	return session_id_;
+transport_manager::SessionID DeviceAdapterListener::DeviceAdapterEvent::session_id(
+    void) const {
+  return session_id_;
 }
 
 DeviceAdapter *DeviceAdapterListener::DeviceAdapterEvent::device_adapter(
-		void) const {
-	return device_adapter_;
+    void) const {
+  return device_adapter_;
 }
 
-RawMessageSptr DeviceAdapterListener::DeviceAdapterEvent::data(
-		void) const {
-	return event_data_;
+RawMessageSptr DeviceAdapterListener::DeviceAdapterEvent::data(void) const {
+  return event_data_;
 }
 
-DeviceAdapterError *DeviceAdapterListener::DeviceAdapterEvent::error(
-		void) const {
-	return event_error_;
+DeviceAdapterError *DeviceAdapterListener::DeviceAdapterEvent::event_error(
+    void) const {
+  return event_error_;
 }
 
 DeviceAdapterListenerImpl::DeviceAdapterListenerImpl(
-		transport_manager::TransportManagerImpl *tm) {
-	transport_manager_impl_ = tm;
+    transport_manager::TransportManagerImpl *tm) {
+  transport_manager_impl_ = tm;
 }
 
 void DeviceAdapterListenerImpl::onSearchDeviceDone(
-		const DeviceAdapter *device_adapter) {
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE, 0,
-			const_cast<DeviceAdapter *>(device_adapter), NULL, NULL);
+    const DeviceAdapter *device_adapter) {
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE, 0,
+      const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), new DeviceAdapterError());
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onSearchDeviceFailed(
-		const DeviceAdapter* device_adapter, const SearchDeviceError& error) {
-	SearchDeviceError *err = new SearchDeviceError(error);
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL, 0,
-			const_cast<DeviceAdapter *>(device_adapter), NULL, err);
+    const DeviceAdapter* device_adapter, const SearchDeviceError& error) {
+  SearchDeviceError *err = new SearchDeviceError(error);
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL, 0,
+      const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onConnectDone(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id) {
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, NULL);
+    const DeviceAdapter* device_adapter,
+    const transport_manager::SessionID session_id) {
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE, session_id,
+      const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), new DeviceAdapterError());
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onConnectFailed(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id,
-		const ConnectError& error) {
-	ConnectError *err = new ConnectError(error);
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, err);
+    const DeviceAdapter* device_adapter,
+    const transport_manager::SessionID session_id, const ConnectError& error) {
+  ConnectError *err = new ConnectError(error);
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL, session_id,
+      const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDisconnectDone(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id) {
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, NULL);
+    const DeviceAdapter* device_adapter,
+    const transport_manager::SessionID session_id) {
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE, session_id,
+      const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), new DeviceAdapterError());
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
-void DeviceAdapterListenerImpl::onDisconnectFailed(const DeviceAdapter* device_adapter,
-                                  const SessionID session_id,
-                                  const DisconnectError& error){
-	DisconnectError *err = new DisconnectError(error);
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, err);
+void DeviceAdapterListenerImpl::onDisconnectFailed(
+    const DeviceAdapter* device_adapter, const SessionID session_id,
+    const DisconnectError& error) {
+  DisconnectError *err = new DisconnectError(error);
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL, session_id,
+      const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDisconnectDeviceDone(
-		const DeviceAdapter* device_adapter, const SessionID session_id) {
+    const DeviceAdapter* device_adapter, const SessionID session_id) {
 
 }
 
 void DeviceAdapterListenerImpl::onDisconnectDeviceFailed(
-		const DeviceAdapter* device_adapter, const SessionID session_id,
-		const DisconnectDeviceError& error) {
+    const DeviceAdapter* device_adapter, const SessionID session_id,
+    const DisconnectDeviceError& error) {
 
 }
 
 void DeviceAdapterListenerImpl::onDataReceiveDone(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id,
-		const RawMessageSptr data_container) {
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), data_container, NULL);
+    const DeviceAdapter* device_adapter,
+    const transport_manager::SessionID session_id,
+    const RawMessageSptr data_container) {
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE, session_id,
+      const_cast<DeviceAdapter *>(device_adapter), data_container, new DeviceAdapterError());
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDataReceiveFailed(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id,
-		const DataReceiveError& error) {
-	DataReceiveError *err = new DataReceiveError(error);
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, err);
+    const DeviceAdapter* device_adapter,
+    const transport_manager::SessionID session_id,
+    const DataReceiveError& error) {
+  DataReceiveError *err = new DataReceiveError(error);
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE, session_id,
+      const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDataSendDone(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id,
-		const RawMessageSptr data_container) {
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE, session_id,
-			const_cast<DeviceAdapter *>(device_adapter), data_container, NULL);
+    const DeviceAdapter* device_adapter,
+    const transport_manager::SessionID session_id,
+    const RawMessageSptr data_container) {
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE, session_id,
+      const_cast<DeviceAdapter *>(device_adapter), data_container, new DeviceAdapterError());
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDataSendFailed(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id,
-		const RawMessageSptr data_container, const DataSendError& error) {
-	DataSendError *err = new DataSendError(error);
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL, session_id,
-			const_cast<DeviceAdapter *>(device_adapter), NULL, err);
+    const DeviceAdapter* device_adapter,
+    const transport_manager::SessionID session_id,
+    const RawMessageSptr data_container, const DataSendError& error) {
+  DataSendError *err = new DataSendError(error);
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL, session_id,
+      const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(), err);
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onCommunicationError(
-		const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id) {
-	DeviceAdapterListenerImpl::DeviceAdapterEvent event(
-			DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
-			session_id, const_cast<DeviceAdapter *>(device_adapter), NULL, NULL);
+    const DeviceAdapter* device_adapter,
+    const transport_manager::SessionID session_id) {
+  DeviceAdapterListenerImpl::DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
+      session_id, const_cast<DeviceAdapter *>(device_adapter), RawMessageSptr(),
+      new DeviceAdapterError());
 
-	transport_manager_impl_->receiveEventFromDevice(event);
+  transport_manager_impl_->receiveEventFromDevice(event);
 
-	pthread_cond_signal(
-			transport_manager_impl_->getDeviceListenerThreadWakeup());
+  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
-bool DeviceAdapterListenerImpl::DeviceAdapterEvent::operator ==(const DeviceAdapterListenerImpl::DeviceAdapterEvent &other){
-	if(this->event_type_ == other.event_type_
-			&& this->session_id_ == other.session_id_
-			&& this->device_adapter_ == other.device_adapter_
-			&& this->event_data_->serial_number() == other.event_data_->serial_number()
-			) return true;
-	else
-		return false;
+bool DeviceAdapterListenerImpl::DeviceAdapterEvent::operator ==(
+    const DeviceAdapterListenerImpl::DeviceAdapterEvent &other) {
+  if (this->event_type_ == other.event_type_
+      && this->session_id_ == other.session_id_
+      && this->device_adapter_ == other.device_adapter_) {
+
+    if (!this->event_data_.valid() && !other.event_data_.valid())
+      return true;
+
+    if (this->event_data_.valid() && other.event_data_.valid()
+        && this->event_data_->serial_number()
+            == other.event_data_->serial_number()) {
+      return true;
+    }
+    return false;
+  } else {
+    return false;
+  }
 }
 
-} //namespace
+}  //namespace

@@ -334,9 +334,13 @@ void BluetoothAdapter::mainThread() {
       device_scan_requested_ = false;
 
       if (device_scan_succeeded) {
-        listener_->onSearchDeviceDone(this);
+        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+          (*it)->onSearchDeviceDone(this);
+        }
       } else {
-        listener_->onSearchDeviceFailed(this, SearchDeviceError());
+        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+          (*it)->onSearchDeviceFailed(this, SearchDeviceError());
+        }
       }
     }
   }

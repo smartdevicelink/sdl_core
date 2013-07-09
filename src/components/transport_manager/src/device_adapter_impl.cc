@@ -78,7 +78,7 @@ DeviceAdapterImpl::Connection::~Connection(void) {
 }
 
 DeviceAdapterImpl::DeviceAdapterImpl()
-    : listener_(0),
+    : listeners_(0),
       handle_generator_(0),
       device_scan_requested_(false),
       device_scan_requested_mutex_(),
@@ -102,19 +102,19 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
   pthread_mutex_destroy(&devices_mutex_);
   pthread_mutex_destroy(&device_scan_requested_mutex_);
   pthread_cond_destroy(&device_scan_requested_cond_);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+    delete (*it);
+  }
+
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::init(
-    DeviceAdapterListener* listener, DeviceHandleGenerator* handle_generator,
+DeviceAdapter::Error DeviceAdapterImpl::init(DeviceHandleGenerator* handle_generator,
     Configuration* configuration) {
-  if (listener == 0)
-    return BAD_PARAM;
   if (handle_generator == 0)
     return BAD_PARAM;
 
   LOG4CXX_INFO(logger_, "Initializing device adapter");
 
-  listener_ = listener;
   handle_generator_ = handle_generator;
   initialized_ = true;
 
@@ -135,6 +135,9 @@ DeviceAdapter::Error DeviceAdapterImpl::init(
   return DeviceAdapter::OK;
 }
 
+void DeviceAdapterImpl::addListener(DeviceAdapterListener *listener){
+  listeners_.push_back(listener);
+}
 DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
   //TODO check if initialized and supported
 
@@ -399,8 +402,9 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
               logger_,
               "Connection " << connection->session_id() << " to remote device "
                   << device->unique_device_id() << " established");
-
-          listener_->onConnectDone(this, connection->session_id());
+          for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+            (*it)->onConnectDone(this, connection->session_id());
+          }
           is_connection_succeeded = true;
 
           pollfd poll_fds[2];
@@ -446,13 +450,17 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                         RawMessageSptr frame(
                             new protocol_handler::RawMessage(
                                 connection->session_id(), 0, data, bytes_read));
-                        listener_->onDataReceiveDone(this,
+                        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+                          (*it)->onDataReceiveDone(this,
                                                      connection->session_id(),
                                                      frame);
+                        }
                       } else {
-                        listener_->onDataReceiveFailed(this,
+                        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+                          (*it)->onDataReceiveFailed(this,
                                                        connection->session_id(),
                                                        DataReceiveError());
+                        }
                       }
                     } else if (bytes_read < 0) {
                       if (EAGAIN != errno && EWOULDBLOCK != errno) {
@@ -522,12 +530,16 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                       }
                     }
                     if (frame_sent) {
-                      listener_->onDataSendDone(this, connection->session_id(),
+                      for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+                        (*it)->onDataSendDone(this, connection->session_id(),
                                                 frame);
+                      }
                     } else {
-                      listener_->onDataSendFailed(this,
+                      for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+                        (*it)->onDataSendFailed(this,
                                                   connection->session_id(),
                                                   frame, DataSendError());
+                      }
                     }
                   }
                 }
@@ -563,16 +575,22 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
     if (is_connection_succeeded) {
       if (close_status == 0) {
-        listener_->onDisconnectDone(this, connection->session_id());
+        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+          (*it)->onDisconnectDone(this, connection->session_id());
+        }
       } else {
-        listener_->onDisconnectFailed(this, connection->session_id(),
+        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+          (*it)->onDisconnectFailed(this, connection->session_id(),
                                       DisconnectError());
+        }
       }
     }
   }
 
   if (!is_connection_succeeded) {
-    listener_->onConnectFailed(this, connection->session_id(), ConnectError());
+    for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+      (*it)->onConnectFailed(this, connection->session_id(), ConnectError());
+    }
   }
 
   if (true == is_pipe_created) {
@@ -779,6 +797,18 @@ int DeviceAdapterImpl::Connection::start_connection_thread(
   if (error_code != 0)
     delete thread_params;
   return error_code;
+}
+
+void DeviceAdapterImpl::broadcastEvent(const DeviceAdapter* device_adapter,
+                    const SessionID session_id,
+                    const SearchDeviceError& error)const{
+
+}
+
+void DeviceAdapterImpl::broadcastEvent(const DeviceAdapter* device_adapter,
+                    const SessionID session_id,
+                    const RawMessageSptr data_container)const{
+
 }
 
 }  // namespace transport_manager
