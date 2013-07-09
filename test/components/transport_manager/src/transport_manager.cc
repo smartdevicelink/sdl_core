@@ -75,9 +75,12 @@ TEST(TransportManagerImpl, searchDevice)
 
   mock_da->init(new DeviceHandleGeneratorImpl(),
                 NULL);
+
+  impl->searchDevices();
+
   EXPECT_CALL(*tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
   EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
-  impl->searchDevices();
+
 
 //  EXPECT_CALL(*mdal, onConnectDone(_, _)).Times(1);
 //  EXPECT_CALL(*mdal, onConnectFailed(_, _, _)).Times(1);

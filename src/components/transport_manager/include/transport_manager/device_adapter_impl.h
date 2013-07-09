@@ -529,7 +529,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_threads_termination
    **/
-  bool shutdown_flag_;
+  volatile bool shutdown_flag_;
 
  private:
   /**

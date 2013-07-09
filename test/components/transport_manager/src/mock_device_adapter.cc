@@ -70,12 +70,24 @@ ApplicationList MockDeviceAdapter::getApplicationList(const DeviceHandle device_
 
 void MockDeviceAdapter::connectionThread(Connection *connection)
 {
-  sleep(5);
+  assert(connection != 0);
+  LOG4CXX_INFO(
+      logger_,
+      "Connection thread started for session " << connection->session_id());
+
+  int my_socket;
+
+  const DeviceHandle device_handle = connection->device_handle();
+  const ApplicationHandle app_handle = connection->application_handle();
+  const int session_id = connection->session_id();
+
+  connection->set_connection_socket(my_socket);
+  handleCommunication(connection);
 }
 
 void MockDeviceAdapter::mainThread()
 {
-  while (false == shutdown_flag_) {
+  while (!shutdown_flag_) {
       DeviceMap new_devices;
       DeviceVector discovered_devices;
 
@@ -85,6 +97,17 @@ void MockDeviceAdapter::mainThread()
         (*it)->onSearchDeviceDone(this);
       }
   }
+}
+
+void MockDeviceAdapter::addDevice(const char *name) {
+  pthread_mutex_lock(&devices_mutex_);
+  MockDevice *device = new MockDevice(name);
+  devices_.insert(std::make_pair( handle_generator_->generate(), device));
+  pthread_mutex_unlock(&devices_mutex_);
+}
+
+bool MockDeviceAdapter::MockDevice::isSameAs(const Device *dev) {
+  return dev->unique_device_id_ == unique_device_id_;
 }
 
 MockDeviceAdapter::~MockDeviceAdapter()

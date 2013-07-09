@@ -50,12 +50,17 @@ namespace test  {
 namespace components  {
 namespace transport_manager {
 
-class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl
-{
+class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
  public:
   virtual ~MockDeviceAdapter();
 
  protected:
+
+  class MockDevice : public Device {
+   public:
+    MockDevice(const char *name) : Device(name) { }
+    virtual bool isSameAs(const Device* other_device) const;
+  };
 
    virtual DeviceType getDeviceType() const;
 
@@ -71,6 +76,8 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl
        const DeviceHandle device_handle) const;
 
    virtual void mainThread();
+
+   void addDevice(const char *name);
 };
 
 }}}
