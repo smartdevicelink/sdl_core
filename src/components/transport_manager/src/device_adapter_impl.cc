@@ -78,7 +78,7 @@ DeviceAdapterImpl::Connection::~Connection(void) {
 }
 
 DeviceAdapterImpl::DeviceAdapterImpl()
-    : listener_(0),
+    : listeners_(0),
       handle_generator_(0),
       device_scan_requested_(false),
       device_scan_requested_mutex_(),
@@ -102,6 +102,10 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
   pthread_mutex_destroy(&devices_mutex_);
   pthread_mutex_destroy(&device_scan_requested_mutex_);
   pthread_cond_destroy(&device_scan_requested_cond_);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
+    delete (*it);
+  }
+
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::init(DeviceHandleGenerator* handle_generator,
@@ -132,7 +136,7 @@ DeviceAdapter::Error DeviceAdapterImpl::init(DeviceHandleGenerator* handle_gener
 }
 
 void DeviceAdapterImpl::addListener(DeviceAdapterListener *listener){
-  listener_.push_back(listener);
+  listeners_.push_back(listener);
 }
 DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
   //TODO check if initialized and supported
@@ -398,7 +402,7 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
               logger_,
               "Connection " << connection->session_id() << " to remote device "
                   << device->unique_device_id() << " established");
-          for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
+          for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
             (*it)->onConnectDone(this, connection->session_id());
           }
           is_connection_succeeded = true;
@@ -446,13 +450,13 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                         RawMessageSptr frame(
                             new protocol_handler::RawMessage(
                                 connection->session_id(), 0, data, bytes_read));
-                        for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
+                        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
                           (*it)->onDataReceiveDone(this,
                                                      connection->session_id(),
                                                      frame);
                         }
                       } else {
-                        for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
+                        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
                           (*it)->onDataReceiveFailed(this,
                                                        connection->session_id(),
                                                        DataReceiveError());
@@ -526,12 +530,12 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
                       }
                     }
                     if (frame_sent) {
-                      for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
+                      for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
                         (*it)->onDataSendDone(this, connection->session_id(),
                                                 frame);
                       }
                     } else {
-                      for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
+                      for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
                         (*it)->onDataSendFailed(this,
                                                   connection->session_id(),
                                                   frame, DataSendError());
@@ -571,11 +575,11 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
     if (is_connection_succeeded) {
       if (close_status == 0) {
-        for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
+        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
           (*it)->onDisconnectDone(this, connection->session_id());
         }
       } else {
-        for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
+        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
           (*it)->onDisconnectFailed(this, connection->session_id(),
                                       DisconnectError());
         }
@@ -584,7 +588,7 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
   }
 
   if (!is_connection_succeeded) {
-    for(DeviceAdapterListenerList::iterator it = listener_.begin(); it != listener_.end(); ++it){
+    for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
       (*it)->onConnectFailed(this, connection->session_id(), ConnectError());
     }
   }

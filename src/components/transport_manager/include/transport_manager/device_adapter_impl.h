@@ -459,7 +459,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Listener for device adapter notifications.
    **/
-  DeviceAdapterListenerList listener_;
+  DeviceAdapterListenerList listeners_;
 
   /**
    * @brief Handle generator implementation.

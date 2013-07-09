@@ -109,8 +109,9 @@ TransportManagerImpl::~TransportManagerImpl() {
   pthread_mutex_destroy(&message_queue_mutex_);
   pthread_mutex_destroy(&event_queue_mutex_);
   pthread_cond_destroy(&device_listener_thread_wakeup_);
-  //delete transport_manager_listener_;
-  //delete device_adapter_listener_;
+  for(TransportManagerListenerList::iterator it = transport_manager_listener_.begin(); it != transport_manager_listener_.end(); ++it){
+    delete (*it);
+  }
   LOG4CXX_INFO(logger_, "TM object destroyed.");
 }
 
@@ -297,7 +298,7 @@ void TransportManagerImpl::postEvent(
                                                     event.session_id(),
                                                     event.device_adapter(),
                                                     event.data(),
-                                                    event.error());
+                                                    event.event_error());
   pthread_mutex_lock(&event_queue_mutex_);
   event_queue_.push_back(evt);
   pthread_mutex_unlock(&event_queue_mutex_);
@@ -318,6 +319,7 @@ void TransportManagerImpl::eventListenerThread(void) {
     pthread_mutex_lock(&event_queue_mutex_);
     pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
 
+    LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
     for (EventQueue::iterator it = event_queue_.begin();
         it != event_queue_.end(); ++it) {
 
@@ -351,7 +353,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL:
           //error happened in real search process (external error)
-          srch_err = static_cast<SearchDeviceError *>((*it).error());
+          srch_err = static_cast<SearchDeviceError *>((*it).event_error());
           for (TransportManagerListenerList::iterator dal_it =
               transport_manager_listener_.begin();
               dal_it != transport_manager_listener_.end(); ++dal_it) {
@@ -395,7 +397,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL:
-          d_err = static_cast<DataReceiveError *>((*it).error());
+          d_err = static_cast<DataReceiveError *>((*it).event_error());
           for (TransportManagerListenerList::iterator dal_it =
               transport_manager_listener_.begin();
               dal_it != transport_manager_listener_.end(); ++dal_it) {

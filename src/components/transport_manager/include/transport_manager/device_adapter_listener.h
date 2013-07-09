@@ -46,9 +46,7 @@ public:
 	class DeviceAdapterEvent {
 	public:
 		bool operator ==(const DeviceAdapterEvent &other);
-		DeviceAdapterEvent(int type, SessionID session_id,
-				DeviceAdapter *device_adapter, RawMessageSptr data,
-				DeviceAdapterError *error);
+		DeviceAdapterEvent(int type, int session_id, DeviceAdapter *adapter, RawMessageSptr data, DeviceAdapterError *error);
 		~DeviceAdapterEvent();
 		void set_event_type(int type);
 		void set_session_id(int id);
@@ -60,7 +58,7 @@ public:
 		int session_id(void) const;
 		DeviceAdapter *device_adapter(void) const;
 		RawMessageSptr data(void) const;
-		DeviceAdapterError *error(void) const;
+		DeviceAdapterError *event_error(void) const;
 
 	private:
 		int event_type_;
