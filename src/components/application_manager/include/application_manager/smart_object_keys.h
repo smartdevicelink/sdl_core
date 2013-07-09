@@ -108,6 +108,9 @@ const char trigger_source[] = "triggerSource";
 const char hmi_level[] = "hmiLevel";
 const char audio_streaming_state[] = "audioStreamingState";
 const char system_context[] = "systemContext";
+const char speech_capabilities[] = "speechCapabilities";
+const char vr_capabilities[] = "vrCapabilities";
+const char audio_pass_thru_capabilities[] = "audioPassThruCapabilities";
 // PutFile
 const char sync_file_name[] = "syncFileName";
 const char file_type[] = "fileType";

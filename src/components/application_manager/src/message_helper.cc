@@ -176,7 +176,7 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
 
   message[strings::msg_params][strings::reason] = reason;
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
+  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
 }
 
 const VehicleData& MessageHelper::vehicle_data() {
