@@ -37,18 +37,20 @@
 #include <map>
 #include <set>
 #include "application_manager/application_manager.h"
-#include "application_manager/message.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/hmi_capabilities.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
 #include "connection_handler/connection_handler_observer.h"
+#include "application_manager/message.h"
+#include "application_manager/application_impl.h"
 #include "connection_handler/device.h"
 #include "request_watchdog/watchdog_subscriber.h"
+#include "interfaces/HMI_API.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
-#include "interfaces/HMI_API.h"
-#include "application_manager/hmi_capabilities.h"
+#include "utils/message_queue.h"
+#include "utils/threads/thread.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -94,7 +96,7 @@ class ApplicationManagerImpl : public ApplicationManager
     std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
     std::vector<Application*> applications_with_navi();
 
-    std::set<connection_handler::Device>& device_list();
+    const std::set<connection_handler::Device>& device_list();
 
     /////////////////////////////////////////////////////
 
@@ -342,9 +344,9 @@ class ApplicationManagerImpl : public ApplicationManager
 
   private:
     ApplicationManagerImpl();
+    bool InitThread(threads::Thread* thread);
 
     void CreateHMIMatrix(HMIMatrix* matrix);
-
     void CreatePoliciesManager(PoliciesManager* managaer);
 
     /**
@@ -373,6 +375,9 @@ class ApplicationManagerImpl : public ApplicationManager
     bool ConvertSOtoMessage(
       const smart_objects::CSmartObject& message, Message& output);
 
+    void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
+    void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
+
     /**
      * @brief Map of connection keys and associated applications
      */
@@ -397,6 +402,20 @@ class ApplicationManagerImpl : public ApplicationManager
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler*        connection_handler_;
     request_watchdog::Watchdog*                   watchdog_;
+
+    MessageQueue<utils::SharedPtr<Message>> messages_from_mobile_;
+    MessageQueue<utils::SharedPtr<Message>> messages_to_mobile_;
+    MessageQueue<utils::SharedPtr<Message>> messages_from_hmh_;
+    MessageQueue<utils::SharedPtr<Message>> messages_to_hmh_;
+
+    threads::Thread* from_mobile_thread_;
+    friend class FromMobileThreadImpl;
+    threads::Thread* to_mobile_thread_;
+    friend class ToMobileThreadImpl;
+    threads::Thread* from_hmh_thread_;
+    friend class FromHMHThreadImpl;
+    threads::Thread* to_hmh_thread_;
+    friend class ToHMHThreadImpl;
 
     static log4cxx::LoggerPtr                     logger_;
 

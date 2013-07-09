@@ -56,6 +56,7 @@ namespace test_command {
 }
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 TEST(add_command, general) {
   std::string incoming_string =
@@ -283,18 +284,62 @@ TEST(json2_command, response_error_params) {
 
 TEST(json2_command, create_object) {
   hmi_apis::HMI_API factory;
-  smart_objects::CSmartObject object = factory.CreateSmartObject(
-                                         hmi_apis::FunctionID::VR_IsReady,
-                                         hmi_apis::messageType::request);
-
   smart_objects::CSmartObject is_vr_ready =
     factory.CreateSmartObject(hmi_apis::FunctionID::VR_IsReady,
                               hmi_apis::messageType::request);
 
   ASSERT_EQ(smart_objects::SmartType_Map, is_vr_ready.getType());
+  std::cout << "FunctionID " << is_vr_ready[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
+            << "; message type " << is_vr_ready[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()
+            << "; protocol version " << is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_VERSION].asInt()
+            << "; protocol type " << is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_TYPE].asInt()
+            << "; correlation id " << is_vr_ready[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt() << std::endl;
+
+  is_vr_ready[sos::S_PARAMS][sos::S_FUNCTION_ID] =
+    hmi_apis::FunctionID::VR_IsReady;
+  is_vr_ready[sos::S_PARAMS][sos::S_MESSAGE_TYPE] =
+    hmi_apis::messageType::request;
+  is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_VERSION] = 2;
+  is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_TYPE] = 1;
+  is_vr_ready[sos::S_PARAMS][sos::S_CORRELATION_ID] = 4444;
+  is_vr_ready[sos::S_MSG_PARAMS] = smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
+  std::cout << "FunctionID " << is_vr_ready[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
+            << "; message type " << is_vr_ready[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()
+            << "; protocol version " << is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_VERSION].asInt()
+            << "; protocol type " << is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_TYPE].asInt()
+            << "; correlation id " << is_vr_ready[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt() << std::endl;
+
+  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, is_vr_ready.isValid());
 
   std::string str;
   formatters::FormatterJsonRpc::ToString(is_vr_ready, str);
+  std::cout << str << std::endl;
+}
+
+TEST(json2_command, without_factory_create) {
+  smart_objects::CSmartObject so_to_send;
+  so_to_send[sos::S_PARAMS][sos::S_FUNCTION_ID] =
+    hmi_apis::FunctionID::VR_IsReady;
+  so_to_send[sos::S_PARAMS][sos::S_MESSAGE_TYPE] =
+    hmi_apis::messageType::request;
+  so_to_send[sos::S_PARAMS][sos::S_PROTOCOL_VERSION] = 2;
+  so_to_send[sos::S_PARAMS][sos::S_PROTOCOL_TYPE] = 1;
+  so_to_send[sos::S_PARAMS][sos::S_CORRELATION_ID] = 4444;
+  so_to_send[sos::S_MSG_PARAMS] = smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
+  std::cout << "FunctionID " << so_to_send[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
+            << "; message type " << so_to_send[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()
+            << "; protocol version " << so_to_send[sos::S_PARAMS][sos::S_PROTOCOL_VERSION].asInt()
+            << "; protocol type " << so_to_send[sos::S_PARAMS][sos::S_PROTOCOL_TYPE].asInt()
+            << "; correlation id " << so_to_send[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt() << std::endl;
+
+  hmi_apis::HMI_API factory;
+  factory.attachSchema(so_to_send);
+  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, so_to_send.isValid());
+
+  std::string str;
+  formatters::FormatterJsonRpc::ToString(so_to_send, str);
   std::cout << str << std::endl;
 }
 

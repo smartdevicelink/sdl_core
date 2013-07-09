@@ -263,6 +263,8 @@ int main(int argc, char** argv) {
   // --------------------------------------------------------------------------
   // Components initialization
 
+  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+
   NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager =
     NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
   DCHECK(transport_manager);
@@ -300,10 +302,9 @@ int main(int argc, char** argv) {
   connection_handler->set_connection_handler_observer(app_manager);
 
   app_manager->set_mobile_message_handler(mmh);
+  mmh->AddMobileMessageListener(app_manager);
   app_manager->set_connection_handler(connection_handler);
   app_manager->set_hmi_message_handler(hmi_handler);
-
-  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.

@@ -27,6 +27,10 @@ set (SOURCES
 ./src/hmi_command_factory.cc
 ./src/message_conversion.cc
 ./src/hmi_capabilities.cc
+./src/from_mobile_thread_impl.cc
+./src/to_mobile_thread_impl.cc
+./src/from_hmh_thread_impl.cc
+./src/to_hmh_thread_impl.cc
 )
 
 set (MOBILE_COMMANDS_SOURCES

@@ -42,11 +42,11 @@ log4cxx::LoggerPtr logger_ =
 
 namespace profile {
 Profile::Profile()
-: config_file_name_("smartDeviceLink.ini")
-, server_address_("127.0.0.1")
-, server_port_(8087)
-, min_tread_stack_size_(threads::Thread::kMinStackSize)
-, is_mixing_audio_supported_(false) {
+  : config_file_name_("smartDeviceLink.ini")
+  , server_address_("127.0.0.1")
+  , server_port_(8087)
+  , min_tread_stack_size_(threads::Thread::kMinStackSize)
+  , is_mixing_audio_supported_(false) {
   UpdateValues();
 }
 
@@ -60,9 +60,9 @@ Profile* Profile::instance() {
 
 void Profile::config_file_name(const std::string& fileName) {
   if (false == fileName.empty()) {
-     LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);
-     config_file_name_ = fileName;
-     UpdateValues();
+    LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);
+    config_file_name_ = fileName;
+    UpdateValues();
   }
 }
 
@@ -111,6 +111,9 @@ void Profile::UpdateValues() {
                            "MAIN", "ThreadStackSize", value))
       && ('\0' != *value)) {
     min_tread_stack_size_ = atoi(value);
+    if (min_tread_stack_size_ < threads::Thread::kMinStackSize) {
+      min_tread_stack_size_ = threads::Thread::kMinStackSize;
+    }
     LOG4CXX_INFO(logger_, "Set threadStackMinSize to " << min_tread_stack_size_);
   }
 
