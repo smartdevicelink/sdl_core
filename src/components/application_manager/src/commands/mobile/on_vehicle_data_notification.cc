@@ -52,7 +52,7 @@ void OnVehicleDataNotification::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(hmi_notification::prndl)) {
     const unsigned int prndl = static_cast<unsigned int>(
-                                 (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
+        (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
 
     // TODO(DK) : need to create enum for vehicleData
     const std::vector<Application*>& applications =

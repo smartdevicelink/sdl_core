@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/set_display_layout_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -47,6 +46,7 @@ SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {
 
 void SetDisplayLayoutResponse::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutResponse::Run");
+
   SendResponse();
 }
 

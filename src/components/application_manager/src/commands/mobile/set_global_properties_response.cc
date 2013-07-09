@@ -64,6 +64,7 @@ void SetGlobalPropertiesResponse::Run() {
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 

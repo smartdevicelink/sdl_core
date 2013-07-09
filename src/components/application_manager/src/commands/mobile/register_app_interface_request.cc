@@ -37,7 +37,6 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -47,8 +46,7 @@ void RegisterAppInterfaceRequest::Run() {
 
   if (ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key])) {
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     LOG4CXX_ERROR_EXT(logger_,
                       "Application "
                       << (*message_)[strings::msg_params]
@@ -59,8 +57,7 @@ void RegisterAppInterfaceRequest::Run() {
         (*message_)[strings::params][strings::connection_key]);
 
     if (!application_impl) {
-       SendResponse(false,
-                    mobile_apis::Result::OUT_OF_MEMORY);
+       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
        LOG4CXX_ERROR_EXT(logger_, "NULL pointer!");
     }
 
@@ -118,8 +115,7 @@ void RegisterAppInterfaceRequest::Run() {
         RegisterApplication(application_impl);
 
     if (!register_application_result) {
-      SendResponse(false,
-                   mobile_apis::Result::GENERIC_ERROR);
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       LOG4CXX_ERROR_EXT(
           logger_,
           "Application " << application_impl->name() <<

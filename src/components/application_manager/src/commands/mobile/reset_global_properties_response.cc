@@ -46,7 +46,7 @@ ResetGlobalPropertiesResponse::~ResetGlobalPropertiesResponse() {
 }
 
 void ResetGlobalPropertiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "ResetGlobalPropertiesResponse::Run ");
+  LOG4CXX_INFO(logger_, "ResetGlobalPropertiesResponse::Run");
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {

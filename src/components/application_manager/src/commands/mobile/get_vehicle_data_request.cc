@@ -57,13 +57,12 @@ void GetVehicleDataRequest::Run() {
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+      ApplicationManagerImpl::instance()->
+      application(app_id));
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -98,7 +97,6 @@ void GetVehicleDataRequest::Run() {
 
   (*get_vehicle_data)[strings::params][strings::message_type] =
     MessageType::kRequest;
-
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
           connection_key, correlation_id, vr_cmd_id, get_vehicle_data);

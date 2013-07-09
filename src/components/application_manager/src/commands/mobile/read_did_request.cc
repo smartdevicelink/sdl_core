@@ -61,14 +61,12 @@ void ReadDIDRequest::Run() {
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "An application "
                       << app->name() << " is not registered.");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    SendResponse(false,
-                 mobile_apis::Result::REJECTED);
+    SendResponse(false, mobile_apis::Result::REJECTED);
     LOG4CXX_ERROR(logger_, "Rejected");
     return;
   }
@@ -77,8 +75,7 @@ void ReadDIDRequest::Run() {
     new smart_objects::CSmartObject();
 
   if (!p_vi_read_did) {
-    SendResponse(false,
-                 mobile_apis::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }

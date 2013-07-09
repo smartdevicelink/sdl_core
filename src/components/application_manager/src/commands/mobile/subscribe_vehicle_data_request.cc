@@ -55,13 +55,12 @@ void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application((*message_)[str::params][str::connection_key]));
+      ApplicationManagerImpl::instance()->application(
+          (*message_)[str::params][str::connection_key]));
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -95,20 +94,14 @@ void SubscribeVehicleDataRequest::Run() {
   }
 
   if (subscribed_items == items_to_subscribe) {
-    SendResponse(false,
-                 mobile_apis::Result::SUCCESS,
-                 "Subscribed on all VehicleData",
-                 &response_params);
+    SendResponse(false, mobile_apis::Result::SUCCESS,
+                 "Subscribed on all VehicleData", &response_params);
   } else if (0 == subscribed_items) {
-    SendResponse(false,
-                 mobile_apis::Result::REJECTED,
-                 "Already subscribed on all VehicleData",
-                 &response_params);
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Already subscribed on all VehicleData", &response_params);
   } else if (subscribed_items < items_to_subscribe) {
-    SendResponse(false,
-                 mobile_apis::Result::WARNINGS,
-                 "Already subscribed on some VehicleData",
-                 &response_params);
+    SendResponse(false, mobile_apis::Result::WARNINGS,
+                 "Already subscribed on some VehicleData", &response_params);
   } else {
     LOG4CXX_ERROR(logger_, "Unknown command sequence!");
     return;

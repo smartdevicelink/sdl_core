@@ -32,9 +32,9 @@
  */
 
 #include "application_manager/commands/mobile/show_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -58,8 +58,7 @@ void ShowRequest::Run() {
   if (!application_impl) {
     LOG4CXX_ERROR_EXT(logger_, "An application "
                           << application_impl->name() << " is not registered.");
-    SendResponse(false, mobile_apis::
-                 Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 

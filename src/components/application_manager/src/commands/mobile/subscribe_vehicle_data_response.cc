@@ -48,7 +48,7 @@ SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {
 }
 
 void SubscribeVehicleDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeVehicleDataResponse::Run ");
+  LOG4CXX_INFO(logger_, "SubscribeVehicleDataResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 

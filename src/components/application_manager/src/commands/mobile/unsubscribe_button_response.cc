@@ -37,7 +37,6 @@
 #include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -50,7 +49,7 @@ UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {
 }
 
 void UnsubscribeButtonResponse::Run() {
-  LOG4CXX_INFO(logger_, "UnsubscribeButtonResponse::Run ");
+  LOG4CXX_INFO(logger_, "UnsubscribeButtonResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 

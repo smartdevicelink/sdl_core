@@ -49,7 +49,7 @@ AlertResponse::~AlertResponse() {
 }
 
 void AlertResponse::Run() {
-  LOG4CXX_INFO(logger_, "AlertResponse::Run ");
+  LOG4CXX_INFO(logger_, "AlertResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 

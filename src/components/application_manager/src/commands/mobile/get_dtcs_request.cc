@@ -56,15 +56,13 @@ void GetDTCsRequest::Run() {
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
     LOG4CXX_ERROR(logger_, "App has not been activated");
-    SendResponse(false,
-                 mobile_apis::Result::REJECTED);
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 

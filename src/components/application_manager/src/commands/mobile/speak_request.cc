@@ -32,9 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/speak_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,16 +50,15 @@ SpeakRequest::~SpeakRequest() {
 
 void SpeakRequest::Run() {
   LOG4CXX_INFO(logger_, "SpeakRequest::Run");
-  ApplicationImpl* application_impl =
-      static_cast<ApplicationImpl*>(application_manager::ApplicationManagerImpl::instance()
-          ->application(
+
+  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>(
+      application_manager::ApplicationManagerImpl::instance()->application(
           (*message_)[strings::params][strings::connection_key]));
 
   if (NULL == application_impl) {
     LOG4CXX_ERROR_EXT(logger_, "An application "
                           << application_impl->name() << " is not registered.");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 

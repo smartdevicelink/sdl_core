@@ -49,6 +49,7 @@ OnAppInterfaceUnregisteredNotification::
 
 void OnAppInterfaceUnregisteredNotification::Run() {
   LOG4CXX_INFO(logger_, "OnAppInterfaceUnregisteredNotification::Run");
+
   SendNotification();
 }
 

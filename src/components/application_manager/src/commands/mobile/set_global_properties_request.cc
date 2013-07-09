@@ -52,13 +52,11 @@ void SetGlobalPropertiesRequest::Run() {
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+      ApplicationManagerImpl::instance()->application(app_id));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -80,8 +78,7 @@ void SetGlobalPropertiesRequest::Run() {
 
   if (NULL == p_smrt_ui) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 

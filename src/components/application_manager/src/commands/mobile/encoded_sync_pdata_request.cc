@@ -64,8 +64,7 @@ void EncodedSyncPDataRequest::Run() {
 
     if (NULL == application_impl) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::
-                   Result::APPLICATION_NOT_REGISTERED);
+      SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
       return;
     }
 

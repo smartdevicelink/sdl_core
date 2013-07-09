@@ -52,7 +52,7 @@ AlertRequest::~AlertRequest() {
 }
 
 void AlertRequest::Run() {
-  LOG4CXX_INFO(logger_, "AlertRequest::Run ");
+  LOG4CXX_INFO(logger_, "AlertRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
@@ -130,9 +130,8 @@ void AlertRequest::SendAlertRequest() {
   (*ui_alert)[strings::msg_params][strings::app_id] =
     (*message_)[strings::params][strings::connection_key];
 
-  MessageChaining* chain = NULL;
-  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, ui_cmd_id);
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+      connection_key, correlation_id, ui_cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_alert);
 }

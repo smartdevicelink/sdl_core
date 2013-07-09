@@ -49,7 +49,7 @@ SubscribeButtonResponse::~SubscribeButtonResponse() {
 }
 
 void SubscribeButtonResponse::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeButtonResponse::Run ");
+  LOG4CXX_INFO(logger_, "SubscribeButtonResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 

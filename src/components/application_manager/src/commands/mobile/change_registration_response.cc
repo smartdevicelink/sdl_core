@@ -32,9 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/change_registration_response.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -78,8 +79,8 @@ void ChangeRegistrationResponse::Run() {
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
-                                     ApplicationManagerImpl::instance()->
-                                     application(data[strings::params][strings::connection_key]));
+        ApplicationManagerImpl::instance()->
+        application(data[strings::params][strings::connection_key]));
 
     if (mobile_api::Result::SUCCESS == result_ui) {
       application->set_language(

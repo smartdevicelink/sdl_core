@@ -35,7 +35,7 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -50,13 +50,13 @@ SliderRequest::~SliderRequest() {
 
 void SliderRequest::Run() {
   LOG4CXX_INFO(logger_, "SliderRequest::Run");
+
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id]));
+      application((*message_)[strings::msg_params][strings::connection_key]));
 
   if (NULL == application_impl) {
-    SendResponse(false, mobile_apis::
-                 Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
@@ -66,10 +66,26 @@ void SliderRequest::Run() {
   const int connectionKey =
     (*message_)[strings::params][strings::connection_key];
 
-  const unsigned int cmd_id = 105;
-    ApplicationManagerImpl::instance()->AddMessageChain(
+  // create HMI request
+  smart_objects::CSmartObject* hmi_request =
+      new smart_objects::CSmartObject(*message_);
+
+  if (NULL == hmi_request) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    return;
+  }
+
+  const int hmi_request_id = hmi_apis::FunctionID::UI_Slider;
+  (*hmi_request)[strings::params][strings::function_id] = hmi_request_id;
+  (*hmi_request)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+  (*hmi_request)[strings::msg_params][strings::app_id] =
+      application_impl->app_id();
+
+  ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, correlationId),
-      connectionKey, correlationId, cmd_id);
+      connectionKey, correlationId, hmi_request_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
 }

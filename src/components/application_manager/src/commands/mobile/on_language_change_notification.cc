@@ -32,9 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/on_language_change_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,6 +46,7 @@ OnLanguageChangeNotification::~OnLanguageChangeNotification() {
 
 void OnLanguageChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnLanguageChangeNotification::Run");
+
   SendNotification();
 }
 

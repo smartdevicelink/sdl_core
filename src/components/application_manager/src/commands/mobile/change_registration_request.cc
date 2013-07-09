@@ -59,8 +59,7 @@ void ChangeRegistrationRequest::Run() {
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -170,10 +169,8 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
   }
 
   if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_,
-                  "ChangeRegistrationRequest language isn't supported by UI");
-    SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "Language isn't supported by UI");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
@@ -193,10 +190,8 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
   }
 
   if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_,
-                  "ChangeRegistrationRequest language isn't supported by VR");
-    SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "Language isn't supported by VR");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
@@ -216,10 +211,8 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
   }
 
   if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_,
-                  "ChangeRegistrationRequest language isn't supported by TTS");
-    SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }

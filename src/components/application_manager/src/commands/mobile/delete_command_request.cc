@@ -51,13 +51,13 @@ DeleteCommandRequest::~DeleteCommandRequest() {
 
 void DeleteCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteCommandRequest::Run");
+
   ApplicationImpl* application =
         static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
             application((*message_)[strings::params][strings::connection_key]));
 
   if (!application) {
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }

@@ -36,6 +36,7 @@
 #include "application_manager/commands/mobile/on_encoded_sync_pdata_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "encryption/Base64.h"
 
@@ -51,7 +52,8 @@ OnEncodedSyncPDataNotification::~OnEncodedSyncPDataNotification() {
 }
 
 void OnEncodedSyncPDataNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnEncodedSyncPDataNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnEncodedSyncPDataNotification::Run");
+
   const std::string fileName =
     (*message_)[strings::params][hmi_notification::file_name].asString();
 

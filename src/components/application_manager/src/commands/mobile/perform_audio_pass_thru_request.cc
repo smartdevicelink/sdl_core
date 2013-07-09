@@ -56,33 +56,29 @@ void PerformAudioPassThruRequest::Run() {
 
   if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
     LOG4CXX_ERROR_EXT(logger_, "TOO_MANY_PENDING_REQUESTS");
-    SendResponse(false,
-                 mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+    SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
     return;
   }
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+      ApplicationManagerImpl::instance()->application(app_id));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
     LOG4CXX_ERROR_EXT(logger_, "application isn't activated");
-    SendResponse(false,
-                 mobile_apis::Result::REJECTED);
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   SendSpeakRequest();
 
-  // crate HMI request
+  // create HMI request
   smart_objects::CSmartObject* ui_audio = new smart_objects::CSmartObject();
   if (NULL == ui_audio) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
@@ -120,16 +116,15 @@ void PerformAudioPassThruRequest::Run() {
 
   // duration
   (*ui_audio)[strings::msg_params][hmi_request::max_duration] =
-    (*message_)[str::msg_params][str::max_duration];
+      (*message_)[str::msg_params][str::max_duration];
 
   const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
+      (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
+      (*message_)[strings::params][strings::connection_key];
 
-  MessageChaining* chain = NULL;
-  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, audio_cmd_id);
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+      connection_key, correlation_id, audio_cmd_id);
 
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(connection_key,

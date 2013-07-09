@@ -47,6 +47,7 @@ PutFileResponse::~PutFileResponse() {
 
 void PutFileResponse::Run() {
   LOG4CXX_INFO(logger_, "PutFileResponse::Run");
+
   (*message_)[strings::msg_params][strings::space_available] =
       static_cast<int>(file_system::AvailableSpace());
   SendResponse();

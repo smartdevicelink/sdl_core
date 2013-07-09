@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/on_permissions_change_notification.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/message.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -48,6 +48,7 @@ OnPermissionsChangeNotification::~OnPermissionsChangeNotification() {
 
 void OnPermissionsChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnPermissionsChangeNotification::Run");
+
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 

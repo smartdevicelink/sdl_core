@@ -61,8 +61,7 @@ void UnsubscribeVehicleDataRequest::Run() {
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -95,20 +94,14 @@ void UnsubscribeVehicleDataRequest::Run() {
   }
 
   if (unsubscribed_items == items_to_unsubscribe) {
-    SendResponse(true,
-                 mobile_apis::Result::SUCCESS,
-                 "Unsubscribed on all VehicleData",
-                 &response_params);
+    SendResponse(true, mobile_apis::Result::SUCCESS,
+                 "Unsubscribed on all VehicleData", &response_params);
   } else if (0 == unsubscribed_items) {
-    SendResponse(false,
-                 mobile_apis::Result::REJECTED,
-                 "Was not subscribed on any VehicleData",
-                 &response_params);
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Was not subscribed on any VehicleData", &response_params);
   } else if (unsubscribed_items < items_to_unsubscribe) {
-    SendResponse(false,
-                 mobile_apis::Result::WARNINGS,
-                 "Was subscribed not to all VehicleData",
-                 &response_params);
+    SendResponse(false, mobile_apis::Result::WARNINGS,
+                 "Was subscribed not to all VehicleData", &response_params);
   } else {
     LOG4CXX_ERROR(logger_, "Unknown command sequence!");
     return;

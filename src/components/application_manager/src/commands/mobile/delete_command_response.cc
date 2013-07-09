@@ -83,7 +83,7 @@ void DeleteCommandResponse::Run() {
 
   smart_objects::CSmartObject data = msg_chain->data();
 
-  // we need to retrieve stored response code before message chain decrase
+  // we need to retrieve stored response code before message chain decrease
   const bool result_ui = msg_chain->ui_response_result();
   const bool result_vr = msg_chain->vr_response_result();
 
@@ -98,7 +98,7 @@ void DeleteCommandResponse::Run() {
         app->FindCommand(
             data[strings::msg_params][strings::cmd_id].asInt());
 
-    if (command)  {
+    if (command) {
       if (true == result_ui) {
         (*command).erase(strings::menu_params);
       }

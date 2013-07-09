@@ -32,10 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/on_audio_pass_thru_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
-#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,7 +45,8 @@ OnAudioPassThruNotification::~OnAudioPassThruNotification() {
 }
 
 void OnAudioPassThruNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnAudioPassThruNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnAudioPassThruNotification::Run");
+
   SendNotification();
 }
 

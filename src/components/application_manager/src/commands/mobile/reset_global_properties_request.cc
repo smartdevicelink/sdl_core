@@ -51,14 +51,13 @@ void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  ApplicationImpl* app =
+      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
+      application(app_id));
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -89,7 +88,7 @@ void ResetGlobalPropertiesRequest::Run() {
       }
       default: {
         LOG4CXX_ERROR(logger_, "Unknown global property 0x%02X value" <<
-                      (*message_)[strings::msg_params][strings::properties][i].asInt());
+            (*message_)[strings::msg_params][strings::properties][i].asInt());
         break;
       }
     }
@@ -97,14 +96,7 @@ void ResetGlobalPropertiesRequest::Run() {
 
   // there is no request to HMI
   /*
-  //TODO(DK): HMI request ID
-  const unsigned int cmd_id = 4;
-
-  ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, corellation_id),
-      connection_key, corellation_id, cmd_id);
-
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+      SetGlobalProperties
   */
 }
 

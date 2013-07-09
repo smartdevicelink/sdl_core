@@ -48,14 +48,14 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 }
 
 void OnButtonPressNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
 
   if ((*message_)[strings::msg_params].keyExists(
         hmi_response::custom_button_id)) {
     LOG4CXX_INFO_EXT(logger_, "No subscription for custom buttons requires");
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                             ApplicationManagerImpl::instance()->active_application());
+        ApplicationManagerImpl::instance()->active_application());
 
     if (NULL == app) {
       LOG4CXX_WARN_EXT(logger_, "OnButtonPress came but no app is active.");
@@ -70,7 +70,7 @@ void OnButtonPressNotification::Run() {
                                 (*message_)[strings::msg_params]
                                 [hmi_response::button_name].asInt());
 
-  std::vector<Application*> subscribedApps =
+  const std::vector<Application*>& subscribedApps =
     ApplicationManagerImpl::instance()->applications_by_button(btn_id);
 
   std::vector<Application*>::const_iterator it = subscribedApps.begin();

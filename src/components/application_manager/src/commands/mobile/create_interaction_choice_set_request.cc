@@ -57,8 +57,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -76,7 +75,8 @@ void CreateInteractionChoiceSetRequest::Run() {
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  const int hmi_request_id = hmi_apis::FunctionID::UI_CreateInteractionChoiceSet;
+  const int hmi_request_id =
+      hmi_apis::FunctionID::UI_CreateInteractionChoiceSet;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));

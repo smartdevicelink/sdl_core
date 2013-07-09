@@ -50,21 +50,21 @@ UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
 }
 
 void UnsubscribeButtonRequest::Run() {
-  LOG4CXX_INFO(logger_, "UnsubscribeButtonRequest::Run ");
+  LOG4CXX_INFO(logger_, "UnsubscribeButtonRequest::Run");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application((*message_)[str::params][str::connection_key]));
+      ApplicationManagerImpl::instance()->application(
+          (*message_)[str::params][str::connection_key]));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   const unsigned int btn_id = static_cast<unsigned int>
-                              ((*message_)[str::params][str::button_name].asInt());
+      ((*message_)[str::params][str::button_name].asInt());
+
   if (!app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);
     SendResponse(false, mobile_apis::Result::INVALID_ID);

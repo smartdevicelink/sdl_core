@@ -50,19 +50,19 @@ SetIconRequest::~SetIconRequest() {
 
 void SetIconRequest::Run() {
   LOG4CXX_INFO(logger_, "SetIconRequest::Run");
+
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
   const std::string& sync_file_name =
-          (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name];
 
   std::string relative_file_path = app->name();
   relative_file_path += "/";
@@ -81,31 +81,35 @@ void SetIconRequest::Run() {
   smart_objects::CSmartObject* set_app_icon_hmi_request  =
       new smart_objects::CSmartObject();
 
-  if(NULL != set_app_icon_hmi_request) {
-    (*set_app_icon_hmi_request)[strings::params][strings::function_id] =
-        hmi_request_id;
-
-    (*set_app_icon_hmi_request)[strings::params][strings::message_type] =
-        MessageType::kRequest;
-
-    (*set_app_icon_hmi_request)[strings::msg_params][strings::app_id] =
-        (*message_)[strings::msg_params][strings::connection_key];
-
-    (*set_app_icon_hmi_request)[strings::params][strings::sync_file_name] =
-        full_file_path;
-
-    const int correlation_id =
-        (*message_)[strings::params][strings::correlation_id];
-    const int connection_key =
-        (*message_)[strings::params][strings::connection_key];
-
-    ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-          connection_key, correlation_id,
-          hmi_request_id, &(*set_app_icon_hmi_request));
-
-    ApplicationManagerImpl::instance()->SendMessageToHMI(
-        set_app_icon_hmi_request);
+  if (NULL == set_app_icon_hmi_request) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    return;
   }
+
+  (*set_app_icon_hmi_request)[strings::params][strings::function_id] =
+      hmi_request_id;
+
+  (*set_app_icon_hmi_request)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+
+  (*set_app_icon_hmi_request)[strings::msg_params][strings::app_id] =
+      (*message_)[strings::msg_params][strings::connection_key];
+
+  (*set_app_icon_hmi_request)[strings::params][strings::sync_file_name] =
+      full_file_path;
+
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+      (*message_)[strings::params][strings::connection_key];
+
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+        connection_key, correlation_id,
+        hmi_request_id, &(*set_app_icon_hmi_request));
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(
+      set_app_icon_hmi_request);
 }
 
 }  // namespace commands

@@ -53,13 +53,12 @@ void DeleteInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application((*message_)[strings::params][strings::connection_key]));
+      ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
