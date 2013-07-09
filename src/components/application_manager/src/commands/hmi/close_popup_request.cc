@@ -45,7 +45,8 @@ ClosePopupRequest::~ClosePopupRequest() {
 }
 
 void ClosePopupRequest::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run ");
+  LOG4CXX_INFO(logger_, "ClosePopupRequest::Run");
+
   SendRequest();
 }
 

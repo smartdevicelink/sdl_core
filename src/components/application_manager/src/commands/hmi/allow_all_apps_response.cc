@@ -44,7 +44,8 @@ AllowAllAppsResponse::~AllowAllAppsResponse() {
 }
 
 void AllowAllAppsResponse::Run() {
-  LOG4CXX_INFO(logger_, "AllowAllAppsResponse::Run ");
+  LOG4CXX_INFO(logger_, "AllowAllAppsResponse::Run");
+
   ApplicationManagerImpl::instance()->set_all_apps_allowed(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool());
 }

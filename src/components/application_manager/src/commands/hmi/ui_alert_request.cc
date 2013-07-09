@@ -45,6 +45,7 @@ UIAlertRequest::~UIAlertRequest() {
 
 void UIAlertRequest::Run() {
   LOG4CXX_INFO(logger_, "UIAlertRequest::Run");
+
   SendRequest();
 }
 

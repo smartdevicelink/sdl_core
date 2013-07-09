@@ -45,6 +45,7 @@ NaviAlertManeuverRequest::~NaviAlertManeuverRequest() {
 
 void NaviAlertManeuverRequest::Run() {
   LOG4CXX_INFO(logger_, "NaviAlertManeuverRequest::Run");
+
   SendRequest();
 }
 

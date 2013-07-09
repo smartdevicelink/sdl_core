@@ -46,6 +46,7 @@ ButtonGetCapabilitiesRequest::~ButtonGetCapabilitiesRequest() {
 
 void ButtonGetCapabilitiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesRequest::Run");
+
   SendRequest();
 }
 

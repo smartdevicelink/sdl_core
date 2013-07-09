@@ -31,16 +31,11 @@
  */
 
 #include "application_manager/commands/hmi/on_ui_command_notification.h"
-#include "application_manager/application_manager_impl.h"
 #include "interfaces/MOBILE_API.h"
-
 
 namespace application_manager {
 
 namespace commands {
-
-
-
 
 OnUICommandNotification::OnUICommandNotification(
   const MessageSharedPtr& message): NotificationFromHMI(message) {

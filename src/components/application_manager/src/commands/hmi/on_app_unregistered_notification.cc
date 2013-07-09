@@ -46,6 +46,8 @@ OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {
 }
 
 void OnAppUnregisteredNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnAppUnregisteredNotification::Run");
+
   SendNotification();
 }
 

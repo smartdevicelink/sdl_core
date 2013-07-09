@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/get_app_list_request.h"
-
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -47,6 +46,8 @@ GetAppListRequest::~GetAppListRequest() {
 }
 
 void GetAppListRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetAppListRequest::Run");
+
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
 
   const std::set<Application*>& applications =

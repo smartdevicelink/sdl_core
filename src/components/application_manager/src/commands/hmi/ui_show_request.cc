@@ -45,6 +45,7 @@ UIShowRequest::~UIShowRequest() {
 
 void UIShowRequest::Run() {
   LOG4CXX_INFO(logger_, "UIShowRequest::Run");
+
   SendRequest();
 }
 

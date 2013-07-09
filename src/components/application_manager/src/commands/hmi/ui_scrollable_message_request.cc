@@ -45,6 +45,7 @@ UIScrollableMessageRequest::~UIScrollableMessageRequest() {
 
 void UIScrollableMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "UIScrollableMessageRequest::Run");
+
   SendRequest();
 }
 

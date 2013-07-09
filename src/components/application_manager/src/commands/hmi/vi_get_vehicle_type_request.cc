@@ -45,6 +45,7 @@ VIGetVehicleTypeRequest::~VIGetVehicleTypeRequest() {
 
 void VIGetVehicleTypeRequest::Run() {
   LOG4CXX_INFO(logger_, "VIGetVehicleTypeRequest::Run");
+
   SendRequest();
 }
 

@@ -45,6 +45,7 @@ UISetMediaClockTimerRequest::~UISetMediaClockTimerRequest() {
 
 void UISetMediaClockTimerRequest::Run() {
   LOG4CXX_INFO(logger_, "UISetMediaClockTimerRequest::Run");
+
   SendRequest();
 }
 

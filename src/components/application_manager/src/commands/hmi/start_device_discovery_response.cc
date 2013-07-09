@@ -43,7 +43,8 @@ StartDeviceDiscoveryResponse::~StartDeviceDiscoveryResponse() {
 }
 
 void StartDeviceDiscoveryResponse::Run() {
-  LOG4CXX_INFO(logger_, "StartDeviceDiscoveryResponse::Run ");
+  LOG4CXX_INFO(logger_, "StartDeviceDiscoveryResponse::Run");
+
   SendResponse();
 }
 

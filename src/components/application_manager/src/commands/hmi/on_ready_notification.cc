@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_ready_notification.h"
-
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -39,14 +39,14 @@ namespace commands {
 
 OnReadyNotification::OnReadyNotification(
   const MessageSharedPtr& message): NotificationFromHMI(message) {
-  LOG4CXX_INFO(logger_, "OnReadyNotification::OnReadyNotification");
 }
 
 OnReadyNotification::~OnReadyNotification() {
 }
 
 void OnReadyNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnReadyNotification::Run()");
+  LOG4CXX_INFO(logger_, "OnReadyNotification::Run");
+
   ApplicationManagerImpl::instance()->OnHMIStartedCooperation();
 }
 

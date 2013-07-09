@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
-#include "application_manager/application_manager_impl.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -46,7 +45,7 @@ OnVRCommandNotification::~OnVRCommandNotification() {
 }
 
 void OnVRCommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
 
   (*message_)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::eType::OnCommandID;

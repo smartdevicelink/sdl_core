@@ -45,6 +45,7 @@ UIDeleteInteractionChoiceSetRequest::~UIDeleteInteractionChoiceSetRequest() {
 
 void UIDeleteInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "UIDeleteInteractionChoiceSetRequest::Run");
+
   SendRequest();
 }
 

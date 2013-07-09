@@ -44,6 +44,7 @@ VIIsReadyResponse::~VIIsReadyResponse() {
 
 void VIIsReadyResponse::Run() {
   LOG4CXX_INFO(logger_, "VIIsReadyResponse::Run");
+
   // TODO(VS): Process response from HMI(field "available") and do something with SDL
 }
 

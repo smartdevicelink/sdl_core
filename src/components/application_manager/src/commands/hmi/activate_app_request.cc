@@ -46,6 +46,8 @@ ActivateAppRequest::~ActivateAppRequest() {
 }
 
 void ActivateAppRequest::Run() {
+  LOG4CXX_INFO(logger_, "ActivateAppRequest::Run");
+
   Application* application =
     ApplicationManagerImpl::instance()->application(
       (*message_)[strings::msg_params][strings::app_id]);

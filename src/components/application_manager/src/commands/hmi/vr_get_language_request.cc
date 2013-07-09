@@ -45,6 +45,7 @@ VRGetLanguageRequest::~VRGetLanguageRequest() {
 
 void VRGetLanguageRequest::Run() {
   LOG4CXX_INFO(logger_, "VRGetLanguageRequest::Run");
+
   SendRequest();
 }
 

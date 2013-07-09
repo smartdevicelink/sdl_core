@@ -44,6 +44,7 @@ ExitApplicationResponse::~ExitApplicationResponse() {
 
 void ExitApplicationResponse::Run() {
   LOG4CXX_INFO(logger_, "ExitApplicationResponse::Run");
+
   SendResponse();
 }
 

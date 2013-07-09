@@ -45,6 +45,7 @@ NaviIsReadyRequest::~NaviIsReadyRequest() {
 
 void NaviIsReadyRequest::Run() {
   LOG4CXX_INFO(logger_, "NaviIsReadyRequest::Run");
+
   SendRequest();
 }
 

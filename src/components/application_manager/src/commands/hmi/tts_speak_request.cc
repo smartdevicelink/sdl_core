@@ -45,6 +45,7 @@ TTSSpeakRequest::~TTSSpeakRequest() {
 
 void TTSSpeakRequest::Run() {
   LOG4CXX_INFO(logger_, "TTSSpeakRequest::Run");
+
   SendRequest();
 }
 

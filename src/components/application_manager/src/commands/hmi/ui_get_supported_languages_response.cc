@@ -45,7 +45,7 @@ UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {
 }
 
 void UIGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesResponse::Run ");
+  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesResponse::Run");
 
   const mobile_apis::Result::eType code =
     static_cast<mobile_apis::Result::eType>(

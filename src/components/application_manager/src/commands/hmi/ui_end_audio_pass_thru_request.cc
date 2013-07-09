@@ -45,6 +45,7 @@ UIEndAudioPassThruRequest::~UIEndAudioPassThruRequest() {
 
 void UIEndAudioPassThruRequest::Run() {
   LOG4CXX_INFO(logger_, "UIEndAudioPassThruRequest::Run");
+
   SendRequest();
 }
 

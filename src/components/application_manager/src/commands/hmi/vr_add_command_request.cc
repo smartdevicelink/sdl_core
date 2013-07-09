@@ -45,6 +45,7 @@ VRAddCommandRequest::~VRAddCommandRequest() {
 
 void VRAddCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "VRAddCommandRequest::Run");
+
   SendRequest();
 }
 

@@ -45,6 +45,7 @@ UISetGlobalPropertiesRequest::~UISetGlobalPropertiesRequest() {
 
 void UISetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "UISetGlobalPropertiesRequest::Run");
+
   SendRequest();
 }
 

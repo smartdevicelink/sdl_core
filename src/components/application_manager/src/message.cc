@@ -59,7 +59,9 @@ Message& Message::operator=(const Message& message) {
   set_correlation_id(message.correlation_id_);
   set_connection_key(message.connection_key_);
   set_message_type(message.type_);
-  set_binary_data(message.binary_data_);
+  if (message.binary_data_) {
+    set_binary_data(message.binary_data_);
+  }
   set_json_message(message.json_message_);
   set_protocol_version(message.protocol_version());
 
@@ -138,8 +140,6 @@ void Message::set_message_type(MessageType type) {
 
 void Message::set_binary_data(BinaryData* data) {
   if (NULL == data) {
-    // Please, don't add NOTREACHED() here.
-    // We can copy object without binary data using copy ctor and operator=
     NOTREACHED();
     return;
   }

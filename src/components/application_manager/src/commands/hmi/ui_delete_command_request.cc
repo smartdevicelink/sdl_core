@@ -45,6 +45,7 @@ UIDeleteCommandRequest::~UIDeleteCommandRequest() {
 
 void UIDeleteCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "UIDeleteCommandRequest::Run");
+
   SendRequest();
 }
 

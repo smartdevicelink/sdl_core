@@ -44,6 +44,7 @@ NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {
 
 void NaviShowConstantTBTResponse::Run() {
   LOG4CXX_INFO(logger_, "NaviShowConstantTBTResponse::Run");
+
   SendResponseToMobile(message_);
 
 }

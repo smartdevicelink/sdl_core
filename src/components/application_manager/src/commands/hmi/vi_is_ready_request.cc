@@ -45,6 +45,7 @@ VIIsReadyRequest::~VIIsReadyRequest() {
 
 void VIIsReadyRequest::Run() {
   LOG4CXX_INFO(logger_, "VIIsReadyRequest::Run");
+
   SendRequest();
 }
 

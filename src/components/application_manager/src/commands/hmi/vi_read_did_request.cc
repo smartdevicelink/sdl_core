@@ -45,6 +45,7 @@ VIReadDIDRequest::~VIReadDIDRequest() {
 
 void VIReadDIDRequest::Run() {
   LOG4CXX_INFO(logger_, "VIReadDIDRequest::Run");
+
   SendRequest();
 }
 

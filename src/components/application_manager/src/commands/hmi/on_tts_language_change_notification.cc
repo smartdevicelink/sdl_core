@@ -33,6 +33,7 @@
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -47,6 +48,7 @@ OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {
 
 void OnTTSLanguageChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnTTSLanguageChangeNotification::Run");
+
   ApplicationManagerImpl::instance()->set_active_tts_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
@@ -57,20 +59,20 @@ void OnTTSLanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::OnLanguageChangeID;
 
-  std::set<Application*> applications = ApplicationManagerImpl::instance()
-                                        ->applications();
+  const std::set<Application*>& applications =
+      ApplicationManagerImpl::instance()->applications();
 
-  for (std::set<Application*>::iterator it = applications.begin();
-       applications.end() != it; ++it) {
-    (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
+  std::set<Application*>::iterator it = applications.begin();
+  for (; applications.end() != it; ++it) {
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(*it);
+    (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 
-    if (static_cast<ApplicationImpl*>(*it)->language()
-        != (*message_)[strings::msg_params][strings::language].asInt()) {
-      static_cast<ApplicationImpl*>(*it)->set_hmi_level(
-          mobile_api::HMILevel::HMI_NONE);
+    if (app->language() != (*message_)[strings::msg_params]
+                               [strings::language].asInt()) {
+      app->set_hmi_level(mobile_api::HMILevel::HMI_NONE);
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          (*it)->app_id(),
+          app->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
     }
   }

@@ -31,7 +31,7 @@
  */
 #include "application_manager/commands/hmi/ui_slider_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "utils/logger.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -45,7 +45,7 @@ UISliderResponse::~UISliderResponse() {
 }
 
 void UISliderResponse::Run() {
-  LOG4CXX_INFO(logger_, "UISliderResponse::Run ");
+  LOG4CXX_INFO(logger_, "UISliderResponse::Run");
 
   (*message_)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::SliderID;

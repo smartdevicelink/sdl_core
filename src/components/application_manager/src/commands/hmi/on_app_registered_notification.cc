@@ -46,6 +46,8 @@ OnAppRegisteredNotification::~OnAppRegisteredNotification() {
 }
 
 void OnAppRegisteredNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnAppRegisteredNotification::Run");
+
   SendNotification();
 }
 

@@ -45,6 +45,7 @@ UICreateInteractionChoiceSetRequest::~UICreateInteractionChoiceSetRequest() {
 
 void UICreateInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "UICreateInteractionChoiceSetRequest::Run");
+
   SendRequest();
 }
 

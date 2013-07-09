@@ -103,7 +103,7 @@ void OnAppDeactivatedNotification::Run() {
       break;
     }
     default: {
-      // TODO(PV): what should be done in this case?
+      LOG4CXX_ERROR_EXT(logger_, "Unknown reason of app deactivation");
       return;
     }
   }

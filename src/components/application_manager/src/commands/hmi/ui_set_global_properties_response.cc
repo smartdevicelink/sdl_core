@@ -52,28 +52,28 @@ void UISetGlobalPropertiesResponse::Run() {
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
 
-    MessageChaining* msg_chain =
-      ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain =
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
-    if (NULL == msg_chain) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
+  if (NULL == msg_chain) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
 
-    /* store received response code for to check it
-     * in corresponding Mobile response
-     */
-    const mobile_apis::Result::eType code =
-      static_cast<mobile_apis::Result::eType>(
-        (*message_)[strings::msg_params][hmi_response::code].asInt());
+  /* store received response code for to check it
+   * in corresponding Mobile response
+   */
+  const mobile_apis::Result::eType code =
+    static_cast<mobile_apis::Result::eType>(
+      (*message_)[strings::msg_params][hmi_response::code].asInt());
 
-    msg_chain->set_ui_response_result(code);
+  msg_chain->set_ui_response_result(code);
 
-    // prepare SmartObject for mobile factory
-    (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::SetGlobalPropertiesID;
+  // prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+    mobile_apis::FunctionID::SetGlobalPropertiesID;
 
-    SendResponseToMobile(message_);
+  SendResponseToMobile(message_);
 }
 
 }  // namespace commands

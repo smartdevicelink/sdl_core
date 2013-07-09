@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/get_device_list_request.h"
-
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -47,6 +46,8 @@ GetDeviceListRequest::~GetDeviceListRequest() {
 }
 
 void GetDeviceListRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetDeviceListRequest::Run");
+
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
 
   const std::set<connection_handler::Device>& devices =

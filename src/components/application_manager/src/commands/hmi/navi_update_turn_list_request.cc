@@ -45,6 +45,7 @@ NaviUpdateTurnListRequest::~NaviUpdateTurnListRequest() {
 
 void NaviUpdateTurnListRequest::Run() {
   LOG4CXX_INFO(logger_, "NaviUpdateTurnListRequest::Run");
+
   SendRequest();
 }
 

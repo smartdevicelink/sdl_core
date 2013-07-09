@@ -45,6 +45,7 @@ VIGetDTCsRequest::~VIGetDTCsRequest() {
 
 void VIGetDTCsRequest::Run() {
   LOG4CXX_INFO(logger_, "VIGetDTCsRequest::Run");
+
   SendRequest();
 }
 

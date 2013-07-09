@@ -45,6 +45,7 @@ UIPerformInteractionRequest::~UIPerformInteractionRequest() {
 
 void UIPerformInteractionRequest::Run() {
   LOG4CXX_INFO(logger_, "UIPerformInteractionRequest::Run");
+
   SendRequest();
 }
 

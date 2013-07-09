@@ -31,7 +31,6 @@
  */
 #include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -44,7 +43,7 @@ TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {
 }
 
 void TTSStopSpeakingResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSStopSpeakingResponse::Run ");
+  LOG4CXX_INFO(logger_, "TTSStopSpeakingResponse::Run");
   // TODO(VS): Process response from HMI
 }
 
