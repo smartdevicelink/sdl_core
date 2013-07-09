@@ -60,6 +60,12 @@ class MockTransportManagerListener : public ::transport_manager::TransportManage
   MOCK_METHOD3(onDataReceiveDone, void(const DeviceAdapter* device_adapter,
                                  const SessionID session_id,
                                  const RawMessageSptr data_container));
+  MOCK_METHOD3(onDataSendDone, void(const DeviceAdapter* device_adapter,
+                              const SessionID session_id,
+                              const RawMessageSptr data_container));
+  MOCK_METHOD3(onDataSendFailed, void(const DeviceAdapter* device_adapter,
+                                const SessionID session_id,
+                                const DataSendError& error));
   ~MockTransportManagerListener() { }
 
 };

@@ -94,7 +94,9 @@ TEST(TransportManagerImpl, searchDevice)
   EXPECT_CALL(*tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
   EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
   EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
-  EXPECT_CALL(*tml, onDataReceiveDone(_, _, _)).Times(1);
+ // EXPECT_CALL(*tml, onDataReceiveDone(_, _, _)).Times(0);
+  EXPECT_CALL(*tml, onDataSendDone(_, _, _)).Times(1);
+  EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(1);
 
   tm->searchDevices();
 
