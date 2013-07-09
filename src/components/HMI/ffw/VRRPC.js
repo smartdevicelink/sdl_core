@@ -149,9 +149,8 @@ FFW.VR = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
-                                                    // protocol
-                        "method": request.method + "Response"
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": request.method
                     }
                 };
                 this.client.send( JSONMessage );
@@ -167,9 +166,8 @@ FFW.VR = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
-                                                    // protocol
-                        "method": request.method + "Response"
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": request.method
                     }
                 };
                 this.client.send( JSONMessage );
@@ -182,9 +180,8 @@ FFW.VR = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
-                                                    // protocol
-                        "method": "VR.GetSupportedLanguagesResponse",
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": "VR.GetSupportedLanguages",
                         "languages": SDL.SDLModel.sdlLanguagesList
                     }
                 };
@@ -198,9 +195,8 @@ FFW.VR = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
-                                                    // protocol
-                        "method": "VR.GetLanguageResponse",
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": "VR.GetLanguage",
                         "language": SDL.SDLModel.hmiTTSVRLanguage
                     }
                 };
@@ -219,7 +215,7 @@ FFW.VR = FFW.RPCObserver.create( {
                             [
                                 "TEXT"
                             ],
-                        "method": "VR.GetCapabilitiesResponse",
+                        "method": "VR.GetCapabilities",
                         "resultCode": "SUCCESS" // type (enum) from SDL protocol
                     }
                 };
@@ -236,9 +232,8 @@ FFW.VR = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
-                                                    // protocol
-                        "method": request.method + "Response"
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": request.method
                     }
                 };
                 this.client.send( JSONMessage );
@@ -275,7 +270,7 @@ FFW.VR = FFW.RPCObserver.create( {
      * send notification when command was triggered from VR
      */
     onChoise: function( commandId ) {
-        Em.Logger.log( "FFW.VR.PerformInteractionResponse" );
+        Em.Logger.log( "FFW.VR.PerformInteraction" );
 
         var JSONMessage = {
             "jsonrpc": "2.0",
@@ -288,7 +283,33 @@ FFW.VR = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
+     * Initiated by VR module to let SDL know that VR session has started.
+     */
+    Started: function() {
+        Em.Logger.log( "FFW.VR.Started" );
+
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "VR.Started"
+        };
+        this.client.send( JSONMessage );
+    },
+
+    /**
+     * Initiated by VR module to let SDL know that VR session has stopped.
+     */
+    Stopped: function() {
+        Em.Logger.log( "FFW.VR.Stopped" );
+
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "VR.Stopped"
+        };
+        this.client.send( JSONMessage );
+    },
+
+    /**
      * send notification when command was triggered
      */
     onCommand: function( commandId, appId ) {
@@ -305,7 +326,7 @@ FFW.VR = FFW.RPCObserver.create( {
         this.client.send( JSONMessage );
     },
 
-    /*
+    /**
      * Notifies if sdl VR components language was changed
      */
     OnLanguageChange: function( lang ) {

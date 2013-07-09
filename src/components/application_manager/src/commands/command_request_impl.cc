@@ -73,19 +73,18 @@ void CommandRequestImpl::SendResponse(const bool success,
   response[strings::params][strings::function_id] =
       (*message_)[strings::params][strings::function_id];
 
-  response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] =
-      result_code;
-
   if (response_params) {
     response[strings::msg_params]= response_params;
   }
+
+  response[strings::msg_params][strings::success] = success;
+  response[strings::msg_params][strings::result_code] = result_code;
 
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(message_);
+  ApplicationManagerImpl::instance()->ManageMobileCommand(&response);
 }
 
 }  // namespace commands
