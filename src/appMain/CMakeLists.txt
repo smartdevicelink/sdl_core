@@ -27,7 +27,7 @@ include_directories (
   ../thirdPartyLibs/jsoncpp/include/
   ../components/mobile_message_handler/include
   ../components/application_manager/include
-  ../components/JSONHandler/include
+  ../components/formatters/include
   ../components/AppMgr/include
   ../components/TransportManager/include
   ../components/config_profile/include
