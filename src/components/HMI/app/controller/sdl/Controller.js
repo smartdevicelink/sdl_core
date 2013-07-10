@@ -182,7 +182,7 @@ SDL.SDLController = Em.Object.create({
      * @param {String}
      */
     tbtClientStateSeleced: function(state) {
-        FFW.UI.onTBTClientState(state, SDL.SDLAppController.model.appId);
+        FFW.Navigation.onTBTClientState(state, SDL.SDLAppController.model.appId);
     },
 
     /**

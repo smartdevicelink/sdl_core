@@ -68,12 +68,31 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
 
     activate: function( params ) {
         if( params ){
+            
+            for (var i = 0; i < params.alertStrings.length; i++) {
+                switch (params.alertStrings[i]) {
+                    case 'navigationText1': {
+                        this.set( 'captionText.content', params.navigationTexts[i].fieldText );
+                        break;
+                    }
+                    case 'navigationText2': {
+                        this.set( 'navigationText2', params.navigationTexts[i].fieldText );
+                        break;
+                    }
+                    case 'ETA': {
+                        this.set( 'eta', params.navigationTexts[i].fieldText );
+                        break;
+                    }
+                    case 'totalDistance': {
+                        this.set( 'totalDistance', params.navigationTexts[i].fieldText );
+                        break;
+                    }
+                }
+            }
+            
+            
             this.softButtons.addItems( params.softButtons );
-            this.set( 'captionText.content', params.navigationText1 );
             this.set( 'appId', params.appId );
-            this.set( 'navigationText2', params.navigationText2 );
-            this.set( 'eta', params.eta );
-            this.set( 'totalDistance', params.totalDistance );
             this.set( 'turnIcon', params.turnIcon );
             this.set( 'distanceToManeuver', params.distanceToManeuver );
             this.set( 'distanceToManeuverScale', params.distanceToManeuverScale );
