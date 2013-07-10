@@ -80,23 +80,20 @@ TEST(TransportManagerImpl, searchDevice)
   tm->addDeviceAdapter(mock_da);
 
   MockTransportManagerListener *tml = new MockTransportManagerListener();
+
+  EXPECT_CALL(*tml, onSearchDeviceDone(_, _));
+  EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
+  EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
+  EXPECT_CALL(*tml, onDataSendDone(_, _, _)).Times(1);
+  EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(0);
+
+
   tm->addEventListener(tml);
   tm->addEventListener(new MyListener());
   tm->addAdapterListener(mock_da, new DeviceAdapterListenerImpl(tm));
 
-  //MockDeviceAdapterListener *mdal = new MockDeviceAdapterListener();
-
-  //impl->addAdapterListener(mock_da, mdal);
-
   mock_da->init(new DeviceHandleGeneratorImpl(),
                 NULL);
-
-  EXPECT_CALL(*tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
-  EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
-  EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
- // EXPECT_CALL(*tml, onDataReceiveDone(_, _, _)).Times(0);
-  EXPECT_CALL(*tml, onDataSendDone(_, _, _)).Times(1);
-  EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(1);
 
   tm->searchDevices();
 
@@ -109,19 +106,4 @@ TEST(TransportManagerImpl, searchDevice)
   utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, data, 100);
   tm->sendMessageToDevice(srm);
 
-  sleep(1);
-
-
-//  EXPECT_CALL(*mdal, onConnectDone(_, _)).Times(1);
-//  EXPECT_CALL(*mdal, onConnectFailed(_, _, _)).Times(1);
-//
-//  impl->connectDevice(1, 1, 1);
-//  unsigned char buf[10] = { 0 };
-//
-//  RawMessageSptr msg(new RawMessage(10, 1, 1, buf, 10));
-//
-//  impl->sendMessageToDevice(msg);
-//
-//  EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(1);
-//  EXPECT_CALL(*mdal, onDataSendFailed(_, _, _, _)).Times(1);
 }
