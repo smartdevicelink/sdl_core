@@ -53,6 +53,7 @@ DeviceAdapterListener::DeviceAdapterEvent::DeviceAdapterEvent(int type, int sess
      : event_type_(type),
       session_id_(session_id),
       device_adapter_(adapter),
+      event_data_(data),
       event_error_(error) {
 
 }
