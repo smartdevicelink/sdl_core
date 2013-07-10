@@ -21,6 +21,6 @@ set (FORMATTER_SOURCES
     ./src/meta_formatter.cc
 )
 
-add_library("JSONHandler" ${SOURCES}
+add_library("formatters" ${SOURCES}
         ${FORMATTER_SOURCES}
 )

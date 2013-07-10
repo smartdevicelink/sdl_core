@@ -2,7 +2,7 @@ set(LIBRARIES
   ApplicationManager
   HMI_API
   SmartObjects
-  JSONHandler
+  formatters
   ProtocolHandler
   connectionHandler
   TransportManager

@@ -15,7 +15,7 @@ include_directories (
   ../src/components/protocol_handler/include
   ../src/components/TransportManager/include
   ../src/components/connection_handler/include
-  ../src/components/JSONHandler/include
+  ../src/components/formatters/include
   ../src/components/SmartObjects/include
   ../src/thirdPartyLibs/jsoncpp/include/
   ../src/thirdPartyLibs/logger/include/
@@ -39,7 +39,7 @@ set(LIBRARIES
     gmock
     gmock_main
     RequestWatchdog
-    JSONHandler
+    formatters
     HMI_API
     SmartObjects
     ApplicationManager

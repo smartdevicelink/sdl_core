@@ -3,7 +3,7 @@ include_directories (
   ../../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../../src/components/SmartObjects/include
-  ../../../../src/components/JSONHandler/include/
+  ../../../../src/components/formatters/include/
   ../../../../src//thirdPartyLibs/jsoncpp/include/
 )
 
@@ -15,7 +15,7 @@ set (LIBRARIES
     gmock_main
     jsoncpp
     SmartObjects
-    JSONHandler
+    formatters
 )
 
 create_test("test_SmartObject_BoolSchemaItemTest"           "./test_BoolSchemaItemTest.cpp"   "${LIBRARIES}")

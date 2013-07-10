@@ -5,7 +5,7 @@ add_subdirectory(./request_watchdog)
 # add_subdirectory(./TransportManager)
 
 # --- JSONHandler
-# add_subdirectory(./json_handler)
+# add_subdirectory(./formatters)
 
 # --- SmartObjects
 add_subdirectory(./SmartObjects)

@@ -17,7 +17,7 @@ set (LIBRARIES
     gmock
     gmock_main
     SmartObjects
-    JSONHandler
+    formatters
     jsoncpp
     rt
 )

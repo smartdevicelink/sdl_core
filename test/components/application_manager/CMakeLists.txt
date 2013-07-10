@@ -15,7 +15,7 @@ set(LIBRARIES
     gmock
     gmock_main
     ApplicationManager
-    JSONHandler
+    formatters
     jsoncpp
     MOBILE_API
     HMI_API
