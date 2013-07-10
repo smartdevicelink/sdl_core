@@ -30,20 +30,25 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
-#include "connection_handler/connection_handler_impl.h"
+#include "application_manager/application.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/hmi_command_factory.h"
-#include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/audio_pass_thru_thread_impl.h"
-#include "utils/threads/thread.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
+#include "config_profile/profile.h"
+#include "utils/threads/thread.h"
 #include "utils/logger.h"
+#include "./from_hmh_thread_impl.h"
+#include "./to_hmh_thread_impl.h"
+#include "./from_mobile_thread_impl.h"
+#include "./to_mobile_thread_impl.h"
 
 namespace application_manager {
 
@@ -67,7 +72,53 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_handler_(NULL),
     mobile_handler_(NULL),
     connection_handler_(NULL),
-    watchdog_(NULL) {
+    watchdog_(NULL),
+    from_mobile_thread_(NULL),
+    to_mobile_thread_(NULL),
+    from_hmh_thread_(NULL),
+    to_hmh_thread_(NULL) {
+  from_mobile_thread_ = new threads::Thread(
+    "application_manager::FromMobileThreadImpl",
+    new FromMobileThreadImpl(this));
+  if (!InitThread(from_mobile_thread_)) {
+    return;
+  }
+  to_mobile_thread_ = new threads::Thread(
+    "application_manager::ToMobileThreadImpl",
+    new ToMobileThreadImpl(this));
+  if (!InitThread(to_mobile_thread_)) {
+    return;
+  }
+
+  to_hmh_thread_ = new threads::Thread(
+    "application_manager::ToHMHThreadImpl",
+    new ToHMHThreadImpl(this));
+  if (!InitThread(to_hmh_thread_)) {
+    return;
+  }
+
+  from_hmh_thread_ = new threads::Thread(
+    "application_manager::FromHMHThreadImpl",
+    new FromHMHThreadImpl(this));
+  if (!InitThread(from_hmh_thread_)) {
+    return;
+  }
+}
+
+bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
+  if (!thread) {
+    LOG4CXX_ERROR(logger_, "Failed to allocate memory for thread object");
+    return false;
+  }
+  LOG4CXX_INFO(logger_, "Starting thread with stack size " <<
+               profile::Profile::instance()->thread_min_stach_size());
+  if (!thread->startWithOptions(
+        threads::ThreadOptions(
+          profile::Profile::instance()->thread_min_stach_size()))) {
+    LOG4CXX_ERROR(logger_, "Failed to start thread");
+    return false;
+  }
+  return true;
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -75,21 +126,37 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   if (perform_audio_thread_) {
     delete perform_audio_thread_;
   }
+
   if (vehicle_type_) {
     delete vehicle_type_;
   }
-  if (hmi_handler_) {
-    delete hmi_handler_;
-  }
-  if (mobile_handler_) {
-    delete mobile_handler_;
-  }
-  if (connection_handler_) {
-    /* TODO (DK) : destructor is protected
-    delete connection_handler_;*/
-  }
+
   if (watchdog_) {
     delete watchdog_;
+  }
+
+  if (from_mobile_thread_) {
+    from_mobile_thread_->stop();
+    delete from_mobile_thread_;
+    from_mobile_thread_ = NULL;
+  }
+
+  if (to_hmh_thread_) {
+    to_hmh_thread_->stop();
+    delete to_hmh_thread_;
+    to_hmh_thread_ = NULL;
+  }
+
+  if (from_hmh_thread_) {
+    from_hmh_thread_->stop();
+    delete from_hmh_thread_;
+    from_hmh_thread_ = NULL;
+  }
+
+  if (to_mobile_thread_) {
+    to_mobile_thread_->stop();
+    delete to_mobile_thread_;
+    to_mobile_thread_ = NULL;
   }
 }
 
@@ -157,7 +224,8 @@ std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
   return result;
 }
 
-std::set<connection_handler::Device>& ApplicationManagerImpl::device_list() {
+const std::set<connection_handler::Device>&
+ApplicationManagerImpl::device_list() {
   std::set<connection_handler::Device> devices;
   return devices;
 }
@@ -230,18 +298,21 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
 
+  smart_objects::CSmartObject* is_vr_ready = new smart_objects::CSmartObject;
+  smart_objects::CSmartObject& so_to_send = *is_vr_ready;
+  so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
+    hmi_apis::FunctionID::VR_IsReady;
+  so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
+    hmi_apis::messageType::request;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
+  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4444;
+  so_to_send[jhs::S_MSG_PARAMS] =
+    smart_objects::CSmartObject(smart_objects::SmartType_Map);
   hmi_apis::HMI_API factory;
-  LOG4CXX_INFO(logger_, "factory");
-  smart_objects::CSmartObject is_vr_ready =
-    factory.CreateSmartObject(hmi_apis::FunctionID::VR_IsReady,
-                              hmi_apis::messageType::request);
+  //factory.attachSchema(so_to_send);
 
-  LOG4CXX_INFO(logger_, "Sending vr is ready");
-
-  /*CommandSharedPtr command = HMICommandFactory::CreateCommand(is_vr_ready);
-  command->Init();
-  command->Run();
-  command->CleanUp();*/
+  ManageHMICommand(is_vr_ready);
 }
 
 // TODO(VS) : Remove function_id from function parameters(it isn't used)
@@ -376,7 +447,7 @@ void ApplicationManagerImpl::StopAudioPassThruThread() {
 }
 
 void ApplicationManagerImpl::OnMobileMessageReceived(
-    const MobileMessage& message) {
+  const MobileMessage& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageReceived");
 
   DCHECK(message);
@@ -385,23 +456,7 @@ void ApplicationManagerImpl::OnMobileMessageReceived(
     return;
   }
 
-  utils::SharedPtr<smart_objects::CSmartObject> smart_object(
-    new smart_objects::CSmartObject);
-
-  if (!smart_object) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
-    return;
-  }
-
-  if (!ConvertMessageToSO(*message, *smart_object)) {
-    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
-    return;
-  }
-
-  LOG4CXX_INFO(logger_, "Converted message, trying to create mobile command");
-  if (!ManageMobileCommand(smart_object)) {
-    LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
-  }
+  messages_from_mobile_.push(message);
 }
 
 void ApplicationManagerImpl::onMessageReceived(
@@ -414,23 +469,7 @@ void ApplicationManagerImpl::onMessageReceived(
     return;
   }
 
-  utils::SharedPtr<smart_objects::CSmartObject> smart_object(
-    new smart_objects::CSmartObject);
-
-  if (!smart_object) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
-    return;
-  }
-
-  if (!ConvertMessageToSO(*message, *smart_object)) {
-    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
-    return;
-  }
-
-  LOG4CXX_INFO(logger_, "Converted message, trying to create hmi command");
-  if (!ManageHMICommand(smart_object)) {
-    LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
-  }
+  messages_from_hmh_.push(message);
 }
 
 void ApplicationManagerImpl::onErrorSending(
@@ -501,17 +540,24 @@ void ApplicationManagerImpl::SendMessageToMobile(
   if (!ConvertSOtoMessage((*message), (*message_to_send))) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to Mobile: failed to create string");
+    return;
   }
 
-  mobile_handler_->SendMessageToMobileApp(message_to_send);
+  messages_to_mobile_.push(message_to_send);
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  DCHECK(message);
+  if (!message) {
+    LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    return false;
+  }
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
 
   if (!command) {
     LOG4CXX_WARN(logger_, "Failed to create mobile command from smart object");
+    return false;
   }
 
   if (command->Init()) {
@@ -525,10 +571,17 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
 void ApplicationManagerImpl::SendMessageToHMI(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  DCHECK(message);
+  if (!message) {
+    LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    return;
+  }
+
   if (!hmi_handler_) {
     LOG4CXX_WARN(logger_, "No HMI Handler set");
     return;
   }
+
   utils::SharedPtr<Message> message_to_send(new Message);
   if (!message_to_send) {
     LOG4CXX_ERROR(logger_, "Null pointer");
@@ -538,16 +591,23 @@ void ApplicationManagerImpl::SendMessageToHMI(
   if (!ConvertSOtoMessage(*message, *message_to_send)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
+    return;
   }
-  hmi_handler_->sendMessageToHMI(message_to_send);
+  messages_to_hmh_.push(message_to_send);
 }
 
 bool ApplicationManagerImpl::ManageHMICommand(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  DCHECK(message);
+  if (!message) {
+    LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    return false;
+  }
   CommandSharedPtr command = HMICommandFactory::CreateCommand(message);
 
   if (!command) {
     LOG4CXX_WARN(logger_, "Failed to create command from smart object");
+    return false;
   }
 
   if (command->Init()) {
@@ -631,11 +691,11 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
   LOG4CXX_INFO(logger_, "Message with protocol: " <<
                message.getElement(
-                 jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt());
+                 jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE).asInt());
 
   std::string output_string;
   switch (message.getElement(
-            jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt()) {
+            jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE).asInt()) {
     case 0: {
       if (!formatters::CFormatterJsonSDLRPCv2::toString(
             message,
@@ -677,8 +737,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
   if (message.keyExists(strings::binary_data)) {
     application_manager::BinaryData* binaryData =
-        new application_manager::BinaryData(
-        message.getElement(strings::binary_data).asBinary());
+      new application_manager::BinaryData(
+      message.getElement(strings::binary_data).asBinary());
 
     if (NULL == binaryData) {
       LOG4CXX_ERROR(logger_, "Null pointer");
@@ -689,6 +749,50 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
   LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
   return true;
+}
+
+void ApplicationManagerImpl::ProcessMessageFromMobile(
+  const utils::SharedPtr<Message>& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
+  utils::SharedPtr<smart_objects::CSmartObject> smart_object(
+    new smart_objects::CSmartObject);
+
+  if (!smart_object) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return;
+  }
+
+  if (!ConvertMessageToSO(*message, *smart_object)) {
+    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+    return;
+  }
+
+  LOG4CXX_INFO(logger_, "Converted message, trying to create mobile command");
+  if (!ManageMobileCommand(smart_object)) {
+    LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
+  }
+}
+
+void ApplicationManagerImpl::ProcessMessageFromHMI(
+  const utils::SharedPtr<Message>& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromHMI()");
+  utils::SharedPtr<smart_objects::CSmartObject> smart_object(
+    new smart_objects::CSmartObject);
+
+  if (!smart_object) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return;
+  }
+
+  if (!ConvertMessageToSO(*message, *smart_object)) {
+    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+    return;
+  }
+
+  LOG4CXX_INFO(logger_, "Converted message, trying to create hmi command");
+  if (!ManageHMICommand(smart_object)) {
+    LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
+  }
 }
 
 }  // namespace application_manager

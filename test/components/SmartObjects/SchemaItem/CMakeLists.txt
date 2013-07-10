@@ -5,6 +5,7 @@ include_directories (
   ../../../../src/components/SmartObjects/include
   ../../../../src/components/formatters/include/
   ../../../../src//thirdPartyLibs/jsoncpp/include/
+  ../../../../src/components/formatters/include/
 )
 
 # Libraries are the same for all SchemaItem tests

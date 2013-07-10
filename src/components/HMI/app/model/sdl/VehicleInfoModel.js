@@ -90,96 +90,92 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      * @type {Object}
      */
     vehicleData: {
-        'VEHICLEDATA_SPEED': {
-            data: 80.0,
-            type: 'speed'
+        'speed': 80.0,
+        'rpm': 5000,
+        'fuelLevel': 0.2,
+        'fuelLevel_State': "UNKNOWN",
+        'instantFuelConsumption': 2.2,
+        'tirePressure': "UNKNOWN",
+        'beltStatus': {
+            'driverBeltDeployed': "NOT_SUPPORTED",
+            'passengerBeltDeployed': "NOT_SUPPORTED",
+            'passengerBuckleBelted': "NOT_SUPPORTED",
+            'driverBuckleBelted': "NOT_SUPPORTED",
+            'leftRow2BuckleBelted': "NOT_SUPPORTED",
+            'passengerChildDetected': "NOT_SUPPORTED",
+            'rightRow2BuckleBelted': "NOT_SUPPORTED",
+            'middleRow2BuckleBelted': "NOT_SUPPORTED",
+            'middleRow3BuckleBelted': "NOT_SUPPORTED",
+            'leftRow3BuckleBelted': "NOT_SUPPORTED",
+            'rightRow3BuckleBelted': "NOT_SUPPORTED",
+            'leftRearInflatableBelted': "NOT_SUPPORTED",
+            'rightRearInflatableBelted': "NOT_SUPPORTED",
+            'middleRow1BeltDeployed': "NOT_SUPPORTED",
+            'middleRow1BuckleBelted': "NOT_SUPPORTED"
         },
-        'VEHICLEDATA_ENGINERPM': {
-            data: 5000,
-            type: 'rpm'
+        'bodyInformation':{
+            'parkBrakeActive': false,
+            'ignitionStableStatus': "MISSING_FROM_TRANSMITTER",
+            'ignitionStatus': "UNKNOWN"
         },
-        'VEHICLEDATA_FUELLEVEL': {
-            data: 0.2,
-            type: 'fuelLevel'
+        'deviceStatus':{
+            'voiceRecOn': false,
+            'btIconOn': false,
+            'callActive': false,
+            'phoneRoaming': false,
+            'textMsgAvailable': false,
+            'battLevelStatus': "NOT_PROVIDED",
+            'stereoAudioOutputMuted': false,
+            'monoAudioOutputMuted': false,
+            'signalLevelStatus': "NOT_PROVIDED",
+            'primaryAudioSource': "NO_SOURCE_SELECTED",
+            'eCallEventActive': false,
         },
-        'VEHICLEDATA_FUELECONOMY': {
-            data: 0.1,
-            type: 'avgFuelEconomy'
+        'driverBraking': "NOT_SUPPORTED",
+        'wiperStatus': "NO_DATA_EXISTS",
+        'headLampStatus':{
+            "lowBeamsOn": false,
+            "highBeamsOn": false
         },
-        'VEHICLEDATA_BATTVOLTS': {
-            data: 12.5,
-            type: 'batteryVoltage'
+        'engineTorque': 2.5,
+        'accPedalPosition': 0.5,
+        'steeringWheelAngle': 1.2,
+        'myKey':{
+            "e911Override": "NO_DATA_EXISTS"
         },
-        'VEHICLEDATA_EXTERNTEMP': {
-            data: 40.0,
-            type: 'externalTemperature'
-        },
-        'VEHICLEDATA_VIN': {
-            data: '52-452-52-752',
-            type: 'vin'
-        },
-        'VEHICLEDATA_PRNDLSTATUS': {
-            data: 'PARK',
-            type: 'prndl'
-        },
-        'VEHICLEDATA_BATTERYPACKVOLTAGE': {
-            data: 12.5,
-            type: 'batteryPackVoltage'
-        },
-        'VEHICLEDATA_BATTERYCURRENT': {
-            data: 7.0,
-            type: 'batteryPackCurrent'
-        },
-        'VEHICLEDATA_BATTERYTEMPERATURE': {
-            data: 30,
-            type: 'batteryPackTemperature'
-        },
-        'VEHICLEDATA_ENGINETORQUE': {
-            data: 650,
-            type: 'engineTorque'
-        },
-        'VEHICLEDATA_ODOMETER': {
-            data: 0,
-            type: 'odometer'
-        },
-        'VEHICLEDATA_TRIPODOMETER': {
-            data: 0,
-            type: 'tripOdometer'
-        },
-        'VEHICLEDATA_GENERICBINARY': {
-            data: '165165650',
-            type: 'genericbinary'
-        },
-        'VEHICLEDATA_SATESN': {
-            data: "165165650",
-            type: 'satRadioESN'
-        },
-        'VEHICLEDATA_RAINSENSOR': {
-            data: 165165650,
-            type: 'rainSensor'
-        },
-        'VEHICLEDATA_GPS': {
-            data: {
-                'longitudeDegrees': 423293,
-                'latitudeDegrees': -830464,
-                'utcYear': 2013,
-                'utcMonth': 2,
-                'utcDay': 14,
-                'utcHours': 13,
-                'utcMinutes': 16,
-                'utcSeconds': 54,
-                'compassDirection': 'SOUTHWEST',
-                'pdop': 15,
-                'hdop': 5,
-                'vdop': 30,
-                'actual': false,
-                'satellites': 8,
-                'dimension': '2D',
-                'altitude': 7,
-                'heading': 173,
-                'speed': 2
-            },
-            type: 'gps'
+        'avgFuelEconomy': 0.1,
+        'batteryVoltage': 12.5,
+        'externalTemperature': 40.0,
+        'vin': '52-452-52-752',
+        'prndl': 'PARK',
+        'batteryPackVoltage': 12.5,
+        'batteryPackCurrent': 7.0,
+        'batteryPackTemperature': 30,
+        'engineTorque': 650,
+        'odometer': 0,
+        'tripOdometer': 0,
+        'genericbinary': '165165650',
+        'satRadioESN': "165165650",
+        'rainSensor': 165165650,
+        'gps': {
+            'longitudeDegrees': 423293,
+            'latitudeDegrees': -830464,
+            'utcYear': 2013,
+            'utcMonth': 2,
+            'utcDay': 14,
+            'utcHours': 13,
+            'utcMinutes': 16,
+            'utcSeconds': 54,
+            'compassDirection': 'SOUTHWEST',
+            'pdop': 15,
+            'hdop': 5,
+            'vdop': 30,
+            'actual': false,
+            'satellites': 8,
+            'dimension': '2D',
+            'altitude': 7,
+            'heading': 173,
+            'speed': 2
         }
     },
 
@@ -209,24 +205,18 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      * @type {Number} id
      */
     vehicleInfoGetDTCs: function( params, id ) {
-        var data = [], i = 0, info = "Inormation about reported DTC's", result = "";
+        var dtc = [],
+            result = "",
+            ecuHeader = 2;
 
-        for( i = 0; i < 3; i++ ){
-            data.push( params.encrypted ? "0" : {
-                "identifier": '0',
-                "statusByte": '0'
-            } );
+        for( var i = 0; i < 3; i++ ){
+            dtc.push( "line " + i );
         }
 
         result = "SUCCESS";
 
-        if( params.encrypted ){
-            result = 'ENCRYPTED';
-            FFW.BasicCommunication.SendData( data );
-            FFW.VehicleInfo.vehicleInfoGetDTCsResponse( null, info, result, id );
-        }else{
-            FFW.VehicleInfo.vehicleInfoGetDTCsResponse( data, info, result, id );
-        }
+        FFW.VehicleInfo.vehicleInfoGetDTCsResponse( ecuHeader, dtc, result, id );
+ 
     },
 
     /**
@@ -236,33 +226,28 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      * @type {Number} id
      */
     vehicleInfoReadDID: function( params, id ) {
-        var data = [], i = 0, info = '', dataResult = [], resultCode = "";
+        var didResult = [], resultCode = "";
         // magic number used because there is no huge database on HMI of vehicle
         // data
         if( this.ecuDIDData[1].data ){
-            info = this.ecuDIDData[1].data;
-            result = "SUCCESS";
+            resultCode = "SUCCESS";
         }else{
-            result = "INVALID_DATA";
+            resultCode = "INVALID_DATA";
         }
 
-        for( i = 0; i < params.didLocation.length; i++ ){
+        for( var i = 0; i < params.didLocation.length; i++ ){
             if( i < 10 ){
-                dataResult[i] = 'SUCCESS';
-                data.push( '0' );
+                didResult[i].resultCode = 'SUCCESS';
+                didResult[i].didLocation = params.didLocation[i];
+                didResult[i].data = '0';
             }else{
-                dataResult[i] = "INVALID_DATA";
-                data.push( '0' );
+                didResult[i].resultCode = "VEHICLE_DATA_NOT_AVAILABLE";
+                didResult[i].didLocation = params.didLocation[i];
+                didResult[i].data = '0';
             }
         }
 
-        if( params.encrypted ){
-            result = 'ENCRYPTED';
-            FFW.BasicCommunication.SendData( data );
-            FFW.VehicleInfo.vehicleInfoReadDIDResponse( null, null, info, result, id );
-        }else{
-            FFW.VehicleInfo.vehicleInfoReadDIDResponse( dataResult, data, info, result, id );
-        }
+        FFW.VehicleInfo.vehicleInfoReadDIDResponse( didResult, resultCode, id );
     },
 
     /**
@@ -271,9 +256,13 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      * @type {Object} message
      */
     getVehicleData: function( message ) {
-
-        return this.vehicleData[message.dataType].data;
-
+        var data = {};
+        
+        for (var key in message) {
+            data[key] = this.vehicleData[key];
+        }
+        
+        return data;
     },
 
     /**
