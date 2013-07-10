@@ -979,7 +979,12 @@ bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::erase(const std::string & 
     return (1 == m_data.map_value->erase(Key));
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartObject::isValid()
+bool NsSmartDeviceLink::NsSmartObjects::CSmartObject::isValid()
+{
+    return (Errors::OK == m_schema.validate(*this));
+}
+
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartObject::validate()
 {
     return m_schema.validate(*this);
 }
