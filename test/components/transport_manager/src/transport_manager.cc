@@ -54,8 +54,8 @@ using ::testing::AtLeast;
 
 TEST(TransportManagerImpl, instance)
 {
-	TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
-	ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
+  TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
+  ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
 }
 
 DeviceHandle hello;
@@ -64,11 +64,20 @@ volatile bool flag = false;
 
 class MyListener : public TransportManagerListenerImpl {
   void onSearchDeviceDone(const DeviceHandle device,
-                          const ApplicationList app_list)
-  {
+                          const ApplicationList app_list) {
     hello = device;
     hello_app = *app_list.begin();
     flag = true;
+  }
+  void onConnectDone(const DeviceAdapter* device_adapter,
+                     const transport_manager::SessionID session_id) {
+    flag = true;
+  }
+  void onDataReceiveDone(const DeviceAdapter* device_adapter,
+                         const transport_manager::SessionID session_id,
+                         const RawMessageSptr data_container) {
+    flag = true;
+
   }
 };
 
@@ -89,39 +98,32 @@ TEST(TransportManagerImpl, searchDevice)
   //impl->addAdapterListener(mock_da, mdal);
 
   mock_da->init(new DeviceHandleGeneratorImpl(),
-                NULL);
+      NULL);
+
+  char *result_data = NULL;
 
   EXPECT_CALL(*tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
   EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
   EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
- // EXPECT_CALL(*tml, onDataReceiveDone(_, _, _)).Times(0);
-  EXPECT_CALL(*tml, onDataSendDone(_, _, _)).Times(1);
-  EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(1);
+  EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(AtLeast(0));
+  EXPECT_CALL(*tml, onDataReceiveDone(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(*tml, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
 
   tm->searchDevices();
 
-  while(!flag) { }
+  while(!flag) {}
+  flag = false;
 
   tm->connectDevice(hello, hello_app, 42);
+  while(!flag) {}
+  flag = false;
 
-  unsigned char data[100] = { 0 };
+  unsigned char data[100] = {99};
 
   utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, data, 100);
   tm->sendMessageToDevice(srm);
 
-  sleep(1);
+  while(!flag) {}
+  flag = false;
 
-
-//  EXPECT_CALL(*mdal, onConnectDone(_, _)).Times(1);
-//  EXPECT_CALL(*mdal, onConnectFailed(_, _, _)).Times(1);
-//
-//  impl->connectDevice(1, 1, 1);
-//  unsigned char buf[10] = { 0 };
-//
-//  RawMessageSptr msg(new RawMessage(10, 1, 1, buf, 10));
-//
-//  impl->sendMessageToDevice(msg);
-//
-//  EXPECT_CALL(*mdal, onDataSendDone(_, _, _)).Times(1);
-//  EXPECT_CALL(*mdal, onDataSendFailed(_, _, _, _)).Times(1);
 }

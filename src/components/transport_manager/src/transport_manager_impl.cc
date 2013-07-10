@@ -343,10 +343,10 @@ void TransportManagerImpl::eventListenerThread(void) {
               item != dev_list.end(); ++item) {
             LOG4CXX_INFO(logger_, "Iterating over device list " << (*item));
             adapter_handler_.addDevice(da, (*item));
-            for (TransportManagerListenerList::iterator dal_it =
+            for (TransportManagerListenerList::iterator tml_it =
                 transport_manager_listener_.begin();
-                dal_it != transport_manager_listener_.end(); ++dal_it) {
-              (*dal_it)->onSearchDeviceDone((*item),
+                tml_it != transport_manager_listener_.end(); ++tml_it) {
+              (*tml_it)->onSearchDeviceDone((*item),
                                             da->getApplicationList((*item)));
             }
             LOG4CXX_INFO(logger_, "Callback called");
@@ -355,19 +355,19 @@ void TransportManagerImpl::eventListenerThread(void) {
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL:
           //error happened in real search process (external error)
           srch_err = static_cast<SearchDeviceError *>((*it).event_error());
-          for (TransportManagerListenerList::iterator dal_it =
+          for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
-              dal_it != transport_manager_listener_.end(); ++dal_it) {
-            (*dal_it)->onSearchDeviceFailed(da, *srch_err);
+              tml_it != transport_manager_listener_.end(); ++tml_it) {
+            (*tml_it)->onSearchDeviceFailed(da, *srch_err);
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE:
           adapter_handler_.addSession((*it).device_adapter(),
                                       (*it).session_id());
-          for (TransportManagerListenerList::iterator dal_it =
+          for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
-              dal_it != transport_manager_listener_.end(); ++dal_it) {
-            (*dal_it)->onConnectDone(da, sid);
+              tml_it != transport_manager_listener_.end(); ++tml_it) {
+            (*tml_it)->onConnectDone(da, sid);
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:
@@ -391,18 +391,18 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE:
           data = (*it).data();
-          for (TransportManagerListenerList::iterator dal_it =
+          for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
-              dal_it != transport_manager_listener_.end(); ++dal_it) {
-            (*dal_it)->onDataReceiveDone(da, sid, data);
+              tml_it != transport_manager_listener_.end(); ++tml_it) {
+            (*tml_it)->onDataReceiveDone(da, sid, data);
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL:
           d_err = static_cast<DataReceiveError *>((*it).event_error());
-          for (TransportManagerListenerList::iterator dal_it =
+          for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
-              dal_it != transport_manager_listener_.end(); ++dal_it) {
-            (*dal_it)->onDataReceiveFailed(da, sid, *d_err);
+              tml_it != transport_manager_listener_.end(); ++tml_it) {
+            (*tml_it)->onDataReceiveFailed(da, sid, *d_err);
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR:
@@ -483,11 +483,11 @@ pthread_cond_t *TransportManagerImpl::getDeviceListenerThreadWakeup(void) {
 DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterBySession(
     SessionID session_id) {
   LOG4CXX_INFO(logger_, "Add adapter by session called " << session_id);
-  std::map<SessionID, DeviceAdapter *>::iterator da = session_to_adapter_map_
+  std::map<SessionID, DeviceAdapter *>::iterator it = session_to_adapter_map_
       .find(session_id);
-  if (da != session_to_adapter_map_.begin()) {
+  if (it != session_to_adapter_map_.end()) {
     LOG4CXX_INFO(logger_, "Device adapter found");
-    return (*da).second;
+    return (*it).second;
   }
   LOG4CXX_INFO(logger_, "Device adapter was not found");
   return NULL;
