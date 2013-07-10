@@ -44,7 +44,10 @@ HMICapabilities::HMICapabilities()
     hmi_zone_capabilities_(NULL),
     soft_buttons_capabilities_(NULL),
     button_capabilities_(NULL),
-    preset_bank_capabilities_(NULL){}
+    preset_bank_capabilities_(NULL),
+    vr_capabilities_(NULL),
+    speech_capabilities_(NULL),
+    audio_pass_thru_capabilities_(NULL){}
 
 HMICapabilities::~HMICapabilities() {
   delete ui_supported_languages_;
@@ -55,6 +58,9 @@ HMICapabilities::~HMICapabilities() {
   delete soft_buttons_capabilities_;
   delete button_capabilities_;
   delete preset_bank_capabilities_;
+  delete vr_capabilities_;
+  delete speech_capabilities_;
+  delete audio_pass_thru_capabilities_;
 }
 
 bool HMICapabilities::attenuated_supported() const {
@@ -126,6 +132,33 @@ void HMICapabilities::set_button_capabilities(
    }
   button_capabilities_ =
      new smart_objects::CSmartObject(button_capabilities);
+}
+
+void HMICapabilities::set_vr_capabilities(
+    const smart_objects::CSmartObject& vr_capabilities) {
+  if (vr_capabilities_) {
+     delete vr_capabilities_;
+  }
+  vr_capabilities_ =
+     new smart_objects::CSmartObject(vr_capabilities);
+}
+
+void HMICapabilities::set_speech_capabilities(
+    const smart_objects::CSmartObject& speech_capabilities) {
+  if (speech_capabilities_) {
+     delete speech_capabilities_;
+  }
+  speech_capabilities_ =
+     new smart_objects::CSmartObject(speech_capabilities);
+}
+
+void HMICapabilities::set_audio_pass_thru_capabilities(
+    const smart_objects::CSmartObject& audio_pass_thru_capabilities) {
+  if (audio_pass_thru_capabilities_) {
+     delete audio_pass_thru_capabilities_;
+  }
+  audio_pass_thru_capabilities_ =
+     new smart_objects::CSmartObject(audio_pass_thru_capabilities);
 }
 
 void HMICapabilities::set_preset_bank_capabilities(

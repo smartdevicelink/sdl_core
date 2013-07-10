@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/get_device_list_request.h"
-
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -47,6 +46,8 @@ GetDeviceListRequest::~GetDeviceListRequest() {
 }
 
 void GetDeviceListRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetDeviceListRequest::Run");
+
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
 
   const std::set<connection_handler::Device>& devices =
@@ -55,10 +56,10 @@ void GetDeviceListRequest::Run() {
   int index = 0;
 
   if (devices.empty())  {
-    (*message_)[strings::msg_params][strings::result_code] =
+    (*message_)[strings::msg_params][hmi_response::code] =
           hmi_apis::Common_Result::eType::NO_DEVICES_CONNECTED;
   } else {
-    (*message_)[strings::msg_params][strings::result_code] =
+    (*message_)[strings::msg_params][hmi_response::code] =
           hmi_apis::Common_Result::eType::SUCCESS;
 
     for (std::set<connection_handler::Device>::iterator it = devices.begin();

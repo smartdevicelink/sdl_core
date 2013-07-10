@@ -32,9 +32,9 @@
 
 #include "application_manager/message_conversion.h"
 #include "application_manager/smart_object_keys.h"
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
 //#include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
-#include "JSONHandler/formatters/formatter_json_rpc.h"
+#include "formatters/formatter_json_rpc.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {

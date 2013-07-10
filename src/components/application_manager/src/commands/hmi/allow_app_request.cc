@@ -44,7 +44,8 @@ AllowAppRequest::~AllowAppRequest() {
 }
 
 void AllowAppRequest::Run() {
-  LOG4CXX_INFO(logger_, "AllowAppRequest::Run ");
+  LOG4CXX_INFO(logger_, "AllowAppRequest::Run");
+
   SendRequest();
 }
 

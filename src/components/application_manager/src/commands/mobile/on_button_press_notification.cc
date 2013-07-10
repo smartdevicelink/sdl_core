@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/on_button_press_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -48,14 +48,14 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 }
 
 void OnButtonPressNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
 
   if ((*message_)[strings::msg_params].keyExists(
         hmi_response::custom_button_id)) {
     LOG4CXX_INFO_EXT(logger_, "No subscription for custom buttons requires");
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                             ApplicationManagerImpl::instance()->active_application());
+        ApplicationManagerImpl::instance()->active_application());
 
     if (NULL == app) {
       LOG4CXX_WARN_EXT(logger_, "OnButtonPress came but no app is active.");
@@ -70,7 +70,7 @@ void OnButtonPressNotification::Run() {
                                 (*message_)[strings::msg_params]
                                 [hmi_response::button_name].asInt());
 
-  std::vector<Application*> subscribedApps =
+  const std::vector<Application*>& subscribedApps =
     ApplicationManagerImpl::instance()->applications_by_button(btn_id);
 
   std::vector<Application*>::const_iterator it = subscribedApps.begin();
@@ -83,7 +83,7 @@ void OnButtonPressNotification::Run() {
 
     if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level()) ||
         (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-         && NsSmartDeviceLinkRPC::V2::ButtonName::OK != btn_id)) {
+         && mobile_apis::ButtonName::OK != btn_id)) {
       SendButtonPress(subscribed_app, false);
     } else {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
@@ -123,7 +123,7 @@ void OnButtonPressNotification::SendButtonPress(const ApplicationImpl* app,
   (*on_btn_press)[strings::params][strings::connection_key] =
     connection_key;
   (*on_btn_press)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnButtonEventID;
+    mobile_apis::FunctionID::eType::OnButtonEventID;
   (*on_btn_press)[strings::msg_params][strings::button_name] =
     (*message_)[strings::msg_params][hmi_response::button_name];
   (*on_btn_press)[strings::msg_params][strings::button_press_mode] =
@@ -138,7 +138,7 @@ void OnButtonPressNotification::SendButtonPress(const ApplicationImpl* app,
 
   (*on_btn_press)[strings::msg_params][strings::success] = true;
   (*on_btn_press)[strings::msg_params][strings::result_code] =
-    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    mobile_apis::Result::SUCCESS;
 
   message_.reset(on_btn_press);
   SendNotification();

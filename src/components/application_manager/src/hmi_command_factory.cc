@@ -46,14 +46,24 @@
 #include "application_manager/commands/hmi/allow_app_response.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_request.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
+#include "application_manager/commands/hmi/activate_app_request.h"
+#include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/exit_all_applications_request.h"
 #include "application_manager/commands/hmi/exit_all_applications_response.h"
 #include "application_manager/commands/hmi/exit_application_request.h"
 #include "application_manager/commands/hmi/exit_application_response.h"
 #include "application_manager/commands/hmi/start_device_discovery_request.h"
 #include "application_manager/commands/hmi/start_device_discovery_response.h"
+#include "application_manager/commands/hmi/close_popup_request.h"
+#include "application_manager/commands/hmi/close_popup_response.h"
+#include "application_manager/commands/hmi/exit_application_request.h"
+#include "application_manager/commands/hmi/exit_application_response.h"
+#include "application_manager/commands/hmi/button_get_capabilities_request.h"
+#include "application_manager/commands/hmi/button_get_capabilities_response.h"
 #include "application_manager/commands/hmi/ui_add_command_request.h"
 #include "application_manager/commands/hmi/ui_add_command_response.h"
+#include "application_manager/commands/hmi/ui_delete_command_request.h"
+#include "application_manager/commands/hmi/ui_delete_command_response.h"
 #include "application_manager/commands/hmi/ui_add_submenu_request.h"
 #include "application_manager/commands/hmi/ui_add_submenu_response.h"
 #include "application_manager/commands/hmi/ui_delete_submenu_request.h"
@@ -68,14 +78,30 @@
 #include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/commands/hmi/ui_show_request.h"
 #include "application_manager/commands/hmi/ui_show_response.h"
+#include "application_manager/commands/hmi/ui_alert_request.h"
+#include "application_manager/commands/hmi/ui_alert_response.h"
 #include "application_manager/commands/hmi/ui_is_ready_request.h"
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
 #include "application_manager/commands/hmi/ui_slider_request.h"
 #include "application_manager/commands/hmi/ui_slider_response.h"
 #include "application_manager/commands/hmi/ui_set_media_clock_timer_request.h"
 #include "application_manager/commands/hmi/ui_set_media_clock_timer_response.h"
+#include "application_manager/commands/hmi/ui_set_global_properties_request.h"
+#include "application_manager/commands/hmi/ui_set_global_properties_response.h"
+#include "application_manager/commands/hmi/ui_scrollable_message_request.h"
+#include "application_manager/commands/hmi/ui_scrollable_message_response.h"
+#include "application_manager/commands/hmi/ui_set_icon_request.h"
+#include "application_manager/commands/hmi/ui_set_icon_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
+#include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
+#include "application_manager/commands/hmi/ui_end_audio_pass_thru_request.h"
+#include "application_manager/commands/hmi/ui_create_interaction_choice_set_request.h"
+#include "application_manager/commands/hmi/ui_create_interaction_choice_set_response.h"
+#include "application_manager/commands/hmi/ui_delete_interaction_choice_set_request.h"
+#include "application_manager/commands/hmi/ui_delete_interaction_choice_set_response.h"
+#include "application_manager/commands/hmi/ui_perform_interaction_request.h"
+#include "application_manager/commands/hmi/ui_perform_interaction_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -98,8 +124,28 @@
 #include "application_manager/commands/hmi/tts_get_language_response.h"
 #include "application_manager/commands/hmi/tts_stop_speaking_request.h"
 #include "application_manager/commands/hmi/tts_stop_speaking_response.h"
-#include "application_manager/commands/hmi/activate_app_request.h"
-#include "application_manager/commands/hmi/activate_app_response.h"
+#include "application_manager/commands/hmi/tts_speak_request.h"
+#include "application_manager/commands/hmi/tts_speak_response.h"
+#include "application_manager/commands/hmi/tts_set_global_properties_request.h"
+#include "application_manager/commands/hmi/tts_set_global_properties_response.h"
+#include "application_manager/commands/hmi/vi_is_ready_request.h"
+#include "application_manager/commands/hmi/vi_is_ready_response.h"
+#include "application_manager/commands/hmi/vi_read_did_request.h"
+#include "application_manager/commands/hmi/vi_read_did_response.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
+#include "application_manager/commands/hmi/vi_get_dtcs_request.h"
+#include "application_manager/commands/hmi/vi_get_dtcs_response.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_type_request.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_type_response.h"
+#include "application_manager/commands/hmi/navi_is_ready_request.h"
+#include "application_manager/commands/hmi/navi_show_constant_tbt_request.h"
+#include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
+#include "application_manager/commands/hmi/navi_is_ready_response.h"
+#include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
+#include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
+#include "application_manager/commands/hmi/navi_update_turn_list_request.h"
+#include "application_manager/commands/hmi/navi_update_turn_list_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
@@ -116,19 +162,11 @@
 #include "application_manager/commands/hmi/on_ui_language_change_notification.h"
 #include "application_manager/commands/hmi/on_vr_language_change_notification.h"
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
-#include "application_manager/commands/hmi/close_popup_request.h"
-#include "application_manager/commands/hmi/close_popup_response.h"
-#include "application_manager/commands/hmi/exit_application_request.h"
-#include "application_manager/commands/hmi/exit_application_response.h"
-#include "application_manager/commands/hmi/button_get_capabilities_request.h"
-#include "application_manager/commands/hmi/button_get_capabilities_response.h"
+#include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
-#include "application_manager/commands/hmi/navigation_is_ready_request.h"
-#include "application_manager/commands/hmi/navigation_is_ready_response.h"
-#include "application_manager/commands/hmi/vehicle_info_is_ready_request.h"
-#include "application_manager/commands/hmi/vehicle_info_is_ready_response.h"
 #include "application_manager/commands/hmi/on_show_notification.h"
+#include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 
 
 namespace application_manager {
@@ -210,6 +248,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::UI_DeleteCommand: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIDeleteCommandResponse(message));
+      } else {
+        command.reset(new commands::UIDeleteCommandRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::UI_AddSubMenu: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
@@ -234,6 +281,60 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UISetMediaClockTimerResponse(message));
       } else {
         command.reset(new commands::UISetMediaClockTimerRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_CreateInteractionChoiceSet: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UICreateInteractionChoiceSetResponse(message));
+      } else {
+        command.reset(new commands::UICreateInteractionChoiceSetRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIDeleteInteractionChoiceSetResponse(message));
+      } else {
+        command.reset(new commands::UIDeleteInteractionChoiceSetRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_PerformInteraction: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIPerformInteractionResponse(message));
+      } else {
+        command.reset(new commands::UIPerformInteractionRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_SetGlobalProperties: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISetGlobalPropertiesResponse(message));
+      } else {
+        command.reset(new commands::UISetGlobalPropertiesRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_ScrollableMessage: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIScrollableMessageResponse(message));
+      } else {
+        command.reset(new commands::UIScrollableMessageRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_SetAppIcon: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UISetIconResponse(message));
+      } else {
+        command.reset(new commands::UISetIconRequest(message));
       }
       break;
     }
@@ -279,6 +380,24 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UIPerformAudioPassThruResponse(message));
       } else {
         command.reset(new commands::UIPerformAudioPassThruRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_EndAudioPassThru: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIEndAudioPassThruResponse(message));
+      } else {
+        command.reset(new commands::UIEndAudioPassThruRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_Alert: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::UIAlertResponse(message));
+      } else {
+        command.reset(new commands::UIAlertRequest(message));
       }
       break;
     }
@@ -381,6 +500,24 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case  hmi_apis::FunctionID::TTS_Speak: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSSpeakResponse(message));
+      } else {
+        command.reset(new commands::TTSSpeakRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::TTS_SetGlobalProperties: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::TTSSetGlobalPropertiesResponse(message));
+      } else {
+        command.reset(new commands::TTSSetGlobalPropertiesRequest(message));
+      }
+      break;
+    }
     case  hmi_apis::FunctionID::BasicCommunication_ActivateApp: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
@@ -438,22 +575,85 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case  hmi_apis::FunctionID::VehicleInfo_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
-        command.reset(new commands::VehicleInfoIsReadyResponse(message));
+        command.reset(new commands::VIIsReadyResponse(message));
       } else {
-        command.reset(new commands::VehicleInfoIsReadyRequest(message));
+        command.reset(new commands::VIIsReadyRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::VehicleInfo_ReadDID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VIReadDIDResponse(message));
+      } else {
+        command.reset(new commands::VIReadDIDRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VIReadDIDResponse(message));
+      } else {
+        command.reset(new commands::VIReadDIDRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VIGetDTCsResponse(message));
+      } else {
+        command.reset(new commands::VIGetDTCsRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::VehicleInfo_GetVehicleType: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::VIGetVehicleTypeResponse(message));
+      } else {
+        command.reset(new commands::VIGetVehicleTypeRequest(message));
       }
       break;
     }
     case  hmi_apis::FunctionID::Navigation_IsReady: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
-        command.reset(new commands::NavigationIsReadyResponse(message));
+        command.reset(new commands::NaviIsReadyResponse(message));
       } else {
-        command.reset(new commands::NavigationIsReadyRequest(message));
+        command.reset(new commands::NaviIsReadyRequest(message));
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::Buttons_GetCapabilities: {
+    case  hmi_apis::FunctionID::Navigation_AlertManeuver: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::NaviAlertManeuverResponse(message));
+      } else {
+        command.reset(new commands::NaviAlertManeuverRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_UpdateTurnList: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::NaviUpdateTurnListResponse(message));
+      } else {
+        command.reset(new commands::NaviUpdateTurnListRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
+      if ((*message)[strings::params][strings::message_type] ==
+          MessageType::kResponse) {
+        command.reset(new commands::NaviShowConstantTBTResponse(message));
+      } else {
+        command.reset(new commands::NaviShowConstantTBTRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Buttons_GetCapabilities: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
         command.reset(new commands::ButtonGetCapabilitiesResponse(message));
@@ -462,7 +662,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::eType::BasicCommunication_PlayTone: {
+    case  hmi_apis::FunctionID::BasicCommunication_PlayTone: {
       command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
@@ -526,16 +726,24 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnTTSLanguageChangeNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::Buttons_OnButtonEvent: {
+    case  hmi_apis::FunctionID::Buttons_OnButtonEvent: {
       command.reset(new commands::OnButtonEventNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::Buttons_OnButtonPress: {
+    case  hmi_apis::FunctionID::Buttons_OnButtonPress: {
       command.reset(new commands::OnButtonPressNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::eType::UI_ShowNotification: {
+    case  hmi_apis::FunctionID::VehicleInfo_OnVehicleData: {
+      command.reset(new commands::OnVIVehicleDataNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_ShowNotification: {
       command.reset(new commands::OnShowNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_OnTBTClientState: {
+      command.reset(new commands::OnNaviTBTClientStateNotification(message));
       break;
     }
   }

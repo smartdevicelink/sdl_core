@@ -31,6 +31,7 @@
  */
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "config_profile/profile.h"
 #include "./to_hmi_thread_impl.h"
 #include "./from_hmi_thread_impl.h"
 
@@ -52,13 +53,15 @@ HMIMessageHandlerImpl::HMIMessageHandlerImpl()
     "hmi_message_handler::ToHMIThreadImpl",
     new ToHMIThreadImpl(this));
   to_hmi_thread_->startWithOptions(
-    threads::ThreadOptions(threads::Thread::kMinStackSize));
+    threads::ThreadOptions(
+      profile::Profile::instance()->thread_min_stach_size()));
 
   from_hmi_thread_ = new threads::Thread(
     "hmi_message_handler::FromHMIThreadImpl",
     new FromHMIThreadImpl(this));
   from_hmi_thread_->startWithOptions(
-    threads::ThreadOptions(threads::Thread::kMinStackSize));
+    threads::ThreadOptions(
+      profile::Profile::instance()->thread_min_stach_size()));
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {

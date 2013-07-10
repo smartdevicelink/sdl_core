@@ -47,18 +47,22 @@ ShowConstantTBTResponse::~ShowConstantTBTResponse() {
 }
 
 void ShowConstantTBTResponse::Run() {
+  LOG4CXX_INFO(logger_, "SetMediaClockTimerResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  const int hmi_correlation_id = 206;
+  const int hmi_correlation_id = (*message_)[strings::params]
+                                 [strings::correlation_id];;
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       hmi_correlation_id)) {
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =
-            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+            mobile_apis::Result::SUCCESS;
     SendResponse();
   }
 }

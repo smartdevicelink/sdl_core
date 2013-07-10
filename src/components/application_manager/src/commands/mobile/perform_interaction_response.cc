@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,18 +49,22 @@ PerformInteractionResponse::~PerformInteractionResponse() {
 }
 
 void PerformInteractionResponse::Run() {
+  LOG4CXX_INFO(logger_, "PerformInteractionResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false) {
      SendResponse();
+     LOG4CXX_ERROR(logger_, "Success = false");
      return;
   }
 
-  const int hmi_request_id = 205;
+  const int hmi_request_id = (*message_)[strings::params]
+                                [strings::correlation_id];
 
   if (ApplicationManagerImpl::instance()->
        DecreaseMessageChain(hmi_request_id)) {
      (*message_)[strings::params][strings::success] = true;
      (*message_)[strings::params][strings::result_code] =
-       NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+       mobile_apis::Result::SUCCESS;
      SendResponse();
   }
 }

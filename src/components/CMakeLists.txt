@@ -19,6 +19,9 @@ if(NOT BUILD_ONLY_TM)
 add_subdirectory(./JSONHandler)
 endif()
 
+# --- formatters
+add_subdirectory(./formatters)
+
 # --- ProtocolHandler
 if(NOT BUILD_ONLY_TM)
 add_subdirectory(./protocol_handler)

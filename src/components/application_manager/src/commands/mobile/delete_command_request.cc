@@ -34,6 +34,8 @@
 #include "application_manager/commands/mobile/delete_command_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 
 namespace application_manager {
@@ -48,20 +50,23 @@ DeleteCommandRequest::~DeleteCommandRequest() {
 }
 
 void DeleteCommandRequest::Run() {
+  LOG4CXX_INFO(logger_, "DeleteCommandRequest::Run");
+
   ApplicationImpl* application =
         static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
             application((*message_)[strings::params][strings::connection_key]));
 
   if (!application) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
   smart_objects::CSmartObject* command = application->
         FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!command) {
-      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
+      LOG4CXX_ERROR(logger_, "Invalid ID");
       return;
   }
 
@@ -77,9 +82,17 @@ void DeleteCommandRequest::Run() {
       smart_objects::CSmartObject* p_smrt_ui  =
           new smart_objects::CSmartObject();
 
-      // TODO(DK) HMI Request Id
-      const int ui_cmd_id = 202;
+      if (NULL == p_smrt_ui) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+        return;
+      }
+
+      const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
       (*p_smrt_ui)[strings::params][strings::function_id] = ui_cmd_id;
+
+      (*p_smrt_ui)[strings::msg_params][strings::correlation_id] =
+          correlation_id;
 
       (*p_smrt_ui)[strings::params][strings::message_type] =
           MessageType::kRequest;
@@ -93,7 +106,7 @@ void DeleteCommandRequest::Run() {
      chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
           connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
 
-      ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+      ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
     }
 
     // check vr params
@@ -101,9 +114,18 @@ void DeleteCommandRequest::Run() {
       smart_objects::CSmartObject* p_smrt_vr  =
           new smart_objects::CSmartObject();
 
-      // TODO(DK) HMI Request Id
-      const int vr_cmd_id = 203;
+      if (NULL == p_smrt_vr) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+        return;
+      }
+
+      const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
+
       (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
+
+      (*p_smrt_vr)[strings::msg_params][strings::correlation_id] =
+          correlation_id;
 
       (*p_smrt_vr)[strings::params][strings::message_type] =
           MessageType::kRequest;
@@ -111,16 +133,13 @@ void DeleteCommandRequest::Run() {
       (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];
 
-      (*p_smrt_vr)[strings::msg_params][strings::vr_commands] =
-          (*message_)[strings::msg_params][strings::vr_commands];
-
       (*p_smrt_vr)[strings::msg_params][strings::app_id] =
                application->app_id();
 
       ApplicationManagerImpl::instance()->AddMessageChain(chain,
           connection_key, correlation_id, vr_cmd_id, p_smrt_vr);
 
-      ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
+      ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
     }
 }
 

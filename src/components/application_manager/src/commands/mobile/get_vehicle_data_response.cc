@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -48,13 +48,14 @@ GetVehicleDataResponse::~GetVehicleDataResponse() {
 }
 
 void GetVehicleDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "GetVehicleDataResponse::Run ");
+  LOG4CXX_INFO(logger_, "GetVehicleDataResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
@@ -64,14 +65,13 @@ void GetVehicleDataResponse::Run() {
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
-    // TODO(DK): HMI code Id
     const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
 
     if (code) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        mobile_apis::Result::SUCCESS;
 
     } else {
       // TODO(DK): Some logic

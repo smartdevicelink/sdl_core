@@ -45,6 +45,7 @@ UIGetLanguageRequest::~UIGetLanguageRequest() {
 
 void UIGetLanguageRequest::Run() {
   LOG4CXX_INFO(logger_, "UIGetLanguageRequest::Run");
+
   SendRequest();
 }
 

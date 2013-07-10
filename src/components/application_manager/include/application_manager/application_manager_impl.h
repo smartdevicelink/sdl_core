@@ -37,17 +37,20 @@
 #include <map>
 #include <set>
 #include "application_manager/application_manager.h"
+#include "application_manager/hmi_capabilities.h"
+#include "hmi_message_handler/hmi_message_observer.h"
+#include "mobile_message_handler/mobile_message_observer.h"
+#include "connection_handler/connection_handler_observer.h"
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
-#include "hmi_message_handler/hmi_message_observer.h"
-#include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "request_watchdog/watchdog_subscriber.h"
+#include "interfaces/HMI_API.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
-#include "interfaces/HMI_API.h"
-#include "application_manager/hmi_capabilities.h"
+#include "utils/message_queue.h"
+#include "utils/threads/thread.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -76,6 +79,7 @@ typedef std::map<unsigned int, MessageChainPtr> MessageChains;
 
 class ApplicationManagerImpl : public ApplicationManager
   , public hmi_message_handler::HMIMessageObserver
+  , public mobile_message_handler::MobileMessageObserver
   , public connection_handler::ConnectionHandlerObserver
   , public request_watchdog::WatchdogSubscriber
     , public HMICapabilities {
@@ -92,7 +96,7 @@ class ApplicationManagerImpl : public ApplicationManager
     std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
     std::vector<Application*> applications_with_navi();
 
-    std::set<connection_handler::Device>& device_list();
+    const std::set<connection_handler::Device>& device_list();
 
     /////////////////////////////////////////////////////
 
@@ -138,7 +142,7 @@ class ApplicationManagerImpl : public ApplicationManager
       MessageChaining* chain,
       unsigned int connection_key,
       unsigned int correlation_id,
-      unsigned int function_id,
+      unsigned int function_id = 0,  // TODO(VS): delete this param
       const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
@@ -251,6 +255,11 @@ class ApplicationManagerImpl : public ApplicationManager
     void set_active_tts_language(
       const hmi_apis::Common_Language::eType& language);
 
+    void set_vehicle_type(
+      const smart_objects::CSmartObject& vehicle_type);
+
+    const smart_objects::CSmartObject* vehicle_type() const;
+
     /*
      * @brief Retrieves SDL access to all mobile apps
      *
@@ -299,10 +308,22 @@ class ApplicationManagerImpl : public ApplicationManager
     void StartDevicesDiscovery();
     void SendMessageToMobile(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
+    bool ManageMobileCommand(
+      const utils::SharedPtr<smart_objects::CSmartObject>& message);
     void SendMessageToHMI(
+      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+    bool ManageHMICommand(
       const utils::SharedPtr<smart_objects::CSmartObject>& message);
 
     /////////////////////////////////////////////////////////
+    /*
+     * @brief Overridden mobile message handler method
+     * for incoming mobile messages
+     *
+     * @param message Incoming mobile message
+     *
+     */
+    virtual void OnMobileMessageReceived(const MobileMessage& message);
 
     void onMessageReceived(
       utils::SharedPtr<application_manager::Message> message);
@@ -323,9 +344,9 @@ class ApplicationManagerImpl : public ApplicationManager
 
   private:
     ApplicationManagerImpl();
+    bool InitThread(threads::Thread* thread);
 
     void CreateHMIMatrix(HMIMatrix* matrix);
-
     void CreatePoliciesManager(PoliciesManager* managaer);
 
     /**
@@ -351,6 +372,11 @@ class ApplicationManagerImpl : public ApplicationManager
 
     bool ConvertMessageToSO(const Message& message,
                             smart_objects::CSmartObject& output);
+    bool ConvertSOtoMessage(
+      const smart_objects::CSmartObject& message, Message& output);
+
+    void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
+    void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
 
     /**
      * @brief Map of connection keys and associated applications
@@ -370,11 +396,26 @@ class ApplicationManagerImpl : public ApplicationManager
     hmi_apis::Common_Language::eType              ui_language_;
     hmi_apis::Common_Language::eType              vr_language_;
     hmi_apis::Common_Language::eType              tts_language_;
+    smart_objects::CSmartObject* vehicle_type_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler*        connection_handler_;
     request_watchdog::Watchdog*                   watchdog_;
+
+    MessageQueue<utils::SharedPtr<Message>> messages_from_mobile_;
+    MessageQueue<utils::SharedPtr<Message>> messages_to_mobile_;
+    MessageQueue<utils::SharedPtr<Message>> messages_from_hmh_;
+    MessageQueue<utils::SharedPtr<Message>> messages_to_hmh_;
+
+    threads::Thread* from_mobile_thread_;
+    friend class FromMobileThreadImpl;
+    threads::Thread* to_mobile_thread_;
+    friend class ToMobileThreadImpl;
+    threads::Thread* from_hmh_thread_;
+    friend class FromHMHThreadImpl;
+    threads::Thread* to_hmh_thread_;
+    friend class ToHMHThreadImpl;
 
     static log4cxx::LoggerPtr                     logger_;
 
@@ -385,28 +426,31 @@ const std::set<Application*>& ApplicationManagerImpl::applications() const {
   return application_list_;
 }
 
+bool ApplicationManagerImpl::vr_session_started() const {
+  return is_vr_session_strated_;
+}
+
 bool ApplicationManagerImpl::driver_distraction() const {
   return is_distracting_driver_;
 }
 
 inline const hmi_apis::Common_Language::eType&
-    ApplicationManagerImpl::active_ui_language() const {
+ApplicationManagerImpl::active_ui_language() const {
   return ui_language_;
 }
 
 inline const hmi_apis::Common_Language::eType&
-    ApplicationManagerImpl::active_vr_language() const {
+ApplicationManagerImpl::active_vr_language() const {
   return vr_language_;
 }
 
 inline const hmi_apis::Common_Language::eType&
-    ApplicationManagerImpl::active_tts_language() const {
+ApplicationManagerImpl::active_tts_language() const {
   return tts_language_;
 }
 
 inline bool ApplicationManagerImpl::all_apps_allowed() const {
   return is_all_apps_allowed_;
-
 }
 }  // namespace application_manager
 

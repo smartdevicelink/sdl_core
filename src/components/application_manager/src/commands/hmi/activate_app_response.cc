@@ -43,6 +43,8 @@ ActivateAppResponse::~ActivateAppResponse() {
 }
 
 void ActivateAppResponse::Run() {
+  LOG4CXX_INFO(logger_, "ActivateAppResponse::Run");
+
   SendResponse();
 }
 

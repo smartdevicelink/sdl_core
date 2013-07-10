@@ -43,6 +43,8 @@ GetDeviceListResponse::~GetDeviceListResponse() {
 }
 
 void GetDeviceListResponse::Run() {
+  LOG4CXX_INFO(logger_, "GetDeviceListResponse::Run");
+
   SendResponse();
 }
 

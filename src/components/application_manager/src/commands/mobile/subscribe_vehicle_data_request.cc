@@ -31,11 +31,12 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "application_manager/commands/mobile/subscribe_vehicle_data_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/Result.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
+#include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
 
@@ -51,50 +52,60 @@ SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {
 }
 
 void SubscribeVehicleDataRequest::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run ");
+  LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application((*message_)[str::params][str::connection_key]));
+      ApplicationManagerImpl::instance()->application(
+          (*message_)[str::params][str::connection_key]));
 
-  std::string info = "";
-  bool result = false;
-  NsSmartDeviceLinkRPC::V2::Result::eType result_code =
-    NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;
+  if (NULL == app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
 
-  do {
-    if (NULL == app) {
-      LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
-      result_code =
-        NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED;
-      break;
-    }
+  // counter for items to subscribe
+  int items_to_subscribe = 0;
+  // counter for subscribed items by application
+  int subscribed_items = 0;
 
-    size_t length = (*message_)[str::msg_params][str::data_type].length();
-    int item_count = 0;
-    for (int i = 0; i < length; ++i) {
-      if (app->SubscribeToIVI(static_cast<unsigned int>(
-                                (*message_)[str::msg_params][str::data_type][i].asInt()))) {
-        ++item_count;
+  // response params
+  namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
+  NsSmart::CSmartObject response_params;
+
+  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
+  VehicleData::const_iterator it = vehicle_data.begin();
+
+  for (; vehicle_data.end() != it; ++it) {
+    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
+        true == (*message_)[str::msg_params][it->first].asBool()) {
+      ++items_to_subscribe;
+      response_params[it->first][strings::data_type] = it->second;
+
+      if (app->SubscribeToIVI(static_cast<unsigned int>(it->second))) {
+        ++subscribed_items;
+        response_params[it->first][strings::result_code] =
+          mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
+      } else {
+        response_params[it->first][strings::result_code] =
+          mobile_apis::VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
       }
     }
+  }
 
-    if (item_count == length) {
-      result = true;
-      result_code = NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-    } else if (0 == item_count) {
-      result_code = NsSmartDeviceLinkRPC::V2::Result::REJECTED;
-      info = "Already subscribed on all VehicleData";
-    } else if (item_count < length) {
-      result_code = NsSmartDeviceLinkRPC::V2::Result::WARNINGS;
-      info = "Already subscribed on some VehicleData";
-    } else {
-      LOG4CXX_ERROR_EXT(logger_, "Unknown command sequence!");
-      break;
-    }
-  } while (0);
-
-  SendResponse(result, result_code, info.c_str());
+  if (subscribed_items == items_to_subscribe) {
+    SendResponse(false, mobile_apis::Result::SUCCESS,
+                 "Subscribed on all VehicleData", &response_params);
+  } else if (0 == subscribed_items) {
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Already subscribed on all VehicleData", &response_params);
+  } else if (subscribed_items < items_to_subscribe) {
+    SendResponse(false, mobile_apis::Result::WARNINGS,
+                 "Already subscribed on some VehicleData", &response_params);
+  } else {
+    LOG4CXX_ERROR(logger_, "Unknown command sequence!");
+    return;
+  }
 }
 
 }  // namespace commands

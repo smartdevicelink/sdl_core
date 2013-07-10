@@ -35,14 +35,12 @@
 #endif
 
 #include <string>
-#include "application_manager/mobile_command_factory.h"
-#include "application_manager/application_manager_impl.h"
-#include "SmartObjects/CSmartObject.hpp"
-#include "application_manager/application_impl.h"
-
 #include "application_manager/audio_pass_thru_thread_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/Result.h"
-#include "JSONHandler/SDLRPCObjects/V2/FunctionID.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/mobile_command_factory.h"
+#include "application_manager/application_impl.h"
+#include "SmartObjects/CSmartObject.hpp"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/timer.h"
 
@@ -56,13 +54,13 @@ AudioPassThruThreadImpl::AudioPassThruThreadImpl(
   unsigned int session_key, unsigned int correlation_id,
   unsigned int max_duration, const SamplingRate& sampling_rate,
   const AudioCaptureQuality& bits_per_sample, const AudioType& audio_type):
-    session_key_(session_key),
-    correlation_id_(correlation_id),
-    max_duration_(max_duration),
-    sampling_rate_(sampling_rate),
-    bits_per_sample_(bits_per_sample),
-    audio_type_(audio_type),
-    timer_(NULL) {
+  session_key_(session_key),
+  correlation_id_(correlation_id),
+  max_duration_(max_duration),
+  sampling_rate_(sampling_rate),
+  bits_per_sample_(bits_per_sample),
+  audio_type_(audio_type),
+  timer_(NULL) {
 }
 
 AudioPassThruThreadImpl::~AudioPassThruThreadImpl() {
@@ -77,7 +75,7 @@ void AudioPassThruThreadImpl::Init() {
 }
 
 void AudioPassThruThreadImpl::FactoryCreateCommand(
-                                          smart_objects::CSmartObject* cmd) {
+  smart_objects::CSmartObject* cmd) {
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(&(*cmd));
   command->Init();
   command->Run();
@@ -90,21 +88,21 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
   smart_objects::CSmartObject* end_audio = new smart_objects::CSmartObject();
   if (NULL == end_audio) {
     smart_objects::CSmartObject* error_response =
-        new smart_objects::CSmartObject();
+      new smart_objects::CSmartObject();
     if (NULL != error_response) {
       (*error_response)[strings::params][strings::message_type] =
-          MessageType::kResponse;
+        MessageType::kResponse;
       (*error_response)[strings::params][strings::correlation_id] =
-          static_cast<int>(correlation_id_);
+        static_cast<int>(correlation_id_);
 
       (*error_response)[strings::params][strings::connection_key] =
-          static_cast<int>(session_key_);
+        static_cast<int>(session_key_);
       (*error_response)[strings::params][strings::function_id] =
-          NsSmartDeviceLinkRPC::V2::FunctionID::eType::PerformAudioPassThruID;
+        mobile_apis::FunctionID::PerformAudioPassThruID;
 
       (*error_response)[strings::msg_params][strings::success] = false;
       (*error_response)[strings::msg_params][strings::result_code] =
-          NsSmartDeviceLinkRPCV2::Result::OUT_OF_MEMORY;
+          mobile_apis::Result::OUT_OF_MEMORY;
       FactoryCreateCommand(error_response);
     }
     return false;
@@ -119,17 +117,18 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
   }
 
   (*end_audio)[strings::params][strings::message_type] =
-      MessageType::kResponse;
+    MessageType::kResponse;
   (*end_audio)[strings::params][strings::correlation_id] =
-      static_cast<int>(correlation_id_);
+    static_cast<int>(correlation_id_);
 
   (*end_audio)[strings::params][strings::connection_key] =
-      static_cast<int>(session_key_);
+    static_cast<int>(session_key_);
   (*end_audio)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::EndAudioPassThruID;
+    mobile_apis::FunctionID::EndAudioPassThruID;
+
   (*end_audio)[strings::msg_params][strings::success] = true;
   (*end_audio)[strings::msg_params][strings::result_code] =
-      NsSmartDeviceLinkRPCV2::Result::SUCCESS;
+    mobile_apis::Result::SUCCESS;
 
   // app_id
   (*end_audio)[strings::msg_params][strings::app_id] = app->app_id();
@@ -235,7 +234,7 @@ void AudioPassThruThreadImpl::threadMain() {
 #endif
 
     smart_objects::CSmartObject* on_audio_pass =
-        new smart_objects::CSmartObject();
+      new smart_objects::CSmartObject();
     if (!on_audio_pass) {
       LOG4CXX_ERROR_EXT(logger_, "OnAudioPassThru NULL pointer");
       if (false == SendEndAudioPassThru()) {
@@ -251,21 +250,22 @@ void AudioPassThruThreadImpl::threadMain() {
     }
 
     (*on_audio_pass)[strings::params][strings::message_type] =
-        MessageType::kNotification;
+      MessageType::kNotification;
     (*on_audio_pass)[strings::params][strings::correlation_id] =
-        static_cast<int>(correlation_id_);
+      static_cast<int>(correlation_id_);
 
     (*on_audio_pass)[strings::params][strings::connection_key] =
-        static_cast<int>(session_key_);
+      static_cast<int>(session_key_);
     (*on_audio_pass)[strings::params][strings::function_id] =
-        NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAudioPassThruID;
+      mobile_apis::FunctionID::OnAudioPassThruID;
 
     (*on_audio_pass)[strings::msg_params][strings::success] = true;
     (*on_audio_pass)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPCV2::Result::SUCCESS;
-    // TODO(DK): key for binary data
-    (*on_audio_pass)[strings::msg_params][strings::success] =
-        smart_objects::CSmartObject(std::vector<unsigned char>(from, to));
+      mobile_apis::Result::SUCCESS;
+
+    // binary data
+    (*on_audio_pass)[strings::binary_data] =
+      smart_objects::CSmartObject(std::vector<unsigned char>(from, to));
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);

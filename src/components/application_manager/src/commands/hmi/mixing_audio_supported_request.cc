@@ -44,7 +44,8 @@ MixingAudioSupportedRequest::~MixingAudioSupportedRequest() {
 }
 
 void MixingAudioSupportedRequest::Run() {
-  LOG4CXX_INFO(logger_, "MixingAudioSupportedRequest::Run ");
+  LOG4CXX_INFO(logger_, "MixingAudioSupportedRequest::Run");
+
   SendRequest();
 }
 

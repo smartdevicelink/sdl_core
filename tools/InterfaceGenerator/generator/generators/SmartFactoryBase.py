@@ -1271,7 +1271,7 @@ class CodeGenerator(object):
         u'''#ifndef $guard\n'''
         u'''#define $guard\n'''
         u'''\n'''
-        u'''#include "JSONHandler/CSmartFactory.hpp"\n'''
+        u'''#include "formatters/CSmartFactory.hpp"\n'''
         u'''#include "SmartObjects/CSmartSchema.hpp"\n'''
         u'''#include "SmartObjects/ISchemaItem.hpp"\n'''
         u'''#include "utils/shared_ptr.h"\n'''

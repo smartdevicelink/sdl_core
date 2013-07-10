@@ -48,7 +48,7 @@ namespace NsMessageBroker
    {
    union {
       unsigned char   b8[20];
-      unsigned long   b32[5];
+      unsigned int   b32[5];
    } h;                       /**< h */
    union {
       unsigned char   b8[8];
@@ -56,7 +56,7 @@ namespace NsMessageBroker
    } c;                       /**< c */
    union {
       unsigned char   b8[64];
-      unsigned long   b32[16];
+      unsigned int   b32[16];
    } m;                       /**< m */
    unsigned char   count;          /**< count */
    };
@@ -65,7 +65,7 @@ namespace NsMessageBroker
    /**
     * \brief Constant table.
     */ 
-   const unsigned long _K[] = { 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6 };
+   const unsigned int _K[] = { 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6 };
 
    /**
     * \brief Constant table.

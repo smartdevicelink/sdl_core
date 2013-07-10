@@ -46,6 +46,8 @@ OnDeviceChosenNotification::~OnDeviceChosenNotification() {
 }
 
 void OnDeviceChosenNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnDeviceChosenNotification::Run");
+
   ApplicationManagerImpl::instance()->ConnectToDevice(
   (*message_)[strings::msg_params][strings::device_info][strings::id].asInt());
 }

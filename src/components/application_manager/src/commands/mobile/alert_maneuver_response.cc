@@ -47,18 +47,22 @@ AlertManeuverResponse::~AlertManeuverResponse() {
 }
 
 void AlertManeuverResponse::Run() {
+  LOG4CXX_INFO(logger_, "AlertManeuverResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  const int correlation_id = 207;
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       correlation_id)) {
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =
-            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+            mobile_apis::Result::SUCCESS;
     SendResponse();
   }
 }

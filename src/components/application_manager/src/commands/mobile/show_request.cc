@@ -32,9 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/show_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -48,13 +49,16 @@ ShowRequest::~ShowRequest() {
 }
 
 void ShowRequest::Run() {
+  LOG4CXX_INFO(logger_, "ShowRequest::Run");
+
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id]));
+      application((*message_)[strings::msg_params][strings::connection_key]));
 
-  if (NULL == application_impl) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::
-                 Result::APPLICATION_NOT_REGISTERED);
+  if (!application_impl) {
+    LOG4CXX_ERROR_EXT(logger_, "An application "
+                          << application_impl->name() << " is not registered.");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -63,10 +67,12 @@ void ShowRequest::Run() {
   const int connectionKey =
     (*message_)[strings::params][strings::connection_key];
 
-  const unsigned int cmd_id = 101;
-    ApplicationManagerImpl::instance()->AddMessageChain(
+  (*message_)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::UI_Show;
+
+  ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, correlationId),
-      connectionKey, correlationId, cmd_id);
+      connectionKey, correlationId);
 
   MessageSharedPtr persistentData;
 
@@ -74,7 +80,7 @@ void ShowRequest::Run() {
 
   application_impl->set_show_command(*persistentData);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
 }
 
 }  // namespace commands

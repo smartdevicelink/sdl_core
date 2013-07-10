@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/get_app_list_request.h"
-
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -47,6 +46,8 @@ GetAppListRequest::~GetAppListRequest() {
 }
 
 void GetAppListRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetAppListRequest::Run");
+
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
 
   const std::set<Application*>& applications =
@@ -55,10 +56,10 @@ void GetAppListRequest::Run() {
   int index = 0;
 
   if (applications.empty())  {
-    (*message_)[strings::msg_params][strings::result_code] =
+    (*message_)[strings::msg_params][hmi_response::code] =
           hmi_apis::Common_Result::eType::NO_APPS_REGISTERED;
   } else {
-    (*message_)[strings::msg_params][strings::result_code] =
+    (*message_)[strings::msg_params][hmi_response::code] =
           hmi_apis::Common_Result::eType::SUCCESS;
 
     for (std::set<Application*>::iterator it = applications.begin();

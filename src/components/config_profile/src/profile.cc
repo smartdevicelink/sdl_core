@@ -35,15 +35,18 @@
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
+#include <string.h>
+
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Profile"));
 
 namespace profile {
 Profile::Profile()
-: config_file_name_("smartDeviceLink.ini")
-, server_address_("127.0.0.1")
-, server_port_(8087)
-, min_tread_stack_size_(threads::Thread::kMinStackSize) {
+  : config_file_name_("smartDeviceLink.ini")
+  , server_address_("127.0.0.1")
+  , server_port_(8087)
+  , min_tread_stack_size_(threads::Thread::kMinStackSize)
+  , is_mixing_audio_supported_(false) {
   UpdateValues();
 }
 
@@ -57,9 +60,9 @@ Profile* Profile::instance() {
 
 void Profile::config_file_name(const std::string& fileName) {
   if (false == fileName.empty()) {
-     LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);
-     config_file_name_ = fileName;
-     UpdateValues();
+    LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);
+    config_file_name_ = fileName;
+    UpdateValues();
   }
 }
 
@@ -77,6 +80,10 @@ const uint16_t& Profile::server_port() const {
 
 const uint64_t& Profile::thread_min_stach_size() const {
   return min_tread_stack_size_;
+}
+
+bool Profile::is_mixing_audio_supported() const {
+  return is_mixing_audio_supported_;
 }
 
 void Profile::UpdateValues() {
@@ -104,7 +111,20 @@ void Profile::UpdateValues() {
                            "MAIN", "ThreadStackSize", value))
       && ('\0' != *value)) {
     min_tread_stack_size_ = atoi(value);
+    if (min_tread_stack_size_ < threads::Thread::kMinStackSize) {
+      min_tread_stack_size_ = threads::Thread::kMinStackSize;
+    }
     LOG4CXX_INFO(logger_, "Set threadStackMinSize to " << min_tread_stack_size_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "MixingAudioSupported", value))
+      && ('\0' != *value)) {
+    if (0 == strcmp("true", value)) {
+      is_mixing_audio_supported_ = true;
+    }
+    LOG4CXX_INFO(logger_, "Set MixingAudioSupported to " << value);
   }
 }
 

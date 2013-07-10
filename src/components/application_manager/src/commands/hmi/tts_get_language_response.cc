@@ -31,7 +31,6 @@
  */
 #include "application_manager/commands/hmi/tts_get_language_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -46,6 +45,7 @@ TTSGetLanguageResponse::~TTSGetLanguageResponse() {
 
 void TTSGetLanguageResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSGetLanguageResponse::Run");
+
   ApplicationManagerImpl::instance()->set_active_tts_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][hmi_response::language].asInt()));

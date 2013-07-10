@@ -113,7 +113,7 @@ SDL.SDLAppController = Em.Object.create( {
     deactivateApp: function() {
 
         if( this.model ){
-            SDL.SDLModel.onDeactivateApp( SDL.States.nextState, this.model.appId, this.model.appName );
+            SDL.SDLModel.onDeactivateApp( SDL.States.nextState, this.model.appId );
         }
 
     },

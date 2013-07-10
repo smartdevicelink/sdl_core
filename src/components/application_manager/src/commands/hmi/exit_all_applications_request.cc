@@ -47,6 +47,8 @@ ExitAllApplicationsRequest::~ExitAllApplicationsRequest() {
 }
 
 void ExitAllApplicationsRequest::Run() {
+  LOG4CXX_INFO(logger_, "ExitAllApplicationsRequest::Run");
+
   const hmi_apis::Common_ApplicationsCloseReason::eType reason =
     static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
       (*message_)[strings::msg_params][hmi_request::reason].asInt());

@@ -45,6 +45,7 @@ TTSGetLanguageRequest::~TTSGetLanguageRequest() {
 
 void TTSGetLanguageRequest::Run() {
   LOG4CXX_INFO(logger_, "TTSGetLanguageRequest::Run");
+
   SendRequest();
 }
 

@@ -44,7 +44,8 @@ UISetIconRequest::~UISetIconRequest() {
 }
 
 void UISetIconRequest::Run() {
-  LOG4CXX_INFO(logger_, "UISetIconRequest::Run ");
+  LOG4CXX_INFO(logger_, "UISetIconRequest::Run");
+
   SendRequest();
 }
 

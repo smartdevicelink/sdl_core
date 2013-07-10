@@ -35,7 +35,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
 
 namespace application_manager {
 
@@ -49,17 +48,15 @@ SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
 }
 
 void SetGlobalPropertiesRequest::Run() {
-  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run ");
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+      ApplicationManagerImpl::instance()->application(app_id));
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -77,33 +74,71 @@ void SetGlobalPropertiesRequest::Run() {
   const int connection_key =
     (*message_)[strings::params][strings::connection_key];
 
-  const unsigned int cmd_id = 14;
-  ApplicationManagerImpl::instance()->AddMessageChain(
-    new MessageChaining(connection_key, correlation_id),
-    connection_key, correlation_id, cmd_id);
-
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
-  // TODO(DK) HMI Request Id
-  const int ui_cmd_id = 1;
-  (*p_smrt_ui)[strings::params][strings::function_id] =
-    ui_cmd_id;
+  if (NULL == p_smrt_ui) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    return;
+  }
 
-  (*p_smrt_ui)[strings::params][strings::message_type] =
-    MessageType::kRequest;
+  // check TTS params
+  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
+      (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
 
-  (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-    (*message_)[strings::msg_params][strings::cmd_id];
+    const int tts_cmd_id = hmi_apis::FunctionID::TTS_SetGlobalProperties;
 
-  (*p_smrt_ui)[strings::msg_params][strings::vr_help_title] =
-    app->vr_help_title();
+    (*p_smrt_ui)[strings::params][strings::function_id] =
+      tts_cmd_id;
 
-  (*p_smrt_ui)[strings::msg_params][strings::vr_help] =
-    app->vr_help();
+    (*p_smrt_ui)[strings::params][strings::message_type] =
+      MessageType::kRequest;
 
-  (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-    app->app_id();
-  ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+
+    (*p_smrt_ui)[strings::msg_params][strings::help_prompt] =
+      app->vr_help_title();
+
+    (*p_smrt_ui)[strings::msg_params][strings::timeout_prompt] =
+      app->vr_help();
+
+    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
+      app->app_id();
+    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
+
+    ApplicationManagerImpl::instance()->AddMessageChain(
+      new MessageChaining(connection_key, correlation_id),
+      connection_key, correlation_id, tts_cmd_id);
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
+      (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+
+    const int ui_cmd_id = hmi_apis::FunctionID::UI_SetGlobalProperties;
+    (*p_smrt_ui)[strings::params][strings::function_id] =
+      ui_cmd_id;
+
+    (*p_smrt_ui)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+
+    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+
+    (*p_smrt_ui)[strings::msg_params][strings::vr_help_title] =
+      app->vr_help_title();
+
+    (*p_smrt_ui)[strings::msg_params][strings::vr_help] =
+      app->vr_help();
+
+    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
+      app->app_id();
+    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
+
+    ApplicationManagerImpl::instance()->AddMessageChain(
+      new MessageChaining(connection_key, correlation_id),
+      connection_key, correlation_id, ui_cmd_id);
+  }
 }
 
 }  // namespace commands

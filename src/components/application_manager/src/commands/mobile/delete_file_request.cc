@@ -49,13 +49,15 @@ DeleteFileRequest::~DeleteFileRequest() {
 }
 
 void DeleteFileRequest::Run() {
+  LOG4CXX_INFO(logger_, "DeleteFileRequest::Run");
+
   ApplicationImpl* application =
       static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (!application) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -71,12 +73,12 @@ void DeleteFileRequest::Run() {
   if (file_system::FileExists(full_file_path)) {
     if (file_system::DeleteFile(full_file_path)) {
       application->DeleteFile(sync_file_name);
-      SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+      SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
-      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
 }
 

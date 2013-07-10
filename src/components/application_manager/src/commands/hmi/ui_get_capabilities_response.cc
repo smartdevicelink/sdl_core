@@ -31,7 +31,6 @@
  */
 #include "application_manager/commands/hmi/ui_get_capabilities_response.h"
 #include "application_manager/application_manager_impl.h"
-//
 
 namespace application_manager {
 
@@ -45,7 +44,8 @@ UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
 }
 
 void UIGetCapabilitiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIGetCapabilitiesResponse::Run ");
+  LOG4CXX_INFO(logger_, "UIGetCapabilitiesResponse::Run");
+
   ApplicationManagerImpl::instance()->set_display_capabilities(
     (*message_)[strings::msg_params][hmi_response::display_capabilities]);
   ApplicationManagerImpl::instance()->set_hmi_zone_capabilities(

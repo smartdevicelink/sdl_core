@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/perform_interaction_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -48,21 +48,24 @@ PerformInteractionRequest::~PerformInteractionRequest() {
 }
 
 void PerformInteractionRequest::Run() {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::Run");
+
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  const int choise_set_id =
-    (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
+  const int choise_set_id = (*message_)[strings::msg_params]
+      [strings::interaction_choice_set_id].asInt();
 
   if (!app->FindChoiceSet(choise_set_id)) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
+    LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
   }
 
@@ -71,13 +74,26 @@ void PerformInteractionRequest::Run() {
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  // TODO(VS): HMI Request Id
-  const int hmi_request_id = 205;
+  // create HMI request
+  smart_objects::CSmartObject* hmi_request =
+      new smart_objects::CSmartObject(*message_);
+
+  if (NULL == hmi_request) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    return;
+  }
+
+  const int hmi_request_id = hmi_apis::FunctionID::UI_PerformInteraction;
+  (*hmi_request)[strings::params][strings::function_id] = hmi_request_id;
+  (*hmi_request)[strings::params][strings::message_type] =
+      MessageType::kRequest;
+  (*hmi_request)[strings::msg_params][strings::app_id] = app->app_id();
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  ApplicationManagerImpl::instance()->ManageHMICommand(hmi_request);
 }
 
 }  // namespace commands

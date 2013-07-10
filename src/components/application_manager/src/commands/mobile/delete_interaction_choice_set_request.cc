@@ -35,7 +35,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -49,16 +50,15 @@ DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {
 }
 
 void DeleteInteractionChoiceSetRequest::Run() {
-  LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run ");
+  LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application((*message_)[strings::params][strings::connection_key]));
+      ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -66,7 +66,8 @@ void DeleteInteractionChoiceSetRequest::Run() {
     (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
 
   if (!app->FindChoiceSet(choise_set_id)) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
@@ -75,12 +76,16 @@ void DeleteInteractionChoiceSetRequest::Run() {
   const int connection_key =
     (*message_)[strings::params][strings::connection_key];
 
-  MessageChaining* chain = NULL;
-
   // create HMI request
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
-  // TODO(DK): HMI Request Id
-  const int ui_cmd_id = 21;
+
+  if (NULL == p_smrt_ui) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    return;
+  }
+
+  const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet;
   (*p_smrt_ui)[strings::params][strings::function_id] =
     ui_cmd_id;
 
@@ -96,10 +101,10 @@ void DeleteInteractionChoiceSetRequest::Run() {
   (*p_smrt_ui)[strings::msg_params][strings::app_id] =
     app->app_id();
 
-  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
           connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+  ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
 }
 
 }  // namespace commands
