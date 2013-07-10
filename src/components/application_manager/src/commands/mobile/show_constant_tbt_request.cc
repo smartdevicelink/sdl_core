@@ -48,13 +48,15 @@ ShowConstantTBTRequest::~ShowConstantTBTRequest() {
 }
 
 void ShowConstantTBTRequest::Run() {
+  LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::Run");
+
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
       ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -65,13 +67,12 @@ void ShowConstantTBTRequest::Run() {
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  // TODO(VS): HMI Request Id
-  const int hmi_request_id = 206;
+  const int hmi_request_id = hmi_apis::FunctionID::Navigation_ShowConstantTBT;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }
 
 }  // namespace commands

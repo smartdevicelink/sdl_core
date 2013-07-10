@@ -36,6 +36,7 @@
 #include "application_manager/commands/mobile/on_encoded_sync_pdata_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "encryption/Base64.h"
 
@@ -51,16 +52,18 @@ OnEncodedSyncPDataNotification::~OnEncodedSyncPDataNotification() {
 }
 
 void OnEncodedSyncPDataNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnEncodedSyncPDataNotification::Run");
+
   const std::string fileName =
-    (*message_)[strings::params][hmi_notification::file_name];
+    (*message_)[strings::params][hmi_notification::file_name].asString();
 
   if (!file_system::FileExists(fileName)) {
     (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
-      NsSmartDeviceLinkRPC::V2::Result::FILE_NOT_FOUND;
+      mobile_apis::Result::FILE_NOT_FOUND;
 
     SendResponse();
-
+    LOG4CXX_ERROR(logger_, "File not found");
     return;
   }
 

@@ -44,7 +44,8 @@ VRDeleteCommandRequest::~VRDeleteCommandRequest() {
 }
 
 void VRDeleteCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "VRDeleteCommandRequest::Run ");
+  LOG4CXX_INFO(logger_, "VRDeleteCommandRequest::Run");
+
   SendRequest();
 }
 

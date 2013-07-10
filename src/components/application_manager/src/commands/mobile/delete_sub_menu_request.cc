@@ -48,19 +48,22 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 }
 
 void DeleteSubMenuRequest::Run() {
+  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
+
   ApplicationImpl* application =
       static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (!application) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
   if (!application->FindSubMenu(
       (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
+    LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
   }
 
@@ -74,7 +77,7 @@ void DeleteSubMenuRequest::Run() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }
 
 }  // namespace commands

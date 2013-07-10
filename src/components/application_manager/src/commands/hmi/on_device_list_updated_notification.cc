@@ -45,6 +45,8 @@ OnDeviceListUpdatedNotification::~OnDeviceListUpdatedNotification() {
 }
 
 void OnDeviceListUpdatedNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnDeviceListUpdatedNotification::Run");
+
   SendNotification();
 }
 

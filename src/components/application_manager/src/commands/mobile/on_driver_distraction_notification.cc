@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/on_driver_distraction_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -48,17 +48,19 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 }
 
 void OnDriverDistractionNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
+
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 
-  std::set<Application*> applications =
+  const std::set<Application*>& applications =
       ApplicationManagerImpl::instance()->applications();
 
-  for (std::set<Application*>::iterator it = applications.begin();
-      applications.end() != it; ++it) {
-    if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE !=
-        static_cast<ApplicationImpl*>(*it)->hmi_level()) {
-      (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
+  std::set<Application*>::iterator it = applications.begin();
+  for (; applications.end() != it; ++it) {
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(*it);
+    if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
+      (*message_)[strings::params][strings::connection_key] = app->app_id();
       SendNotification();
     }
   }

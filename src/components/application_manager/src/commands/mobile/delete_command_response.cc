@@ -48,46 +48,41 @@ DeleteCommandResponse::~DeleteCommandResponse() {
 }
 
 void DeleteCommandResponse::Run() {
+  LOG4CXX_INFO(logger_, "DeleteCommandResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false)
   {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-  // TODO(DK) HMI Request Id
   const int function_id =
       (*message_)[strings::params][strings::function_id].asInt();
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
 
-  // TODO(DK): HMI code Id
-  const NsSmartDeviceLinkRPC::V2::Result::eType code =
-      static_cast<NsSmartDeviceLinkRPC::V2::Result::eType>(
+  const mobile_apis::Result::eType code =
+      static_cast<mobile_apis::Result::eType>(
       (*message_)[strings::msg_params][hmi_response::code].asInt());
 
-  // TODO(VS) HMI Request Id
-  const int ui_cmd_id = 202;
-  const int vr_cmd_id = 203;
+  const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
+  const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
 
   MessageChaining* msg_chain =
   ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     return;
   }
 
   smart_objects::CSmartObject data = msg_chain->data();
 
-  if (function_id == ui_cmd_id) {
-    msg_chain->set_ui_response_result(code);
-  } else if (function_id == vr_cmd_id) {
-    msg_chain->set_vr_response_result(code);
-  }
-
-  // we need to retrieve stored response code before message chain decrase
+  // we need to retrieve stored response code before message chain decrease
   const bool result_ui = msg_chain->ui_response_result();
   const bool result_vr = msg_chain->vr_response_result();
 
@@ -102,7 +97,7 @@ void DeleteCommandResponse::Run() {
         app->FindCommand(
             data[strings::msg_params][strings::cmd_id].asInt());
 
-    if (command)  {
+    if (command) {
       if (true == result_ui) {
         (*command).erase(strings::menu_params);
       }
@@ -117,8 +112,11 @@ void DeleteCommandResponse::Run() {
             data[strings::msg_params][strings::cmd_id].asInt());
         (*message_)[strings::msg_params][strings::success] = true;
         (*message_)[strings::msg_params][strings::result_code] =
-            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+            mobile_apis::Result::SUCCESS;
         SendResponse();
+      }
+      else {
+       // TODO(VS): check ui and vr response code
       }
     }
   }

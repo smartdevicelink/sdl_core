@@ -39,22 +39,38 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceRequest::Run() {
-  ApplicationManagerImpl* application_manager_impl =
+  LOG4CXX_INFO(logger_, "UnregisterAppInterfaceRequest::Run");
+
+  ApplicationManagerImpl* app_manager =
     ApplicationManagerImpl::instance();
-  if (!application_manager_impl->
-      application((*message_)[strings::params][strings::connection_key])) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+
+  if (!app_manager->application(
+      (*message_)[strings::params][strings::connection_key])) {
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  if (!application_manager_impl->
-      UnregisterApplication((*message_)[strings::msg_params][strings::app_id])) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+  if (!app_manager->UnregisterApplication(
+      (*message_)[strings::msg_params][strings::app_id])) {
+    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+    LOG4CXX_ERROR(logger_, "Generic error");
     return;
   }
 
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  smart_objects::CSmartObject message;
+
+  message[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+
+  message[strings::params][strings::app_id] =
+      (*message_)[strings::params][strings::connection_key];
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
+
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands

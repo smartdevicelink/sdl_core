@@ -32,7 +32,7 @@
 
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
-#include "application_manager/hmi_command_factory.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -57,10 +57,7 @@ void RequestFromHMI::Run() {
 }
 
 void RequestFromHMI::SendResponseToHMI() {
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(message_);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }
 
 }  // namespace commands

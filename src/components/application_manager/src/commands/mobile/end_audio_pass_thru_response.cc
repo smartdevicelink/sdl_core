@@ -33,9 +33,8 @@
 
 #include "application_manager/commands/mobile/end_audio_pass_thru_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,15 +48,15 @@ EndAudioPassThruResponse::~EndAudioPassThruResponse() {
 }
 
 void EndAudioPassThruResponse::Run() {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruResponse::Run ");
+  LOG4CXX_INFO(logger_, "EndAudioPassThruResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   if (false == (*message_)[strings::msg_params][strings::success].asBool()) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
-
 
   const int correlation_id =
     (*message_)[strings::params][strings::correlation_id].asInt();

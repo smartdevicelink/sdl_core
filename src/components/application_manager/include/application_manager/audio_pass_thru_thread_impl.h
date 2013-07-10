@@ -158,7 +158,8 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
    *
    * @param cmd Smart object representing command
    */
-  void FactoryCreateCommand(smart_objects::CSmartObject* cmd);
+  void FactoryCreateCommand(
+      NsSmartDeviceLink::NsSmartObjects::CSmartObject* cmd);
 
   sync_primitives::SynchronisationPrimitives synchronisation_;
   sync_primitives::Timer*     timer_;

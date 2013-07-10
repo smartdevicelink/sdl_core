@@ -48,13 +48,15 @@ SetMediaClockRequest::~SetMediaClockRequest() {
 }
 
 void SetMediaClockRequest::Run() {
+  LOG4CXX_INFO(logger_, "SetMediaClockRequest::Run");
+
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id]));
 
   if (NULL == application_impl) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::
-                 Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -68,7 +70,7 @@ void SetMediaClockRequest::Run() {
       new MessageChaining(connectionKey, correlationId),
       connectionKey, correlationId, cmd_id);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
 }
 
 }  // namespace commands

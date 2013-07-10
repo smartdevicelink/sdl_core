@@ -39,7 +39,8 @@ namespace application_manager  {
 namespace commands  {
 
 void RegisterAppInterfaceResponse::Run()  {
-  // TODO(VS): Add response params to response SmarObject
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceResponse::Run");
+
   SendResponse();
 }
 

@@ -52,7 +52,7 @@ class UISetMediaClockTimerResponse : public ResponseFromHMI {
   explicit UISetMediaClockTimerResponse(const MessageSharedPtr& message);
 
   /**
-   * @brief UIAddSubmenuResponse class destructor
+   * @brief UISetMediaClockTimerResponse class destructor
    **/
   virtual ~UISetMediaClockTimerResponse();
 

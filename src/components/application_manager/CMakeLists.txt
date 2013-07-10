@@ -1,12 +1,13 @@
 include_directories (
   ./include/
   ../utils/include/
-  ../JSONHandler/include/
+  ../formatters/include/
   ../protocol_handler/include/
   ../SmartObjects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
   ../connection_handler/include/
+  ../config_profile/include/
   ../request_watchdog/include/
   ../TransportManager/include/
   ../../thirdPartyLibs/jsoncpp/include/
@@ -26,6 +27,10 @@ set (SOURCES
 ./src/hmi_command_factory.cc
 ./src/message_conversion.cc
 ./src/hmi_capabilities.cc
+./src/from_mobile_thread_impl.cc
+./src/to_mobile_thread_impl.cc
+./src/from_hmh_thread_impl.cc
+./src/to_hmh_thread_impl.cc
 )
 
 set (MOBILE_COMMANDS_SOURCES
@@ -144,6 +149,14 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/exit_application_response.cc
 ./src/commands/hmi/start_device_discovery_request.cc
 ./src/commands/hmi/start_device_discovery_response.cc
+./src/commands/hmi/close_popup_request.cc
+./src/commands/hmi/close_popup_response.cc
+./src/commands/hmi/exit_application_request.cc
+./src/commands/hmi/exit_application_response.cc
+./src/commands/hmi/activate_app_request.cc
+./src/commands/hmi/activate_app_response.cc
+./src/commands/hmi/button_get_capabilities_request.cc
+./src/commands/hmi/button_get_capabilities_response.cc
 ./src/commands/hmi/vr_is_ready_request.cc
 ./src/commands/hmi/vr_is_ready_response.cc
 ./src/commands/hmi/vr_add_command_request.cc
@@ -166,8 +179,14 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_get_supported_languages_response.cc
 ./src/commands/hmi/tts_stop_speaking_request.cc
 ./src/commands/hmi/tts_stop_speaking_response.cc
+./src/commands/hmi/tts_speak_request.cc
+./src/commands/hmi/tts_speak_response.cc
+./src/commands/hmi/tts_set_global_properties_request.cc
+./src/commands/hmi/tts_set_global_properties_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
+./src/commands/hmi/ui_delete_command_request.cc
+./src/commands/hmi/ui_delete_command_response.cc
 ./src/commands/hmi/ui_add_submenu_request.cc
 ./src/commands/hmi/ui_add_submenu_response.cc
 ./src/commands/hmi/ui_delete_submenu_request.cc
@@ -182,19 +201,50 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_change_registration_response.cc
 ./src/commands/hmi/ui_show_request.cc
 ./src/commands/hmi/ui_show_response.cc
+./src/commands/hmi/ui_alert_request.cc
+./src/commands/hmi/ui_alert_response.cc
 ./src/commands/hmi/ui_slider_request.cc
+./src/commands/hmi/ui_scrollable_message_request.cc
+./src/commands/hmi/ui_scrollable_message_response.cc
+./src/commands/hmi/ui_set_global_properties_request.cc
+./src/commands/hmi/ui_set_global_properties_response.cc
 ./src/commands/hmi/ui_slider_response.cc
 ./src/commands/hmi/ui_is_ready_request.cc
 ./src/commands/hmi/ui_is_ready_response.cc
 ./src/commands/hmi/ui_perform_audio_pass_thru_request.cc
 ./src/commands/hmi/ui_perform_audio_pass_thru_response.cc
-./src/commands/hmi/navigation_is_ready_request.cc
-./src/commands/hmi/navigation_is_ready_response.cc
-./src/commands/hmi/vehicle_info_is_ready_request.cc
-./src/commands/hmi/vehicle_info_is_ready_response.cc
+./src/commands/hmi/ui_end_audio_pass_thru_request.cc
+./src/commands/hmi/ui_end_audio_pass_thru_response.cc
+./src/commands/hmi/ui_create_interaction_choice_set_request.cc
+./src/commands/hmi/ui_create_interaction_choice_set_response.cc
+./src/commands/hmi/ui_delete_interaction_choice_set_request.cc
+./src/commands/hmi/ui_delete_interaction_choice_set_response.cc
+./src/commands/hmi/ui_perform_interaction_request.cc
+./src/commands/hmi/ui_perform_interaction_response.cc
 ./src/commands/hmi/ui_set_icon_request.cc
+./src/commands/hmi/ui_set_icon_response.cc
 ./src/commands/hmi/ui_set_media_clock_timer_request.cc
 ./src/commands/hmi/ui_set_media_clock_timer_response.cc
+./src/commands/hmi/ui_show_request.cc
+./src/commands/hmi/ui_show_response.cc
+./src/commands/hmi/vi_is_ready_request.cc
+./src/commands/hmi/vi_is_ready_response.cc
+./src/commands/hmi/vi_read_did_request.cc
+./src/commands/hmi/vi_read_did_response.cc
+./src/commands/hmi/vi_get_vehicle_data_request.cc
+./src/commands/hmi/vi_get_vehicle_data_response.cc
+./src/commands/hmi/vi_get_dtcs_request.cc
+./src/commands/hmi/vi_get_dtcs_response.cc
+./src/commands/hmi/vi_get_vehicle_type_request.cc
+./src/commands/hmi/vi_get_vehicle_type_response.cc
+./src/commands/hmi/navi_is_ready_request.cc
+./src/commands/hmi/navi_is_ready_response.cc
+./src/commands/hmi/navi_alert_maneuver_request.cc
+./src/commands/hmi/navi_alert_maneuver_response.cc
+./src/commands/hmi/navi_update_turn_list_request.cc
+./src/commands/hmi/navi_update_turn_list_response.cc
+./src/commands/hmi/navi_show_constant_tbt_request.cc
+./src/commands/hmi/navi_show_constant_tbt_response.cc
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
@@ -207,23 +257,15 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_vr_stopped_notification.cc
 ./src/commands/hmi/on_vr_command_notification.cc
 ./src/commands/hmi/on_ui_command_notification.cc
+./src/commands/hmi/on_navi_tbt_client_state_notification.cc
 ./src/commands/hmi/on_app_deactivated_notification.cc
 ./src/commands/hmi/on_tts_language_change_notification.cc
 ./src/commands/hmi/on_vr_language_change_notification.cc
 ./src/commands/hmi/on_ui_language_change_notification.cc
-./src/commands/hmi/close_popup_request.cc
-./src/commands/hmi/close_popup_response.cc
-./src/commands/hmi/exit_application_request.cc
-./src/commands/hmi/exit_application_response.cc
-./src/commands/hmi/ui_show_request.cc
-./src/commands/hmi/ui_show_response.cc
-./src/commands/hmi/activate_app_request.cc
-./src/commands/hmi/activate_app_response.cc
-./src/commands/hmi/button_get_capabilities_request.cc
-./src/commands/hmi/button_get_capabilities_response.cc
 ./src/commands/hmi/on_button_event_notification.cc
 ./src/commands/hmi/on_button_press_notification.cc
 ./src/commands/hmi/on_show_notification.cc
+./src/commands/hmi/on_vi_vehicle_data_notification.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})

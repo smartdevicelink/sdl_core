@@ -48,7 +48,7 @@ namespace connection_handler {
 log4cxx::LoggerPtr  ConnectionHandlerImpl::logger_ =
     log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ConnectionHandler"));
 
-ConnectionHandlerImpl* ConnectionHandlerImpl::getInstance() {
+ConnectionHandlerImpl* ConnectionHandlerImpl::instance() {
   static ConnectionHandlerImpl instance;
   return &instance;
 }

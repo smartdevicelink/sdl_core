@@ -33,14 +33,83 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include <map>
+#include "interfaces/MOBILE_API.h"
 #include "application_manager/application_impl.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 
 namespace application_manager {
 
-namespace mobile_api = NsSmartDeviceLinkRPC::V2;
+namespace mobile_api = mobile_apis;
+
+/*
+ * @brief Typedef for HMI TextFieldName type
+ */
+typedef enum {
+  MAIN_FILED1              = 0,
+  MAIN_FILED2,
+  MAIN_FILED3,
+  MAIN_FILED4,
+  STATUS_BAR,
+  MEDIA_CLOCK,
+  MEDIA_TRACK,
+  ALERT_TEXT1,
+  ALERT_TEXT2,
+  ALERT_TEXT3,
+  SCROLLABLE_MSG_BODY,
+  INITIAL_INTERACTION_TEXT,
+  NAVI_TEXT1,
+  NAVI_TEXT2,
+  ETA,
+  TOTAL_DISTANCE,
+  NAVI_TEXT,
+  AUDIO_DISPLAY_TEXT1,
+  AUDIO_DISPLAY_TEXT2,
+  SLIDER_HADER,
+  SLIDER_FOOTEER
+} TextFieldName;
+
+/*
+ * @brief Typedef for the vehicle data types that can
+ * be published and subscribed to
+ */
+typedef enum {
+  GPS                      = 0,
+  SPEED,
+  RPM,
+  FUELLEVEL,
+  FUELLEVEL_STATE,
+  FUELCONSUMPTION,
+  EXTERNTEMP,
+  VIN,
+  PRNDL,
+  TIREPRESSURE,
+  ODOMETER,
+  BELTSTATUS,
+  BODYINFO,
+  DEVICESTATUS,
+  ECALLINFO,
+  AIRBAGSTATUS,
+  EMERGENCYEVENT,
+  CLUSTERMODESTATUS,
+  MYKEY,
+  BRAKING,
+  WIPERSTATUS,
+  HEADLAMPSTATUS,
+  BATTVOLTAGE,
+  ENGINETORQUE,
+  ACCPEDAL,
+  STEERINGWHEEL
+} VehicleDataType;
+
+/*
+ * @brief Typedef for VehicleData
+ *
+ * @param const char* Name of the parameter in mobile request
+ * @param VehicleDataType Enum for vehicle data
+ */
+typedef std::map<const char*, VehicleDataType> VehicleData;
 
 /**
  * @brief MessageHelper class
@@ -83,10 +152,20 @@ class MessageHelper {
    **/
   static void SendOnAppInterfaceUnregisteredNotificationToMobile(
       int connection_key,
-      NsSmartDeviceLinkRPC::V2::AppInterfaceUnregisteredReason::eType reason);
+      mobile_apis::AppInterfaceUnregisteredReason::eType reason);
+
+  /*
+   * @brief Retrieve vehicle data map for param name in mobile request
+   * to VehicleDataType
+   *
+   * @return VehicleData reference
+   */
+  static const VehicleData& vehicle_data();
 
  private:
    MessageHelper();
+
+   static const VehicleData      vehicle_data_;
    DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 };
 

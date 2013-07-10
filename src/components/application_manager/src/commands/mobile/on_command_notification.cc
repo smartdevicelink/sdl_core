@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/on_command_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -48,11 +48,11 @@ OnCommandNotification::~OnCommandNotification() {
 }
 
 void OnCommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnCommandNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnCommandNotification::Run");
 
   ApplicationImpl* app =
     static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-                                  application((*message_)[strings::msg_params][strings::app_id].asInt()));
+        application((*message_)[strings::msg_params][strings::app_id].asInt()));
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -60,7 +60,7 @@ void OnCommandNotification::Run() {
   }
 
   const unsigned int cmd_id = static_cast<unsigned int>(
-                                (*message_)[strings::msg_params][strings::cmd_id].asInt());
+      (*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!app->FindCommand(cmd_id)) {
     LOG4CXX_ERROR_EXT(logger_,
@@ -101,7 +101,7 @@ void OnCommandNotification::SendOnMenuCommand(const ApplicationImpl* app) {
 
   (*on_menu_cmd)[strings::msg_params][strings::success] = true;
   (*on_menu_cmd)[strings::msg_params][strings::result_code] =
-    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    mobile_apis::Result::SUCCESS;
 
   // msg trigger_source param is set in HMI notification
 

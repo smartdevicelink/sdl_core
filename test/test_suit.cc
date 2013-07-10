@@ -11,9 +11,13 @@
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
+<<<<<<< HEAD
 #endif
 
 
+=======
+#include "mobile_message_handler/mobile_message_handler_test.h"
+>>>>>>> origin/develop
 //#include "SmartObjectConvertionTimeTest.h"
 //#include "jsoncpp/json_reader_test.h"
 //#include "json_handler/smart_schema_draft_test.h"
@@ -22,7 +26,12 @@
 //#include "json_handler/formatters/formatter_json_alrpcv2_test.h"
 //#include "json_handler/formatters/formatter_json_rpcv2_test.h"
 
+<<<<<<< HEAD
 #ifndef BUILD_ONLY_TM
+=======
+
+using namespace test::components::mobile_message_handler_test;
+>>>>>>> origin/develop
 using namespace test::components::request_watchdog_test;
 using namespace test::components::utils;
 using namespace test::components::protocol_handler_test;

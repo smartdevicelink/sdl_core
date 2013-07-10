@@ -49,19 +49,28 @@ SpeakResponse::~SpeakResponse() {
 }
 
 void SpeakResponse::Run() {
+  LOG4CXX_INFO(logger_, "SpeakResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  const int correlation_id = 102;
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       correlation_id)) {
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-            NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
-    SendResponse();
+    const int code =
+        (*message_)[strings::msg_params][hmi_response::code].asInt();
+    if (true == code) {
+      (*message_)[strings::params][strings::success] = true;
+      (*message_)[strings::params][strings::result_code] =
+          mobile_apis::Result::SUCCESS;
+    } else {
+      // TODO(VS): Some logic
+    }
   }
 }
 

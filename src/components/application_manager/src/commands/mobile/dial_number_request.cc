@@ -48,8 +48,9 @@ DialNumberRequest::~DialNumberRequest() {
 }
 
 void DialNumberRequest::Run() {
-  SendResponse(false, NsSmartDeviceLinkRPC::V2::
-                   Result::UNSUPPORTED_REQUEST);
+  LOG4CXX_INFO(logger_, "DialNumberRequest::Run");
+
+  SendResponse(false, mobile_apis::Result::UNSUPPORTED_REQUEST);
 }
 
 }  // namespace commands

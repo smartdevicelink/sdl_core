@@ -171,12 +171,82 @@ struct HMICapabilities {
       const smart_objects::CSmartObject& soft_button_capabilities);
 
     /*
+     * @brief Retrieves information about the Button's capabilities
+     *
+     * @return Currently supported Button's capabilities
+     */
+    inline const smart_objects::CSmartObject* button_capabilities() const {
+      return soft_buttons_capabilities_;
+    }
+
+    /*
+     * @brief Sets supported speech capabilities
+     *
+     * @param speech_capabilities supported speech capabilities
+     */
+    void set_speech_capabilities(
+      const smart_objects::CSmartObject& speech_capabilities);
+
+    /*
+     * @brief Retrieves information about the speech capabilities
+     *
+     * @return Currently supported speech capabilities
+     */
+    inline const smart_objects::CSmartObject* speech_capabilities() const {
+      return speech_capabilities_;
+    }
+
+    /*
+     * @brief Sets supported VR capabilities
+     *
+     * @param vr_capabilities supported VR capabilities
+     */
+    void set_vr_capabilities(
+      const smart_objects::CSmartObject& vr_capabilities);
+
+    /*
+     * @brief Retrieves information about the VR capabilities
+     *
+     * @return Currently supported VR capabilities
+     */
+    inline const smart_objects::CSmartObject* vr_capabilities() const {
+      return vr_capabilities_;
+    }
+
+    /*
+     * @brief Sets supported audio_pass_thru capabilities
+     *
+     * @param vr_capabilities supported audio_pass_thru capabilities
+     */
+    void set_audio_pass_thru_capabilities(
+      const smart_objects::CSmartObject& audio_pass_thru_capabilities);
+
+    /*
+     * @brief Retrieves information about the audio_pass_thru capabilities
+     *
+     * @return Currently supported audio_pass_thru capabilities
+     */
+    inline const smart_objects::CSmartObject*
+        audio_pass_thru_capabilities() const {
+      return audio_pass_thru_capabilities_;
+    }
+
+    /*
      * @brief Sets supported Button's capabilities
      *
      * @param soft_button_capabilities supported Button's capabilities
      */
     void set_button_capabilities(
         const smart_objects::CSmartObject& button_capabilities);
+
+    /*
+     * @brief Retrieves information about the preset bank capabilities
+     *
+     * @return Currently supported preset bank capabilities
+     */
+    inline const smart_objects::CSmartObject* preset_bank_capabilities() const {
+      return preset_bank_capabilities_;
+    }
 
     /*
      * @brief Sets supported preset bank capabilities
@@ -196,6 +266,9 @@ struct HMICapabilities {
     smart_objects::CSmartObject* soft_buttons_capabilities_;
     smart_objects::CSmartObject* button_capabilities_;
     smart_objects::CSmartObject* preset_bank_capabilities_;
+    smart_objects::CSmartObject* vr_capabilities_;
+    smart_objects::CSmartObject* speech_capabilities_;
+    smart_objects::CSmartObject* audio_pass_thru_capabilities_;
 };
 }  //  namespace application_manager
 

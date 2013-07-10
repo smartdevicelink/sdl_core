@@ -43,6 +43,8 @@ ExitAllApplicationsResponse::~ExitAllApplicationsResponse() {
 }
 
 void ExitAllApplicationsResponse::Run() {
+  LOG4CXX_INFO(logger_, "ExitAllApplicationsResponse::Run");
+
   SendResponse();
 }
 

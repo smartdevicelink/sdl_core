@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/subscribe_vehicle_data_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -48,13 +48,14 @@ SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {
 }
 
 void SubscribeVehicleDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeVehicleDataResponse::Run ");
+  LOG4CXX_INFO(logger_, "SubscribeVehicleDataResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 

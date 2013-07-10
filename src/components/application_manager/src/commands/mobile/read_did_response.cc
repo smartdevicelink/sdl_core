@@ -33,41 +33,43 @@
 
 #include "application_manager/commands/mobile/read_did_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ReadDIDResponse::ReadDIDResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+ReadDIDResponse::ReadDIDResponse(const MessageSharedPtr& message)
+  : CommandResponseImpl(message) {
 }
 
 ReadDIDResponse::~ReadDIDResponse() {
 }
 
 void ReadDIDResponse::Run() {
-  LOG4CXX_INFO(logger_, "ReadDIDResponse::Run ");
+  LOG4CXX_INFO(logger_, "ReadDIDResponse::Run");
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  const int hmi_correlation_id = 205;
+  const int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        hmi_correlation_id)) {
-    // TODO(DK): HMI code Id
+      correlation_id)) {
+
     const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
     if (true == code) {
       (*message_)[strings::params][strings::success] = true;
       (*message_)[strings::params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        mobile_apis::Result::SUCCESS;
     } else {
       // TODO(DK): Some logic
     }

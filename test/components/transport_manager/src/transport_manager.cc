@@ -50,7 +50,55 @@ using namespace test::components::transport_manager;
 using protocol_handler::RawMessage;
 
 using testing::_;
+using ::testing::Eq;
+using ::testing::Pointee;
+using ::testing::Property;
 using ::testing::AtLeast;
+using ::testing::MatcherInterface;
+using ::testing::MatchResultListener;
+using ::testing::Matcher;
+
+class RawMessageSptrMatcher : public MatcherInterface<RawMessageSptr> {
+ public:
+  explicit RawMessageSptrMatcher(const unsigned char* data)
+      : data_(data), data_size_(0) {}
+
+  virtual bool MatchAndExplain(const RawMessageSptr ptr,
+                               MatchResultListener* listener) const {
+    unsigned char *d = ptr->data();
+    unsigned int count = 0;
+    data_size_ = ptr->data_size();
+    for(int i = 0; i < ptr->data_size(); ++i){
+      if(d[i] == data_[i])
+        ++count;
+    }
+    return count == ptr->data_size();
+  }
+
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "data_ =  " ;
+    for(int i = 0; i < data_size_; ++i){
+      if(0 != data_[i])
+        *os << data_[i];
+    }
+  }
+
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    *os << "data_ =  " ;
+    for(int i = 0; i < data_size_; ++i){
+      if (0 != data_[i])
+      *os << data_[i];
+    }
+  }
+ private:
+  const unsigned char *data_;
+  mutable unsigned int data_size_;
+};
+
+inline const Matcher<RawMessageSptr> RawMessageSptrEq(const unsigned char* data) {
+  return MakeMatcher(new RawMessageSptrMatcher(data));
+}
+
 
 TEST(TransportManagerImpl, instance)
 {
@@ -97,13 +145,14 @@ TEST(TransportManagerImpl, searchDevice)
   mock_da->init(new DeviceHandleGeneratorImpl(),
       NULL);
 
-  char *result_data = NULL;
+  const unsigned char data[100] = {99};
+  utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, const_cast<unsigned char *>(data), 100);
 
   EXPECT_CALL(*tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
   EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
   EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
   EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(AtLeast(0));
-  EXPECT_CALL(*tml, onDataReceiveDone(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(*tml, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(AtLeast(1));
   EXPECT_CALL(*tml, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
 
   tm->searchDevices();
@@ -115,9 +164,7 @@ TEST(TransportManagerImpl, searchDevice)
   while(!flag) {}
   flag = false;
 
-  unsigned char data[100] = {99};
 
-  utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, data, 100);
   tm->sendMessageToDevice(srm);
 
   while(!flag) {}

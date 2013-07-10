@@ -67,17 +67,17 @@ class AlertRequest : public CommandRequestImpl {
   /*
    * @brief Sends UI Alert request
    */
-  void SendAlertRequest() const;
+  void SendAlertRequest();
 
   /*
    * @brief Sends TTS Speak request
    */
-  void SendSpeekRequest() const;
+  void SendSpeekRequest();
 
   /*
    * @brief Sends Basic communication playtone request
    */
-  void SendPlayToneRequest() const;
+  void SendPlayToneRequest();
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };

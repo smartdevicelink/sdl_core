@@ -37,11 +37,11 @@
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
 #include "application_manager/commands/mobile/unregister_app_interface_response.h"
 
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
-namespace function_ids = NsSmartDeviceLinkRPC::V2::FunctionID;
+namespace function_ids = mobile_apis::FunctionID;
 
 CommandSharedPtr CreateCommand(const MessageSharedPtr& message) {
   CommandSharedPtr command(NULL);
