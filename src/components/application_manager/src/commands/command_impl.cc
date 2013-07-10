@@ -39,6 +39,10 @@ namespace commands {
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
+const int CommandImpl::hmi_protocol_type_ = 1;
+const int CommandImpl::mobile_protocol_type_ = 0;
+const int CommandImpl::protocol_version_ = 2;
+
 CommandImpl::CommandImpl(const MessageSharedPtr& message)
 : message_(message) {
 }

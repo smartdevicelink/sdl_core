@@ -42,6 +42,7 @@ const char message_type[] = "message_type";
 const char correlation_id[] = "correlation_id";
 const char function_id[] = "function_id";
 const char protocol_version[] = "protocol_version";
+const char protocol_type[] = "protocol_type";
 const char connection_key[] = "connection_key";
 
 const char msg_params[] = "msg_params";
