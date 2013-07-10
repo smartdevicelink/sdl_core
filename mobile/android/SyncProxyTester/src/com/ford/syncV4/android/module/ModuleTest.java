@@ -314,6 +314,10 @@ public class ModuleTest {
 												+ File.separator + filename;
 										processTestFile(fullPath);
 										paths.add(getTestResultsFilename(fullPath));
+										String testErrorsFilename = getTestErrorsFilename(fullPath);
+										if (!fileIsEmpty(testErrorsFilename)) {
+											paths.add(testErrorsFilename);
+										}
 									} catch (Exception e) {
 										_msgAdapter
 												.logMessage("Parser Failed!!",
@@ -342,6 +346,10 @@ public class ModuleTest {
 
 							List<String> paths = new ArrayList<String>();
 							paths.add(getTestResultsFilename(mFilePath));
+							String testErrorsFilename = getTestErrorsFilename(mFilePath);
+							if (!fileIsEmpty(testErrorsFilename)) {
+								paths.add(testErrorsFilename);
+							}
 							sendReportEmail(paths);
 						} catch (Exception e) {
 							_msgAdapter.logMessage("Parser Failed!!",
@@ -404,12 +412,19 @@ public class ModuleTest {
 					
 					FileInputStream fin = new FileInputStream(filename);
 					InputStreamReader isr = new InputStreamReader(fin);
-					
+
+					// file writer for test results
 					String outFile = getTestResultsFilename(filename);
 					File out = new File(outFile);
 					FileWriter writer = new FileWriter(out);
 					writer.flush();
-					
+
+					// file writer for test errors
+					String outErrorFile = getTestErrorsFilename(filename);
+					File outError = new File(outErrorFile);
+					FileWriter errorWriter = new FileWriter(outError);
+					errorWriter.flush();
+
 					parser.setInput(isr);
 					int eventType = parser.getEventType();
 					String name;
@@ -613,18 +628,45 @@ public class ModuleTest {
 							name = parser.getName();
 							if (name.equalsIgnoreCase("test")) {
 								try {
+									final String FIELD_SEPARATOR = ", ";
+									final String EOL = "\n";
+
 									boolean localPass = true;
 									int i = numIterations;
 									int numPass = 0;
 									while (i > 0) {
 										xmlTest();
-										if (pass) numPass++;
-										else localPass = false;
+										if (pass) {
+											numPass++;
+										} else {
+											localPass = false;
+											StringBuilder errorBuilder = new StringBuilder(currentTest.getName());
+											errorBuilder.append(" Expected");
+											for (Pair p : expecting) {
+												errorBuilder.append(FIELD_SEPARATOR);
+												errorBuilder.append(p.first);
+												errorBuilder.append(" ");
+												errorBuilder.append(p.second);
+											}
+											errorBuilder.append(EOL);
+
+											errorBuilder.append(currentTest.getName());
+											errorBuilder.append(" Actual");
+											for (Pair p : responses) {
+												errorBuilder.append(FIELD_SEPARATOR);
+												errorBuilder.append(p.first);
+												errorBuilder.append(" ");
+												errorBuilder.append(p.second);
+											}
+											errorBuilder.append(EOL);
+
+											String errorLine = errorBuilder.toString();
+											errorWriter.write(errorLine);
+										}
 										i--;
 									}
-									
+
 									if (currentTest != null) {
-										String FIELD_SEPARATOR = ", ";
 										StringBuilder result = new StringBuilder(currentTest.getName());
 										String[] fields = { (localPass ? "Pass" : "Fail"), String.valueOf(numPass), String.valueOf(numIterations) };
 										for (String field : fields) {
@@ -632,8 +674,8 @@ public class ModuleTest {
 											result.append(field);
 										}
 										String resultLine = result.toString();
-										
-										writer.write(resultLine + "\n");
+
+										writer.write(resultLine + EOL);
 										Log.i(TAG, resultLine);
 										_msgAdapter.logMessage(resultLine, true);
 									}
@@ -671,6 +713,7 @@ public class ModuleTest {
 						eventType = parser.next();
 					}
 					writer.close();
+					errorWriter.close();
 					Log.d(TAG, "Tests finished");
 					
 					currentTest = null;
@@ -684,6 +727,17 @@ public class ModuleTest {
 						filename.length() - TEST_FILEEXT.length())
 						+ ".csv";
 			}
+
+			private String getTestErrorsFilename(String filename) {
+				return filename.substring(0,
+						filename.length() - TEST_FILEEXT.length())
+						+ "Errors.csv";
+			}
+
+			private boolean fileIsEmpty(String filename) {
+				return new File(filename).length() <= 0;
+			}
+
 		});
 	}
 	
