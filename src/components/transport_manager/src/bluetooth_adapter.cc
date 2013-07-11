@@ -159,7 +159,7 @@ SearchDeviceError* BluetoothDeviceScanner::doInquiry(
       if (bluetooth_device) {
         discovered_devices->push_back(bluetooth_device);
       } else {
-        //TODO
+        //TODO return error ???
       }
     }
   }
