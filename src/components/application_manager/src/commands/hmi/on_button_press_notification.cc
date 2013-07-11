@@ -40,9 +40,6 @@ namespace application_manager {
 
 namespace commands {
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
-
 OnButtonPressNotification::OnButtonPressNotification(
     const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
@@ -51,6 +48,8 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 }
 
 void OnButtonPressNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
+
   if((*message_)[strings::msg_params].keyExists(
       hmi_response::custom_button_id)) {
 
@@ -58,13 +57,11 @@ void OnButtonPressNotification::Run() {
         ApplicationManagerImpl::instance()->active_application());
 
     if (NULL == app) {
-      LOG4CXX_ERROR_EXT(logger_,
-                        "NULL pointer application found as an active item!");
+      LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
       return;
     }
 
     NotifyMobileApp(app);
-
     return;
   }
 
@@ -72,18 +69,16 @@ void OnButtonPressNotification::Run() {
       (*message_)[strings::msg_params]
       [hmi_response::button_name].asInt());
 
-  std::vector<Application*> subscribedApps =
+  const std::vector<Application*>& subscribedApps =
       ApplicationManagerImpl::instance()->applications_by_button(btn_id);
 
   std::vector<Application*>::const_iterator it = subscribedApps.begin();
-
   for (; subscribedApps.end() != it; ++it) {
     ApplicationImpl* subscribed_app = static_cast<ApplicationImpl*>(*it);
 
     if (subscribed_app) {
       NotifyMobileApp(subscribed_app);
     }
-
   }
 }
 

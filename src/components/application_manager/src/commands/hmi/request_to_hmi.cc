@@ -57,8 +57,7 @@ void RequestToHMI::Run() {
 }
 
 void RequestToHMI::SendRequest() {
-  // TODO(VS) : add mobile message handler function to send message to HMI
-  //ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands

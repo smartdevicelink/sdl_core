@@ -44,7 +44,8 @@ ClosePopupResponse::~ClosePopupResponse() {
 }
 
 void ClosePopupResponse::Run() {
-  LOG4CXX_INFO(logger_, "ClosePopupResponse::Run ");
+  LOG4CXX_INFO(logger_, "ClosePopupResponse::Run");
+
   // TODO(VS): Process response from HMI
 }
 

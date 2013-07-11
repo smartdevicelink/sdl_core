@@ -43,7 +43,8 @@ UIIsReadyResponse::~UIIsReadyResponse() {
 }
 
 void UIIsReadyResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIIsReadyResponse::Run ");
+  LOG4CXX_INFO(logger_, "UIIsReadyResponse::Run");
+
   // TODO(VS): Process response from HMI(field "available") and do something with SDL
 }
 

@@ -97,7 +97,7 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void sendMessageToDevice(
-      const protocol_handler::RawMessage &message) = 0;
+      const RawMessageSptr message) = 0;
 
   /**
    * @brief receive event from device
@@ -124,7 +124,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void registerEventListener(TransportManagerListener *listener) = 0;
+  virtual void addEventListener(TransportManagerListener *listener) = 0;
 
   /**
    * @brief register listener that would be used to catch adapter's events
@@ -133,7 +133,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void registerAdapterListener(
+  virtual void addAdapterListener(device_adapter::DeviceAdapter *adapter,
       device_adapter::DeviceAdapterListener *listener) = 0;
 
   /**

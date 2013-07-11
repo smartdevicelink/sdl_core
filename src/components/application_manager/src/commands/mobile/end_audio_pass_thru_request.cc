@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,12 +51,21 @@ EndAudioPassThruRequest::~EndAudioPassThruRequest() {
 }
 
 void EndAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run ");
+  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
+
+  ApplicationManagerImpl::instance()->StopAudioPassThruThread();
 
   // crate HMI UI request
   smart_objects::CSmartObject* ui_audio = new smart_objects::CSmartObject();
-  // TODO(DK): HMI ui request Id
-  const int audio_cmd_id = 62;
+
+  if (NULL == ui_audio) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    return;
+  }
+
+  const int audio_cmd_id = hmi_apis::FunctionID::UI_EndAudioPassThru;
   (*ui_audio)[str::params][str::function_id] = audio_cmd_id;
   (*ui_audio)[str::params][str::message_type] = MessageType::kRequest;
   // app_id
@@ -71,12 +80,10 @@ void EndAudioPassThruRequest::Run() {
   (*ui_audio)[str::params][str::correlation_id] = correlation_id;
   (*ui_audio)[str::params][str::connection_key] = connection_key;
 
-  MessageChaining* chain = NULL;
-  chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, audio_cmd_id);
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+      connection_key, correlation_id, audio_cmd_id);
 
-  ApplicationManagerImpl::instance()->StopAudioPassThruThread();
-  ApplicationManagerImpl::instance()->SendMessageToHMI(ui_audio);
+  ApplicationManagerImpl::instance()->ManageHMICommand(ui_audio);
 }
 
 }  // namespace commands

@@ -5,7 +5,6 @@
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
 
-
 if(BUILD_ONLY_TM)
 add_definitions(-DBUILD_ONLY_TM)
 include_directories (
@@ -22,8 +21,10 @@ include_directories (
 else()
 include_directories (
   ../src/thirdPartyLibs/gmock-1.6.0/include
+  ../src/components/formatters/include
   ../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../src/components/application_manager/include
+  ../src/components/mobile_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/protocol_handler/include
   ../src/components/TransportManager/include
@@ -33,6 +34,7 @@ include_directories (
   ../src/thirdPartyLibs/jsoncpp/include/
   ../src/thirdPartyLibs/logger/include/
   ../src/components/utils/include/
+  ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
@@ -66,21 +68,29 @@ set(LIBRARIES
     HMI_API
     SmartObjects
     ApplicationManager
+<<<<<<< HEAD
     test_JSONHandler_v4_protocol_v2_0_revP
     test_JSONHandlerTest
+=======
+    MobileMessageHandler
+    ProtocolHandler
+    #test_JSONHandler_v4_protocol_v2_0_revP
+    #test_JSONHandlerTest
+>>>>>>> origin/develop
     test_SmartObjectTest
     test_FormattersCommandsTest
     test_UtilsTest
     test_RequestWatchdogTest
     test_ProtocolHandlerTest
     test_JSONCPPTest
-    v4_protocol_v2_0_revT
+    test_MobileMessageHandlerTest
+    MOBILE_API
     jsoncpp
-    rt
     Utils
+    rt
 )
-endif()
-
 add_executable("test_suit" "./test_suit.cc")
 target_link_libraries("test_suit" ${LIBRARIES})
+endif()
+
 

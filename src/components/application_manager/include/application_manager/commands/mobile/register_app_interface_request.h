@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
 
 /**
@@ -64,6 +66,15 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    **/
   virtual void Run();
   // virtual void cleanUp() = 0;
+
+  /**
+    * @brief Sends RegisterAppInterface response to mobile
+    *
+    *@param application_impl application
+    *
+    **/
+  void SendRegisterAppInterfaceResponseToMobile(
+      const ApplicationImpl& application_impl);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);

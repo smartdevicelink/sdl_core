@@ -43,7 +43,8 @@ VRIsReadyResponse::~VRIsReadyResponse() {
 }
 
 void VRIsReadyResponse::Run() {
-  LOG4CXX_INFO(logger_, "VRIsReadyResponse::Run ");
+  LOG4CXX_INFO(logger_, "VRIsReadyResponse::Run");
+
   // TODO(VS): Process response from HMI(field "available") and do something with SDL
 }
 

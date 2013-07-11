@@ -32,7 +32,6 @@
 
 #include "application_manager/commands/hmi/on_show_notification.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -46,6 +45,7 @@ OnShowNotification::~OnShowNotification() {
 
 void OnShowNotification::Run() {
   LOG4CXX_INFO(logger_, "OnShowNotification::Run");
+
   SendNotification();
 }
 

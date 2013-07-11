@@ -38,14 +38,16 @@ namespace application_manager {
 namespace commands {
 
 ButtonGetCapabilitiesRequest::ButtonGetCapabilitiesRequest(
-    const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 ButtonGetCapabilitiesRequest::~ButtonGetCapabilitiesRequest() {
 }
 
 void ButtonGetCapabilitiesRequest::Run() {
-  LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesRequest::Run ");
+  LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesRequest::Run");
+
   SendRequest();
 }
 

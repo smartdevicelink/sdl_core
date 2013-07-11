@@ -53,7 +53,7 @@ void GenericResponse::Run() {
 
   response[strings::msg_params][strings::success] = false;
   response[strings::msg_params][strings::result_code] =
-      NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA;
+      mobile_apis::Result::INVALID_DATA;
 
   SendResponse();
 }

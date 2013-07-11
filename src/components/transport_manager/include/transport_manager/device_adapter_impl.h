@@ -45,10 +45,10 @@
 
 namespace transport_manager {
 
-class DeviceAdapterListener;
 class DeviceHandleGenerator;
 
 namespace device_adapter {
+class DeviceAdapterListener;
 
 /**
  * @brief Internal class describing device.
@@ -118,9 +118,9 @@ class Connection {
    **/
   virtual ~Connection();
 
-  virtual Error sendData(RawMessageSptr message) = 0;
+  virtual DeviceAdapter::Error sendData(RawMessageSptr message) = 0;
 
-  virtual Error disconnect() = 0;
+  virtual DeviceAdapter::Error disconnect() = 0;
 };
 
 typedef utils::SharedPtr<Connection> ConnectionSptr;
@@ -161,16 +161,16 @@ class DeviceAdapterController {
 
 class DeviceScanner {
  public:
-  virtual Error init() = 0;
-  virtual Error scan() = 0;
+  virtual DeviceAdapter::Error init() = 0;
+  virtual DeviceAdapter::Error scan() = 0;
   virtual ~DeviceScanner() {
   }
 };
 
 class ServerConnectionFactory {
  public:
-  virtual Error init() = 0;
-  virtual Error createConnection(DeviceHandle device_handle, ApplicationHandle app_handle,
+  virtual DeviceAdapter::Error init() = 0;
+  virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle, ApplicationHandle app_handle,
                                  SessionID session_id) = 0;
   virtual ~ServerConnectionFactory() {
   }
@@ -178,7 +178,7 @@ class ServerConnectionFactory {
 
 class ClientConnectionListener {
  public:
-  virtual Error init() = 0;
+  virtual DeviceAdapter::Error init() = 0;
   virtual ~ClientConnectionListener() {
   }
 };
@@ -204,8 +204,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * Called from transport manager to start device adapter.
    **/
-  virtual Error init(DeviceAdapterListener* listener,
-                     DeviceHandleGenerator* handle_generator,
+  virtual DeviceAdapter::Error init(DeviceHandleGenerator* handle_generator,
                      Configuration* configuration);
 
   /**
@@ -215,7 +214,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
    **/
-  virtual Error searchDevices();
+  virtual DeviceAdapter::Error searchDevices();
 
   /**
    * @brief Connect to the specified application discovered on device.
@@ -226,7 +225,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
    **/
-  virtual Error connect(const DeviceHandle device_handle,
+  virtual DeviceAdapter::Error connect(const DeviceHandle device_handle,
                         const ApplicationHandle app_handle,
                         const SessionID session_id);
 
@@ -237,7 +236,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
-  virtual Error disconnect(const SessionID session_id);
+  virtual DeviceAdapter::Error disconnect(const SessionID session_id);
 
   /**
    * @brief Disconnect from all sessions on specified device.
@@ -246,7 +245,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
-  virtual Error disconnectDevice(const DeviceHandle device_handle);
+  virtual DeviceAdapter::Error disconnectDevice(const DeviceHandle device_handle);
 
   /**
    * @brief Send frame.
@@ -258,7 +257,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  virtual Error sendData(const SessionID session_id, const RawMessageSptr data);
+  virtual DeviceAdapter::Error sendData(const SessionID session_id, const RawMessageSptr data);
 
   virtual bool isSearchDevicesSupported() const;
   virtual bool isServerOriginatedConnectSupported() const;
@@ -302,7 +301,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Listener for device adapter notifications.
    **/
-  DeviceAdapterListener* listener_;
+  DeviceAdapterListenerList listeners_;
 
   /**
    * @brief Handle generator implementation.

@@ -32,7 +32,7 @@
  * @version 1.0
  */
 
-SDL.SDLController = Em.Object.create( {
+SDL.SDLController = Em.Object.create({
 
     /**
      * Current system context
@@ -41,30 +41,30 @@ SDL.SDLController = Em.Object.create( {
      */
     sysContext: function() {
 
-        if( SDL.VRPopUp.VRActive ){
+        if(SDL.VRPopUp.VRActive){
             return 'VRSESSION';
         }
 
-        if( SDL.AlertPopUp.active ){
+        if(SDL.AlertPopUp.active){
             return 'ALERT';
         }
 
-        if( SDL.TBTClientStateView.active || SDL.VehicleInfo.active || SDL.DriverDistraction.active ){
+        if(SDL.TBTClientStateView.active || SDL.VehicleInfo.active || SDL.DriverDistraction.active){
             return 'HMI_OBSCURED';
         }
 
-        if( SDL.OptionsView.active ){
+        if(SDL.OptionsView.active){
             return 'MENU';
         }
 
-        if( SDL.States.info.nonMedia.active || SDL.States.media.sdlmedia.active ){
+        if(SDL.States.info.nonMedia.active || SDL.States.media.sdlmedia.active){
             return 'MAIN';
         }else{
             return 'MENU';
         }
 
-    }.property( 'SDL.DriverDistraction.active', 'SDL.OptionsView.active', 'SDL.VRPopUp.VRActive', 'SDL.AlertPopUp.active', 'SDL.TBTClientStateView.active',
-                    'SDL.VehicleInfo.active', 'SDL.States.info.nonMedia.active', 'SDL.States.media.sdlmedia.active' ),
+    }.property('SDL.DriverDistraction.active', 'SDL.OptionsView.active', 'SDL.VRPopUp.VRActive', 'SDL.AlertPopUp.active', 'SDL.TBTClientStateView.active',
+                    'SDL.VehicleInfo.active', 'SDL.States.info.nonMedia.active', 'SDL.States.media.sdlmedia.active'),
 
     /**
      * List of SDL application models
@@ -82,11 +82,11 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Object}
      */
-    defaultActionSoftButton: function( element ) {
-        switch( element.groupName ){
+    defaultActionSoftButton: function(element) {
+        switch(element.groupName){
 
             case "AlertPopUp": {
-                SDL.AlertPopUp.deactivate( true );
+                SDL.AlertPopUp.deactivate(true);
                 break;
             }
             case "ScrollableMessage": {
@@ -98,11 +98,11 @@ SDL.SDLController = Em.Object.create( {
                 break;
             }
             case "NonMediaView": {
-                SDL.SDLController.getApplicationModel( element.appId ).clearAppOverLay();
+                SDL.SDLController.getApplicationModel(element.appId).clearAppOverLay();
                 break;
             }
             case "MediaView": {
-                SDL.SDLController.getApplicationModel( element.appId ).clearAppOverLay();
+                SDL.SDLController.getApplicationModel(element.appId).clearAppOverLay();
                 break;
             }
 
@@ -122,17 +122,17 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Object}
      */
-    stealFocusSoftButton: function( element ) {
-        switch( element.groupName ){
+    stealFocusSoftButton: function(element) {
+        switch(element.groupName){
 
             case "AlertPopUp": {
                 SDL.AlertPopUp.deactivate();
-                SDL.SDLController.getApplicationModel( element.appId ).turnOnSDL();
+                SDL.SDLController.getApplicationModel(element.appId).turnOnSDL();
                 break;
             }
             case "ScrollableMessage": {
                 SDL.ScrollableMessage.deactivate();
-                SDL.SDLController.getApplicationModel( element.appId ).turnOnSDL();
+                SDL.SDLController.getApplicationModel(element.appId).turnOnSDL();
                 break;
             }
 
@@ -145,15 +145,15 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Object}
      */
-    keepContextSoftButton: function( element ) {
-        switch( element.groupName ){
+    keepContextSoftButton: function(element) {
+        switch(element.groupName){
 
             case "AlertPopUp": {
-                SDL.AlertPopUp.set( 'timer', 0 );
+                SDL.AlertPopUp.set('timer', 0);
                 break;
             }
             case "ScrollableMessage": {
-                SDL.ScrollableMessage.set( 'timer', 0 );
+                SDL.ScrollableMessage.set('timer', 0);
                 break;
             }
 
@@ -164,7 +164,7 @@ SDL.SDLController = Em.Object.create( {
      * Method to close AlertMeneuverPopUp view
      */
     closeAlertMeneuverPopUp: function() {
-        SDL.AlertManeuverPopUp.set( 'activate', false );
+        SDL.AlertManeuverPopUp.set('activate', false);
     },
 
     /**
@@ -172,8 +172,8 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Number} appId AppId of activated sdl application
      */
-    tbtTurnList: function( appId ) {
-        SDL.TBTTurnList.activate( appId );
+    tbtTurnList: function(appId) {
+        SDL.TBTTurnList.activate(appId);
     },
 
     /**
@@ -181,15 +181,15 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {String}
      */
-    tbtClientStateSeleced: function( state ) {
-        FFW.UI.onTBTClientState( state, SDL.SDLAppController.model.appId );
+    tbtClientStateSeleced: function(state) {
+        FFW.UI.onTBTClientState(state, SDL.SDLAppController.model.appId);
     },
 
     /**
      * Method to sent notification ABORTED for PerformInteractionChoise
      */
-    interactionChoiseCloseResponse: function( result, performInteractionRequestId ) {
-        FFW.UI.interactionResponse( result, performInteractionRequestId );
+    interactionChoiseCloseResponse: function(result, performInteractionRequestId) {
+        FFW.UI.interactionResponse(result, performInteractionRequestId);
     },
 
     /**
@@ -198,8 +198,8 @@ SDL.SDLController = Em.Object.create( {
      * @param {String} result
      * @param {Number} alertRequestId
      */
-    alertResponse: function( result, alertRequestId ) {
-        FFW.UI.sendUIResult( result, alertRequestId, 'UI.Alert' );
+    alertResponse: function(result, alertRequestId) {
+        FFW.UI.alertResponse(result, alertRequestId);
     },
 
     /**
@@ -208,8 +208,8 @@ SDL.SDLController = Em.Object.create( {
      * @param {String} result
      * @param {Number} messageRequestId
      */
-    scrollableMessageResponse: function( result, messageRequestId ) {
-        FFW.UI.sendUIResult( result, messageRequestId, 'UI.ScrollableMessage' );
+    scrollableMessageResponse: function(result, messageRequestId) {
+        FFW.UI.sendUIResult(result, messageRequestId, 'UI.ScrollableMessage');
     },
 
     /**
@@ -218,8 +218,8 @@ SDL.SDLController = Em.Object.create( {
      * @param {String} result
      * @param {Number} sliderRequestId
      */
-    sliderResponse: function( result, sliderRequestId ) {
-        FFW.UI.sendUIResult( result, sliderRequestId, 'UI.Slider' );
+    sliderResponse: function(result, sliderRequestId) {
+        FFW.UI.sendUIResult(result, sliderRequestId, 'UI.Slider');
     },
 
     /**
@@ -227,8 +227,8 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Object} element Button object
      */
-    callPerformAudioPassThruPopUpResponse: function( element ) {
-        this.performAudioPassThruResponse( element.responseResult );
+    callPerformAudioPassThruPopUpResponse: function(element) {
+        this.performAudioPassThruResponse(element.responseResult);
     },
 
     /**
@@ -237,9 +237,9 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {String} result Result code
      */
-    performAudioPassThruResponse: function( result ) {
-        SDL.SDLModel.set( 'AudioPassThruState', false );
-        FFW.UI.sendUIResult( result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru" );
+    performAudioPassThruResponse: function(result) {
+        SDL.SDLModel.set('AudioPassThruState', false);
+        FFW.UI.sendUIResult(result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru");
     },
 
     /**
@@ -247,17 +247,17 @@ SDL.SDLController = Em.Object.create( {
      * to UIRPC
      */
     onLanguageChangeUI: function() {
-        FFW.UI.OnLanguageChange( SDL.SDLModel.hmiUILanguage );
-    }.observes( 'SDL.SDLModel.hmiUILanguage' ),
+        FFW.UI.OnLanguageChange(SDL.SDLModel.hmiUILanguage);
+    }.observes('SDL.SDLModel.hmiUILanguage'),
 
     /**
      * Method to set language for TTS and VR components with parameters sent
      * from SDLCore to UIRPC
      */
     onLanguageChangeTTSVR: function() {
-        FFW.TTS.OnLanguageChange( SDL.SDLModel.hmiTTSVRLanguage );
-        FFW.VR.OnLanguageChange( SDL.SDLModel.hmiTTSVRLanguage );
-    }.observes( 'SDL.SDLModel.hmiTTSVRLanguage' ),
+        FFW.TTS.OnLanguageChange(SDL.SDLModel.hmiTTSVRLanguage);
+        FFW.VR.OnLanguageChange(SDL.SDLModel.hmiTTSVRLanguage);
+    }.observes('SDL.SDLModel.hmiTTSVRLanguage'),
 
     /**
      * Register application
@@ -265,13 +265,13 @@ SDL.SDLController = Em.Object.create( {
      * @param {Object} params
      * @param {Number} applicationType
      */
-    registerApplication: function( params, applicationType ) {
+    registerApplication: function(params, applicationType) {
 
-        SDL.SDLModel.get( 'registeredApps' ).pushObject( SDL.SDLController.applicationModels[applicationType].create( {
+        SDL.SDLModel.get('registeredApps').pushObject(SDL.SDLController.applicationModels[applicationType].create({
             appId: params.appId,
             appName: params.appName,
             deviceName: params.deviceName
-        } ) );
+        }));
 
     },
 
@@ -280,17 +280,17 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Number} appId
      */
-    unregisterApplication: function( appId ) {
+    unregisterApplication: function(appId) {
 
-        this.getApplicationModel( appId ).onDeleteApplication( appId );
+        this.getApplicationModel(appId).onDeleteApplication(appId);
 
-        this.getApplicationModel( appId ).set( 'active', false );
+        this.getApplicationModel(appId).set('active', false);
 
-        var index = SDL.SDLModel.registeredApps.indexOf( SDL.SDLModel.registeredApps.filterProperty( 'appId', appId )[0] );
+        var index = SDL.SDLModel.registeredApps.indexOf(SDL.SDLModel.registeredApps.filterProperty('appId', appId)[0]);
 
-        SDL.SDLModel.registeredApps.replace( index, 1 );
+        SDL.SDLModel.registeredApps.replace(index, 1);
 
-        this.set( 'model', null );
+        this.set('model', null);
 
     },
 
@@ -298,45 +298,45 @@ SDL.SDLController = Em.Object.create( {
      * SDL Driver Distraction ON/OFF switcher
      */
     selectDriverDistraction: function() {
-        if( SDL.SDLModel.driverDistractionState ){
-            FFW.UI.onDriverDistraction( "DD_ON" );
+        if(SDL.SDLModel.driverDistractionState){
+            FFW.UI.onDriverDistraction("DD_ON");
         }else{
-            FFW.UI.onDriverDistraction( "DD_OFF" );
+            FFW.UI.onDriverDistraction("DD_OFF");
         }
-    }.observes( 'SDL.SDLModel.driverDistractionState' ),
+    }.observes('SDL.SDLModel.driverDistractionState'),
 
     /**
      * SDL Protocol Version 2 ON/OFF switcher
      */
     selectProtocolVersion: function() {
-        if( SDL.SDLModel.protocolVersion2State ){
-            FFW.BasicCommunication.OnVersionChanged( 2 );
+        if(SDL.SDLModel.protocolVersion2State){
+            FFW.BasicCommunication.OnVersionChanged(2);
         }else{
-            FFW.BasicCommunication.OnVersionChanged( 1 );
+            FFW.BasicCommunication.OnVersionChanged(1);
         }
-    }.observes( 'SDL.SDLModel.protocolVersion2State' ),
+    }.observes('SDL.SDLModel.protocolVersion2State'),
 
     /**
      * Get application model
      * 
      * @param {Number}
      */
-    getApplicationModel: function( applicationId ) {
-        return SDL.SDLModel.registeredApps.filterProperty( 'appId', applicationId )[0];
+    getApplicationModel: function(applicationId) {
+        return SDL.SDLModel.registeredApps.filterProperty('appId', applicationId)[0];
     },
 
     /**
      * Function returns ChangeDeviceView back to previous state
      */
     turnChangeDeviceViewBack: function() {
-        SDL.States.goToStates( 'info.apps' );
+        SDL.States.goToStates('info.apps');
     },
 
     /**
      * Enter screen vith list of devices application model
      */
     onGetDeviceList: function() {
-        SDL.States.goToStates( 'info.devicelist' );
+        SDL.States.goToStates('info.devicelist');
         FFW.BasicCommunication.getDeviceList();
     },
 
@@ -345,8 +345,8 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param element: SDL.Button
      */
-    onDeviceChoosed: function( element ) {
-        FFW.UI.OnDeviceChosen( element.deviceName );
+    onDeviceChoosed: function(element) {
+        FFW.UI.OnDeviceChosen(element.deviceName, element.appId);
         this.turnChangeDeviceViewBack();
     },
 
@@ -356,8 +356,8 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Object}
      */
-    onGetAppList: function( appList ) {
-        SDL.SDLModel.onGetAppList( appList );
+    onGetAppList: function(appList) {
+        SDL.SDLModel.onGetAppList(appList);
     },
 
     /**
@@ -372,8 +372,8 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Object}
      */
-    onActivateSDLApp: function( element ) {
-        this.getApplicationModel( element.appId ).turnOnSDL();
+    onActivateSDLApp: function(element) {
+        this.getApplicationModel(element.appId).turnOnSDL();
     },
 
     /**
@@ -381,14 +381,14 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Object}
      */
-    onSoftButtonActionUpCustom: function( element ) {
-        if( element.time > 0 ){
-            FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID );
+    onSoftButtonActionUpCustom: function(element) {
+        if(element.time > 0){
+            FFW.Buttons.buttonEventCustom("CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
         }else{
-            FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID );
-            FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", element.softButtonID );
+            FFW.Buttons.buttonEventCustom("CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
+            FFW.Buttons.buttonPressedCustom("CUSTOM_BUTTON", "SHORT", element.softButtonID);
         }
-        clearTimeout( element.timer );
+        clearTimeout(element.timer);
         element.time = 0;
     },
 
@@ -397,13 +397,13 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {Object}
      */
-    onSoftButtonActionDownCustom: function( element ) {
-        FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID );
+    onSoftButtonActionDownCustom: function(element) {
+        FFW.Buttons.buttonEventCustom("CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID);
         element.time = 0;
-        element.timer = setTimeout( function() {
-            FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", element.softButtonID );
+        element.timer = setTimeout(function() {
+            FFW.Buttons.buttonPressedCustom("CUSTOM_BUTTON", "LONG", element.softButtonID);
             element.time++;
-        }, 2000 );
+        }, 2000);
     },
 
     /**
@@ -412,14 +412,14 @@ SDL.SDLController = Em.Object.create( {
      * @param {String}
      * @param {Object}
      */
-    onSoftButtonActionUp: function( element ) {
-        if( element.time > 0 ){
-            FFW.Buttons.buttonEvent( element.presetName, "BUTTONUP" );
+    onSoftButtonActionUp: function(element) {
+        if(element.time > 0){
+            FFW.Buttons.buttonEvent(element.presetName, "BUTTONUP");
         }else{
-            FFW.Buttons.buttonEvent( element.presetName, "BUTTONUP" );
-            FFW.Buttons.buttonPressed( element.presetName, "SHORT" );
+            FFW.Buttons.buttonEvent(element.presetName, "BUTTONUP");
+            FFW.Buttons.buttonPressed(element.presetName, "SHORT");
         }
-        clearTimeout( element.timer );
+        clearTimeout(element.timer);
         element.time = 0;
     },
 
@@ -428,8 +428,8 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {String}
      */
-    onSoftButtonOkActionDown: function( name ) {
-        FFW.Buttons.buttonEvent( name, "BUTTONDOWN" );
+    onSoftButtonOkActionDown: function(name) {
+        FFW.Buttons.buttonEvent(name, "BUTTONDOWN");
     },
 
     /**
@@ -437,10 +437,10 @@ SDL.SDLController = Em.Object.create( {
      * 
      * @param {String}
      */
-    onSoftButtonOkActionUp: function( name ) {
-        FFW.Buttons.buttonEvent( name, "BUTTONUP" );
-        FFW.Buttons.buttonPressed( name, "SHORT" );
-        SDL.SDLAppController.model.set( 'isPlaying', !SDL.SDLAppController.model.isPlaying );
+    onSoftButtonOkActionUp: function(name) {
+        FFW.Buttons.buttonEvent(name, "BUTTONUP");
+        FFW.Buttons.buttonPressed(name, "SHORT");
+        SDL.SDLAppController.model.set('isPlaying', !SDL.SDLAppController.model.isPlaying);
     },
 
     /**
@@ -449,19 +449,19 @@ SDL.SDLController = Em.Object.create( {
      * @param {String}
      * @param {Object}
      */
-    onSoftButtonActionDown: function( element ) {
-        FFW.Buttons.buttonEvent( element.presetName, "BUTTONDOWN" );
+    onSoftButtonActionDown: function(element) {
+        FFW.Buttons.buttonEvent(element.presetName, "BUTTONDOWN");
         element.time = 0;
-        element.timer = setTimeout( function() {
-            FFW.Buttons.buttonPressed( element.presetName, "LONG" );
+        element.timer = setTimeout(function() {
+            FFW.Buttons.buttonPressed(element.presetName, "LONG");
             element.time++;
-        }, 2000 );
+        }, 2000);
     },
 
     /**
      * Send system context
      */
     onSystemContextChange: function() {
-        FFW.UI.OnSystemContext( this.get( 'sysContext' ) );
+        FFW.UI.OnSystemContext(this.get('sysContext'));
     }
-} );
+});

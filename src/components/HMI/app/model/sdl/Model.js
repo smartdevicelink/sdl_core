@@ -93,49 +93,78 @@ SDL.SDLModel = Em.Object.create( {
     /**
      * List of states for OnTBTClientState notification
      */
-    tbtClientStates:
-        [
-            {
-                name: "ROUTE_UPDATE_REQUEST",
-                id: 0
-            },
-            {
-                name: "ROUTE_ACCEPTED",
-                id: 1
-            },
-            {
-                name: "ROUTE_REFUSED",
-                id: 2
-            },
-            {
-                name: "ROUTE_CANCELLED",
-                id: 3
-            },
-            {
-                name: "ETA_REQUEST",
-                id: 4
-            },
-            {
-                name: "NEXT_TURN_REQUEST",
-                id: 5
-            },
-            {
-                name: "ROUTE_STATUS_REQUEST",
-                id: 6
-            },
-            {
-                name: "ROUTE_SUMMARY_REQUEST",
-                id: 7
-            },
-            {
-                name: "TRIP_STATUS_REQUEST",
-                id: 8
-            },
-            {
-                name: "ROUTE_UPDATE_REQUEST_TIMEOUT",
-                id: 9
-            }
-        ],
+    tbtClientStates:[
+        {
+            name: "ROUTE_UPDATE_REQUEST",
+            id: 0
+        },
+        {
+            name: "ROUTE_ACCEPTED",
+            id: 1
+        },
+        {
+            name: "ROUTE_REFUSED",
+            id: 2
+        },
+        {
+            name: "ROUTE_CANCELLED",
+            id: 3
+        },
+        {
+            name: "ETA_REQUEST",
+            id: 4
+        },
+        {
+            name: "NEXT_TURN_REQUEST",
+            id: 5
+        },
+        {
+            name: "ROUTE_STATUS_REQUEST",
+            id: 6
+        },
+        {
+            name: "ROUTE_SUMMARY_REQUEST",
+            id: 7
+        },
+        {
+            name: "TRIP_STATUS_REQUEST",
+            id: 8
+        },
+        {
+            name: "ROUTE_UPDATE_REQUEST_TIMEOUT",
+            id: 9
+        }
+    ],
+        
+    /**
+     * Enum with result codes for RPC
+     */
+    resultCode:{
+        "SUCCESS":0,
+        "UNSUPPORTED_REQUEST":1,
+        "UNSUPPORTED_RESOURCE":2,
+        "DISALLOWED":3,
+        "REJECTED":4,
+        "ABORTED":5,
+        "IGNORED":6,
+        "RETRY":7,
+        "IN_USE":8,
+        "DATA_NOT_AVAILABLE":9,
+        "TIMED_OUT":10,
+        "INVALID_DATA":11,
+        "CHAR_LIMIT_EXCEEDED":12,
+        "INVALID_ID":13,
+        "DUPLICATE_NAME":14,
+        "APPLICATION_NOT_REGISTERED":15,
+        "WRONG_LANGUAGE":16,
+        "OUT_OF_MEMORY":17,
+        "TOO_MANY_PENDING_REQUESTS":18,
+        "NO_APPS_REGISTERED":19,
+        "NO_DEVICES_CONNECTED":20,
+        "WARNINGS":21,
+        "GENERIC_ERROR":22,
+        "USER_DISALLOWED":23
+    },
 
     /**
      * Data for AudioPassThruPopUp that contains params for visualisation
@@ -225,7 +254,7 @@ SDL.SDLModel = Em.Object.create( {
             'ZH-CN',
             'ZH-TW',
             'JA-JP',
-            'AR',
+            'AR-SA',
             'KO-KR'
         ],
 
@@ -364,8 +393,8 @@ SDL.SDLModel = Em.Object.create( {
      */
     setProperties: function( message ) {
 
-        this.set( 'globalProperties.helpPrompt', message.helpPrompt );
-        this.set( 'globalProperties.timeoutPrompt', message.timeoutPrompt );
+        //this.set( 'globalProperties.helpPrompt', message.helpPrompt );
+        //this.set( 'globalProperties.timeoutPrompt', message.timeoutPrompt );
 
     },
 
@@ -392,7 +421,7 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Object} params
      */
     onGetDeviceList: function( params ) {
-        if( null == params.resultCode || ( null != params.resultCode && "SUCCESS" == params.resultCode ) ){
+        if( 0 == params.code || null == params.code ){
             if( SDL.States.info.devicelist.active && params.deviceList && params.deviceList.length ){
                 SDL.DeviceListView.ShowDeviceList( params );
             }
@@ -411,11 +440,11 @@ SDL.SDLModel = Em.Object.create( {
         img.onload = function() {
             // code to set the src on success
             SDL.SDLController.getApplicationModel( message.appId ).set( 'appIcon', message.syncFileName );
-            FFW.UI.sendUIResult( "SUCCESS", id, method );
+            FFW.UI.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], id, method );
         };
         img.onerror = function( event ) {
             // doesn't exist or error loading
-            FFW.UI.sendUIResult( "INVALID_DATA", id, method );
+            FFW.UI.sendUIResult( SDL.SDLModel.resultCode["INVALID_DATA"], id, method );
             return false;
         };
 
@@ -428,7 +457,6 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Object} message Object with parameters come from SDLCore
      */
     onUIAlertManeuver: function( message ) {
-
         SDL.AlertManeuverPopUp.AlertManeuverActive( message );
     },
 
@@ -443,7 +471,7 @@ SDL.SDLModel = Em.Object.create( {
         if( !SDL.AlertPopUp.active ){
             SDL.AlertPopUp.AlertActive( message, alertRequestId );
         }else{
-            SDL.SDLController.alertResponse( 'REJECTED', alertRequestId );
+            SDL.SDLController.alertResponse( this.resultCode['REJECTED'], alertRequestId );
         }
     },
 
@@ -492,10 +520,10 @@ SDL.SDLModel = Em.Object.create( {
      */
     UIEndAudioPassThru: function() {
         if( this.AudioPassThruState ){
-            FFW.UI.sendUIResult( "SUCCESS", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
-            SDL.SDLController.performAudioPassThruResponse( "SUCCESS" );
+            FFW.UI.sendUIResult( this.resultCode["SUCCESS"], FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
+            SDL.SDLController.performAudioPassThruResponse( this.resultCode["SUCCESS"] );
         }else{
-            FFW.UI.sendUIResult( "GENERIC_ERROR", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
+            FFW.UI.sendUIResult( this.resultCode["GENERIC_ERROR"], FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
         }
     },
 
@@ -535,7 +563,7 @@ SDL.SDLModel = Em.Object.create( {
         SDL.VRPopUp.DeleteCommand( commandId );
     },
 
-    onDeactivateApp: function( target, appId, appName ) {
+    onDeactivateApp: function( target, appId ) {
         
         /**
          * Close Options menu if opened
@@ -569,6 +597,6 @@ SDL.SDLModel = Em.Object.create( {
             }
         }
 
-        FFW.BasicCommunication.DeactivateApp( appName, reason, appId );
+        FFW.BasicCommunication.DeactivateApp( reason, appId );
     }
 } );

@@ -99,7 +99,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         MockDeviceAdapter(IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator)
         : mListener(Listener)
         , mHandleGenerator(HandleGenerator)
-        , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest")))
+        , mLogger(log4cxx::Logger::getLogger("TransportManagerTest"))
         {
         }
 
@@ -211,7 +211,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
     protected:
         IDeviceAdapterListener & mListener;
         IHandleGenerator & mHandleGenerator;
-        Logger mLogger;
+        log4cxx::LoggerPtr mLogger;
     };
 
     /**

@@ -37,6 +37,7 @@
 
 #include <queue>
 #include <map>
+#include <list>
 
 #include "utils/logger.h"
 #include "transport_manager/transport_manager.h"
@@ -111,7 +112,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void sendMessageToDevice(const protocol_handler::RawMessage &message);
+  virtual void sendMessageToDevice(const RawMessageSptr message);
 
   /**
    * @brief receive event from device
@@ -129,7 +130,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void registerEventListener(TransportManagerListener *listener);
+  virtual void addEventListener(TransportManagerListener *listener);
 
   /**
    * @brief add new device adapter
@@ -147,8 +148,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void registerAdapterListener(
-      device_adapter::DeviceAdapterListener *listener);
+  virtual void addAdapterListener(device_adapter::DeviceAdapter *adapter, device_adapter::DeviceAdapterListener *listener);
 
   /**
    * @brief remove device from internal storages
@@ -181,6 +181,7 @@ class TransportManagerImpl : public TransportManager {
                               const ApplicationHandle &app_id);
 
   /**
+<<<<<<< HEAD
    * @brief set new listener
    *
    * @param listener
@@ -200,6 +201,8 @@ class TransportManagerImpl : public TransportManager {
   void set_transport_manager_listener(TransportManagerListener *listener);
 
   /**
+=======
+>>>>>>> tmRefactoring
    * @brief interface function to wake up adapter listener thread
    *
    * @param
@@ -217,7 +220,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  void postMessage(const protocol_handler::RawMessage &message);
+  void postMessage(const RawMessageSptr message);
 
   /**
    * @brief update message in queue
@@ -226,7 +229,8 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  void updateMessage(const protocol_handler::RawMessage &message);
+  /*not clear when this function shall be used
+   * void updateMessage(const RawMessageSptr old_message, const RawMessageSptr new_message);*/
 
   /**
    * @brief remove mesage from TM's queue
@@ -235,7 +239,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  void removeMessage(const protocol_handler::RawMessage &message);
+  void removeMessage(const RawMessageSptr message);
 
   void removeEvent(const DeviceAdapterEvent &event);
 
@@ -263,7 +267,7 @@ class TransportManagerImpl : public TransportManager {
     void removeSession(device_adapter::DeviceAdapter *da,
                        transport_manager::SessionID sid);
     void removeDevice(const transport_manager::DeviceHandle &device);
-    AdapterList device_adapters(void);
+    const AdapterList &device_adapters(void);
 
     ~AdapterHandler();
     AdapterHandler();
@@ -293,7 +297,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  typedef std::vector<protocol_handler::RawMessage> MessageQueue;
+  typedef std::list<RawMessageSptr> MessageQueue;
 
   /**
    * @brief type for mesage queue
@@ -394,22 +398,13 @@ class TransportManagerImpl : public TransportManager {
    * @brief flag that indicates that thread is active
    * if it is false then threads exist main loop
    **/
-  mutable bool all_thread_active_;
+  volatile bool all_thread_active_;
 
-  /**
-   * @brief Device adapter listener.
-   **/
-  device_adapter::DeviceAdapterListener *device_adapter_listener_;
-
-  /**
-   * @brief Device handle generator.
-   **/
-  class DeviceHandleGenerator *device_handle_generator_;
-
+  typedef std::list<TransportManagerListener *> TransportManagerListenerList;
   /**
    * @brief listener that would be called when TM's event happened.
    **/
-  TransportManagerListener *transport_manager_listener_;
+  TransportManagerListenerList transport_manager_listener_;
 
   /**
    * @brief ID of message queue processing thread

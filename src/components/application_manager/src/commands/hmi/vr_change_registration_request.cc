@@ -44,7 +44,8 @@ VRChangeRegistrationRequest::~VRChangeRegistrationRequest() {
 }
 
 void VRChangeRegistrationRequest::Run() {
-  LOG4CXX_INFO(logger_, "VRChangeRegistrationRequest::Run ");
+  LOG4CXX_INFO(logger_, "VRChangeRegistrationRequest::Run");
+
   SendRequest();
 }
 

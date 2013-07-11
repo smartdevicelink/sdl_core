@@ -32,9 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/change_registration_response.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -49,7 +50,9 @@ ChangeRegistrationResponse::~ChangeRegistrationResponse() {
 
 void ChangeRegistrationResponse::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationResponse::Run");
-  if ((*message_)[strings::msg_params].keyExists(strings::success)) {
+
+  if ((*message_)[strings::msg_params][strings::success] == false) {
+    LOG4CXX_ERROR(logger_, "Success = false");
     SendResponse();
     return;
   }
@@ -76,8 +79,8 @@ void ChangeRegistrationResponse::Run() {
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
-                                     ApplicationManagerImpl::instance()->
-                                     application(data[strings::params][strings::connection_key]));
+        ApplicationManagerImpl::instance()->
+        application(data[strings::params][strings::connection_key]));
 
     if (mobile_api::Result::SUCCESS == result_ui) {
       application->set_language(
@@ -95,7 +98,7 @@ void ChangeRegistrationResponse::Run() {
         (mobile_api::Result::SUCCESS == result_vr)) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
-        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        mobile_apis::Result::SUCCESS;
       SendResponse();
     } else {
       // TODO(VS): check ui and vr response code

@@ -47,8 +47,11 @@ SetIconResponse::~SetIconResponse() {
 }
 
 void SetIconResponse::Run() {
+  LOG4CXX_INFO(logger_, "EncodedSyncPDataResponse::Run");
+
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
@@ -76,7 +79,7 @@ void SetIconResponse::Run() {
 
       (*message_)[strings::params][strings::success] = true;
       (*message_)[strings::params][strings::result_code] =
-              NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+              mobile_apis::Result::SUCCESS;
       SendResponse();
     } else {
       // TODO(VS): Some logic

@@ -35,7 +35,7 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
@@ -59,8 +59,7 @@ void ChangeRegistrationRequest::Run() {
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -73,7 +72,9 @@ void ChangeRegistrationRequest::Run() {
   if (false == IsLanguageSupportedByUI(hmi_language) ||
       false == IsLanguageSupportedByVR(language)     ||
       false == IsLanguageSupportedByTTS(language)) {
-        return;
+
+    LOG4CXX_ERROR(logger_, "Language is not supported by any of modules");
+    return;
   }
 
   const int correlation_id =
@@ -91,6 +92,7 @@ void ChangeRegistrationRequest::Run() {
 
     if (NULL == ui_request) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
       return;
     }
 
@@ -110,7 +112,7 @@ void ChangeRegistrationRequest::Run() {
     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
         connection_key, correlation_id, ui_hmi_request_id, &(*message_));
 
-    ApplicationManagerImpl::instance()->SendMessageToHMI(ui_request);
+    ApplicationManagerImpl::instance()->ManageHMICommand(ui_request);
 
     has_actually_changed = true;
   }
@@ -122,6 +124,7 @@ void ChangeRegistrationRequest::Run() {
 
     if (NULL == vr_request) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
       return;
     }
 
@@ -141,13 +144,13 @@ void ChangeRegistrationRequest::Run() {
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
         connection_key, correlation_id, vr_hmi_request_id, &(*message_));
 
-    ApplicationManagerImpl::instance()->SendMessageToHMI(vr_request);
+    ApplicationManagerImpl::instance()->ManageHMICommand(vr_request);
 
     has_actually_changed = true;
   }
 
   if (!has_actually_changed) {
-    SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+    SendResponse(true, mobile_apis::Result::SUCCESS);
   }
 }
 
@@ -166,10 +169,8 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
   }
 
   if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_,
-                  "ChangeRegistrationRequest language isn't supported by UI");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "Language isn't supported by UI");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
@@ -189,10 +190,8 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
   }
 
   if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_,
-                  "ChangeRegistrationRequest language isn't supported by VR");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "Language isn't supported by VR");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
@@ -212,10 +211,8 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
   }
 
   if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_,
-                  "ChangeRegistrationRequest language isn't supported by TTS");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }

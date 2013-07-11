@@ -128,9 +128,40 @@ FFW.TTS = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
-                        // protocol
-                        "method": "TTS.SpeakResponse"
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": "TTS.Speak"
+                    }
+                };
+                this.client.send( JSONMessage );
+
+                break;
+            }
+            case "TTS.SetGlobalProperties": {
+
+                SDL.SDLModel.setProperties( request.params );
+
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": "TTS.SetGlobalProperties"
+                    }
+                };
+                this.client.send( JSONMessage );
+
+                break;
+            }
+            case "TTS.StopSpeaking": {
+
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": "TTS.StopSpeaking"
                     }
                 };
                 this.client.send( JSONMessage );
@@ -149,9 +180,9 @@ FFW.TTS = FFW.RPCObserver.create( {
                                 "TEXT"
                             ],
 
-                        "resultCode": "SUCCESS", // type (enum) from SDL
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
                         // protocol
-                        "method": "TTS.GetCapabilitiesResponse"
+                        "method": "TTS.GetCapabilities"
                     }
                 };
                 this.client.send( JSONMessage );
@@ -164,9 +195,8 @@ FFW.TTS = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
-                        // protocol
-                        "method": "TTS.GetSupportedLanguagesResponse",
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                        "method": "TTS.GetSupportedLanguages",
                         "languages": SDL.SDLModel.sdlLanguagesList
                     }
                 };
@@ -180,9 +210,8 @@ FFW.TTS = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
-                        // protocol
-                        "method": "TTS.GetLanguageResponse",
+                        "code": SDL.SDLModel.resultCode["SUCCESS"],  // type (enum) from SDL
+                        "method": "TTS.GetLanguage",
                         "language": SDL.SDLModel.hmiTTSVRLanguage
                     }
                 };
@@ -199,9 +228,9 @@ FFW.TTS = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": "SUCCESS", // type (enum) from SDL
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
                         // protocol
-                        "method": "TTS.ChangeRegistrationResponse"
+                        "method": "TTS.ChangeRegistration"
                     }
                 };
                 this.client.send( JSONMessage );
@@ -217,7 +246,7 @@ FFW.TTS = FFW.RPCObserver.create( {
                     "id": request.id,
                     "result": {
                         "available": this.get('isReady'),
-                        "code": 0,
+                        "code": SDL.SDLModel.resultCode["SUCCESS"],
                         "method" : "TTS.IsReady"
                     }
                 };

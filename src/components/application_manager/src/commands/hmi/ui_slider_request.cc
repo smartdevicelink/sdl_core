@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/ui_slider_request.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -45,7 +44,8 @@ UISliderRequest::~UISliderRequest() {
 }
 
 void UISliderRequest::Run() {
-  LOG4CXX_INFO(logger_, "UISliderRequest::Run ");
+  LOG4CXX_INFO(logger_, "UISliderRequest::Run");
+
   SendRequest();
 }
 

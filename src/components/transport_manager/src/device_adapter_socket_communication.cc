@@ -83,20 +83,20 @@ void* startThreadedSocketConnection(void* v) {
   return 0;
 }
 
-Error ThreadedSocketConnection::start() {
+DeviceAdapter::Error ThreadedSocketConnection::start() {
   int notification_pipe_fds[2];
   const int pipe_ret = pipe(notification_pipe_fds);
   if (0 == pipe_ret) {
     notification_pipe_read_fd_ = notification_pipe_fds[0];
     notification_pipe_write_fd_ = notification_pipe_fds[1];
   } else {
-    return FAIL;
+    return DeviceAdapter::FAIL;
   }
 
   if (pthread_create(&thread_, 0, &startThreadedSocketConnection, this))
-    return OK;
+    return DeviceAdapter::OK;
   else
-    return FAIL;
+    return DeviceAdapter::FAIL;
 }
 
 void ThreadedSocketConnection::finalise() {
@@ -104,28 +104,28 @@ void ThreadedSocketConnection::finalise() {
   close(socket_);
 }
 
-Error ThreadedSocketConnection::notify() const {
+DeviceAdapter::Error ThreadedSocketConnection::notify() const {
   if (-1 != notification_pipe_write_fd_) {
     uint8_t c = 0;
     if (1 == write(notification_pipe_write_fd_, &c, 1)) {
-      return OK;
+      return DeviceAdapter::OK;
     } else {
       LOG4CXX_ERROR_WITH_ERRNO(
           logger_,
           "Failed to wake up connection thread for connection " << session_id());
     }
   }
-  return FAIL;
+  return DeviceAdapter::FAIL;
 }
 
-Error ThreadedSocketConnection::sendData(RawMessageSptr message) {
+DeviceAdapter::Error ThreadedSocketConnection::sendData(RawMessageSptr message) {
   pthread_mutex_lock(&frames_to_send_mutex_);
   frames_to_send_.push(message);
   pthread_mutex_unlock(&frames_to_send_mutex_);
   return notify();
 }
 
-Error ThreadedSocketConnection::disconnect() {
+DeviceAdapter::Error ThreadedSocketConnection::disconnect() {
   terminate_flag_ = true;
   return notify();
 }

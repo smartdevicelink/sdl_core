@@ -45,6 +45,7 @@ VRGetSupportedLanguagesRequest::~VRGetSupportedLanguagesRequest() {
 
 void VRGetSupportedLanguagesRequest::Run() {
   LOG4CXX_INFO(logger_, "VRGetSupportedLanguagesRequest::Run");
+
   SendRequest();
 }
 

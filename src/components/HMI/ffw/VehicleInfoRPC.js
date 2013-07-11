@@ -127,7 +127,8 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
         switch( request.method ){
             case "VehicleInfo.GetVehicleData": {
                 
-                var vehicleData = SDL.SDLVehicleInfoModel.getVehicleData( request.params ), resultCode;
+                var vehicleData = SDL.SDLVehicleInfoModel.getVehicleData( request.params ),
+                    resultCode;
 
                 if( vehicleData ){
                     resultCode = "SUCCESS";
@@ -140,12 +141,16 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "resultCode": resultCode, // type (enum) from SDL protocol
-                        "method": "VehicleInfo.GetVehicleDataResponse"
-                    // request.params.dataType: vehicleData
+                        "code": SDL.SDLModel.resultCode[resultCode], // type (enum) from SDL protocol
+                        "method": "VehicleInfo.GetVehicleData"
                     }
                 };
-                JSONMessage.result[SDL.SDLVehicleInfoModel.vehicleData[request.params.dataType].type] = vehicleData;
+                
+                if( vehicleData ){
+                    for (var key in vehicleData) {
+                        JSONMessage.result[key] = vehicleData[key];
+                    }
+                }
                 this.client.send( JSONMessage );
                 
                 break;
@@ -180,7 +185,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                     "id": request.id,
                     "result": {
                         "available": this.get('isReady'),
-                        "code": 0,
+                        "code": SDL.SDLModel.resultCode["SUCCESS"],
                         "method" : "VehicleInfo.IsReady"
                     }
                 };
@@ -227,8 +232,8 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
             "jsonrpc": "2.0",
             "id": id,
             "result": {
-                "resultCode": "SUCCESS", // type (enum) from SDL protocol
-                "method": "VehicleInfo.GetVehicleTypeResponse",
+                "code": SDL.SDLModel.resultCode["SUCCESS"],
+                "method": "VehicleInfo.GetVehicleType",
                 "vehicleType": vehicleType
             }
         };
@@ -245,72 +250,47 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
      * @type {string} result
      * @type {int} id
      */
-    vehicleInfoReadDIDResponse: function( dataResult, data, info, result, id ) {
+    vehicleInfoReadDIDResponse: function( didResult, resultCode, id ) {
         Em.Logger.log( "FFW.VehicleInfo.ReadDID" );
 
         var JSONMessage;
         // send repsonse
-        if( result != 'ENCRYPTED' ){
-            JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": {
-                    "resultCode": result, // type (enum) from SDL protocol
-                    "method": "VehicleInfo.ReadDIDResponse",
-                    "info": info,
-                    "dataResult": dataResult,
-                    "data": data
-                }
-            };
-        }else{
-            JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": {
-                    "resultCode": result, // type (enum) from SDL protocol
-                    "method": "VehicleInfo.ReadDIDResponse",
-                    "info": info
-                }
-            };
-        }
+        JSONMessage = {
+            "jsonrpc": "2.0",
+            "id": id,
+            "result": {
+                "code": SDL.SDLModel.resultCode[resultCode], // type (enum) from SDL protocol
+                "method": "VehicleInfo.ReadDID",
+                "didResult": didResult
+            }
+        };
         this.client.send( JSONMessage );
     },
 
     /**
      * GetDTCs Response
      * 
-     * @type {array} data
-     * @type {string} info
-     * @type {string} result
-     * @type {int} id
+     * @type {Number} ecuHeader
+     * @type {Array} dtc
+     * @type {String} result
+     * @type {Number} id
      */
-    vehicleInfoGetDTCsResponse: function( data, info, result, id ) {
+    vehicleInfoGetDTCsResponse: function( ecuHeader, dtc, result, id ) {
         Em.Logger.log( "FFW.VehicleInfo.GetDTCs" );
 
         var JSONMessage;
         // send repsonse
-        if( result != 'ENCRYPTED' ){
-            JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": {
-                    "resultCode": result, // type (enum) from SDL protocol
-                    "method": "VehicleInfo.GetDTCsResponse",
-                    "info": info,
-                    "dtcList": data
-                }
-            };
-        }else{
-            JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": {
-                    "resultCode": result, // type (enum) from SDL protocol
-                    "method": "VehicleInfo.GetDTCsResponse",
-                    "info": info
-                }
-            };
-        }
+        JSONMessage = {
+            "jsonrpc": "2.0",
+            "id": id,
+            "result": {
+                "code": SDL.SDLModel.resultCode[result], // type (enum) from SDL protocol
+                "method": "VehicleInfo.GetDTCs",
+                "ecuHeader": ecuHeader,
+                "dtc": dtc
+            }
+        };
+
         this.client.send( JSONMessage );
     }
 } )

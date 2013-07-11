@@ -31,10 +31,7 @@
  */
 
 #include "application_manager/commands/command_response_impl.h"
-#include "mobile_message_handler/mobile_message_handler_impl.h"
-#include "application_manager/message_conversion.h"
-#include "SmartObjects/CSmartObject.hpp"
-#include "application_manager/message.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -59,10 +56,7 @@ void CommandResponseImpl::Run() {
 }
 
 void CommandResponseImpl::SendResponse() {
-  //TODO(PV)
-  /*Message message = SmartObjectToMessage(&(*message_));
-  mobile_message_handler::MobileMessageHandlerImpl::instance()->
-      SendMessageToMobileApp(&message);*/
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands

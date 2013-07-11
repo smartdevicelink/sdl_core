@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -47,7 +47,7 @@ void UIShowResponse::Run() {
   LOG4CXX_INFO(logger_, "UIShowResponse::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    NsSmartDeviceLinkRPC::V2::FunctionID::ShowID;
+    mobile_apis::FunctionID::ShowID;
 
   SendResponseToMobile(message_);
 }

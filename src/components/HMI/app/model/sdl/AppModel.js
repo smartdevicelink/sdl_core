@@ -192,9 +192,9 @@ SDL.SDLAppModel = Em.Object.extend( {
 
         this.get( 'commandsList' ).pushObject( {
             menuId: params.menuId,
-            name: params.menuName,
+            name: params.menuParams.menuName,
             parent: 0,
-            position: params.position
+            position: params.menuParams.position
         } );
     },
 
@@ -217,7 +217,7 @@ SDL.SDLAppModel = Em.Object.extend( {
         // remove commands from deleted submenu
         this.get( 'commandsList' ).removeObjects( this.get( 'commandsList' ).filterProperty( 'parent', menuId ) );
 
-        return 'SUCCESS';
+        return SDL.SDLModel.resultCode['SUCCESS'];
     },
 
     /**
@@ -237,13 +237,13 @@ SDL.SDLAppModel = Em.Object.extend( {
             var choiceSetId = message.interactionChoiceSetIDList[i];
             SDL.InteractionChoicesView.preformChoices( this.interactionChoices[choiceSetId], performInteractionRequestId, message.timeout );
 
-            SDL.VRPopUp.CreateInteractionChoise( this.interactionChoices[choiceSetId], performInteractionRequestId );
+            //SDL.VRPopUp.CreateInteractionChoise( this.interactionChoices[choiceSetId], performInteractionRequestId );
         }
 
         SDL.InteractionChoicesView.activate( message.initialText );
 
         // Show Initial prompt
-        SDL.SDLModel.onPrompt( message.initialPrompt );
+       //SDL.SDLModel.onPrompt( message.initialPrompt );
     },
 
     /**

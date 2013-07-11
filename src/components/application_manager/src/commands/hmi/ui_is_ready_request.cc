@@ -44,7 +44,8 @@ UIIsReadyRequest::~UIIsReadyRequest() {
 }
 
 void UIIsReadyRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIIsReadyRequest::Run ");
+  LOG4CXX_INFO(logger_, "UIIsReadyRequest::Run");
+
   SendRequest();
 }
 

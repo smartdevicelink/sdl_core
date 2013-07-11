@@ -117,7 +117,7 @@
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_response.h"
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "application_manager/commands/mobile/update_turn_list_response.h"
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -126,7 +126,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
   CommandSharedPtr command(NULL);
 
   switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
-    case NsSmartDeviceLinkRPC::V2::FunctionID::RegisterAppInterfaceID: {
+    case mobile_apis::FunctionID::RegisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kRequest) {
         command.reset(new commands::RegisterAppInterfaceRequest(message));
@@ -136,7 +136,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::UnregisterAppInterfaceID: {
+    case mobile_apis::FunctionID::UnregisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kRequest) {
         command.reset(new commands::UnregisterAppInterfaceRequest(message));
@@ -146,7 +146,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::SetGlobalPropertiesID: {
+    case mobile_apis::FunctionID::SetGlobalPropertiesID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
@@ -156,7 +156,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::ResetGlobalPropertiesID: {
+    case mobile_apis::FunctionID::ResetGlobalPropertiesID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
@@ -166,7 +166,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::AddCommandID: {
+    case mobile_apis::FunctionID::AddCommandID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::AddCommandResponse(message));
@@ -175,7 +175,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::AddSubMenuID: {
+    case mobile_apis::FunctionID::AddSubMenuID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::AddSubMenuResponse(message));
@@ -184,7 +184,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::DeleteSubMenuID: {
+    case mobile_apis::FunctionID::DeleteSubMenuID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::DeleteSubMenuResponse(message));
@@ -193,7 +193,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::DeleteInteractionChoiceSetID: {
+    case mobile_apis::FunctionID::DeleteInteractionChoiceSetID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
@@ -203,7 +203,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::AlertID: {
+    case mobile_apis::FunctionID::AlertID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::AlertResponse(message));
@@ -212,7 +212,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::PerformAudioPassThruID: {
+    case mobile_apis::FunctionID::PerformAudioPassThruID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
@@ -223,7 +223,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::CreateInteractionChoiceSetID: {
+    case mobile_apis::FunctionID::CreateInteractionChoiceSetID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
@@ -233,7 +233,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::PerformInteractionID: {
+    case mobile_apis::FunctionID::PerformInteractionID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::PerformInteractionResponse(message));
@@ -242,7 +242,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::EndAudioPassThruID: {
+    case mobile_apis::FunctionID::EndAudioPassThruID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::EndAudioPassThruResponse(message));
@@ -251,7 +251,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::PutFileID: {
+    case mobile_apis::FunctionID::PutFileID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::PutFileResponse(message));
@@ -260,7 +260,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::DeleteFileID: {
+    case mobile_apis::FunctionID::DeleteFileID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::DeleteFileResponse(message));
@@ -269,7 +269,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::ListFilesID: {
+    case mobile_apis::FunctionID::ListFilesID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::ListFilesResponse(message));
@@ -278,7 +278,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::SubscribeButtonID: {
+    case mobile_apis::FunctionID::SubscribeButtonID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::SubscribeButtonResponse(message));
@@ -287,7 +287,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::UnsubscribeButtonID: {
+    case mobile_apis::FunctionID::UnsubscribeButtonID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::UnsubscribeButtonResponse(message));
@@ -296,7 +296,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::ShowConstantTBTID: {
+    case mobile_apis::FunctionID::ShowConstantTBTID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::ShowConstantTBTResponse(message));
@@ -305,7 +305,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::SubscribeVehicleDataID: {
+    case mobile_apis::FunctionID::SubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
@@ -316,7 +316,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::UnsubscribeVehicleDataID: {
+    case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
@@ -327,7 +327,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::ReadDIDID: {
+    case mobile_apis::FunctionID::ReadDIDID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::ReadDIDResponse(message));
@@ -336,7 +336,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::GetVehicleDataID: {
+    case mobile_apis::FunctionID::GetVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::GetVehicleDataResponse(message));
@@ -345,7 +345,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::AlertManeuverID: {
+    case mobile_apis::FunctionID::AlertManeuverID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::AlertManeuverResponse(message));
@@ -354,7 +354,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::SetAppIconID: {
+    case mobile_apis::FunctionID::SetAppIconID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::SetIconResponse(message));
@@ -363,7 +363,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::SetDisplayLayoutID: {
+    case mobile_apis::FunctionID::SetDisplayLayoutID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::SetDisplayLayoutResponse(message));
@@ -372,7 +372,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::UpdateTurnListID: {
+    case mobile_apis::FunctionID::UpdateTurnListID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::UpdateTurnListResponse(message));
@@ -381,7 +381,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::ChangeRegistrationID: {
+    case mobile_apis::FunctionID::ChangeRegistrationID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::ChangeRegistrationResponse(message));
@@ -390,7 +390,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::GetDTCsID: {
+    case mobile_apis::FunctionID::GetDTCsID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(new commands::GetDTCsResponse(message));
@@ -399,48 +399,48 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnButtonEventID: {
+    case mobile_apis::FunctionID::OnButtonEventID: {
       command.reset(new commands::OnButtonEventNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnButtonPressID: {
+    case mobile_apis::FunctionID::OnButtonPressID: {
       command.reset(new commands::OnButtonPressNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnAudioPassThruID: {
+    case mobile_apis::FunctionID::OnAudioPassThruID: {
       command.reset(new commands::OnAudioPassThruNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnVehicleDataID: {
+    case mobile_apis::FunctionID::OnVehicleDataID: {
       command.reset(new commands::OnVehicleDataNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnAppInterfaceUnregisteredID: {
+    case mobile_apis::FunctionID::OnAppInterfaceUnregisteredID: {
       command.reset(
           new commands::OnAppInterfaceUnregisteredNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnCommandID: {
+    case mobile_apis::FunctionID::OnCommandID: {
       command.reset(new commands::OnCommandNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnTBTClientStateID: {
+    case mobile_apis::FunctionID::OnTBTClientStateID: {
       command.reset(new commands::OnTBTClientStateNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnDriverDistractionID: {
+    case mobile_apis::FunctionID::OnDriverDistractionID: {
       command.reset(new commands::OnDriverDistractionNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnLanguageChangeID: {
+    case mobile_apis::FunctionID::OnLanguageChangeID: {
       command.reset(new commands::OnLanguageChangeNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnPermissionsChangeID: {
+    case mobile_apis::FunctionID::OnPermissionsChangeID: {
       command.reset(new commands::OnPermissionsChangeNotification(message));
       break;
     }
-    case NsSmartDeviceLinkRPC::V2::FunctionID::OnHMIStatusID: {
+    case mobile_apis::FunctionID::OnHMIStatusID: {
       command.reset(new commands::OnHMIStatusNotification(message));
       break;
     }

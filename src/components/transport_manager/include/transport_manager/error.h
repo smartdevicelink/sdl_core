@@ -37,10 +37,6 @@
 
 namespace transport_manager {
 
-enum Error {
-  OK, FAIL, NOT_SUPPORTED, ALREADY_EXIST, BAD_STATE, BAD_PARAM
-};
-
 class BaseError {
 };
 

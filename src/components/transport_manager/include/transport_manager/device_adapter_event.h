@@ -58,7 +58,7 @@ class DeviceAdapterEvent {
   int session_id(void) const;
   device_adapter::DeviceAdapter *device_adapter(void) const;
   RawMessageSptr data(void) const;
-  BaseError *error(void) const;
+  BaseError *event_error(void) const;
 
  private:
   int event_type_;

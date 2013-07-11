@@ -45,7 +45,8 @@ StartDeviceDiscoveryRequest::~StartDeviceDiscoveryRequest() {
 }
 
 void StartDeviceDiscoveryRequest::Run() {
-  LOG4CXX_INFO(logger_, "StartDeviceDiscoveryRequest::Run ");
+  LOG4CXX_INFO(logger_, "StartDeviceDiscoveryRequest::Run");
+
   ApplicationManagerImpl::instance()->StartDevicesDiscovery();
 }
 

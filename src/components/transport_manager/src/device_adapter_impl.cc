@@ -58,7 +58,7 @@ Connection::~Connection() {
 }
 
 DeviceAdapterImpl::DeviceAdapterImpl()
-    : listener_(0),
+    : listeners_(0),
       handle_generator_(0),
       initialised_(0),
       devices_(),
@@ -77,18 +77,15 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
   pthread_mutex_destroy(&devices_mutex_);
 }
 
-Error DeviceAdapterImpl::init(DeviceAdapterListener* listener,
+DeviceAdapter::Error DeviceAdapterImpl::init(
                               DeviceHandleGenerator* handle_generator,
                               Configuration* configuration) {
 
-  if (listener == 0)
-    return BAD_PARAM;
   if (handle_generator == 0)
     return BAD_PARAM;
 
   LOG4CXX_INFO(logger_, "Initializing device adapter");
 
-  listener_ = listener;
   handle_generator_ = handle_generator;
 
   Error error = OK;
@@ -104,7 +101,7 @@ Error DeviceAdapterImpl::init(DeviceAdapterListener* listener,
   return error;
 }
 
-Error DeviceAdapterImpl::searchDevices() {
+DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
   if (!initialised_)
     return BAD_STATE;
   if (device_scanner_ == 0)
@@ -112,7 +109,7 @@ Error DeviceAdapterImpl::searchDevices() {
   return device_scanner_->scan();
 }
 
-Error DeviceAdapterImpl::connect(const DeviceHandle device_handle,
+DeviceAdapter::Error DeviceAdapterImpl::connect(const DeviceHandle device_handle,
                                  const ApplicationHandle app_handle,
                                  const SessionID session_id) {
   if (!initialised_)
@@ -124,7 +121,7 @@ Error DeviceAdapterImpl::connect(const DeviceHandle device_handle,
                                                       session_id);
 }
 
-Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
+DeviceAdapter::Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
   if (!initialised_)
     return BAD_STATE;
   ConnectionSptr connection = findEstablishedConnection(session_id);
@@ -135,7 +132,7 @@ Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
   }
 }
 
-Error DeviceAdapterImpl::disconnectDevice(const DeviceHandle device_handle) {
+DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(const DeviceHandle device_handle) {
   if (!initialised_)
     return BAD_STATE;
 
@@ -156,7 +153,7 @@ Error DeviceAdapterImpl::disconnectDevice(const DeviceHandle device_handle) {
   return OK;
 }
 
-Error DeviceAdapterImpl::sendData(const int session_id,
+DeviceAdapter::Error DeviceAdapterImpl::sendData(const int session_id,
                                   const RawMessageSptr data) {
   if (!initialised_)
     return BAD_STATE;
@@ -179,10 +176,6 @@ DeviceList DeviceAdapterImpl::getDeviceList() const {
   }
   pthread_mutex_unlock(&devices_mutex_);
   return devices;
-}
-
-DeviceAdapterListener* DeviceAdapterImpl::getListener() {
-  return listener_;
 }
 
 DeviceHandleGenerator* DeviceAdapterImpl::getDeviceHandleGenerator() {
@@ -262,11 +255,13 @@ void DeviceAdapterImpl::searchDeviceDone(const DeviceVector& devices) {
   devices_ = new_devices;
   pthread_mutex_unlock(&devices_mutex_);
 
-  listener_->onSearchDeviceDone(this);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onSearchDeviceDone(this);
 }
 
 void DeviceAdapterImpl::searchDeviceFailed(const SearchDeviceError& error) {
-  listener_->onSearchDeviceFailed(this, error);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onSearchDeviceFailed(this, error);
 }
 
 void DeviceAdapterImpl::setDeviceScanner(DeviceScanner* device_scanner) {
@@ -312,28 +307,33 @@ void DeviceAdapterImpl::disconnnectDone(const SessionID session_id) {
   pthread_mutex_lock(&connections_mutex_);
   connections_.erase(session_id);
   pthread_mutex_unlock(&connections_mutex_);
-  listener_->onDisconnectDone(this, session_id);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onDisconnectDone(this, session_id);
 }
 
 void DeviceAdapterImpl::dataReceiveDone(const SessionID session_id,
                                         RawMessageSptr message) {
-  listener_->onDataReceiveDone(this, session_id, message);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onDataReceiveDone(this, session_id, message);
 }
 
 void DeviceAdapterImpl::dataReceiveFailed(const SessionID session_id,
                                           const DataReceiveError& error) {
-  listener_->onDataReceiveFailed(this, session_id, error);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onDataReceiveFailed(this, session_id, error);
 }
 
 void DeviceAdapterImpl::dataSendDone(const SessionID session_id,
                                      RawMessageSptr message) {
-  listener_->onDataSendDone(this, session_id, message);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onDataSendDone(this, session_id, message);
 }
 
 void DeviceAdapterImpl::dataSendFailed(const SessionID session_id,
                                        RawMessageSptr message,
                                        const DataSendError& error) {
-  listener_->onDataSendFailed(this, session_id, message, error);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onDataSendFailed(this, session_id, message, error);
 }
 
 DeviceSptr DeviceAdapterImpl::findDevice(DeviceHandle device_handle) const {
@@ -351,7 +351,8 @@ void DeviceAdapterImpl::connectDone(const SessionID session_id) {
   ConnectionInfo& info = connections_[session_id];
   info.state = ConnectionInfo::ESTABLISHED;
   pthread_mutex_unlock(&connections_mutex_);
-  listener_->onConnectDone(this, session_id);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onConnectDone(this, session_id);
 }
 
 void DeviceAdapterImpl::connectFailed(const SessionID session_id,
@@ -359,7 +360,8 @@ void DeviceAdapterImpl::connectFailed(const SessionID session_id,
   pthread_mutex_lock(&connections_mutex_);
   connections_.erase(session_id);
   pthread_mutex_unlock(&connections_mutex_);
-  listener_->onConnectFailed(this, session_id, error);
+  for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it)
+    (*it)->onConnectFailed(this, session_id, error);
 }
 
 ConnectionSptr DeviceAdapterImpl::findEstablishedConnection(

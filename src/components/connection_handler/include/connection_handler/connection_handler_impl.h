@@ -71,7 +71,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Singletone instantiator.
      * \return pointer to ConnectionHandlerImpl instance.
      */
-    static ConnectionHandlerImpl* getInstance();
+    static ConnectionHandlerImpl* instance();
 
     /**
      * \brief Destructor

@@ -44,14 +44,14 @@
 namespace protocol_handler {
 /**
  * \class SmartDeviceLinkRawMessage
- * \brief Class-wraper for information about message for interchanging
+ * \brief Class-wrapper for information about message for interchanging
  * between components.
  */
 class RawMessage {
  public:
   /**
    * \brief Constructor
-   * \param connectionKey Identifier of connection within wich message
+   * \param connectionKey Identifier of connection within which message
    * is transferred
    * \param protocolVersion Version of protocol of the message
    * \param data Message string
@@ -63,12 +63,13 @@ class RawMessage {
   RawMessage(int connectionKey, unsigned int protocolVersion, int serialNumber,
              unsigned char* data, unsigned int dataSize);
 
+  bool operator ==(RawMessage &other)const;
+
   /**
    * \brief Destructor
    */
   ~RawMessage();
 
-  bool operator ==(const RawMessage &other);
   /**
    * \brief Getter for connection identifier
    */
@@ -94,6 +95,10 @@ class RawMessage {
    */
   unsigned int serial_number() const;
 
+  bool isWaiting() const;
+
+  void set_waiting(bool v) ;
+
  private:
   /**
    * \brief Connection Identifier
@@ -113,7 +118,7 @@ class RawMessage {
 
   /**
    * \brief Version of SmartDeviceLink protocol (currently 1,2)
-   * used for tranferring message.
+   * used for transferring message.
    */
   unsigned int protocol_version_;
   /**
@@ -121,6 +126,13 @@ class RawMessage {
    *
    */
   unsigned int serial_number_;
+
+  /**
+   * specifies current state of message in queue. if false message is "ready to be processed"
+   * otherwise it is "waiting for response"
+   *
+   */
+  bool waiting_;
 };
 }  // namespace protocol_handler
 

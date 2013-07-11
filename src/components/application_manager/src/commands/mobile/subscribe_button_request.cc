@@ -35,7 +35,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/Result.h"
 
 namespace application_manager {
 
@@ -51,31 +50,30 @@ SubscribeButtonRequest::~SubscribeButtonRequest() {
 }
 
 void SubscribeButtonRequest::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeButtonRequest::Run ");
+  LOG4CXX_INFO(logger_, "SubscribeButtonRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+      ApplicationManagerImpl::instance()->application(app_id));
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   const unsigned int btn_id = static_cast<unsigned int>
-                              ((*message_)[str::params][str::button_name].asInt());
+      ((*message_)[str::params][str::button_name].asInt());
+
   if (app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button " << btn_id);
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::SUBSCRIBED_ALREADY);
+                 mobile_apis::Result::SUBSCRIBED_ALREADY);
     return;
   }
 
   app->SubscribeToButton(btn_id);
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands

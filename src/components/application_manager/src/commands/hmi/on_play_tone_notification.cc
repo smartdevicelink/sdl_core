@@ -44,7 +44,8 @@ OnPlayToneNotification::~OnPlayToneNotification() {
 }
 
 void OnPlayToneNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnPlayToneNotification::Run ");
+  LOG4CXX_INFO(logger_, "OnPlayToneNotification::Run");
+
   SendNotification();
 }
 

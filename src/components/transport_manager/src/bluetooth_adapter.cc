@@ -254,11 +254,14 @@ BluetoothDeviceScanner::RfcommChannelVector BluetoothDeviceScanner::discoverSmar
 
     LOG4CXX_INFO(
         logger_,
-        "SmartDeviceLink service was discovered on device " << getUniqueDeviceId(device_address) << " at channel(s): " << rfcomm_channels_string.str().c_str());
+        "SmartDeviceLink service was discovered on device "
+            << getUniqueDeviceId(device_address) << " at channel(s): "
+            << rfcomm_channels_string.str().c_str());
   } else {
     LOG4CXX_INFO(
         logger_,
-        "SmartDeviceLink service was not discovered on device " << getUniqueDeviceId(device_address));
+        "SmartDeviceLink service was not discovered on device "
+            << getUniqueDeviceId(device_address));
   }
 
   return channels;
@@ -314,7 +317,7 @@ bool BluetoothDeviceScanner::waitForDeviceScanRequest() {
   return deviceScanRequested;
 }
 
-Error BluetoothDeviceScanner::init() {
+DeviceAdapter::Error BluetoothDeviceScanner::init() {
   const int thread_start_error = pthread_create(&thread_, 0,
                                                 &bluetoothDeviceScannerThread,
                                                 this);
@@ -326,10 +329,10 @@ Error BluetoothDeviceScanner::init() {
     LOG4CXX_ERROR(
         logger_,
         "Bluetooth device scanner thread start failed, error code " << thread_start_error);
-    return FAIL;
+    return DeviceAdapter::FAIL;
   }
 
-  return OK;
+  return DeviceAdapter::OK;
 }
 
 void BluetoothDeviceScanner::terminate() {
@@ -347,11 +350,11 @@ void BluetoothDeviceScanner::terminate() {
   }
 }
 
-Error BluetoothDeviceScanner::scan() {
+DeviceAdapter::Error BluetoothDeviceScanner::scan() {
   if ((!thread_started_) && shutdown_requested_) {
-    return BAD_STATE;
+    return DeviceAdapter::BAD_STATE;
   }
-  Error ret = OK;
+  DeviceAdapter::Error ret = DeviceAdapter::OK;
 
   pthread_mutex_lock(&device_scan_requested_mutex_);
 
@@ -361,7 +364,7 @@ Error BluetoothDeviceScanner::scan() {
     device_scan_requested_ = true;
     pthread_cond_signal(&device_scan_requested_cond_);
   } else {
-    ret = BAD_STATE;
+    ret = DeviceAdapter::BAD_STATE;
     LOG4CXX_INFO(logger_, "Device scan is currently in progress");
   }
 
@@ -459,18 +462,18 @@ BluetoothConnectionFactory::BluetoothConnectionFactory(
     : controller_(controller) {
 }
 
-Error BluetoothConnectionFactory::init() {
-  return OK;
+DeviceAdapter::Error BluetoothConnectionFactory::init() {
+  return DeviceAdapter::OK;
 }
 
-Error BluetoothConnectionFactory::createConnection(DeviceHandle device_handle,
+DeviceAdapter::Error BluetoothConnectionFactory::createConnection(DeviceHandle device_handle,
                                                    ApplicationHandle app_handle,
                                                    SessionID session_id) {
   BluetoothSocketConnection* connection(
       new BluetoothSocketConnection(device_handle, app_handle, session_id,
                                     controller_));
-  Error error = connection->start();
-  if (error != OK)
+  DeviceAdapter::Error error = connection->start();
+  if (error != DeviceAdapter::OK)
     delete connection;
   return error;
 }

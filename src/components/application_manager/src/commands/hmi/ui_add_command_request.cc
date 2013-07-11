@@ -44,7 +44,8 @@ UIAddCommandRequest::~UIAddCommandRequest() {
 }
 
 void UIAddCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run ");
+  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run");
+
   SendRequest();
 }
 

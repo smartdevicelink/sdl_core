@@ -44,7 +44,8 @@ UIGetSupportedLanguagesRequest::~UIGetSupportedLanguagesRequest() {
 }
 
 void UIGetSupportedLanguagesRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesRequest::Run ");
+  LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesRequest::Run");
+
   SendRequest();
 }
 

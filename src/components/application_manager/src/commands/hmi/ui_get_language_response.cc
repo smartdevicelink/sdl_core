@@ -46,6 +46,7 @@ UIGetLanguageResponse::~UIGetLanguageResponse() {
 
 void UIGetLanguageResponse::Run() {
   LOG4CXX_INFO(logger_, "UIGetLanguageResponse::Run");
+
   ApplicationManagerImpl::instance()->set_active_ui_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][hmi_response::language].asInt()));

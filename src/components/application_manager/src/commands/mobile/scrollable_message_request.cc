@@ -36,19 +36,20 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 void ScrollabeMessageRequest::Run() {
+  LOG4CXX_INFO(logger_, "ScrollabeMessageRequest::Run");
+
   ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id]));
 
   if (NULL == application_impl) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::
-                 Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -57,12 +58,12 @@ void ScrollabeMessageRequest::Run() {
   const int connectionKey =
     (*message_)[strings::params][strings::connection_key];
 
-  const unsigned int cmd_id = 106;
+  const unsigned int cmd_id = hmi_apis::FunctionID::UI_ScrollableMessage;
     ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connectionKey, correlationId),
       connectionKey, correlationId, cmd_id);
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(&(*message_));
+  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
 }
 
 }  // namespace commands

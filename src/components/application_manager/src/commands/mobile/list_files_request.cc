@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/list_files_request.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -46,7 +45,9 @@ ListFilesRequest::~ListFilesRequest() {
 }
 
 void ListFilesRequest::Run() {
-  SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+  LOG4CXX_INFO(logger_, "ListFilesRequest::Run");
+
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands

@@ -137,6 +137,8 @@ class SharedPtr {
   template<typename OtherObjectType>
   SharedPtr<ObjectType>& operator =(const SharedPtr<OtherObjectType>& Other);
 
+  bool operator ==(const SharedPtr<ObjectType>& Other) const;
+
   /**
    * @brief Member access operator.
    *
@@ -221,6 +223,12 @@ template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>&
 utils::SharedPtr<ObjectType>::operator=(const SharedPtr<ObjectType>& Other) {
   return operator=<ObjectType>(Other);
+}
+
+template<typename ObjectType>
+inline bool utils::SharedPtr<ObjectType>::operator ==(
+    const SharedPtr<ObjectType>& Other) const {
+  return (mObject == Other.mObject);
 }
 
 template<typename ObjectType>

@@ -31,11 +31,45 @@
  */
 
 #include "application_manager/message_helper.h"
-#include "application_manager/mobile_command_factory.h"
-#include "application_manager/hmi_command_factory.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
+
+const VehicleData MessageHelper::vehicle_data_ =
+{
+  {strings::gps,                      VehicleDataType::GPS},
+  {strings::speed,                    VehicleDataType::SPEED},
+  {strings::rpm,                      VehicleDataType::RPM},
+  {strings::fuel_level,               VehicleDataType::FUELLEVEL},
+  {strings::fuel_level_state,         VehicleDataType::FUELLEVEL_STATE},
+  {strings::instant_fuel_consumption, VehicleDataType::FUELCONSUMPTION},
+  {strings::external_temp,            VehicleDataType::EXTERNTEMP},
+  {strings::vin,                      VehicleDataType::VIN},
+  {strings::prndl,                    VehicleDataType::PRNDL},
+  {strings::tire_pressure,            VehicleDataType::TIREPRESSURE},
+  {strings::odometer,                 VehicleDataType::ODOMETER},
+  {strings::belt_status,              VehicleDataType::BELTSTATUS},
+  {strings::body_information,         VehicleDataType::BODYINFO},
+  {strings::device_status,            VehicleDataType::DEVICESTATUS},
+  {strings::e_call_info,              VehicleDataType::ECALLINFO},
+  {strings::airbag_status,            VehicleDataType::AIRBAGSTATUS},
+  {strings::emergency_event,          VehicleDataType::EMERGENCYEVENT},
+  {strings::cluster_mode_status,      VehicleDataType::CLUSTERMODESTATUS},
+  {strings::my_key,                   VehicleDataType::MYKEY},
+  {strings::driver_braking,           VehicleDataType::BRAKING},
+  {strings::wiper_status,             VehicleDataType::WIPERSTATUS},
+  {strings::head_lamp_status,         VehicleDataType::HEADLAMPSTATUS},
+  /*
+  NOT DEFINED in mobile API
+  {strings::gps,                      VehicleDataType::BATTVOLTAGE},
+  */
+  {strings::engine_torque,            VehicleDataType::ENGINETORQUE},
+  {strings::acc_pedal_pos,            VehicleDataType::ACCPEDAL},
+  {strings::steering_wheel_angle,     VehicleDataType::STEERINGWHEEL},
+};
+
 
 void MessageHelper::SendHMIStatusNotification(
           const ApplicationImpl& application_impl) {
@@ -58,11 +92,7 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
       application_impl.system_context();
 
-  CommandSharedPtr command = MobileCommandFactory::CreateCommand(&message);
-  command->Init();
-  // TODO(VS): run must return bool, so SendHMIStatusNotification must also return bool
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
 }
 
 void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
@@ -85,10 +115,7 @@ void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
     ++index;
   }
 
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
@@ -99,8 +126,6 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
                hmi_apis::FunctionID::BasicCommunication_OnAppRegistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
-
-
 
   message[strings::msg_params][strings::application][strings::app_name] =
       application_impl.name();
@@ -135,10 +160,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   message[strings::msg_params][strings::application][strings::app_type] =
       application_impl.app_types();
 
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -154,10 +176,11 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
 
   message[strings::msg_params][strings::reason] = reason;
 
-  CommandSharedPtr command = HMICommandFactory::CreateCommand(&message);
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
+}
+
+const VehicleData& MessageHelper::vehicle_data() {
+  return vehicle_data_;
 }
 
 } //  namespace application_manager

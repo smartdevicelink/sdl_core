@@ -43,10 +43,10 @@ namespace device_adapter {
 
 class ThreadedSocketConnection : public Connection {
  public:
-  Error sendData(RawMessageSptr message);
-  Error disconnect();
+  DeviceAdapter::Error sendData(RawMessageSptr message);
+  DeviceAdapter::Error disconnect();
 
-  Error start();
+  DeviceAdapter::Error start();
  protected:
   ThreadedSocketConnection(const DeviceHandle device_handle,
                            const ApplicationHandle app_handle,
@@ -80,7 +80,7 @@ class ThreadedSocketConnection : public Connection {
   void thread();
   void transmit();
   void finalise();
-  Error notify() const;
+  DeviceAdapter::Error notify() const;
   bool receive();
   bool send();
   bool clearNotificationPipe();

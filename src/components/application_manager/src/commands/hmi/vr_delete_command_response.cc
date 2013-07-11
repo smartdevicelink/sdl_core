@@ -43,7 +43,7 @@ VRDeleteCommandResponse::~VRDeleteCommandResponse() {
 }
 
 void VRDeleteCommandResponse::Run() {
-  LOG4CXX_INFO(logger_, "VRDeleteCommandResponse::Run ");
+  LOG4CXX_INFO(logger_, "VRDeleteCommandResponse::Run");
 }
 
 }  // namespace commands

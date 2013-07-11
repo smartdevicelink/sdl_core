@@ -50,9 +50,9 @@ class BluetoothDeviceScanner : public DeviceScanner {
   ~BluetoothDeviceScanner();
   void thread();
  protected:
-  virtual Error init();
+  virtual DeviceAdapter::Error init();
   virtual void terminate();
-  virtual Error scan();
+  virtual DeviceAdapter::Error scan();
  private:
 
   typedef std::vector<uint8_t> RfcommChannelVector;
@@ -137,8 +137,8 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
  public:
   BluetoothConnectionFactory(DeviceAdapterController* controller);
  protected:
-  virtual Error init();
-  virtual Error createConnection(DeviceHandle device_handle,
+  virtual DeviceAdapter::Error init();
+  virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle,
                                  ApplicationHandle app_handle,
                                  SessionID session_id);
   virtual ~BluetoothConnectionFactory();

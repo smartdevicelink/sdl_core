@@ -43,6 +43,8 @@ GetAppListResponse::~GetAppListResponse() {
 }
 
 void GetAppListResponse::Run() {
+  LOG4CXX_INFO(logger_, "GetAppListResponse::Run");
+
   SendResponse();
 }
 

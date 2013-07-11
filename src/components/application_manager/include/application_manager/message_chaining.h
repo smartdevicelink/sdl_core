@@ -33,16 +33,22 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CHAINING_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CHAINING_IMPL_H_
 
-#include "interfaces/v4_protocol_v2_0_revT.h"
+#include "interfaces/MOBILE_API.h"
 #include "SmartObjects/CSmartObject.hpp"
 
 namespace application_manager {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-namespace mobile_api = NsSmartDeviceLinkRPC::V2;
+namespace mobile_api = mobile_apis;
 
 /**
- * @brief Messagechaining class is intended to
+ * @brief Messagechaining class
+ *
+ * Class used to store temporary Mobile request data, connection key,
+ * because of HMI response doesn't contain it, but it is required for
+ * Mobile response and correlation Id.
+ * Class provides also possibility to store intermediate HMI response
+ * results required by Mobile response.
  */
 class MessageChaining {
  public:

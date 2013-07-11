@@ -35,7 +35,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -49,22 +50,23 @@ AddCommandRequest::~AddCommandRequest() {
 }
 
 void AddCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "AddCommandRequest::Run ");
+  LOG4CXX_INFO(logger_, "AddCommandRequest::Run");
 
   ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application((*message_)[strings::params][strings::connection_key]));
+      ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (app->
       FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt())) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
@@ -78,8 +80,14 @@ void AddCommandRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
-    // TODO(DK): HMI Request Id
-    const int ui_cmd_id = 1;
+    if (NULL == p_smrt_ui) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+      return;
+    }
+
+    const int ui_cmd_id = hmi_apis::FunctionID::UI_AddCommand;
+
     (*p_smrt_ui)[strings::params][strings::function_id] =
       ui_cmd_id;
 
@@ -105,8 +113,13 @@ void AddCommandRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
     smart_objects::CSmartObject* p_smrt_vr  = new smart_objects::CSmartObject();
 
-    // TODO(DK): HMI Request Id
-    const int vr_cmd_id = 2;
+    if (NULL == p_smrt_vr) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+      return;
+    }
+
+    const int vr_cmd_id = hmi_apis::FunctionID::VR_AddCommand;
     (*p_smrt_vr)[strings::params][strings::function_id] =
       vr_cmd_id;
 
@@ -125,7 +138,7 @@ void AddCommandRequest::Run() {
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
         connection_key, correlation_id, vr_cmd_id, &(*message_));
 
-    ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_vr);
+    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
   }
 }
 

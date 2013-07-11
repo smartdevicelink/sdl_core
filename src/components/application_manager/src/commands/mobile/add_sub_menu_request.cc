@@ -35,7 +35,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -48,28 +47,31 @@ AddSubMenuRequest::~AddSubMenuRequest() {
 }
 
 void AddSubMenuRequest::Run() {
+  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
+
   ApplicationImpl* application =
       static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
   if (!application) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-
   if (application->FindSubMenu(
       (*message_)[strings::msg_params][strings::menu_id].asInt())) {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::INVALID_ID);
-
+    LOG4CXX_ERROR(logger_, "INVALID_ID");
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
   if (application->IsSubMenuNameAlreadyExist(
       (*message_)[strings::msg_params][strings::menu_name].asString())) {
+    LOG4CXX_ERROR(logger_, "DUPLICATE_NAME");
     SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::DUPLICATE_NAME);
+                 mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
 
@@ -83,7 +85,7 @@ void AddSubMenuRequest::Run() {
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, corellation_id, hmi_request_id, &(*message_));
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }
 
 }  // namespace commands

@@ -44,7 +44,8 @@ UIChangeRegistrationRequest::~UIChangeRegistrationRequest() {
 }
 
 void UIChangeRegistrationRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIChangeRegistrationRequest::Run ");
+  LOG4CXX_INFO(logger_, "UIChangeRegistrationRequest::Run");
+
   SendRequest();
 }
 

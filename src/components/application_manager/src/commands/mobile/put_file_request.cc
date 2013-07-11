@@ -48,13 +48,15 @@ PutFileRequest::~PutFileRequest() {
 }
 
 void PutFileRequest::Run() {
+  LOG4CXX_INFO(logger_, "PutFileRequest::Run");
+
   ApplicationImpl* application =
     static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-                                  application((*message_)[strings::params][strings::connection_key]));
+        application((*message_)[strings::params][strings::connection_key]));
 
   if (!application) {
-    SendResponse(false,
-                 NsSmartDeviceLinkRPC::V2::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -82,12 +84,12 @@ void PutFileRequest::Run() {
                            file_data)) {
       application->AddFile(sync_file_name, is_persistent_file);
 
-      SendResponse(true, NsSmartDeviceLinkRPC::V2::Result::SUCCESS);
+      SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
-      SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::GENERIC_ERROR);
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   }
 }
 
