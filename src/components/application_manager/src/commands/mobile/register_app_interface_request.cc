@@ -133,7 +133,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   mobile_apis::Result::eType result =  mobile_apis::Result::SUCCESS;
 
-  smart_objects::CSmartObject response_params;
+  smart_objects::CSmartObject* result_so = new smart_objects::CSmartObject;
+  // TODO(VS) : add null check.
+  smart_objects::CSmartObject& response_params = *result_so;
 
   ApplicationManagerImpl* app_manager =  ApplicationManagerImpl::instance();
 
@@ -161,27 +163,44 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
-  response_params[strings::msg_params][hmi_response::display_capabilities] =
+  if (app_manager->display_capabilities()) {
+    response_params[strings::msg_params][hmi_response::display_capabilities] =
       app_manager->display_capabilities();
-  response_params[strings::msg_params][hmi_response::button_capabilities] =
+  }
+  if (app_manager->button_capabilities()) {
+    response_params[strings::msg_params][hmi_response::button_capabilities] =
       app_manager->button_capabilities();
-  response_params[strings::msg_params][hmi_response::soft_button_capabilities] =
+  }
+  if (app_manager->soft_button_capabilities()) {
+    response_params[strings::msg_params][hmi_response::soft_button_capabilities] =
       app_manager->soft_button_capabilities();
-  response_params[strings::msg_params][hmi_response::preset_bank_capabilities] =
+  }
+  if (app_manager->preset_bank_capabilities()) {
+    response_params[strings::msg_params][hmi_response::preset_bank_capabilities] =
       app_manager->preset_bank_capabilities();
-  response_params[strings::msg_params][hmi_response::hmi_zone_capabilities] =
+  }
+  if (app_manager->hmi_zone_capabilities()) {
+    response_params[strings::msg_params][hmi_response::hmi_zone_capabilities] =
       app_manager->hmi_zone_capabilities();
-
-  response_params[strings::msg_params][strings::speech_capabilities] =
+  }
+  if (app_manager->speech_capabilities()) {
+    response_params[strings::msg_params][strings::speech_capabilities] =
       app_manager->speech_capabilities();
-  response_params[strings::msg_params][strings::vr_capabilities] = app_manager
+  }
+  if (app_manager->vr_capabilities()) {
+    response_params[strings::msg_params][strings::vr_capabilities] = app_manager
       ->vr_capabilities();
-  response_params[strings::msg_params][strings::audio_pass_thru_capabilities] =
+  }
+  if (app_manager->audio_pass_thru_capabilities()) {
+    response_params[strings::msg_params][strings::audio_pass_thru_capabilities] =
       app_manager->audio_pass_thru_capabilities();
-  response_params[strings::msg_params][hmi_response::vehicle_type] = app_manager
+  }
+  if (app_manager->vehicle_type()) {
+    response_params[strings::msg_params][hmi_response::vehicle_type] = app_manager
       ->vehicle_type();
+  }
 
-  SendResponse(true, result, "", &response_params);
+  SendResponse(true, result, "", result_so);
 }
 
 }  // namespace commands

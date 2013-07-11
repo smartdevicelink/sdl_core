@@ -366,6 +366,7 @@ MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
   dataForSending[offset++] = jsonSize >> 8;
   dataForSending[offset++] = jsonSize;
 
+  printf("\n\n\n%s", message->json_message().c_str());
   memcpy(dataForSending + offset, message->json_message().c_str(), jsonSize);
 
   if (message->has_binary_data()) {

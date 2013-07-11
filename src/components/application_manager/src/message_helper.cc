@@ -72,7 +72,12 @@ const VehicleData MessageHelper::vehicle_data_ = {
 
 void MessageHelper::SendHMIStatusNotification(
   const ApplicationImpl& application_impl) {
-  smart_objects::CSmartObject message;
+  smart_objects::CSmartObject* notification = new smart_objects::CSmartObject;
+  if (!notification) {
+    // TODO(VS): please add logger.
+    return;
+  }
+  smart_objects::CSmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     mobile_api::FunctionID::OnHMIStatusID;
@@ -91,12 +96,17 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
     application_impl.system_context();
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
+  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
   const std::set<connection_handler::Device>& device_list) {
-  smart_objects::CSmartObject message;
+  smart_objects::CSmartObject* notification = new smart_objects::CSmartObject;
+  if (!notification) {
+    // TODO(VS): please add logger.
+    return;
+  }
+  smart_objects::CSmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated;
@@ -115,12 +125,17 @@ void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
     ++index;
   }
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
+  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   const ApplicationImpl& application_impl) {
-  smart_objects::CSmartObject message;
+  smart_objects::CSmartObject* notification = new smart_objects::CSmartObject;
+  if (!notification) {
+    // TODO(VS): please add logger.
+    return;
+  }
+  smart_objects::CSmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_OnAppRegistered;
@@ -160,13 +175,18 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   message[strings::msg_params][strings::application][strings::app_type] =
     application_impl.app_types();
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
+  ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   int connection_key,
   mobile_api::AppInterfaceUnregisteredReason::eType reason) {
-  smart_objects::CSmartObject message;
+  smart_objects::CSmartObject* notification = new smart_objects::CSmartObject;
+  if (!notification) {
+    // TODO(VS): please add logger.
+    return;
+  }
+  smart_objects::CSmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     mobile_api::FunctionID::OnAppInterfaceUnregisteredID;
@@ -177,7 +197,7 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
 
   message[strings::msg_params][strings::reason] = reason;
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(&message);
+  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 const VehicleData& MessageHelper::vehicle_data() {
