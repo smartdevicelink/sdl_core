@@ -56,6 +56,8 @@ void CommandNotificationImpl::Run() {
 }
 
 void CommandNotificationImpl::SendNotification() {
+  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 

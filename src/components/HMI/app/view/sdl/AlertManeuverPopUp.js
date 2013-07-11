@@ -169,15 +169,7 @@ SDL.AlertManeuverPopUp = Em.ContainerView.create( {
     AlertManeuverActive: function( message ) {
         var self = this;
 
-        // play audio alert
-        if( message.playTone ){
-            SDL.Audio.play( 'audio/alert.wav' );
-        }
-
         this.addSoftButtons( message.softButtons );
-        if( message.ttsChunks ){
-            SDL.SDLModel.onPrompt( message.ttsChunks.ttsChunks );
-        }
 
         this.set( 'appName', SDL.SDLController.getApplicationModel( message.appId ).appName );
 

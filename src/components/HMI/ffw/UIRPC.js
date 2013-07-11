@@ -167,7 +167,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 SDL.SDLController.getApplicationModel( request.params.appId ).onSDLUIShow( request.params );
 
-                this.sendResponse(request.id, 0, 'Show');
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -333,30 +333,6 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 break;
             }
-            case "UI.ShowConstantTBT": {
-
-                SDL.SDLModel.tbtActivate( request.params );
-
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                break;
-            }
-            case "UI.UpdateTurnList": {
-
-                SDL.SDLModel.tbtTurnListUpdate( request.params );
-
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                break;
-            }
-            case "UI.AlertManeuver": {
-
-                SDL.SDLModel.onUIAlertManeuver( request.params );
-
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                break;
-            }
             case "UI.DialNumber": {
 
                 SDL.SDLModel.dialNumber( request.params );
@@ -473,28 +449,10 @@ FFW.UI = FFW.RPCObserver.create( {
     },
 
     /**
-     * Updated version of response
-     * with no additional params
-     *
-     * @param {Number} responseId
-     * @param {Number} codeId
-     * @param {String} responseMethod
-     */
-    sendResponse: function( responseId, codeId, responseMethod ) {
-        var JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": responseId,
-                "result": {
-                    "code": codeId,
-                    "method" : "UI." + responseMethod
-            }
-        };
-
-        this.client.send( JSONMessage );
-    },
-
-    /**
      * send response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
      */
     sendUIResult: function( resultCode, id, method ) {
 
@@ -516,7 +474,9 @@ FFW.UI = FFW.RPCObserver.create( {
     },
 
     /**
-     * send response from onRPCRequest
+     * send response from onRPCRequest     
+     * @param {Number} resultCode
+     * @param {Number} id
      */
     alertResponse: function( resultCode, id ) {
 
@@ -537,6 +497,12 @@ FFW.UI = FFW.RPCObserver.create( {
         }
     },
 
+    /**
+     * send response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} sliderRequestId
+     * @param {Number} sliderPosition
+     */
     sendSliderResult: function( resultCode, sliderRequestId, sliderPosition ) {
         var JSONMessage = {
             "jsonrpc": "2.0",
@@ -556,6 +522,8 @@ FFW.UI = FFW.RPCObserver.create( {
 
     /**
      * send notification when command was triggered
+     * @param {Number} commandId
+     * @param {Number} appId
      */
     onCommand: function( commandId, appId ) {
         Em.Logger.log( "FFW.UI.onCommand" );
@@ -573,6 +541,8 @@ FFW.UI = FFW.RPCObserver.create( {
 
     /**
      * send notification when command was triggered
+     * @param {Number} softButtonID
+     * @param {Number} appId
      */
     onCommandSoftButton: function( softButtonID, appId ) {
         Em.Logger.log( "FFW.UI.onCommand" );
@@ -590,6 +560,9 @@ FFW.UI = FFW.RPCObserver.create( {
 
     /**
      * send notification when command was triggered
+     * @param {Number} resultCode
+     * @param {Number} performInteractionRequestId
+     * @param {Number} commandId
      */
     interactionResponse: function( resultCode, performInteractionRequestId, commandId ) {
         Em.Logger.log( "FFW.UI.PerformInteractionResponse" );
@@ -613,6 +586,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
     /**
      * send notification when DriverDistraction PopUp is visible
+     * @param {String} driverDistractionState
      */
     onDriverDistraction: function( driverDistractionState ) {
         Em.Logger.log( "FFW.UI.DriverDistraction" );
@@ -630,6 +604,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
     /**
      * Notifies if system context is changed
+     * @param {String} systemContextValue
      */
     OnSystemContext: function( systemContextValue ) {
         Em.Logger.log( "FFW.UI.OnSystemContext" );
@@ -647,6 +622,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
     /**
      * Notifies if application was activated
+     * @param {String} appName
      */
     OnAppActivated: function( appName ) {
         Em.Logger.log( "FFW.UI.OnAppActivated" );
@@ -664,6 +640,8 @@ FFW.UI = FFW.RPCObserver.create( {
 
     /**
      * Notifies if device was choosed
+     * @param {String} deviceName
+     * @param {Number} appId
      */
     OnDeviceChosen: function(deviceName, appId) {
         Em.Logger.log( "FFW.UI.OnDeviceChosen" );
@@ -684,6 +662,7 @@ FFW.UI = FFW.RPCObserver.create( {
 
     /**
      * Notifies if sdl UI components language was changed
+     * @param {String} lang
      */
     OnLanguageChange: function( lang ) {
         Em.Logger.log( "FFW.UI.OnLanguageChange" );
@@ -694,24 +673,6 @@ FFW.UI = FFW.RPCObserver.create( {
             "method": "UI.OnLanguageChange",
             "params": {
                 "hmiDisplayLanguage": lang
-            }
-        };
-        this.client.send( JSONMessage );
-    },
-
-    /**
-     * Notifies if TBTClientState was activated
-     */
-    onTBTClientState: function( state, appId ) {
-        Em.Logger.log( "FFW.UI.OnTBTClientState" );
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnTBTClientState",
-            "params": {
-                "state": state,
-                "appId": appId
             }
         };
         this.client.send( JSONMessage );

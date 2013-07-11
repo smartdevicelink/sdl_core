@@ -40,8 +40,6 @@
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
-#include "interfaces/HMI_API.h"
-#include "interfaces/HMI_API_schema.h"
 #include "config_profile/profile.h"
 #include "utils/threads/thread.h"
 #include "utils/logger.h"
@@ -76,7 +74,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     from_mobile_thread_(NULL),
     to_mobile_thread_(NULL),
     from_hmh_thread_(NULL),
-    to_hmh_thread_(NULL) {
+    to_hmh_thread_(NULL),
+    hmi_so_factory_(NULL) {
   from_mobile_thread_ = new threads::Thread(
     "application_manager::FromMobileThreadImpl",
     new FromMobileThreadImpl(this));
@@ -112,9 +111,10 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
   }
   LOG4CXX_INFO(logger_, "Starting thread with stack size " <<
                profile::Profile::instance()->thread_min_stach_size());
-  if (!thread->startWithOptions(
+  if (!thread->start()) {
+    /*startWithOptions(
         threads::ThreadOptions(
-          profile::Profile::instance()->thread_min_stach_size()))) {
+          profile::Profile::instance()->thread_min_stach_size()))*/
     LOG4CXX_ERROR(logger_, "Failed to start thread");
     return false;
   }
@@ -309,8 +309,8 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4444;
   so_to_send[jhs::S_MSG_PARAMS] =
     smart_objects::CSmartObject(smart_objects::SmartType_Map);
-  hmi_apis::HMI_API factory;
-  //factory.attachSchema(so_to_send);
+
+  //  ApplicationManagerImpl::hmi_so_factory_.attachSchema(so_to_send);
 
   ManageHMICommand(is_vr_ready);
 }
@@ -586,6 +586,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
 void ApplicationManagerImpl::SendMessageToHMI(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToHMI");
   DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
@@ -602,6 +603,10 @@ void ApplicationManagerImpl::SendMessageToHMI(
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
+
+  hmi_so_factory().attachSchema(*message);
+  LOG4CXX_INFO(logger_, "Attached schema to message, result if valid: "
+               << message->isValid());
 
   if (!ConvertSOtoMessage(*message, *message_to_send)) {
     LOG4CXX_WARN(logger_,
@@ -681,9 +686,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       LOG4CXX_INFO(logger_, "Convertion result: " <<
                    result << " function id " <<
                    output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-      /*hmi_apis::HMI_API factory;
-      factory.attachSchema(output);
-      LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());*/
+      hmi_so_factory().attachSchema(output);
+      LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());
       break;
     }
     default:
@@ -808,6 +812,13 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
   if (!ManageHMICommand(smart_object)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
+}
+
+hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() {
+  if (!hmi_so_factory_) {
+    hmi_so_factory_ = new hmi_apis::HMI_API;
+  }
+  return *hmi_so_factory_;
 }
 
 }  // namespace application_manager

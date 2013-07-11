@@ -47,6 +47,8 @@
 #include "connection_handler/device.h"
 #include "request_watchdog/watchdog_subscriber.h"
 #include "interfaces/HMI_API.h"
+#include "formatters/CSmartFactory.hpp"
+#include "interfaces/HMI_API_schema.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -367,6 +369,7 @@ class ApplicationManagerImpl : public ApplicationManager
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
+    hmi_apis::HMI_API& hmi_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
     void CreatePoliciesManager(PoliciesManager* managaer);
@@ -438,6 +441,8 @@ class ApplicationManagerImpl : public ApplicationManager
     friend class FromHMHThreadImpl;
     threads::Thread* to_hmh_thread_;
     friend class ToHMHThreadImpl;
+
+    hmi_apis::HMI_API* hmi_so_factory_;
 
     static log4cxx::LoggerPtr                     logger_;
 

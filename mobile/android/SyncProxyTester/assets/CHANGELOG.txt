@@ -1,3 +1,6 @@
+[CW28]
+* Cherry-pick Ford's changes: generate test error report with actual and expected responses.
+
 [CW25]
 + ModuleTest can run tests from directory.
 * Rename MakeMeFeelGood request => GenericRequest.

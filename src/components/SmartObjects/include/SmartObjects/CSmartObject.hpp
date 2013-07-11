@@ -554,7 +554,7 @@ namespace NsSmartDeviceLink
              *
              * This method does not automatically convert the object to a map or
              * add elements. If this object is not a map or it does not contain
-             * key then null object is returned.
+             * key then invalid object is returned.
              *
              * @param Key Key of an element.
              *
@@ -592,11 +592,18 @@ namespace NsSmartDeviceLink
              * @{
              */
             /**
-             * @brief Validates object according to attached schema
+             * @brief Validates object according to attached schema.
              *
-             * @return bool
+             * @return bolean validation result
              **/
-            Errors::eType isValid();
+            bool isValid();
+
+            /**
+             * @brief Validates object according to attached schema.
+             *
+             * @return Result of validation.
+             */
+            Errors::eType validate();            
 
             /**
              * @brief Sets new schema

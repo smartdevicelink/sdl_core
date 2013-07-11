@@ -65,14 +65,19 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
   Json::Value msg_params_json(Json::objectValue);
   formatted_object.getSchema().unapplySchema(formatted_object);
 
-  bool result = formatted_object.keyExists(strings::S_MSG_PARAMS);
-  if (true == result) {
+  bool result = true;
+  bool is_message_params = formatted_object.keyExists(strings::S_MSG_PARAMS);
+  bool empty_message_params = true;
+  if (true == is_message_params) {
     const NsSmartObjects::CSmartObject &msg_params =
         formatted_object.getElement(strings::S_MSG_PARAMS);
 
     result = (NsSmartObjects::SmartType_Map == msg_params.getType());
     if (true == result) {
       objToJsonValue(msg_params, msg_params_json);
+    }
+    if (0 < msg_params.length()) {
+      empty_message_params = false;
     }
   }
 
@@ -93,7 +98,9 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
         const std::string message_type = message_type_object;
 
         if (kRequest == message_type) {
-          root[kParams] = msg_params_json;
+          if (false == empty_message_params) {
+            root[kParams] = msg_params_json;
+          }
           result = result && SetMethod(params, root);
           result = result && SetId(params, root);
         } else if (kResponse == message_type) {
@@ -116,8 +123,18 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::CSmartObject &obj,
         } else if (kNotification == message_type) {
           root[kParams] = msg_params_json;
           result = result && SetMethod(params, root);
-        } else {
-          result = false;
+        } else if (kErrorResponse == message_type) {
+          result = result && SetId(params, root);
+          result = result && SetMethod(params, root[kError][kData]);
+          result = result && SetMessage(params, root[kError]);
+
+          const NsSmartObjects::CSmartObject &code = params.getElement(
+                strings::kCode);
+          if (NsSmartObjects::SmartType_Integer != code.getType()) {
+            result = false;
+          } else {
+            root[kError][kCode] = code.asInt();
+          }
         }
       }
     }
@@ -161,6 +178,23 @@ bool FormatterJsonRpc::SetId(const NsSmartObjects::CSmartObject &params,
   return result;
 }
 
-} // namespace Formatters
-} // namespace NsJSONHandler
-} // namespace NsSmartDeviceLink
+bool FormatterJsonRpc::SetMessage(const NsSmartObjects::CSmartObject &params,
+                                  Json::Value &message_container) {
+  bool result = false;
+
+  if (true == params.keyExists(strings::kMessage)) {
+    const NsSmartObjects::CSmartObject &message = params.getElement(
+        strings::kMessage);
+
+    if (NsSmartObjects::SmartType_String == message.getType()) {
+       message_container[kMessage] = message.asString();
+      result = true;
+    }
+  }
+
+  return result;
+}
+
+}  // namespace Formatters
+}  // namespace NsJSONHandler
+}  // namespace NsSmartDeviceLink

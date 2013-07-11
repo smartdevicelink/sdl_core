@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,37 +31,61 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/command_impl.h"
+#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_FORMATTERS_COMMANDS_H_
+#define TEST_COMPONENTS_APPLICATION_MANAGER_FORMATTERS_COMMANDS_H_
 
-namespace application_manager {
+#include <string>
+#include <iostream>
 
-namespace commands {
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
+//#include "application_manager/mobile_command_factory.h"
+#include "utils/shared_ptr.h"
 
-const int CommandImpl::hmi_protocol_type_ = 1;
-const int CommandImpl::mobile_protocol_type_ = 0;
-const int CommandImpl::protocol_version_ = 2;
+//#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+//#include "formatters/formatter_json_rpc.h"
 
-CommandImpl::CommandImpl(const MessageSharedPtr& message)
-: message_(message) {
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/MOBILE_API_schema.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/HMI_API_schema.h"
+
+#include "utils/threads/thread.h"
+
+namespace test_command {
+
+class SomeClass : public threads::ThreadDelegate {
+  public:
+    void threadMain();
+};
+
+void SomeClass::threadMain() {
+  hmi_apis::HMI_API factory;
+  while (1) {
+    std::cout << "1" << std::endl;
+  }
 }
 
-CommandImpl::~CommandImpl() {
+}
+/*namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
+*/
+TEST(generated_factory, create) {
+  threads::Thread* thread = new threads::Thread(
+    "application_manager::SomeClass",
+    new test_command::SomeClass);
+
+  if (!thread->startWithOptions(
+        threads::ThreadOptions(16384))) {
+    std::cout << "Something went wrong with thread." << std::endl;
+    return;
+  }
+
+  sleep(2);
+  thread->stop();
+
 }
 
-bool CommandImpl::Init() {
-  return true;
-}
-
-bool CommandImpl::CleanUp() {
-  return true;
-}
-
-void CommandImpl::Run() {
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
+#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_FORMATTERS_COMMANDS_H_

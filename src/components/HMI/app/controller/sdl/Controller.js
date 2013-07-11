@@ -182,7 +182,7 @@ SDL.SDLController = Em.Object.create({
      * @param {String}
      */
     tbtClientStateSeleced: function(state) {
-        FFW.UI.onTBTClientState(state, SDL.SDLAppController.model.appId);
+        FFW.Navigation.onTBTClientState(state, SDL.SDLAppController.model.appId);
     },
 
     /**
@@ -337,7 +337,8 @@ SDL.SDLController = Em.Object.create({
      */
     onGetDeviceList: function() {
         SDL.States.goToStates('info.devicelist');
-        FFW.BasicCommunication.getDeviceList();
+        //FFW.BasicCommunication.getDeviceList();
+        FFW.BasicCommunication.StartDeviceDiscovery();
     },
 
     /**
