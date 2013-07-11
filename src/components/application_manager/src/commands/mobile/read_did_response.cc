@@ -65,7 +65,7 @@ void ReadDIDResponse::Run() {
       correlation_id)) {
 
     const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
+      (*message_)[strings::params][hmi_response::code].asInt();
     if (true == code) {
       (*message_)[strings::params][strings::success] = true;
       (*message_)[strings::params][strings::result_code] =

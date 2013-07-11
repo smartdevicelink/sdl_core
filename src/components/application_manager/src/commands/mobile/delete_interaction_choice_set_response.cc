@@ -62,7 +62,7 @@ void DeleteInteractionChoiceSetResponse::Run() {
     (*message_)[strings::params][strings::correlation_id].asLong();
 
   const int code =
-    (*message_)[strings::msg_params][hmi_response::code].asInt();
+    (*message_)[strings::params][hmi_response::code].asInt();
 
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(correlation_id)) {

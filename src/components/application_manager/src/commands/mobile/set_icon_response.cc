@@ -69,7 +69,7 @@ void SetIconResponse::Run() {
 
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(hmi_request_id)) {
-    if ((*message_)[strings::msg_params][hmi_response::code].asInt()) {
+    if ((*message_)[strings::params][hmi_response::code].asInt()) {
       ApplicationImpl* app = static_cast<ApplicationImpl*>(
           ApplicationManagerImpl::instance()->
           application(data[strings::msg_params][strings::app_id]));

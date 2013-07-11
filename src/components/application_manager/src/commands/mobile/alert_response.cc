@@ -68,7 +68,7 @@ void AlertResponse::Run() {
 
     // TODO (DK): correct mobile code
     const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
+      (*message_)[strings::params][hmi_response::code].asInt();
 
     const long mobile_correlation_id = ApplicationManagerImpl::instance()->
         GetMobilecorrelation_id(correlation_id);

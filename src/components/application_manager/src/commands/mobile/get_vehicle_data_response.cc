@@ -66,7 +66,7 @@ void GetVehicleDataResponse::Run() {
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
     const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
+      (*message_)[strings::params][hmi_response::code].asInt();
 
     if (code) {
       (*message_)[strings::msg_params][strings::success] = true;
