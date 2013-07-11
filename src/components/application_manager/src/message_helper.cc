@@ -70,7 +70,6 @@ const VehicleData MessageHelper::vehicle_data_ =
   {strings::steering_wheel_angle,     VehicleDataType::STEERINGWHEEL},
 };
 
-
 void MessageHelper::SendHMIStatusNotification(
           const ApplicationImpl& application_impl) {
   smart_objects::CSmartObject message;
@@ -182,5 +181,33 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
 const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
+
+smart_objects::CSmartObject* MessageHelper::CreateGetDeviceListResponse(
+    const std::set<connection_handler::Device>& devices)
+{
+  smart_objects::CSmartObject* response  = new smart_objects::CSmartObject();
+
+  if (NULL == response) {
+    return NULL;
+  }
+
+  int index = 0;
+
+  if (!devices.empty())  {
+    for (std::set<connection_handler::Device>::iterator it = devices.begin();
+        devices.end() != it; ++it) {
+      (*response)[strings::msg_params]
+                  [strings::device_list]
+                   [index][strings::name] = (*it).user_friendly_name();
+      (*response)[strings::msg_params]
+                  [strings::device_list]
+                   [index][strings::id] = (*it).device_handle();
+      ++index;
+    }
+  }
+
+  return response;
+}
+
 
 } //  namespace application_manager

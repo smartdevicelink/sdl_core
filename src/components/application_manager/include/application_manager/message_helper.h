@@ -162,6 +162,16 @@ class MessageHelper {
    */
   static const VehicleData& vehicle_data();
 
+  /*
+   * @brief Prepare GetDeviceListResponse
+   *
+   *
+   * @param devices Devices list
+   *
+   */
+  smart_objects::CSmartObject* CreateGetDeviceListResponse(
+      const std::set<connection_handler::Device>& devices);
+
  private:
    MessageHelper();
 
