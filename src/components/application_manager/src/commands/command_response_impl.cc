@@ -67,7 +67,6 @@ void CommandResponseImpl::SendResponse(bool success) {
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   (*message_)[strings::msg_params][strings::correlation_id] =
       mobile_correlation_id;
-  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
 
   if(success) {
     (*message_)[strings::msg_params][strings::success] = true;

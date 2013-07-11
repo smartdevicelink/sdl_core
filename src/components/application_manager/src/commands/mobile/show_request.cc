@@ -35,6 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -61,8 +62,6 @@ void ShowRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-      hmi_apis::FunctionID::UI_Show;
-
 
   smart_objects::CSmartObject msg_params;
   msg_params = (*message_)[strings::msg_params];
@@ -110,8 +109,7 @@ void ShowRequest::Run() {
 
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,
-                   msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true);
 
   MessageSharedPtr persistentData =
       new smart_objects::CSmartObject((*message_)[strings::msg_params]);
