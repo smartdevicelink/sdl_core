@@ -54,13 +54,22 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
  public:
   virtual ~MockDeviceAdapter();
 
+  struct listenerData_t {
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    int sockfd;
+    bool active;
+  };
  protected:
 
   class MockDevice : public Device {
     pthread_t workerThread;
+    pthread_mutex_t device_started_mutex;
+    listenerData_t listener;
    public:
     MockDevice(const char *name) : Device(name), workerThread(0) { }
-    void start(int socket_fd);
+    void start();
+    void stop();
   };
 
    virtual DeviceType getDeviceType() const;
@@ -77,7 +86,7 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
        const DeviceHandle device_handle) const;
 
    virtual void mainThread();
-
+public:
    void addDevice(const char *name);
 };
 

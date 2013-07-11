@@ -15,7 +15,8 @@ install_manifest.txt
 *.kdev4
 .project
 .cproject
-*.*~
+*~
+*.log
 
 # ctags-generated
 tags

@@ -485,7 +485,6 @@ DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterBySession(
   LOG4CXX_INFO(logger_, "Add adapter by session called " << session_id);
   std::map<SessionID, DeviceAdapter *>::iterator it = session_to_adapter_map_
       .find(session_id);
-
   if (it != session_to_adapter_map_.end()) {
     LOG4CXX_INFO(logger_, "Device adapter found");
     return (*it).second;

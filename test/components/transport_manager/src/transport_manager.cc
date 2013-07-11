@@ -125,7 +125,6 @@ class MyListener : public TransportManagerListenerImpl {
                          const transport_manager::SessionID session_id,
                          const RawMessageSptr data_container) {
     flag = true;
-
   }
 };
 
@@ -144,6 +143,8 @@ TEST(TransportManagerImpl, searchDevice)
 
   mock_da->init(new DeviceHandleGeneratorImpl(),
       NULL);
+
+  mock_da->addDevice("hello");
 
   const unsigned char data[100] = {99};
   utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, const_cast<unsigned char *>(data), 100);
@@ -164,10 +165,7 @@ TEST(TransportManagerImpl, searchDevice)
   while(!flag) {}
   flag = false;
 
-
   tm->sendMessageToDevice(srm);
-
   while(!flag) {}
   flag = false;
-
 }
