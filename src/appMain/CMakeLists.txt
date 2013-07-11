@@ -1,6 +1,7 @@
 set(LIBRARIES
   ApplicationManager
   HMI_API
+  MOBILE_API
   SmartObjects
   formatters
   ProtocolHandler

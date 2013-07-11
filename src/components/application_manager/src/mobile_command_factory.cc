@@ -122,8 +122,8 @@
 namespace application_manager {
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+  const MessageSharedPtr& message) {
+  CommandSharedPtr command;
 
   switch ((*message)[strings::params][strings::function_id].asInt()) {
     case mobile_apis::FunctionID::RegisterAppInterfaceID: {
@@ -132,7 +132,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::RegisterAppInterfaceRequest(message));
       } else {
         command.reset(
-            new commands::RegisterAppInterfaceResponse(message));
+          new commands::RegisterAppInterfaceResponse(message));
       }
       break;
     }
@@ -142,7 +142,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::UnregisterAppInterfaceRequest(message));
       } else {
         command.reset(
-            new commands::UnregisterAppInterfaceResponse(message));
+          new commands::UnregisterAppInterfaceResponse(message));
       }
       break;
     }
@@ -150,7 +150,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::SetGlobalPropertiesResponse(message));
+          new commands::SetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::SetGlobalPropertiesRequest(message));
       }
@@ -160,7 +160,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::ResetGlobalPropertiesResponse(message));
+          new commands::ResetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::ResetGlobalPropertiesRequest(message));
       }
@@ -197,7 +197,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::DeleteInteractionChoiceSetResponse(message));
+          new commands::DeleteInteractionChoiceSetResponse(message));
       } else {
         command.reset(new commands::DeleteInteractionChoiceSetRequest(message));
       }
@@ -216,10 +216,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::PerformAudioPassThruResponse(message));
+          new commands::PerformAudioPassThruResponse(message));
       } else {
         command.reset(
-            new commands::PerformAudioPassThruRequest(message));
+          new commands::PerformAudioPassThruRequest(message));
       }
       break;
     }
@@ -227,7 +227,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::CreateInteractionChoiceSetResponse(message));
+          new commands::CreateInteractionChoiceSetResponse(message));
       } else {
         command.reset(new commands::CreateInteractionChoiceSetRequest(message));
       }
@@ -309,10 +309,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::SubscribeVehicleDataResponse(message));
+          new commands::SubscribeVehicleDataResponse(message));
       } else {
         command.reset(
-            new commands::SubscribeVehicleDataRequest(message));
+          new commands::SubscribeVehicleDataRequest(message));
       }
       break;
     }
@@ -320,10 +320,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::UnsubscribeVehicleDataResponse(message));
+          new commands::UnsubscribeVehicleDataResponse(message));
       } else {
         command.reset(
-            new commands::UnsubscribeVehicleDataRequest(message));
+          new commands::UnsubscribeVehicleDataRequest(message));
       }
       break;
     }
@@ -417,7 +417,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::OnAppInterfaceUnregisteredID: {
       command.reset(
-          new commands::OnAppInterfaceUnregisteredNotification(message));
+        new commands::OnAppInterfaceUnregisteredNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnCommandID: {

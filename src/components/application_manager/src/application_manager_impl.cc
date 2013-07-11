@@ -592,6 +592,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
     return false;
   }
+  LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
 
   if (!command) {
@@ -696,10 +697,14 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
         return false;
       }
-
       LOG4CXX_INFO(logger_, "Convertion result for sdl object is true" <<
                    " function_id " <<
                    output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+      if (!mobile_so_factory().attachSchema(output)) {
+        LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
+        return false;
+      }
+      LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());
       break;
     }
     case ProtocolVersion::kHMI: {
@@ -710,12 +715,16 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       LOG4CXX_INFO(logger_, "Convertion result: " <<
                    result << " function id " <<
                    output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-      hmi_so_factory().attachSchema(output);
-      LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());
+      if (!hmi_so_factory().attachSchema(output)) {
+        LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
+        return false;
+      }
       break;
     }
     default:
-      NOTREACHED();
+      // TODO(PV):
+      //  removed NOTREACHED() because some app can still have vesion 1.
+      LOG4CXX_WARN(logger_, "Application used unsupported protocol.");
       return false;
   }
   LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
@@ -746,6 +755,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }
+      output.set_protocol_version(application_manager::kV2);
       break;
     }
     case 1: {
@@ -755,6 +765,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }
+      output.set_protocol_version(application_manager::kHMI);
       break;
     }
     default:
@@ -768,6 +779,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   output.set_function_id(message.getElement(
                            jhs::S_PARAMS).getElement(
                            jhs::S_FUNCTION_ID).asInt());
+  // TODO(PV): not always correlation id is present
   output.set_correlation_id(
     message.getElement(jhs::S_PARAMS).getElement(
       jhs::S_CORRELATION_ID).asInt());
@@ -776,7 +788,6 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
       message.getElement(jhs::S_PARAMS).getElement(
         jhs::S_MESSAGE_TYPE).asInt()));
   output.set_json_message(output_string);
-  output.set_protocol_version(application_manager::kHMI);
 
   if (message.keyExists(strings::binary_data)) {
     application_manager::BinaryData* binaryData =
@@ -797,21 +808,21 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
-  utils::SharedPtr<smart_objects::CSmartObject> smart_object(
+
+  utils::SharedPtr<smart_objects::CSmartObject> so_from_mobile(
     new smart_objects::CSmartObject);
 
-  if (!smart_object) {
+  if (!so_from_mobile) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
 
-  if (!ConvertMessageToSO(*message, *smart_object)) {
+  if (!ConvertMessageToSO(*message, *so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
 
-  LOG4CXX_INFO(logger_, "Converted message, trying to create mobile command");
-  if (!ManageMobileCommand(smart_object)) {
+  if (!ManageMobileCommand(so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 }
@@ -841,8 +852,23 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
 hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() {
   if (!hmi_so_factory_) {
     hmi_so_factory_ = new hmi_apis::HMI_API;
+    if (!hmi_so_factory_) {
+      LOG4CXX_ERROR(logger_, "Out of memory");
+      CHECK(hmi_so_factory_);
+    }
   }
   return *hmi_so_factory_;
+}
+
+mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
+  if (!mobile_so_factory_) {
+    mobile_so_factory_ = new mobile_apis::MOBILE_API;
+    if (!mobile_so_factory_) {
+      LOG4CXX_ERROR(logger_, "Out of memory.");
+      CHECK(mobile_so_factory_);
+    }
+  }
+  return *mobile_so_factory_;
 }
 
 }  // namespace application_manager

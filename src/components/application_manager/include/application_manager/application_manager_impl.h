@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 
+#include <cstdint>
 #include <vector>
 #include <map>
 #include <set>
-#include <cstdint>
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "hmi_message_handler/hmi_message_observer.h"
@@ -49,6 +49,7 @@
 #include "interfaces/HMI_API.h"
 #include "formatters/CSmartFactory.hpp"
 #include "interfaces/HMI_API_schema.h"
+#include "interfaces/MOBILE_API_schema.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -180,7 +181,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return Unique correlation ID for HMI request
      */
     uint64_t GetHMIcorrelation_id(uint32_t correlation_id,
-                                 uint32_t connection_key) const;
+                                  uint32_t connection_key) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request
@@ -364,6 +365,7 @@ class ApplicationManagerImpl : public ApplicationManager
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
     hmi_apis::HMI_API& hmi_so_factory();
+    mobile_apis::MOBILE_API& mobile_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
     void CreatePoliciesManager(PoliciesManager* managaer);
@@ -400,21 +402,21 @@ class ApplicationManagerImpl : public ApplicationManager
     /**
      * @brief Map of connection keys and associated applications
      */
-    std::map<int, Application*>                   applications_;
+    std::map<int, Application*> applications_;
     /**
      * @brief List of applications
      */
-    std::set<Application*>                        application_list_;
-    MessageChains                                 message_chaining_;
-    bool                                          audio_pass_thru_flag_;
-    threads::Thread*                              perform_audio_thread_;
-    bool                                          is_distracting_driver_;
-    bool                                          is_vr_session_strated_;
-    bool                                          hmi_cooperating_;
-    bool                                          is_all_apps_allowed_;
-    hmi_apis::Common_Language::eType              ui_language_;
-    hmi_apis::Common_Language::eType              vr_language_;
-    hmi_apis::Common_Language::eType              tts_language_;
+    std::set<Application*> application_list_;
+    MessageChains message_chaining_;
+    bool audio_pass_thru_flag_;
+    threads::Thread* perform_audio_thread_;
+    bool is_distracting_driver_;
+    bool is_vr_session_strated_;
+    bool hmi_cooperating_;
+    bool is_all_apps_allowed_;
+    hmi_apis::Common_Language::eType ui_language_;
+    hmi_apis::Common_Language::eType vr_language_;
+    hmi_apis::Common_Language::eType tts_language_;
     smart_objects::CSmartObject*                  vehicle_type_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
@@ -437,8 +439,9 @@ class ApplicationManagerImpl : public ApplicationManager
     friend class ToHMHThreadImpl;
 
     hmi_apis::HMI_API* hmi_so_factory_;
+    mobile_apis::MOBILE_API* mobile_so_factory_;
 
-    static log4cxx::LoggerPtr                     logger_;
+    static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
