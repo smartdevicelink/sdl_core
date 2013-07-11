@@ -55,9 +55,28 @@ bool CommandResponseImpl::CleanUp() {
 void CommandResponseImpl::Run() {
 }
 
-void CommandResponseImpl::SendResponse() {
+void CommandResponseImpl::SendResponse(bool success) {
+
+  const long hmi_correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asLong();
+
+  const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+          GetMobilecorrelation_id(hmi_correlation_id);
+
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+  (*message_)[strings::msg_params][strings::correlation_id] =
+      mobile_correlation_id;
+  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
+
+  if(success) {
+    (*message_)[strings::msg_params][strings::success] = true;
+    (*message_)[strings::msg_params][strings::result_code] =
+                  mobile_apis::Result::SUCCESS;
+  } else {
+    // TODO Process unsuccessful case
+  }
+
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
