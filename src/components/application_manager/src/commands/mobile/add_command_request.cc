@@ -34,7 +34,6 @@
 #include <cstdint>
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -80,8 +79,7 @@ void AddCommandRequest::Run() {
     msg_params[strings::msg_params][strings::app_id] =
       app->app_id();
 
-    const int ui_cmd_id = hmi_apis::FunctionID::UI_AddCommand;
-    CreateHMIRequest(ui_cmd_id, msg_params);
+    CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true);
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
@@ -94,8 +92,7 @@ void AddCommandRequest::Run() {
     msg_params[strings::msg_params][strings::app_id] =
         app->app_id();
 
-    const int vr_cmd_id = hmi_apis::FunctionID::VR_AddCommand;
-    CreateHMIRequest(vr_cmd_id, msg_params);
+    CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, true);
   }
 }
 

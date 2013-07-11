@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/delete_interaction_choice_set_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -71,45 +70,13 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  // create HMI request
-  smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
-
-  if (NULL == p_smrt_ui) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet;
-  (*p_smrt_ui)[strings::params][strings::function_id] =
-    ui_cmd_id;
-
-  (*message_)[strings::params][strings::correlation_id] =
-      hmi_correlation_id;
-
-  (*p_smrt_ui)[strings::params][strings::message_type] =
-    MessageType::kRequest;
-
-  (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-    (*message_)[strings::msg_params][strings::cmd_id];
-
-  (*p_smrt_ui)[strings::msg_params][strings::interaction_choice_set_id] =
+  smart_objects::CSmartObject msg_params;
+  msg_params[strings::msg_params][strings::interaction_choice_set_id] =
     choise_set_id;
+  msg_params[strings::msg_params][strings::app_id] = app->app_id();
 
-  (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-    app->app_id();
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-          connection_key, correlation_id, hmi_correlation_id, p_smrt_ui);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet,
+                   msg_params, true);
 }
 
 }  // namespace commands

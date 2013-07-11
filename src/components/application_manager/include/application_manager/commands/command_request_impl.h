@@ -59,9 +59,12 @@ class CommandRequestImpl : public CommandImpl {
   void SendResponse(const bool success,
                     const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
-                    const NsSmart::CSmartObject* response_params = NULL);
+                    const NsSmart::CSmartObject* response_params = NULL) const;
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                   const NsSmart::CSmartObject& request_params);
+                   const NsSmart::CSmartObject& msg_params,
+                   bool chaining_required = false) const;
+  void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
+                   const NsSmart::CSmartObject& msg_params) const;
 };
 
 }  // namespace commands

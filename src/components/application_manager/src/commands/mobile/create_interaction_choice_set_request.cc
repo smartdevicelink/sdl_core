@@ -70,18 +70,13 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+  smart_objects::CSmartObject msg_params;
+  msg_params = (*message_)[strings::msg_params];
+  msg_params[strings::msg_params][strings::app_id] =
+      app->app_id();
 
-  const int hmi_request_id =
-      hmi_apis::FunctionID::UI_CreateInteractionChoiceSet;
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_CreateInteractionChoiceSet,
+                   msg_params, true);
 }
 
 }  // namespace commands

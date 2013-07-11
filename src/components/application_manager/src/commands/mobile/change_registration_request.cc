@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/change_registration_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -77,80 +76,32 @@ void ChangeRegistrationRequest::Run() {
     return;
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  MessageChaining* chain = NULL;
-
   bool has_actually_changed = false;
   if (app->ui_language() !=
      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
-    smart_objects::CSmartObject* ui_request  =
-        new smart_objects::CSmartObject();
 
-    if (NULL == ui_request) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
-    }
-
-    const int ui_hmi_request_id = hmi_apis::FunctionID::UI_ChangeRegistration;
-    (*ui_request)[strings::params][strings::function_id] =
-        ui_hmi_request_id;
-    (*ui_request)[strings::params][strings::correlation_id] =
-        hmi_correlation_id;
-    (*ui_request)[strings::params][strings::message_type] =
-        MessageType::kRequest;
-
-    (*ui_request)[strings::msg_params][strings::language] =
+    smart_objects::CSmartObject msg_params;
+    msg_params[strings::msg_params][strings::language] =
         (*message_)[strings::msg_params][strings::hmi_display_language];
+    msg_params[strings::msg_params][strings::app_id] = app->app_id();
 
-    (*ui_request)[strings::msg_params][strings::app_id] =
-        app->app_id();
-
-    chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, hmi_correlation_id, &(*message_));
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(ui_request);
+    CreateHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
+                     msg_params, true);
 
     has_actually_changed = true;
   }
 
   if (app->language() !=
      (*message_)[strings::msg_params][strings::language].asInt()) {
-    smart_objects::CSmartObject* vr_request  =
-        new smart_objects::CSmartObject();
 
-    if (NULL == vr_request) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
-    }
-
-    const int vr_hmi_request_id = hmi_apis::FunctionID::VR_ChangeRegistration;
-    (*vr_request)[strings::params][strings::function_id] =
-        vr_hmi_request_id;
-
-    (*vr_request)[strings::params][strings::correlation_id] =
-        hmi_correlation_id;
-
-    (*vr_request)[strings::params][strings::message_type] =
-        MessageType::kRequest;
-
-    (*vr_request)[strings::msg_params][strings::language] =
+    smart_objects::CSmartObject msg_params;
+    msg_params[strings::msg_params][strings::language] =
         (*message_)[strings::msg_params][strings::language];
-
-    (*vr_request)[strings::msg_params][strings::app_id] =
+    msg_params[strings::msg_params][strings::app_id] =
         app->app_id();
 
-    ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, hmi_correlation_id, &(*message_));
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(vr_request);
+    CreateHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
+                     msg_params, true);
 
     has_actually_changed = true;
   }

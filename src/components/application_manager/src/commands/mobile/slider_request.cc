@@ -32,10 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/slider_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -61,37 +61,13 @@ void SliderRequest::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  // create HMI request
-  smart_objects::CSmartObject* hmi_request =
-      new smart_objects::CSmartObject(*message_);
-
-  if (NULL == hmi_request) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  const int hmi_request_id = hmi_apis::FunctionID::UI_Slider;
-  (*hmi_request)[strings::params][strings::function_id] = hmi_request_id;
-  (*hmi_request)[strings::msg_params][strings::correlation_id] =
-      hmi_correlation_id;
-  (*hmi_request)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-  (*hmi_request)[strings::msg_params][strings::app_id] =
+  smart_objects::CSmartObject msg_params;
+  msg_params = (*message_)[strings::msg_params];
+  msg_params[strings::msg_params][strings::app_id] =
       application_impl->app_id();
 
-  ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, correlation_id),
-      connection_key, correlation_id, hmi_correlation_id);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(hmi_request);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_Slider,
+                   msg_params, true);
 }
 
 }  // namespace commands

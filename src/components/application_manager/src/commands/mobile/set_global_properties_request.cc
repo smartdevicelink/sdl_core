@@ -34,7 +34,8 @@
 #include "application_manager/commands/mobile/set_global_properties_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -69,86 +70,31 @@ void SetGlobalPropertiesRequest::Run() {
   app->set_vr_help(
     (*message_)[strings::msg_params][strings::vr_help]);
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
-
-  if (NULL == p_smrt_ui) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
   // check TTS params
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
 
-    const int tts_cmd_id = hmi_apis::FunctionID::TTS_SetGlobalProperties;
+    smart_objects::CSmartObject msg_params;
+    msg_params[strings::msg_params][strings::help_prompt] =
+        app->vr_help_title();
+    msg_params[strings::msg_params][strings::timeout_prompt] = app->vr_help();
+    msg_params[strings::msg_params][strings::app_id] = app->app_id();
 
-    (*p_smrt_ui)[strings::params][strings::function_id] =
-      tts_cmd_id;
-
-    // be sure to use HMI correlation id
-    (*p_smrt_ui)[strings::params][strings::correlation_id] =
-        hmi_correlation_id;
-
-    (*p_smrt_ui)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
-
-    (*p_smrt_ui)[strings::msg_params][strings::help_prompt] =
-      app->vr_help_title();
-
-    (*p_smrt_ui)[strings::msg_params][strings::timeout_prompt] =
-      app->vr_help();
-
-    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-      app->app_id();
-    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
-
-    ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, correlation_id),
-      connection_key, correlation_id, hmi_correlation_id);
+    CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
+                     msg_params, true);
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
       (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
 
-    const int ui_cmd_id = hmi_apis::FunctionID::UI_SetGlobalProperties;
-    (*p_smrt_ui)[strings::params][strings::function_id] =
-      ui_cmd_id;
-
-    // be sure to use HMI correlation id
-    (*p_smrt_ui)[strings::params][strings::correlation_id] =
-        hmi_correlation_id;
-
-    (*p_smrt_ui)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
-
-    (*p_smrt_ui)[strings::msg_params][strings::vr_help_title] =
+    smart_objects::CSmartObject msg_params;
+    msg_params[strings::msg_params][strings::vr_help_title] =
       app->vr_help_title();
+    msg_params[strings::msg_params][strings::vr_help] = app->vr_help();
+    msg_params[strings::msg_params][strings::app_id] = app->app_id();
 
-    (*p_smrt_ui)[strings::msg_params][strings::vr_help] =
-      app->vr_help();
-
-    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-      app->app_id();
-    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
-
-    ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, correlation_id),
-      connection_key, correlation_id, hmi_correlation_id);
+    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                     msg_params, true);
   }
 }
 

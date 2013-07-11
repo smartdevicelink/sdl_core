@@ -32,9 +32,11 @@
  */
 
 #include "application_manager/commands/mobile/show_constant_tbt_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -60,42 +62,36 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject* navi_show_constant_tbt  =
-      new smart_objects::CSmartObject();
-
-  if (!navi_show_constant_tbt) {
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    LOG4CXX_ERROR(logger_, "Null pointer");
-    return;
-  }
-
   app->set_tbt_show_command((*message_)[strings::msg_params]);
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+  smart_objects::CSmartObject msg_params;
+  msg_params = (*message_)[strings::msg_params];
 
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+  msg_params[hmi_request::navi_texts] =
+      smart_objects::CSmartObject(smart_objects::SmartType_Array);
 
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
+  if (msg_params.keyExists(strings::navigation_text_1)) {
+    // erase useless parametr
+    msg_params.erase(strings::navigation_text_1);
+    msg_params[hmi_request::navi_texts][0][hmi_request::field_name] =
+        TextFieldName::NAVI_TEXT1;
+    msg_params[hmi_request::navi_texts][0][hmi_request::field_text] =
+       (*message_)[strings::msg_params][strings::navigation_text_1];
 
-  const int hmi_request_id = hmi_apis::FunctionID::Navigation_ShowConstantTBT;
+  }
 
-  (*navi_show_constant_tbt)[strings::params][strings::function_id] =
-      hmi_request_id;
+  if (msg_params.keyExists(strings::navigation_text_2)) {
+    // erase useless param
+    msg_params.erase(strings::navigation_text_2);
+    msg_params[hmi_request::navi_texts][1][hmi_request::field_name] =
+        TextFieldName::NAVI_TEXT2;
+    msg_params[hmi_request::navi_texts][1][hmi_request::field_text] =
+       (*message_)[strings::msg_params][strings::navigation_text_2];
 
-  // be sure to use HMI correlation id
-  (*navi_show_constant_tbt)[strings::params][strings::correlation_id] =
-      hmi_correlation_id;
+  }
 
-  (*navi_show_constant_tbt)[strings::params][strings::message_type] =
-    MessageType::kRequest;
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_correlation_id, &(*message_));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(navi_show_constant_tbt);
+  CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,
+                   msg_params, true);
 }
 
 }  // namespace commands

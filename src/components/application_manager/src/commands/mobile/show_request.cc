@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/show_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -51,43 +51,71 @@ ShowRequest::~ShowRequest() {
 void ShowRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowRequest::Run");
 
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
+  ApplicationImpl* app = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::connection_key]));
 
-  if (!application_impl) {
-    LOG4CXX_ERROR_EXT(logger_, "An application "
-                          << application_impl->name() << " is not registered.");
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
+                      " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int correlation_key =
-    (*message_)[strings::params][strings::connection_key];
-
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, correlation_key);
-
-  // be sure to use HMI correlation id
-  (*message_)[strings::params][strings::correlation_id] =
-      hmi_correlation_id;
-
-  (*message_)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::UI_Show;
 
-  ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(correlation_key, correlation_id),
-      correlation_key, correlation_id, hmi_correlation_id);
 
-  MessageSharedPtr persistentData;
+  smart_objects::CSmartObject msg_params;
+  msg_params = (*message_)[strings::msg_params];
 
-  (*persistentData)[strings::msg_params] = (*message_)[strings::msg_params];
+  msg_params[hmi_request::show_strings] =
+      smart_objects::CSmartObject(smart_objects::SmartType_Array);
 
-  application_impl->set_show_command(*persistentData);
+  if (msg_params.keyExists(strings::main_field_1)) {
+    // erase useless parametr
+    msg_params.erase(strings::main_field_1);
+    msg_params[hmi_request::show_strings][0][hmi_request::field_name] =
+        TextFieldName::MAIN_FILED1;
+    msg_params[hmi_request::show_strings][0][hmi_request::field_text] =
+       (*message_)[strings::msg_params][strings::main_field_1];
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
+  }
+
+  if (msg_params.keyExists(strings::main_field_2)) {
+    // erase useless param
+    msg_params.erase(strings::main_field_2);
+    msg_params[hmi_request::show_strings][1][hmi_request::field_name] =
+        TextFieldName::MAIN_FILED2;
+    msg_params[hmi_request::show_strings][1][hmi_request::field_text] =
+       (*message_)[strings::msg_params][strings::main_field_2];
+
+  }
+
+  if (msg_params.keyExists(strings::main_field_3)) {
+    // erase useless param
+    msg_params.erase(strings::main_field_3);
+    msg_params[hmi_request::show_strings][2][hmi_request::field_name] =
+        TextFieldName::MAIN_FILED3;
+    msg_params[hmi_request::show_strings][2][hmi_request::field_text] =
+       (*message_)[strings::msg_params][strings::main_field_3];
+
+  }
+
+  if (msg_params.keyExists(strings::main_field_4)) {
+    // erase useless param
+    msg_params.erase(strings::main_field_4);
+    msg_params[hmi_request::show_strings][3][hmi_request::field_name] =
+        TextFieldName::MAIN_FILED4;
+    msg_params[hmi_request::show_strings][3][hmi_request::field_text] =
+       (*message_)[strings::msg_params][strings::main_field_4];
+
+  }
+
+  CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,
+                   msg_params, true);
+
+  MessageSharedPtr persistentData =
+      new smart_objects::CSmartObject((*message_)[strings::msg_params]);
+  app->set_show_command(*persistentData);
 }
 
 }  // namespace commands

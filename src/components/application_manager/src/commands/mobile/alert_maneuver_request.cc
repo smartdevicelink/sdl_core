@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/alert_maneuver_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
@@ -56,23 +55,16 @@ void AlertManeuverRequest::Run() {
       application((*message_)[strings::params][strings::connection_key]));
 
   if (NULL == app) {
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-
-  const int hmi_request_id = hmi_apis::FunctionID::Navigation_AlertManeuver;
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  smart_objects::CSmartObject msg_params;
+  msg_params[strings::msg_params][hmi_request::soft_buttons] =
+    (*message_)[strings::msg_params][strings::soft_buttons];
+  CreateHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
+                   msg_params, true);
 }
 
 }  // namespace commands

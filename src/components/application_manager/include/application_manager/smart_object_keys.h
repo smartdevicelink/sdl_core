@@ -65,10 +65,13 @@ const char tts_name[] = "ttsName";
 const char binary_data[] = "binary_data";
 const char help_promt[] = "helpPrompt";
 const char timeout_promt[] = "timeoutPrompt";
+const char timeout[] = "timeout";
 const char vr_help_title[] = "vrHelpTitle";
 const char vr_help[] = "vrHelp";
 const char main_field_1[] = "mainField1";
 const char main_field_2[] = "mainField2";
+const char main_field_3[] = "mainField3";
+const char main_field_4[] = "mainField4";
 const char alignment[] = "alignment";
 const char status_bar[] = "statusBar";
 const char media_clock[] = "media_clock";
@@ -77,10 +80,14 @@ const char properties[] = "properties";
 const char cmd_id[] = "cmdID";
 const char menu_params[] = "menuParams";
 const char vr_commands[] = "vrCommands";
+const char position[] = "position";
 const char menu_id[] = "menuID";
 const char menu_name[] = "menuName";
 const char interaction_choice_set_id[] = "interactionChoiceSetID";
+const char interaction_choice_set_id_list[] = "interactionChoiceSetIDList";
 const char choice_set[] = "choiceSet";
+const char navigation_text_1[] = "navigationText1";
+const char navigation_text_2[] = "navigationText2";
 const char alert_text1[] = "alertText1";
 const char alert_text2[] = "alertText2";
 const char alert_text3[] = "alertText3";
@@ -163,6 +170,7 @@ const char cluster_mode_status[] = "clusterModeStatus";
 const char my_key[] = "myKey";
 const char help_prompt[] = "helpPrompt";
 const char timeout_prompt[] = "timeoutPrompt";
+const char scroll_message_body[] = "scrollableMessageBody";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -170,6 +178,7 @@ const char state[] = "state";
 }  // namespace mobile_notification
 
 namespace hmi_request {
+  const char parent_id[] = "parentID";
   const char field_name[] = "fieldName";
   const char field_text[] = "fieldText";
   const char alert_strings[] = "alertStrings";
@@ -179,6 +188,10 @@ namespace hmi_request {
   const char audio_pass_display_texts[] = "audioPassThruDisplayTexts";
   const char max_duration[] = "maxDuration";
   const char reason[] = "reason";
+  const char message_text[] = "messageText";
+  const char initial_text[] = "initialText";
+  const char navi_texts[] = "navigationTexts";
+  const char show_strings[] = "showStrings";
 }  // namespace hmi_request
 
 namespace hmi_response {

@@ -34,8 +34,8 @@
 #include "application_manager/commands/mobile/speak_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,54 +51,23 @@ SpeakRequest::~SpeakRequest() {
 void SpeakRequest::Run() {
   LOG4CXX_INFO(logger_, "SpeakRequest::Run");
 
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>(
+  ApplicationImpl* app = static_cast<ApplicationImpl*>(
       application_manager::ApplicationManagerImpl::instance()->application(
           (*message_)[strings::params][strings::connection_key]));
 
-  if (NULL == application_impl) {
-    LOG4CXX_ERROR_EXT(logger_, "An application "
-                          << application_impl->name() << " is not registered.");
+  if (NULL == app) {
+    LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
+                      " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  smart_objects::CSmartObject* speak_request =
-      new smart_objects::CSmartObject();
+  smart_objects::CSmartObject msg_params;
+  msg_params = (*message_)[strings::msg_params];
+  msg_params[strings::msg_params][strings::app_id] =
+      app->app_id();
 
-  if (!speak_request) {
-    LOG4CXX_INFO(logger_, "NULL pointer!");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  (*speak_request)[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::TTS_Speak;
-
-  (*speak_request)[strings::params][strings::correlation_id] =
-      hmi_correlation_id;
-
-  (*speak_request)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-  (*speak_request)[strings::msg_params][strings::app_id] =
-      application_impl->app_id();
-
-  (*speak_request)[strings::msg_params][strings::tts_chunks] =
-      (*message_)[strings::msg_params][strings::tts_chunks];
-
-  ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, correlation_id), connection_key,
-      correlation_id, hmi_correlation_id);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(speak_request);
+  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, true);
 }
 
 }  // namespace commands

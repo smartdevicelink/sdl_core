@@ -66,18 +66,24 @@ class AlertRequest : public CommandRequestImpl {
  private:
   /*
    * @brief Sends UI Alert request
+   *
+   * @param app_id Id of application requested this RPC
    */
-  void SendAlertRequest();
+  void SendAlertRequest(int app_id);
 
   /*
    * @brief Sends TTS Speak request
+   *
+   * @param app_id Id of application requested this RPC
    */
-  void SendSpeekRequest();
+  void SendSpeekRequest(int app_id);
 
   /*
    * @brief Sends Basic communication playtone request
+   *
+   * @param app_id Id of application requested this RPC
    */
-  void SendPlayToneRequest();
+  void SendPlayToneRequest(int app_id);
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };

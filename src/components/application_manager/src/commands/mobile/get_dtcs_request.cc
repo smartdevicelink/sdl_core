@@ -66,46 +66,16 @@ void GetDTCsRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject* vi_request  =
-          new smart_objects::CSmartObject();
-
-  if (NULL == vi_request) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-  const int hmi_request_id = hmi_apis::FunctionID::VehicleInfo_GetDTCs;
-
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  (*vi_request)[strings::params][strings::correlation_id] =
-      hmi_correlation_id;
-
-  (*vi_request)[strings::params][strings::function_id] =
-      hmi_request_id;
-
-  (*vi_request)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-  (*vi_request)[strings::msg_params][strings::ecu_name] =
+  smart_objects::CSmartObject msg_params;
+  msg_params[strings::msg_params][strings::ecu_name] =
       (*message_)[strings::msg_params][strings::ecu_name];
-
-  (*vi_request)[strings::msg_params][strings::dtc_mask] =
+  msg_params[strings::msg_params][strings::dtc_mask] =
       (*message_)[strings::msg_params][strings::dtc_mask];
-
-  (*vi_request)[strings::msg_params][strings::app_id] =
+  msg_params[strings::msg_params][strings::app_id] =
       app->app_id();
 
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_correlation_id, &(*vi_request));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetDTCs,
+                   msg_params, true);
 }
 
 }  // namespace commands

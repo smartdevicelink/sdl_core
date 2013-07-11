@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/add_sub_menu_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -49,51 +50,40 @@ AddSubMenuRequest::~AddSubMenuRequest() {
 void AddSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
 
-  ApplicationImpl* application =
+  ApplicationImpl* app =
       static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key]));
 
-  if (!application) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  if (application->FindSubMenu(
+  if (app->FindSubMenu(
       (*message_)[strings::msg_params][strings::menu_id].asInt())) {
     LOG4CXX_ERROR(logger_, "INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
-  if (application->IsSubMenuNameAlreadyExist(
+  if (app->IsSubMenuNameAlreadyExist(
       (*message_)[strings::msg_params][strings::menu_name].asString())) {
     LOG4CXX_ERROR(logger_, "DUPLICATE_NAME");
-    SendResponse(false,
-                 mobile_apis::Result::DUPLICATE_NAME);
+    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
 
-  const int correlation_id =
-        (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-        (*message_)[strings::params][strings::connection_key];
+  smart_objects::CSmartObject msg_params;
+  msg_params[strings::msg_params][strings::menu_id] =
+      (*message_)[strings::msg_params][strings::menu_id];
+  msg_params[strings::msg_params][strings::menu_params][strings::position] =
+      (*message_)[strings::msg_params][strings::position];
+  msg_params[strings::msg_params][strings::menu_params][strings::menu_name] =
+      (*message_)[strings::msg_params][strings::menu_name];
+  msg_params[strings::msg_params][strings::app_id] = app->app_id();
 
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  const int hmi_request_id = hmi_apis::FunctionID::UI_AddSubMenu;
-
-  (*message_)[strings::params][strings::correlation_id] =
-      hmi_correlation_id;
-  (*message_)[strings::params][strings::function_id] =
-      hmi_request_id;
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_correlation_id, &(*message_));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, msg_params, true);
 }
 
 }  // namespace commands

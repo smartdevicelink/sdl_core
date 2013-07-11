@@ -32,9 +32,11 @@
  */
 
 #include "application_manager/commands/mobile/scrollable_message_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -43,27 +45,29 @@ namespace commands {
 void ScrollabeMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "ScrollabeMessageRequest::Run");
 
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
+  ApplicationImpl* app = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id]));
 
-  if (NULL == application_impl) {
+  if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int correlation_key =
-    (*message_)[strings::params][strings::connection_key];
+  smart_objects::CSmartObject msg_params;
+  msg_params[hmi_request::initial_text][hmi_request::field_name] =
+      TextFieldName::SCROLLABLE_MSG_BODY;
+  msg_params[hmi_request::initial_text][hmi_request::field_text] =
+    (*message_)[strings::msg_params][strings::scroll_message_body];
+  msg_params[strings::msg_params][strings::app_id] = app->app_id();
+  msg_params[strings::msg_params][strings::soft_buttons] =
+      (*message_)[strings::msg_params][strings::soft_buttons];
+  msg_params[strings::msg_params][strings::timeout] =
+      (*message_)[strings::msg_params][strings::timeout];
 
-  const unsigned int cmd_id = hmi_apis::FunctionID::UI_ScrollableMessage;
-    ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(correlation_key, correlation_id),
-      correlation_key, correlation_id, cmd_id);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
+  CreateHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage,
+                   msg_params, true);
 }
 
 }  // namespace commands

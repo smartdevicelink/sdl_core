@@ -34,9 +34,8 @@
 #include "application_manager/commands/mobile/delete_command_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -70,77 +69,29 @@ void DeleteCommandRequest::Run() {
       return;
   }
 
-  const int correlation_id =
-        (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-        (*message_)[strings::params][strings::connection_key];
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  MessageChaining * chain = NULL;
-
   if ((*command)[strings::msg_params].keyExists(strings::menu_params)) {
-      smart_objects::CSmartObject* p_smrt_ui  =
-          new smart_objects::CSmartObject();
 
-      if (NULL == p_smrt_ui) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-        return;
-      }
-
-      const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
-      (*p_smrt_ui)[strings::params][strings::function_id] = ui_cmd_id;
-
-      (*p_smrt_ui)[strings::msg_params][strings::correlation_id] =
-          hmi_correlation_id;
-
-      (*p_smrt_ui)[strings::params][strings::message_type] =
-          MessageType::kRequest;
-
-      (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
+      smart_objects::CSmartObject msg_params;
+      msg_params[strings::msg_params][strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];
-
-      (*p_smrt_ui)[strings::msg_params][strings::app_id] =
+      msg_params[strings::msg_params][strings::app_id] =
           application->app_id();
 
-     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, hmi_correlation_id, p_smrt_ui);
-
-      ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
+      CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand,
+                       msg_params, true);
     }
 
     // check vr params
     if ((*command)[strings::msg_params].keyExists(strings::vr_commands)) {
-      smart_objects::CSmartObject* p_smrt_vr  =
-          new smart_objects::CSmartObject();
 
-      if (NULL == p_smrt_vr) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-        return;
-      }
-
-      const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
-
-      (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
-
-      (*p_smrt_vr)[strings::msg_params][strings::correlation_id] =
-          hmi_correlation_id;
-
-      (*p_smrt_vr)[strings::params][strings::message_type] =
-          MessageType::kRequest;
-
-      (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
+      smart_objects::CSmartObject msg_params;
+      msg_params[strings::msg_params][strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];
-
-      (*p_smrt_vr)[strings::msg_params][strings::app_id] =
+      msg_params[strings::msg_params][strings::app_id] =
                application->app_id();
 
-      ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, hmi_correlation_id, p_smrt_vr);
-
-      ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
+      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand,
+                       msg_params, true);
     }
 }
 

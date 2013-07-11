@@ -35,6 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -69,35 +70,15 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
+  smart_objects::CSmartObject msg_params;
+  msg_params[strings::msg_params][strings::interaction_choice_set_id_list] =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+  msg_params[strings::msg_params][strings::timeout] =
+      (*message_)[strings::msg_params][strings::timeout];
+  msg_params[strings::msg_params][strings::app_id] = app->app_id();
 
-  // create HMI request
-  smart_objects::CSmartObject* hmi_request =
-      new smart_objects::CSmartObject(*message_);
-
-  if (NULL == hmi_request) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  const int hmi_request_id = hmi_apis::FunctionID::UI_PerformInteraction;
-  (*hmi_request)[strings::params][strings::function_id] = hmi_request_id;
-  (*hmi_request)[strings::params][strings::correlation_id] =
-      hmi_correlation_id;
-  (*hmi_request)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-  (*hmi_request)[strings::msg_params][strings::app_id] = app->app_id();
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_correlation_id, &(*message_));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(hmi_request);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
+                   msg_params, true);
 }
 
 }  // namespace commands

@@ -35,6 +35,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -50,34 +52,23 @@ SetMediaClockRequest::~SetMediaClockRequest() {
 void SetMediaClockRequest::Run() {
   LOG4CXX_INFO(logger_, "SetMediaClockRequest::Run");
 
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
+  ApplicationImpl* app = static_cast<ApplicationImpl*>
       (application_manager::ApplicationManagerImpl::instance()->
       application((*message_)[strings::msg_params][strings::app_id]));
 
-  if (NULL == application_impl) {
+  if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int correlation_key =
-    (*message_)[strings::params][strings::connection_key];
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, correlation_key);
+  smart_objects::CSmartObject msg_params;
+  // copy entirely msg
+  msg_params = (*message_)[strings::msg_params];
+  msg_params[strings::msg_params][strings::app_id] = app->app_id();
 
-  const int cmd_id = hmi_apis::FunctionID::UI_SetMediaClockTimer;
-  (*message_)[strings::params][strings::correlation_id] =
-      hmi_correlation_id;
-  (*message_)[strings::params][strings::function_id] =
-      cmd_id;
-
-    ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(correlation_key, correlation_id),
-      correlation_key, correlation_id, hmi_correlation_id);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
+  CreateHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer,
+                   msg_params, true);
 }
 
 }  // namespace commands
