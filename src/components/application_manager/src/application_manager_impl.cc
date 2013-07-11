@@ -592,7 +592,10 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
     return false;
   }
+
   LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
+  // TODO(AK): check hmi level here!!!
+
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
 
   if (!command) {

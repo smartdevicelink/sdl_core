@@ -33,6 +33,10 @@ set (SOURCES
 ./src/to_hmh_thread_impl.cc
 )
 
+set (POLICIES_MANAGER
+./src/policies_manager/policies_manager.cc
+)
+
 set (MOBILE_COMMANDS_SOURCES
 ./src/commands/command_impl.cc
 ./src/commands/command_request_impl.cc
@@ -268,5 +272,5 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_vi_vehicle_data_notification.cc
 )
 
-add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})
+add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER})
 target_link_libraries ("ApplicationManager" log4cxx)

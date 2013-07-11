@@ -43,6 +43,7 @@ log4cxx::LoggerPtr logger_ =
 namespace profile {
 Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
+  , policies_file_name_("policy_table.json")
   , server_address_("127.0.0.1")
   , server_port_(8087)
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
@@ -68,6 +69,10 @@ void Profile::config_file_name(const std::string& fileName) {
 
 const std::string& Profile::config_file_name() const {
   return config_file_name_;
+}
+
+const std::string& Profile::policies_file_name() const {
+  return policies_file_name_;
 }
 
 const std::string& Profile::server_address() const {
@@ -96,6 +101,14 @@ void Profile::UpdateValues() {
       && ('\0' != *value)) {
     server_address_ = value;
     LOG4CXX_INFO(logger_, "Set server address to " << server_address_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "PoliciesTable", value))
+      && ('\0' != *value)) {
+    policies_file_name_ = value;
+    LOG4CXX_INFO(logger_, "Set server address to " << policies_file_name_);
   }
 
   *value = '\0';

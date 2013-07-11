@@ -1,3 +1,9 @@
+############################## Subfolders #####################################
+# --- Policies table test
+add_subdirectory(./policies_manager)
+
+###############################################################################
+
 include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
@@ -23,9 +29,5 @@ set(LIBRARIES
 )
 
 #create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")
-
 create_test("test_formatters_commands" "./formatters_commands.cc" "${LIBRARIES}")
-
-#create_test("test_generated_factory" "./generated_factory.cc" "${LIBRARIES}")
-
 add_library("test_FormattersCommandsTest" "./formatters_commands.cc")

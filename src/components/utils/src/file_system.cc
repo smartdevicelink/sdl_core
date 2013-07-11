@@ -223,3 +223,15 @@ bool file_system::ReadBinaryFile(const std::string& name,
   std::copy(s.begin(), s.end(), result.begin());
   return true;
 }
+
+bool file_system::ReadFile(const std::string& name, std::string& result) {
+  if (!FileExists(name) || !IsAccessible(name, R_OK)) {
+    return false;
+  }
+
+  std::ifstream file(name.c_str());
+  std::ostringstream ss;
+  ss << file.rdbuf();
+  result = ss.str();
+  return true;
+}
