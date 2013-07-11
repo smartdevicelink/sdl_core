@@ -50,8 +50,9 @@ namespace transport_manager {
 log4cxx::LoggerPtr TransportManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("TransportManager"));
 
-TransportManager::~TransportManager(){};
-TransportManagerListener::~TransportManagerListener(){};
+TransportManager::~TransportManager() {
+}
+;
 
 TransportManagerImpl::TransportManagerImpl()
     : message_queue_mutex_(),
@@ -373,7 +374,7 @@ void TransportManagerImpl::messageQueueThread(void) {
     //todo: add priority processing
 
     u_int serial_number = 0;
-    protocol_handler::RawMessage *active_msg;
+    protocol_handler::RawMessage *active_msg = NULL;
     pthread_mutex_lock(&message_queue_mutex_);
     for (std::vector<protocol_handler::RawMessage>::iterator msg =
         message_queue_.begin(); msg != message_queue_.end(); ++msg) {
@@ -382,22 +383,24 @@ void TransportManagerImpl::messageQueueThread(void) {
         serial_number = (*msg).serial_number();
       }
     }
-    RawMessageSptr msg_to_send(
-        new protocol_handler::RawMessage(active_msg->connection_key(),
-                                         active_msg->protocol_version(),
-                                         active_msg->serial_number(),
-                                         active_msg->data(),
-                                         active_msg->data_size()));
-    pthread_mutex_unlock(&message_queue_mutex_);
+    if (NULL != active_msg) {
+      RawMessageSptr msg_to_send(
+          new protocol_handler::RawMessage(active_msg->connection_key(),
+                                           active_msg->protocol_version(),
+                                           active_msg->serial_number(),
+                                           active_msg->data(),
+                                           active_msg->data_size()));
 
-    DeviceAdapter *device_adapter = adapter_handler_.getAdapterBySession(
-        active_msg->connection_key());
+      DeviceAdapter *device_adapter = adapter_handler_.getAdapterBySession(
+          active_msg->connection_key());
 
-    if (NULL == device_adapter) {
-      //probably error no device adapters found
-    } else {
-      device_adapter->sendData(active_msg->connection_key(), msg_to_send);
+      if (NULL == device_adapter) {
+        //probably error no device adapters found
+      } else {
+        device_adapter->sendData(active_msg->connection_key(), msg_to_send);
+      }
     }
+    pthread_mutex_unlock(&message_queue_mutex_);
   }  //while(true)
 
   message_queue_.clear();
@@ -480,6 +483,20 @@ void TransportManagerImpl::AdapterHandler::addDevice(DeviceAdapter *da,
 void TransportManagerImpl::AdapterHandler::removeDevice(
     const DeviceHandle &device) {
   device_to_adapter_multimap_.erase(device);
+}
+
+void TransportManagerImpl::acceptConnect(const DeviceHandle &device_id,
+                                         const ApplicationHandle &app_id,
+                                         const SessionID &session_id)
+{
+//todo: implement it
+}
+
+void TransportManagerImpl::declineConnect(const DeviceHandle &device_id,
+                                         const ApplicationHandle &app_id)
+{
+//todo: implement it
+
 }
 
 }  //namespace

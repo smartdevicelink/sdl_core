@@ -160,6 +160,27 @@ class TransportManagerImpl : public TransportManager {
   virtual void removeDevice(const DeviceHandle &device);
 
   /**
+   * @brief accept device originated connection
+   *
+   * @param
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void acceptConnect(const DeviceHandle &device_id,
+                             const ApplicationHandle &app_id,
+                             const SessionID &session_id);
+
+  /**
+   * @brief decline device originated connection
+   *
+   * @param
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void declineConnect(const DeviceHandle &device_id,
+                              const ApplicationHandle &app_id);
+
+  /**
    * @brief set new listener
    *
    * @param listener
