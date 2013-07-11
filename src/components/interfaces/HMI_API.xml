@@ -1141,7 +1141,7 @@
     </function>
     <function name="OnDeviceListUpdated" messagetype="notification">
         <description>Notification from SmartDeviceLink to HMI about changes in device list.</description>
-        <param name="deviceList" type="String" mandatory="false" array="true" minsize="1" maxsize="100"/>
+        <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
     </function>
     <function name="GetAppList" messagetype="request">
         <description>This methos is usually invoked by HMI to get list of registered apps.</description>

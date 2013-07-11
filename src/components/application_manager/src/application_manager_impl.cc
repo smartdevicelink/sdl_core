@@ -297,6 +297,11 @@ void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
+  if (!connection_handler_) {
+    LOG4CXX_WARN(logger_, "Connection handler is not set.");
+  } else {
+    connection_handler_->StartTransportManager();
+  }
 
   smart_objects::CSmartObject* is_vr_ready = new smart_objects::CSmartObject;
   smart_objects::CSmartObject& so_to_send = *is_vr_ready;
@@ -495,6 +500,32 @@ void ApplicationManagerImpl::onErrorSending(
 void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
   // TODO(DK): HMI StartDeviceDiscovery response
+  /*smart_objects::CSmartObject* update_list = new smart_objects::CSmartObject;
+  smart_objects::CSmartObject& so_to_send = *update_list;
+  so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
+    hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated;
+  so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
+    hmi_apis::messageType::notification;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
+  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4435;
+  so_to_send[jhs::S_MSG_PARAMS] =
+    smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  if (!device_list.empty()) {
+    so_to_send[jhs::S_MSG_PARAMS]["deviceList"] =
+      smart_objects::CSmartObject(smart_objects::SmartType_Array);
+    int i = 0;
+    for (connection_handler::DeviceList::const_iterator it = device_list.begin();
+         device_list.end() != it;
+         ++it) {
+      smart_objects::CSmartObject obj =
+        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+      obj["name"] = it->second.user_friendly_name();
+      obj["id"] = it->second.device_handle();
+      so_to_send[jhs::S_MSG_PARAMS]["deviceList"][i++] = obj;
+    }
+  }
+  ManageHMICommand(update_list);*/
 }
 
 void ApplicationManagerImpl::RemoveDevice(
