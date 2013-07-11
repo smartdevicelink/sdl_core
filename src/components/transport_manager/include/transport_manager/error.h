@@ -1,7 +1,6 @@
 /**
- * \file handle_generator.h
- * \brief HandleGenerator class header file.
- *
+ * \file error.h
+ * \brief Transport manager error types definition.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,37 +32,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
 
-#include "transport_manager/common.h"
+namespace transport_manager {
 
-namespace transport_manager
-{
-
-/**
- * @brief Interface for device handle generator.
- * @interface DeviceHandleGenerator
- **/
-class DeviceHandleGenerator
-{
-public:
-
-  /**
-   * @brief Destructor.
-   **/
-  virtual ~DeviceHandleGenerator();
-
-  /**
-   * @brief Generate new device handle.
-   *
-   * Method used for generation of unique device handle.
-   *
-   * @return New device handle.
-   **/
-  virtual DeviceHandle generate() = 0;
+enum Error {
+  OK, FAIL, NOT_SUPPORTED, ALREADY_EXIST, BAD_STATE, BAD_PARAM
 };
 
-} // namespace transport_manager
+class BaseError {
+};
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+class SearchDeviceError : public BaseError {
+};
+
+class ConnectError : public BaseError {
+};
+
+class DisconnectError : public BaseError {
+};
+
+class DisconnectDeviceError : public BaseError {
+};
+
+class DataReceiveError : public BaseError {
+};
+
+class DataSendError : public BaseError {
+};
+
+class CommunicationError : public BaseError {
+};
+
+}  // namespace
+
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR

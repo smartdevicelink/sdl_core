@@ -37,26 +37,19 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
 
 #include <string>
-#include <vector>
-#include "utils/shared_ptr.h"
+
 #include "transport_manager/common.h"
-#include "transport_manager/device_handle_generator.h"
-#include "protocol_handler/raw_message.h"
+#include "transport_manager/error.h"
 
 namespace transport_manager {
+
+class DeviceHandleGenerator;
 
 namespace device_adapter {
 
 class Configuration;
 class DeviceAdapterListener;
 typedef std::string DeviceType;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
-
-enum Error {
-  OK, FAIL, NOT_SUPPORTED, ALREADY_EXIST, BAD_STATE, BAD_PARAM
-};
 
 class DeviceAdapter {
 public:
@@ -91,31 +84,6 @@ public:
 	virtual ApplicationList getApplicationList(
 			const DeviceHandle device_handle) const = 0;
 };
-
-class DeviceAdapterError {
-};
-
-class SearchDeviceError: public DeviceAdapterError {
-};
-
-class ConnectError: public DeviceAdapterError {
-};
-
-class DisconnectError: public DeviceAdapterError {
-};
-
-class DisconnectDeviceError: public DeviceAdapterError {
-};
-
-class DataReceiveError: public DeviceAdapterError {
-};
-
-class DataSendError: public DeviceAdapterError {
-};
-
-class CommunicationError: public DeviceAdapterError {
-};
-
 
 } // namespace device_adapter
 

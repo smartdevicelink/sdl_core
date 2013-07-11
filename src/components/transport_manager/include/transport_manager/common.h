@@ -35,6 +35,8 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
 
+#include <vector>
+
 #include "protocol_handler/raw_message.h"
 #include "utils/shared_ptr.h"
 
@@ -47,6 +49,10 @@ namespace transport_manager {
 typedef int SessionID;
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 
+typedef int ApplicationHandle;
+typedef int DeviceHandle;
+typedef std::vector<ApplicationHandle> ApplicationList;
+typedef std::vector<DeviceHandle> DeviceList;
 
 }
 

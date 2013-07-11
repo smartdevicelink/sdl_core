@@ -1,7 +1,6 @@
 /**
- * \file handle_generator.h
- * \brief HandleGenerator class header file.
- *
+ * \file device_adapter_event.h
+ * \brief DeviceAdapterEvent class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,37 +32,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
 
-#include "transport_manager/common.h"
+namespace transport_manager {
 
-namespace transport_manager
-{
+namespace device_adapter {
+class DeviceAdapter;
+}
 
-/**
- * @brief Interface for device handle generator.
- * @interface DeviceHandleGenerator
- **/
-class DeviceHandleGenerator
-{
-public:
+class DeviceAdapterEvent {
+ public:
+  bool operator ==(const DeviceAdapterEvent &other);
+  DeviceAdapterEvent(int type, SessionID session_id,
+                     device_adapter::DeviceAdapter *device_adapter, RawMessageSptr data,
+                     BaseError *error);
+  ~DeviceAdapterEvent();
+  void set_event_type(int type);
+  void set_session_id(int id);
+  void set_device_adapter(device_adapter::DeviceAdapter *device_adapter);
+  void set_data(RawMessageSptr data);
+  void set_error(BaseError *error);
 
-  /**
-   * @brief Destructor.
-   **/
-  virtual ~DeviceHandleGenerator();
+  int event_type(void) const;
+  int session_id(void) const;
+  device_adapter::DeviceAdapter *device_adapter(void) const;
+  RawMessageSptr data(void) const;
+  BaseError *error(void) const;
 
-  /**
-   * @brief Generate new device handle.
-   *
-   * Method used for generation of unique device handle.
-   *
-   * @return New device handle.
-   **/
-  virtual DeviceHandle generate() = 0;
+ private:
+  int event_type_;
+  int session_id_;
+  device_adapter::DeviceAdapter *device_adapter_;
+  RawMessageSptr event_data_;
+  BaseError *event_error_;
 };
 
-} // namespace transport_manager
+}  // namespace
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
