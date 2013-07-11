@@ -169,13 +169,15 @@ FFW.Navigation = FFW.RPCObserver.create( {
             }
             case "Navigation.UpdateTurnList": {
 
-                if (SDL.ValidateMessage.UpdateTurnList){
+                var result = SDL.ValidateMessage.Navigation.ShowConstantTBT(request.params);
+
+                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
 
                     SDL.SDLModel.tbtTurnListUpdate( request.params );
                     this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 } else {
-                    this.sendNavigationError( SDL.SDLModel.resultCode["INVALID_DATA"], request.id, request.method, "Not all mandatory fields does exists" );
+                    this.sendNavigationError( result.resultCode, request.id, request.method, result.resultMessage );
                 }
 
                 break;
@@ -199,7 +201,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
      */
     sendNavigationError: function( resultCode, id, method, message ) {
 
-        Em.Logger.log( "FFW.UI." + method + "Response" );
+        Em.Logger.log( "FFW.Navigation." + method + "Response" );
 
         if( resultCode ){
 

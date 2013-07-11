@@ -192,7 +192,9 @@ SDL.AlertPopUp = Em.ContainerView.create({
 
         this.set('alertRequestId', alertRequestId);
 
-        this.addSoftButtons(message.softButtons, message.appId);
+        if (message.softButtons) {
+            this.addSoftButtons(message.softButtons, message.appId);
+        }
 
         this.set('appName', SDL.SDLController.getApplicationModel(message.appId).appName);
 

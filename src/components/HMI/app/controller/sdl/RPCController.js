@@ -69,7 +69,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (params.navigationTexts.length < 0){
+            if (params.navigationTexts.length < 0) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -87,7 +87,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (typeof params.turnIcon != 'string'){
+            if (typeof params.turnIcon != 'string') {
                 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -105,7 +105,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (typeof params.distanceToManeuver != 'number'){
+            if (typeof params.distanceToManeuver != 'number') {
                 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -123,7 +123,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (typeof params.distanceToManeuverScale != 'number'){
+            if (typeof params.distanceToManeuverScale != 'number') {
                 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -141,7 +141,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (typeof params.appId != 'number'){
+            if (typeof params.appId != 'number') {
                 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -183,7 +183,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (params.turnList.length < 1){
+            if (params.turnList.length < 1) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -200,5 +200,75 @@ SDL.ValidateMessage = Em.Object.create({
             return this.resultStruct;
         }
 
+    }),
+    
+    /**
+     * Object that contains check methods that
+     * returns true if mandatory fields is successful
+     * and returns false if not
+     */
+    UI: Em.Object.create({
+
+        resultStruct: {},
+        
+        /**
+         * Validate method for request UI.Alert
+         * 
+         * @param {Object} params
+         */
+        Alert: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.alertStrings) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'alertStrings' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (params.alertStrings.length < 0) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'alertStrings'!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.appId) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appId' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appId != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appId'!"
+                };
+                
+                return this.resultStruct;
+            }
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        }
     })
 });

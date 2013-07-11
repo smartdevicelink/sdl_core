@@ -173,7 +173,15 @@ FFW.UI = FFW.RPCObserver.create( {
             }
             case "UI.Alert": {
 
-                SDL.SDLModel.onUIAlert( request.params, request.id );
+                var result = SDL.ValidateMessage.UI.Alert(request.params);
+
+                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
+
+                    SDL.SDLModel.onUIAlert( request.params, request.id );
+
+                } else {
+                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
+                }
 
                 break;
             }
@@ -445,6 +453,34 @@ FFW.UI = FFW.RPCObserver.create( {
                 // statements_def
                 break;
             }
+        }
+    },
+
+    /**
+     * Send error response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     */
+    sendUIError: function( resultCode, id, method, message ) {
+
+        Em.Logger.log( "FFW.UI." + method + "Response" );
+
+        if( resultCode ){
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "error": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "message": message,
+                    "data":{
+                        "method": method
+                    }
+                }
+            };
+            this.client.send( JSONMessage );
         }
     },
 
