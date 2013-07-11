@@ -155,21 +155,28 @@ FFW.Navigation = FFW.RPCObserver.create( {
             }
             case "Navigation.ShowConstantTBT": {
 
-                if (SDL.ValidateMessage.ShowConstantTBT){
+                var result = SDL.ValidateMessage.Navigation.ShowConstantTBT(request.params);
+                
+                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
 
                     SDL.SDLModel.tbtActivate( request.params );
                     this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 } else {
-                    this.sendNavigationError( SDL.SDLModel.resultCode["INVALID_DATA"], request.id, request.method, "Not all mandatory fields does exists" );
+                    this.sendNavigationError( result.resultCode, request.id, request.method, result.resultMessage );
                 }
                 break;
             }
             case "Navigation.UpdateTurnList": {
 
-                SDL.SDLModel.tbtTurnListUpdate( request.params );
+                if (SDL.ValidateMessage.UpdateTurnList){
 
-                this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    SDL.SDLModel.tbtTurnListUpdate( request.params );
+                    this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+
+                } else {
+                    this.sendNavigationError( SDL.SDLModel.resultCode["INVALID_DATA"], request.id, request.method, "Not all mandatory fields does exists" );
+                }
 
                 break;
             }
