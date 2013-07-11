@@ -46,7 +46,7 @@ namespace device_adapter {
 
 class BluetoothDeviceScanner : public DeviceScanner {
  public:
-  BluetoothDeviceScanner();
+  BluetoothDeviceScanner(DeviceAdapterController* controller);
   ~BluetoothDeviceScanner();
   void thread();
  protected:
@@ -60,9 +60,9 @@ class BluetoothDeviceScanner : public DeviceScanner {
   bool waitForDeviceScanRequest();
   RfcommChannelVector discoverSmartDeviceLinkRfcommChannels(
       const bdaddr_t& device_address);
-  SearchDeviceError* doInquiry(
-      DeviceVector* discovered_devices);
+  SearchDeviceError* doInquiry(DeviceVector* discovered_devices);
 
+  DeviceAdapterController* controller_;
   pthread_t thread_;
   bool thread_started_;
   bool shutdown_requested_;
@@ -102,9 +102,7 @@ class BluetoothDevice : public Device {
    **/
   virtual bool isSameAs(const Device* other) const;
 
-  const RfcommChannels& rfcomm_channels() const {
-    return rfcomm_channels_;
-  }
+  bool getRfcommChannel(const ApplicationHandle app_handle, uint8_t* channel_out);
 
   const bdaddr_t& address() const {
     return address_;
@@ -124,12 +122,41 @@ class BluetoothDevice : public Device {
   ApplicationHandle next_application_handle_;
 };
 
+class BluetoothSocketConnection : public ThreadedSocketConnection {
+ public:
+  BluetoothSocketConnection(const DeviceHandle device_handle,
+                            const ApplicationHandle app_handle,
+                            const SessionID session_id,
+                            DeviceAdapterController* controller);
+  virtual ~BluetoothSocketConnection();
+ protected:
+  virtual bool establish(ConnectError** error);
+};
+
+class BluetoothConnectionFactory : public ServerConnectionFactory {
+ public:
+  BluetoothConnectionFactory(DeviceAdapterController* controller);
+ protected:
+  virtual Error init();
+  virtual Error createConnection(DeviceHandle device_handle,
+                                 ApplicationHandle app_handle,
+                                 SessionID session_id);
+  virtual ~BluetoothConnectionFactory();
+ private:
+  DeviceAdapterController* controller_;
+};
+
 class BluetoothDeviceAdapter : public DeviceAdapterImpl {
  public:
-  BluetoothDeviceAdapter() {
-    setDeviceScanner(new BluetoothDeviceScanner);
-    setDataTransmitter(new SocketDataTransmitter);
+  BluetoothDeviceAdapter()
+      : device_scanner_(new BluetoothDeviceScanner(this)),
+        server_connection_factory_(new BluetoothConnectionFactory(this)) {
+    setDeviceScanner(device_scanner_.get());
+    setServerConnectionFactory(server_connection_factory_.get());
   }
+ private:
+  std::auto_ptr<DeviceScanner> device_scanner_;
+  std::auto_ptr<ServerConnectionFactory> server_connection_factory_;
 };
 
 }  // namespace device_adapter

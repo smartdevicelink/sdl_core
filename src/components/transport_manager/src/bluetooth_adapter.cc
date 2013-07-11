@@ -56,14 +56,27 @@ namespace transport_manager {
 
 namespace device_adapter {
 
+bool BluetoothDevice::getRfcommChannel(const ApplicationHandle app_handle,
+                                       uint8_t* channel_out) {
+  RfcommChannels::const_iterator it = rfcomm_channels_.find(app_handle);
+  if (it != rfcomm_channels_.end()) {
+    *channel_out = it->second;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 std::string getUniqueDeviceId(const bdaddr_t& device_address) {
   char device_address_string[32];
   ba2str(&device_address, device_address_string);
   return std::string("BT-") + device_address_string;
 }
 
-BluetoothDeviceScanner::BluetoothDeviceScanner()
-    : thread_(),
+BluetoothDeviceScanner::BluetoothDeviceScanner(
+    DeviceAdapterController* controller)
+    : controller_(controller),
+      thread_(),
       thread_started_(false),
       shutdown_requested_(false),
       device_scan_requested_(false),
@@ -270,11 +283,9 @@ void BluetoothDeviceScanner::thread() {
           LOG4CXX_INFO(logger_,
                        device->unique_device_id() << ", " << device->name());
         }
-        getController()->setDevices(discovered_devices);
-        getController()->getListener()->onSearchDeviceDone(getDeviceAdapter());
+        controller_->searchDeviceDone(discovered_devices);
       } else {
-        getController()->getListener()->onSearchDeviceFailed(getDeviceAdapter(),
-                                                             *error);
+        controller_->searchDeviceFailed(*error);
       }
     }
     device_scan_requested_ = false;
@@ -388,6 +399,86 @@ bool BluetoothDevice::isSameAs(const Device* other) const {
   return result;
 }
 
+BluetoothSocketConnection::BluetoothSocketConnection(
+    const DeviceHandle device_handle, const ApplicationHandle app_handle,
+    const SessionID session_id, DeviceAdapterController* controller)
+    : ThreadedSocketConnection(device_handle, app_handle, session_id,
+                               controller) {
+}
+
+BluetoothSocketConnection::~BluetoothSocketConnection() {
+}
+
+bool BluetoothSocketConnection::establish(ConnectError** error) {
+  DeviceSptr device = getController()->findDevice(device_handle());
+
+  BluetoothDevice* bluetooth_device =
+      static_cast<BluetoothDevice*>(device.get());
+
+  uint8_t rfcomm_channel;
+  if (!bluetooth_device->getRfcommChannel(application_handle(), &rfcomm_channel)) {
+    LOG4CXX_ERROR(logger_,
+                  "Application " << application_handle() << " not found");
+    *error = new ConnectError();
+    return false;
+  }
+
+  struct sockaddr_rc remoteSocketAddress = { 0 };
+  remoteSocketAddress.rc_family = AF_BLUETOOTH;
+  memcpy(&remoteSocketAddress.rc_bdaddr, &bluetooth_device->address(),
+         sizeof(bdaddr_t));
+  remoteSocketAddress.rc_channel = rfcomm_channel;
+
+  const int rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+  if (-1 == rfcomm_socket) {
+    LOG4CXX_ERROR_WITH_ERRNO(
+        logger_,
+        "Failed to create RFCOMM socket for device " << device_handle());
+    *error = new ConnectError();
+    return false;
+  }
+
+  const int connect_status = ::connect(rfcomm_socket,
+                                       (struct sockaddr*) &remoteSocketAddress,
+                                       sizeof(remoteSocketAddress));
+
+  if (0 != connect_status) {
+    LOG4CXX_ERROR_WITH_ERRNO(
+        logger_,
+        "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << session_id());
+    *error = new ConnectError();
+    return false;
+  }
+
+  set_socket(rfcomm_socket);
+  return true;
+}
+
+BluetoothConnectionFactory::BluetoothConnectionFactory(
+    DeviceAdapterController* controller)
+    : controller_(controller) {
+}
+
+Error BluetoothConnectionFactory::init() {
+  return OK;
+}
+
+Error BluetoothConnectionFactory::createConnection(DeviceHandle device_handle,
+                                                   ApplicationHandle app_handle,
+                                                   SessionID session_id) {
+  BluetoothSocketConnection* connection(
+      new BluetoothSocketConnection(device_handle, app_handle, session_id,
+                                    controller_));
+  Error error = connection->start();
+  if (error != OK)
+    delete connection;
+  return error;
+}
+
+BluetoothConnectionFactory::~BluetoothConnectionFactory() {
+}
+
 }  // namespace device_adapter
 
 }  // namespace transport_manager
+

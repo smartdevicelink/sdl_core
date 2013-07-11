@@ -41,107 +41,80 @@ namespace transport_manager {
 
 namespace device_adapter {
 
-template<typename TaskData>
-class Task {
- public:
-  virtual void perform(TaskData task_data) = 0;
- protected:
-  virtual ~Task() {
-  }
-};
-
-template<typename TaskData>
-class Thread {
- public:
-  Thread(TaskData task_data)
-      : thread_(),
-        task_(0),
-        repeat_(false),
-        task_data_(task_data) {
-  }
-
-  ~Thread() {
-    pthread_join(thread_, 0);
-  }
-
-  bool start() {
-    const int status = pthread_create(&thread_, 0, &Thread::threadFunc, this);
-    return status == 0;
-  }
-
-  void setTask(Task<TaskData>* task) {
-    task_ = task;
-    repeat_ = false;
-  }
-
-  void setRepeatTask(Task<TaskData>* task) {
-    task_ = task;
-    repeat_ = true;
-  }
-
-  static void* threadFunc(void* arg) {
-    Thread* thread = static_cast<Thread*>(arg);
-    while (thread->task_) {
-      Task<TaskData>* task = thread->task_;
-      if (!thread->repeat_)
-        thread->task_ = 0;
-      task->perform(thread->task_data_);
-    }
-    return 0;
-  }
-
- private:
-  pthread_t thread_;
-  Task<TaskData>* task_;
-  bool repeat_;
-  TaskData task_data_;
-};
-
 class ThreadedSocketConnection : public Connection {
  public:
-  typedef utils::SharedPtr<ThreadedSocketConnection> Sptr;
+  Error sendData(RawMessageSptr message);
+  Error disconnect();
+
+  Error start();
+ protected:
   ThreadedSocketConnection(const DeviceHandle device_handle,
                            const ApplicationHandle app_handle,
-                           const SessionID session_id);
+                           const SessionID session_id,
+                           DeviceAdapterController* controller);
   virtual ~ThreadedSocketConnection();
-  Thread<Sptr>* thread() {
-    return thread_;
-  }
-  void start(int socket);
 
-  int socket() const {
-    return socket_;
+  virtual bool establish(ConnectError** error) = 0;
+
+  DeviceAdapterController* getController() {
+    return controller_;
   }
-  void notify() const;
-  int notification_pipe_read_fd() const;
+
+  SessionID session_id() const {
+    return session_id_;
+  }
+
+  DeviceHandle device_handle() const {
+    return session_id_;
+  }
+
+  ApplicationHandle application_handle() const {
+    return app_handle_;
+  }
+
+  void set_socket(int socket) {
+    socket_ = socket;
+  }
 
  private:
-  ThreadedSocketConnection(const ThreadedSocketConnection&);
-  Thread<Sptr>* thread_;
+  void thread();
+  void transmit();
+  void finalise();
+  Error notify() const;
+  bool receive();
+  bool send();
+  bool clearNotificationPipe();
+  void abort();
+
+  friend void* startThreadedSocketConnection(void*);
+
+  DeviceAdapterController* controller_;
+  /**
+   * @brief Frames that must be sent to remote device.
+   **/
+  typedef std::queue<RawMessageSptr> FrameQueue;
+  FrameQueue frames_to_send_;
+  mutable pthread_mutex_t frames_to_send_mutex_;
+
+  pthread_t thread_;
+
   int notification_pipe_read_fd_;
   int notification_pipe_write_fd_;
   int socket_;
+  bool terminate_flag_;
+  const DeviceHandle device_handle_;
+  const ApplicationHandle app_handle_;
+  const SessionID session_id_;
 };
 
-class SocketDataTransmitter : public DataTransmitter, public Task<
-    ThreadedSocketConnection::Sptr> {
- public:
-  SocketDataTransmitter();
- protected:
-  virtual Error init();
-  virtual void terminate();
-  virtual void registerConnection(ConnectionSptr connection);
-  virtual void unregisterConnection(ConnectionSptr connection);
-  virtual void notifyDataAvailable(ConnectionSptr connection);
-  virtual void perform(ThreadedSocketConnection::Sptr task_data);
-  virtual ~SocketDataTransmitter() {
-  }
-
- private:
-  bool receive(ThreadedSocketConnection::Sptr connection);
-  bool clearNotificationPipe(ThreadedSocketConnection::Sptr connection);
-  bool send(ThreadedSocketConnection::Sptr connection);
-};
+/*
+ class TcpSocketConnection : public Connection {
+ virtual void establish() {
+ // wait for accept/reject
+ getConnectionManager()->onConnectionDone();
+ }
+ };
+ */
 
 }  // namespace
 

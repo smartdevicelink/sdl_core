@@ -49,191 +49,221 @@ namespace device_adapter {
 
 ThreadedSocketConnection::ThreadedSocketConnection(
     const DeviceHandle device_handle, const ApplicationHandle app_handle,
-    const SessionID session_id)
-    : Connection(device_handle, app_handle, session_id),
-      thread_(new Thread<Sptr>),
+    const SessionID session_id, DeviceAdapterController* controller)
+    : controller_(controller),
+      frames_to_send_(),
       notification_pipe_read_fd_(-1),
       notification_pipe_write_fd_(-1),
-      socket_(-1) {
+      terminate_flag_(false),
+      socket_(-1),
+      device_handle_(device_handle),
+      app_handle_(app_handle),
+      session_id_(session_id),
+      thread_() {
+  pthread_mutex_init(&frames_to_send_mutex_, 0);
 }
 
 ThreadedSocketConnection::~ThreadedSocketConnection() {
+  terminate_flag_ = true;
+  notify();
+  pthread_join(thread_, 0);
+  close(notification_pipe_read_fd_);
+  close(notification_pipe_write_fd_);
+  pthread_mutex_destroy(&frames_to_send_mutex_);
 }
 
-void ThreadedSocketConnection::start(int socket) {
+void ThreadedSocketConnection::abort() {
+  terminate_flag_ = true;
+}
+
+void* startThreadedSocketConnection(void* v) {
+  ThreadedSocketConnection* connection =
+      static_cast<ThreadedSocketConnection*>(v);
+  connection->thread();
+  return 0;
+}
+
+Error ThreadedSocketConnection::start() {
   int notification_pipe_fds[2];
   const int pipe_ret = pipe(notification_pipe_fds);
-  if(0 == pipe_ret) {
+  if (0 == pipe_ret) {
     notification_pipe_read_fd_ = notification_pipe_fds[0];
     notification_pipe_write_fd_ = notification_pipe_fds[1];
+  } else {
+    return FAIL;
   }
-  socket_ = socket;
-  thread_ = new Thread<Sptr>;
-  if(thread_)
-    thread_->start();
+
+  if (pthread_create(&thread_, 0, &startThreadedSocketConnection, this))
+    return OK;
+  else
+    return FAIL;
 }
 
-void ThreadedSocketConnection::notify() const {
+void ThreadedSocketConnection::finalise() {
+  controller_->connectionFinished(session_id());
+  close(socket_);
+}
+
+Error ThreadedSocketConnection::notify() const {
   if (-1 != notification_pipe_write_fd_) {
     uint8_t c = 0;
-    if (1 != write(notification_pipe_write_fd_, &c, 1)) {
+    if (1 == write(notification_pipe_write_fd_, &c, 1)) {
+      return OK;
+    } else {
       LOG4CXX_ERROR_WITH_ERRNO(
           logger_,
           "Failed to wake up connection thread for connection " << session_id());
     }
   }
+  return FAIL;
 }
 
-int ThreadedSocketConnection::notification_pipe_read_fd() const {
-  return notification_pipe_read_fd_;
+Error ThreadedSocketConnection::sendData(RawMessageSptr message) {
+  pthread_mutex_lock(&frames_to_send_mutex_);
+  frames_to_send_.push(message);
+  pthread_mutex_unlock(&frames_to_send_mutex_);
+  return notify();
 }
 
-SocketDataTransmitter::SocketDataTransmitter() {
+Error ThreadedSocketConnection::disconnect() {
+  terminate_flag_ = true;
+  return notify();
 }
 
-Error SocketDataTransmitter::init() {
-  return OK;
+void ThreadedSocketConnection::thread() {
+  controller_->connectionCreated(this, session_id(), device_handle_,
+                                 app_handle_);
+  ConnectError* connect_error;
+  if (establish(&connect_error)) {
+    controller_->connectDone(session_id());
+    while (!terminate_flag_)
+      transmit();
+    finalise();
+    //TODO clear queue controller_->dataSendFailed
+    controller_->disconnectDone(session_id());
+  } else {
+    controller_->connectFailed(session_id(), *connect_error);
+    delete connect_error;
+  }
 }
 
-void SocketDataTransmitter::terminate() {
-}
-
-void SocketDataTransmitter::registerConnection(ConnectionSptr connection) {
-  Thread<ThreadedSocketConnection::Sptr>* thread =
-      static_cast<ThreadedSocketConnection*>(&*connection)->thread();  // FIXME
-  if (thread)
-    thread->setRepeatTask(this);
-}
-
-void SocketDataTransmitter::unregisterConnection(ConnectionSptr connection) {
-  static_cast<ThreadedSocketConnection*>(connection)->notify();
-}
-
-void SocketDataTransmitter::notifyDataAvailable(ConnectionSptr connection) {
-  static_cast<ThreadedSocketConnection*>(connection)->notify();
-}
-
-void SocketDataTransmitter::perform(ThreadedSocketConnection::Sptr connection) {
+void ThreadedSocketConnection::transmit() {
   pollfd poll_fds[2];
-  poll_fds[0].fd = connection->socket();
+  poll_fds[0].fd = socket_;
   poll_fds[0].events = POLLIN | POLLPRI;
-  poll_fds[1].fd = connection->notification_pipe_read_fd();
+  poll_fds[1].fd = notification_pipe_read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
 
   const int poll_status = poll(poll_fds, sizeof(poll_fds) / sizeof(poll_fds[0]),
                                -1);
   if (poll_status == -1) {
-    LOG4CXX_ERROR_WITH_ERRNO(
-        logger_, "poll() failed for connection " << connection->session_id());
-    getController()->endConnection(connection);
+    LOG4CXX_ERROR_WITH_ERRNO(logger_,
+                             "poll() failed for connection " << session_id());
+    abort();
     return;
   }
 
   if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
-    LOG4CXX_INFO(logger_,
-                 "Connection " << connection->session_id() << " terminated");
-    getController()->endConnection(connection);
+    LOG4CXX_INFO(logger_, "Connection " << session_id() << " terminated");
+    abort();
     return;
   }
 
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
     LOG4CXX_ERROR(
         logger_,
-        "Notification pipe for connection " << connection->session_id() << " terminated");
-    getController()->endConnection(connection);
+        "Notification pipe for connection " << session_id() << " terminated");
+    abort();
     return;
   }
 
   if (0 != poll_fds[0].revents) {
-    const bool receive_ok = receive(connection);
+    const bool receive_ok = receive();
     if (!receive_ok) {
-      getController()->endConnection(connection);
+      abort();
       return;
     }
   }
 
   if (0 != poll_fds[1].revents) {
-    const bool clear_notification_pipe_ok = clearNotificationPipe(connection);
+    const bool clear_notification_pipe_ok = clearNotificationPipe();
     if (!clear_notification_pipe_ok) {
-      getController()->endConnection(connection);
+      abort();
       return;
     }
 
-    const bool send_ok = send(connection);
+    const bool send_ok = send();
     if (!send_ok) {
-      getController()->endConnection(connection);
+      abort();
       return;
     }
   }
 }
 
-bool SocketDataTransmitter::receive(ThreadedSocketConnection::Sptr connection) {
+bool ThreadedSocketConnection::receive() {
   uint8_t buffer[4096];
   ssize_t bytes_read = -1;
 
   do {
-    bytes_read = recv(connection->socket(), buffer, sizeof(buffer),
-                      MSG_DONTWAIT);
+    bytes_read = recv(socket_, buffer, sizeof(buffer), MSG_DONTWAIT);
 
     if (bytes_read > 0) {
       LOG4CXX_INFO(
           logger_,
-          "Received " << bytes_read << " bytes for connection " << connection->session_id());
+          "Received " << bytes_read << " bytes for connection " << session_id());
       unsigned char* data = new unsigned char[bytes_read];
       if (data) {
         memcpy(data, buffer, bytes_read);
         RawMessageSptr frame(
-            new protocol_handler::RawMessage(connection->session_id(), 0, data,
+            new protocol_handler::RawMessage(session_id(), 0, data,
                                              bytes_read));
-        getController()->getListener()->onDataReceiveDone(
-            getDeviceAdapter(), connection->session_id(), frame);
+        controller_->dataReceiveDone(session_id(), frame);
       } else {
-        getController()->getListener()->onDataReceiveFailed(
-            getDeviceAdapter(), connection->session_id(), DataReceiveError());
+        controller_->dataReceiveFailed(session_id(), DataReceiveError());
       }
     } else if (bytes_read < 0) {
       if (EAGAIN != errno && EWOULDBLOCK != errno) {
         LOG4CXX_ERROR_WITH_ERRNO(
-            logger_,
-            "recv() failed for connection " << connection->session_id());
+            logger_, "recv() failed for connection " << session_id());
 
         return false;
       }
     } else {
-      LOG4CXX_INFO(
-          logger_,
-          "Connection " << connection->session_id() << " closed by remote peer");
+      LOG4CXX_INFO(logger_,
+                   "Connection " << session_id() << " closed by remote peer");
       return false;
     }
   } while (bytes_read > 0);
   return true;
 }
 
-bool SocketDataTransmitter::clearNotificationPipe(
-    ThreadedSocketConnection::Sptr connection) {
+bool ThreadedSocketConnection::clearNotificationPipe() {
   uint8_t buffer[4096];
   ssize_t bytes_read = -1;
   do {
-    bytes_read = read(connection->notification_pipe_read_fd(), buffer,
-                      sizeof(buffer));
+    bytes_read = read(notification_pipe_read_fd_, buffer, sizeof(buffer));
   } while (bytes_read > 0);
 
   if ((bytes_read < 0) && (EAGAIN != errno)) {
     LOG4CXX_ERROR_WITH_ERRNO(
         logger_,
-        "Failed to clear notification pipe for connection " << connection->session_id());
+        "Failed to clear notification pipe for connection " << session_id());
     return false;
   }
   return true;
 }
 
-bool SocketDataTransmitter::send(ThreadedSocketConnection::Sptr connection) {
-  FrameQueue frames_to_send = connection->frames_to_send();
+bool ThreadedSocketConnection::send() {
+  FrameQueue frames_to_send;
+  pthread_mutex_lock(&frames_to_send_mutex_);
+  std::swap(frames_to_send, frames_to_send_);
+  pthread_mutex_unlock(&frames_to_send_mutex_);
+
   bool frame_sent = false;
   for (; false == frames_to_send.empty(); frames_to_send.pop()) {
     RawMessageSptr frame = frames_to_send.front();
 
-    const ssize_t bytes_sent = ::send(connection->socket(), frame->data(),
+    const ssize_t bytes_sent = ::send(socket_, frame->data(),
                                       frame->data_size(), 0);
 
     if (static_cast<size_t>(bytes_sent) == frame->data_size()) {
@@ -243,20 +273,16 @@ bool SocketDataTransmitter::send(ThreadedSocketConnection::Sptr connection) {
         //TODO isn't it OK?
         LOG4CXX_ERROR(
             logger_,
-            "Sent " << bytes_sent << " bytes while " << frame->data_size() << " had been requested for connection " << connection->session_id());
+            "Sent " << bytes_sent << " bytes while " << frame->data_size() << " had been requested for connection " << session_id());
       } else {
-        LOG4CXX_ERROR_WITH_ERRNO(
-            logger_, "Send failed for connection " << connection->session_id());
+        LOG4CXX_ERROR_WITH_ERRNO(logger_,
+                                 "Send failed for connection " << session_id());
       }
     }
     if (frame_sent) {
-      getController()->getListener()->onDataSendDone(getDeviceAdapter(),
-                                                     connection->session_id(),
-                                                     frame);
+      controller_->dataSendDone(session_id(), frame);
     } else {
-      getController()->getListener()->onDataSendFailed(getDeviceAdapter(),
-                                                       connection->session_id(),
-                                                       frame, DataSendError());
+      controller_->dataSendFailed(session_id(), frame, DataSendError());
     }
   }
   return true;
