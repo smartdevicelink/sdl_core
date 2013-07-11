@@ -85,7 +85,7 @@ SDL.DeviceListView = Em.ContainerView.create( {
         content: 'Change Devices'
     } ),
 
-    /*
+    /**
      * Function calls when notification from RPC comes and creates buttons to
      * choose devices
      */
@@ -102,12 +102,12 @@ SDL.DeviceListView = Em.ContainerView.create( {
                 action: 'onDeviceChoosed',
                 target: 'SDL.SDLController',
                 onDown: false,
-                appId: params.deviceList[i].id
+                id: params.deviceList[i].id
             } ) );
         }
     },
 
-    /*
+    /**
      * Function calls each time when user enters Change Device menu and clear
      * all old data about devices
      */

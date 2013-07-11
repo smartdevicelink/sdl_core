@@ -347,7 +347,7 @@ SDL.SDLController = Em.Object.create({
      * @param element: SDL.Button
      */
     onDeviceChoosed: function(element) {
-        FFW.UI.OnDeviceChosen(element.deviceName, element.appId);
+        FFW.UI.OnDeviceChosen(element.deviceName, element.id);
         this.turnChangeDeviceViewBack();
     },
 

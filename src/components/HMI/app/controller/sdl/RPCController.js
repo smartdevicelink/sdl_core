@@ -165,11 +165,39 @@ SDL.ValidateMessage = Em.Object.create({
          */
         UpdateTurnList: function(params) {
 
-            if (!params.turnList || params.turnList.length < 1) {
-                return false;
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.turnList) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'navigationTexts' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (params.turnList.length < 1){
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'navigationTexts'!"
+                };
+
+                return this.resultStruct;
             }
             
-            return true;
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+            
+            return this.resultStruct;
         }
 
     })
