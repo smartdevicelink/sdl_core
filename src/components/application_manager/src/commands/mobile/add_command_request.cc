@@ -59,8 +59,7 @@ void AddCommandRequest::Run() {
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -71,87 +70,32 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-
-  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
-
-  MessageChaining* chain = NULL;
-  // check menu params
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
-    smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
-    if (NULL == p_smrt_ui) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
-    }
+    smart_objects::CSmartObject msg_params;
+    msg_params[strings::msg_params][strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+    msg_params[strings::msg_params][strings::menu_params] =
+      (*message_)[strings::msg_params][strings::menu_params];
+    msg_params[strings::msg_params][strings::app_id] =
+      app->app_id();
 
     const int ui_cmd_id = hmi_apis::FunctionID::UI_AddCommand;
-
-    (*p_smrt_ui)[strings::params][strings::function_id] =
-      ui_cmd_id;
-
-    // be sure to use HMI correlation id
-    (*p_smrt_ui)[strings::params][strings::correlation_id] =
-        hmi_correlation_id;
-
-    (*p_smrt_ui)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
-
-    (*p_smrt_ui)[strings::msg_params][strings::menu_params] =
-      (*message_)[strings::msg_params][strings::menu_params];
-
-    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-      app->app_id();
-
-    // be sure to use mobile correlation id
-    chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, hmi_correlation_id, &(*message_));
-
-    ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+    CreateHMIRequest(ui_cmd_id, msg_params);
   }
 
-  // check vr params
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
-    smart_objects::CSmartObject* p_smrt_vr  = new smart_objects::CSmartObject();
 
-    if (NULL == p_smrt_vr) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
-    }
+    smart_objects::CSmartObject msg_params;
+    msg_params[strings::msg_params][strings::cmd_id] =
+        (*message_)[strings::msg_params][strings::cmd_id];
+    msg_params[strings::msg_params][strings::vr_commands] =
+       (*message_)[strings::msg_params][strings::vr_commands];
+    msg_params[strings::msg_params][strings::app_id] =
+        app->app_id();
 
     const int vr_cmd_id = hmi_apis::FunctionID::VR_AddCommand;
-    (*p_smrt_vr)[strings::params][strings::function_id] =
-      vr_cmd_id;
-
-    // be sure to use HMI correlation id
-    (*p_smrt_vr)[strings::params][strings::correlation_id] =
-        hmi_correlation_id;
-
-    (*p_smrt_vr)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-    (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
-
-    (*p_smrt_vr)[strings::msg_params][strings::vr_commands] =
-      (*message_)[strings::msg_params][strings::vr_commands];
-
-    (*p_smrt_vr)[strings::msg_params][strings::app_id] =
-      app->app_id();
-
-    ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, hmi_correlation_id, &(*message_));
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
+    CreateHMIRequest(vr_cmd_id, msg_params);
   }
 }
 

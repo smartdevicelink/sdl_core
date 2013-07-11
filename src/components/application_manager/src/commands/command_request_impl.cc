@@ -66,8 +66,10 @@ void CommandRequestImpl::SendResponse(const bool success,
   response[strings::params][strings::message_type] = MessageType::kResponse;
   response[strings::params][strings::correlation_id] =
       (*message_)[strings::params][strings::correlation_id];
-  response[strings::params][strings::protocol_version] =
-      (*message_)[strings::params][strings::protocol_version];
+  response[strings::params][strings::protocol_type] =
+      CommandImpl::mobile_protocol_type_;
+  response[strings::params][strings::protoco_version] =
+        CommandImpl::protocol_version_;
   response[strings::params][strings::connection_key] =
       (*message_)[strings::params][strings::connection_key];
   response[strings::params][strings::function_id] =
@@ -77,14 +79,49 @@ void CommandRequestImpl::SendResponse(const bool success,
     response[strings::msg_params]= response_params;
   }
 
-  response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] = result_code;
-
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
+  response[strings::msg_params][strings::success] = success;
+  response[strings::msg_params][strings::result_code] = result_code;
+
   ApplicationManagerImpl::instance()->ManageMobileCommand(&response);
+}
+
+void CommandRequestImpl::CreateHMIRequest(
+    const hmi_apis::FunctionID::eType& function_id,
+    const NsSmart::CSmartObject& request_params) {
+
+  NsSmartDeviceLink::NsSmartObjects::CSmartObject request;
+  const long correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asLong();
+  const long connection_key =
+    (*message_)[strings::params][strings::connection_key].asLong();
+
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
+  request[strings::params][strings::message_type] = MessageType::kRequest;
+  request[strings::params][strings::connection_key] = connection_key;
+  request[strings::params][strings::function_id] = function_id;
+  request[strings::params][strings::correlation_id] = hmi_correlation_id;
+  request[strings::params][strings::protocol_version] =
+      CommandImpl::protocol_version_;
+  request[strings::params][strings::protocol_type] =
+      CommandImpl::hmi_protocol_type_;
+
+  request[strings::msg_params]= request_params;
+
+  if (!ApplicationManagerImpl::instance()->ManageHMICommand(&request)) {
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+  } else {
+    if (!ApplicationManagerImpl::instance()->AddMessageChain(
+        connection_key, correlation_id, hmi_correlation_id, &(*message_))) {
+      LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");
+    }
+  }
+
 }
 
 }  // namespace commands

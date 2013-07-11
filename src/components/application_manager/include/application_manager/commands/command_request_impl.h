@@ -35,6 +35,7 @@
 
 #include "application_manager/commands/command_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -59,6 +60,8 @@ class CommandRequestImpl : public CommandImpl {
                     const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
                     const NsSmart::CSmartObject* response_params = NULL);
+  void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                   const NsSmart::CSmartObject& request_params);
 };
 
 }  // namespace commands

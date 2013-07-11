@@ -315,32 +315,28 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   ManageHMICommand(is_vr_ready);
 }
 
-// TODO(VS) : Remove function_id from function parameters(it isn't used)
-MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
-    unsigned int connection_key,
+bool ApplicationManagerImpl::AddMessageChain(unsigned int connection_key,
     unsigned int correlation_id, const uint64_t hmi_correlation_id,
-    const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data) {
-  if (!chain) {
-    chain = new MessageChaining(
-      connection_key,
-      correlation_id);
-    if (data) {
-      chain->set_data(*data);
-    }
+    const smart_objects::CSmartObject* data) {
 
-    MessageChainPtr ptr(chain);
-    message_chaining_[hmi_correlation_id] = ptr;
-    return chain;
-  } else  {
-      MessageChains::const_iterator it = message_chaining_.begin();
-      for (; it != message_chaining_.end(); ++it) {
-        if ((*it->second) == *chain) {
-          it->second->IncrementCounter();
-          break;
+    MessageChains::iterator it =  message_chaining_.find(hmi_correlation_id);
+    if (message_chaining_.end() != it) {
+      it->second->IncrementCounter();
+    } else {
+      MessageChaining* chain =
+          new MessageChaining(connection_key, correlation_id);
+      if (chain) {
+        if (data) {
+          chain->set_data(*data);
         }
+        MessageChainPtr ptr(chain);
+        message_chaining_[hmi_correlation_id] = ptr;
+      } else {
+        LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+        return false;
       }
-  }
-  return chain;
+    }
+    return true;
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(

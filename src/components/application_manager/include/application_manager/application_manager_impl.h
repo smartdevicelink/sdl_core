@@ -131,23 +131,17 @@ class ApplicationManagerImpl : public ApplicationManager
      * from mobile request, to ensure that all response were received
      * before sending response to mobile.
      *
-     * @param chain Pointer to MessageChaining class.
-     * If parameter is empty new instance is created,
-     * otherwise counter of MessageChaining for
-     * corresponding correlation ID is increased
-     *
      * @param connection_key Connection key of connection with application
      * @param correlation_id Correlation id of Mobile request
      * @param hmi_correlation_id Unique correlation id of HMI request
      * @param data Temporary SmartObject from mobile request.
      * Sometimes request data is needed in mobile response.
      *
-     * @return pointer to MessageChaining
+     * @return TRUE on success, otherwise FALSE
      */
-    MessageChaining* AddMessageChain(
-      MessageChaining* chain, unsigned int connection_key,
+    bool AddMessageChain( unsigned int connection_key,
       const unsigned int correlation_id, const uint64_t hmi_correlation_id,
-      const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
+      const smart_objects::CSmartObject* data = NULL);
 
     /*
      * @brief Decrease chain after response from hmi was received
@@ -421,7 +415,7 @@ class ApplicationManagerImpl : public ApplicationManager
     hmi_apis::Common_Language::eType              ui_language_;
     hmi_apis::Common_Language::eType              vr_language_;
     hmi_apis::Common_Language::eType              tts_language_;
-    smart_objects::CSmartObject* vehicle_type_;
+    smart_objects::CSmartObject*                  vehicle_type_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
