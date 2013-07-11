@@ -184,7 +184,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
   LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand function_id: " <<
                (*message)[strings::params][strings::function_id].asInt());
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
+  switch ((*message)[strings::params][strings::function_id].asInt()) {
     case  hmi_apis::FunctionID::BasicCommunication_StartDeviceDiscovery: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {

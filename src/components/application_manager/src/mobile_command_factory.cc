@@ -125,7 +125,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     const MessageSharedPtr& message) {
   CommandSharedPtr command(NULL);
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
+  switch ((*message)[strings::params][strings::function_id].asInt()) {
     case mobile_apis::FunctionID::RegisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kRequest) {
