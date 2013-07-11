@@ -155,17 +155,28 @@ FFW.Navigation = FFW.RPCObserver.create( {
             }
             case "Navigation.ShowConstantTBT": {
 
-                SDL.SDLModel.tbtActivate( request.params );
+                var result = SDL.ValidateMessage.Navigation.ShowConstantTBT(request.params);
+                
+                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
 
-                this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    SDL.SDLModel.tbtActivate( request.params );
+                    this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
+                } else {
+                    this.sendNavigationError( result.resultCode, request.id, request.method, result.resultMessage );
+                }
                 break;
             }
             case "Navigation.UpdateTurnList": {
 
-                SDL.SDLModel.tbtTurnListUpdate( request.params );
+                if (SDL.ValidateMessage.UpdateTurnList){
 
-                this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    SDL.SDLModel.tbtTurnListUpdate( request.params );
+                    this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+
+                } else {
+                    this.sendNavigationError( SDL.SDLModel.resultCode["INVALID_DATA"], request.id, request.method, "Not all mandatory fields does exists" );
+                }
 
                 break;
             }
@@ -181,12 +192,40 @@ FFW.Navigation = FFW.RPCObserver.create( {
     },
 
     /**
+     * Send error response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     */
+    sendNavigationError: function( resultCode, id, method, message ) {
+
+        Em.Logger.log( "FFW.UI." + method + "Response" );
+
+        if( resultCode ){
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "error": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "message": message,
+                    "data":{
+                        "method": method
+                    }
+                }
+            };
+            this.client.send( JSONMessage );
+        }
+    },
+
+    /**
      * send response from onRPCRequest
      * @param {Number} resultCode
      * @param {Number} id
      * @param {String} method
      */
-    sendUIResult: function( resultCode, id, method ) {
+    sendNavigationResult: function( resultCode, id, method ) {
 
         Em.Logger.log( "FFW.UI." + method + "Response" );
 

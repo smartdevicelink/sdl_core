@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *  · Redistributions of source code must retain the above copyright notice,
@@ -11,7 +11,7 @@
  *  · Neither the name of the Ford Motor Company nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -94,14 +94,15 @@ SDL.DeviceListView = Em.ContainerView.create( {
         var i, len = params.deviceList.length;
         for( i = 0; i < len; i++ ){
             this.get( 'listOfDevices.list.childViews' ).pushObject( SDL.Button.create( {
-                deviceName: params.deviceList[i],
-                icon: params.icon,
-                text: params.deviceList[i],
+                deviceName: params.deviceList[i].name,
+                icon: params.deviceList[i].icon,
+                text: params.deviceList[i].name,
                 classNames: 'ffw-button notpressed list-item',
-                templateName: params.icon ? 'rightIcon' : 'text',
+                templateName: params.deviceList[i].icon ? 'rightIcon' : 'text',
                 action: 'onDeviceChoosed',
                 target: 'SDL.SDLController',
-                onDown: false
+                onDown: false,
+                appId: params.deviceList[i].id
             } ) );
         }
     },

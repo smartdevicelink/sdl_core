@@ -42,14 +42,134 @@ SDL.ValidateMessage = Em.Object.create({
      */
     Navigation: Em.Object.create({
 
+        resultStruct: {},
+        
         /**
          * Validate method for request Navigation.ShowConstantTBT
          * 
          * @param {Object} params
          */
         ShowConstantTBT: function(params) {
-            var result;
 
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.navigationTexts) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'navigationTexts' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (params.navigationTexts.length < 0){
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'navigationTexts'!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.turnIcon) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'turnIcon' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.turnIcon != 'string'){
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'turnIcon'!"
+                };
+                
+                return this.resultStruct;
+            }
+            if (!params.distanceToManeuver) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'distanceToManeuver' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.distanceToManeuver != 'number'){
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'distanceToManeuver'!"
+                };
+                
+                return this.resultStruct;
+            }
+            if (!params.distanceToManeuverScale) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'distanceToManeuverScale' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.distanceToManeuverScale != 'number'){
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'distanceToManeuverScale'!"
+                };
+                
+                return this.resultStruct;
+            }
+            if (!params.appId) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appId' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appId != 'number'){
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appId'!"
+                };
+                
+                return this.resultStruct;
+            }
+            
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+            
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request Navigation.UpdateTurnList
+         * 
+         * @param {Object} params
+         */
+        UpdateTurnList: function(params) {
+
+            if (!params.turnList || params.turnList.length < 1) {
+                return false;
+            }
+            
+            return true;
         }
 
     })

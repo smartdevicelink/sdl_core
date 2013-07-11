@@ -36,6 +36,7 @@
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/audio_pass_thru_thread_impl.h"
+#include "application_manager/message_helper.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "formatters/formatter_json_rpc.h"
@@ -292,11 +293,22 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
 
 void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
   // TODO(VS): Call function from ConnectionHandler
+  if (!connection_handler_) {
+    LOG4CXX_WARN(logger_, "Connection handler is not set.");
+    return;
+  }
+
+  connection_handler_->ConnectToDevice(id);
 }
 
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
+  if (!connection_handler_) {
+    LOG4CXX_WARN(logger_, "Connection handler is not set.");
+  } else {
+    connection_handler_->StartTransportManager();
+  }
 
   smart_objects::CSmartObject* is_vr_ready = new smart_objects::CSmartObject;
   smart_objects::CSmartObject& so_to_send = *is_vr_ready;
@@ -340,7 +352,7 @@ bool ApplicationManagerImpl::AddMessageChain(unsigned int connection_key,
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
-    const uint64_t hmi_correlation_id) {
+  const uint64_t hmi_correlation_id) {
   bool result = false;
   MessageChains::iterator it =
     message_chaining_.find(hmi_correlation_id);
@@ -357,7 +369,7 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 }
 
 MessageChaining* ApplicationManagerImpl::GetMessageChain(
-    const uint64_t hmi_correlation_id) const {
+  const uint64_t hmi_correlation_id) const {
   MessageChains::const_iterator it =
     message_chaining_.find(hmi_correlation_id);
   if (message_chaining_.end() != it) {
@@ -368,14 +380,13 @@ MessageChaining* ApplicationManagerImpl::GetMessageChain(
 }
 
 uint32_t ApplicationManagerImpl::GetMobilecorrelation_id(
-    uint64_t correlation_id) const {
+  uint64_t correlation_id) const {
   uint32_t mobile_correlation_id = correlation_id >> 32;
   return mobile_correlation_id;
 }
 
 uint64_t ApplicationManagerImpl::GetHMIcorrelation_id(
-    uint32_t correlation_id,  uint32_t connection_key) const {
-
+  uint32_t correlation_id,  uint32_t connection_key) const {
   // to avoid warning: left shift count >= width of type
   uint64_t mobile_correlation_id = correlation_id;
   uint64_t conn_key = connection_key;
@@ -491,6 +502,23 @@ void ApplicationManagerImpl::onErrorSending(
 void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
   // TODO(DK): HMI StartDeviceDiscovery response
+  smart_objects::CSmartObject* update_list = new smart_objects::CSmartObject;
+  smart_objects::CSmartObject& so_to_send = *update_list;
+  so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
+    hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated;
+  so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
+    hmi_apis::messageType::notification;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
+  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4435;
+  smart_objects::CSmartObject* msg_params =
+    MessageHelper::CreateDeviceListSO(device_list);
+  if (!msg_params) {
+    LOG4CXX_WARN(logger_, "Failed to create sub-smart object.");
+    delete update_list;
+  }
+  so_to_send[jhs::S_MSG_PARAMS] = *msg_params;
+  ManageHMICommand(update_list);
 }
 
 void ApplicationManagerImpl::RemoveDevice(

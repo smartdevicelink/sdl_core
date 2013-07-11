@@ -52,7 +52,7 @@ void SetGlobalPropertiesResponse::Run() {
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
@@ -78,12 +78,10 @@ void SetGlobalPropertiesResponse::Run() {
 
     if ((mobile_apis::Result::SUCCESS == result_ui) &&
             (mobile_apis::Result::SUCCESS == result_tts)) {
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-      SendResponse();
+      SendResponse(true);
     } else {
       // TODO: check ui and tts response code
+      SendResponse(false);
     }
   }
 }

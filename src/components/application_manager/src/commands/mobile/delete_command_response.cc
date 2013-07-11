@@ -52,7 +52,7 @@ void DeleteCommandResponse::Run() {
 
   if ((*message_)[strings::params][strings::success] == false)
   {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
@@ -67,7 +67,7 @@ void DeleteCommandResponse::Run() {
 
   const mobile_apis::Result::eType code =
       static_cast<mobile_apis::Result::eType>(
-      (*message_)[strings::msg_params][hmi_response::code].asInt());
+      (*message_)[strings::params][hmi_response::code].asInt());
 
   const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
   const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
@@ -112,15 +112,7 @@ void DeleteCommandResponse::Run() {
           !(*command).keyExists(strings::vr_commands)) {
         app->RemoveCommand(data[strings::msg_params][strings::cmd_id].asInt());
 
-        const long mobile_correlation_id = ApplicationManagerImpl::instance()->
-            GetMobilecorrelation_id(correlation_id);
-
-        (*message_)[strings::msg_params][strings::correlation_id] =
-            mobile_correlation_id;
-        (*message_)[strings::msg_params][strings::success] = true;
-        (*message_)[strings::msg_params][strings::result_code] =
-            mobile_apis::Result::SUCCESS;
-        SendResponse();
+        SendResponse(true);
       }
       else {
        // TODO(VS): check ui and vr response code

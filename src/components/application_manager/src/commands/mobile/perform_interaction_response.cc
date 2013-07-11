@@ -52,7 +52,7 @@ void PerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionResponse::Run");
 
   if ((*message_)[strings::params][strings::success] == false) {
-     SendResponse();
+     SendResponse(false);
      LOG4CXX_ERROR(logger_, "Success = false");
      return;
   }
@@ -65,7 +65,7 @@ void PerformInteractionResponse::Run() {
      (*message_)[strings::params][strings::success] = true;
      (*message_)[strings::params][strings::result_code] =
        mobile_apis::Result::SUCCESS;
-     SendResponse();
+     SendResponse(true);
   }
 }
 

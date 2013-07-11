@@ -310,7 +310,7 @@ TEST(json2_command, create_object) {
             << "; protocol type " << is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_TYPE].asInt()
             << "; correlation id " << is_vr_ready[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt() << std::endl;
 
-  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, is_vr_ready.isValid());
+  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, is_vr_ready.validate());
 
   std::string str;
   formatters::FormatterJsonRpc::ToString(is_vr_ready, str);
@@ -336,7 +336,7 @@ TEST(json2_command, without_factory_create) {
 
   hmi_apis::HMI_API factory;
   factory.attachSchema(so_to_send);
-  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, so_to_send.isValid());
+  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, so_to_send.validate());
 
   std::string str;
   formatters::FormatterJsonRpc::ToString(so_to_send, str);

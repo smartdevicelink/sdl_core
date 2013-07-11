@@ -50,7 +50,7 @@ void SetIconResponse::Run() {
   LOG4CXX_INFO(logger_, "EncodedSyncPDataResponse::Run");
 
   if ((*message_)[strings::params][strings::success] == false) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
@@ -69,7 +69,7 @@ void SetIconResponse::Run() {
 
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(hmi_request_id)) {
-    if ((*message_)[strings::msg_params][hmi_response::code].asInt()) {
+    if ((*message_)[strings::params][hmi_response::code].asInt()) {
       ApplicationImpl* app = static_cast<ApplicationImpl*>(
           ApplicationManagerImpl::instance()->
           application(data[strings::msg_params][strings::app_id]));
@@ -77,12 +77,10 @@ void SetIconResponse::Run() {
       app->set_app_icon_path(data[strings::msg_params]
                                  [strings::sync_file_name]);
 
-      (*message_)[strings::params][strings::success] = true;
-      (*message_)[strings::params][strings::result_code] =
-              mobile_apis::Result::SUCCESS;
-      SendResponse();
+      SendResponse(true);
     } else {
       // TODO(VS): Some logic
+      SendResponse(false);
     }
   }
 }

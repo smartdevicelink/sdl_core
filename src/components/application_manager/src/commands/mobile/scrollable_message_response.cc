@@ -48,7 +48,7 @@ ScrollableMessageResponse::ScrollableMessageResponse(
 void ScrollableMessageResponse::Run() {
   LOG4CXX_INFO(logger_, "ScrollableMessageResponse::Run");
 
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands

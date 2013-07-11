@@ -54,7 +54,7 @@ void ChangeRegistrationResponse::Run() {
 
   if ((*message_)[strings::msg_params][strings::success] == false) {
     LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse();
+    SendResponse(false);
     return;
   }
 
@@ -103,12 +103,7 @@ void ChangeRegistrationResponse::Run() {
 
     if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
         (hmi_apis::Common_Result::SUCCESS == result_vr)) {
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::correlation_id] =
-          mobile_correlation_id;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-      SendResponse();
+      SendResponse(true);
     } else {
       // TODO(VS): check ui and vr response code
     }

@@ -52,30 +52,16 @@ void AddSubMenuResponse::Run() {
 
   if ((*message_)[strings::params][strings::success] == false) {
     LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse();
+    SendResponse(false);
     return;
   }
 
   const long correlation_id = (*message_)[strings::params]
                                  [strings::correlation_id].asLong();
 
-  smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
-    GetMessageChain(correlation_id)->data();
-
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(correlation_id)) {
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->
-          application(data[strings::params][strings::connection_key]));
-
-    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
-        GetMobilecorrelation_id(correlation_id);
-    (*message_)[strings::msg_params][strings::correlation_id] =
-        mobile_correlation_id;
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-    SendResponse();
+    SendResponse(true);
   }
 }
 

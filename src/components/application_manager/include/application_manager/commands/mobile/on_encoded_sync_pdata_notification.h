@@ -39,9 +39,9 @@
 
 namespace application_manager {
 
-class ApplicationImpl;
-
 namespace commands {
+
+class ApplicationImpl;
 
 /**
  * @brief OnEncodedSyncPDataNotification class is used as callback including binary

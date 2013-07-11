@@ -54,7 +54,7 @@ void DeleteInteractionChoiceSetResponse::Run() {
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
     LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse();
+    SendResponse(false);
     return;
   }
 
@@ -62,21 +62,12 @@ void DeleteInteractionChoiceSetResponse::Run() {
     (*message_)[strings::params][strings::correlation_id].asLong();
 
   const int code =
-    (*message_)[strings::msg_params][hmi_response::code].asInt();
+    (*message_)[strings::params][hmi_response::code].asInt();
 
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(correlation_id)) {
 
-      const long mobile_correlation_id = ApplicationManagerImpl::instance()->
-        GetMobilecorrelation_id(correlation_id);
-
-      (*message_)[strings::msg_params][strings::correlation_id] =
-        mobile_correlation_id;
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-
-    SendResponse();
+    SendResponse(true);
   }
 }
 

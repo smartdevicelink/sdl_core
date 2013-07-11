@@ -58,7 +58,7 @@ void GenericResponse::Run() {
   response[strings::msg_params][strings::result_code] =
       mobile_apis::Result::INVALID_DATA;
 
-  SendResponse();
+  SendResponse(false);
 }
 
 }  // namespace commands

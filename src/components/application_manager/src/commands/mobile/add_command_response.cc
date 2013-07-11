@@ -55,7 +55,7 @@ void AddCommandResponse::Run() {
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
     LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse();
+    SendResponse(false);
     return;
   }
 
@@ -83,9 +83,6 @@ void AddCommandResponse::Run() {
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
 
-    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
-        GetMobilecorrelation_id(correlation_id);
-
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
              ApplicationManagerImpl::instance()->
              application(connection_key));
@@ -103,14 +100,10 @@ void AddCommandResponse::Run() {
 
       if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
           (hmi_apis::Common_Result::SUCCESS == result_vr)) {
-            (*message_)[strings::msg_params][strings::success] = true;
-            (*message_)[strings::msg_params][strings::correlation_id] =
-                mobile_correlation_id;
-            (*message_)[strings::msg_params][strings::result_code] =
-                mobile_apis::Result::SUCCESS;
-                SendResponse();
+        SendResponse(true);
     } else {
-      // TODO(DK): check ui and vr response code
+      // TODO: Check Response result code
+      SendResponse(false);
     }
   }
 }

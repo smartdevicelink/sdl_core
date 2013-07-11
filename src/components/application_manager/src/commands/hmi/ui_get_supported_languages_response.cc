@@ -49,7 +49,7 @@ void UIGetSupportedLanguagesResponse::Run() {
 
   const hmi_apis::Common_Result::eType code =
     static_cast<hmi_apis::Common_Result::eType>(
-      (*message_)[strings::msg_params][hmi_response::code].asInt());
+      (*message_)[strings::params][hmi_response::code].asInt());
 
   if (hmi_apis::Common_Result::SUCCESS == code) {
     ApplicationManagerImpl::instance()->set_ui_supported_languages(

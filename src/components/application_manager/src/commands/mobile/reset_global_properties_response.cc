@@ -50,15 +50,12 @@ void ResetGlobalPropertiesResponse::Run() {
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  (*message_)[strings::msg_params][strings::success] = true;
-  (*message_)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::SUCCESS;
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands

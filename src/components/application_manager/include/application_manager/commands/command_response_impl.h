@@ -52,7 +52,7 @@ class CommandResponseImpl : public CommandImpl {
     virtual bool Init();
     virtual bool CleanUp();
     virtual void Run();
-    void SendResponse();
+    void SendResponse(bool success);
 };
 
 }  // namespace commands
