@@ -54,29 +54,32 @@ namespace connection_handler {
  * \brief SmartDeviceLink ConnectionHandler interface class
  */
 class ConnectionHandler {
- public:
-  /**
-   * \brief Sets observer pointer for ConnectionHandler.
-   * \param observer Pointer to observer object.
-   **/
-  virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver * observer)=0;
+  public:
+    /**
+     * \brief Sets observer pointer for ConnectionHandler.
+     * \param observer Pointer to observer object.
+     **/
+    virtual void set_connection_handler_observer(
+      ConnectionHandlerObserver* observer) = 0;
 
-  /**
-   * \brief Sets pointer to TransportManager.
-   * \param transportManager Pointer to TransportManager object.
-   **/
-  virtual void set_transport_manager(
-      NsSmartDeviceLink::NsTransportManager::ITransportManager * transport_manager)=0;
+    /**
+     * \brief Sets pointer to TransportManager.
+     * \param transportManager Pointer to TransportManager object.
+     **/
+    virtual void set_transport_manager(
+      NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager) = 0;
 
-  virtual void StartTransportManager() = 0;
+    virtual void StartTransportManager() = 0;
 
- protected:
-  /**
-   * \brief Destructor
-   */
-  virtual ~ConnectionHandler() {
-  }
+    virtual void ConnectToDevice(
+      connection_handler::DeviceHandle device_handle) = 0;
+
+  protected:
+    /**
+     * \brief Destructor
+     */
+    virtual ~ConnectionHandler() {
+    }
 };
 }/* namespace connection_handler */
 
