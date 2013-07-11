@@ -48,8 +48,38 @@ SDL.ValidateMessage = Em.Object.create({
          * @param {Object} params
          */
         ShowConstantTBT: function(params) {
-            var result;
 
+            if (!params.navigationTexts || params.navigationTexts.length < 0) {
+                return false;
+            }
+            if (!params.turnIcon || typeof params.turnIcon != 'string') {
+                return false;
+            }
+            if (!params.distanceToManeuver || typeof params.distanceToManeuver != 'number') {
+                return false;
+            }
+            if (!params.distanceToManeuver || typeof params.distanceToManeuverScale != 'number') {
+                return false;
+            }
+            if (!params.appId || typeof params.appId != 'number') {
+                return false;
+            }
+            
+            return true;
+        },
+        
+        /**
+         * Validate method for request Navigation.UpdateTurnList
+         * 
+         * @param {Object} params
+         */
+        UpdateTurnList: function(params) {
+
+            if (!params.turnList || params.turnList.length < 1) {
+                return false;
+            }
+            
+            return true;
         }
 
     })

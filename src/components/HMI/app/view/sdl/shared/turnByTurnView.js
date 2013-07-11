@@ -69,7 +69,7 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
     activate: function( params ) {
         if( params ){
             
-            for (var i = 0; i < params.alertStrings.length; i++) {
+            for (var i = 0; i < params.navigationTexts.length; i++) {
                 switch (params.alertStrings[i]) {
                     case 'navigationText1': {
                         this.set( 'captionText.content', params.navigationTexts[i].fieldText );
@@ -90,13 +90,16 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
                 }
             }
             
-            
-            this.softButtons.addItems( params.softButtons );
+            if (params.softButtons) {
+                this.softButtons.addItems( params.softButtons );
+            }
+            if (params.maneuverComplete){
+                this.set( 'maneuverComplete', params.maneuverComplete );
+            }
             this.set( 'appId', params.appId );
             this.set( 'turnIcon', params.turnIcon );
             this.set( 'distanceToManeuver', params.distanceToManeuver );
             this.set( 'distanceToManeuverScale', params.distanceToManeuverScale );
-            this.set( 'maneuverComplete', params.maneuverComplete );
 
             this.set( 'active', true );
         }
