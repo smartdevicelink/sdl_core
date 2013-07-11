@@ -50,7 +50,7 @@ void PutFileResponse::Run() {
 
   (*message_)[strings::msg_params][strings::space_available] =
       static_cast<int>(file_system::AvailableSpace());
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands

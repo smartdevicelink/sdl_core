@@ -54,7 +54,7 @@ void GetVehicleDataResponse::Run() {
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
@@ -69,14 +69,11 @@ void GetVehicleDataResponse::Run() {
       (*message_)[strings::params][hmi_response::code].asInt();
 
     if (code) {
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-
+      SendResponse(true);
     } else {
       // TODO(DK): Some logic
+      SendResponse(false);
     }
-    SendResponse();
   }
 }
 

@@ -54,13 +54,13 @@ void UnsubscribeVehicleDataResponse::Run() {
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
   // TODO(DK): Some logic
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands

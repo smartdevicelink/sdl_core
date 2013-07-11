@@ -62,7 +62,7 @@ void OnEncodedSyncPDataNotification::Run() {
     (*message_)[strings::msg_params][strings::result_code] =
       mobile_apis::Result::FILE_NOT_FOUND;
 
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "File not found");
     return;
   }
@@ -76,7 +76,7 @@ void OnEncodedSyncPDataNotification::Run() {
 
   (*message_)[strings::params][strings::data] = string_pdata;
 
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands

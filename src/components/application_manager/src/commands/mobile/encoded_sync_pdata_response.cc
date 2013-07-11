@@ -53,7 +53,7 @@ void EncodedSyncPDataResponse::Run() {
   LOG4CXX_INFO(logger_, "EncodedSyncPDataResponse::Run");
 
   if ((*message_)[strings::params][strings::success] == false) {
-      SendResponse();
+      SendResponse(false);
       LOG4CXX_ERROR(logger_, "Success = false");
       return;
     }
@@ -63,16 +63,7 @@ void EncodedSyncPDataResponse::Run() {
 
     if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
-
-      const long mobile_correlation_id = ApplicationManagerImpl::instance()->
-        GetMobilecorrelation_id(correlation_id);
-
-      (*message_)[strings::msg_params][strings::correlation_id] =
-        mobile_correlation_id;
-      (*message_)[strings::params][strings::success] = true;
-      (*message_)[strings::params][strings::result_code] =
-              mobile_apis::Result::SUCCESS;
-      SendResponse();
+      SendResponse(true);
     }
 }
 

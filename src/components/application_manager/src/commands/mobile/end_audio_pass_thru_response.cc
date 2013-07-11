@@ -53,7 +53,7 @@ void EndAudioPassThruResponse::Run() {
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   if (false == (*message_)[strings::msg_params][strings::success].asBool()) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
@@ -65,15 +65,7 @@ void EndAudioPassThruResponse::Run() {
         correlation_id)) {
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
 
-    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
-      GetMobilecorrelation_id(correlation_id);
-
-    (*message_)[strings::msg_params][strings::correlation_id] =
-      mobile_correlation_id;
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-    SendResponse();
+    SendResponse(true);
   }
 }
 

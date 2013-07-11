@@ -51,7 +51,7 @@ void UpdateTurnListResponse::Run() {
   LOG4CXX_INFO(logger_, "UpdateTurnListResponse::Run");
 
   if ((*message_)[strings::params][strings::success] == false) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
@@ -61,10 +61,7 @@ void UpdateTurnListResponse::Run() {
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       hmi_correlation_id)) {
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-            mobile_apis::Result::SUCCESS;
-    SendResponse();
+    SendResponse(true);
   }
 }
 

@@ -51,7 +51,7 @@ void DeleteSubMenuResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuResponse::Run");
 
   if ((*message_)[strings::params][strings::success] == false) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
@@ -64,19 +64,7 @@ void DeleteSubMenuResponse::Run() {
 
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(hmi_correlation_id)) {
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->
-          application(data[strings::params][strings::connection_key]));
-
-    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
-      GetMobilecorrelation_id(hmi_correlation_id);
-
-    (*message_)[strings::msg_params][strings::correlation_id] =
-      mobile_correlation_id;
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-    SendResponse();
+    SendResponse(true);
   }
 }
 

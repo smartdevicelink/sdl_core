@@ -41,7 +41,7 @@ namespace commands  {
 void UnregisterAppInterfaceResponse::Run() {
   LOG4CXX_INFO(logger_, "UnregisterAppInterfaceResponse::Run");
 
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands

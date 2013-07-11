@@ -55,7 +55,7 @@ void AlertResponse::Run() {
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
+    SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
@@ -70,12 +70,6 @@ void AlertResponse::Run() {
     const int code =
       (*message_)[strings::params][hmi_response::code].asInt();
 
-    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
-        GetMobilecorrelation_id(correlation_id);
-
-    (*message_)[strings::msg_params][strings::correlation_id] =
-        mobile_correlation_id;
-
     if (code) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
@@ -85,7 +79,7 @@ void AlertResponse::Run() {
       (*message_)[strings::msg_params][strings::result_code] =
         mobile_apis::Result::IGNORED;
     }
-    SendResponse();
+    SendResponse(true);
   }
 }
 
