@@ -75,6 +75,8 @@ void DeleteInteractionChoiceSetRequest::Run() {
     (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
     (*message_)[strings::params][strings::connection_key];
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
 
   // create HMI request
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
@@ -89,6 +91,9 @@ void DeleteInteractionChoiceSetRequest::Run() {
   (*p_smrt_ui)[strings::params][strings::function_id] =
     ui_cmd_id;
 
+  (*message_)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
+
   (*p_smrt_ui)[strings::params][strings::message_type] =
     MessageType::kRequest;
 
@@ -102,7 +107,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
     app->app_id();
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-          connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
+          connection_key, correlation_id, hmi_correlation_id, p_smrt_ui);
 
   ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
 }

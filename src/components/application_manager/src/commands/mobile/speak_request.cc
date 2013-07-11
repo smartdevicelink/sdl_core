@@ -71,26 +71,32 @@ void SpeakRequest::Run() {
     return;
   }
 
+  const int correlation_id =
+      (*message_)[strings::params][strings::correlation_id];
+  const int connection_key =
+      (*message_)[strings::params][strings::connection_key];
+
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
   (*speak_request)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::TTS_Speak;
+
+  (*speak_request)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
 
   (*speak_request)[strings::params][strings::message_type] =
       MessageType::kRequest;
 
   (*speak_request)[strings::msg_params][strings::app_id] =
-      (*message_)[strings::params][strings::connection_key];
+      application_impl->app_id();
 
   (*speak_request)[strings::msg_params][strings::tts_chunks] =
       (*message_)[strings::msg_params][strings::tts_chunks];
 
-  const int correlationId =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
-      (*message_)[strings::params][strings::connection_key];
-
   ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, correlationId), connectionKey,
-      correlationId);
+      new MessageChaining(connection_key, correlation_id), connection_key,
+      correlation_id, hmi_correlation_id);
 
   ApplicationManagerImpl::instance()->ManageHMICommand(speak_request);
 }

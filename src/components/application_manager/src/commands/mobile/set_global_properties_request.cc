@@ -74,6 +74,9 @@ void SetGlobalPropertiesRequest::Run() {
   const int connection_key =
     (*message_)[strings::params][strings::connection_key];
 
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
 
   if (NULL == p_smrt_ui) {
@@ -90,6 +93,10 @@ void SetGlobalPropertiesRequest::Run() {
 
     (*p_smrt_ui)[strings::params][strings::function_id] =
       tts_cmd_id;
+
+    // be sure to use HMI correlation id
+    (*p_smrt_ui)[strings::params][strings::correlation_id] =
+        hmi_correlation_id;
 
     (*p_smrt_ui)[strings::params][strings::message_type] =
       MessageType::kRequest;
@@ -109,7 +116,7 @@ void SetGlobalPropertiesRequest::Run() {
 
     ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connection_key, correlation_id),
-      connection_key, correlation_id, tts_cmd_id);
+      connection_key, correlation_id, hmi_correlation_id);
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
@@ -118,6 +125,10 @@ void SetGlobalPropertiesRequest::Run() {
     const int ui_cmd_id = hmi_apis::FunctionID::UI_SetGlobalProperties;
     (*p_smrt_ui)[strings::params][strings::function_id] =
       ui_cmd_id;
+
+    // be sure to use HMI correlation id
+    (*p_smrt_ui)[strings::params][strings::correlation_id] =
+        hmi_correlation_id;
 
     (*p_smrt_ui)[strings::params][strings::message_type] =
       MessageType::kRequest;
@@ -137,7 +148,7 @@ void SetGlobalPropertiesRequest::Run() {
 
     ApplicationManagerImpl::instance()->AddMessageChain(
       new MessageChaining(connection_key, correlation_id),
-      connection_key, correlation_id, ui_cmd_id);
+      connection_key, correlation_id, hmi_correlation_id);
   }
 }
 

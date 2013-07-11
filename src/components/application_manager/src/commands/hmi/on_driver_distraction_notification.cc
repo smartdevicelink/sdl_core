@@ -34,6 +34,7 @@
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -85,8 +86,14 @@ void OnDriverDistractionNotification::NotifyMobileApp(
   (*on_driver_distraction)[strings::params][strings::function_id] =
     mobile_api::FunctionID::OnDriverDistractionID;
 
+  const long correlation_id =
+  (*message_)[strings::params][strings::correlation_id].asLong();
+
+  const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+      GetMobilecorrelation_id(correlation_id);
+
   (*on_driver_distraction)[strings::params][strings::correlation_id] =
-    (*message_)[strings::params][strings::correlation_id];
+      mobile_correlation_id;
 
   (*on_driver_distraction)[strings::params][strings::message_type] =
     MessageType::kNotification;

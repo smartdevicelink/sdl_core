@@ -62,8 +62,8 @@ void DeleteCommandResponse::Run() {
   const int function_id =
       (*message_)[strings::params][strings::function_id].asInt();
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+  const long correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asLong();
 
   const mobile_apis::Result::eType code =
       static_cast<mobile_apis::Result::eType>(
@@ -83,8 +83,10 @@ void DeleteCommandResponse::Run() {
   smart_objects::CSmartObject data = msg_chain->data();
 
   // we need to retrieve stored response code before message chain decrease
-  const bool result_ui = msg_chain->ui_response_result();
-  const bool result_vr = msg_chain->vr_response_result();
+  const hmi_apis::Common_Result::eType result_ui =
+      msg_chain->ui_response_result();
+  const hmi_apis::Common_Result::eType result_vr =
+      msg_chain->vr_response_result();
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
@@ -98,18 +100,23 @@ void DeleteCommandResponse::Run() {
             data[strings::msg_params][strings::cmd_id].asInt());
 
     if (command) {
-      if (true == result_ui) {
+      if (hmi_apis::Common_Result::SUCCESS == result_ui) {
         (*command).erase(strings::menu_params);
       }
 
-      if (true == result_vr) {
+      if (hmi_apis::Common_Result::SUCCESS == result_vr) {
         (*command).erase(strings::vr_commands);
       }
 
       if (!(*command).keyExists(strings::menu_params) &&
           !(*command).keyExists(strings::vr_commands)) {
-        app->RemoveCommand(
-            data[strings::msg_params][strings::cmd_id].asInt());
+        app->RemoveCommand(data[strings::msg_params][strings::cmd_id].asInt());
+
+        const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+            GetMobilecorrelation_id(correlation_id);
+
+        (*message_)[strings::msg_params][strings::correlation_id] =
+            mobile_correlation_id;
         (*message_)[strings::msg_params][strings::success] = true;
         (*message_)[strings::msg_params][strings::result_code] =
             mobile_apis::Result::SUCCESS;

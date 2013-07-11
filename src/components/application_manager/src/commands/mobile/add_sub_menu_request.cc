@@ -75,15 +75,23 @@ void AddSubMenuRequest::Run() {
     return;
   }
 
-  const int corellation_id =
+  const int correlation_id =
         (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
         (*message_)[strings::params][strings::connection_key];
 
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
   const int hmi_request_id = hmi_apis::FunctionID::UI_AddSubMenu;
 
+  (*message_)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
+  (*message_)[strings::params][strings::function_id] =
+      hmi_request_id;
+
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, corellation_id, hmi_request_id, &(*message_));
+        connection_key, correlation_id, hmi_correlation_id, &(*message_));
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }

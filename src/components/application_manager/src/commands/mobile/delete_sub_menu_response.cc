@@ -56,8 +56,8 @@ void DeleteSubMenuResponse::Run() {
     return;
   }
 
-  const int hmi_correlation_id = (*message_)[strings::params]
-                                 [strings::correlation_id];;
+  const long hmi_correlation_id = (*message_)[strings::params]
+                                 [strings::correlation_id].asLong();
 
   smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
     GetMessageChain(hmi_correlation_id)->data();
@@ -68,6 +68,11 @@ void DeleteSubMenuResponse::Run() {
         ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::connection_key]));
 
+    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+      GetMobilecorrelation_id(hmi_correlation_id);
+
+    (*message_)[strings::msg_params][strings::correlation_id] =
+      mobile_correlation_id;
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =
         mobile_apis::Result::SUCCESS;

@@ -85,12 +85,18 @@ void GetVehicleDataRequest::Run() {
   (*get_vehicle_data) = (*message_);
 
   const int correlation_id =
-    (*get_vehicle_data)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-    (*get_vehicle_data)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
+
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
 
   const int vr_cmd_id = hmi_apis::FunctionID::VehicleInfo_GetVehicleData;
   (*get_vehicle_data)[strings::params][strings::function_id] = vr_cmd_id;
+  // be sure to use HMI correlation id
+  (*get_vehicle_data)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
 
   (*get_vehicle_data)[strings::msg_params][strings::app_id] =
     app->app_id();
@@ -99,7 +105,7 @@ void GetVehicleDataRequest::Run() {
     MessageType::kRequest;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-          connection_key, correlation_id, vr_cmd_id, get_vehicle_data);
+          connection_key, correlation_id, hmi_correlation_id, get_vehicle_data);
 
   ApplicationManagerImpl::instance()->ManageHMICommand(get_vehicle_data);
 }

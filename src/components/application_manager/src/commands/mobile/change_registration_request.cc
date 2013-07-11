@@ -81,6 +81,8 @@ void ChangeRegistrationRequest::Run() {
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
 
   MessageChaining* chain = NULL;
 
@@ -99,7 +101,8 @@ void ChangeRegistrationRequest::Run() {
     const int ui_hmi_request_id = hmi_apis::FunctionID::UI_ChangeRegistration;
     (*ui_request)[strings::params][strings::function_id] =
         ui_hmi_request_id;
-
+    (*ui_request)[strings::params][strings::correlation_id] =
+        hmi_correlation_id;
     (*ui_request)[strings::params][strings::message_type] =
         MessageType::kRequest;
 
@@ -110,7 +113,7 @@ void ChangeRegistrationRequest::Run() {
         app->app_id();
 
     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, ui_hmi_request_id, &(*message_));
+        connection_key, correlation_id, hmi_correlation_id, &(*message_));
 
     ApplicationManagerImpl::instance()->ManageHMICommand(ui_request);
 
@@ -132,6 +135,9 @@ void ChangeRegistrationRequest::Run() {
     (*vr_request)[strings::params][strings::function_id] =
         vr_hmi_request_id;
 
+    (*vr_request)[strings::params][strings::correlation_id] =
+        hmi_correlation_id;
+
     (*vr_request)[strings::params][strings::message_type] =
         MessageType::kRequest;
 
@@ -142,7 +148,7 @@ void ChangeRegistrationRequest::Run() {
         app->app_id();
 
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, vr_hmi_request_id, &(*message_));
+        connection_key, correlation_id, hmi_correlation_id, &(*message_));
 
     ApplicationManagerImpl::instance()->ManageHMICommand(vr_request);
 

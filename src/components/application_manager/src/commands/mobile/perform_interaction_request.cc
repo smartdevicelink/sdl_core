@@ -73,6 +73,8 @@ void PerformInteractionRequest::Run() {
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
 
   // create HMI request
   smart_objects::CSmartObject* hmi_request =
@@ -86,12 +88,14 @@ void PerformInteractionRequest::Run() {
 
   const int hmi_request_id = hmi_apis::FunctionID::UI_PerformInteraction;
   (*hmi_request)[strings::params][strings::function_id] = hmi_request_id;
+  (*hmi_request)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
   (*hmi_request)[strings::params][strings::message_type] =
       MessageType::kRequest;
   (*hmi_request)[strings::msg_params][strings::app_id] = app->app_id();
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
+        connection_key, correlation_id, hmi_correlation_id, &(*message_));
 
   ApplicationManagerImpl::instance()->ManageHMICommand(hmi_request);
 }

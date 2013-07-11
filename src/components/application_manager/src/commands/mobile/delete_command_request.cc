@@ -74,7 +74,8 @@ void DeleteCommandRequest::Run() {
         (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
         (*message_)[strings::params][strings::connection_key];
-
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
 
   MessageChaining * chain = NULL;
 
@@ -92,7 +93,7 @@ void DeleteCommandRequest::Run() {
       (*p_smrt_ui)[strings::params][strings::function_id] = ui_cmd_id;
 
       (*p_smrt_ui)[strings::msg_params][strings::correlation_id] =
-          correlation_id;
+          hmi_correlation_id;
 
       (*p_smrt_ui)[strings::params][strings::message_type] =
           MessageType::kRequest;
@@ -104,7 +105,7 @@ void DeleteCommandRequest::Run() {
           application->app_id();
 
      chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
+          connection_key, correlation_id, hmi_correlation_id, p_smrt_ui);
 
       ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
     }
@@ -125,7 +126,7 @@ void DeleteCommandRequest::Run() {
       (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
 
       (*p_smrt_vr)[strings::msg_params][strings::correlation_id] =
-          correlation_id;
+          hmi_correlation_id;
 
       (*p_smrt_vr)[strings::params][strings::message_type] =
           MessageType::kRequest;
@@ -137,7 +138,7 @@ void DeleteCommandRequest::Run() {
                application->app_id();
 
       ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, vr_cmd_id, p_smrt_vr);
+          connection_key, correlation_id, hmi_correlation_id, p_smrt_vr);
 
       ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
     }

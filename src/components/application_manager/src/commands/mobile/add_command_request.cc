@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdint>
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
@@ -75,6 +76,9 @@ void AddCommandRequest::Run() {
   const int connection_key =
     (*message_)[strings::params][strings::connection_key];
 
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
   MessageChaining* chain = NULL;
   // check menu params
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
@@ -91,6 +95,10 @@ void AddCommandRequest::Run() {
     (*p_smrt_ui)[strings::params][strings::function_id] =
       ui_cmd_id;
 
+    // be sure to use HMI correlation id
+    (*p_smrt_ui)[strings::params][strings::correlation_id] =
+        hmi_correlation_id;
+
     (*p_smrt_ui)[strings::params][strings::message_type] =
       MessageType::kRequest;
 
@@ -103,8 +111,9 @@ void AddCommandRequest::Run() {
     (*p_smrt_ui)[strings::msg_params][strings::app_id] =
       app->app_id();
 
+    // be sure to use mobile correlation id
     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-            connection_key, correlation_id, ui_cmd_id, &(*message_));
+        connection_key, correlation_id, hmi_correlation_id, &(*message_));
 
     ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
   }
@@ -123,6 +132,10 @@ void AddCommandRequest::Run() {
     (*p_smrt_vr)[strings::params][strings::function_id] =
       vr_cmd_id;
 
+    // be sure to use HMI correlation id
+    (*p_smrt_vr)[strings::params][strings::correlation_id] =
+        hmi_correlation_id;
+
     (*p_smrt_vr)[strings::params][strings::message_type] =
       MessageType::kRequest;
 
@@ -136,7 +149,7 @@ void AddCommandRequest::Run() {
       app->app_id();
 
     ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, vr_cmd_id, &(*message_));
+        connection_key, correlation_id, hmi_correlation_id, &(*message_));
 
     ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
   }

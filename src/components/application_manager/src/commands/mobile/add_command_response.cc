@@ -36,6 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -58,8 +59,8 @@ void AddCommandResponse::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const long correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asLong();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -73,12 +74,17 @@ void AddCommandResponse::Run() {
   smart_objects::CSmartObject data = msg_chain->data();
 
   // we need to retrieve stored response code before message chain decrease
-  const bool result_ui = msg_chain->ui_response_result();
-  const bool result_vr = msg_chain->vr_response_result();
+  const hmi_apis::Common_Result::eType result_ui =
+      msg_chain->ui_response_result();
+  const hmi_apis::Common_Result::eType result_vr =
+      msg_chain->vr_response_result();
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
+
+    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+        GetMobilecorrelation_id(correlation_id);
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
              ApplicationManagerImpl::instance()->
@@ -95,9 +101,11 @@ void AddCommandResponse::Run() {
                               data[strings::msg_params]);
       }
 
-      if ((mobile_apis::Result::SUCCESS == result_ui) &&
-          (mobile_apis::Result::SUCCESS == result_vr)) {
+      if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
+          (hmi_apis::Common_Result::SUCCESS == result_vr)) {
             (*message_)[strings::msg_params][strings::success] = true;
+            (*message_)[strings::msg_params][strings::correlation_id] =
+                mobile_correlation_id;
             (*message_)[strings::msg_params][strings::result_code] =
                 mobile_apis::Result::SUCCESS;
                 SendResponse();

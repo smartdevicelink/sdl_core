@@ -58,12 +58,21 @@ void EndAudioPassThruResponse::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const long correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asLong();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
+
+    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+      GetMobilecorrelation_id(correlation_id);
+
+    (*message_)[strings::msg_params][strings::correlation_id] =
+      mobile_correlation_id;
+    (*message_)[strings::params][strings::success] = true;
+    (*message_)[strings::params][strings::result_code] =
+        mobile_apis::Result::SUCCESS;
     SendResponse();
   }
 }

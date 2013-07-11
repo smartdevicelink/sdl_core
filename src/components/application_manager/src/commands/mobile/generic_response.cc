@@ -32,9 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/generic_response.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_conversion.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/message_conversion.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -44,8 +45,10 @@ void GenericResponse::Run() {
   NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
 
   response[strings::params][strings::message_type] = MessageType::kResponse;
-  response[strings::params][strings::correlation_id] =
-      (*message_)[strings::params][strings::correlation_id];
+
+  response[strings::params][strings::correlation_id] = static_cast<long>(
+      ApplicationManagerImpl::instance()->GetMobilecorrelation_id(
+        (*message_)[strings::params][strings::correlation_id].asLong()));
   response[strings::params][strings::protocol_version] =
       (*message_)[strings::params][strings::protocol_version];
   response[strings::params][strings::connection_key] =

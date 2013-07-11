@@ -61,10 +61,12 @@ void SliderRequest::Run() {
     return;
   }
 
-  const int correlationId =
+  const int correlation_id =
     (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
+  const int connection_key =
     (*message_)[strings::params][strings::connection_key];
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
 
   // create HMI request
   smart_objects::CSmartObject* hmi_request =
@@ -78,14 +80,16 @@ void SliderRequest::Run() {
 
   const int hmi_request_id = hmi_apis::FunctionID::UI_Slider;
   (*hmi_request)[strings::params][strings::function_id] = hmi_request_id;
+  (*hmi_request)[strings::msg_params][strings::correlation_id] =
+      hmi_correlation_id;
   (*hmi_request)[strings::params][strings::message_type] =
       MessageType::kRequest;
   (*hmi_request)[strings::msg_params][strings::app_id] =
       application_impl->app_id();
 
   ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, correlationId),
-      connectionKey, correlationId, hmi_request_id);
+      new MessageChaining(connection_key, correlation_id),
+      connection_key, correlation_id, hmi_correlation_id);
 
   ApplicationManagerImpl::instance()->ManageHMICommand(hmi_request);
 }

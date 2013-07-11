@@ -82,11 +82,19 @@ void ReadDIDRequest::Run() {
 
   const int correlation_id =
     (*p_vi_read_did)[strings::params][strings::correlation_id];
+
   const int connection_key =
     (*p_vi_read_did)[strings::params][strings::connection_key];
 
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
   const int vi_read_did = hmi_apis::FunctionID::VehicleInfo_ReadDID;
   (*p_vi_read_did)[strings::params][strings::function_id] = vi_read_did;
+
+  // be sure to use HMI correlation id
+  (*p_vi_read_did)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
 
   (*p_vi_read_did)[strings::params][strings::message_type] =
     MessageType::kRequest;
@@ -99,7 +107,7 @@ void ReadDIDRequest::Run() {
     (*message_)[str::msg_params][str::did_location];
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-          connection_key, correlation_id, vi_read_did, p_vi_read_did);
+          connection_key, correlation_id, hmi_correlation_id, p_vi_read_did);
 
   ApplicationManagerImpl::instance()->ManageHMICommand(p_vi_read_did);
 }

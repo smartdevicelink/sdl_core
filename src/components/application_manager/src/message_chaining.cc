@@ -34,16 +34,16 @@
 
 namespace application_manager {
 
-MessageChaining::MessageChaining(int connection_key,
+MessageChaining::MessageChaining(unsigned int connection_key,
                                  unsigned int correlation_id):
   correlation_id_(correlation_id),
   connection_key_(connection_key),
   success_(true),
   counter_(1),
   data_(),
-  ui_response_result_(mobile_api::Result::INVALID_ENUM),
-  vr_response_result_(mobile_api::Result::INVALID_ENUM),
-  tts_response_result_(mobile_api::Result::INVALID_ENUM) {
+  ui_response_result_(hmi_apis::Common_Result::INVALID_ENUM),
+  vr_response_result_(hmi_apis::Common_Result::INVALID_ENUM),
+  tts_response_result_(hmi_apis::Common_Result::INVALID_ENUM) {
 }
 
 MessageChaining::~MessageChaining() {
@@ -59,7 +59,7 @@ const unsigned int MessageChaining::correlation_id() const {
   return correlation_id_;
 }
 
-int MessageChaining::connection_key() const {
+const unsigned int MessageChaining::connection_key() const {
   return connection_key_;
 }
 
@@ -83,27 +83,33 @@ const smart_objects::CSmartObject& MessageChaining::data() const {
   return data_;
 }
 
-void MessageChaining::set_vr_response_result(const mobile_api::Result::eType& result) {
+void MessageChaining::set_vr_response_result(
+    const hmi_apis::Common_Result::eType& result) {
   vr_response_result_ = result;
 }
 
-const mobile_api::Result::eType& MessageChaining::vr_response_result() const {
+const hmi_apis::Common_Result::eType&
+    MessageChaining::vr_response_result() const {
   return vr_response_result_;
 }
 
-void MessageChaining::set_ui_response_result(const mobile_api::Result::eType& result) {
+void MessageChaining::set_ui_response_result(
+    const hmi_apis::Common_Result::eType& result) {
   ui_response_result_ = result;
 }
 
-const mobile_api::Result::eType& MessageChaining::ui_response_result() const {
+const hmi_apis::Common_Result::eType&
+    MessageChaining::ui_response_result() const {
   return ui_response_result_;
 }
 
-void MessageChaining::set_tts_response_result(const mobile_api::Result::eType& result) {
+void MessageChaining::set_tts_response_result(
+    const hmi_apis::Common_Result::eType& result) {
   tts_response_result_ = result;
 }
 
-const mobile_api::Result::eType& MessageChaining::tts_response_result() const {
+const hmi_apis::Common_Result::eType&
+    MessageChaining::tts_response_result() const {
   return tts_response_result_;
 }
 

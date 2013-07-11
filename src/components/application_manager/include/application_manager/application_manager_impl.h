@@ -36,6 +36,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <cstdint>
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "hmi_message_handler/hmi_message_observer.h"
@@ -74,7 +75,7 @@ typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
 /**
   *@brief Map of messages between mobile app and hmi
 */
-typedef std::map<unsigned int, MessageChainPtr> MessageChains;
+typedef std::map<uint64_t, MessageChainPtr> MessageChains;
 
 
 class ApplicationManagerImpl : public ApplicationManager
@@ -125,44 +126,65 @@ class ApplicationManagerImpl : public ApplicationManager
 
     /*
      * @brief Add to the chain amount of requests sent to hmi
-     * from mobile request, to ensure that response to mobile
-     * will be sent only after all hmi response were received.
+     * from mobile request, to ensure that all response were received
+     * before sending response to mobile.
      *
      * @param chain Pointer to MessageChaining class.
      * If parameter is empty new instance is created,
      * otherwise counter of MessageChaining for
      * corresponding correlation ID is increased
      *
-     * @param connection_key of connection for Mobile side
-     * @param correlation_id Correlation id for response for Mobile side
-     * @param function_id Id of HMI request/response
+     * @param connection_key Connection key of connection with application
+     * @param correlation_id Correlation id of Mobile request
+     * @param hmi_correlation_id Unique correlation id of HMI request
+     * @param data Temporary SmartObject from mobile request.
+     * Sometimes request data is needed in mobile response.
+     *
      * @return pointer to MessageChaining
      */
     MessageChaining* AddMessageChain(
-      MessageChaining* chain,
-      unsigned int connection_key,
-      unsigned int correlation_id,
-      unsigned int function_id = 0,  // TODO(VS): delete this param
+      MessageChaining* chain, unsigned int connection_key,
+      const unsigned int correlation_id, const uint64_t hmi_correlation_id,
       const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
-     * @brief Decrease chain for correlation ID
-     * after response from hmi was received.
+     * @brief Decrease chain after response from hmi was received
      *
-     * @param correlation_id Correlation id for response for Mobile side
+     * @param hmi_correlation_id Unique HMI correlation id from response
      *
      * @return true if there is no other pending responses
      */
-    bool DecreaseMessageChain(unsigned int correlation_id);
+    bool DecreaseMessageChain(const uint64_t hmi_correlation_id);
 
     /*
-     * @brief Retriev MessageChaining object from chain
+     * @brief Retrieve MessageChaining object from chain for corresponding
+     * HMI correlation ID
      *
-     * @param correlation_id Correlation id for response for Mobile side
+     * @param hmi_correlation_id HMI correlation id from HMI response
      *
      * @return MessageChaining on success, otherwise NULL
      */
-    MessageChaining* GetMessageChain(unsigned int correlation_id) const;
+    MessageChaining* GetMessageChain(const uint64_t hmi_correlation_id) const;
+
+    /*
+     * @brief Converts HMI correlation ID to mobile correlation ID
+     *
+     * @param correlation_id Correlation id of the HMI response
+     *
+     * @return Correlation ID of the mobile request
+     */
+    uint32_t GetMobilecorrelation_id(uint64_t correlation_id) const;
+
+    /*
+     * @brief Converts Mobile correlation ID to unique HMI correlation ID
+     *
+     * @param correlation_id Correlation id of the mobile request
+     * @param connection_key Connection key of the current request
+     *
+     * @return Unique correlation ID for HMI request
+     */
+    uint64_t GetHMIcorrelation_id(uint32_t correlation_id,
+                                 uint32_t connection_key) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request

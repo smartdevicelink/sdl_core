@@ -318,8 +318,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 // TODO(VS) : Remove function_id from function parameters(it isn't used)
 MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     unsigned int connection_key,
-    unsigned int correlation_id,
-    unsigned int function_id,
+    unsigned int correlation_id, const uint64_t hmi_correlation_id,
     const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data) {
   if (!chain) {
     chain = new MessageChaining(
@@ -330,26 +329,25 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(MessageChaining* chain,
     }
 
     MessageChainPtr ptr(chain);
-    message_chaining_[correlation_id] = ptr;
+    message_chaining_[hmi_correlation_id] = ptr;
     return chain;
   } else  {
-    MessageChains::const_iterator it = message_chaining_.begin();
-    for (; it != message_chaining_.end(); ++it) {
-      if ((*it->second) == *chain) {
-        it->second->IncrementCounter();
-        message_chaining_[correlation_id] = it->second;
-        break;
+      MessageChains::const_iterator it = message_chaining_.begin();
+      for (; it != message_chaining_.end(); ++it) {
+        if ((*it->second) == *chain) {
+          it->second->IncrementCounter();
+          break;
+        }
       }
-    }
   }
   return chain;
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
-  unsigned int correlation_id) {
+    const uint64_t hmi_correlation_id) {
   bool result = false;
   MessageChains::iterator it =
-    message_chaining_.find(correlation_id);
+    message_chaining_.find(hmi_correlation_id);
 
   if (message_chaining_.end() != it) {
     (*it->second).DecrementCounter();
@@ -358,18 +356,35 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
     }
     message_chaining_.erase(it);
   }
+
   return result;
 }
 
 MessageChaining* ApplicationManagerImpl::GetMessageChain(
-  unsigned int correlation_id) const {
+    const uint64_t hmi_correlation_id) const {
   MessageChains::const_iterator it =
-    message_chaining_.find(correlation_id);
+    message_chaining_.find(hmi_correlation_id);
   if (message_chaining_.end() != it) {
     return &(*it->second);
   }
 
   return NULL;
+}
+
+uint32_t ApplicationManagerImpl::GetMobilecorrelation_id(
+    uint64_t correlation_id) const {
+  uint32_t mobile_correlation_id = correlation_id >> 32;
+  return mobile_correlation_id;
+}
+
+uint64_t ApplicationManagerImpl::GetHMIcorrelation_id(
+    uint32_t correlation_id,  uint32_t connection_key) const {
+
+  // to avoid warning: left shift count >= width of type
+  uint64_t mobile_correlation_id = correlation_id;
+  uint64_t conn_key = connection_key;
+  uint64_t hmi_correlation_id = connection_key | (mobile_correlation_id << 32);
+  return hmi_correlation_id;
 }
 
 bool ApplicationManagerImpl::audio_pass_thru_flag() const {

@@ -83,15 +83,31 @@ void UpdateTurnListRequest::Run() {
                [strings::turn_icon][strings::value] = file_path;
   }
 
+  smart_objects::CSmartObject* hmi_request  =
+      new smart_objects::CSmartObject();
+
+    if (NULL == hmi_request) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+      return;
+    }
+
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
   const int hmi_request_id = hmi_apis::FunctionID::Navigation_UpdateTurnList;
+  (*message_)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
+  (*message_)[strings::params][strings::function_id] =
+      hmi_request_id;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
+        connection_key, correlation_id, hmi_correlation_id, &(*message_));
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }

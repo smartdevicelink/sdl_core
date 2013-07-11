@@ -32,8 +32,9 @@
 #include "application_manager/commands/hmi/ui_delete_submenu_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
-#include "interfaces/MOBILE_API.h"
 #include "SmartObjects/CSmartObject.hpp"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -49,8 +50,8 @@ UIDeleteSubmenuResponse::~UIDeleteSubmenuResponse() {
 void UIDeleteSubmenuResponse::Run() {
   LOG4CXX_INFO(logger_, "UIDeleteSubmenuResponse::Run");
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+  const long correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asLong();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -66,8 +67,8 @@ void UIDeleteSubmenuResponse::Run() {
   /* store received response code for to check it
    * in corresponding Mobile response
    */
-  const mobile_apis::Result::eType code =
-    static_cast<mobile_apis::Result::eType>(
+  const hmi_apis::Common_Result::eType code =
+    static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::msg_params][hmi_response::code].asInt());
 
   msg_chain->set_ui_response_result(code);
@@ -82,7 +83,7 @@ void UIDeleteSubmenuResponse::Run() {
     return;
   }
 
-  if (mobile_apis::Result::SUCCESS == code) {
+  if (hmi_apis::Common_Result::SUCCESS == code) {
     app->RemoveSubMenu(data[strings::msg_params][strings::menu_id].asInt());
   }
 

@@ -60,19 +60,42 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
+  smart_objects::CSmartObject* navi_show_constant_tbt  =
+      new smart_objects::CSmartObject();
+
+  if (!navi_show_constant_tbt) {
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return;
+  }
+
   app->set_tbt_show_command((*message_)[strings::msg_params]);
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id];
+
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
   const int hmi_request_id = hmi_apis::FunctionID::Navigation_ShowConstantTBT;
 
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
+  (*navi_show_constant_tbt)[strings::params][strings::function_id] =
+      hmi_request_id;
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  // be sure to use HMI correlation id
+  (*navi_show_constant_tbt)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
+
+  (*navi_show_constant_tbt)[strings::params][strings::message_type] =
+    MessageType::kRequest;
+
+  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
+        connection_key, correlation_id, hmi_correlation_id, &(*message_));
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(navi_show_constant_tbt);
 }
 
 }  // namespace commands

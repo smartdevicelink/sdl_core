@@ -81,8 +81,11 @@ void GetDTCsRequest::Run() {
       (*message_)[strings::params][strings::connection_key];
   const int hmi_request_id = hmi_apis::FunctionID::VehicleInfo_GetDTCs;
 
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, connection_key);
+
   (*vi_request)[strings::params][strings::correlation_id] =
-      correlation_id;
+      hmi_correlation_id;
 
   (*vi_request)[strings::params][strings::function_id] =
       hmi_request_id;
@@ -100,7 +103,7 @@ void GetDTCsRequest::Run() {
       app->app_id();
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*vi_request));
+        connection_key, correlation_id, hmi_correlation_id, &(*vi_request));
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }

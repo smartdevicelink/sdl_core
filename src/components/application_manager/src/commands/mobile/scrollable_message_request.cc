@@ -53,15 +53,15 @@ void ScrollabeMessageRequest::Run() {
     return;
   }
 
-  const int correlationId =
+  const int correlation_id =
     (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
+  const int correlation_key =
     (*message_)[strings::params][strings::connection_key];
 
   const unsigned int cmd_id = hmi_apis::FunctionID::UI_ScrollableMessage;
     ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, correlationId),
-      connectionKey, correlationId, cmd_id);
+      new MessageChaining(correlation_key, correlation_id),
+      correlation_key, correlation_id, cmd_id);
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
 }

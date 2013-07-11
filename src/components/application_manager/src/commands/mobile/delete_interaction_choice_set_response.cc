@@ -58,15 +58,21 @@ void DeleteInteractionChoiceSetResponse::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const long correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asLong();
 
   const int code =
     (*message_)[strings::msg_params][hmi_response::code].asInt();
 
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(correlation_id)) {
-          (*message_)[strings::msg_params][strings::success] = true;
+
+      const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+        GetMobilecorrelation_id(correlation_id);
+
+      (*message_)[strings::msg_params][strings::correlation_id] =
+        mobile_correlation_id;
+      (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
         mobile_apis::Result::SUCCESS;
 

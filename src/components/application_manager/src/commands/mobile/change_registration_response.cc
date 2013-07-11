@@ -36,6 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -57,8 +58,8 @@ void ChangeRegistrationResponse::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const long correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asLong();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -69,8 +70,10 @@ void ChangeRegistrationResponse::Run() {
   }
 
   // we need to retrieve stored response code before message chain decrease
-  const mobile_api::Result::eType result_ui = msg_chain->ui_response_result();
-  const mobile_api::Result::eType result_vr = msg_chain->vr_response_result();
+  const hmi_apis::Common_Result::eType result_ui =
+      msg_chain->ui_response_result();
+  const hmi_apis::Common_Result::eType result_vr =
+      msg_chain->vr_response_result();
 
   // get stored SmartObject
   smart_objects::CSmartObject data = msg_chain->data();
@@ -78,25 +81,31 @@ void ChangeRegistrationResponse::Run() {
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
+
+    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+    GetMobilecorrelation_id(correlation_id);
+
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
         ApplicationManagerImpl::instance()->
         application(data[strings::params][strings::connection_key]));
 
-    if (mobile_api::Result::SUCCESS == result_ui) {
+    if (hmi_apis::Common_Result::SUCCESS == result_ui) {
       application->set_language(
         static_cast<mobile_api::Language::eType>(
           data[strings::msg_params][strings::language].asInt()));
     }
 
-    if (mobile_api::Result::SUCCESS == result_vr) {
+    if (hmi_apis::Common_Result::SUCCESS == result_vr) {
       application->set_ui_language(
         static_cast<mobile_api::Language::eType>(
           data[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
-    if ((mobile_api::Result::SUCCESS == result_ui) &&
-        (mobile_api::Result::SUCCESS == result_vr)) {
+    if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
+        (hmi_apis::Common_Result::SUCCESS == result_vr)) {
       (*message_)[strings::msg_params][strings::success] = true;
+      (*message_)[strings::msg_params][strings::correlation_id] =
+          mobile_correlation_id;
       (*message_)[strings::msg_params][strings::result_code] =
         mobile_apis::Result::SUCCESS;
       SendResponse();

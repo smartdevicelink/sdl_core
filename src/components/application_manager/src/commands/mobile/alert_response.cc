@@ -60,14 +60,21 @@ void AlertResponse::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const long correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asLong();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
 
+    // TODO (DK): correct mobile code
     const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
+
+    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+        GetMobilecorrelation_id(correlation_id);
+
+    (*message_)[strings::msg_params][strings::correlation_id] =
+        mobile_correlation_id;
 
     if (code) {
       (*message_)[strings::msg_params][strings::success] = true;

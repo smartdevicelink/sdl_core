@@ -62,17 +62,24 @@ void ShowRequest::Run() {
     return;
   }
 
-  const int correlationId =
+  const int correlation_id =
     (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
+  const int correlation_key =
     (*message_)[strings::params][strings::connection_key];
+
+  const long hmi_correlation_id = ApplicationManagerImpl::instance()->
+  GetHMIcorrelation_id(correlation_id, correlation_key);
+
+  // be sure to use HMI correlation id
+  (*message_)[strings::params][strings::correlation_id] =
+      hmi_correlation_id;
 
   (*message_)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::UI_Show;
 
   ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, correlationId),
-      connectionKey, correlationId);
+      new MessageChaining(correlation_key, correlation_id),
+      correlation_key, correlation_id, hmi_correlation_id);
 
   MessageSharedPtr persistentData;
 

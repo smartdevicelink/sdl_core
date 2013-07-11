@@ -31,7 +31,7 @@
  */
 #include "application_manager/commands/hmi/tts_get_supported_languages_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -47,11 +47,11 @@ TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {
 void TTSGetSupportedLanguagesResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSGetSupportedLanguagesResponse::Run");
 
-  const mobile_apis::Result::eType code =
-      static_cast<mobile_apis::Result::eType>((*message_)[strings::msg_params][hmi_response::code]
-          .asInt());
+  const hmi_apis::Common_Result::eType code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::msg_params][hmi_response::code].asInt());
 
-  if (mobile_apis::Result::SUCCESS == code) {
+  if (hmi_apis::Common_Result::SUCCESS == code) {
     ApplicationManagerImpl::instance()->set_tts_supported_languages(
         (*message_)[strings::msg_params][hmi_response::languages]);
   }
