@@ -164,13 +164,23 @@ SDL.SDLAppModel = Em.Object.extend( {
      */
     addCommand: function( params ) {
 
-        this.get( 'commandsList' ).pushObject( {
-            commandId: params.cmdId,
-            name: params.menuParams.menuName,
-            parent: params.menuParams.parentID ? params.menuParams.parentID : 0,
-            position: params.menuParams.position,
-            icon: params.cmdIcon ? params.cmdIcon.value : null
-        } );
+        if (params.menuParams) {
+            this.get( 'commandsList' ).pushObject( {
+                commandId: params.cmdID,
+                name: params.menuParams.menuName ? params.menuParams.menuName,
+                parent: params.menuParams.parentID ? params.menuParams.parentID : 0,
+                position: params.menuParams.position ? params.menuParams.position,
+                icon: params.cmdIcon ? params.cmdIcon.value : null
+            } );
+        } else {
+            this.get( 'commandsList' ).pushObject( {
+                commandId: params.cmdID,
+                name: '',
+                parent: 0,
+                position: 0,
+                icon: params.cmdIcon ? params.cmdIcon.value : null
+            } );
+        }
     },
 
     /**
@@ -191,10 +201,10 @@ SDL.SDLAppModel = Em.Object.extend( {
     addSubMenu: function( params ) {
 
         this.get( 'commandsList' ).pushObject( {
-            menuId: params.menuId,
-            name: params.menuParams.menuName,
+            menuId: params.menuID,
+            name: params.menuParams.menuName ? params.menuParams.menuName : '',
             parent: 0,
-            position: params.menuParams.position
+            position: params.menuParams.position ? params.menuParams.position : 0
         } );
     },
 

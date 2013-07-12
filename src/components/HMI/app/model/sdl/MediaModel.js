@@ -257,7 +257,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             }
         }
 
-        this.appInfo.set('alignment', params.alignment);
+        if (params.alignment) {
+            this.appInfo.set('alignment', params.alignment);
+        }
 
         if(params.graphic){
             this.appInfo.set('trackIcon', params.graphic);
@@ -265,7 +267,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
         }
 
-        this.updateSoftButtons(params.softButtons);
+        if (params.softButtons) {
+            this.updateSoftButtons(params.softButtons);
+        }
 
         if(params.customPresets){
             var i = 0;
