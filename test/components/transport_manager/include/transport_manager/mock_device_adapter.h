@@ -56,7 +56,7 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
 
   struct listenerData_t {
     pthread_mutex_t mutex;
-    pthread_cond_t cond;
+    pthread_barrier_t barrier;
     int sockfd;
     bool active;
   };

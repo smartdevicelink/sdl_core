@@ -62,9 +62,6 @@ namespace {
       pthread_cond_wait(&data->cond, &data->mutex);
       int len = recv(data->sockfd, buf, 4096, 0);
       if (len > 0) {
-        for (unsigned char *p = buf; p < buf + len; ++p) {
-          *p ^= 0xAA;
-        }
         send(data->sockfd, buf, len, 0);
       }
     }
@@ -91,8 +88,6 @@ namespace {
 
     res = listen(data->sockfd, 5);
 
-    pthread_cond_signal(&data->cond);
-
     for (int i = 0; i < 5; ++i) {
       workerData[i].active = true;
       workerData[i].sockfd = 0;
@@ -100,9 +95,11 @@ namespace {
       pthread_create(&workerData[i].tid, NULL, mockDeviceWorker, &workerData[i]);
     }
 
+    pthread_barrier_wait(&data->barrier);
     while(data->active) {
       size_t addr_size;
       sockaddr peer_addr;
+
       int peer_socket = accept(data->sockfd, &peer_addr, &addr_size);
 
       if (peer_socket != 0) {
@@ -127,10 +124,10 @@ namespace transport_manager {
 void MockDeviceAdapter::MockDevice::start() {
   listener.active = true;
   pthread_mutex_init(&listener.mutex, NULL);
-  pthread_cond_init(&listener.cond, NULL);
+  pthread_barrier_init(&listener.barrier, NULL, 2);
   pthread_mutex_lock(&listener.mutex);
   pthread_create(&workerThread, NULL, mockDeviceListenerThreadRoutine, &listener);
-  pthread_cond_wait(&listener.cond, &listener.mutex);
+  pthread_barrier_wait(&listener.barrier);
 }
 
 void MockDeviceAdapter::MockDevice::stop() {
