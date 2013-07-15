@@ -71,12 +71,15 @@ void AddCommandRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
 
-    smart_objects::CSmartObject msg_params;
-    msg_params[strings::msg_params][strings::cmd_id] =
+    smart_objects::CSmartObject msg_params =
+        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
-    msg_params[strings::msg_params][strings::menu_params] =
+    msg_params[strings::menu_params] =
       (*message_)[strings::msg_params][strings::menu_params];
-    msg_params[strings::msg_params][strings::app_id] =
+    msg_params[strings::cmd_icon] =
+      (*message_)[strings::msg_params][strings::cmd_icon];
+    msg_params[strings::app_id] =
       app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true);
@@ -84,12 +87,13 @@ void AddCommandRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
 
-    smart_objects::CSmartObject msg_params;
-    msg_params[strings::msg_params][strings::cmd_id] =
+    smart_objects::CSmartObject msg_params =
+        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::cmd_id] =
         (*message_)[strings::msg_params][strings::cmd_id];
-    msg_params[strings::msg_params][strings::vr_commands] =
+    msg_params[strings::vr_commands] =
        (*message_)[strings::msg_params][strings::vr_commands];
-    msg_params[strings::msg_params][strings::app_id] =
+    msg_params[strings::app_id] =
         app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, true);

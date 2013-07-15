@@ -107,7 +107,7 @@ void CommandRequestImpl::CreateHMIRequest(
   GetHMIcorrelation_id(correlation_id, connection_key);
 
   NsSmartDeviceLink::NsSmartObjects::CSmartObject* result =
-  new NsSmartDeviceLink::NsSmartObjects::CSmartObject;
+      new NsSmartDeviceLink::NsSmartObjects::CSmartObject;
   if (!result) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
     return;
@@ -123,7 +123,7 @@ void CommandRequestImpl::CreateHMIRequest(
   request[strings::params][strings::protocol_type] =
       CommandImpl::hmi_protocol_type_;
 
-  request[strings::msg_params]= msg_params;
+  request[strings::msg_params] = msg_params;
 
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
