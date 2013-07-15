@@ -155,30 +155,15 @@ FFW.Navigation = FFW.RPCObserver.create( {
             }
             case "Navigation.ShowConstantTBT": {
 
-                var result = SDL.ValidateMessage.Navigation.ShowConstantTBT(request.params);
-                
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
+                SDL.SDLModel.tbtActivate( request.params );
+                this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
-                    SDL.SDLModel.tbtActivate( request.params );
-                    this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendNavigationError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
                 break;
             }
             case "Navigation.UpdateTurnList": {
 
-                var result = SDL.ValidateMessage.Navigation.ShowConstantTBT(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLModel.tbtTurnListUpdate( request.params );
-                    this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendNavigationError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLModel.tbtTurnListUpdate( request.params );
+                this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }

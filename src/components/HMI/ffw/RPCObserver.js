@@ -51,26 +51,34 @@ FFW.RPCObserver = Em.Object.extend( {
      * to
      */
     onRPCResult: function( result ) {
-
         // parse JSON string and set necessary properties
     },
 
     /*
      */
     onRPCError: function( error ) {
-
         // parse JSON string and set necessary properties
     },
 
     /*
      */
     onRPCNotification: function( notification ) {
-
         // parse JSON string and set necessary properties
     },
 
     onRPCRequest: function( request ) {
+        if ( request && request.method ) {
+            var parsedMethod = request.method.split(/[.]/),
+                validateFunc,
+                result;
+            validateFunc = SDL.ValidateMessage[parsed[0]][parsed[1]];
+            result = validateFunc(request.params);
 
+            if (result.resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
+                this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
+                return;
+            }
+        }
         // parse JSON string and send back necessary data
     }
 } )

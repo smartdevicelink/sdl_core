@@ -167,9 +167,9 @@ SDL.SDLAppModel = Em.Object.extend( {
         if (params.menuParams) {
             this.get( 'commandsList' ).pushObject( {
                 commandId: params.cmdID,
-                name: params.menuParams.menuName ? params.menuParams.menuName,
+                name: params.menuParams.menuName ? params.menuParams.menuName : "",
                 parent: params.menuParams.parentID ? params.menuParams.parentID : 0,
-                position: params.menuParams.position ? params.menuParams.position,
+                position: params.menuParams.position ? params.menuParams.position : 0,
                 icon: params.cmdIcon ? params.cmdIcon.value : null
             } );
         } else {

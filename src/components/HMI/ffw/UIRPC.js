@@ -162,183 +162,87 @@ FFW.UI = FFW.RPCObserver.create( {
         switch( request.method ){
             case "UI.Show": {
 
-                var result = SDL.ValidateMessage.UI.Show(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-                    // Close TBT
-                    SDL.TurnByTurnView.deactivate();
-                    SDL.SDLController.getApplicationModel( request.params.appId ).onSDLUIShow( request.params );
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.TurnByTurnView.deactivate();
+                SDL.SDLController.getApplicationModel( request.params.appId ).onSDLUIShow( request.params );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.Alert": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLModel.onUIAlert( request.params, request.id );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLModel.onUIAlert( request.params, request.id );
 
                 break;
             }
             case "UI.SetGlobalProperties": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
+                SDL.SDLModel.setProperties( request.params );
 
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLModel.setProperties( request.params );
-
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.ResetGlobalProperties": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
+                // reset all requested properties
+                SDL.SDLModel.resetProperties( request.params );
 
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    // reset all requested properties
-                    SDL.SDLModel.resetProperties( request.params );
-
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.AddCommand": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLController.getApplicationModel( request.params.appId ).addCommand( request.params );
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLController.getApplicationModel( request.params.appId ).addCommand( request.params );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.DeleteCommand": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLController.getApplicationModel( request.params.appId ).deleteCommand( request.params.cmdId );
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLController.getApplicationModel( request.params.appId ).deleteCommand( request.params.cmdId );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.AddSubMenu": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLController.getApplicationModel( request.params.appId ).addSubMenu( request.params );
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLController.getApplicationModel( request.params.appId ).addSubMenu( request.params );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.DeleteSubMenu": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    var resultCode = SDL.SDLController.getApplicationModel( request.params.appId ).deleteSubMenu( request.params.menuID );
-                    this.sendUIResult( resultCode, request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                var resultCode = SDL.SDLController.getApplicationModel( request.params.appId ).deleteSubMenu( request.params.menuID );
+                this.sendUIResult( resultCode, request.id, request.method );
 
                 break;
             }
             case "UI.CreateInteractionChoiceSet": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLController.getApplicationModel( request.params.appId ).onCreateInteraction( request.params );
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLController.getApplicationModel( request.params.appId ).onCreateInteraction( request.params );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.DeleteInteractionChoiceSet": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLController.getApplicationModel( request.params.appId ).onDeleteInteraction( request.params );
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLController.getApplicationModel( request.params.appId ).onDeleteInteraction( request.params );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.PerformInteraction": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLModel.uiPerformInteraction( request.params, request.id );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLModel.uiPerformInteraction( request.params, request.id );
 
                 break;
             }
             case "UI.SetMediaClockTimer": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    var resultCode = SDL.SDLController.getApplicationModel( request.params.appId ).sdlSetMediaClockTimer( request.params );
-                    this.sendUIResult( resultCode, request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                var resultCode = SDL.SDLController.getApplicationModel( request.params.appId ).sdlSetMediaClockTimer( request.params );
+                this.sendUIResult( resultCode, request.id, request.method );
 
                 break;
             }
@@ -348,97 +252,45 @@ FFW.UI = FFW.RPCObserver.create( {
             }
             case "UI.Slider": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLModel.uiSlider( request );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLModel.uiSlider( request );
 
                 break;
             }
             case "UI.ScrollableMessage": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLModel.onSDLScrolableMessage( request.params, request.id );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLModel.onSDLScrolableMessage( request.params, request.id );
 
                 break;
             }
             case "UI.ChangeRegistration": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLModel.changeRegistrationUI( request.params.language );
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                SDL.SDLModel.changeRegistrationUI( request.params.language );
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
             case "UI.SetAppIcon": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
                     SDL.SDLModel.onSDLSetAppIcon( request.params, request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
 
                 break;
             }
             case "UI.PerformAudioPassThru": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    this.performAudioPassThruRequestId = request.id;
-                    SDL.SDLModel.UIPerformAudioPassThru( request.params );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                this.performAudioPassThruRequestId = request.id;
+                SDL.SDLModel.UIPerformAudioPassThru( request.params );
 
                 break;
             }
             case "UI.EndAudioPassThru": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
                     this.endAudioPassThruRequestId = request.id;
 
                     SDL.SDLModel.UIEndAudioPassThru();
 
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
-
                 break;
             }
             case "UI.GetSupportedLanguages": {
-
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
 
                     var JSONMessage = {
                         "id": request.id,
@@ -451,17 +303,9 @@ FFW.UI = FFW.RPCObserver.create( {
                     };
                     this.client.send( JSONMessage );
 
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
-
                 break;
             }
             case "UI.GetLanguage": {
-
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
-
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
 
                     var JSONMessage = {
                         "jsonrpc": "2.0",
@@ -475,25 +319,13 @@ FFW.UI = FFW.RPCObserver.create( {
                     };
                     this.client.send( JSONMessage );
 
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
-
                 break;
             }
             case "UI.DialNumber": {
 
-                var result = SDL.ValidateMessage.UI.Alert(request.params);
+                SDL.SDLModel.dialNumber( request.params );
 
-                if (result.resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
-
-                    SDL.SDLModel.dialNumber( request.params );
-
-                    this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                } else {
-                    this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                }
+                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
