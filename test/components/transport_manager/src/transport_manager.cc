@@ -101,92 +101,96 @@ inline const Matcher<RawMessageSptr> RawMessageSptrEq(const unsigned char* data)
 
 DeviceHandle hello;
 ApplicationHandle hello_app;
-volatile bool flag = false;
+pthread_cond_t stop_here;
+pthread_mutex_t stop_here_mutex;
 
 class MyListener : public TransportManagerListenerImpl {
   void onSearchDeviceDone(const DeviceHandle device,
                           const ApplicationList app_list) {
     hello = device;
     hello_app = *app_list.begin();
-    flag = true;
+    pthread_cond_signal(&stop_here);
   }
   void onConnectDone(const DeviceAdapter* device_adapter,
                      const transport_manager::SessionID session_id) {
-    flag = true;
+    pthread_cond_signal(&stop_here);
   }
   void onDataReceiveDone(const DeviceAdapter* device_adapter,
                          const transport_manager::SessionID session_id,
                          const RawMessageSptr data_container) {
-    flag = true;
+    pthread_cond_signal(&stop_here);
   }
 };
 
-class TransportManagerImplTest: public ::testing::Test
-{
-public:
-  static MockDeviceAdapter *mock_da;
-  static MockTransportManagerListener *tml;
-};
 
-TEST_F(TransportManagerImplTest, instance)
+static MockDeviceAdapter *mock_da;
+static MockTransportManagerListener *tml;
+
+
+TEST(TransportManagerImplTest, instance)
 {
   TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
   ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
 }
 
-TEST_F(TransportManagerImplTest, search)
+TEST(TransportManagerImplTest, search)
 {
+  pthread_mutex_lock(&stop_here_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
 
-  EXPECT_CALL(*TransportManagerImplTest::tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
-  EXPECT_CALL(*TransportManagerImplTest::tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
+  EXPECT_CALL(*tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
+  EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
 
   tm->searchDevices();
-  while (!flag) {}
+  pthread_cond_wait(&stop_here, &stop_here_mutex);
+  pthread_mutex_unlock(&stop_here_mutex);
 }
 
-TEST_F(TransportManagerImplTest, connect)
+TEST(TransportManagerImplTest, connect)
 {
+  pthread_mutex_lock(&stop_here_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
-  EXPECT_CALL(*TransportManagerImplTest::tml, onConnectDone(_, 42)).Times(1);
+  EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
   tm->connectDevice(hello, hello_app, 42);
-  while (!flag) {}
+  pthread_cond_wait(&stop_here, &stop_here_mutex);
+  pthread_mutex_unlock(&stop_here_mutex);
 }
 
-TEST_F(TransportManagerImplTest, sendReceive)
+TEST(TransportManagerImplTest, sendReceive)
 {
+  pthread_mutex_lock(&stop_here_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
   const unsigned char data[100] = {99};
   utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, const_cast<unsigned char *>(data), 100);
+
+  tm->sendMessageToDevice(srm);
 
   EXPECT_CALL(*tml, onDataSendDone(_, _, _)).Times(AtLeast(1));
   EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(AtLeast(0));
   EXPECT_CALL(*tml, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(AtLeast(1));
   EXPECT_CALL(*tml, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
 
-  tm->sendMessageToDevice(srm);
-  while (!flag) {}
+  pthread_cond_wait(&stop_here, &stop_here_mutex);
+  pthread_mutex_unlock(&stop_here_mutex);
 }
 
-MockTransportManagerListener *TransportManagerImplTest::tml;
-MockDeviceAdapter *TransportManagerImplTest::mock_da;
-
 int main(int argc, char** argv) {
-
+  pthread_mutex_init(&stop_here_mutex, NULL);
+  pthread_cond_init(&stop_here, NULL);
 
   TransportManagerImpl* tm = TransportManagerImpl::instance();
-  TransportManagerImplTest::mock_da = new MockDeviceAdapter();
-  tm->addDeviceAdapter(TransportManagerImplTest::mock_da);
+  mock_da = new MockDeviceAdapter();
+  tm->addDeviceAdapter(mock_da);
 
-  TransportManagerImplTest::tml = new MockTransportManagerListener();
-  tm->addEventListener(TransportManagerImplTest::tml);
+  tml = new MockTransportManagerListener();
+  tm->addEventListener(tml);
   tm->addEventListener(new MyListener());
-  tm->addAdapterListener(TransportManagerImplTest::mock_da, new DeviceAdapterListenerImpl(tm));
+  tm->addAdapterListener(mock_da, new DeviceAdapterListenerImpl(tm));
 
-  TransportManagerImplTest::mock_da->init(new DeviceHandleGeneratorImpl(),
+  mock_da->init(new DeviceHandleGeneratorImpl(),
       NULL);
 
-  TransportManagerImplTest::mock_da->addDevice("hello");
+  mock_da->addDevice("hello");
 
   testing::InitGoogleTest(&argc, argv);
   RUN_ALL_TESTS();
