@@ -178,10 +178,6 @@ DeviceList DeviceAdapterImpl::getDeviceList() const {
   return devices;
 }
 
-DeviceHandleGenerator* DeviceAdapterImpl::getDeviceHandleGenerator() {
-  return handle_generator_;
-}
-
 void DeviceAdapterImpl::addDevice(DeviceSptr device) {
   DeviceHandle handle;
 

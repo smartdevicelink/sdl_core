@@ -149,6 +149,7 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
   virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle,
                                  ApplicationHandle app_handle,
                                  SessionID session_id);
+  virtual void terminate();
   virtual ~BluetoothConnectionFactory();
  private:
   DeviceAdapterController* controller_;
@@ -156,12 +157,8 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
 
 class BluetoothDeviceAdapter : public DeviceAdapterImpl {
  public:
-  BluetoothDeviceAdapter()
-      : device_scanner_(new BluetoothDeviceScanner(this)),
-        server_connection_factory_(new BluetoothConnectionFactory(this)) {
-    setDeviceScanner(device_scanner_.get());
-    setServerConnectionFactory(server_connection_factory_.get());
-  }
+  BluetoothDeviceAdapter();
+  virtual ~BluetoothDeviceAdapter();
  protected:
   virtual DeviceType getDeviceType() const;
  private:

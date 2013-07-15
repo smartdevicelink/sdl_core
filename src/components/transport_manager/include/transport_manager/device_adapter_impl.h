@@ -135,8 +135,6 @@ class DeviceAdapterController {
   virtual ~DeviceAdapterController() {
   }
 
-  virtual DeviceHandleGenerator* getDeviceHandleGenerator() = 0;
-
   virtual void addDevice(DeviceSptr device) = 0;
   virtual void searchDeviceDone(const DeviceVector& devices) = 0;
   virtual void searchDeviceFailed(const SearchDeviceError& error) = 0;
@@ -166,6 +164,7 @@ class DeviceScanner {
  public:
   virtual DeviceAdapter::Error init() = 0;
   virtual DeviceAdapter::Error scan() = 0;
+  virtual void terminate() = 0;
   virtual ~DeviceScanner() {
   }
 };
@@ -176,6 +175,7 @@ class ServerConnectionFactory {
   virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle,
                                                 ApplicationHandle app_handle,
                                                 SessionID session_id) = 0;
+  virtual void terminate() = 0;
   virtual ~ServerConnectionFactory() {
   }
 };
@@ -183,6 +183,7 @@ class ServerConnectionFactory {
 class ClientConnectionListener {
  public:
   virtual DeviceAdapter::Error init() = 0;
+  virtual void terminate() = 0;
   virtual ~ClientConnectionListener() {
   }
 };
@@ -275,8 +276,6 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   virtual ApplicationList getApplicationList(
       const DeviceHandle device_handle) const;
   virtual DeviceSptr findDevice(DeviceHandle device_handle) const;
-
-  virtual DeviceHandleGenerator* getDeviceHandleGenerator();
 
   virtual void searchDeviceDone(const DeviceVector& devices);
   virtual void searchDeviceFailed(const SearchDeviceError& error);

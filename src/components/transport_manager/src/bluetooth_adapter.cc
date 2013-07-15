@@ -365,8 +365,9 @@ DeviceAdapter::Error BluetoothDeviceScanner::scan() {
   return ret;
 }
 
-BluetoothDevice::BluetoothDevice(const bdaddr_t& address, const char* name,
-                                 const RfcommChannelVector& rfcomm_channels)
+BluetoothDevice::BluetoothDevice(
+    const bdaddr_t& address, const char* name,
+    const RfcommChannelVector& rfcomm_channels)
     : Device(name),
       address_(address),
       next_application_handle_(1) {
@@ -478,7 +479,22 @@ DeviceAdapter::Error BluetoothConnectionFactory::createConnection(DeviceHandle d
   return error;
 }
 
+void BluetoothConnectionFactory::terminate() {
+}
+
 BluetoothConnectionFactory::~BluetoothConnectionFactory() {
+}
+
+BluetoothDeviceAdapter::BluetoothDeviceAdapter()
+    : device_scanner_(new BluetoothDeviceScanner(this)),
+      server_connection_factory_(new BluetoothConnectionFactory(this)) {
+  setDeviceScanner(device_scanner_.get());
+  setServerConnectionFactory(server_connection_factory_.get());
+}
+
+BluetoothDeviceAdapter::~BluetoothDeviceAdapter() {
+  device_scanner_->terminate();
+  server_connection_factory_->terminate();
 }
 
 DeviceType BluetoothDeviceAdapter::getDeviceType() const {
