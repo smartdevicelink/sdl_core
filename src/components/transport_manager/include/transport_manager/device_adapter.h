@@ -69,7 +69,8 @@ class DeviceAdapter {
   };
 
  public:
-  virtual ~DeviceAdapter() { }
+  virtual ~DeviceAdapter() {
+  }
 
   virtual DeviceType getDeviceType() const = 0;
 
@@ -91,6 +92,11 @@ class DeviceAdapter {
                         const int session_id) = 0;
 
   virtual bool isClientOriginatedConnectSupported() const = 0;
+  virtual Error acceptConnect(const DeviceHandle device_handle,
+                              const ApplicationHandle app_handle,
+                              const SessionID session_id) = 0;
+  virtual Error declineConnect(const DeviceHandle device_handle,
+                               const ApplicationHandle app_handle) = 0;
 
   virtual Error disconnect(const int session_id) = 0;
   virtual Error disconnectDevice(const DeviceHandle device_handle) = 0;
@@ -102,8 +108,8 @@ class DeviceAdapter {
       const DeviceHandle device_handle) const = 0;
 };
 
-} // namespace device_adapter
+}  // namespace device_adapter
 
-} // namespace transport_manager
+}  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER

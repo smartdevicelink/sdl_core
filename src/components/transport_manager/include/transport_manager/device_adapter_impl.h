@@ -135,7 +135,7 @@ class DeviceAdapterController {
   virtual ~DeviceAdapterController() {
   }
 
-  virtual void addDevice(DeviceSptr device) = 0;
+  virtual std::pair<DeviceHandle, DeviceSptr> addDevice(DeviceSptr device) = 0;
   virtual void searchDeviceDone(const DeviceVector& devices) = 0;
   virtual void searchDeviceFailed(const SearchDeviceError& error) = 0;
   virtual DeviceSptr findDevice(const DeviceHandle device_handle) const = 0;
@@ -148,7 +148,8 @@ class DeviceAdapterController {
   virtual void connectFailed(const SessionID session_id,
                              const ConnectError& error) = 0;
   virtual void connectionFinished(const SessionID session_id) = 0;
-  virtual void connectionAborted(const SessionID session_id, const CommunicationError& error) = 0;
+  virtual void connectionAborted(const SessionID session_id,
+                                 const CommunicationError& error) = 0;
   virtual void disconnectDone(const SessionID session_id) = 0;
   virtual void dataReceiveDone(const SessionID session_id,
                                RawMessageSptr message) = 0;
@@ -158,6 +159,8 @@ class DeviceAdapterController {
                             RawMessageSptr message) = 0;
   virtual void dataSendFailed(const SessionID session_id,
                               RawMessageSptr message, const DataSendError&) = 0;
+  virtual void connectRequested(const DeviceHandle device_handle,
+                                const ApplicationHandle app_handle) = 0;
 };
 
 class DeviceScanner {
@@ -184,6 +187,11 @@ class ClientConnectionListener {
  public:
   virtual DeviceAdapter::Error init() = 0;
   virtual void terminate() = 0;
+  virtual DeviceAdapter::Error acceptConnect(const DeviceHandle device_handle,
+                                             const ApplicationHandle app_handle,
+                                             const SessionID session_id) = 0;
+  virtual DeviceAdapter::Error declineConnect(
+      const DeviceHandle device_handle, const ApplicationHandle app_handle) = 0;
   virtual ~ClientConnectionListener() {
   }
 };
@@ -268,6 +276,12 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   virtual DeviceAdapter::Error sendData(const SessionID session_id,
                                         const RawMessageSptr data);
 
+  virtual Error acceptConnect(const DeviceHandle device_handle,
+                              const ApplicationHandle app_handle,
+                              const SessionID session_id);
+  virtual Error declineConnect(const DeviceHandle device_handle,
+                               const ApplicationHandle app_handle);
+
   virtual bool isSearchDevicesSupported() const;
   virtual bool isServerOriginatedConnectSupported() const;
   virtual bool isClientOriginatedConnectSupported() const;
@@ -279,7 +293,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
 
   virtual void searchDeviceDone(const DeviceVector& devices);
   virtual void searchDeviceFailed(const SearchDeviceError& error);
-  virtual void addDevice(DeviceSptr device);
+  virtual std::pair<DeviceHandle, DeviceSptr> addDevice(DeviceSptr device);
 
   virtual void connectionCreated(ConnectionSptr connection,
                                  const SessionID session_id,
@@ -299,7 +313,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   virtual void dataSendDone(const SessionID session_id, RawMessageSptr message);
   virtual void dataSendFailed(const SessionID session_id,
                               RawMessageSptr message, const DataSendError&);
-
+  virtual void connectRequested(const DeviceHandle device_handle,
+                                const ApplicationHandle app_handle);
   void setDeviceScanner(DeviceScanner* device_scanner);
   void setServerConnectionFactory(
       ServerConnectionFactory* server_connection_factory);

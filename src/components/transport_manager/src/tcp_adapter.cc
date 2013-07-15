@@ -34,11 +34,6 @@
  */
 
 #include <memory.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <errno.h>
 
 #include "transport_manager/tcp_adapter.h"
@@ -103,18 +98,42 @@ DeviceAdapter::Error TcpClientListener::init() {
   return DeviceAdapter::OK;
 }
 
+DeviceAdapter::Error TcpClientListener::acceptConnect(
+    const DeviceHandle device_handle, const ApplicationHandle app_handle,
+    const SessionID session_id) {
+  DeviceSptr device = controller_->findDevice(device_handle);
+  if (device.get() == 0)
+    return DeviceAdapter::BAD_PARAM;
+  TcpDevice* tcp_device = static_cast<TcpDevice*>(device.get());
+  const int socket = tcp_device->getApplicationSocket(app_handle);
+  if (socket == -1)
+    return DeviceAdapter::BAD_PARAM;
+
+  ConnectionSptr connection(
+      new TcpSocketConnection(device_handle, app_handle, session_id, controller_));
+  controller_->connectionCreated(connection, session_id, device_handle,
+                                 app_handle);
+  return static_cast<TcpSocketConnection*>(connection.get())->start();
+}
+
+DeviceAdapter::Error TcpClientListener::declineConnect(
+    const DeviceHandle device_handle, const ApplicationHandle app_handle) {
+  DeviceSptr device = controller_->findDevice(device_handle);
+  if (device.get() == 0)
+    return DeviceAdapter::BAD_PARAM;
+  TcpDevice* tcp_device = static_cast<TcpDevice*>(device.get());
+  const int socket = tcp_device->getApplicationSocket(app_handle);
+  if (socket == -1)
+    return DeviceAdapter::BAD_PARAM;
+
+  close(socket);
+  return DeviceAdapter::OK;
+}
+
 void TcpClientListener::terminate() {
   shutdown_requested_ = true;
 
   if (true == thread_started_) {
-    /*FIXME
-     pthread_mutex_lock(&device_scan_requested_mutex_);
-     device_scan_requested_ = false;
-     pthread_cond_signal(&device_scan_requested_cond_);
-     pthread_mutex_unlock(&device_scan_requested_mutex_);
-     LOG4CXX_INFO(logger_,
-     "Waiting for bluetooth device scanner thread termination");
-     */
     pthread_join(thread_, 0);
     LOG4CXX_INFO(logger_, "Tcp client listener thread terminated");
   }
@@ -143,104 +162,75 @@ void TcpClientListener::thread() {
       continue;
     }
 
-    bool isConnectionThreadStarted = false;
+    char device_name[32];
+    strncpy(device_name, inet_ntoa(client_address.sin_addr),
+            sizeof(device_name) / sizeof(device_name[0]));
+    LOG4CXX_INFO(logger_, "Connected client " << device_name);
 
-    char deviceName[32];
-
-    strncpy(deviceName, inet_ntoa(client_address.sin_addr),
-            sizeof(deviceName) / sizeof(deviceName[0]));
-
-    LOG4CXX_INFO(logger_, "Connected client " << deviceName);
-
-    tDeviceHandle deviceHandle = InvalidDeviceHandle;
-
-    pthread_mutex_lock (&mDevicesMutex);
-
-    for (tDeviceMap::const_iterator deviceIterator = mDevices.begin();
-        deviceIterator != mDevices.end(); ++deviceIterator) {
-      const STCPDevice * device =
-          dynamic_cast<const STCPDevice *>(deviceIterator->second);
-
-      if (0 != device) {
-        if (clientAddress.sin_addr.s_addr == device->mAddress) {
-          deviceHandle = deviceIterator->first;
-          break;
-        }
-      }
-    }
-
-    pthread_mutex_unlock(&mDevicesMutex);
-
-    if (InvalidDeviceHandle == deviceHandle) {
-      deviceHandle = mHandleGenerator.generateNewDeviceHandle();
-      STCPDevice * device = new STCPDevice(deviceName,
-                                           clientAddress.sin_addr.s_addr);
-
-      pthread_mutex_lock(&mDevicesMutex);
-
-      if (true
-          == mDevices.insert(std::make_pair(deviceHandle, device)).second) {
-        device->mUniqueDeviceId = std::string("TCP-") + deviceName;
-
-        LOG4CXX_INFO(
-            logger_,
-            "Added new device " << deviceHandle << ": " << device->mName << " (" << device->mUniqueDeviceId << ")");
-      } else {
-        LOG4CXX_ERROR(
-            logger_,
-            "Device handle " << deviceHandle << " is already present in devices map");
-
-        deviceHandle = InvalidDeviceHandle;
-        delete device;
-        device = 0;
-      }
-
-      pthread_mutex_unlock(&mDevicesMutex);
-
-      if (0 != device) {
-        updateClientDeviceList();
-      }
-    }
-
-    if (InvalidDeviceHandle != deviceHandle) {
-      isConnectionThreadStarted = startConnection(
-          new STCPConnection(deviceHandle, connectionFd,
-                             clientAddress.sin_port));
-    } else {
-      LOG4CXX_ERROR(logger_, "Failed to insert new device into devices map");
-    }
-  }
-
-  if (false == isConnectionThreadStarted) {
-    close (connectionFd);
+    TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr, device_name);
+    std::pair<DeviceHandle, DeviceSptr> device_pair = controller_->addDevice(
+        tcp_device);
+    DeviceHandle device_handle = device_pair.first;
+    tcp_device = static_cast<TcpDevice*>(device_pair.second.get());
+    const ApplicationHandle app_handle = tcp_device->addApplication(
+        connection_fd);
+    controller_->connectRequested(device_handle, app_handle);
   }
 
   LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
 }
 
-TcpDevice::TcpDevice(const int port, const char* name) {
+TcpDevice::TcpDevice(const in_addr& in_addr, const char* name)
+    : Device(name),
+      in_addr_(in_addr) {
 }
 
 bool TcpDevice::isSameAs(const Device* other) const {
+  const TcpDevice* other_tcp_device = static_cast<const TcpDevice*>(other);
+  return other_tcp_device->in_addr_.s_addr == in_addr_.s_addr;
 }
 
 ApplicationList TcpDevice::getApplicationList() const {
+  pthread_mutex_lock(&applications_mutex_);
+  ApplicationList app_list(applications_.begin(), applications_.end());
+  pthread_mutex_unlock(&applications_mutex_);
+  return app_list;
+}
+
+ApplicationHandle TcpDevice::addApplication(const int socket) {
+  pthread_mutex_lock(&applications_mutex_);
+  applications_.insert(socket);
+  pthread_mutex_unlock(&applications_mutex_);
+  return socket;
+}
+
+void TcpDevice::removeApplication(const ApplicationHandle app_handle) {
+  pthread_mutex_lock(&applications_mutex_);
+  applications_.erase(app_handle);
+  pthread_mutex_unlock(&applications_mutex_);
+}
+
+int TcpDevice::getApplicationSocket(const ApplicationHandle app_handle) const {
+  return app_handle;
 }
 
 TcpSocketConnection::TcpSocketConnection(const DeviceHandle device_handle,
                                          const ApplicationHandle app_handle,
                                          const SessionID session_id,
-                                         DeviceAdapterController* controller) {
+                                         DeviceAdapterController* controller)
+    : ThreadedSocketConnection(device_handle, app_handle, session_id,
+                               controller) {
 }
 
 TcpSocketConnection::~TcpSocketConnection() {
 }
 
 bool TcpSocketConnection::establish(ConnectError** error) {
+  return true;
 }
 
 TcpDeviceAdapter::TcpDeviceAdapter()
-    : client_connection_listener_(new TcpClientListener) {
+    : client_connection_listener_(new TcpClientListener(this, 1234)) {
   setClientConnectionListener(client_connection_listener_.get());
 }
 
@@ -251,8 +241,7 @@ DeviceType TcpDeviceAdapter::getDeviceType() const {
   return "sdl-tcp";
 }
 
-}
-// namespace device_adapter
+}  // namespace device_adapter
 
-}// namespace transport_manager
+}  // namespace transport_manager
 

@@ -36,6 +36,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER
 
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
 #include "device_adapter_socket_communication.h"
 #include "device_adapter_impl.h"
 
@@ -50,6 +56,11 @@ class TcpClientListener : public ClientConnectionListener {
  protected:
   virtual ~TcpClientListener();
   virtual DeviceAdapter::Error init();
+  virtual DeviceAdapter::Error acceptConnect(const DeviceHandle device_handle,
+                                             const ApplicationHandle app_handle,
+                                             const SessionID session_id);
+  virtual DeviceAdapter::Error declineConnect(
+      const DeviceHandle device_handle, const ApplicationHandle app_handle);
   virtual void terminate();
  private:
   const uint16_t port_;
@@ -69,7 +80,7 @@ class TcpDevice : public Device {
    * @param name Human-readable device name.
    * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
    **/
-  TcpDevice(const int port, const char* name);
+  TcpDevice(const in_addr& in_addr, const char* name);
 
   /**
    * @brief Compare devices.
@@ -85,9 +96,15 @@ class TcpDevice : public Device {
 
   virtual ApplicationList getApplicationList() const;
 
- private:
+  ApplicationHandle addApplication(const int socket);
+  void removeApplication(const ApplicationHandle app_handle);
+  int getApplicationSocket(const ApplicationHandle app_handle) const;
 
-  ApplicationHandle next_application_handle_;
+ private:
+  std::set<int> applications_;
+  mutable pthread_mutex_t applications_mutex_;
+  const in_addr in_addr_;
+  const std::string name_;
 };
 
 class TcpSocketConnection : public ThreadedSocketConnection {

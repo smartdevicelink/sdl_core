@@ -181,28 +181,6 @@ class TransportManagerImpl : public TransportManager {
                               const ApplicationHandle &app_id);
 
   /**
-<<<<<<< HEAD
-   * @brief set new listener
-   *
-   * @param listener
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  void set_device_adapter_listener(
-      device_adapter::DeviceAdapterListener *listener);
-
-  /**
-   * @brief set tm's event listener
-   *
-   * @param event type, function address
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  void set_transport_manager_listener(TransportManagerListener *listener);
-
-  /**
-=======
->>>>>>> tmRefactoring
    * @brief interface function to wake up adapter listener thread
    *
    * @param

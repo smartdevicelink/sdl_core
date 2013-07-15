@@ -178,24 +178,29 @@ DeviceList DeviceAdapterImpl::getDeviceList() const {
   return devices;
 }
 
-void DeviceAdapterImpl::addDevice(DeviceSptr device) {
+std::pair<DeviceHandle, DeviceSptr> DeviceAdapterImpl::addDevice(
+    DeviceSptr device) {
   DeviceHandle handle;
-
+  DeviceSptr existing_device;
   bool same_device_found = false;
   pthread_mutex_lock(&devices_mutex_);
   for (DeviceMap::const_iterator i = devices_.begin(); i != devices_.end();
       ++i) {
-    const DeviceSptr other_device = i->second;
-    if (device->isSameAs(other_device.get())) {
+    existing_device = i->second;
+    if (device->isSameAs(existing_device.get())) {
       same_device_found = true;
       break;
     }
   }
   if (!same_device_found) {
-    DeviceHandle handle = handle_generator_->generate();
+    handle = handle_generator_->generate();
     devices_[handle] = device;
   }
   pthread_mutex_unlock(&devices_mutex_);
+  if (same_device_found)
+    return std::make_pair(handle, existing_device);
+  else
+    return std::make_pair(handle, device);
 }
 
 void DeviceAdapterImpl::searchDeviceDone(const DeviceVector& devices) {
@@ -402,6 +407,34 @@ void DeviceAdapterImpl::connectionAborted(const SessionID session_id,
   for (DeviceAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->onUnexpectedDisconnect(this, session_id, error);
+}
+
+DeviceAdapter::Error DeviceAdapterImpl::acceptConnect(
+    const DeviceHandle device_handle, const ApplicationHandle app_handle,
+    const SessionID session_id) {
+  if (NULL != client_connection_listener_) {
+    return client_connection_listener_->acceptConnect(device_handle, app_handle,
+                                                      session_id);
+  } else {
+    return DeviceAdapter::NOT_SUPPORTED;
+  }
+}
+
+DeviceAdapter::Error DeviceAdapterImpl::declineConnect(
+    const DeviceHandle device_handle, const ApplicationHandle app_handle) {
+  if (NULL != client_connection_listener_) {
+    return client_connection_listener_->declineConnect(device_handle,
+                                                       app_handle);
+  } else {
+    return DeviceAdapter::NOT_SUPPORTED;
+  }
+}
+
+void DeviceAdapterImpl::connectRequested(const DeviceHandle device_handle,
+                                         const ApplicationHandle app_handle) {
+  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+      it != listeners_.end(); ++it)
+    (*it)->onConnectRequested(this, device_handle, app_handle);
 }
 
 ConnectionSptr DeviceAdapterImpl::findEstablishedConnection(
