@@ -19,21 +19,13 @@ set (LIBRARIES
     jsoncpp
     rt
 )
-set (SOURCES
-  ./transport_manager_instance_test.cc
-  ./src/mock_device_adapter.cc
-)
 
-set (SRC2
+set (SOURCES
    ./src/transport_manager.cc
    ./src/mock_device_adapter.cc
 )
 
-add_library("test_TransportManagerTest" ${SOURCES})
-create_test("test_TransportManager_InstanceTest" "${SOURCES}" "${LIBRARIES}")
-create_test("test_TransportManager_SecondTest" "${SRC2}" "${LIBRARIES}")
+create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")
 target_link_libraries("test_TransportManagerTest" TransportManager)
-target_link_libraries("test_TransportManager_InstanceTest" TransportManager)
-target_link_libraries("test_TransportManager_SecondTest" TransportManager)
-target_link_libraries("test_TransportManager_SecondTest" explain)
+target_link_libraries("test_TransportManagerTest" explain)
 endif()

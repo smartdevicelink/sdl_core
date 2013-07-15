@@ -99,13 +99,6 @@ inline const Matcher<RawMessageSptr> RawMessageSptrEq(const unsigned char* data)
   return MakeMatcher(new RawMessageSptrMatcher(data));
 }
 
-
-TEST(TransportManagerImpl, instance)
-{
-  TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
-  ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
-}
-
 DeviceHandle hello;
 ApplicationHandle hello_app;
 volatile bool flag = false;
@@ -128,44 +121,74 @@ class MyListener : public TransportManagerListenerImpl {
   }
 };
 
-TEST(TransportManagerImpl, searchDevice)
+class TransportManagerImplTest: public ::testing::Test
+{
+public:
+  static MockDeviceAdapter *mock_da;
+  static MockTransportManagerListener *tml;
+};
+
+TEST_F(TransportManagerImplTest, instance)
+{
+  TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
+  ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
+}
+
+TEST_F(TransportManagerImplTest, search)
 {
   TransportManagerImpl* tm = TransportManagerImpl::instance();
 
-  MockDeviceAdapter *mock_da = new MockDeviceAdapter();
-  tm->addDeviceAdapter(mock_da);
+  EXPECT_CALL(*TransportManagerImplTest::tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
+  EXPECT_CALL(*TransportManagerImplTest::tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
 
-  MockTransportManagerListener *tml = new MockTransportManagerListener();
+  tm->searchDevices();
+  while (!flag) {}
+}
 
-  tm->addEventListener(tml);
-  tm->addEventListener(new MyListener());
-  tm->addAdapterListener(mock_da, new DeviceAdapterListenerImpl(tm));
+TEST_F(TransportManagerImplTest, connect)
+{
+  TransportManagerImpl* tm = TransportManagerImpl::instance();
+  EXPECT_CALL(*TransportManagerImplTest::tml, onConnectDone(_, 42)).Times(1);
+  tm->connectDevice(hello, hello_app, 42);
+  while (!flag) {}
+}
 
-  mock_da->init(new DeviceHandleGeneratorImpl(),
-      NULL);
-
-  mock_da->addDevice("hello");
-
+TEST_F(TransportManagerImplTest, sendReceive)
+{
+  TransportManagerImpl* tm = TransportManagerImpl::instance();
   const unsigned char data[100] = {99};
   utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, const_cast<unsigned char *>(data), 100);
 
-  EXPECT_CALL(*tml, onSearchDeviceDone(_, _)).Times(AtLeast(1));
-  EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
-  EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
+  EXPECT_CALL(*tml, onDataSendDone(_, _, _)).Times(AtLeast(1));
   EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(AtLeast(0));
   EXPECT_CALL(*tml, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(AtLeast(1));
   EXPECT_CALL(*tml, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
 
-  tm->searchDevices();
-
-  while(!flag) {}
-  flag = false;
-
-  tm->connectDevice(hello, hello_app, 42);
-  while(!flag) {}
-  flag = false;
-
   tm->sendMessageToDevice(srm);
-  while(!flag) {}
-  flag = false;
+  while (!flag) {}
+}
+
+MockTransportManagerListener *TransportManagerImplTest::tml;
+MockDeviceAdapter *TransportManagerImplTest::mock_da;
+
+int main(int argc, char** argv) {
+
+
+  TransportManagerImpl* tm = TransportManagerImpl::instance();
+  TransportManagerImplTest::mock_da = new MockDeviceAdapter();
+  tm->addDeviceAdapter(TransportManagerImplTest::mock_da);
+
+  TransportManagerImplTest::tml = new MockTransportManagerListener();
+  tm->addEventListener(TransportManagerImplTest::tml);
+  tm->addEventListener(new MyListener());
+  tm->addAdapterListener(TransportManagerImplTest::mock_da, new DeviceAdapterListenerImpl(tm));
+
+  TransportManagerImplTest::mock_da->init(new DeviceHandleGeneratorImpl(),
+      NULL);
+
+  TransportManagerImplTest::mock_da->addDevice("hello");
+
+  testing::InitGoogleTest(&argc, argv);
+  RUN_ALL_TESTS();
+  return 0;
 }
