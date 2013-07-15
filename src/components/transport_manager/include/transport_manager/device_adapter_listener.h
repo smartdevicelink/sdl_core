@@ -59,6 +59,9 @@ class DeviceAdapterListener {
                                const transport_manager::SessionID session_id,
                                const ConnectError& error) = 0;
 
+  virtual void onUnexpectedDisconnect(const DeviceAdapter* device_adapter,
+                                      const SessionID session_id,
+                                      const CommunicationError& error) = 0;
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
                                 const SessionID session_id) = 0;
   virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,

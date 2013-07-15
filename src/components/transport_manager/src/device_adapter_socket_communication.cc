@@ -55,6 +55,7 @@ ThreadedSocketConnection::ThreadedSocketConnection(
       notification_pipe_read_fd_(-1),
       notification_pipe_write_fd_(-1),
       terminate_flag_(false),
+      unexpected_disconnect_(false),
       socket_(-1),
       device_handle_(device_handle),
       app_handle_(app_handle),
@@ -74,6 +75,7 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
 
 void ThreadedSocketConnection::abort() {
   terminate_flag_ = true;
+  unexpected_disconnect_ = true;
 }
 
 void* startThreadedSocketConnection(void* v) {
@@ -100,7 +102,10 @@ DeviceAdapter::Error ThreadedSocketConnection::start() {
 }
 
 void ThreadedSocketConnection::finalise() {
-  controller_->connectionFinished(session_id());
+  if(unexpected_disconnect_)
+    controller_->connectionFinished(session_id());
+  else
+    controller_->connectionAborted(session_id(), CommunicationError());
   close(socket_);
 }
 

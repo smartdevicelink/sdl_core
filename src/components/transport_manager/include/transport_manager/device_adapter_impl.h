@@ -79,6 +79,8 @@ class Device {
    **/
   virtual bool isSameAs(const Device* other_device) const = 0;
 
+  virtual ApplicationList getApplicationList() const = 0;
+
   const std::string& unique_device_id() const {
     return unique_device_id_;
   }
@@ -138,16 +140,17 @@ class DeviceAdapterController {
   virtual void addDevice(DeviceSptr device) = 0;
   virtual void searchDeviceDone(const DeviceVector& devices) = 0;
   virtual void searchDeviceFailed(const SearchDeviceError& error) = 0;
-  virtual DeviceSptr findDevice(DeviceHandle device_handle) const = 0;
+  virtual DeviceSptr findDevice(const DeviceHandle device_handle) const = 0;
 
-  virtual void clientConnected(DeviceHandle, ApplicationHandle) = 0;
   virtual void connectionCreated(ConnectionSptr connection,
                                  const SessionID session_id,
                                  const DeviceHandle device_handle,
                                  const ApplicationHandle app_handle) = 0;
   virtual void connectDone(const SessionID session_id) = 0;
-  virtual void connectFailed(const SessionID session_id, const ConnectError& error) = 0;
+  virtual void connectFailed(const SessionID session_id,
+                             const ConnectError& error) = 0;
   virtual void connectionFinished(const SessionID session_id) = 0;
+  virtual void connectionAborted(const SessionID session_id, const CommunicationError& error) = 0;
   virtual void disconnectDone(const SessionID session_id) = 0;
   virtual void dataReceiveDone(const SessionID session_id,
                                RawMessageSptr message) = 0;
@@ -170,8 +173,9 @@ class DeviceScanner {
 class ServerConnectionFactory {
  public:
   virtual DeviceAdapter::Error init() = 0;
-  virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle, ApplicationHandle app_handle,
-                                 SessionID session_id) = 0;
+  virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle,
+                                                ApplicationHandle app_handle,
+                                                SessionID session_id) = 0;
   virtual ~ServerConnectionFactory() {
   }
 };
@@ -205,7 +209,9 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * Called from transport manager to start device adapter.
    **/
   virtual DeviceAdapter::Error init(DeviceHandleGenerator* handle_generator,
-                     Configuration* configuration);
+                                    Configuration* configuration);
+
+  virtual void addListener(DeviceAdapterListener *listener);
 
   /**
    * @brief Start scanning for new devices.
@@ -226,8 +232,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
    **/
   virtual DeviceAdapter::Error connect(const DeviceHandle device_handle,
-                        const ApplicationHandle app_handle,
-                        const SessionID session_id);
+                                       const ApplicationHandle app_handle,
+                                       const SessionID session_id);
 
   /**
    * @brief Disconnect from specified session.
@@ -245,7 +251,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
-  virtual DeviceAdapter::Error disconnectDevice(const DeviceHandle device_handle);
+  virtual DeviceAdapter::Error disconnectDevice(
+      const DeviceHandle device_handle);
 
   /**
    * @brief Send frame.
@@ -257,29 +264,35 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  virtual DeviceAdapter::Error sendData(const SessionID session_id, const RawMessageSptr data);
+  virtual DeviceAdapter::Error sendData(const SessionID session_id,
+                                        const RawMessageSptr data);
 
   virtual bool isSearchDevicesSupported() const;
   virtual bool isServerOriginatedConnectSupported() const;
   virtual bool isClientOriginatedConnectSupported() const;
 
   virtual DeviceList getDeviceList() const;
+  virtual ApplicationList getApplicationList(
+      const DeviceHandle device_handle) const;
   virtual DeviceSptr findDevice(DeviceHandle device_handle) const;
 
-  virtual DeviceAdapterListener* getListener();
   virtual DeviceHandleGenerator* getDeviceHandleGenerator();
 
-  virtual void searchDeviceDone(const DeviceVector& devices) = 0;
-  virtual void searchDeviceFailed(const SearchDeviceError& error) = 0;
+  virtual void searchDeviceDone(const DeviceVector& devices);
+  virtual void searchDeviceFailed(const SearchDeviceError& error);
   virtual void addDevice(DeviceSptr device);
 
   virtual void connectionCreated(ConnectionSptr connection,
                                  const SessionID session_id,
                                  const DeviceHandle device_handle,
                                  const ApplicationHandle app_handle);
+  virtual void connectionFinished(const SessionID session_id);
+  virtual void connectionAborted(const SessionID session_id,
+                                 const CommunicationError& error);
   virtual void connectDone(const SessionID session_id);
-  virtual void connectFailed(const SessionID session_id, const ConnectError& error);
-  virtual void disconnnectDone(const SessionID session_id);
+  virtual void connectFailed(const SessionID session_id,
+                             const ConnectError& error);
+  virtual void disconnectDone(const SessionID session_id);
   virtual void dataReceiveDone(const SessionID session_id,
                                RawMessageSptr message);
   virtual void dataReceiveFailed(const SessionID session_id,

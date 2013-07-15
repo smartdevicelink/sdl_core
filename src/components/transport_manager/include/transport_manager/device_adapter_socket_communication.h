@@ -102,6 +102,7 @@ class ThreadedSocketConnection : public Connection {
   int notification_pipe_write_fd_;
   int socket_;
   bool terminate_flag_;
+  bool unexpected_disconnect_;
   const DeviceHandle device_handle_;
   const ApplicationHandle app_handle_;
   const SessionID session_id_;

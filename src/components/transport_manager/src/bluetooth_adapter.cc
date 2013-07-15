@@ -34,16 +34,8 @@
  */
 
 #include <errno.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
-
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/hci_lib.h>
-#include <bluetooth/sdp.h>
-#include <bluetooth/sdp_lib.h>
-#include <bluetooth/rfcomm.h>
 
 #include <iomanip>
 #include <set>
@@ -402,6 +394,14 @@ bool BluetoothDevice::isSameAs(const Device* other) const {
   return result;
 }
 
+ApplicationList BluetoothDevice::getApplicationList() const {
+  ApplicationList result;
+  for(RfcommChannels::const_iterator it = rfcomm_channels_.begin(); it != rfcomm_channels_.end(); ++it)
+    result.push_back(it->first);
+  return result;
+}
+
+
 BluetoothSocketConnection::BluetoothSocketConnection(
     const DeviceHandle device_handle, const ApplicationHandle app_handle,
     const SessionID session_id, DeviceAdapterController* controller)
@@ -479,6 +479,10 @@ DeviceAdapter::Error BluetoothConnectionFactory::createConnection(DeviceHandle d
 }
 
 BluetoothConnectionFactory::~BluetoothConnectionFactory() {
+}
+
+DeviceType BluetoothDeviceAdapter::getDeviceType() const {
+  return "sdl-bluetooth";
 }
 
 }  // namespace device_adapter

@@ -36,7 +36,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
 
-#include "bluetooth_adapter.h"
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
+#include <bluetooth/sdp.h>
+#include <bluetooth/sdp_lib.h>
+#include <bluetooth/rfcomm.h>
+
 #include "device_adapter_socket_communication.h"
 #include "device_adapter_impl.h"
 
@@ -104,6 +110,8 @@ class BluetoothDevice : public Device {
 
   bool getRfcommChannel(const ApplicationHandle app_handle, uint8_t* channel_out);
 
+  virtual ApplicationList getApplicationList() const;
+
   const bdaddr_t& address() const {
     return address_;
   }
@@ -154,6 +162,8 @@ class BluetoothDeviceAdapter : public DeviceAdapterImpl {
     setDeviceScanner(device_scanner_.get());
     setServerConnectionFactory(server_connection_factory_.get());
   }
+ protected:
+  virtual DeviceType getDeviceType() const;
  private:
   std::auto_ptr<DeviceScanner> device_scanner_;
   std::auto_ptr<ServerConnectionFactory> server_connection_factory_;
