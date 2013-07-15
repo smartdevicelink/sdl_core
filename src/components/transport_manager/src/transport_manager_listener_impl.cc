@@ -33,16 +33,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
-
-#include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_impl.h"
 
 namespace transport_manager {
 
 TransportManagerListener::~TransportManagerListener() {
 }
-}
-
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
+}  //  namespace transport_manager

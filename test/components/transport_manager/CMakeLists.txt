@@ -27,5 +27,4 @@ set (SOURCES
 
 create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")
 target_link_libraries("test_TransportManagerTest" TransportManager)
-target_link_libraries("test_TransportManagerTest" explain)
 endif()

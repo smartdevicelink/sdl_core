@@ -36,57 +36,48 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
 
-#include "transport_manager/device_adapter.h"
+#include <string>
+#include <set>
+#include "protocol_handler/raw_message.h"
 
 namespace transport_manager {
 
-class TransportManagerListener {
-  //todo: define interface of tm listener.
-
- public:
-  virtual ~TransportManagerListener();
-
-  virtual void onSearchDeviceDone(const DeviceHandle device,
-                                  const ApplicationList app_list) = 0;
-  virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
-                                    const SearchDeviceError& error) = 0;
-
-  virtual void onConnectDone(const DeviceAdapter* device_adapter,
-                             const transport_manager::SessionID session_id) = 0;
-  virtual void onConnectFailed(const DeviceAdapter* device_adapter,
-                               const transport_manager::SessionID session_id,
-                               const ConnectError& error) = 0;
-
-  virtual void onDisconnectDone(
-      const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id) = 0;
-  virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
-                                  const transport_manager::SessionID session_id,
-                                  const DisconnectDeviceError& error) = 0;
-  virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id) = 0;
-  virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
-                                        const SessionID session_id,
-                                        const DisconnectDeviceError& error) = 0;
-
-  virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,
-                                 const transport_manager::SessionID session_id,
-                                 const RawMessageSptr data_container) = 0;
-  virtual void onDataReceiveFailed(
-      const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id,
-      const DataReceiveError& error) = 0;
-
-  virtual void onDataSendDone(const DeviceAdapter* device_adapter,
-                              const transport_manager::SessionID session_id,
-                              const RawMessageSptr data_container) = 0;
-  virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
-                                const transport_manager::SessionID session_id,
-                                const DataSendError& error) = 0;
-
-  virtual void onCommunicationError(
-      const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id) = 0;
+struct DeviceInfo {
+  std::string name;
+  int handle;
 };
-}  //namespace
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
+
+// TODO(PV):
+enum TMResult {
+  OK = 0,
+  FAIL,
+  CONNECTION_CLOSED_BY_APP,
+  SENDING_FAILED_WHO_KNOWS_WHY
+};
+
+typedef int ConnectionID;
+
+class TransportManagerListener {
+  public:
+    virtual ~TransportManagerListener() = 0;
+
+    // TODO(PV): can be used other container type.
+    virtual void OnDeviceListUpdated(
+      const std::set<DeviceInfo>& device_list) = 0;
+    virtual void OnScanDevicesFinished(TMResult result) = 0;
+    virtual void onConnectionEstablished(ConnectionID connection_id) = 0;
+    virtual void onConnectionClosed(ConnectionID connection_id,
+                                    TMResult reason) = 0;
+
+    // TODO(PV): is it frame or whole message or just some number of bytes?
+    virtual void onFrameReceived(
+      const protocol_handler::RawMessage& message) = 0;
+
+    // TODO(PV): probably we don't need to give message back,
+    // maybe we should instead some messaged id/correlationID/serial_number?
+    virtual void onFrameSend(
+      const protocol_handler::RawMessage& message,
+      TMResult& result) = 0;
+};
+}  //  namespace transport_manager
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER

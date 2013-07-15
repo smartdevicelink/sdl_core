@@ -1,6 +1,6 @@
 /*
  * \file mock_device_adapter.cc
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -36,85 +36,84 @@
 #include <sys/un.h>
 
 #include <list>
-#include <libexplain/bind.h>
 
 #include "transport_manager/mock_device_adapter.h"
 #include "transport_manager/device_adapter_impl.h"
 
 namespace {
 
-  struct workerData_t{
-    pthread_t tid;
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
-    int sockfd;
-    bool active;
-  };
+struct workerData_t {
+  pthread_t tid;
+  pthread_mutex_t mutex;
+  pthread_cond_t cond;
+  int sockfd;
+  bool active;
+};
 
-  workerData_t workerData[5];
+workerData_t workerData[5];
 
-  static void *mockDeviceWorker(void* p) {
-    workerData_t *data = static_cast<workerData_t*>(p);
+static void* mockDeviceWorker(void* p) {
+  workerData_t* data = static_cast<workerData_t*>(p);
 
-    unsigned char *buf = new unsigned char[4096];
-    pthread_mutex_lock(&data->mutex);
-    while(data->active) {
-      pthread_cond_wait(&data->cond, &data->mutex);
-      int len = recv(data->sockfd, buf, 4096, 0);
-      if (len > 0) {
-        send(data->sockfd, buf, len, 0);
-      }
+  unsigned char* buf = new unsigned char[4096];
+  pthread_mutex_lock(&data->mutex);
+  while (data->active) {
+    pthread_cond_wait(&data->cond, &data->mutex);
+    int len = recv(data->sockfd, buf, 4096, 0);
+    if (len > 0) {
+      send(data->sockfd, buf, len, 0);
     }
+  }
 
-    pthread_mutex_unlock(&data->mutex);
-    delete[] buf;
+  pthread_mutex_unlock(&data->mutex);
+  delete[] buf;
+  return NULL;
+}
+
+static void* mockDeviceListenerThreadRoutine(void* p) {
+  test::components::transport_manager::MockDeviceAdapter::listenerData_t* data = static_cast<test::components::transport_manager::MockDeviceAdapter::listenerData_t*>(p);
+  data->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (data->sockfd == -1) {
+    return NULL;
+  }
+  sockaddr_un my_addr;
+  memset(&my_addr, 0, sizeof(my_addr));
+  strcpy(my_addr.sun_path, "./mockDevice");
+  my_addr.sun_family = AF_UNIX;
+  int res = bind(data->sockfd, reinterpret_cast<sockaddr*>(&my_addr), sizeof(my_addr));
+  if (res == -1) {
     return NULL;
   }
 
-  static void *mockDeviceListenerThreadRoutine(void *p) {
-    test::components::transport_manager::MockDeviceAdapter::listenerData_t *data = static_cast<test::components::transport_manager::MockDeviceAdapter::listenerData_t*>(p);
-    data->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (data->sockfd == -1) {
-      return NULL;
-    }
-    sockaddr_un my_addr;
-    memset(&my_addr, 0, sizeof(my_addr));
-    strcpy(my_addr.sun_path, "./mockDevice");
-    my_addr.sun_family = AF_UNIX;
-    int res = bind(data->sockfd, reinterpret_cast<sockaddr*>(&my_addr), sizeof(my_addr));
-    if (res == -1) {
-      return NULL;
-    }
+  res = listen(data->sockfd, 5);
 
-    res = listen(data->sockfd, 5);
+  for (int i = 0; i < 5; ++i) {
+    workerData[i].active = true;
+    workerData[i].sockfd = 0;
+    pthread_mutex_init(&workerData[i].mutex, NULL);
+    pthread_create(&workerData[i].tid, NULL, mockDeviceWorker, &workerData[i]);
+  }
 
-    for (int i = 0; i < 5; ++i) {
-      workerData[i].active = true;
-      workerData[i].sockfd = 0;
-      pthread_mutex_init(&workerData[i].mutex, NULL);
-      pthread_create(&workerData[i].tid, NULL, mockDeviceWorker, &workerData[i]);
-    }
+  pthread_barrier_wait(&data->barrier);
+  while (data->active) {
+    size_t addr_size;
+    sockaddr peer_addr;
 
-    pthread_barrier_wait(&data->barrier);
-    while(data->active) {
-      size_t addr_size;
-      sockaddr peer_addr;
+    int peer_socket = accept(data->sockfd, &peer_addr, &addr_size);
 
-      int peer_socket = accept(data->sockfd, &peer_addr, &addr_size);
-
-      if (peer_socket != 0) {
-        for (int i = 0; i < 5; ++i) {
-          if (workerData[i].sockfd == 0) {
-            workerData[i].sockfd = peer_socket;
-            pthread_cond_signal(&workerData[i].cond);
-            break;
-          }
+    if (peer_socket != 0) {
+      for (int i = 0; i < 5; ++i) {
+        if (workerData[i].sockfd == 0) {
+          workerData[i].sockfd = peer_socket;
+          pthread_cond_signal(&workerData[i].cond);
+          break;
         }
       }
     }
-
-    return NULL;
   }
+
+  return NULL;
+}
 }
 
 namespace test {
@@ -167,11 +166,11 @@ ApplicationList MockDeviceAdapter::getApplicationList(const DeviceHandle device_
   return rc;
 }
 
-void MockDeviceAdapter::connectionThread(Connection *connection) {
+void MockDeviceAdapter::connectionThread(Connection* connection) {
   assert(connection != 0);
   LOG4CXX_INFO(
-      logger_,
-      "Connection thread started for session " << connection->session_id());
+    logger_,
+    "Connection thread started for session " << connection->session_id());
 
   const DeviceHandle device_handle = connection->device_handle();
   const ApplicationHandle app_handle = connection->application_handle();
@@ -194,21 +193,21 @@ void MockDeviceAdapter::connectionThread(Connection *connection) {
 
 void MockDeviceAdapter::mainThread() {
   while (!shutdown_flag_) {
-      DeviceMap new_devices;
-      DeviceVector discovered_devices;
+    DeviceMap new_devices;
+    DeviceVector discovered_devices;
 
-      bool device_scan_requested = waitForDeviceScanRequest(0);
+    bool device_scan_requested = waitForDeviceScanRequest(0);
 
-      if(device_scan_requested) {
-        for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
-          (*it)->onSearchDeviceDone(this);
-        }
-        device_scan_requested_ = false;
+    if (device_scan_requested) {
+      for (DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it) {
+        (*it)->onSearchDeviceDone(this);
       }
+      device_scan_requested_ = false;
+    }
   }
 }
 
-void MockDeviceAdapter::addDevice(const char *name) {
+void MockDeviceAdapter::addDevice(const char* name) {
   static int devid = 100;
   MockDevice* dev = new MockDevice(name);
   dev->start();
