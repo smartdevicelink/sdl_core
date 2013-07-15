@@ -79,26 +79,30 @@ void PerformAudioPassThruRequest::Run() {
   ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(true);
 
   // create HMI request
-  smart_objects::CSmartObject msg_params;
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
+  msg_params[hmi_request::audio_pass_display_texts] =
+      smart_objects::CSmartObject(smart_objects::SmartType_Array);
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    msg_params[str::msg_params][hmi_request::audio_pass_display_texts][0]
+    msg_params[hmi_request::audio_pass_display_texts][0]
     [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT1;
-    msg_params[str::msg_params][hmi_request::audio_pass_display_texts][0]
+    msg_params[hmi_request::audio_pass_display_texts][0]
     [hmi_request::field_text] =
       (*message_)[str::msg_params][str::audio_pass_display_text1];
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    msg_params[str::msg_params][hmi_request::audio_pass_display_texts][1]
+    msg_params[hmi_request::audio_pass_display_texts][1]
     [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT2;
-    msg_params[str::msg_params][hmi_request::audio_pass_display_texts][1]
+    msg_params[hmi_request::audio_pass_display_texts][1]
     [hmi_request::field_text] =
       (*message_)[str::msg_params][str::audio_pass_display_text2];
   }
 
   // duration
-  msg_params[strings::msg_params][hmi_request::max_duration] =
+  msg_params[hmi_request::max_duration] =
       (*message_)[str::msg_params][str::max_duration];
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_PerformAudioPassThru,

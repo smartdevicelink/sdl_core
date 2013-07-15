@@ -43,7 +43,7 @@ namespace commands {
 
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run");
-
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run" << (*message_)[strings::params][strings::connection_key].asInt());
   if (ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key])) {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);

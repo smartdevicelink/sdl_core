@@ -70,10 +70,11 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
   msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::msg_params][strings::app_id] =
-      app->app_id();
+  msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_CreateInteractionChoiceSet,
                    msg_params, true);

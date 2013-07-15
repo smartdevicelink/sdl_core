@@ -32,6 +32,7 @@
  */
 
 #include <cstdint>
+#include <string>
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -77,10 +78,13 @@ void AddCommandRequest::Run() {
       (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::menu_params] =
       (*message_)[strings::msg_params][strings::menu_params];
-    msg_params[strings::cmd_icon] =
-      (*message_)[strings::msg_params][strings::cmd_icon];
-    msg_params[strings::app_id] =
-      app->app_id();
+    std::string file_path = app->name();
+    file_path += "/";
+    file_path += (*message_)[strings::msg_params][strings::cmd_icon]
+        [strings::value].asString();
+    msg_params[strings::cmd_icon] = file_path;
+
+    msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true);
   }
@@ -93,8 +97,7 @@ void AddCommandRequest::Run() {
         (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::vr_commands] =
        (*message_)[strings::msg_params][strings::vr_commands];
-    msg_params[strings::app_id] =
-        app->app_id();
+    msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, true);
   }

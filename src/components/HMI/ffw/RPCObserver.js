@@ -79,6 +79,6 @@ FFW.RPCObserver = Em.Object.extend( {
                 return;
             }
         }
-        // parse JSON string and send back necessary data
+        //parse JSON string and send back necessary data
     }
 } )

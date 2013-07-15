@@ -80,10 +80,12 @@ void ChangeRegistrationRequest::Run() {
   if (app->ui_language() !=
      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
 
-    smart_objects::CSmartObject msg_params;
-    msg_params[strings::msg_params][strings::language] =
+    smart_objects::CSmartObject msg_params =
+        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
+    msg_params[strings::language] =
         (*message_)[strings::msg_params][strings::hmi_display_language];
-    msg_params[strings::msg_params][strings::app_id] = app->app_id();
+    msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
                      msg_params, true);
@@ -94,11 +96,11 @@ void ChangeRegistrationRequest::Run() {
   if (app->language() !=
      (*message_)[strings::msg_params][strings::language].asInt()) {
 
-    smart_objects::CSmartObject msg_params;
-    msg_params[strings::msg_params][strings::language] =
+    smart_objects::CSmartObject msg_params =
+        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::language] =
         (*message_)[strings::msg_params][strings::language];
-    msg_params[strings::msg_params][strings::app_id] =
-        app->app_id();
+    msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
                      msg_params, true);

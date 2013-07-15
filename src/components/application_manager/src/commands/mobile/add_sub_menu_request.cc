@@ -74,14 +74,16 @@ void AddSubMenuRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
-  msg_params[strings::msg_params][strings::menu_id] =
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::menu_id] =
       (*message_)[strings::msg_params][strings::menu_id];
-  msg_params[strings::msg_params][strings::menu_params][strings::position] =
+  msg_params[strings::menu_params][strings::position] =
       (*message_)[strings::msg_params][strings::position];
-  msg_params[strings::msg_params][strings::menu_params][strings::menu_name] =
+  msg_params[strings::menu_params][strings::menu_name] =
       (*message_)[strings::msg_params][strings::menu_name];
-  msg_params[strings::msg_params][strings::app_id] = app->app_id();
+  msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, msg_params, true);
 }

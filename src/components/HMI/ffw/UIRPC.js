@@ -101,7 +101,7 @@ FFW.UI = FFW.RPCObserver.create( {
      */
     onRPCUnregistered: function() {
         Em.Logger.log( "FFW.UI.onRPCUnregistered" );
-        this._super();
+        //this._super();
 
         // unsubscribe from notifications
         this.onVRChoiseUnsubscribeRequestId = this.client.unsubscribeFromNotification( this.onVRChoiseNotification );

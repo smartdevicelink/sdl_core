@@ -61,13 +61,12 @@ void SliderRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::msg_params][strings::app_id] =
-      application_impl->app_id();
+  msg_params[strings::app_id] = application_impl->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_Slider,
-                   msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_Slider, msg_params, true);
 }
 
 }  // namespace commands

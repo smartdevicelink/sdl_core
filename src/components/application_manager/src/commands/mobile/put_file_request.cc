@@ -72,7 +72,9 @@ void PutFileRequest::Run() {
       (*message_)[strings::msg_params][strings::persistent_file];
   }
 
-  const std::vector<unsigned char> file_data = message_->asBinary();
+  const std::vector<unsigned char> file_data =
+      (*message_)[strings::msg_params][strings::binary_data].asBinary();
+  LOG4CXX_ERROR(logger_, "######## size " << file_data.size());
 
   if (free_space > file_data.size()) {
     std::string relative_file_path =

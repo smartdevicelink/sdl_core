@@ -67,14 +67,14 @@ void DeleteSubMenuRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
-  msg_params[strings::msg_params][strings::menu_id] =
-      (*message_)[strings::msg_params][strings::menu_id];
-  msg_params[strings::msg_params][strings::app_id] =
-      app->app_id();
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu,
-                   msg_params, true);
+  msg_params[strings::menu_id] =
+      (*message_)[strings::msg_params][strings::menu_id];
+  msg_params[strings::app_id] = app->app_id();
+
+  CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, msg_params, true);
 }
 
 }  // namespace commands

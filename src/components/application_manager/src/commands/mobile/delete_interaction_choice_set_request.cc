@@ -61,8 +61,8 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  const int choise_set_id =
-    (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
+  const int choise_set_id = (*message_)[strings::msg_params]
+      [strings::interaction_choice_set_id].asInt();
 
   if (!app->FindChoiceSet(choise_set_id)) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
@@ -70,10 +70,11 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
-  msg_params[strings::msg_params][strings::interaction_choice_set_id] =
-    choise_set_id;
-  msg_params[strings::msg_params][strings::app_id] = app->app_id();
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::interaction_choice_set_id] = choise_set_id;
+  msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet,
                    msg_params, true);

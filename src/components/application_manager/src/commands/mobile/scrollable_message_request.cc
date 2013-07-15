@@ -55,15 +55,17 @@ void ScrollabeMessageRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
   msg_params[hmi_request::initial_text][hmi_request::field_name] =
       TextFieldName::SCROLLABLE_MSG_BODY;
   msg_params[hmi_request::initial_text][hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::scroll_message_body];
-  msg_params[strings::msg_params][strings::app_id] = app->app_id();
-  msg_params[strings::msg_params][strings::soft_buttons] =
+  msg_params[strings::app_id] = app->app_id();
+  msg_params[strings::soft_buttons] =
       (*message_)[strings::msg_params][strings::soft_buttons];
-  msg_params[strings::msg_params][strings::timeout] =
+  msg_params[strings::timeout] =
       (*message_)[strings::msg_params][strings::timeout];
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage,

@@ -70,11 +70,12 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
-  msg_params[strings::msg_params][strings::app_id] = app->app_id();
-  msg_params[strings::msg_params][strings::ecu_name] =
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = app->app_id();
+  msg_params[strings::ecu_name] =
     (*message_)[str::msg_params][str::ecu_name];
-  msg_params[strings::msg_params][strings::did_location] =
+  msg_params[strings::did_location] =
     (*message_)[str::msg_params][str::did_location];
 
   CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_ReadDID,

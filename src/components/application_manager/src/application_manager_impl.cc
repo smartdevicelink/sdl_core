@@ -614,7 +614,6 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
 void ApplicationManagerImpl::SendMessageToHMI(
   const utils::SharedPtr<smart_objects::CSmartObject>& message) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToHMI");
   DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
@@ -708,6 +707,12 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         return false;
       }
       LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());
+      output[strings::params][strings::connection_key] =
+          message.connection_key();
+      if (message.binary_data()) {
+        output[strings::params][strings::binary_data] =
+            message.binary_data();
+      }
       break;
     }
     case ProtocolVersion::kHMI: {

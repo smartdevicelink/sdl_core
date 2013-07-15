@@ -60,9 +60,12 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
-  msg_params[strings::msg_params][hmi_request::soft_buttons] =
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
+  msg_params[hmi_request::soft_buttons] =
     (*message_)[strings::msg_params][strings::soft_buttons];
+
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
                    msg_params, true);
 }

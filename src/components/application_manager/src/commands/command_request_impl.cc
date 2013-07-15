@@ -115,7 +115,6 @@ void CommandRequestImpl::CreateHMIRequest(
 
   NsSmartDeviceLink::NsSmartObjects::CSmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
-  request[strings::params][strings::connection_key] = connection_key;
   request[strings::params][strings::function_id] = function_id;
   request[strings::params][strings::correlation_id] = hmi_correlation_id;
   request[strings::params][strings::protocol_version] =

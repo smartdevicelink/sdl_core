@@ -62,10 +62,11 @@ void SetMediaClockRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
   // copy entirely msg
   msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::msg_params][strings::app_id] = app->app_id();
+  msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer,
                    msg_params, true);

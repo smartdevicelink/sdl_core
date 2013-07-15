@@ -77,10 +77,11 @@ void SetIconRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params;
-  const int hmi_request_id = hmi_apis::FunctionID::UI_SetAppIcon;
-  msg_params[strings::msg_params][strings::app_id] = app->app_id();
-  msg_params[strings::params][strings::sync_file_name] = full_file_path;
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::app_id] = app->app_id();
+  msg_params[strings::sync_file_name] = full_file_path;
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, msg_params, true);
 }

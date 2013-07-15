@@ -76,7 +76,7 @@ class AlertRequest : public CommandRequestImpl {
    *
    * @param app_id Id of application requested this RPC
    */
-  void SendSpeekRequest(int app_id);
+  void SendSpeakRequest(int app_id);
 
   /*
    * @brief Sends Basic communication playtone request

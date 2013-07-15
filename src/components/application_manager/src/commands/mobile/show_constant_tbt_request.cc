@@ -64,7 +64,8 @@ void ShowConstantTBTRequest::Run() {
 
   app->set_tbt_show_command((*message_)[strings::msg_params]);
 
-  smart_objects::CSmartObject msg_params;
+  smart_objects::CSmartObject msg_params =
+      smart_objects::CSmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
   msg_params[hmi_request::navi_texts] =
