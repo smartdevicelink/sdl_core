@@ -70,8 +70,8 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::interaction_choice_set_id_list] =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];

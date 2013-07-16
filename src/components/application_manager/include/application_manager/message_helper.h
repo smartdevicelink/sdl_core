@@ -169,7 +169,7 @@ class MessageHelper {
      * @param devices Devices list
      *
      */
-    static smart_objects::CSmartObject* CreateDeviceListSO(
+    static smart_objects::SmartObject* CreateDeviceListSO(
       const connection_handler::DeviceList& devices);
 
   private:

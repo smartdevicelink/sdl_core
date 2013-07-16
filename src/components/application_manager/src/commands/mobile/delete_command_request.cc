@@ -60,7 +60,7 @@ void DeleteCommandRequest::Run() {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
-  smart_objects::CSmartObject* command = application->
+  smart_objects::SmartObject* command = application->
         FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!command) {
@@ -71,8 +71,8 @@ void DeleteCommandRequest::Run() {
 
   if ((*command)[strings::msg_params].keyExists(strings::menu_params)) {
 
-      smart_objects::CSmartObject msg_params =
-          smart_objects::CSmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
 
       msg_params[strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];
@@ -85,8 +85,8 @@ void DeleteCommandRequest::Run() {
     // check vr params
     if ((*command)[strings::msg_params].keyExists(strings::vr_commands)) {
 
-      smart_objects::CSmartObject msg_params =
-          smart_objects::CSmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
 
       msg_params[strings::cmd_id] =
           (*message_)[strings::msg_params][strings::cmd_id];

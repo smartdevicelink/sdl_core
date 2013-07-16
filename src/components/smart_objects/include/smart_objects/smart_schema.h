@@ -42,7 +42,7 @@ namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
-        class CSmartObject;
+        class SmartObject;
 
         /**
          * @brief Smart Schema.
@@ -74,7 +74,7 @@ namespace NsSmartDeviceLink
              *
              * @return Result of validation.
              */
-            Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& Object);
+            Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& Object);
 
             /**
              * @brief Set new root schema item.
@@ -88,14 +88,14 @@ namespace NsSmartDeviceLink
              *
              * @param Object Object to apply schema.
              **/
-            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief The reverse SmartObject conversion using schema.
              *
              * @param object Object to convert.
              */
-            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object);
+            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& object);
 
             /**
              * @brief Build smart object by smart schema having copied matched
@@ -105,8 +105,8 @@ namespace NsSmartDeviceLink
              * @param result_object object to build
              */
             virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) const;
+              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) const;
 
         protected:
 

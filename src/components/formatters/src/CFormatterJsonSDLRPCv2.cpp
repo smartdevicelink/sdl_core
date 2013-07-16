@@ -42,12 +42,12 @@ namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 // ----------------------------------------------------------------------------
 
 bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toString(
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
+        const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
         std::string& outStr)
 {
     Json::Value root(Json::objectValue);
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject formattedObj(obj);
+    NsSmartDeviceLink::NsSmartObjects::SmartObject formattedObj(obj);
     formattedObj.getSchema().unapplySchema(formattedObj);       // converts enums(as int) to strings
 
     objToJsonValue(formattedObj.getElement(NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS), root);
@@ -61,14 +61,14 @@ bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toStr
 
 Formatters::CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode
   Formatters::CFormatterJsonSDLRPCv2::MetaFormatToString(
-            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+            const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
             const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
             std::string& outStr) {
 
   meta_formatter_error_code::tMetaFormatterErrorCode result_code
                                     = meta_formatter_error_code::kErrorOk;
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject tmp_object;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject tmp_object;
 
   if (false == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
       result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;

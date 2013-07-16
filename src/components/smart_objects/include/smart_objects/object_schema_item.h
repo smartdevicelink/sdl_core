@@ -101,21 +101,21 @@ namespace NsSmartDeviceLink
              *
              * @return NsSmartObjects::Errors::eType
              **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief Apply schema.
              *
              * @param Object Object to apply schema.
              **/
-            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief Unapply schema.
              *
              * @param Object Object to unapply schema.
              **/
-            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief Build smart object by smart schema having copied matched
@@ -125,8 +125,8 @@ namespace NsSmartDeviceLink
              * @param result_object object to build
              */
             virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 
         private:
             /**

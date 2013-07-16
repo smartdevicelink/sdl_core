@@ -80,8 +80,8 @@ void ChangeRegistrationRequest::Run() {
   if (app->ui_language() !=
      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
 
-    smart_objects::CSmartObject msg_params =
-        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     msg_params[strings::language] =
         (*message_)[strings::msg_params][strings::hmi_display_language];
@@ -96,8 +96,8 @@ void ChangeRegistrationRequest::Run() {
   if (app->language() !=
      (*message_)[strings::msg_params][strings::language].asInt()) {
 
-    smart_objects::CSmartObject msg_params =
-        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::language] =
         (*message_)[strings::msg_params][strings::language];
     msg_params[strings::app_id] = app->app_id();
@@ -116,7 +116,7 @@ void ChangeRegistrationRequest::Run() {
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     const int& hmi_display_lang) {
 
-  const smart_objects::CSmartObject* ui_languages =
+  const smart_objects::SmartObject* ui_languages =
       ApplicationManagerImpl::instance()->ui_supported_languages();
 
   bool is_language_supported = false;
@@ -137,7 +137,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     const int& hmi_display_lang) {
 
-  const smart_objects::CSmartObject* vr_languages =
+  const smart_objects::SmartObject* vr_languages =
       ApplicationManagerImpl::instance()->vr_supported_languages();
 
   bool is_language_supported = false;
@@ -158,7 +158,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     const int& hmi_display_lang) {
 
-  const smart_objects::CSmartObject* tts_languages =
+  const smart_objects::SmartObject* tts_languages =
       ApplicationManagerImpl::instance()->tts_supported_languages();
 
   bool is_language_supported = false;

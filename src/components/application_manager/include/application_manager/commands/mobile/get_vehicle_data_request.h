@@ -39,7 +39,7 @@
 
 namespace application_manager {
 
-class CSmartObject;
+class SmartObject;
 
 namespace commands {
 

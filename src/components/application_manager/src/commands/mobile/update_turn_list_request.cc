@@ -83,8 +83,8 @@ void UpdateTurnListRequest::Run() {
                [strings::turn_icon][strings::value] = file_path;
   }
 
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList,

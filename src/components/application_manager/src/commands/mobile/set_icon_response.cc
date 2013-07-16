@@ -64,7 +64,7 @@ void SetIconResponse::Run() {
     return;
   }
 
-  smart_objects::CSmartObject data =
+  smart_objects::SmartObject data =
       msg_chain->data();
 
   if (ApplicationManagerImpl::instance()->

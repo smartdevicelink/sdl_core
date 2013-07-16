@@ -56,7 +56,7 @@ utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem> NsSmartDe
     return new NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem(Members);
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
@@ -105,7 +105,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
     return result;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map == Object.getType())
     {
@@ -119,7 +119,7 @@ void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::applySchema(NsSmartDe
     }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map == Object.getType())
     {
@@ -134,10 +134,10 @@ void NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::unapplySchema(NsSmart
 }
 
 void smart_objects_ns::CObjectSchemaItem::BuildObjectBySchema(
-    const smart_objects_ns::CSmartObject& pattern_object,
-    smart_objects_ns::CSmartObject& result_object) {
+    const smart_objects_ns::SmartObject& pattern_object,
+    smart_objects_ns::SmartObject& result_object) {
 
-  result_object = smart_objects_ns::CSmartObject(smart_objects_ns::SmartType_Map);
+  result_object = smart_objects_ns::SmartObject(smart_objects_ns::SmartType_Map);
 
   if (smart_objects_ns::SmartType_Map == pattern_object.getType()) {
     for (std::map<std::string,
@@ -150,7 +150,7 @@ void smart_objects_ns::CObjectSchemaItem::BuildObjectBySchema(
             pattern_object.getElement(i->first), result_object[i->first]);
         } else if (true == i->second.mIsMandatory) {
           i->second.mSchemaItem->BuildObjectBySchema(
-            smart_objects_ns::CSmartObject(), result_object[i->first]);
+            smart_objects_ns::SmartObject(), result_object[i->first]);
         }
       } // for
   } else {
@@ -163,7 +163,7 @@ void smart_objects_ns::CObjectSchemaItem::BuildObjectBySchema(
         if (true == i->second.mIsMandatory) {
           is_any_mandatory_field = true;
           i->second.mSchemaItem->BuildObjectBySchema(
-              smart_objects_ns::CSmartObject(), result_object[i->first]);
+              smart_objects_ns::SmartObject(), result_object[i->first]);
         }
       } // for
   }

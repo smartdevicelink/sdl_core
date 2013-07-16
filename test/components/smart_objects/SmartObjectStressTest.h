@@ -60,7 +60,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         std::string to_string(const double value) const
         {
-            // Content is the same as in CSmartObject::convert_double_to_string
+            // Content is the same as in SmartObject::convert_double_to_string
             std::stringstream ss;
             ss << std::fixed << std::setprecision(10) << value;         //convert double to string w fixed notation, hi precision
             std::string s = ss.str();                                   //output to std::string
@@ -108,7 +108,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             return std::string(buff);
         }
 
-        void makeRandomObject(CSmartObject &obj, const int size, std::string key_path)
+        void makeRandomObject(SmartObject &obj, const int size, std::string key_path)
         {
             int type_id = rand() % 8;
 
@@ -166,7 +166,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 #ifdef NO_INCLUSIVE_MAPS
                     obj[key] = key;
 #else
-                    obj[key] = CSmartObject();
+                    obj[key] = SmartObject();
                     makeRandomObject(obj[key], size - 1, key_path + key + ' ');     // recursion
 #endif // MAP_WORKAROUND
                 }
@@ -179,7 +179,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 mVerifyMap[key_path] = "array";
                 for (int i = 0; i < size; i++)
                 {
-                    obj[i] = CSmartObject();      // just init it as an array
+                    obj[i] = SmartObject();      // just init it as an array
                     makeRandomObject(obj[i], size - 1, key_path + generate_key("A", i) + ' ');     // recursion
                 }
                 break;
@@ -199,10 +199,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             }
         }
 
-        CSmartObject get_object(CSmartObject &rootObj, const std::string &path) const
+        SmartObject get_object(SmartObject &rootObj, const std::string &path) const
         {
             std::vector<std::string> obj_tokens;
-            CSmartObject lastObj = rootObj;
+            SmartObject lastObj = rootObj;
 
             obj_tokens = split(path, ' ');
 
@@ -212,7 +212,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 {
                     int index = atoi(&(obj_tokens[i].c_str()[1]));      // get integer skipping first char
 #ifdef COPY_SUB_OBJECTS_WORKAROUND
-                    lastObj = CSmartObject(lastObj[index]);
+                    lastObj = SmartObject(lastObj[index]);
 #else
                     lastObj = lastObj[index];       // go to the child object
 #endif
@@ -220,7 +220,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 else if (obj_tokens[i][0] == 'M')       // map
                 {
 #ifdef COPY_SUB_OBJECTS_WORKAROUND
-                    lastObj = CSmartObject(lastObj[obj_tokens[i]]);
+                    lastObj = SmartObject(lastObj[obj_tokens[i]]);
 #else
                     lastObj = lastObj[obj_tokens[i]];       // go to the child object
 #endif
@@ -236,21 +236,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     };
 
     /*
-     * The test creates the initial CSmartObject and use it as an array for the next CSmartObjects.
-     * Each next CSmartObject is randomly assigned to some type.
-     * If one of the object happens to be a container it fills it with CSmartObject of random type. The amount of these
+     * The test creates the initial SmartObject and use it as an array for the next SmartObjects.
+     * Each next SmartObject is randomly assigned to some type.
+     * If one of the object happens to be a container it fills it with SmartObject of random type. The amount of these
      * objects is the size of the parent container -1.
-     * The iteration continues until all nodes are simple CSmartObjects (not arrays or maps)
+     * The iteration continues until all nodes are simple SmartObjects (not arrays or maps)
      */
     TEST_F(StressTestHelper, StressTest)
     {
-        CSmartObject objects;
+        SmartObject objects;
 
         const int size = 11;
 
         for (int i = 0; i < size; i++)
         {
-            CSmartObject obj;
+            SmartObject obj;
 
             makeRandomObject(obj, size - 1, generate_key("A", i) + ' ');
 
@@ -260,7 +260,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         for (VerificationMap::const_iterator it = mVerifyMap.begin(); it != mVerifyMap.end(); it++)
         {
             std::string value(it->second);
-            CSmartObject obj = get_object(objects, it->first);
+            SmartObject obj = get_object(objects, it->first);
 
             // Binary data check
             if(!value.compare(0, 2, "c:"))
@@ -326,7 +326,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST_F(StressTestHelper, ExtraManualDebugTest)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         obj[0] = false;
         obj[1] = 0.869495;
@@ -334,14 +334,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj[3] = 'Q';
         obj[4] = true;
         obj[5] = 3.704;
-        obj[6] = CSmartObject();
+        obj[6] = SmartObject();
         obj[6][0] = std::string("ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt");
         obj[6][1] = 'K';
         obj[6][2] = 0.735294;
         obj[6][3] = 'I';
-        obj[6][4] = CSmartObject();
+        obj[6][4] = SmartObject();
         obj[6][4]["M0"] = 0.59432;
-        CSmartObject & refObj = obj[6][4];
+        SmartObject & refObj = obj[6][4];
         refObj["M1"]["M0"]["M0"][0] = true;
 
         // FIXME: Figure out why there's a trailing zero while converting from double to string

@@ -72,12 +72,12 @@ const VehicleData MessageHelper::vehicle_data_ = {
 
 void MessageHelper::SendHMIStatusNotification(
   const ApplicationImpl& application_impl) {
-  smart_objects::CSmartObject* notification = new smart_objects::CSmartObject;
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
     return;
   }
-  smart_objects::CSmartObject& message = *notification;
+  smart_objects::SmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     mobile_api::FunctionID::OnHMIStatusID;
@@ -101,12 +101,12 @@ void MessageHelper::SendHMIStatusNotification(
 
 void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
   const std::set<connection_handler::Device>& device_list) {
-  smart_objects::CSmartObject* notification = new smart_objects::CSmartObject;
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
     return;
   }
-  smart_objects::CSmartObject& message = *notification;
+  smart_objects::SmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated;
@@ -130,12 +130,12 @@ void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   const ApplicationImpl& application_impl) {
-  smart_objects::CSmartObject* notification = new smart_objects::CSmartObject;
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
     return;
   }
-  smart_objects::CSmartObject& message = *notification;
+  smart_objects::SmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_OnAppRegistered;
@@ -181,12 +181,12 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   int connection_key,
   mobile_api::AppInterfaceUnregisteredReason::eType reason) {
-  smart_objects::CSmartObject* notification = new smart_objects::CSmartObject;
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
     return;
   }
-  smart_objects::CSmartObject& message = *notification;
+  smart_objects::SmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     mobile_api::FunctionID::OnAppInterfaceUnregisteredID;
@@ -204,10 +204,10 @@ const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
 
-smart_objects::CSmartObject* MessageHelper::CreateDeviceListSO(
+smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
   const connection_handler::DeviceList& devices) {
-  smart_objects::CSmartObject* device_list_so  =
-    new smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject* device_list_so  =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if (NULL == device_list_so) {
     return NULL;
@@ -215,8 +215,8 @@ smart_objects::CSmartObject* MessageHelper::CreateDeviceListSO(
 
   if (!devices.empty())  {
     (*device_list_so)[strings::device_list] =
-      smart_objects::CSmartObject(smart_objects::SmartType_Array);
-    smart_objects::CSmartObject& list_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject& list_so =
       (*device_list_so)[strings::device_list];
     int index = 0;
     for (connection_handler::DeviceList::const_iterator it = devices.begin();

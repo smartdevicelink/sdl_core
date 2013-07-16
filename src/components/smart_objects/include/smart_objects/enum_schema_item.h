@@ -78,7 +78,7 @@ namespace NsSmartDeviceLink
              *
              * @return NsSmartObjects::Errors::eType
              **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief Set default value to an object.
@@ -87,7 +87,7 @@ namespace NsSmartDeviceLink
              *
              * @return true if default value was successfully set, false otherwise.
              **/
-            virtual bool setDefaultValue(CSmartObject & Object);
+            virtual bool setDefaultValue(SmartObject & Object);
 
             /**
              * @brief Apply schema.
@@ -98,14 +98,14 @@ namespace NsSmartDeviceLink
              *
              * @param Object Object to apply schema.
              **/
-            virtual void applySchema(CSmartObject & Object);
+            virtual void applySchema(SmartObject & Object);
 
             /**
              * @brief Unapply schema.
              *
              * @param Object Object to unapply schema.
              **/
-            virtual void unapplySchema(CSmartObject & Object);
+            virtual void unapplySchema(SmartObject & Object);
 
             /**
              * @brief Build smart object by smart schema having copied matched
@@ -115,8 +115,8 @@ namespace NsSmartDeviceLink
              * @param result_object object to build
              */
             virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 
             /**
              * @brief The method converts a string into the value of enum EnumType
@@ -186,7 +186,7 @@ utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType> > 
 }
 
 template <typename EnumType>
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
@@ -210,7 +210,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
 }
 
 template <typename EnumType>
-bool NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     bool result = false;
     EnumType value;
@@ -225,7 +225,7 @@ bool NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::setDefaultVal
 }
 
 template <typename EnumType>
-void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_String == Object.getType())
     {
@@ -244,7 +244,7 @@ void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(N
 }
 
 template <typename EnumType>
-void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer == Object.getType())
     {
@@ -261,8 +261,8 @@ void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema
 
 template <typename EnumType>
 void smart_objects_ns::TEnumSchemaItem<EnumType>::BuildObjectBySchema(
-    const smart_objects_ns::CSmartObject& pattern_object,
-    smart_objects_ns::CSmartObject& result_object) {
+    const smart_objects_ns::SmartObject& pattern_object,
+    smart_objects_ns::SmartObject& result_object) {
 
   if (smart_objects_ns::SmartType_Integer == pattern_object.getType()) {
     result_object = static_cast<int>(pattern_object);

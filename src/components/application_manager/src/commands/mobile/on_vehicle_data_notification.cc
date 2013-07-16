@@ -79,8 +79,8 @@ void OnVehicleDataNotification::SendVehicleData(const ApplicationImpl* app) {
     return;
   }
 
-  smart_objects::CSmartObject* on_vehicle_data =
-    new smart_objects::CSmartObject();
+  smart_objects::SmartObject* on_vehicle_data =
+    new smart_objects::SmartObject();
 
   if (!on_vehicle_data) {
     LOG4CXX_ERROR_EXT(logger_, "SendVehicleData NULL pointer");

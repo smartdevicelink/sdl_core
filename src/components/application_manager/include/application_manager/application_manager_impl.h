@@ -58,7 +58,7 @@
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-class CSmartObject;
+class SmartObject;
 }
 }
 
@@ -142,7 +142,7 @@ class ApplicationManagerImpl : public ApplicationManager
      */
     bool AddMessageChain( unsigned int connection_key,
       const unsigned int correlation_id, const uint64_t hmi_correlation_id,
-      const smart_objects::CSmartObject* data = NULL);
+      const smart_objects::SmartObject* data = NULL);
 
     /*
      * @brief Decrease chain after response from hmi was received
@@ -275,9 +275,9 @@ class ApplicationManagerImpl : public ApplicationManager
       const hmi_apis::Common_Language::eType& language);
 
     void set_vehicle_type(
-      const smart_objects::CSmartObject& vehicle_type);
+      const smart_objects::SmartObject& vehicle_type);
 
-    const smart_objects::CSmartObject* vehicle_type() const;
+    const smart_objects::SmartObject* vehicle_type() const;
 
     /*
      * @brief Retrieves SDL access to all mobile apps
@@ -326,13 +326,13 @@ class ApplicationManagerImpl : public ApplicationManager
 
     void StartDevicesDiscovery();
     void SendMessageToMobile(
-      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message);
     bool ManageMobileCommand(
-      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message);
     void SendMessageToHMI(
-      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message);
     bool ManageHMICommand(
-      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message);
 
     /////////////////////////////////////////////////////////
     /*
@@ -378,7 +378,7 @@ class ApplicationManagerImpl : public ApplicationManager
        * \param application Application that recieved message to be checked by policies
        * \return bool Indicates whether message is allowed for application
        */
-    bool CheckPolicies(smart_objects::CSmartObject* message,
+    bool CheckPolicies(smart_objects::SmartObject* message,
                        Application* application);
 
     /**
@@ -389,12 +389,12 @@ class ApplicationManagerImpl : public ApplicationManager
        * \param message Message received for application
        * \return bool Indicates whether message is allowed for application
        */
-    bool CheckHMIMatrix(smart_objects::CSmartObject* message);
+    bool CheckHMIMatrix(smart_objects::SmartObject* message);
 
     bool ConvertMessageToSO(const Message& message,
-                            smart_objects::CSmartObject& output);
+                            smart_objects::SmartObject& output);
     bool ConvertSOtoMessage(
-      const smart_objects::CSmartObject& message, Message& output);
+      const smart_objects::SmartObject& message, Message& output);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
@@ -417,7 +417,7 @@ class ApplicationManagerImpl : public ApplicationManager
     hmi_apis::Common_Language::eType ui_language_;
     hmi_apis::Common_Language::eType vr_language_;
     hmi_apis::Common_Language::eType tts_language_;
-    smart_objects::CSmartObject*                  vehicle_type_;
+    smart_objects::SmartObject*                  vehicle_type_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;

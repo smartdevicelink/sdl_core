@@ -44,7 +44,7 @@ utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem> NsSmartDev
     return new NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize);
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
@@ -91,7 +91,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
     return result;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == Object.getType())
     {
@@ -102,7 +102,7 @@ void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::applySchema(NsSmartDev
     }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == Object.getType())
     {
@@ -114,8 +114,8 @@ void NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem::unapplySchema(NsSmartD
 }
 
 void smart_objects_ns::CArraySchemaItem::BuildObjectBySchema(
-    const smart_objects_ns::CSmartObject& pattern_object,
-    smart_objects_ns::CSmartObject& result_object) {
+    const smart_objects_ns::SmartObject& pattern_object,
+    smart_objects_ns::SmartObject& result_object) {
 
   if (smart_objects_ns::SmartType_Array == pattern_object.getType()) {
     int array_len = pattern_object.length();
@@ -129,7 +129,7 @@ void smart_objects_ns::CArraySchemaItem::BuildObjectBySchema(
     }
   }
   // empty array
-  result_object = smart_objects_ns::CSmartObject(
+  result_object = smart_objects_ns::SmartObject(
       smart_objects_ns::SmartType_Array);
 }
 

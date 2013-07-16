@@ -71,12 +71,12 @@ void AlertRequest::Run() {
 
 void AlertRequest::SendAlertRequest(int app_id) {
 
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   // alert1
   msg_params[hmi_request::alert_strings] =
-      smart_objects::CSmartObject(smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
   msg_params[hmi_request::alert_strings][0]
   [hmi_request::field_name] = TextFieldName::ALERT_TEXT1;
   msg_params[hmi_request::alert_strings][0]
@@ -112,11 +112,11 @@ void AlertRequest::SendSpeakRequest(int app_id) {
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       // crate HMI basic communication playtone request
-      smart_objects::CSmartObject msg_params =
-          smart_objects::CSmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
 
       msg_params[hmi_request::tts_chunks] =
-          smart_objects::CSmartObject(smart_objects::SmartType_Array);
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
       msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
       CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
@@ -130,7 +130,7 @@ void AlertRequest::SendPlayToneRequest(int app_id) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
       CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_PlayTone,
-          smart_objects::CSmartObject());
+          smart_objects::SmartObject());
     }
   }
 }

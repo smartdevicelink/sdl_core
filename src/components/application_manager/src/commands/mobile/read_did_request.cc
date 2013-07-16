@@ -70,8 +70,8 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::ecu_name] =
     (*message_)[str::msg_params][str::ecu_name];

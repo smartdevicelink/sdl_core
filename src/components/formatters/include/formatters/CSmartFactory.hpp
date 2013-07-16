@@ -151,7 +151,7 @@ namespace NsSmartDeviceLink
              *
              * @return True if operation was successful or false otherwise.
              */
-            bool attachSchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject& object);
+            bool attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& object);
 
           /**
            * @brief Attach schema to the struct SmartObject.
@@ -162,7 +162,7 @@ namespace NsSmartDeviceLink
            * @return True if operation was successful of false otherwise.
            */
           bool AttachSchema(const StructIdEnum struct_id,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject &object);
+              NsSmartDeviceLink::NsSmartObjects::SmartObject &object);
 
 
           /**
@@ -178,7 +178,7 @@ namespace NsSmartDeviceLink
            *         SmartObject) function returns empty SmartObject with
            *         null type.
            */
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject CreateSmartObject(
+          NsSmartDeviceLink::NsSmartObjects::SmartObject CreateSmartObject(
               const FunctionIdEnum function_id,
               const MessageTypeEnum message_type);
 
@@ -194,7 +194,7 @@ namespace NsSmartDeviceLink
            *         SmartObject) function returns empty SmartObject with
            *         null type.
            */
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject CreateSmartObject(
+          NsSmartDeviceLink::NsSmartObjects::SmartObject CreateSmartObject(
               const StructIdEnum struct_id);
 
           /**
@@ -275,7 +275,7 @@ namespace NsSmartDeviceLink
         }
 
         template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
-        bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject &object)
+        bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject &object)
         {
             if(false == object.keyExists(strings::S_PARAMS)) return false;
             if(false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE)) return false;
@@ -306,7 +306,7 @@ namespace NsSmartDeviceLink
       bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
           AttachSchema(
               const StructIdEnum struct_id,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject &object) {
+              NsSmartDeviceLink::NsSmartObjects::SmartObject &object) {
         typename StructsSchemesMap::iterator structs_iterator =
             structs_schemes_.find(struct_id);
 
@@ -323,7 +323,7 @@ namespace NsSmartDeviceLink
       template <class FunctionIdEnum,
           class MessageTypeEnum,
           class StructIdEnum>
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject
+      NsSmartDeviceLink::NsSmartObjects::SmartObject
           CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
           CreateSmartObject(
               const FunctionIdEnum function_id,
@@ -335,29 +335,29 @@ namespace NsSmartDeviceLink
             functions_schemes_.find(key);
 
         if(schema_iterator != functions_schemes_.end()) {
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject function_object(
+          NsSmartDeviceLink::NsSmartObjects::SmartObject function_object(
               NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
           function_object.setSchema(schema_iterator->second);
           schema_iterator->second.applySchema(function_object);
             return function_object;
         }
 
-        return NsSmartDeviceLink::NsSmartObjects::CSmartObject();
+        return NsSmartDeviceLink::NsSmartObjects::SmartObject();
       }
 
       template <class FunctionIdEnum,
           class MessageTypeEnum,
           class StructIdEnum>
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject
+      NsSmartDeviceLink::NsSmartObjects::SmartObject
           CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
           CreateSmartObject(const StructIdEnum struct_id) {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject struct_object(
+        NsSmartDeviceLink::NsSmartObjects::SmartObject struct_object(
             NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
         if (AttachSchema(struct_id, struct_object)) {
           return struct_object;
         }
 
-        return NsSmartDeviceLink::NsSmartObjects::CSmartObject();
+        return NsSmartDeviceLink::NsSmartObjects::SmartObject();
       }
 
       template <class FunctionIdEnum,

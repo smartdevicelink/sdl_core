@@ -73,7 +73,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
         }\
         ";
 
-        CSmartObject obj;
+        SmartObject obj;
         bResult = CFormatterJsonSDLRPCv2::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj, FunctionID::RegisterAppInterfaceID, messageType::request, 1);
         ASSERT_TRUE(bResult);
 
@@ -150,7 +150,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
     }
 
     TEST(test_general, test_AttachSchema) {
-      CSmartObject object(SmartType_Map);
+      SmartObject object(SmartType_Map);
       test_JSONHandler_v4_protocol_v2_0_revP factory;
 
       ASSERT_FALSE(factory.AttachSchema(StructIdentifiers::INVALID_ENUM,
@@ -186,7 +186,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
     TEST(test_general, test_SmartObjectCreation) {
       test_JSONHandler_v4_protocol_v2_0_revP factory;
 
-      CSmartObject object = factory.CreateSmartObject(
+      SmartObject object = factory.CreateSmartObject(
           StructIdentifiers::INVALID_ENUM);
 
       ASSERT_EQ(SmartType_Null, object.getType());
@@ -269,7 +269,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
       ASSERT_TRUE(factory.GetSchema(StructIdentifiers::SyncMsgVersion,
                                     schema));
       
-      CSmartObject object(SmartType_Map);      
+      SmartObject object(SmartType_Map);      
       object.setSchema(schema);
 
       object["majorVersion"] = 1;
@@ -294,7 +294,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
                                     messageType::request,
                                     schema));
 
-      object = CSmartObject(SmartType_Map);
+      object = SmartObject(SmartType_Map);
       object.setSchema(schema);
 
       object[S_PARAMS][S_FUNCTION_ID] = FunctionID::UnregisterAppInterfaceID;
@@ -302,7 +302,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
       object[S_PARAMS][S_CORRELATION_ID] = 22;
       object[S_PARAMS][S_PROTOCOL_VERSION] = 1;
       object[S_PARAMS][S_PROTOCOL_TYPE] = 1;
-      object[S_MSG_PARAMS] = CSmartObject(SmartType_Map);
+      object[S_MSG_PARAMS] = SmartObject(SmartType_Map);
 
       ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
                 object.isValid());

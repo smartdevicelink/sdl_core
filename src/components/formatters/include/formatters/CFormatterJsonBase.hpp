@@ -100,7 +100,7 @@ namespace meta_formatter_error_code {
          * @param obj The resulting SmartObject.
          */
         static void jsonValueToObj(const Json::Value &value,
-                NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj);
+                NsSmartDeviceLink::NsSmartObjects::SmartObject &obj);
 
     public:
        /**
@@ -109,7 +109,7 @@ namespace meta_formatter_error_code {
          * @param obj Input SmartObject. Can contain a complex structure of objects.
          * @param value The resulting JSON object. It has the same structure as the input SmartObject.
          */
-        static void objToJsonValue(const NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
+        static void objToJsonValue(const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
                 Json::Value &value);
     };
 

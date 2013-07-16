@@ -48,7 +48,7 @@ namespace Formatters {
   *
   * Sample usage:
   *    CSmartFactory factory;
-  *    CSmartObject object;
+  *    SmartObject object;
   *    CSmartSchmema schema;
   *
   */
@@ -66,9 +66,9 @@ class CMetaFormatter {
     * @return true if successful, false - otherwise
     */
   static bool CreateObjectByPattern(
-          const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+          const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
           const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+          NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 };
 
 }// namespace NsSmartDeviceLink

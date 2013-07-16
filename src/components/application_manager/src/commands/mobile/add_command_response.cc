@@ -59,8 +59,8 @@ void AddCommandResponse::Run() {
     return;
   }
 
-  const long correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asLong();
+  const uint64_t correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUint64();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -71,7 +71,7 @@ void AddCommandResponse::Run() {
   }
 
   const int connection_key =  msg_chain->connection_key();
-  smart_objects::CSmartObject data = msg_chain->data();
+  smart_objects::SmartObject data = msg_chain->data();
 
   // we need to retrieve stored response code before message chain decrease
   const hmi_apis::Common_Result::eType result_ui =
@@ -87,7 +87,7 @@ void AddCommandResponse::Run() {
              ApplicationManagerImpl::instance()->
              application(connection_key));
 
-    smart_objects::CSmartObject* command =
+    smart_objects::SmartObject* command =
        app->FindCommand(
            data[strings::msg_params][strings::cmd_id].asInt());
 

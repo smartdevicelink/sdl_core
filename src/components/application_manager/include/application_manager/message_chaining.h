@@ -111,14 +111,14 @@ class MessageChaining {
    *
    * @return reference to SmartObject data
    */
-  void set_data(const smart_objects::CSmartObject& data);
+  void set_data(const smart_objects::SmartObject& data);
 
   /**
    * @brief Retrieves SmartObject data
    *
    * @return reference to SmartObject data
    */
-  const smart_objects::CSmartObject& data() const;
+  const smart_objects::SmartObject& data() const;
 
   /**
    * @brief Sets VR HMI response result code
@@ -161,7 +161,7 @@ class MessageChaining {
   unsigned int                connection_key_;
   bool                        success_;
   int                         counter_; // amount of pending HMI responses
-  smart_objects::CSmartObject data_;   // temporal data
+  smart_objects::SmartObject data_;   // temporal data
   hmi_apis::Common_Result::eType   vr_response_result_;
   hmi_apis::Common_Result::eType   ui_response_result_;
   hmi_apis::Common_Result::eType   tts_response_result_;

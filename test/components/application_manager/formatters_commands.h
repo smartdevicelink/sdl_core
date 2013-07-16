@@ -65,7 +65,7 @@ TEST(add_command, general) {
     \"menuName\" : \"SubmenuName\"\
 }";
 
-  smart_objects::CSmartObject incoming_message;
+  smart_objects::SmartObject incoming_message;
 
   formatters::CFormatterJsonSDLRPCv2::fromString<mobile_apis::FunctionID::eType, mobile_apis::messageType::eType>(
     incoming_string,
@@ -99,7 +99,7 @@ TEST(add_command, general) {
 
 TEST(json2_command, notification) {
   std::string incoming_string = "{\"jsonrpc\" : \"2.0\",\"method\" : \"BasicCommunication.OnDeviceListUpdated\", \"params\" : { \"deviceList\" : [ \"XT910\", \"GT-I9300\", \"HTC Explorer A310e\" ] }}";
-  smart_objects::CSmartObject incoming_message;
+  smart_objects::SmartObject incoming_message;
 
   formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
     incoming_string,
@@ -137,7 +137,7 @@ TEST(json2_command, notification) {
 TEST(json2_command, request_no_params) {
   std::string incoming_string = "{\"id\":5005,\"jsonrpc\":\"2.0\",\"method\":\"BasicCommunication.GetAppList\"}";
 
-  smart_objects::CSmartObject incoming_message;
+  smart_objects::SmartObject incoming_message;
 
   formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
     incoming_string,
@@ -195,7 +195,7 @@ TEST(json2_command, response_params) {
     }\
   }";
 
-  smart_objects::CSmartObject incoming_message;
+  smart_objects::SmartObject incoming_message;
 
   formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
     incoming_string,
@@ -250,7 +250,7 @@ TEST(json2_command, response_error_params) {
   }\
 }";
 
-  smart_objects::CSmartObject incoming_message;
+  smart_objects::SmartObject incoming_message;
 
   formatters::FormatterJsonRpc::
   FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
@@ -284,7 +284,7 @@ TEST(json2_command, response_error_params) {
 
 TEST(json2_command, create_object) {
   hmi_apis::HMI_API factory;
-  smart_objects::CSmartObject is_vr_ready =
+  smart_objects::SmartObject is_vr_ready =
     factory.CreateSmartObject(hmi_apis::FunctionID::VR_IsReady,
                               hmi_apis::messageType::request);
 
@@ -302,7 +302,7 @@ TEST(json2_command, create_object) {
   is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_VERSION] = 2;
   is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_TYPE] = 1;
   is_vr_ready[sos::S_PARAMS][sos::S_CORRELATION_ID] = 4444;
-  is_vr_ready[sos::S_MSG_PARAMS] = smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  is_vr_ready[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   std::cout << "FunctionID " << is_vr_ready[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
             << "; message type " << is_vr_ready[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()
@@ -318,7 +318,7 @@ TEST(json2_command, create_object) {
 }
 
 TEST(json2_command, without_factory_create) {
-  smart_objects::CSmartObject so_to_send;
+  smart_objects::SmartObject so_to_send;
   so_to_send[sos::S_PARAMS][sos::S_FUNCTION_ID] =
     hmi_apis::FunctionID::VR_IsReady;
   so_to_send[sos::S_PARAMS][sos::S_MESSAGE_TYPE] =
@@ -326,7 +326,7 @@ TEST(json2_command, without_factory_create) {
   so_to_send[sos::S_PARAMS][sos::S_PROTOCOL_VERSION] = 2;
   so_to_send[sos::S_PARAMS][sos::S_PROTOCOL_TYPE] = 1;
   so_to_send[sos::S_PARAMS][sos::S_CORRELATION_ID] = 4444;
-  so_to_send[sos::S_MSG_PARAMS] = smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  so_to_send[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   std::cout << "FunctionID " << so_to_send[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
             << "; message type " << so_to_send[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()

@@ -49,7 +49,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<int>> item =
             TNumberSchemaItem<int>::create(); // No default value, no min, no max
@@ -94,7 +94,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<int>> item =
             TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(10)); // No default value, no max value
@@ -128,7 +128,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<int>> item =
             TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(),
@@ -164,7 +164,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<int>> item =
             TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(-949),
@@ -208,7 +208,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<int>> item =
             TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(-12000),
@@ -269,7 +269,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<int>> item =
             TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(90),
@@ -327,7 +327,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<int>> item =
             TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(-120),
@@ -374,7 +374,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<int>> item =
             TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(-120),
@@ -430,7 +430,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<double>> item =
             TNumberSchemaItem<double>::create(); // No default value, no min, no max
@@ -477,7 +477,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<double>> item =
             TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(10.0)); // No default value, no max value
@@ -511,7 +511,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<double>> item =
             TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(),
@@ -547,7 +547,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<double>> item =
             TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(-949.0),
@@ -591,7 +591,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<double>> item =
             TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(-12000.0),
@@ -652,7 +652,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<double>> item =
             TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(90.0),
@@ -710,7 +710,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<double>> item =
             TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(-120.0),
@@ -756,7 +756,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
 
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<TNumberSchemaItem<double>> item =
             TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(-120.0),

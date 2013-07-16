@@ -44,7 +44,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_primitive_types, test_SmartObjectsDraftTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
         obj = 5;
         ASSERT_EQ(5, (int)obj);
@@ -58,7 +58,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_map_access, test_SmartObjectsDraftTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
         obj["aa"] = true;
         ASSERT_TRUE((bool)obj["aa"]);
@@ -69,7 +69,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_array_access, test_SmartObjectsDraftTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
         obj[0] = 5;
         obj[-1] = 6; // Appending new item to array
@@ -80,15 +80,15 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_public_interface, test_SmartObjectsDraftTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
         // ---- INTEGER ---- //
         obj = 1;
         ASSERT_EQ(1, (int)obj);
 
-        // ---- LONG ---- //
-        obj = 100l;
-        ASSERT_EQ(100l, (long)obj);
+        // ---- uint64_t ---- //
+        obj = static_cast<uint64_t>(100);
+        ASSERT_EQ(100, static_cast<uint64_t>(obj));
 
         // ---- DOUBLE ---- //
         obj = 3.14;
@@ -162,15 +162,15 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_helper_methods, test_SmartObjectsDraftTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
         // ---- INTEGER ---- //
         obj = 1;
         ASSERT_EQ(1, obj.asInt());
 
-        // ---- LONG ---- //
-        obj = 100l;
-        ASSERT_EQ(100l, obj.asLong());
+        // ---- uint64_t ---- //
+        obj = static_cast<uint64_t>(100);
+        ASSERT_EQ(100, obj.asUint64());
 
         // ---- DOUBLE ---- //
         obj = 3.14;

@@ -34,27 +34,27 @@
 
 #include "smart_objects/schema_item.h"
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::ISchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::ISchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& object)
 {
     return NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::ISchemaItem::setDefaultValue(CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::ISchemaItem::setDefaultValue(SmartObject & Object)
 {
     return false;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
 }
 
-void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
 }
 
 
 void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::BuildObjectBySchema(
-      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) {
 
 }

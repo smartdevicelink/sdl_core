@@ -34,7 +34,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "SmartObjects/CSmartObject.hpp"
+#include "SmartObjects/SmartObject.hpp"
 
 namespace test { namespace components { namespace json_handler { namespace formatters {
 
@@ -42,12 +42,12 @@ namespace test { namespace components { namespace json_handler { namespace forma
     class CFormatterTestHelper : public ::testing::Test
     {
     protected:
-        void fillTestObject(NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+        void fillTestObject(NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
-        //bool checkTestObject(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+        //bool checkTestObject(const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
-        void compareObjects(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
-                            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second);
+        void compareObjects(const NsSmartDeviceLink::NsSmartObjects::SmartObject& first,
+                            const NsSmartDeviceLink::NsSmartObjects::SmartObject& second);
     };
 
 }}}}

@@ -64,12 +64,12 @@ void ShowConstantTBTRequest::Run() {
 
   app->set_tbt_show_command((*message_)[strings::msg_params]);
 
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
   msg_params[hmi_request::navi_texts] =
-      smart_objects::CSmartObject(smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   if (msg_params.keyExists(strings::navigation_text_1)) {
     // erase useless parametr

@@ -128,7 +128,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
 };
 
 TEST_F(ObjectSchemaItemTest, test_too_few_object_params) {
-  CSmartObject obj;
+  SmartObject obj;
   utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
 
   obj[S_PARAMS][S_MESSAGE_TYPE] = "request";
@@ -143,7 +143,7 @@ TEST_F(ObjectSchemaItemTest, test_too_few_object_params) {
 }
 
 TEST_F(ObjectSchemaItemTest, test_too_many_object_params) {
-  CSmartObject srcObj;
+  SmartObject srcObj;
   utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
 
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = 1;
@@ -165,7 +165,7 @@ TEST_F(ObjectSchemaItemTest, test_too_many_object_params) {
   srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-  srcObj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::CSmartObject();
+  srcObj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
   srcObj[S_MSG_PARAMS]["double"] = -0.1234;
   srcObj[S_MSG_PARAMS]["success"] = true;
   srcObj[S_MSG_PARAMS]["resultCode"] = 2;
@@ -178,7 +178,7 @@ TEST_F(ObjectSchemaItemTest, test_too_many_object_params) {
 
 
 TEST_F(ObjectSchemaItemTest, test_object_with_correct_params) {
-  CSmartObject obj, dstObj;
+  SmartObject obj, dstObj;
   utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
 
   obj[S_PARAMS][S_MESSAGE_TYPE] = "APPLICATION_NOT_REGISTERED";
@@ -217,7 +217,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_correct_params) {
 }
 
 TEST_F(ObjectSchemaItemTest, test_object_with_incorrect_params) {
-  CSmartObject obj;
+  SmartObject obj;
   utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
 
   obj[S_PARAMS][S_MESSAGE_TYPE] = "request";

@@ -58,8 +58,8 @@ void ChangeRegistrationResponse::Run() {
     return;
   }
 
-  const long correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asLong();
+  const uint64_t correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUint64();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -76,13 +76,13 @@ void ChangeRegistrationResponse::Run() {
       msg_chain->vr_response_result();
 
   // get stored SmartObject
-  smart_objects::CSmartObject data = msg_chain->data();
+  smart_objects::SmartObject data = msg_chain->data();
 
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
 
-    const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+    const uint64_t mobile_correlation_id = ApplicationManagerImpl::instance()->
     GetMobilecorrelation_id(correlation_id);
 
     ApplicationImpl* application = static_cast<ApplicationImpl*>(

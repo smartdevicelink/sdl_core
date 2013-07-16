@@ -42,13 +42,13 @@ namespace application_manager {
 namespace commands {
 
 void GenericResponse::Run() {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject response;
 
   response[strings::params][strings::message_type] = MessageType::kResponse;
 
-  response[strings::params][strings::correlation_id] = static_cast<long>(
+  response[strings::params][strings::correlation_id] = static_cast<uint64_t>(
       ApplicationManagerImpl::instance()->GetMobilecorrelation_id(
-        (*message_)[strings::params][strings::correlation_id].asLong()));
+        (*message_)[strings::params][strings::correlation_id].asUint64()));
   response[strings::params][strings::protocol_version] =
       (*message_)[strings::params][strings::protocol_version];
   response[strings::params][strings::connection_key] =

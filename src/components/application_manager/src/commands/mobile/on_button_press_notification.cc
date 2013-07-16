@@ -94,8 +94,8 @@ void OnButtonPressNotification::Run() {
 
 void OnButtonPressNotification::SendButtonPress(const ApplicationImpl* app,
     bool is_custom_btn_id) {
-  smart_objects::CSmartObject* on_btn_press =
-    new smart_objects::CSmartObject();
+  smart_objects::SmartObject* on_btn_press =
+    new smart_objects::SmartObject();
 
   if (!on_btn_press) {
     LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");

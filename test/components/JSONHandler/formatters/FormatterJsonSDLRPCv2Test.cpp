@@ -115,8 +115,8 @@ enum Type {
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
 
         std::string str;
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject dstObj;
 
         fillTestObject(srcObj);
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -156,7 +156,7 @@ enum Type {
             \"vrSynonyms\": [\"Synonym 1\", \"Synonym 2\"]\
         }";
 
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
         bool result;
 
         result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
@@ -175,7 +175,7 @@ enum Type {
     TEST_F(CFormatterTestHelper, test_SDLRPCv2_EmptyMapArrayTest) {
       using namespace NsSmartDeviceLink::NsSmartObjects;
 
-      CSmartObject srcObj, dstObj;
+      SmartObject srcObj, dstObj;
       std::string str;
 
       fillTestObject(srcObj);
@@ -183,8 +183,8 @@ enum Type {
       srcObj[S_PARAMS][S_MESSAGE_TYPE] = 0;
       srcObj[S_PARAMS][S_CORRELATION_ID] = 0;
       srcObj[S_PARAMS][S_FUNCTION_ID] = 0;
-      srcObj[S_MSG_PARAMS]["EmptyArray"] = CSmartObject(SmartType_Array);
-      srcObj[S_MSG_PARAMS]["EmptyMap"] = CSmartObject(SmartType_Map);
+      srcObj[S_MSG_PARAMS]["EmptyArray"] = SmartObject(SmartType_Array);
+      srcObj[S_MSG_PARAMS]["EmptyMap"] = SmartObject(SmartType_Map);
       srcObj[S_MSG_PARAMS]["AnotherEmptyArray"] = srcObj[S_MSG_PARAMS]["EmptyArray"];
       srcObj[S_MSG_PARAMS]["AnotherEmptyMap"]  =  srcObj[S_MSG_PARAMS]["EmptyMap"];
 
@@ -215,7 +215,7 @@ enum Type {
             \"vrSynonyms\": [\"Synonym 1\", \"Synonym 2\"]\
         }";
 
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1, obj2;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj1, obj2;
         bool result;
 
         result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::

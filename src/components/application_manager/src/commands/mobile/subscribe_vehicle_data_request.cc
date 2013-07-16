@@ -71,7 +71,7 @@ void SubscribeVehicleDataRequest::Run() {
 
   // response params
   namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
-  NsSmart::CSmartObject response_params;
+  NsSmart::SmartObject response_params;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();

@@ -52,7 +52,7 @@ void EndAudioPassThruRequest::Run() {
   ApplicationManagerImpl::instance()->StopAudioPassThruThread();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                   smart_objects::CSmartObject(), true);
+                   smart_objects::SmartObject(), true);
 }
 
 }  // namespace commands

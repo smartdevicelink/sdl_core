@@ -64,7 +64,7 @@ TEST(test_general, test_json_rpc_full) {
   "   }\n"
   "}\n";
 
-  so::CSmartObject object;
+  so::SmartObject object;
   ASSERT_TRUE(fm::FormatterJsonRpc::kSuccess ==
               (fm::FormatterJsonRpc::FromString<gen::FunctionID::eType,
                                                 gen::messageType::eType>(
@@ -86,7 +86,7 @@ TEST(test_general, test_json_rpc_full) {
 }
 
 TEST(test_JSONRPC_general, test_AttachSchema) {
-  so::CSmartObject object(so::SmartType_Map);
+  so::SmartObject object(so::SmartType_Map);
   gen::test_json_rpc factory;
 
   ASSERT_FALSE(factory.AttachSchema(gen::StructIdentifiers::INVALID_ENUM,
@@ -116,7 +116,7 @@ TEST(test_JSONRPC_general, test_AttachSchema) {
 TEST(test_JSONRPC_general, test_SmartObjectCreation) {
   gen::test_json_rpc factory;
 
-  so::CSmartObject object = factory.CreateSmartObject(
+  so::SmartObject object = factory.CreateSmartObject(
       gen::StructIdentifiers::INVALID_ENUM);
 
   ASSERT_EQ(so::SmartType_Null, object.getType());
@@ -202,7 +202,7 @@ TEST(test_JSONRPC_general, test_GetSmartSchema) {
   ASSERT_TRUE(factory.GetSchema(gen::StructIdentifiers::interface1_struct1,
                                 schema));
 
-  so::CSmartObject object(so::SmartType_Map);
+  so::SmartObject object(so::SmartType_Map);
   object.setSchema(schema);
 
   object["member1"] = 1;
@@ -226,7 +226,7 @@ TEST(test_JSONRPC_general, test_GetSmartSchema) {
                                 gen::messageType::request,
                                 schema));
 
-  object = so::CSmartObject(so::SmartType_Map);
+  object = so::SmartObject(so::SmartType_Map);
   object.setSchema(schema);
 
   object[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =

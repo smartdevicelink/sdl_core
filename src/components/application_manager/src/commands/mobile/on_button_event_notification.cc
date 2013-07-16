@@ -93,8 +93,8 @@ void OnButtonEventNotification::Run() {
 
 void OnButtonEventNotification::SendButtonEvent(const ApplicationImpl* app,
     bool is_custom_btn_id) {
-  smart_objects::CSmartObject* on_btn_event =
-    new smart_objects::CSmartObject();
+  smart_objects::SmartObject* on_btn_event =
+    new smart_objects::SmartObject();
 
   if (!on_btn_event) {
     LOG4CXX_ERROR_EXT(logger_, "OnButtonEvent NULL pointer");
