@@ -72,8 +72,8 @@ void OnCommandNotification::Run() {
 }
 
 void OnCommandNotification::SendOnMenuCommand(const ApplicationImpl* app) {
-  smart_objects::CSmartObject* on_menu_cmd =
-    new smart_objects::CSmartObject();
+  smart_objects::SmartObject* on_menu_cmd =
+    new smart_objects::SmartObject();
 
   if (!on_menu_cmd) {
     LOG4CXX_ERROR_EXT(logger_, "OnCommandNotification NULL pointer");

@@ -44,7 +44,7 @@ namespace application_manager {
  **/
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-typedef utils::SharedPtr<smart_objects::CSmartObject> MessageSharedPtr;
+typedef utils::SharedPtr<smart_objects::SmartObject> MessageSharedPtr;
 
 namespace commands {
 

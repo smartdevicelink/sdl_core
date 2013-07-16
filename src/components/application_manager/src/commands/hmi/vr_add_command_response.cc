@@ -50,8 +50,8 @@ VRAddCommandResponse::~VRAddCommandResponse() {
 void VRAddCommandResponse::Run() {
   LOG4CXX_INFO(logger_, "VRAddCommandResponse::Run");
 
-  const long correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asLong();
+  const uint64_t correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUint64();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -61,7 +61,7 @@ void VRAddCommandResponse::Run() {
     return;
   }
 
-  smart_objects::CSmartObject data =
+  smart_objects::SmartObject data =
     msg_chain->data();
 
   /* store received response code for to check it

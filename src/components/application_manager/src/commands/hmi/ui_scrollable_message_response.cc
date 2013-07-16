@@ -50,8 +50,8 @@ UIScrollableMessageResponse::~UIScrollableMessageResponse() {
 void UIScrollableMessageResponse::Run() {
   LOG4CXX_INFO(logger_, "UIScrollableMessageResponse::Run");
 
-  const long correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asLong();
+  const uint64_t correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUint64();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);

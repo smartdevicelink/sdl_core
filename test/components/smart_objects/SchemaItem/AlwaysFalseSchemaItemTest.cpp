@@ -45,7 +45,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_AlwaysFalseSchemaItemTest, simple_test)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<ISchemaItem> item = CAlwaysFalseSchemaItem::create();
 

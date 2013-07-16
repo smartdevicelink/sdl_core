@@ -62,7 +62,7 @@ namespace NsSmartDeviceLink
              *
              * @return NsSmartDeviceLink::NsSmartObjects::Errors::ERROR
              **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
         private:
             /**

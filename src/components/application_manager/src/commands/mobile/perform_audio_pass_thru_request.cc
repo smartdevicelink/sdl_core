@@ -79,11 +79,11 @@ void PerformAudioPassThruRequest::Run() {
   ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(true);
 
   // create HMI request
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[hmi_request::audio_pass_display_texts] =
-      smart_objects::CSmartObject(smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
     msg_params[hmi_request::audio_pass_display_texts][0]
@@ -119,7 +119,7 @@ void PerformAudioPassThruRequest::Run() {
 
 void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) const {
   // crate HMI TTS speak request
-  smart_objects::CSmartObject msg_params;
+  smart_objects::SmartObject msg_params;
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
     msg_params[str::msg_params][hmi_request::tts_chunks][0] =

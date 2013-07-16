@@ -62,8 +62,8 @@ void DeleteCommandResponse::Run() {
   const int function_id =
       (*message_)[strings::params][strings::function_id].asInt();
 
-  const long correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asLong();
+  const uint64_t correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUint64();
 
   const mobile_apis::Result::eType code =
       static_cast<mobile_apis::Result::eType>(
@@ -80,7 +80,7 @@ void DeleteCommandResponse::Run() {
     return;
   }
 
-  smart_objects::CSmartObject data = msg_chain->data();
+  smart_objects::SmartObject data = msg_chain->data();
 
   // we need to retrieve stored response code before message chain decrease
   const hmi_apis::Common_Result::eType result_ui =
@@ -95,7 +95,7 @@ void DeleteCommandResponse::Run() {
           ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::app_id]));
 
-    smart_objects::CSmartObject* command =
+    smart_objects::SmartObject* command =
         app->FindCommand(
             data[strings::msg_params][strings::cmd_id].asInt());
 

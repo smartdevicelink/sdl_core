@@ -63,16 +63,16 @@ void NotificationFromHMI::SendNotificationToMobile(const MessageSharedPtr& messa
 
 void NotificationFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
-    const NsSmartObj::CSmartObject& msg_params) const {
+    const NsSmartObj::SmartObject& msg_params) const {
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject* result =
-        new NsSmartDeviceLink::NsSmartObjects::CSmartObject;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
+        new NsSmartDeviceLink::NsSmartObjects::SmartObject;
     if (!result) {
       LOG4CXX_ERROR(logger_, "Memory allocation failed.");
       return;
     }
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& request = *result;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
     request[strings::params][strings::message_type] = MessageType::kRequest;
     request[strings::params][strings::function_id] = function_id;
     request[strings::params][strings::protocol_version] =

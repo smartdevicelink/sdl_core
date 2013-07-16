@@ -72,8 +72,8 @@ void SetGlobalPropertiesRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
 
-    smart_objects::CSmartObject msg_params =
-        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     msg_params[strings::help_prompt] = app->vr_help_title();
     msg_params[strings::timeout_prompt] = app->vr_help();
@@ -86,8 +86,8 @@ void SetGlobalPropertiesRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
       (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
 
-    smart_objects::CSmartObject msg_params =
-        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     msg_params[strings::vr_help_title] = app->vr_help_title();
     msg_params[strings::vr_help] = app->vr_help();

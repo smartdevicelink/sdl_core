@@ -99,7 +99,7 @@ enum eType {
 class SmartObjectConvertionTimeTest : public ::testing::Test {
   protected:
 
-    double getConvertionTimeToJsonV2Format(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& srcObj
+    double getConvertionTimeToJsonV2Format(const NsSmartDeviceLink::NsSmartObjects::SmartObject& srcObj
                                            , std::string& jsonString) {
       timespec convertionStartTime;
       timespec convertionEndTime;
@@ -119,7 +119,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     }
 
     double getConvertionTimeFromJsonV2Format(std::string& jsonString
-        , NsSmartDeviceLink::NsSmartObjects::CSmartObject& dstObj) {
+        , NsSmartDeviceLink::NsSmartObjects::SmartObject& dstObj) {
       timespec convertionStartTime;
       timespec convertionEndTime;
       double convertionTime;
@@ -138,7 +138,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
       return convertionTime;
     }
 
-    double getConvertionTimeToJsonV1Format(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& srcObj
+    double getConvertionTimeToJsonV1Format(const NsSmartDeviceLink::NsSmartObjects::SmartObject& srcObj
                                            , std::string& jsonString) {
       timespec convertionStartTime;
       timespec convertionEndTime;
@@ -158,7 +158,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     }
 
     double getConvertionTimeFromJsonV1Format(std::string& jsonString
-        , NsSmartDeviceLink::NsSmartObjects::CSmartObject& dstObj) {
+        , NsSmartDeviceLink::NsSmartObjects::SmartObject& dstObj) {
       timespec convertionStartTime;
       timespec convertionEndTime;
       double convertionTime;
@@ -176,8 +176,8 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
       return convertionTime;
     }
 
-    void calculateConvertionTime(NsSmartDeviceLink::NsSmartObjects::CSmartObject& srcObj
-                                 , NsSmartDeviceLink::NsSmartObjects::CSmartObject& dstObj) {
+    void calculateConvertionTime(NsSmartDeviceLink::NsSmartObjects::SmartObject& srcObj
+                                 , NsSmartDeviceLink::NsSmartObjects::SmartObject& dstObj) {
       std::string jsonString;
       double convertionToTime = 0.0;
       double convertionFromTime = 0.0;
@@ -214,8 +214,8 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
       EXPECT_TRUE(srcObj == dstObj) << "The objects are different after V2 conversion";
     }
 
-    void calculateConvertionTimeWithJsonStringOutput(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& srcObj
-        , NsSmartDeviceLink::NsSmartObjects::CSmartObject& dstObj) {
+    void calculateConvertionTimeWithJsonStringOutput(const NsSmartDeviceLink::NsSmartObjects::SmartObject& srcObj
+        , NsSmartDeviceLink::NsSmartObjects::SmartObject& dstObj) {
       std::string jsonString;
       double convertionToTime;
       double convertionFromTime;
@@ -326,7 +326,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
 };
 
 TEST_F(SmartObjectConvertionTimeTest, test_int_object_convertion) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj, dstObj;
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema = initBasicObjectSchema();
 
   srcObj.setSchema(schema);
@@ -344,7 +344,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_int_object_convertion) {
 }
 
 TEST_F(SmartObjectConvertionTimeTest, test_double_object_convertion) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj, dstObj;
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema = initBasicObjectSchema();
 
   srcObj.setSchema(schema);
@@ -366,7 +366,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_double_object_convertion) {
 }
 
 TEST_F(SmartObjectConvertionTimeTest, test_some_object_convertion) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj, dstObj;
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema = initBasicObjectSchema();
 
   srcObj.setSchema(schema);
@@ -391,7 +391,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_some_object_convertion) {
   srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-  srcObj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::CSmartObject();
+  srcObj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
   srcObj[S_MSG_PARAMS]["double"] = -0.1234;
 
   printf("\n Random object.\n");
@@ -399,7 +399,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_some_object_convertion) {
 }
 
 TEST_F(SmartObjectConvertionTimeTest, test_map_object_convertion) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj, mapObj, innerObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj, dstObj, mapObj, innerObj;
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema = initBasicObjectSchema();
 
   srcObj.setSchema(schema);
@@ -454,7 +454,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_map_object_convertion) {
 }
 
 TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj, arrayObj, innerObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj, dstObj, arrayObj, innerObj;
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema = initBasicObjectSchema();
   int arraySize = 10;
 
@@ -546,7 +546,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
 
 
 TEST_F(SmartObjectConvertionTimeTest, test_object_with_enum_convertion) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj, dstObj;
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema = initObjectSchema();
 
   srcObj.setSchema(schema);
@@ -568,7 +568,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_object_with_enum_convertion) {
 }
 
 TEST_F(SmartObjectConvertionTimeTest, test_object_without_enum_convertion) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj, dstObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj, dstObj;
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema = initBasicObjectSchema();
 
   srcObj.setSchema(schema);

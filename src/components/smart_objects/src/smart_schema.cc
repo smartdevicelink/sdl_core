@@ -46,7 +46,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema(utils::SharedPtr<N
 
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartSchema::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartSchema::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& object)
 {
     return mSchemaItem->validate(object);
 }
@@ -56,19 +56,19 @@ void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::setSchemaItem(utils::Share
     mSchemaItem = SchemaItem;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     mSchemaItem->applySchema(Object);
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     mSchemaItem->unapplySchema(Object);
 }
 
 void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::BuildObjectBySchema(
-    const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) const  {
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) const  {
 
   mSchemaItem->BuildObjectBySchema(pattern_object, result_object);
 }

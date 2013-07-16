@@ -43,7 +43,7 @@ utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CAlwaysFalseSchemaItem> NsSm
     return new CAlwaysFalseSchemaItem();
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CAlwaysFalseSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CAlwaysFalseSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& object)
 {
     return NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 }

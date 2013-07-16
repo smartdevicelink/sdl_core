@@ -108,7 +108,7 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      *
      * @return true if success, false otherwise.
      */
-    static bool ToString(const NsSmartObjects::CSmartObject& obj,
+    static bool ToString(const NsSmartObjects::SmartObject& obj,
                          std::string& out_str);
 
     /**
@@ -125,7 +125,7 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      */
     template <typename FunctionId, typename MessageType>
     static int FromString(const std::string& str,
-                          NsSmartObjects::CSmartObject& out);
+                          NsSmartObjects::SmartObject& out);
 
   private:
     /**
@@ -223,7 +223,7 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      */
     template <typename FunctionId>
     static int ParseFunctionId(const Json::Value& method_value,
-                               NsSmartObjects::CSmartObject& out);
+                               NsSmartObjects::SmartObject& out);
 
     /**
      * @brief Set method.
@@ -237,7 +237,7 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      * @return true if function id was extracted successfully and set as a
      *         value of "method" field.
      */
-    static bool SetMethod(const NsSmartObjects::CSmartObject& params,
+    static bool SetMethod(const NsSmartObjects::SmartObject& params,
                           Json::Value& method_container);
 
     /**
@@ -252,7 +252,7 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      * @return true if request/response id was extracted successfully and set
      *         as a value of "id" field.
      */
-    static bool SetId(const NsSmartObjects::CSmartObject& params,
+    static bool SetId(const NsSmartObjects::SmartObject& params,
                       Json::Value& id_container);
 
     /**
@@ -266,13 +266,13 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      * @return true if message string was extracted successfully and set
      *         as a value of "message" field.
      */
-    static bool SetMessage(const NsSmartObjects::CSmartObject& params,
+    static bool SetMessage(const NsSmartObjects::SmartObject& params,
                            Json::Value& id_container);
 };
 
 template <typename FunctionId, typename MessageType>
 int FormatterJsonRpc::FromString(const std::string& str,
-                                 NsSmartObjects::CSmartObject& out) {
+                                 NsSmartObjects::SmartObject& out) {
   Json::Value root;
   Json::Reader reader;
   int result = kSuccess;
@@ -307,7 +307,7 @@ int FormatterJsonRpc::FromString(const std::string& str,
         result |= ParseFunctionId<FunctionId>(root[kMethod], out);
       }
       out[strings::S_MSG_PARAMS]
-        = NsSmartObjects::CSmartObject(NsSmartObjects::SmartType_Map);
+        = NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
     } else {
       const Json::Value& id_value = root[kId];
 
@@ -322,7 +322,7 @@ int FormatterJsonRpc::FromString(const std::string& str,
           id_value.asDouble();
       } else if (true == id_value.isNull()) {
         out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
-          NsSmartObjects::CSmartObject(NsSmartObjects::SmartType_Null);
+          NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Null);
       } else {
         result |= kInvalidFormat | kInvalidId;
       }
@@ -331,14 +331,14 @@ int FormatterJsonRpc::FromString(const std::string& str,
         message_type_string = kRequest;
         result |= ParseFunctionId<FunctionId>(root[kMethod], out);
         out[strings::S_MSG_PARAMS]
-          = NsSmartObjects::CSmartObject(NsSmartObjects::SmartType_Map);
+          = NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
       } else {
         Json::Value method_container;
         bool method_container_found = false;
 
         if (true == root.isMember(kResult)) {
           out[strings::S_MSG_PARAMS]
-            = NsSmartObjects::CSmartObject(NsSmartObjects::SmartType_Map);
+            = NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
 
           message_type_string = kResponse;
           response_value = root[kResult];
@@ -461,7 +461,7 @@ int FormatterJsonRpc::FromString(const std::string& str,
 
 template <typename FunctionId>
 int FormatterJsonRpc::ParseFunctionId(const Json::Value& method_value,
-                                      NsSmartObjects::CSmartObject& out) {
+                                      NsSmartObjects::SmartObject& out) {
   int result = kSuccess;
 
   if (false == method_value.isString()) {

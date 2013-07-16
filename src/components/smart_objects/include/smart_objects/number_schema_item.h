@@ -74,7 +74,7 @@ namespace NsSmartDeviceLink
              *
              * @return NsSmartObjects::Errors::eType
              **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief Set default value to an object.
@@ -83,7 +83,7 @@ namespace NsSmartDeviceLink
              *
              * @return true if default value was successfully set, false otherwise.
              **/
-            virtual bool setDefaultValue(CSmartObject & Object);
+            virtual bool setDefaultValue(SmartObject & Object);
 
             /**
              * @brief Build smart object by smart schema having copied matched
@@ -93,8 +93,8 @@ namespace NsSmartDeviceLink
              * @param result_object object to build
              */
             virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 
         private:
 
@@ -187,7 +187,7 @@ utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType
 }
 
 template <typename NumberType>
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
@@ -223,7 +223,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
 }
 
 template <typename NumberType>
-bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaultValue(CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaultValue(SmartObject & Object)
 {
     bool result = false;
     NumberType value;
@@ -240,8 +240,8 @@ bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaul
 
 template <typename NumberType>
 void NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::BuildObjectBySchema(
-    const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) {
 
   if (getSmartType() == pattern_object.getType()) {
     result_object = static_cast<NumberType>(pattern_object);

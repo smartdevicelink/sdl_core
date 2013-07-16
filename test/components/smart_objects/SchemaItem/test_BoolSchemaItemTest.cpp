@@ -47,7 +47,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_no_default_value, test_BoolSchemaItemTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
         utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(); // No default value
@@ -87,7 +87,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
      **/
     TEST(test_item_with_default_value, test_BoolSchemaItemTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
         utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(false); // Default value = false
@@ -123,7 +123,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
     TEST(test_map_validate, test_BoolSchemaItemTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
         utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(false); // Default value = false
 
@@ -154,7 +154,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
     TEST(test_array_validate, test_BoolSchemaItemTest)
     {
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
         utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create();
 

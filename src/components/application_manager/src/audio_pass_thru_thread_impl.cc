@@ -75,7 +75,7 @@ void AudioPassThruThreadImpl::Init() {
 }
 
 void AudioPassThruThreadImpl::FactoryCreateCommand(
-  smart_objects::CSmartObject* cmd) {
+  smart_objects::SmartObject* cmd) {
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(&(*cmd));
   command->Init();
   command->Run();
@@ -85,10 +85,10 @@ void AudioPassThruThreadImpl::FactoryCreateCommand(
 bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
   LOG4CXX_INFO(logger_, "sendEndAudioPassThruToHMI");
 
-  smart_objects::CSmartObject* end_audio = new smart_objects::CSmartObject();
+  smart_objects::SmartObject* end_audio = new smart_objects::SmartObject();
   if (NULL == end_audio) {
-    smart_objects::CSmartObject* error_response =
-      new smart_objects::CSmartObject();
+    smart_objects::SmartObject* error_response =
+      new smart_objects::SmartObject();
     if (NULL != error_response) {
       (*error_response)[strings::params][strings::message_type] =
         MessageType::kResponse;
@@ -233,8 +233,8 @@ void AudioPassThruThreadImpl::threadMain() {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif
 
-    smart_objects::CSmartObject* on_audio_pass =
-      new smart_objects::CSmartObject();
+    smart_objects::SmartObject* on_audio_pass =
+      new smart_objects::SmartObject();
     if (!on_audio_pass) {
       LOG4CXX_ERROR_EXT(logger_, "OnAudioPassThru NULL pointer");
       if (false == SendEndAudioPassThru()) {
@@ -265,7 +265,7 @@ void AudioPassThruThreadImpl::threadMain() {
 
     // binary data
     (*on_audio_pass)[strings::binary_data] =
-      smart_objects::CSmartObject(std::vector<unsigned char>(from, to));
+      smart_objects::SmartObject(std::vector<unsigned char>(from, to));
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);

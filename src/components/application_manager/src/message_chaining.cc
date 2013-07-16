@@ -75,11 +75,11 @@ int MessageChaining::counter() const {
   return counter_;
 }
 
-void MessageChaining::set_data(const smart_objects::CSmartObject& data) {
+void MessageChaining::set_data(const smart_objects::SmartObject& data) {
   data_ = data;
 }
 
-const smart_objects::CSmartObject& MessageChaining::data() const {
+const smart_objects::SmartObject& MessageChaining::data() const {
   return data_;
 }
 

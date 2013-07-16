@@ -57,7 +57,7 @@ class NotificationFromHMI : public CommandImpl {
     virtual void Run();
     void SendNotificationToMobile(const MessageSharedPtr& message);
     void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                          const NsSmartObj::CSmartObject& msg_params) const;
+                          const NsSmartObj::SmartObject& msg_params) const;
 };
 
 }  // namespace commands

@@ -44,53 +44,53 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(test_simple_type_can_be_set_in_constructor, test_SmartObjectInvalidTest)
     {
-      CSmartObject objMap(SmartType_Map);
+      SmartObject objMap(SmartType_Map);
       ASSERT_EQ(SmartType_Map, objMap.getType());
 
-      CSmartObject objArray(SmartType_Array);
+      SmartObject objArray(SmartType_Array);
       ASSERT_EQ(SmartType_Array, objArray.getType());
 
-        CSmartObject objInt(SmartType_Integer);
+        SmartObject objInt(SmartType_Integer);
         ASSERT_EQ(SmartType_Integer, objInt.getType());
 
-        CSmartObject objDouble(SmartType_Double);
+        SmartObject objDouble(SmartType_Double);
         ASSERT_EQ(SmartType_Double, objDouble.getType());
 
-        CSmartObject objBoolean(SmartType_Boolean);
+        SmartObject objBoolean(SmartType_Boolean);
         ASSERT_EQ(SmartType_Boolean, objBoolean.getType());
 
-        CSmartObject objChar(SmartType_Character);
+        SmartObject objChar(SmartType_Character);
         ASSERT_EQ(SmartType_Character, objChar.getType());
 
-        CSmartObject objString(SmartType_String);
+        SmartObject objString(SmartType_String);
         ASSERT_EQ(SmartType_String, objString.getType());
 
-        CSmartObject objBinary(SmartType_Binary);
+        SmartObject objBinary(SmartType_Binary);
         ASSERT_EQ(SmartType_Binary, objBinary.getType());
 
-        CSmartObject objInvalid(SmartType_Invalid);
+        SmartObject objInvalid(SmartType_Invalid);
         ASSERT_EQ(SmartType_Invalid, objInvalid.getType());
 
-        CSmartObject objNullConstructor(SmartType_Null);
+        SmartObject objNullConstructor(SmartType_Null);
         ASSERT_EQ(SmartType_Null, objNullConstructor.getType());
 
-        CSmartObject objNullDefault;
+        SmartObject objNullDefault;
         ASSERT_EQ(SmartType_Null, objNullDefault.getType());
     }
 
     TEST(test_invalid_object_remains_invalid, test_SmartObjectInvalidTest)
     {
-        CSmartObject obj(SmartType_Invalid);
+        SmartObject obj(SmartType_Invalid);
         ASSERT_EQ(SmartType_Invalid, obj.getType());
 
         obj = 1;
         ASSERT_EQ(SmartType_Invalid, obj.getType());
         ASSERT_EQ(invalid_int_value, (int)obj);
 
-        // ---- LONG ---- //
-        obj = 100l;
+        // ---- uint64_t ---- //
+        obj = static_cast<uint64_t>(100);
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, (long)obj);
+        ASSERT_EQ(invalid_int_value, (uint64_t)obj);
 
         // ---- DOUBLE ---- //
         obj = 3.14;

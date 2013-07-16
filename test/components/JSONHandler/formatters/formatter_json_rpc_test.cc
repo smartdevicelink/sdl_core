@@ -57,11 +57,11 @@ typedef NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase FBase;
  * @param[out] result_string Output JSON string.
  */
 void AnyObjectToJsonString(
-  const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
+  const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
     std::string& result_string) {
 
   Json::Value params(Json::objectValue);
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject formattedObj(obj);
+  NsSmartDeviceLink::NsSmartObjects::SmartObject formattedObj(obj);
   FBase::objToJsonValue(formattedObj, params);
   result_string = params.toStyledString();
 }
@@ -69,8 +69,8 @@ void AnyObjectToJsonString(
 TEST_F(CFormatterTestHelper, ToString) {
 
   std::string str;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject dstObj;
 
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;
   test_json_rpc factory;
@@ -108,8 +108,8 @@ TEST_F(CFormatterTestHelper, ToString) {
   // Compare SmartObjects
   compareObjects(srcObj, dstObj);
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj2;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj2;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj2;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject dstObj2;
   factory.GetSchema(FunctionID::interface2_Function1,
                                   messageType::notification,
                                   schema);
@@ -160,7 +160,7 @@ TEST_F(CFormatterTestHelper, FromString) {
             }\
         }";
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject dstObj;
 
   int result =
       JSONFormatter::FromString<FunctionID::eType, messageType::eType>(
@@ -196,7 +196,7 @@ TEST_F(CFormatterTestHelper, FromString) {
  * @return true if parsing result contains specified error code.
  */
 bool CheckErrorCode(int error, const std::string &str) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject out;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject out;
 
   return error == (error & JSONFormatter::FromString<FunctionID::eType,
                                                      messageType::eType>(
@@ -798,7 +798,7 @@ TEST(FormatterJsonRpc, ErrorResponseMessageNotAvailable) {
 }
 
 TEST(FormatterJsonRpc, MessageType) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject out;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject out;
 
   ASSERT_TRUE((JSONFormatter::kSuccess ==
       JSONFormatter::FromString<FunctionID::eType, messageType::eType>(

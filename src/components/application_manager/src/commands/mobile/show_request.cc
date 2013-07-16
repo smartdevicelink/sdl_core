@@ -63,13 +63,13 @@ void ShowRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params = (*message_)[strings::msg_params];
 
   msg_params[hmi_request::show_strings] =
-      smart_objects::CSmartObject(smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   if (msg_params.keyExists(strings::main_field_1)) {
     // erase useless parametr
@@ -114,7 +114,7 @@ void ShowRequest::Run() {
   CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true);
 
   MessageSharedPtr persistentData =
-      new smart_objects::CSmartObject((*message_)[strings::msg_params]);
+      new smart_objects::SmartObject((*message_)[strings::msg_params]);
   app->set_show_command(*persistentData);
 }
 

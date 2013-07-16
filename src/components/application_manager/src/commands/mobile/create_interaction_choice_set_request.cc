@@ -77,9 +77,8 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
   }
 
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
-
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
 
@@ -89,7 +88,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
   bool result = true;
-  smart_objects::CSmartObject& choice_set =
+  smart_objects::SmartObject& choice_set =
       (*message_)[strings::msg_params][strings::choice_set];
 
   for (size_t i = 0; i < choice_set.length(); ++i) {
@@ -107,7 +106,7 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
 
 bool CreateInteractionChoiceSetRequest::CheckChoiseSetVRSynonyms() {
   bool result = true;
-  smart_objects::CSmartObject& choice_set =
+  smart_objects::SmartObject& choice_set =
       (*message_)[strings::msg_params][strings::choice_set];
 
   for (size_t i = 0; i < choice_set.length(); ++i) {

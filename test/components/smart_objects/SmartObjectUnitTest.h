@@ -45,7 +45,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
     protected:
 
-        void makeMapObject(CSmartObject &obj, const int size) const
+        void makeMapObject(SmartObject &obj, const int size) const
         {
             char i_key[8], j_key[8], k_key[8], value[8];
 
@@ -61,7 +61,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     }
         }
 
-        void checkMapObject(CSmartObject &obj, const int size) const
+        void checkMapObject(SmartObject &obj, const int size) const
         {
             char i_key[8], j_key[8], k_key[8], value[8];
 
@@ -79,7 +79,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                     }
         }
 
-       void makeArrayObject(CSmartObject &obj, int size, int base=0)
+       void makeArrayObject(SmartObject &obj, int size, int base=0)
        {
            for (int i = 0; i < size; i++)
                for (int j = 0; j < size; j++)
@@ -89,7 +89,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                    }
        }
 
-       void checkArrayObject(CSmartObject &obj, int size, int base=0)
+       void checkArrayObject(SmartObject &obj, int size, int base=0)
        {
            for (int i = 0; i < size; i++)
                for (int j = 0; j < size; j++)
@@ -106,7 +106,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
      */
     TEST(BasicMixtedTypes, test_SmartObjectUnitTest)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj)) << "Wrong cast to int just after construction";
 
@@ -144,7 +144,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST_F(TestHelper, BasicArrayTest)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj[0])) << "Wrong value at accessing non existent index";
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj["non_existent_key"])) << "Wrong value at accessing non existent key";
@@ -171,7 +171,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST_F(TestHelper, BasicMapTest)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         ASSERT_EQ(invalid_int_value, static_cast<int>(obj["non_existent_key"])) << "Wrong value for non existent key";
 
@@ -191,31 +191,31 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(ConstructorsTest, test_SmartObjectUnitTest)
     {
-        CSmartObject objInt(5678);
+        SmartObject objInt(5678);
         ASSERT_EQ(5678, static_cast<int>(objInt)) << "Wrong constructor with int param";
 
         char c_str[] = "test c_string";
-        CSmartObject obj_c_str(c_str);
+        SmartObject obj_c_str(c_str);
         ASSERT_EQ("test c_string", static_cast<std::string>(obj_c_str)) << "Wrong constructor with c_str param";
 
-        CSmartObject obj_std_str(std::string("test std_string"));
+        SmartObject obj_std_str(std::string("test std_string"));
         ASSERT_EQ(std::string("test std_string"), static_cast<std::string>(obj_std_str));
 
-        CSmartObject obj_char('R');
+        SmartObject obj_char('R');
         ASSERT_EQ('R', static_cast<char>(obj_char)) << "Wrong constructor with char param";
 
-        CSmartObject obj_double(-0.4321);
+        SmartObject obj_double(-0.4321);
         ASSERT_EQ(-0.4321, static_cast<double>(obj_double)) << "Wrong constructor with double param";
 
-        CSmartObject obj_bool(true);
+        SmartObject obj_bool(true);
         ASSERT_TRUE(static_cast<bool>(obj_bool)) << "Wrong constructor with bool param";
 
-        CSmartObject src_obj;
+        SmartObject src_obj;
 
         src_obj["key_1"] = "value_1";     // FIXME: String assignment crashes test
         src_obj["key_2"]["sub_key_1"] = "value_2";
 
-        CSmartObject dst_obj(src_obj);
+        SmartObject dst_obj(src_obj);
         ASSERT_EQ("value_1", static_cast<std::string>(dst_obj["key_1"])) << "Copy constructor is not correct";
         ASSERT_EQ("value_2", static_cast<std::string>(dst_obj["key_2"]["sub_key_1"])) << "Copy constructor is not correct";
     }
@@ -223,7 +223,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     TEST(FromString, TypeConversion)
     {
         {   // String to bool
-            CSmartObject obj;
+            SmartObject obj;
             ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj));
             obj = "true";
             ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj));
@@ -233,7 +233,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             ASSERT_TRUE(static_cast<bool>(obj));
         }
         {   // String to int
-            CSmartObject obj;
+            SmartObject obj;
             ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
             obj = "0";
             ASSERT_EQ(0, static_cast<int>(obj));
@@ -253,7 +253,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
         }
         {   // String to char
-            CSmartObject obj;
+            SmartObject obj;
             ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
             obj = "C";
             ASSERT_EQ('C', static_cast<char>(obj));
@@ -265,7 +265,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
         }
         {   // String to double
-            CSmartObject obj;
+            SmartObject obj;
             ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
             obj = "1234";
             ASSERT_EQ(1234, static_cast<double>(obj));
@@ -281,19 +281,19 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             ASSERT_EQ(invalid_double_value, static_cast<double>(obj));        // FIXME:
         }
         {   // String to Map
-            CSmartObject obj;
+            SmartObject obj;
             ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
             obj = "this is not a map";
             ASSERT_EQ(invalid_char_value, static_cast<char>(obj["some_key"]));
         }
         {   // String to Array
-            CSmartObject obj;
+            SmartObject obj;
             ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj[0]));
             obj = "this is not an array";
             ASSERT_EQ(invalid_double_value, static_cast<double>(obj[0]));
         }
         {   // String to Binary
-            CSmartObject obj;
+            SmartObject obj;
             ASSERT_EQ(invalid_binary_value, obj.asBinary());
             obj = "this is not an array";
             ASSERT_EQ(invalid_binary_value, obj.asBinary());
@@ -302,7 +302,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(FromBool, TypeConversion)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         obj = true;
 
@@ -329,7 +329,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(FromInt, TypeConversion)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         obj = 123;
 
@@ -361,7 +361,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(FromChar, TypeConversion)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         obj = '1';
 
@@ -386,7 +386,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(FromDouble, TypeConversion)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         obj = 0.1;
         ASSERT_EQ("0.1", static_cast<std::string>(obj));        // FIXME: result 0.100000
@@ -415,7 +415,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(FromMap, TypeConversion)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         obj["key1"] = 123;
 
@@ -430,7 +430,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(FromArray, TypeConversion)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         obj[0] = 'A';
         obj[1] = -123;
@@ -446,7 +446,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST_F(TestHelper, AssignmentTest)
     {
-        CSmartObject objSrc, objDst;
+        SmartObject objSrc, objDst;
 
         objSrc = -6;
         objDst = 7;
@@ -482,7 +482,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST_F(TestHelper, SizeTest)
     {
-        CSmartObject obj;
+        SmartObject obj;
 
         ASSERT_EQ(0, obj.length()) << "Wrong size for the uninitialized object";
 
@@ -511,7 +511,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
    TEST(CopyObjectsTest, SmartObjectTest)
    {
-       CSmartObject obj;
+       SmartObject obj;
 
        obj[0] = "test string";
 
@@ -527,18 +527,18 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     TEST(CopyConstructorTest, SmartObjectTest)
     {
-        CSmartObject srcObj;
+        SmartObject srcObj;
 
         srcObj[0] = "test string";
 
-        CSmartObject dstObj = srcObj[0];
+        SmartObject dstObj = srcObj[0];
 
         ASSERT_EQ("test string", static_cast<std::string>(dstObj));
     }
 
     TEST(MapEraseTest, SmartObjectTest)
     {
-        CSmartObject srcObj;
+        SmartObject srcObj;
 
         srcObj["one"] = 1;
         srcObj["two"] = 2;

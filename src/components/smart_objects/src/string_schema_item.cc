@@ -43,7 +43,7 @@ utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem> NsSmartDe
     return new NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem(MaxLength, DefaultValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
@@ -70,7 +70,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
     return result;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     bool result = false;
     std::string value;
@@ -85,8 +85,8 @@ bool NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::setDefaultValue(NsSma
 }
 
 void smart_objects_ns::CStringSchemaItem::BuildObjectBySchema(
-    const smart_objects_ns::CSmartObject& pattern_object,
-    smart_objects_ns::CSmartObject& result_object) {
+    const smart_objects_ns::SmartObject& pattern_object,
+    smart_objects_ns::SmartObject& result_object) {
 
   if (smart_objects_ns::SmartType_String == pattern_object.getType()) {
     result_object = pattern_object;

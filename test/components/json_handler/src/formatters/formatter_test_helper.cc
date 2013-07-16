@@ -36,7 +36,7 @@ using namespace test::components::json_handler::formatters;
 using namespace NsSmartDeviceLink::NsSmartObjects;
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
-void CFormatterTestHelper::fillTestObject(CSmartObject& obj)
+void CFormatterTestHelper::fillTestObject(SmartObject& obj)
 {
     obj[S_PARAMS][S_MESSAGE_TYPE] = "request";
     obj[S_PARAMS][S_FUNCTION_ID] = "some function";
@@ -56,14 +56,14 @@ void CFormatterTestHelper::fillTestObject(CSmartObject& obj)
     obj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
     obj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
     obj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-    obj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::CSmartObject();
+    obj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
     obj[S_MSG_PARAMS]["double"] = -0.1234;
 }
 
 
 void CFormatterTestHelper::compareObjects(
-    const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
-    const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second) {
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& first,
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& second) {
   if (SmartType_Array == first.getType()) {
     ASSERT_EQ(SmartType_Array, second.getType());
 

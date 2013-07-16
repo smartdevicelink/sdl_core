@@ -55,8 +55,8 @@ void AlertManeuverResponse::Run() {
     return;
   }
 
-  const long correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asLong();
+  const uint64_t correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUint64();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       correlation_id)) {

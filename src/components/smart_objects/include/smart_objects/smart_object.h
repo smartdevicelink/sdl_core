@@ -1,6 +1,6 @@
 /**
- * @file CSmartObject.hpp
- * @brief CSmartObject header file.
+ * @file SmartObject.hpp
+ * @brief SmartObject header file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,8 +32,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __CSMARTOBJECT_HPP__
-#define __CSMARTOBJECT_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 
 #include <set>
 #include <string>
@@ -44,7 +44,7 @@
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-class CSmartObject;
+class SmartObject;
 
 /**
  * @brief Enumeration with all types, supported by SmartObject
@@ -104,12 +104,12 @@ enum SmartType {
 /**
  * @brief SmartArray type
  **/
-typedef std::vector<CSmartObject> SmartArray;
+typedef std::vector<SmartObject> SmartArray;
 
 /**
  * @brief SmartMap type
  **/
-typedef std::map<std::string, CSmartObject> SmartMap;
+typedef std::map<std::string, SmartObject> SmartMap;
 
 /**
  * @brief SmartBinary type
@@ -122,21 +122,21 @@ typedef std::vector<unsigned char> SmartBinary;
  * This class act as Variant type from other languages and can be used as primitive type
  * like bool, int, char, double, string and as complex type like array and map.
  **/
-class CSmartObject {
+class SmartObject {
  public:
   /**
    * @brief Constructor.
    *
    * Creates object with Null type.
    **/
-  CSmartObject();
+  SmartObject();
 
   /**
    * @brief Copy constructor.
    *
    * @param Other Object to be copied from.
    **/
-  CSmartObject(const CSmartObject& Other);
+  SmartObject(const SmartObject& Other);
 
   /**
    * @brief Constructor for creating object of given primitive type.
@@ -145,21 +145,21 @@ class CSmartObject {
    *
    * @param type Type of the created object.
    **/
-  CSmartObject(SmartType Type);
+  explicit SmartObject(SmartType Type);
 
   /**
    * @brief Destructor
    *
    **/
-  ~CSmartObject();
+  ~SmartObject();
 
   /**
    * @brief Assignment operator.
    *
    * @param  Other Other SmartObject
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(const CSmartObject& Other);
+  SmartObject& operator=(const SmartObject& Other);
 
   /**
    * @brief Comparison operator
@@ -167,7 +167,7 @@ class CSmartObject {
    * @param  Other Other SmartObject to be compared with
    * @return bool Result of comparison
    **/
-  bool operator==(const CSmartObject& Other) const;
+  bool operator==(const SmartObject& Other) const;
 
   /**
    * @name Support of type: int
@@ -178,7 +178,7 @@ class CSmartObject {
    *
    * @param InitialValue Initial object value
    **/
-  CSmartObject(int InitialValue);
+  explicit SmartObject(int InitialValue);
 
   /**
    * @brief Conversion operator to type: int
@@ -186,7 +186,7 @@ class CSmartObject {
    * @return int Value of the object converted to int type or invalid_int_value if
    *         conversion is not possible
    **/
-  operator int(void) const;
+  operator int() const;
 
   /**
    * @brief Returns current object converted to int
@@ -199,9 +199,9 @@ class CSmartObject {
    * @brief Assignment operator for type: int
    *
    * @param  NewValue New object value
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(int NewValue);
+  SmartObject& operator=(int NewValue);
 
   /**
    * @brief Comparison operator for comparing object with integer value
@@ -211,44 +211,44 @@ class CSmartObject {
    **/
   bool operator==(int Value) const;
 
-  // Support of type: long
+  // Support of type: uint64_t
   /**
    * @brief Constructor for creating object of type: int
    *
    * @param InitialValue Initial object value
    **/
-  CSmartObject(long InitialValue);
+  explicit SmartObject(uint64_t InitialValue);
 
   /**
    * @brief Conversion operator to type: int
    *
-   * @return long Value of the object converted to int type or invalid_int_value if
+   * @return uint64_t Value of the object converted to int type or invalid_int_value if
    *         conversion is not possible
    **/
-  operator long(void) const;
+  operator uint64_t(void) const;
 
   /**
-   * @brief Returns current object converted to long int
+   * @brief Returns current object converted to uint64_t int
    *
    * @return double
    **/
-  long asLong() const;
+  uint64_t asUint64() const;
 
   /**
    * @brief Assignment operator for type: int
    *
    * @param  NewValue New object value
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(long NewValue);
+  SmartObject& operator=(uint64_t NewValue);
 
   /**
-   * @brief Comparison operator for comparing object with long value
+   * @brief Comparison operator for comparing object with uint64_t value
    *
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(long Value) const;
+  bool operator==(uint64_t Value) const;
 
   /** @} */
 
@@ -261,7 +261,7 @@ class CSmartObject {
    *
    * @param InitialValue Initial object value
    **/
-  CSmartObject(double InitialValue);
+  explicit SmartObject(double InitialValue);
 
   /**
    * @brief Conversion operator to type: double
@@ -269,7 +269,7 @@ class CSmartObject {
    * @return double Value of the object converted to double type or invalid_double_value if
    *         conversion is not possible
    **/
-  operator double(void) const;
+  operator double() const;
 
   /**
    * @brief Returns current object converted to double
@@ -281,18 +281,18 @@ class CSmartObject {
   /**
    * @brief Assignment operator for type: double
    *
-   * @param  NewValue New object value
-   * @return CSmartObject&
+   * @param  new_value New object value
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(double);
+  SmartObject& operator=(double new_value);
 
   /**
    * @brief Comparison operator for comparing object with double value
    *
-   * @param  Value Value to compare object with
+   * @param  new_value Value to compare object with
    * @return bool
    **/
-  bool operator==(double) const;
+  bool operator==(double new_value) const;
   /** @} */
 
   /**
@@ -304,7 +304,7 @@ class CSmartObject {
    *
    * @param InitialValue Initial object value
    **/
-  CSmartObject(bool InitialValue);
+  explicit SmartObject(bool InitialValue);
 
   /**
    * @brief Conversion operator to type: bool
@@ -312,7 +312,7 @@ class CSmartObject {
    * @return bool Value of the object converted to bool type or invalid_bool_value if
    *         conversion is not possible
    **/
-  operator bool(void) const;
+  operator bool() const;
 
   /**
    * @brief Returns current object converted to bool
@@ -325,9 +325,9 @@ class CSmartObject {
    * @brief Assignment operator for type: bool
    *
    * @param  NewValue New object value
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(bool NewValue);
+  SmartObject& operator=(bool NewValue);
 
   /**
    * @brief Comparison operator for comparing object with bool value
@@ -347,7 +347,7 @@ class CSmartObject {
    *
    * @param InitialValue Initial object value
    **/
-  CSmartObject(char InitialValue);
+  explicit SmartObject(char InitialValue);
 
   /**
    * @brief Conversion operator to type: char
@@ -355,7 +355,7 @@ class CSmartObject {
    * @return char Value of the object converted to bool type or invalid_char_value if
    *         conversion is not possible
    **/
-  operator char(void) const;
+  operator char() const;
 
   /**
    * @brief Returns current object converted to char
@@ -368,9 +368,9 @@ class CSmartObject {
    * @brief Assignment operator for type: char
    *
    * @param  NewValue New object value
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(char NewValue);
+  SmartObject& operator=(char NewValue);
 
   /**
    * @brief Comparison operator for comparing object with char value
@@ -390,14 +390,14 @@ class CSmartObject {
    *
    * @param InitialValue Initial object value
    **/
-  CSmartObject(const std::string InitialValue);
+  explicit SmartObject(const std::string& InitialValue);
 
   /**
    * @brief Constructor for creating object of type: string
    *
    * @param InitialValue Initial object value
    **/
-  CSmartObject(char* InitialValue);
+  explicit SmartObject(char* InitialValue);
 
   /**
    * @brief Conversion operator to type: string
@@ -418,17 +418,17 @@ class CSmartObject {
    * @brief Assignment operator for type: string
    *
    * @param  NewValue New object value
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(const std::string& NewValue);
+  SmartObject& operator=(const std::string& NewValue);
 
   /**
    * @brief Assignment operator for type: string
    *
    * @param  NewValue New object value
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(const char* NewValue);
+  SmartObject& operator=(const char* NewValue);
 
   /**
    * @brief Comparison operator for comparing object with string value
@@ -456,7 +456,7 @@ class CSmartObject {
    *
    * @param InitialValue Initial binary value
    **/
-  CSmartObject(SmartBinary InitialValue);
+  explicit SmartObject(const SmartBinary& InitialValue);
 
   /**
    * @brief Conversion operator to type: binary
@@ -477,9 +477,9 @@ class CSmartObject {
    * @brief Assignment operator for type: binary
    *
    * @param  NewValue New object value
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator=(SmartBinary);
+  SmartObject& operator=(SmartBinary);
 
   /**
    * @brief Comparison operator for comparing object with binary value
@@ -498,9 +498,9 @@ class CSmartObject {
    * @brief Support of array-like access
    *
    * @param  Index index of element to return
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator[](int Index);
+  SmartObject& operator[](int Index);
 
   /**
    * @brief Get array element.
@@ -513,7 +513,7 @@ class CSmartObject {
    *
    * @return Element of array or null object if element can't be provided.
    **/
-  const CSmartObject & getElement(size_t Index) const;
+  const SmartObject & getElement(size_t Index) const;
 
   /** @} */
 
@@ -525,25 +525,25 @@ class CSmartObject {
    * @brief Support of map-like access
    *
    * @param  Key Key of element to return
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator[](const std::string Key);
+  SmartObject& operator[](const std::string Key);
 
   /**
    * @brief Support of map-like access
    *
    * @param  Key Key of element to return
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator[](char* Key);
+  SmartObject& operator[](char* Key);
 
   /**
    * @brief Support of map-like access
    *
    * @param  Key Key of element to return
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& operator[](const char* Key);
+  SmartObject& operator[](const char* Key);
 
   /**
    * @brief Get map element.
@@ -556,7 +556,7 @@ class CSmartObject {
    *
    * @return Element of map or null object if element can't be provided.
    **/
-  const CSmartObject & getElement(const std::string & Key) const;
+  const SmartObject & getElement(const std::string & Key) const;
 
   /**
    * @brief Enumerates content of the object when it behaves like a map.
@@ -659,7 +659,7 @@ class CSmartObject {
    * @param  NewValue New object value
    * @return void
    **/
-  inline void set_value_long(long NewValue);
+  inline void set_value_uint64_t(uint64_t NewValue);
 
   /**
    * @brief Converts object to int type
@@ -673,7 +673,7 @@ class CSmartObject {
    *
    * @return int Converted value or invalid_int_value if conversion not possible
    **/
-  inline long convert_long(void) const;
+  inline uint64_t convert_uint64_t(void) const;
   /** @} */
 
   /**
@@ -804,9 +804,9 @@ class CSmartObject {
    * @brief Returns SmartObject from internal array data by it's index
    *
    * @param Index Index of element to retrieve
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  CSmartObject& handle_array_access(int Index);
+  SmartObject& handle_array_access(int Index);
   /** @} */
 
   /**
@@ -817,9 +817,9 @@ class CSmartObject {
    * @brief Returns SmartObject from internal map data by it's key
    *
    * @param Key Key of element to retrieve
-   * @return CSmartObject&
+   * @return SmartObject&
    **/
-  inline CSmartObject& handle_map_access(std::string Key);
+  inline SmartObject& handle_map_access(std::string Key);
   /** @} */
 
   /**
@@ -835,12 +835,12 @@ class CSmartObject {
   static double convert_string_to_double(const std::string* Value);
 
   /**
-   * @brief Converts string to long
+   * @brief Converts string to uint64_t
    *
    * @param Value Pointer to string to convert
-   * @return long int
+   * @return uint64_t int
    **/
-  static long convert_string_to_long(const std::string* Value);
+  static uint64_t convert_string_to_uint64_t(const std::string* Value);
 
   /**
    * @brief Converts double value to string
@@ -860,7 +860,7 @@ class CSmartObject {
    * @param  OtherObject Object to be duplicated
    * @return void
    **/
-  void duplicate(const CSmartObject& OtherObject);
+  void duplicate(const SmartObject& OtherObject);
 
   /**
    * @brief Cleans up internal data for some types (like string, array or map)
@@ -889,7 +889,7 @@ class CSmartObject {
     double double_value;
     bool bool_value;
     char char_value;
-    long long_value;
+    uint64_t uint64_t_value;
     std::string* str_value;
     SmartArray* array_value;
     SmartMap* map_value;
@@ -940,7 +940,7 @@ static const char* invalid_cstr_value = "";
 /**
  * @brief Value that is used as invalid value for object type
  **/
-static CSmartObject invalid_object_value(SmartType_Invalid);
+static SmartObject invalid_object_value(SmartType_Invalid);
 
 /**
  * @brief Value that is used as invalid value for object type
@@ -948,4 +948,4 @@ static CSmartObject invalid_object_value(SmartType_Invalid);
 static const SmartBinary invalid_binary_value;
 }
 }
-#endif // __CSMARTOBJECT_HPP__
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_

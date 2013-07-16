@@ -37,7 +37,7 @@
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-class CSmartObject;
+class SmartObject;
 }
 }
 
@@ -72,7 +72,7 @@ class Application {
      * and sends to HMI/Mobile side.
      * @param message Points to message to be processed by Application
      */
-    virtual void ProcessMessage(smart_objects::CSmartObject* message) = 0;
+    virtual void ProcessMessage(smart_objects::SmartObject* message) = 0;
 
     /**
      * @brief Called when on some stage of message processing outside
@@ -82,15 +82,15 @@ class Application {
      * TODO(PV): should we pass error_code along with possible error_string
      * in smartObject? If not need to add error_string
      */
-    virtual void ReportError(smart_objects::CSmartObject* message,
+    virtual void ReportError(smart_objects::SmartObject* message,
                              ErrorCode error_code) = 0;
 
     /**
      * @brief Returns message belonging to the application
      * that is currently executed (i.e. on HMI).
-     * @return smart_objects::CSmartObject * Active message
+     * @return smart_objects::SmartObject * Active message
      */
-    virtual const smart_objects::CSmartObject* active_message() const = 0;
+    virtual const smart_objects::SmartObject* active_message() const = 0;
     virtual void CloseActiveMessage() = 0;
     virtual const Version& version() const = 0;
     virtual int app_id() const = 0;

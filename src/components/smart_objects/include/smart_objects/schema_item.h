@@ -1,6 +1,6 @@
 /**
- * @file CSmartObject.hpp
- * @brief CSmartObject header file.
+ * @file SmartObject.hpp
+ * @brief SmartObject header file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -41,7 +41,7 @@ namespace NsSmartDeviceLink
 {
     namespace NsSmartObjects
     {
-        class CSmartObject;
+        class SmartObject;
 
         /**
          * @brief Base schema item.
@@ -56,7 +56,7 @@ namespace NsSmartDeviceLink
              *
              * @return NsSmartObjects::Errors::eType
              **/
-            virtual Errors::eType validate(const CSmartObject & Object);
+            virtual Errors::eType validate(const SmartObject & Object);
 
             /**
              * @brief Set default value to an object.
@@ -65,21 +65,21 @@ namespace NsSmartDeviceLink
              *
              * @return true if default value was successfully set, false otherwise.
              **/
-            virtual bool setDefaultValue(CSmartObject & Object);
+            virtual bool setDefaultValue(SmartObject & Object);
 
             /**
              * @brief Apply schema.
              *
              * @param Object Object to apply schema.
              **/
-            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief Unapply schema.
              *
              * @param Object Object to unapply schema.
              **/
-            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief Build smart object by smart schema having copied matched
@@ -89,8 +89,8 @@ namespace NsSmartDeviceLink
              * @param result_object object to build
              */
             virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
         };
     }
 }

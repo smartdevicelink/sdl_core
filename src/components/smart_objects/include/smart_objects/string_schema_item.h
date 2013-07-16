@@ -71,7 +71,7 @@ namespace NsSmartDeviceLink
              *
              * @return NsSmartObjects::Errors::eType
              **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
             /**
              * @brief Set default value to an object.
@@ -80,7 +80,7 @@ namespace NsSmartDeviceLink
              *
              * @return true if default value was successfully set, false otherwise.
              **/
-            virtual bool setDefaultValue(CSmartObject & Object);
+            virtual bool setDefaultValue(SmartObject & Object);
 
             /**
              * @brief Build smart object by smart schema having copied matched
@@ -90,8 +90,8 @@ namespace NsSmartDeviceLink
              * @param result_object object to build
              */
             virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::CSmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 
         private:
             /**

@@ -50,8 +50,8 @@ UICreateInteractionChoiceSetResponse::~UICreateInteractionChoiceSetResponse() {
 void UICreateInteractionChoiceSetResponse::Run() {
   LOG4CXX_INFO(logger_, "UICreateInteractionChoiceSetResponse::Run");
 
-  const long correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asLong();
+  const uint64_t correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUint64();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -61,7 +61,7 @@ void UICreateInteractionChoiceSetResponse::Run() {
     return;
   }
 
-  smart_objects::CSmartObject data =
+  smart_objects::SmartObject data =
     msg_chain->data();
 
   /* store received response code for to check it
@@ -90,7 +90,7 @@ void UICreateInteractionChoiceSetResponse::Run() {
     app->AddChoiceSet(choice_set_id, data[strings::msg_params]);
   }
 
-  smart_objects::CSmartObject& choice_set =
+  smart_objects::SmartObject& choice_set =
       data[strings::msg_params][strings::choice_set];
 
   if (choice_set.keyExists(strings::vr_commands)) {

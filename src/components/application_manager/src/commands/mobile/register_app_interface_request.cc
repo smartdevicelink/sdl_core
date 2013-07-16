@@ -133,9 +133,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   mobile_apis::Result::eType result =  mobile_apis::Result::SUCCESS;
 
-  smart_objects::CSmartObject* result_so = new smart_objects::CSmartObject;
+  smart_objects::SmartObject* result_so = new smart_objects::SmartObject;
   // TODO(VS) : add null check.
-  smart_objects::CSmartObject& response_params = *result_so;
+  smart_objects::SmartObject& response_params = *result_so;
 
   ApplicationManagerImpl* app_manager =  ApplicationManagerImpl::instance();
 

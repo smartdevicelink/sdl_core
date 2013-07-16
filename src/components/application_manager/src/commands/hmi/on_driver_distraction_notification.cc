@@ -75,8 +75,8 @@ void OnDriverDistractionNotification::Run() {
 
 void OnDriverDistractionNotification::NotifyMobileApp(
   const ApplicationImpl* app) {
-  smart_objects::CSmartObject* on_driver_distraction =
-    new smart_objects::CSmartObject();
+  smart_objects::SmartObject* on_driver_distraction =
+    new smart_objects::SmartObject();
 
   if (NULL == on_driver_distraction) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
@@ -86,10 +86,10 @@ void OnDriverDistractionNotification::NotifyMobileApp(
   (*on_driver_distraction)[strings::params][strings::function_id] =
     mobile_api::FunctionID::OnDriverDistractionID;
 
-  const long correlation_id =
-  (*message_)[strings::params][strings::correlation_id].asLong();
+  const uint64_t correlation_id =
+  (*message_)[strings::params][strings::correlation_id].asUint64();
 
-  const long mobile_correlation_id = ApplicationManagerImpl::instance()->
+  const uint64_t mobile_correlation_id = ApplicationManagerImpl::instance()->
       GetMobilecorrelation_id(correlation_id);
 
   (*on_driver_distraction)[strings::params][strings::correlation_id] =

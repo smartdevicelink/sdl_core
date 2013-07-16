@@ -59,7 +59,7 @@ const int Formatters::CFormatterJsonSDLRPCv1::kCorrelationIdNotFound = 1 << 3;
 // ----------------------------------------------------------------------------
 
 const std::string Formatters::CFormatterJsonSDLRPCv1::getMessageType(
-        const SmartObjects::CSmartObject& obj)
+        const SmartObjects::SmartObject& obj)
 {
     return obj.getElement(str::S_PARAMS).getElement(str::S_MESSAGE_TYPE);
 }
@@ -92,13 +92,13 @@ const std::string Formatters::CFormatterJsonSDLRPCv1::getMessageType(
 // ----------------------------------------------------------------------------
 
 bool Formatters::CFormatterJsonSDLRPCv1::toString(
-        const SmartObjects::CSmartObject& obj,
+        const SmartObjects::SmartObject& obj,
         std::string& outStr)
 {
     Json::Value root(Json::objectValue);
     Json::Value params(Json::objectValue);
 
-    SmartObjects::CSmartObject formattedObj(obj);
+    SmartObjects::SmartObject formattedObj(obj);
     formattedObj.getSchema().unapplySchema(formattedObj);       // converts enums(as int) to strings
 
     objToJsonValue(formattedObj.getElement(str::S_MSG_PARAMS), params);
@@ -124,13 +124,13 @@ bool Formatters::CFormatterJsonSDLRPCv1::toString(
 
 Formatters::CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode
   Formatters::CFormatterJsonSDLRPCv1::MetaFormatToString(
-            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+            const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
             const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
             std::string& outStr) {
   meta_formatter_error_code::tMetaFormatterErrorCode result_code
                                     = meta_formatter_error_code::kErrorOk;
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject tmp_object;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject tmp_object;
     
   if (false == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
       result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;

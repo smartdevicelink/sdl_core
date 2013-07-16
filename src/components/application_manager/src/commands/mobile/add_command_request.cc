@@ -72,8 +72,8 @@ void AddCommandRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
 
-    smart_objects::CSmartObject msg_params =
-        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::menu_params] =
@@ -91,8 +91,8 @@ void AddCommandRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
 
-    smart_objects::CSmartObject msg_params =
-        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::cmd_id] =
         (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::vr_commands] =

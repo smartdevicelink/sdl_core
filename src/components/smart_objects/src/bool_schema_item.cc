@@ -42,12 +42,12 @@ utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> NsSmartDevi
     return new CBoolSchemaItem(DefaultValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     return (true == NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean == Object.getType()) ? NsSmartDeviceLink::NsSmartObjects::Errors::OK : NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::CSmartObject & Object)
+bool NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     bool result = false;
     bool value = false;
@@ -63,8 +63,8 @@ bool NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsSmart
 
 
 void smart_objects_ns::CBoolSchemaItem::BuildObjectBySchema(
-    const smart_objects_ns::CSmartObject& pattern_object,
-    smart_objects_ns::CSmartObject& result_object) {
+    const smart_objects_ns::SmartObject& pattern_object,
+    smart_objects_ns::SmartObject& result_object) {
 
   if (smart_objects_ns::SmartType_Boolean == pattern_object.getType()) {
     result_object = pattern_object;

@@ -48,7 +48,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_no_default_value, test_StringSchemaItemTest)
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(); // No default value, no max length
 
@@ -94,7 +94,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_item_with_default_value, test_StringSchemaItemTest)
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(TSchemaItemParameter<size_t>(),
             TSchemaItemParameter<std::string>("Default string")); // Default value, no max length
@@ -137,7 +137,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_item_with_max_length, test_StringSchemaItemTest)
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));
@@ -170,7 +170,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_map_validate, test_StringSchemaItemTest)
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));
@@ -230,7 +230,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_array_validate, test_StringSchemaItemTest)
     {
         using namespace NsSmartDeviceLink::NsSmartObjects;
-        CSmartObject obj;
+        SmartObject obj;
 
         utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));

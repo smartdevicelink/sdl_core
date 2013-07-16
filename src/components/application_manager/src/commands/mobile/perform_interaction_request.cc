@@ -63,7 +63,7 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject& choice_list =
+  smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
@@ -83,16 +83,16 @@ void PerformInteractionRequest::Run() {
 bool PerformInteractionRequest::SendVRAddCommandRequest(
     const ApplicationImpl* app) {
 
-  smart_objects::CSmartObject& choice_list =
+  smart_objects::SmartObject& choice_list =
   (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
     // choice_set contains SmartObject msg_params
-    smart_objects::CSmartObject* i_choice_set =
+    smart_objects::SmartObject* i_choice_set =
         app->FindChoiceSetVRCommands(choice_list[i].asInt());
 
     for (size_t j = 0; j < choice_list.length(); ++j) {
-      smart_objects::CSmartObject* j_choice_set =
+      smart_objects::SmartObject* j_choice_set =
           app->FindChoiceSetVRCommands(choice_list[j].asInt());
 
       if ((!i_choice_set) || (!j_choice_set)) {
@@ -102,10 +102,10 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
       }
 
       // choice_set pointer contains SmartObject msg_params
-      smart_objects::CSmartObject& i_vr_commands =
+      smart_objects::SmartObject& i_vr_commands =
           (*i_choice_set)[strings::choice_set][strings::vr_commands];
 
-      smart_objects::CSmartObject& j_vr_commands =
+      smart_objects::SmartObject& j_vr_commands =
           (*j_choice_set)[strings::choice_set][strings::vr_commands];
 
       for (size_t ii = 0; ii < i_vr_commands.length(); ++ii) {
@@ -121,7 +121,7 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
 
-    smart_objects::CSmartObject* choice_set =
+    smart_objects::SmartObject* choice_set =
         app->FindChoiceSetVRCommands(choice_list[i].asInt());
 
     if (!choice_set) {
@@ -130,13 +130,13 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
       return false;
     }
 
-    smart_objects::CSmartObject msg_params =
-        smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::app_id] = app->app_id();
     msg_params[strings::cmd_id] =
         (*choice_set)[strings::choice_set][strings::choice_id];
     msg_params[strings::vr_commands] =
-        smart_objects::CSmartObject(smart_objects::SmartType_Array);
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
     msg_params[strings::vr_commands] =
         (*choice_set)[strings::choice_set][strings::vr_commands];
 
@@ -149,16 +149,16 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
 bool PerformInteractionRequest::SendUIPerforminterActionRequest(
     const ApplicationImpl* app) {
 
-  smart_objects::CSmartObject& choice_list =
+  smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
     for (size_t i = 0; i < choice_list.length(); ++i) {
       // choice_set contains SmartObject msg_params
-      smart_objects::CSmartObject* i_choice_set =
+      smart_objects::SmartObject* i_choice_set =
           app->FindChoiceSetVRCommands(choice_list[i].asInt());
 
       for (size_t j = 0; j < choice_list.length(); ++j) {
-        smart_objects::CSmartObject* j_choice_set =
+        smart_objects::SmartObject* j_choice_set =
             app->FindChoiceSetVRCommands(choice_list[j].asInt());
 
         if ((!i_choice_set) || (!j_choice_set)) {
@@ -179,8 +179,8 @@ bool PerformInteractionRequest::SendUIPerforminterActionRequest(
       }
     }
 
-  smart_objects::CSmartObject msg_params =
-      smart_objects::CSmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[hmi_request::initial_text][hmi_request::field_name] =
       TextFieldName::INITIAL_INTERACTION_TEXT;

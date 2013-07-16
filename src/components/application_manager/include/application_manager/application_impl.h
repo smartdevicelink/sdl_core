@@ -54,27 +54,27 @@ class InitialApplicationData {
     InitialApplicationData();
     ~InitialApplicationData();
 
-    const smart_objects::CSmartObject* app_types() const;
-    const smart_objects::CSmartObject* vr_synonyms() const;
-    const smart_objects::CSmartObject* mobile_app_id() const;
-    const smart_objects::CSmartObject* tts_name() const;
-    const smart_objects::CSmartObject* ngn_media_screen_name() const;
+    const smart_objects::SmartObject* app_types() const;
+    const smart_objects::SmartObject* vr_synonyms() const;
+    const smart_objects::SmartObject* mobile_app_id() const;
+    const smart_objects::SmartObject* tts_name() const;
+    const smart_objects::SmartObject* ngn_media_screen_name() const;
     const mobile_api::Language::eType& language() const;
     const mobile_api::Language::eType& ui_language() const;
-    void set_app_types(const smart_objects::CSmartObject& app_types);
-    void set_vr_synonyms(const smart_objects::CSmartObject& vr_synonyms);
-    void set_mobile_app_id(const smart_objects::CSmartObject& mobile_app_id);
-    void set_tts_name(const smart_objects::CSmartObject& tts_name);
-    void set_ngn_media_screen_name(const smart_objects::CSmartObject& ngn_name);
+    void set_app_types(const smart_objects::SmartObject& app_types);
+    void set_vr_synonyms(const smart_objects::SmartObject& vr_synonyms);
+    void set_mobile_app_id(const smart_objects::SmartObject& mobile_app_id);
+    void set_tts_name(const smart_objects::SmartObject& tts_name);
+    void set_ngn_media_screen_name(const smart_objects::SmartObject& ngn_name);
     void set_language(const mobile_api::Language::eType& language);
     void set_ui_language(const mobile_api::Language::eType& ui_language);
 
   protected:
-    smart_objects::CSmartObject* app_types_;
-    smart_objects::CSmartObject* vr_synonyms_;
-    smart_objects::CSmartObject* mobile_app_id_;
-    smart_objects::CSmartObject* tts_name_;
-    smart_objects::CSmartObject* ngn_media_screen_name_;
+    smart_objects::SmartObject* app_types_;
+    smart_objects::SmartObject* vr_synonyms_;
+    smart_objects::SmartObject* mobile_app_id_;
+    smart_objects::SmartObject* tts_name_;
+    smart_objects::SmartObject* ngn_media_screen_name_;
     mobile_api::Language::eType  language_;
     mobile_api::Language::eType  ui_language_;
 };
@@ -82,48 +82,48 @@ class InitialApplicationData {
 /*
  * @brief Typedef for supported commands in application menu
  */
-typedef std::map<unsigned int, smart_objects::CSmartObject*> CommandsMap;
+typedef std::map<unsigned int, smart_objects::SmartObject*> CommandsMap;
 
 /*
  * @brief Typedef for supported sub menu in application menu
  */
-typedef std::map<unsigned int, smart_objects::CSmartObject*> SubMenuMap;
+typedef std::map<unsigned int, smart_objects::SmartObject*> SubMenuMap;
 
 /*
  * @brief Typedef for interaction choice set
  */
-typedef std::map<unsigned int, smart_objects::CSmartObject*> ChoiceSetMap;
+typedef std::map<unsigned int, smart_objects::SmartObject*> ChoiceSetMap;
 
 /*
  * @brief Typedef for interaction choice set VR commands
  */
-typedef std::map<unsigned int, smart_objects::CSmartObject*> ChoiceSetVRCmdMap;
+typedef std::map<unsigned int, smart_objects::SmartObject*> ChoiceSetVRCmdMap;
 
 class DynamicApplicationData {
   public:
     DynamicApplicationData();
     ~DynamicApplicationData();
-    const smart_objects::CSmartObject* help_promt() const;
-    const smart_objects::CSmartObject* timeout_promt() const;
-    const smart_objects::CSmartObject* vr_help_title() const;
-    const smart_objects::CSmartObject* vr_help() const;
+    const smart_objects::SmartObject* help_promt() const;
+    const smart_objects::SmartObject* timeout_promt() const;
+    const smart_objects::SmartObject* vr_help_title() const;
+    const smart_objects::SmartObject* vr_help() const;
     const mobile_api::TBTState::eType& tbt_state() const;
-    const smart_objects::CSmartObject* show_command() const;
-    const smart_objects::CSmartObject* tbt_show_command() const;
+    const smart_objects::SmartObject* show_command() const;
+    const smart_objects::SmartObject* tbt_show_command() const;
 
-    void set_help_prompt(const smart_objects::CSmartObject& help_promt);
-    void set_timeout_prompt(const smart_objects::CSmartObject& timeout_promt);
-    void set_vr_help_title(const smart_objects::CSmartObject& vr_help_title);
-    void set_vr_help(const smart_objects::CSmartObject& vr_help);
+    void set_help_prompt(const smart_objects::SmartObject& help_promt);
+    void set_timeout_prompt(const smart_objects::SmartObject& timeout_promt);
+    void set_vr_help_title(const smart_objects::SmartObject& vr_help_title);
+    void set_vr_help(const smart_objects::SmartObject& vr_help);
     void set_tbt_state(const mobile_api::TBTState::eType& tbt_state);
-    void set_show_command(const smart_objects::CSmartObject& show_command);
-    void set_tbt_show_command(const smart_objects::CSmartObject& tbt_show);
+    void set_show_command(const smart_objects::SmartObject& show_command);
+    void set_tbt_show_command(const smart_objects::SmartObject& tbt_show);
 
     /*
      * @brief Adds a command to the in application menu
      */
     void AddCommand(unsigned int cmd_id,
-                    const smart_objects::CSmartObject& command);
+                    const smart_objects::SmartObject& command);
 
     /*
      * @brief Deletes all commands from the application menu with the specified command id
@@ -133,13 +133,13 @@ class DynamicApplicationData {
     /*
      * @brief Finds command with the specified command id
      */
-    smart_objects::CSmartObject*  FindCommand(unsigned int cmd_id);
+    smart_objects::SmartObject*  FindCommand(unsigned int cmd_id);
 
     /*
      * @brief Adds a menu to the application
      */
     void AddSubMenu(unsigned int menu_id,
-                    const smart_objects::CSmartObject& menu);
+                    const smart_objects::SmartObject& menu);
 
     /*
      * @brief Deletes menu from the application menu
@@ -149,7 +149,7 @@ class DynamicApplicationData {
     /*
      * @brief Finds menu with the specified id
      */
-    smart_objects::CSmartObject*  FindSubMenu(unsigned int menu_id);
+    smart_objects::SmartObject*  FindSubMenu(unsigned int menu_id);
 
     /*
      * @brief Returns true if sub menu with such name already exist
@@ -168,7 +168,7 @@ class DynamicApplicationData {
      * @param choice_set SmartObject that represent choice set
      */
     void AddChoiceSet(unsigned int choice_set_id,
-                      const smart_objects::CSmartObject& choice_set);
+                      const smart_objects::SmartObject& choice_set);
 
     /*
      * @brief Deletes choice set from the application
@@ -182,8 +182,7 @@ class DynamicApplicationData {
      *
      * @param choice_set_id Unique ID of the interaction choice set
      */
-    smart_objects::CSmartObject*  FindChoiceSet(
-        unsigned int choice_set_id);
+    smart_objects::SmartObject*  FindChoiceSet(unsigned int choice_set_id);
 
     /*
      * @brief Adds VR commands for choice set to the application
@@ -192,7 +191,7 @@ class DynamicApplicationData {
      * @param choice_set SmartObject that represent VR commands
      */
     void AddChoiceSetVRCommands(unsigned int choice_set_id,
-                      const smart_objects::CSmartObject& vr_commands);
+                      const smart_objects::SmartObject& vr_commands);
 
     /*
      * @brief Deletes entirely ChoiceSet - VR commands map
@@ -215,7 +214,7 @@ class DynamicApplicationData {
      *
      * @return SmartObject for VR commands
      */
-    smart_objects::CSmartObject*  FindChoiceSetVRCommands(
+    smart_objects::SmartObject*  FindChoiceSetVRCommands(
         unsigned int choice_set_id) const;
 
     /*
@@ -233,13 +232,13 @@ class DynamicApplicationData {
     inline bool is_perform_interaction_active() const;
 
   protected:
-    smart_objects::CSmartObject* help_promt_;
-    smart_objects::CSmartObject* timeout_promt_;
-    smart_objects::CSmartObject* vr_help_title_;
-    smart_objects::CSmartObject* vr_help_;
+    smart_objects::SmartObject* help_promt_;
+    smart_objects::SmartObject* timeout_promt_;
+    smart_objects::SmartObject* vr_help_title_;
+    smart_objects::SmartObject* vr_help_;
     mobile_api::TBTState::eType  tbt_state_;
-    smart_objects::CSmartObject* show_command_;
-    smart_objects::CSmartObject* tbt_show_command_;
+    smart_objects::SmartObject* show_command_;
+    smart_objects::SmartObject* tbt_show_command_;
 
     CommandsMap                  commands_;
     SubMenuMap                   sub_menu_;
@@ -263,8 +262,8 @@ class ApplicationImpl : public Application,
     explicit ApplicationImpl(int app_id);
     ~ApplicationImpl();
 
-    void ProcessMessage(smart_objects::CSmartObject* message);
-    void ReportError(smart_objects::CSmartObject* message,
+    void ProcessMessage(smart_objects::SmartObject* message);
+    void ReportError(smart_objects::SmartObject* message,
                      ErrorCode error_code);
     void CloseActiveMessage();
     bool IsFullscreen() const;
@@ -273,7 +272,7 @@ class ApplicationImpl : public Application,
     bool SupportsNavigation() const;
     void AllowNavigation(bool allow);
 
-    const smart_objects::CSmartObject* active_message() const;
+    const smart_objects::SmartObject* active_message() const;
     const Version& version() const;
     int app_id() const;
     const std::string& name() const;
@@ -310,7 +309,7 @@ class ApplicationImpl : public Application,
     void CleanupFiles();
 
   private:
-    smart_objects::CSmartObject*           active_message_;
+    smart_objects::SmartObject*           active_message_;
 
     Version                                version_;
     int                                    app_id_;

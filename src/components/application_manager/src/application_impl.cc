@@ -73,24 +73,24 @@ InitialApplicationData::~InitialApplicationData() {
   }
 }
 
-const smart_objects::CSmartObject* InitialApplicationData::app_types() const {
+const smart_objects::SmartObject* InitialApplicationData::app_types() const {
   return app_types_;
 }
 
-const smart_objects::CSmartObject* InitialApplicationData::vr_synonyms() const {
+const smart_objects::SmartObject* InitialApplicationData::vr_synonyms() const {
   return vr_synonyms_;
 }
 
-const smart_objects::CSmartObject*
+const smart_objects::SmartObject*
 InitialApplicationData::mobile_app_id() const {
   return mobile_app_id_;
 }
 
-const smart_objects::CSmartObject* InitialApplicationData::tts_name() const {
+const smart_objects::SmartObject* InitialApplicationData::tts_name() const {
   return tts_name_;
 }
 
-const smart_objects::CSmartObject*
+const smart_objects::SmartObject*
 InitialApplicationData::ngn_media_screen_name() const {
   return ngn_media_screen_name_;
 }
@@ -104,51 +104,51 @@ const mobile_api::Language::eType& InitialApplicationData::ui_language() const {
 }
 
 void InitialApplicationData::set_app_types(
-  const smart_objects::CSmartObject& app_types) {
+  const smart_objects::SmartObject& app_types) {
   if (app_types_) {
     delete app_types_;
   }
 
   app_types_ =
-    new smart_objects::CSmartObject(app_types);
+    new smart_objects::SmartObject(app_types);
 }
 
 void InitialApplicationData::set_vr_synonyms(
-  const smart_objects::CSmartObject& vr_synonyms) {
+  const smart_objects::SmartObject& vr_synonyms) {
   if (vr_synonyms_) {
     delete vr_synonyms_;
   }
   vr_synonyms_ =
-    new smart_objects::CSmartObject(vr_synonyms);
+    new smart_objects::SmartObject(vr_synonyms);
 }
 
 void InitialApplicationData::set_mobile_app_id(
-  const smart_objects::CSmartObject& mobile_app_id) {
+  const smart_objects::SmartObject& mobile_app_id) {
   if (mobile_app_id_) {
     delete mobile_app_id_;
   }
   mobile_app_id_ =
-    new smart_objects::CSmartObject(mobile_app_id);
+    new smart_objects::SmartObject(mobile_app_id);
 }
 
 void InitialApplicationData::set_tts_name(
-  const smart_objects::CSmartObject& tts_name) {
+  const smart_objects::SmartObject& tts_name) {
   if (tts_name_) {
     delete tts_name_;
   }
 
   tts_name_ =
-    new smart_objects::CSmartObject(tts_name);
+    new smart_objects::SmartObject(tts_name);
 }
 
 void InitialApplicationData::set_ngn_media_screen_name(
-  const smart_objects::CSmartObject& ngn_name) {
+  const smart_objects::SmartObject& ngn_name) {
   if (ngn_media_screen_name_) {
     delete ngn_media_screen_name_;
   }
 
   ngn_media_screen_name_ =
-    new smart_objects::CSmartObject(ngn_name);
+    new smart_objects::SmartObject(ngn_name);
 }
 
 void InitialApplicationData::set_language(
@@ -227,21 +227,21 @@ DynamicApplicationData::~DynamicApplicationData() {
   choice_set_vr_commands_map_.clear();
 }
 
-const smart_objects::CSmartObject* DynamicApplicationData::help_promt() const {
+const smart_objects::SmartObject* DynamicApplicationData::help_promt() const {
   return help_promt_;
 }
 
-const smart_objects::CSmartObject*
+const smart_objects::SmartObject*
 DynamicApplicationData::timeout_promt() const {
   return timeout_promt_;
 }
 
-const smart_objects::CSmartObject*
+const smart_objects::SmartObject*
 DynamicApplicationData::vr_help_title() const {
   return vr_help_title_;
 }
 
-const smart_objects::CSmartObject*
+const smart_objects::SmartObject*
 DynamicApplicationData::vr_help() const {
   return vr_help_;
 }
@@ -250,46 +250,46 @@ const mobile_api::TBTState::eType& DynamicApplicationData::tbt_state() const {
   return tbt_state_;
 }
 
-const smart_objects::CSmartObject*
+const smart_objects::SmartObject*
 DynamicApplicationData::show_command() const {
   return show_command_;
 }
 
-const smart_objects::CSmartObject*
+const smart_objects::SmartObject*
 DynamicApplicationData::tbt_show_command() const {
   return tbt_show_command_;
 }
 
 void DynamicApplicationData::set_help_prompt(
-  const smart_objects::CSmartObject& help_promt) {
+  const smart_objects::SmartObject& help_promt) {
   if (help_promt_) {
     delete help_promt_;
   }
-  help_promt_ = new smart_objects::CSmartObject(help_promt);
+  help_promt_ = new smart_objects::SmartObject(help_promt);
 }
 
 void DynamicApplicationData::set_timeout_prompt(
-  const smart_objects::CSmartObject& timeout_promt) {
+  const smart_objects::SmartObject& timeout_promt) {
   if (timeout_promt_) {
     delete timeout_promt_;
   }
-  timeout_promt_ = new smart_objects::CSmartObject(timeout_promt);
+  timeout_promt_ = new smart_objects::SmartObject(timeout_promt);
 }
 
 void DynamicApplicationData::set_vr_help_title(
-  const smart_objects::CSmartObject& vr_help_title) {
+  const smart_objects::SmartObject& vr_help_title) {
   if (vr_help_title_) {
     delete vr_help_title_;
   }
-  vr_help_title_ = new smart_objects::CSmartObject(vr_help_title);
+  vr_help_title_ = new smart_objects::SmartObject(vr_help_title);
 }
 
 void DynamicApplicationData::set_vr_help(
-  const smart_objects::CSmartObject& vr_help) {
+  const smart_objects::SmartObject& vr_help) {
   if (vr_help_) {
     delete vr_help_;
   }
-  vr_help_ = new smart_objects::CSmartObject(vr_help);
+  vr_help_ = new smart_objects::SmartObject(vr_help);
 }
 
 void DynamicApplicationData::set_tbt_state(
@@ -298,25 +298,25 @@ void DynamicApplicationData::set_tbt_state(
 }
 
 void DynamicApplicationData::set_show_command(
-  const smart_objects::CSmartObject& show_command) {
+  const smart_objects::SmartObject& show_command) {
   if (show_command_) {
     delete show_command_;
   }
-  show_command_ = new smart_objects::CSmartObject(show_command);
+  show_command_ = new smart_objects::SmartObject(show_command);
 }
 
 void DynamicApplicationData::set_tbt_show_command(
-  const smart_objects::CSmartObject& tbt_show) {
+  const smart_objects::SmartObject& tbt_show) {
   if (tbt_show_command_) {
     delete tbt_show_command_;
   }
-  tbt_show_command_ = new smart_objects::CSmartObject(tbt_show);
+  tbt_show_command_ = new smart_objects::SmartObject(tbt_show);
 }
 
 void
 DynamicApplicationData::AddCommand(unsigned int cmd_id,
-                                   const smart_objects::CSmartObject& command) {
-  commands_[cmd_id] = new smart_objects::CSmartObject(command);
+                                   const smart_objects::SmartObject& command) {
+  commands_[cmd_id] = new smart_objects::SmartObject(command);
 }
 
 void DynamicApplicationData::RemoveCommand(unsigned int cmd_id) {
@@ -328,7 +328,7 @@ void DynamicApplicationData::RemoveCommand(unsigned int cmd_id) {
   }
 }
 
-smart_objects::CSmartObject*  DynamicApplicationData::FindCommand(
+smart_objects::SmartObject*  DynamicApplicationData::FindCommand(
   unsigned int cmd_id) {
   CommandsMap::const_iterator it = commands_.find(cmd_id);
   if (it != commands_.end()) {
@@ -341,8 +341,8 @@ smart_objects::CSmartObject*  DynamicApplicationData::FindCommand(
 // TODO(VS): Create common functions for processing collections
 void
 DynamicApplicationData::AddSubMenu(unsigned int menu_id,
-                                   const smart_objects::CSmartObject& menu) {
-  sub_menu_[menu_id] = new smart_objects::CSmartObject(menu);
+                                   const smart_objects::SmartObject& menu) {
+  sub_menu_[menu_id] = new smart_objects::SmartObject(menu);
 }
 
 void DynamicApplicationData::RemoveSubMenu(unsigned int menu_id) {
@@ -354,7 +354,7 @@ void DynamicApplicationData::RemoveSubMenu(unsigned int menu_id) {
   }
 }
 
-smart_objects::CSmartObject*  DynamicApplicationData::FindSubMenu(
+smart_objects::SmartObject*  DynamicApplicationData::FindSubMenu(
   unsigned int menu_id) {
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (it != sub_menu_.end()) {
@@ -368,7 +368,7 @@ bool DynamicApplicationData::IsSubMenuNameAlreadyExist(
   const std::string& name) {
   for (SubMenuMap::iterator it = sub_menu_.begin();
        sub_menu_.end() != it; ++it) {
-    smart_objects::CSmartObject* menu = it->second;
+    smart_objects::SmartObject* menu = it->second;
     if ((*menu)[strings::menu_name] == name) {
       return true;
     }
@@ -377,8 +377,8 @@ bool DynamicApplicationData::IsSubMenuNameAlreadyExist(
 }
 
 void DynamicApplicationData::AddChoiceSet(unsigned int choice_set_id,
-    const smart_objects::CSmartObject& choice_set) {
-  choice_set_map_[choice_set_id] = new smart_objects::CSmartObject(choice_set);
+    const smart_objects::SmartObject& choice_set) {
+  choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
 }
 
 void DynamicApplicationData::RemoveChoiceSet(unsigned int choice_set_id) {
@@ -390,7 +390,7 @@ void DynamicApplicationData::RemoveChoiceSet(unsigned int choice_set_id) {
   }
 }
 
-smart_objects::CSmartObject*  DynamicApplicationData::FindChoiceSet(
+smart_objects::SmartObject*  DynamicApplicationData::FindChoiceSet(
   unsigned int choice_set_id) {
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (it != choice_set_map_.end()) {
@@ -401,9 +401,9 @@ smart_objects::CSmartObject*  DynamicApplicationData::FindChoiceSet(
 }
 
 void DynamicApplicationData::AddChoiceSetVRCommands(unsigned int choice_set_id,
-                  const smart_objects::CSmartObject& vr_commands) {
+                  const smart_objects::SmartObject& vr_commands) {
   choice_set_vr_commands_map_[choice_set_id] =
-      new smart_objects::CSmartObject(vr_commands);
+      new smart_objects::SmartObject(vr_commands);
 }
 
 void DynamicApplicationData::DeleteChoiceSetVRCommands() {
@@ -415,7 +415,7 @@ void DynamicApplicationData::DeleteChoiceSetVRCommands() {
   choice_set_vr_commands_map_.clear();
 }
 
-smart_objects::CSmartObject*  DynamicApplicationData::FindChoiceSetVRCommands(
+smart_objects::SmartObject*  DynamicApplicationData::FindChoiceSetVRCommands(
     unsigned int choice_set_id) const {
   ChoiceSetVRCmdMap::const_iterator it =
       choice_set_vr_commands_map_.find(choice_set_id);
@@ -455,7 +455,7 @@ ApplicationImpl::~ApplicationImpl() {
   CleanupFiles();
 }
 
-void ApplicationImpl::ProcessMessage(smart_objects::CSmartObject* message) {
+void ApplicationImpl::ProcessMessage(smart_objects::SmartObject* message) {
   // TODO(PV): add code here when factory is created.
   // factory::create command.
   // if (command.Run()) {
@@ -464,7 +464,7 @@ void ApplicationImpl::ProcessMessage(smart_objects::CSmartObject* message) {
   }
 }
 
-void ApplicationImpl::ReportError(smart_objects::CSmartObject* message,
+void ApplicationImpl::ReportError(smart_objects::SmartObject* message,
                                   ErrorCode error_code) {
   // factory->create response(message, error_code);
   // response.Run();
@@ -496,7 +496,7 @@ void ApplicationImpl::AllowNavigation(bool allow) {
   allowed_support_navigation_ = allow;
 }
 
-const smart_objects::CSmartObject* ApplicationImpl::active_message() const {
+const smart_objects::SmartObject* ApplicationImpl::active_message() const {
   return active_message_;
 }
 

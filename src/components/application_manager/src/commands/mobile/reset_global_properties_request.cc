@@ -107,7 +107,7 @@ void ResetGlobalPropertiesRequest::ResetHelpPromt(ApplicationImpl* const app,
   }
 
   CommandsMap cmdMap = app->commands_map();
-  smart_objects::CSmartObject helpPrompt;
+  smart_objects::SmartObject helpPrompt;
 
   int index = 0;
   CommandsMap::const_iterator command_it = cmdMap.begin();
@@ -138,7 +138,7 @@ void ResetGlobalPropertiesRequest::ResetVrHelpTitle(
     return;
   }
 
-  smart_objects::CSmartObject help_title(app->name());
+  smart_objects::SmartObject help_title(app->name());
   app->set_vr_help_title(help_title);
 }
 

@@ -69,11 +69,11 @@ void OnVRCommandNotification::Run() {
 
     ChoiceSetVRCmdMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
-      smart_objects::CSmartObject msg_params =
-          smart_objects::CSmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::app_id] = app->app_id();
 
-      const smart_objects::CSmartObject& choice_set =
+      const smart_objects::SmartObject& choice_set =
           (*it->second).getElement(strings::choice_set);
 
       msg_params[strings::cmd_id] =

@@ -69,18 +69,18 @@ TEST_F(CMetaFormatterTestHelper, test_inputObjectIdenticalToSchemaWithAndWithout
   Json::Value value;  // just a quick workaround to avoid undefined reference to Json
   Json::Reader reader;    // the same thing
   
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject object1 =
+  NsSmartDeviceLink::NsSmartObjects::SmartObject object1 =
     factory_.CreateSmartObject(
       generated_ns::FunctionID::RegisterAppInterfaceID,
       generated_ns::messageType::request);
 
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject object2 =
+  NsSmartDeviceLink::NsSmartObjects::SmartObject object2 =
     factory_.CreateSmartObject(
       generated_ns::FunctionID::RegisterAppInterfaceID,
       generated_ns::messageType::request);
   
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object1;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object2;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject result_object1;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject result_object2;
   // get schema
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;  
   bool get_schema_result = factory_.GetSchema(
@@ -134,9 +134,9 @@ TEST_F(CMetaFormatterTestHelper, test_inputObjectIdenticalToSchemaWithAndWithout
 
 
 TEST_F(CMetaFormatterTestHelper, test_NormalSchemaWithEmptyObject) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject object;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject expected_object;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject object;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject result_object;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject expected_object;
   // get schema
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;
   bool get_schema_result = factory_.GetSchema(
@@ -161,8 +161,8 @@ TEST_F(CMetaFormatterTestHelper, test_NormalSchemaWithEmptyObject) {
 }
 
 TEST_F(CMetaFormatterTestHelper, test_NormalSchemaWithObjectWithoutSomeMandatoryFields) {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject object;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject object;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject result_object;
   // get schema
   NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema;
   bool get_schema_result = factory_.GetSchema(
@@ -197,11 +197,11 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyMap) {
     smartobjects_ns::CSmartSchema(
       smartobjects_ns::CObjectSchemaItem::create(schemaMembersMap));
 
-  smartobjects_ns::CSmartObject object;
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject result_object_empty_map;
+  smartobjects_ns::SmartObject object;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject result_object_empty_map;
 
-  smartobjects_ns::CSmartObject object_empty_map =
-  smartobjects_ns::CSmartObject(smartobjects_ns::SmartType_Map);
+  smartobjects_ns::SmartObject object_empty_map =
+  smartobjects_ns::SmartObject(smartobjects_ns::SmartType_Map);
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object_empty_map,
       map_schema, result_object_empty_map);
   ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
@@ -215,7 +215,7 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyMap) {
   ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
   
   object["field1"] = 0;
-  object["field2"] = smartobjects_ns::CSmartObject();
+  object["field2"] = smartobjects_ns::SmartObject();
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object,
       map_schema, result_object_empty_map);
   ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
@@ -248,14 +248,14 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyMap) {
 }
 
 TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyArray) {
-  smartobjects_ns::CSmartObject object;
+  smartobjects_ns::SmartObject object;
   
-  smartobjects_ns::CSmartObject result_object_empty_array;
+  smartobjects_ns::SmartObject result_object_empty_array;
   smartobjects_ns::CSmartSchema array_schema =
     smartobjects_ns::CSmartSchema(smartobjects_ns::CArraySchemaItem::create());
 
-  smartobjects_ns::CSmartObject object_empty_aray =
-    smartobjects_ns::CSmartObject(smartobjects_ns::SmartType_Array);
+  smartobjects_ns::SmartObject object_empty_aray =
+    smartobjects_ns::SmartObject(smartobjects_ns::SmartType_Array);
 
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object_empty_aray,
       array_schema, result_object_empty_array);
@@ -293,8 +293,8 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyArray) {
 }
 
 TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
-  smartobjects_ns::CSmartObject result_object;
-  smartobjects_ns::CSmartObject object;
+  smartobjects_ns::SmartObject result_object;
+  smartobjects_ns::SmartObject object;
   
   std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember>
     paramsMembersMap;
@@ -389,7 +389,7 @@ TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
   EXPECT_EQ(55,
     result_object[strings_ns::S_PARAMS][strings_ns::S_CORRELATION_ID].asInt());
   EXPECT_EQ(11,
-    result_object[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION].asLong());
+    result_object[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION].asUint64());
 
   EXPECT_EQ(smartobjects_ns::SmartType_Map,
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"].getType());
@@ -408,7 +408,7 @@ TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
   EXPECT_EQ(200,
     result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][1].asInt());
   EXPECT_EQ(300,
-    result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][2].asLong());
+    result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][2].asUint64());
   EXPECT_EQ(std::string("defValue"),
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_string"].asString());
   EXPECT_EQ(std::string("some string"),

@@ -310,8 +310,8 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
     connection_handler_->StartTransportManager();
   }
 
-  smart_objects::CSmartObject* is_vr_ready = new smart_objects::CSmartObject;
-  smart_objects::CSmartObject& so_to_send = *is_vr_ready;
+  smart_objects::SmartObject* is_vr_ready = new smart_objects::SmartObject;
+  smart_objects::SmartObject& so_to_send = *is_vr_ready;
   so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
     hmi_apis::FunctionID::VR_IsReady;
   so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
@@ -320,7 +320,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
   so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4444;
   so_to_send[jhs::S_MSG_PARAMS] =
-    smart_objects::CSmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   //  ApplicationManagerImpl::hmi_so_factory_.attachSchema(so_to_send);
 
@@ -329,7 +329,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
 bool ApplicationManagerImpl::AddMessageChain(unsigned int connection_key,
     unsigned int correlation_id, const uint64_t hmi_correlation_id,
-    const smart_objects::CSmartObject* data) {
+    const smart_objects::SmartObject* data) {
 
     MessageChains::iterator it =  message_chaining_.find(hmi_correlation_id);
     if (message_chaining_.end() != it) {
@@ -427,14 +427,14 @@ void ApplicationManagerImpl::set_active_tts_language(
 }
 
 void ApplicationManagerImpl::set_vehicle_type(
-  const smart_objects::CSmartObject& vehicle_type) {
+  const smart_objects::SmartObject& vehicle_type) {
   if (vehicle_type_) {
     delete vehicle_type_;
   }
-  vehicle_type_ = new smart_objects::CSmartObject(vehicle_type);
+  vehicle_type_ = new smart_objects::SmartObject(vehicle_type);
 }
 
-const smart_objects::CSmartObject*
+const smart_objects::SmartObject*
 ApplicationManagerImpl::vehicle_type() const {
   return vehicle_type_;
 }
@@ -502,8 +502,8 @@ void ApplicationManagerImpl::onErrorSending(
 void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
   // TODO(DK): HMI StartDeviceDiscovery response
-  smart_objects::CSmartObject* update_list = new smart_objects::CSmartObject;
-  smart_objects::CSmartObject& so_to_send = *update_list;
+  smart_objects::SmartObject* update_list = new smart_objects::SmartObject;
+  smart_objects::SmartObject& so_to_send = *update_list;
   so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
     hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated;
   so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
@@ -511,7 +511,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
   so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
   so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4435;
-  smart_objects::CSmartObject* msg_params =
+  smart_objects::SmartObject* msg_params =
     MessageHelper::CreateDeviceListSO(device_list);
   if (!msg_params) {
     LOG4CXX_WARN(logger_, "Failed to create sub-smart object.");
@@ -563,7 +563,7 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 }
 
 void ApplicationManagerImpl::SendMessageToMobile(
-  const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  const utils::SharedPtr<smart_objects::SmartObject>& message) {
   DCHECK(message);
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
@@ -586,7 +586,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
-  const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  const utils::SharedPtr<smart_objects::SmartObject>& message) {
   DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
@@ -613,7 +613,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 }
 
 void ApplicationManagerImpl::SendMessageToHMI(
-  const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  const utils::SharedPtr<smart_objects::SmartObject>& message) {
   DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
@@ -644,7 +644,7 @@ void ApplicationManagerImpl::SendMessageToHMI(
 }
 
 bool ApplicationManagerImpl::ManageHMICommand(
-  const utils::SharedPtr<smart_objects::CSmartObject>& message) {
+  const utils::SharedPtr<smart_objects::SmartObject>& message) {
   DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
@@ -672,18 +672,18 @@ void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
 void ApplicationManagerImpl::CreatePoliciesManager(PoliciesManager* managaer) {
 }
 
-bool ApplicationManagerImpl::CheckPolicies(smart_objects::CSmartObject* message,
+bool ApplicationManagerImpl::CheckPolicies(smart_objects::SmartObject* message,
     Application* application) {
   return true;
 }
 
 bool ApplicationManagerImpl::CheckHMIMatrix(
-  smart_objects::CSmartObject* message) {
+  smart_objects::SmartObject* message) {
   return true;
 }
 
 bool ApplicationManagerImpl::ConvertMessageToSO(
-  const Message& message, smart_objects::CSmartObject& output) {
+  const Message& message, smart_objects::SmartObject& output) {
   LOG4CXX_INFO(logger_, "Message to convert: protocol " <<
                message.protocol_version() <<
                "; json " << message.json_message());
@@ -740,7 +740,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
 }
 
 bool ApplicationManagerImpl::ConvertSOtoMessage(
-  const smart_objects::CSmartObject& message, Message& output) {
+  const smart_objects::SmartObject& message, Message& output) {
   LOG4CXX_INFO(logger_, "Message to convert");
 
   if (smart_objects::SmartType_Null == message.getType() ||
@@ -817,8 +817,8 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
 
-  utils::SharedPtr<smart_objects::CSmartObject> so_from_mobile(
-    new smart_objects::CSmartObject);
+  utils::SharedPtr<smart_objects::SmartObject> so_from_mobile(
+    new smart_objects::SmartObject);
 
   if (!so_from_mobile) {
     LOG4CXX_ERROR(logger_, "Null pointer");
@@ -838,8 +838,8 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
 void ApplicationManagerImpl::ProcessMessageFromHMI(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromHMI()");
-  utils::SharedPtr<smart_objects::CSmartObject> smart_object(
-    new smart_objects::CSmartObject);
+  utils::SharedPtr<smart_objects::SmartObject> smart_object(
+    new smart_objects::SmartObject);
 
   if (!smart_object) {
     LOG4CXX_ERROR(logger_, "Null pointer");
