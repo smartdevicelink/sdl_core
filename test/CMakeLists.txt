@@ -17,7 +17,7 @@ include_directories (
   ../src/components/TransportManager/include
   ../src/components/connection_handler/include
   ../src/components/formatters/include
-  ../src/components/SmartObjects/include
+  ../src/components/smart_objects/include
   ../src/thirdPartyLibs/jsoncpp/include/
   ../src/thirdPartyLibs/logger/include/
   ../src/components/utils/include/
@@ -26,7 +26,7 @@ include_directories (
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
   ../test/components/json_handler/include
-  ../test/components/SmartObjects
+  ../test/components/smart_objects
   ../test/components/
   ../test/thirdPartyLibs/jsoncpp/include
   ../test/components/application_manager

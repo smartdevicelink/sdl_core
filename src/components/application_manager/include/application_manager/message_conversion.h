@@ -35,7 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CONVERSION_H_
 
 #include "application_manager/message.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 

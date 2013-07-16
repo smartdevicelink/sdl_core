@@ -3,7 +3,7 @@ include_directories (
   ../utils/include/
   ../formatters/include/
   ../protocol_handler/include/
-  ../SmartObjects/include/
+  ../smart_objects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
   ../connection_handler/include/

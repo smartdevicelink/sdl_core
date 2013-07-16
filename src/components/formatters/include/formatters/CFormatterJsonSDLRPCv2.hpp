@@ -35,8 +35,9 @@
 #ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
 #define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
 
-#include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
+
+#include "smart_objects/smart_object.h"
 
 #include "CFormatterJsonBase.hpp"
 #include "formatters/CSmartFactory.hpp"

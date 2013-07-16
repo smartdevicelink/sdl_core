@@ -33,7 +33,7 @@
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 

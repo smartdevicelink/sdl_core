@@ -6,7 +6,7 @@ include_directories (
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
   ../../thirdPartyLibs/logger/include
-  ../../../src/components/SmartObjects/include
+  ../../../src/components/smart_objects/include
 )
 
 set (SOURCES

@@ -37,7 +37,7 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 
 #include "application_manager/message.h"
 #include "application_manager/application.h"

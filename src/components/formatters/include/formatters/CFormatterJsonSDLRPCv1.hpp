@@ -34,13 +34,14 @@
 #ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__
 #define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__
 
-#include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
+
+#include "smart_objects/smart_object.h"
+#include "smart_objects/enum_schema_item.h"
 
 #include "CFormatterJsonBase.hpp"
 
 #include "formatters/CSmartFactory.hpp"
-#include "SmartObjects/TEnumSchemaItem.hpp"
 #include "formatters/meta_formatter.h"
 
 namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {

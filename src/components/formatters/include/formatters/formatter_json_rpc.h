@@ -38,8 +38,8 @@
 #include <string>
 #include <sys/stat.h>
 
-#include "SmartObjects/CSmartObject.hpp"
-#include "SmartObjects/TEnumSchemaItem.hpp"
+#include "smart_objects/smart_object.h"
+#include "smart_objects/enum_schema_item.h"
 #include "json/json.h"
 
 #include "CFormatterJsonBase.hpp"

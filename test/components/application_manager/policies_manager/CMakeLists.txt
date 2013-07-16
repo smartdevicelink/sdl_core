@@ -2,7 +2,7 @@ include_directories (
   ../../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../../src/components/application_manager/include
-  ../../../../src/components/SmartObjects/include
+  ../../../../src/components/smart_objects/include
   ../../../../src/components/utils/include/
   ../../../../src//thirdPartyLibs/jsoncpp/include/
   ../../../../test/components/application_manager/policies_manager/include

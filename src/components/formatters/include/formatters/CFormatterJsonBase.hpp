@@ -35,7 +35,7 @@
 #ifndef __CFORMATTERJSONBASE_HPP__
 #define __CFORMATTERJSONBASE_HPP__
 
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 #include "json/json.h"
 
 namespace NsSmartDeviceLink {
@@ -110,11 +110,11 @@ namespace meta_formatter_error_code {
          * @param value The resulting JSON object. It has the same structure as the input SmartObject.
          */
         static void objToJsonValue(const NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
-                Json::Value &value);      
+                Json::Value &value);
     };
 
-}  
-}  
+}
+}
 } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 #endif // __CFORMATTERJSONBASE_HPP__

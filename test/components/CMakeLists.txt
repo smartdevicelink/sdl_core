@@ -8,7 +8,7 @@ add_subdirectory(./request_watchdog)
 # add_subdirectory(./formatters)
 
 # --- SmartObjects
-add_subdirectory(./SmartObjects)
+add_subdirectory(./smart_objects)
 
 # --- AppMgr
  add_subdirectory(./application_manager)

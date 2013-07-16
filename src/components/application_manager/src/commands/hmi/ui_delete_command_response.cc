@@ -32,7 +32,7 @@
 #include "application_manager/commands/hmi/ui_delete_command_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 

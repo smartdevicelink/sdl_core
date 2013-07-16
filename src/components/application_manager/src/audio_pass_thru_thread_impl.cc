@@ -39,7 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/timer.h"

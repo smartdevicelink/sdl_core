@@ -36,7 +36,7 @@ include_directories (
   ../components/connection_handler/include/
   ../components/hmi_message_handler/include
   ../components/request_watchdog/include
-  ../components/SmartObjects/include/
+  ../components/smart_objects/include/
   ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include

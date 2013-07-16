@@ -31,7 +31,7 @@
 */
 
 #include "application_manager/hmi_capabilities.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 

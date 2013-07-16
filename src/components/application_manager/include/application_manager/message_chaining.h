@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CHAINING_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CHAINING_IMPL_H_
 
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {

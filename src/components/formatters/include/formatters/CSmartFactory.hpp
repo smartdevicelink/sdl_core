@@ -35,8 +35,8 @@
 #ifndef __CSMARTFACTORY_HPP__
 #define __CSMARTFACTORY_HPP__
 
-#include "SmartObjects/CSmartObject.hpp"
-#include "SmartObjects/CSmartSchema.hpp"
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
 #include <map>
 #include <string>
 
@@ -160,7 +160,7 @@ namespace NsSmartDeviceLink
            * @param object SmartObject to attach schema for.
            *
            * @return True if operation was successful of false otherwise.
-           */ 
+           */
           bool AttachSchema(const StructIdEnum struct_id,
               NsSmartDeviceLink::NsSmartObjects::CSmartObject &object);
 
@@ -177,11 +177,11 @@ namespace NsSmartDeviceLink
            *         Otherwise (if SmartSchema was not attached to the
            *         SmartObject) function returns empty SmartObject with
            *         null type.
-           */          
+           */
           NsSmartDeviceLink::NsSmartObjects::CSmartObject CreateSmartObject(
               const FunctionIdEnum function_id,
               const MessageTypeEnum message_type);
-          
+
           /**
            * @brief Create new SmartObject with attached struct SmartSchema.
            *
@@ -193,7 +193,7 @@ namespace NsSmartDeviceLink
            *         Otherwise (if SmartSchema was not attached to the
            *         SmartObject) function returns empty SmartObject with
            *         null type.
-           */ 
+           */
           NsSmartDeviceLink::NsSmartObjects::CSmartObject CreateSmartObject(
               const StructIdEnum struct_id);
 
@@ -210,7 +210,7 @@ namespace NsSmartDeviceLink
            *
            * @return True if function schema for specified input parameters
            *         is found or false otherwise.
-           */          
+           */
            bool GetSchema(
               const FunctionIdEnum function_id,
               const MessageTypeEnum message_type,
@@ -229,7 +229,7 @@ namespace NsSmartDeviceLink
            *
            * @return True if struct schema for specified input parameter is
            *         found or false otherwise.
-           */          
+           */
           bool GetSchema(
               const StructIdEnum struct_id,
               NsSmartDeviceLink::NsSmartObjects::CSmartSchema &result);
@@ -251,7 +251,7 @@ namespace NsSmartDeviceLink
            *
            * This container type should be used to store SmartSchemes of
            * structs.
-           */            
+           */
           typedef std::map<StructIdEnum,
             NsSmartDeviceLink::NsSmartObjects::CSmartSchema>
             StructsSchemesMap;
@@ -322,7 +322,7 @@ namespace NsSmartDeviceLink
 
       template <class FunctionIdEnum,
           class MessageTypeEnum,
-          class StructIdEnum>      
+          class StructIdEnum>
       NsSmartDeviceLink::NsSmartObjects::CSmartObject
           CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
           CreateSmartObject(
@@ -336,7 +336,7 @@ namespace NsSmartDeviceLink
 
         if(schema_iterator != functions_schemes_.end()) {
           NsSmartDeviceLink::NsSmartObjects::CSmartObject function_object(
-              NsSmartDeviceLink::NsSmartObjects::SmartType_Map);          
+              NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
           function_object.setSchema(schema_iterator->second);
           schema_iterator->second.applySchema(function_object);
             return function_object;
@@ -347,7 +347,7 @@ namespace NsSmartDeviceLink
 
       template <class FunctionIdEnum,
           class MessageTypeEnum,
-          class StructIdEnum>      
+          class StructIdEnum>
       NsSmartDeviceLink::NsSmartObjects::CSmartObject
           CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
           CreateSmartObject(const StructIdEnum struct_id) {
@@ -380,7 +380,7 @@ namespace NsSmartDeviceLink
 
         return false;
       }
-      
+
       template <class FunctionIdEnum,
           class MessageTypeEnum,
           class StructIdEnum>
