@@ -73,7 +73,13 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
   virtual void onConnectFailed(
       const device_adapter::DeviceAdapter* device_adapter, const int session_id,
       const ConnectError& error);
+  virtual void onConnectRequested(
+      const device_adapter::DeviceAdapter* device_adapter,
+      const DeviceHandle device_handle, const ApplicationHandle app_handle);
 
+  virtual void onUnexpectedDisconnect(
+      const device_adapter::DeviceAdapter* device_adapter,
+      const SessionID session_id, const CommunicationError& error);
   virtual void onDisconnectDone(
       const device_adapter::DeviceAdapter* device_adapter,
       const transport_manager::SessionID session_id);
