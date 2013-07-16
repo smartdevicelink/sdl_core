@@ -64,6 +64,23 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+
+  /*
+   * @brief Checks if incoming choice set doesn't has similar menu names.
+   *
+   * return Return TRUE if there are no similar menu names in choice set,
+   * otherwise FALSE
+   */
+  bool CheckChoiceSetMenuNames();
+
+  /*
+   * @brief Checks if incoming choice set doesn't has similar VR synonyms.
+   *
+   * return Return TRUE if there are no similar VR synonyms in choice set,
+   * otherwise FALSE
+   */
+  bool CheckChoiseSetVRSynonyms();
+
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };
 

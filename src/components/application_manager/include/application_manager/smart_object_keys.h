@@ -87,6 +87,7 @@ const char menu_name[] = "menuName";
 const char interaction_choice_set_id[] = "interactionChoiceSetID";
 const char interaction_choice_set_id_list[] = "interactionChoiceSetIDList";
 const char choice_set[] = "choiceSet";
+const char choice_id[] = "choiceID";
 const char navigation_text_1[] = "navigationText1";
 const char navigation_text_2[] = "navigationText2";
 const char alert_text1[] = "alertText1";

@@ -31,7 +31,10 @@
  */
 
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -47,12 +50,48 @@ OnVRCommandNotification::~OnVRCommandNotification() {
 void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
 
-  (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::OnCommandID;
+  int app_id = (*message_)[strings::params][strings::connection_key];
+  ApplicationImpl* app = static_cast<ApplicationImpl*>(
+                           ApplicationManagerImpl::instance()->
+                           application(app_id));
 
-  (*message_)[strings::params][strings::trigger_source] =
-    mobile_apis::TriggerSource::TS_VR;
-  SendNotificationToMobile(message_);
+  if (NULL == app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
+  /* check if perform interaction is active
+   * if it is active we should sent to HMI DeleteCommand request
+   * and PerformInterActionResponse to mobile
+   */
+  if (app->is_perform_interaction_active()) {
+    const ChoiceSetVRCmdMap& choice_set_map = app->GetChoiceSetVRCommands();
+
+    ChoiceSetVRCmdMap::const_iterator it = choice_set_map.begin();
+    for (; choice_set_map.end() != it; ++it) {
+      smart_objects::CSmartObject msg_params =
+          smart_objects::CSmartObject(smart_objects::SmartType_Map);
+      msg_params[strings::app_id] = app->app_id();
+
+      const smart_objects::CSmartObject& choice_set =
+          (*it->second).getElement(strings::choice_set);
+
+      msg_params[strings::cmd_id] =
+          choice_set.getElement(strings::choice_id);
+
+      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+    }
+
+    app->DeleteChoiceSetVRCommands();
+
+  } else {
+    (*message_)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::eType::OnCommandID;
+
+    (*message_)[strings::params][strings::trigger_source] =
+      mobile_apis::TriggerSource::TS_VR;
+    SendNotificationToMobile(message_);
+  }
 }
 
 }  // namespace commands

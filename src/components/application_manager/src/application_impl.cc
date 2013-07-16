@@ -168,7 +168,12 @@ DynamicApplicationData::DynamicApplicationData()
     vr_help_(NULL),
     tbt_state_(mobile_api::TBTState::INVALID_ENUM),
     show_command_(NULL),
-    tbt_show_command_(NULL) {
+    tbt_show_command_(NULL),
+    commands_(),
+    sub_menu_(),
+    choice_set_map_(),
+    choice_set_vr_commands_map_(),
+    is_perform_interaction_active_(false) {
 }
 
 DynamicApplicationData::~DynamicApplicationData() {
@@ -206,21 +211,20 @@ DynamicApplicationData::~DynamicApplicationData() {
        commands_.end() != command_it; ++command_it) {
     delete command_it->second;
   }
-
   commands_.clear();
 
   for (SubMenuMap::iterator sub_menu_it = sub_menu_.begin();
        sub_menu_.end() != sub_menu_it; ++sub_menu_it) {
     delete sub_menu_it->second;
   }
-
-  for (ChoiceSetMap::iterator choice_it = choice_set_map_.begin();
-       choice_set_map_.end() != choice_it;
-       ++choice_it) {
-    delete choice_it->second;
-  }
-
   sub_menu_.clear();
+
+  for (ChoiceSetVRCmdMap::iterator it = choice_set_vr_commands_map_.begin();
+      choice_set_vr_commands_map_.end() != it;
+       ++it) {
+    delete it->second;
+  }
+  choice_set_vr_commands_map_.clear();
 }
 
 const smart_objects::CSmartObject* DynamicApplicationData::help_promt() const {
@@ -394,6 +398,37 @@ smart_objects::CSmartObject*  DynamicApplicationData::FindChoiceSet(
   }
 
   return NULL;
+}
+
+void DynamicApplicationData::AddChoiceSetVRCommands(unsigned int choice_set_id,
+                  const smart_objects::CSmartObject& vr_commands) {
+  choice_set_vr_commands_map_[choice_set_id] =
+      new smart_objects::CSmartObject(vr_commands);
+}
+
+void DynamicApplicationData::DeleteChoiceSetVRCommands() {
+  for (ChoiceSetVRCmdMap::iterator it = choice_set_vr_commands_map_.begin();
+      choice_set_vr_commands_map_.end() != it;
+       ++it) {
+    delete it->second;
+  }
+  choice_set_vr_commands_map_.clear();
+}
+
+smart_objects::CSmartObject*  DynamicApplicationData::FindChoiceSetVRCommands(
+    unsigned int choice_set_id) const {
+  ChoiceSetVRCmdMap::const_iterator it =
+      choice_set_vr_commands_map_.find(choice_set_id);
+
+  if (it != choice_set_vr_commands_map_.end()) {
+    return it->second;
+  }
+
+  return NULL;
+}
+
+void DynamicApplicationData::set_perform_interaction_active(bool active) {
+  is_perform_interaction_active_ = active;
 }
 
 ApplicationImpl::ApplicationImpl(int app_id)

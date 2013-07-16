@@ -77,7 +77,7 @@ FFW.VR = FFW.RPCObserver.create( {
      */
     onRPCUnregistered: function() {
         Em.Logger.log( "FFW.VR.onRPCUnregistered" );
-        //this._super();
+        this._super();
     },
 
     /*

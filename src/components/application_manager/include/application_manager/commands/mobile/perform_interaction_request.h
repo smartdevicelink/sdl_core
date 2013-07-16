@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class ApplicationImpl;
+
 namespace commands {
 
 /**
@@ -64,6 +66,24 @@ class PerformInteractionRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+  /*
+   * @brief Sends VR AddCommand request to HMI
+   *
+   * @param app_id Application ID
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool SendVRAddCommandRequest(const ApplicationImpl* app);
+
+  /*
+   * @brief Sends UI PerformInteraction request to HMI
+   *
+   * @param app_id Application ID
+   *
+   * * @return TRUE on success, otherwise FALSE
+   */
+  bool SendUIPerforminterActionRequest(const ApplicationImpl* app);
+
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 

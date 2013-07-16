@@ -94,6 +94,11 @@ typedef std::map<unsigned int, smart_objects::CSmartObject*> SubMenuMap;
  */
 typedef std::map<unsigned int, smart_objects::CSmartObject*> ChoiceSetMap;
 
+/*
+ * @brief Typedef for interaction choice set VR commands
+ */
+typedef std::map<unsigned int, smart_objects::CSmartObject*> ChoiceSetVRCmdMap;
+
 class DynamicApplicationData {
   public:
     DynamicApplicationData();
@@ -155,6 +160,7 @@ class DynamicApplicationData {
      * @brief Retrieve application commands
      */
     inline const CommandsMap& commands_map() const;
+
     /*
      * @brief Adds a interaction choice set to the application
      *
@@ -176,7 +182,55 @@ class DynamicApplicationData {
      *
      * @param choice_set_id Unique ID of the interaction choice set
      */
-    smart_objects::CSmartObject*  FindChoiceSet(unsigned int choice_set_id);
+    smart_objects::CSmartObject*  FindChoiceSet(
+        unsigned int choice_set_id);
+
+    /*
+     * @brief Adds VR commands for choice set to the application
+     *
+     * @param choice_set_id Unique ID used for this interaction choice set
+     * @param choice_set SmartObject that represent VR commands
+     */
+    void AddChoiceSetVRCommands(unsigned int choice_set_id,
+                      const smart_objects::CSmartObject& vr_commands);
+
+    /*
+     * @brief Deletes entirely ChoiceSet - VR commands map
+     *
+     * @param choice_set_id Unique ID of the interaction choice set
+     */
+    void DeleteChoiceSetVRCommands();
+
+    /*
+     * @brief Retrieves entirely ChoiceSet - VR commands map
+     *
+     * @return ChoiceSet - VR commands map
+     */
+    inline const ChoiceSetVRCmdMap& GetChoiceSetVRCommands();
+
+    /*
+     * @brief Retrieves VR commands for specified choice_set_id id
+     *
+     * @param choice_set_id Unique ID of the interaction choice set
+     *
+     * @return SmartObject for VR commands
+     */
+    smart_objects::CSmartObject*  FindChoiceSetVRCommands(
+        unsigned int choice_set_id) const;
+
+    /*
+     * @brief Sets perform interaction state
+     *
+     * @param active Current state of the perform interaction
+     */
+    void set_perform_interaction_active(bool active);
+
+    /*
+     * @brief Retrieves perform interaction state
+     *
+     * @return TRUE if perform interaction active, otherwise FALSE
+     */
+    inline bool is_perform_interaction_active() const;
 
   protected:
     smart_objects::CSmartObject* help_promt_;
@@ -187,9 +241,11 @@ class DynamicApplicationData {
     smart_objects::CSmartObject* show_command_;
     smart_objects::CSmartObject* tbt_show_command_;
 
-    CommandsMap   commands_;
-    SubMenuMap    sub_menu_;
-    ChoiceSetMap  choice_set_map_;
+    CommandsMap                  commands_;
+    SubMenuMap                   sub_menu_;
+    ChoiceSetMap                 choice_set_map_;
+    ChoiceSetVRCmdMap            choice_set_vr_commands_map_;
+    bool                         is_perform_interaction_active_;
 };
 
 struct AppFile {
@@ -275,6 +331,14 @@ class ApplicationImpl : public Application,
 
 const CommandsMap& DynamicApplicationData::commands_map() const {
   return commands_;
+}
+
+bool DynamicApplicationData::is_perform_interaction_active() const {
+  return is_perform_interaction_active_;
+}
+
+const ChoiceSetVRCmdMap& DynamicApplicationData::GetChoiceSetVRCommands() {
+  return choice_set_vr_commands_map_;
 }
 
 const mobile_api::AudioStreamingState::eType&

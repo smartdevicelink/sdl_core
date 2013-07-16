@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager_impl.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
@@ -58,6 +59,30 @@ void NotificationFromHMI::Run() {
 
 void NotificationFromHMI::SendNotificationToMobile(const MessageSharedPtr& message) {
   ApplicationManagerImpl::instance()->ManageMobileCommand(message);
+}
+
+void NotificationFromHMI::CreateHMIRequest(
+    const hmi_apis::FunctionID::eType& function_id,
+    const NsSmartObj::CSmartObject& msg_params) const {
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject* result =
+        new NsSmartDeviceLink::NsSmartObjects::CSmartObject;
+    if (!result) {
+      LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+      return;
+    }
+
+    NsSmartDeviceLink::NsSmartObjects::CSmartObject& request = *result;
+    request[strings::params][strings::message_type] = MessageType::kRequest;
+    request[strings::params][strings::function_id] = function_id;
+    request[strings::params][strings::protocol_version] =
+        CommandImpl::protocol_version_;
+    request[strings::params][strings::protocol_type] =
+        CommandImpl::hmi_protocol_type_;
+
+    request[strings::msg_params] = msg_params;
+
+    ApplicationManagerImpl::instance()->ManageHMICommand(result);
 }
 
 }  // namespace commands

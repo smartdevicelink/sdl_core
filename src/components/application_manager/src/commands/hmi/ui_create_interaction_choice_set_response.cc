@@ -83,10 +83,18 @@ void UICreateInteractionChoiceSetResponse::Run() {
     return;
   }
 
+  const int choice_set_id =
+      data[strings::msg_params][strings::interaction_choice_set_id].asInt();
+
   if (hmi_apis::Common_Result::SUCCESS == code) {
-    app->AddChoiceSet(data[strings::msg_params]
-                      [strings::interaction_choice_set_id].asInt(),
-                      data[strings::msg_params]);
+    app->AddChoiceSet(choice_set_id, data[strings::msg_params]);
+  }
+
+  smart_objects::CSmartObject& choice_set =
+      data[strings::msg_params][strings::choice_set];
+
+  if (choice_set.keyExists(strings::vr_commands)) {
+    app->AddChoiceSetVRCommands(choice_set_id, data[strings::msg_params]);
   }
 
   // prepare SmartObject for mobile factory
