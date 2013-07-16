@@ -380,6 +380,11 @@ void TransportManagerImpl::eventListenerThread(void) {
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE:
           adapter_handler_.removeSession((*it).device_adapter(),
                                          (*it).session_id());
+          for (TransportManagerListenerList::iterator tml_it =
+              transport_manager_listener_.begin();
+              tml_it != transport_manager_listener_.end(); ++tml_it) {
+            (*tml_it)->onDisconnectDone(da, sid);
+          }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL:
           break;

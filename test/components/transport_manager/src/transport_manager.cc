@@ -120,8 +120,11 @@ class MyListener : public TransportManagerListenerImpl {
                          const RawMessageSptr data_container) {
     pthread_cond_signal(&task_complete);
   }
+  virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
+                                      const SessionID session_id){
+    pthread_cond_signal(&task_complete);
+  }
 };
-
 
 static MockDeviceAdapter *mock_da;
 static MockTransportManagerListener *tml;
@@ -170,6 +173,16 @@ TEST(TransportManagerImplTest, sendReceive)
   EXPECT_CALL(*tml, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(AtLeast(1));
   EXPECT_CALL(*tml, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
 
+  pthread_cond_wait(&task_complete, &task_mutex);
+  pthread_mutex_unlock(&task_mutex);
+}
+
+TEST(TransportManagerImplTest, disconnect)
+{
+  pthread_mutex_lock(&task_mutex);
+  TransportManagerImpl* tm = TransportManagerImpl::instance();
+  tm->disconnectDevice(42);
+  EXPECT_CALL(*tml, onDisconnectDone(_, _)).Times(1);
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
 }

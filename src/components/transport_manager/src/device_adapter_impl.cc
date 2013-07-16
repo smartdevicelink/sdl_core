@@ -702,7 +702,7 @@ DeviceAdapter::Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
   pthread_mutex_lock(&connections_mutex_);
   ConnectionMap::const_iterator it = connections_.find(session_id);
   if (it != connections_.end()) {
-    Connection* connection = it->second;
+    connection = it->second;
   } else {
     error = BAD_PARAM;
   }
