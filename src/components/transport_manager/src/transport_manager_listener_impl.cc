@@ -37,6 +37,6 @@
 
 namespace transport_manager {
 
-TransportManagerListener::~TransportManagerListener() {
+TransportManagerListenerImpl::~TransportManagerListenerImpl() {
 }
 }  //  namespace transport_manager

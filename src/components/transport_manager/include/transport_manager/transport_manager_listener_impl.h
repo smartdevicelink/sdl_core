@@ -42,19 +42,29 @@ namespace transport_manager {
 
 class TransportManagerListenerImpl: public TransportManagerListener {
   public:
-    virtual ~TransportManagerListenerImpl() {}
+    virtual ~TransportManagerListenerImpl();
 
     virtual void OnDeviceListUpdated(
-      const std::set<DeviceInfo>& device_list) {}
-    virtual void OnScanDevicesFinished(TMResult result) {}
-    virtual void onConnectionEstablished(ConnectionID connection_id) {}
-    virtual void onConnectionClosed(ConnectionID connection_id,
-                                    TMResult reason) {}
-    virtual void onFrameReceived(const protocol_handler::RawMessage& message) {}
+      const Devices& device_list) {}
+    virtual void OnAccessRequested(const DeviceInfo& device) {}
+    virtual void OnScanDevicesFinished() {}
+    virtual void OnScanDevicesFailed(const SearchDeviceError& error) {}
+    virtual void OnConnectionEstablished() {}
+    virtual void OnConnectionFailed(const ConnectError& error) {}
+    virtual void OnConnectionClosed(SessionID connection_id) {}
+    virtual void OnConnectionClosedFailure(SessionID connection_id,
+                                           const DisconnectError& error) {}
+    virtual void OnDeviceDisconnected(const DeviceInfo& device,
+                                      const DisconnectDeviceError& error) {}
+    virtual void OnTMMessageReceived(
+      const RawMessageSptr& message) {}
+    virtual void OnTMMessageReceiveFailed(
+      const DataReceiveError& error) {}
 
-    virtual void onFrameSend(
-      const protocol_handler::RawMessage& message,
-      TMResult& result) {}
+    virtual void OnTMMessageSend() {}
+    virtual void OnTMMessageSendFailed(
+      const DataSendError& error,
+      const RawMessageSptr& message) {}
 };
 }  // namespace transport_manager
 #endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL

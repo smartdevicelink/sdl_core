@@ -35,6 +35,8 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
 
+#include <string>
+#include <set>
 #include "protocol_handler/raw_message.h"
 #include "utils/shared_ptr.h"
 
@@ -47,7 +49,36 @@ namespace transport_manager {
 typedef int SessionID;
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 
+struct DeviceInfo {
+  std::string name;
+  unsigned int handle;
+};
+typedef std::set<DeviceInfo> Devices;
 
-}
+class DeviceAdapterError {
+};
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+class SearchDeviceError : public DeviceAdapterError {
+};
+
+class ConnectError : public DeviceAdapterError {
+};
+
+class DisconnectError : public DeviceAdapterError {
+};
+
+class DisconnectDeviceError : public DeviceAdapterError {
+};
+
+class DataReceiveError : public DeviceAdapterError {
+};
+
+class DataSendError : public DeviceAdapterError {
+};
+
+class CommunicationError : public DeviceAdapterError {
+};
+
+}  //  namespace transport_manager
+
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON

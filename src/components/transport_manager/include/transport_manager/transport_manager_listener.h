@@ -36,48 +36,34 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
 
-#include <string>
-#include <set>
-#include "protocol_handler/raw_message.h"
+#include "transport_manager/common.h"
 
 namespace transport_manager {
 
-struct DeviceInfo {
-  std::string name;
-  int handle;
-};
-
-// TODO(PV):
-enum TMResult {
-  OK = 0,
-  FAIL,
-  CONNECTION_CLOSED_BY_APP,
-  SENDING_FAILED_WHO_KNOWS_WHY
-};
-
-typedef int ConnectionID;
-
 class TransportManagerListener {
   public:
-    virtual ~TransportManagerListener() = 0;
+    virtual ~TransportManagerListener() {}
 
-    // TODO(PV): can be used other container type.
     virtual void OnDeviceListUpdated(
-      const std::set<DeviceInfo>& device_list) = 0;
-    virtual void OnScanDevicesFinished(TMResult result) = 0;
-    virtual void onConnectionEstablished(ConnectionID connection_id) = 0;
-    virtual void onConnectionClosed(ConnectionID connection_id,
-                                    TMResult reason) = 0;
-
-    // TODO(PV): is it frame or whole message or just some number of bytes?
-    virtual void onFrameReceived(
-      const protocol_handler::RawMessage& message) = 0;
-
-    // TODO(PV): probably we don't need to give message back,
-    // maybe we should instead some messaged id/correlationID/serial_number?
-    virtual void onFrameSend(
-      const protocol_handler::RawMessage& message,
-      TMResult& result) = 0;
+      const Devices& device_list) = 0;
+    virtual void OnAccessRequested(const DeviceInfo& device) = 0;
+    virtual void OnScanDevicesFinished() = 0;
+    virtual void OnScanDevicesFailed(const SearchDeviceError& error) = 0;
+    virtual void OnConnectionEstablished() = 0;
+    virtual void OnConnectionFailed(const ConnectError& error) = 0;
+    virtual void OnConnectionClosed(SessionID connection_id) = 0;
+    virtual void OnConnectionClosedFailure(SessionID connection_id,
+                                           const DisconnectError& error) = 0;
+    virtual void OnDeviceDisconnected(const DeviceInfo& device,
+                                      const DisconnectDeviceError& error) = 0;
+    virtual void OnTMMessageReceived(
+      const RawMessageSptr& message) = 0;
+    virtual void OnTMMessageReceiveFailed(
+      const DataReceiveError& error) = 0;
+    virtual void OnTMMessageSend() = 0;
+    virtual void OnTMMessageSendFailed(
+      const DataSendError& error,
+      const RawMessageSptr& message) = 0;
 };
 }  //  namespace transport_manager
 #endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
