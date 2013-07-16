@@ -346,10 +346,15 @@ void TransportManagerImpl::eventListenerThread(void) {
             for (TransportManagerListenerList::iterator tml_it =
                 transport_manager_listener_.begin();
                 tml_it != transport_manager_listener_.end(); ++tml_it) {
-              (*tml_it)->onSearchDeviceDone((*item),
+              (*tml_it)->onDeviceFound((*item),
                                             da->getApplicationList((*item)));
             }
             LOG4CXX_INFO(logger_, "Callback called");
+          }
+          for (TransportManagerListenerList::iterator tml_it =
+              transport_manager_listener_.begin();
+              tml_it != transport_manager_listener_.end(); ++tml_it) {
+            (*tml_it)->onSearchDeviceDone();
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL:

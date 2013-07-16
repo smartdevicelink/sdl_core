@@ -51,10 +51,11 @@ namespace transport_manager {
 class MockTransportManagerListener : public ::transport_manager::TransportManagerListenerImpl
 {
   public:
-  MOCK_METHOD2(onSearchDeviceDone, void (const DeviceHandle device,
+  MOCK_METHOD2(onDeviceFound, void (const DeviceHandle device,
                                          const ApplicationList app_list));
+  MOCK_METHOD0(onSearchDeviceDone, void ());
   MOCK_METHOD2(onSearchDeviceFailed, void (const DeviceAdapter* device_adapter,
-      const SearchDeviceError& error));
+                                           const SearchDeviceError& error));
   MOCK_METHOD2(onConnectDone, void(const DeviceAdapter* device_adapter,
                              const SessionID session_id));
   MOCK_METHOD3(onDataReceiveDone, void(const DeviceAdapter* device_adapter,
