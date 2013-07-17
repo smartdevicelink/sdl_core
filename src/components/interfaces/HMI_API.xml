@@ -1140,8 +1140,8 @@
         <description>This methos is usually invoked by HMI to get list of registered apps.</description>
 		<param name="deviceInfo" type="Common.DeviceInfo" mandatory="true"/>
     </function>
-    <function name="onActivateApp" messagetype="notification">
-      <description>Invoked by BasicCommunication component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action. Application is shown on recieving successful response.</description>
+    <function name="onAppActivated" messagetype="notification">
+      <description>Invoked by BasicCommunication component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action.</description>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of selected application.</description>
       </param>
