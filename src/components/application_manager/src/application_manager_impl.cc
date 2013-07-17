@@ -575,6 +575,10 @@ void ApplicationManagerImpl::SendMessageToMobile(
     return;
   }
 
+  mobile_so_factory().attachSchema(*message);
+  LOG4CXX_INFO(logger_, "Attached schema to message, result if valid: "
+               << message->isValid());
+
   utils::SharedPtr<Message> message_to_send(new Message);
   if (!ConvertSOtoMessage((*message), (*message_to_send))) {
     LOG4CXX_WARN(logger_,
