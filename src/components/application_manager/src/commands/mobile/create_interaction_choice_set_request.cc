@@ -75,6 +75,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   if ((false == CheckChoiceSetMenuNames()) ||
       (false == CheckChoiceSetVRSynonyms())) {
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+    return;
   }
 
   smart_objects::SmartObject msg_params =
@@ -87,7 +88,6 @@ void CreateInteractionChoiceSetRequest::Run() {
 }
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
-  bool result = true;
   smart_objects::SmartObject& choice_set =
       (*message_)[strings::msg_params][strings::choice_set];
 
@@ -96,16 +96,14 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
       if (choice_set[i][strings::menu_name].asString() ==
           choice_set[j][strings::menu_name].asString()) {
         LOG4CXX_ERROR(logger_, "Incoming choice set has duplicated menu name");
-        result =false;
-        break;
+        return false;
       }
     }
   }
-  return result;
+  return true;
 }
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
-  bool result = true;
   smart_objects::SmartObject& choice_set =
       (*message_)[strings::msg_params][strings::choice_set];
 
@@ -118,14 +116,13 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
           if (choice_set[i][strings::vr_commands][ii].asString() ==
               choice_set[j][strings::vr_commands][jj].asString()) {
             LOG4CXX_ERROR(logger_, "Choice set has duplicated VR synonym");
-            result =false;
-            break;
+            return false;
           }
         }
       }
     }
   }
-  return result;
+  return true;
 }
 
 }  // namespace commands
