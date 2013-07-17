@@ -68,7 +68,7 @@ void EncodedSyncPDataRequest::Run() {
       return;
     }
 
-    uint64_t free_space = file_system::AvailableSpace();
+    unsigned int free_space = file_system::AvailableSpace();
 
     const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
 

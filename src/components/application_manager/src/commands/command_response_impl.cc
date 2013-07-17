@@ -57,10 +57,10 @@ void CommandResponseImpl::Run() {
 
 void CommandResponseImpl::SendResponse(bool success) {
 
-  const uint64_t hmi_correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUint64();
+  const unsigned int hmi_correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  const uint64_t mobile_correlation_id = ApplicationManagerImpl::instance()->
+  const unsigned int mobile_correlation_id = ApplicationManagerImpl::instance()->
           GetMobilecorrelation_id(hmi_correlation_id);
 
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;

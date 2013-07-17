@@ -389,7 +389,7 @@ TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
   EXPECT_EQ(55,
     result_object[strings_ns::S_PARAMS][strings_ns::S_CORRELATION_ID].asInt());
   EXPECT_EQ(11,
-    result_object[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION].asUint64());
+    result_object[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION].asUInt());
 
   EXPECT_EQ(smartobjects_ns::SmartType_Map,
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"].getType());
@@ -408,7 +408,7 @@ TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
   EXPECT_EQ(200,
     result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][1].asInt());
   EXPECT_EQ(300,
-    result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][2].asUint64());
+    result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][2].asUInt());
   EXPECT_EQ(std::string("defValue"),
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_string"].asString());
   EXPECT_EQ(std::string("some string"),

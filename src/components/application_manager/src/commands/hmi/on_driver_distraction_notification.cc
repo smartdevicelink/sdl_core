@@ -86,10 +86,10 @@ void OnDriverDistractionNotification::NotifyMobileApp(
   (*on_driver_distraction)[strings::params][strings::function_id] =
     mobile_api::FunctionID::OnDriverDistractionID;
 
-  const uint64_t correlation_id =
-  (*message_)[strings::params][strings::correlation_id].asUint64();
+  const unsigned int correlation_id =
+  (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  const uint64_t mobile_correlation_id = ApplicationManagerImpl::instance()->
+  const unsigned int mobile_correlation_id = ApplicationManagerImpl::instance()->
       GetMobilecorrelation_id(correlation_id);
 
   (*on_driver_distraction)[strings::params][strings::correlation_id] =

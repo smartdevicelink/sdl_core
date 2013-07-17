@@ -50,7 +50,7 @@ CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {
 void CreateInteractionChoiceSetResponse::Run() {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
+  if ((*message_)[strings::params][strings::success].asBool() == false) {
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;

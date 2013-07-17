@@ -56,8 +56,8 @@ void DeleteSubMenuResponse::Run() {
     return;
   }
 
-  const uint64_t hmi_correlation_id = (*message_)[strings::params]
-                                 [strings::correlation_id].asUint64();
+  const unsigned int hmi_correlation_id = (*message_)[strings::params]
+                                 [strings::correlation_id].asUInt();
 
   smart_objects::SmartObject data = ApplicationManagerImpl::instance()->
     GetMessageChain(hmi_correlation_id)->data();

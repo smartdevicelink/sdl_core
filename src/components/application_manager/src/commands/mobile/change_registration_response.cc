@@ -58,8 +58,8 @@ void ChangeRegistrationResponse::Run() {
     return;
   }
 
-  const uint64_t correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUint64();
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -82,7 +82,7 @@ void ChangeRegistrationResponse::Run() {
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
 
-    const uint64_t mobile_correlation_id = ApplicationManagerImpl::instance()->
+    const unsigned int mobile_correlation_id = ApplicationManagerImpl::instance()->
     GetMobilecorrelation_id(correlation_id);
 
     ApplicationImpl* application = static_cast<ApplicationImpl*>(

@@ -60,7 +60,7 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(SmartType Type)
       m_schema() {
   switch (Type) {
     case SmartType_Integer:
-      set_value_uint64_t(0);
+      set_value_unsigned_int(0);
       break;
     case SmartType_Double:
       set_value_double(0);
@@ -110,7 +110,7 @@ bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
 
   switch (m_type) {
     case SmartType_Integer:
-      return m_data.uint64_t_value == Other.m_data.uint64_t_value;
+      return m_data.unsigned_int_value == Other.m_data.unsigned_int_value;
     case SmartType_Double:
       return m_data.double_value == Other.m_data.double_value;
     case SmartType_Boolean:
@@ -183,23 +183,23 @@ bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
 void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_integer(
     int NewValue) {
   set_new_type(SmartType_Integer);
-  m_data.uint64_t_value = NewValue;
+  m_data.unsigned_int_value = NewValue;
 }
 
 int NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_int(void) const {
-  uint64_t retval;
+  unsigned int retval;
 
   switch (m_type) {
     case SmartType_String:
-      retval = convert_string_to_uint64_t(m_data.str_value);
+      retval = convert_string_to_unsigned_int(m_data.str_value);
       break;
     case SmartType_Boolean:
       return (m_data.bool_value == true) ? 1 : 0;
     case SmartType_Integer:
-      retval = m_data.uint64_t_value;
+      retval = m_data.unsigned_int_value;
       break;
     case SmartType_Double:
-      retval = static_cast<uint64_t>(m_data.double_value);
+      retval = static_cast<unsigned int>(m_data.double_value);
       break;
     default:
       return invalid_int_value;
@@ -214,36 +214,36 @@ int NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_int(void) const {
 }
 
 // =============================================================
-// uint64_t TYPE SUPPORT
+// unsigned int TYPE SUPPORT
 // =============================================================
 NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
-    uint64_t InitialValue)
+    unsigned int InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
-  set_value_uint64_t(InitialValue);
+  set_value_unsigned_int(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator uint64_t(void) const {
-  return convert_uint64_t();
+NsSmartDeviceLink::NsSmartObjects::SmartObject::operator unsigned int(void) const {
+  return convert_unsigned_int();
 }
 
-uint64_t NsSmartDeviceLink::NsSmartObjects::SmartObject::asUint64() const {
-  return static_cast<uint64_t>(*this);
+unsigned int NsSmartDeviceLink::NsSmartObjects::SmartObject::asUInt() const {
+  return static_cast<unsigned int>(*this);
 }
 
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
 NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    uint64_t NewValue) {
+    unsigned int NewValue) {
   if (m_type != SmartType_Invalid) {
-    set_value_integer(NewValue);
+    set_value_unsigned_int(NewValue);
   }
   return *this;
 }
 
 bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    uint64_t Value) const {
-  int comp = convert_uint64_t();
+    unsigned int Value) const {
+  int comp = convert_unsigned_int();
   if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_int_value) {
     return false;
   } else {
@@ -251,25 +251,25 @@ bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
   }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_uint64_t(
-    uint64_t NewValue) {
+void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_unsigned_int(
+    unsigned int NewValue) {
   set_new_type(SmartType_Integer);
-  m_data.uint64_t_value = NewValue;
+  m_data.unsigned_int_value = NewValue;
 }
 
-uint64_t
-NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_uint64_t() const {
+unsigned int
+NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_unsigned_int() const {
   switch (m_type) {
     case SmartType_String:
-      return convert_string_to_uint64_t(m_data.str_value);
+      return convert_string_to_unsigned_int(m_data.str_value);
       break;
     case SmartType_Boolean:
       return (m_data.bool_value == true) ? 1 : 0;
     case SmartType_Integer:
-      return m_data.uint64_t_value;
+      return m_data.unsigned_int_value;
       break;
     case SmartType_Double:
-      return static_cast<uint64_t>(m_data.double_value);
+      return static_cast<unsigned int>(m_data.double_value);
       break;
     default:
       break;
@@ -390,7 +390,7 @@ bool NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_bool(void) const {
     case SmartType_Boolean:
       return m_data.bool_value;
     case SmartType_Integer:
-      return (m_data.uint64_t_value != 0);
+      return (m_data.unsigned_int_value != 0);
       break;
     case SmartType_Double:
       return (m_data.double_value != 0.0);
@@ -514,7 +514,7 @@ std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string(
       return *(m_data.str_value);
     case SmartType_Integer:
       // TODO(AK): fix this hack
-      return std::to_string(static_cast<int>(m_data.uint64_t_value));
+      return std::to_string(static_cast<int>(m_data.unsigned_int_value));
       break;
     case SmartType_Character:
       return std::string(1, m_data.char_value);
@@ -757,7 +757,7 @@ void NsSmartDeviceLink::NsSmartObjects::SmartObject::duplicate(
       newData.array_value = new SmartArray(*OtherObject.m_data.array_value);
       break;
     case SmartType_Integer:
-      newData.uint64_t_value = OtherObject.m_data.uint64_t_value;
+      newData.unsigned_int_value = OtherObject.m_data.unsigned_int_value;
       break;
     case SmartType_Double:
       newData.double_value = OtherObject.m_data.double_value;
@@ -876,8 +876,8 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_double_to_string(
   return s;
 }
 
-uint64_t
-NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string_to_uint64_t(
+unsigned int
+NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string_to_unsigned_int(
     const std::string* Value) {
   if (0 == Value->size()) {
     return invalid_int_value;
@@ -892,7 +892,7 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string_to_uint64_t(
 
   char* ptr;
   errno = 0;
-  uint64_t result = strtol(Value->c_str(), &ptr, 10);
+  unsigned int result = strtol(Value->c_str(), &ptr, 10);
   if (errno || (ptr != (Value->c_str() + Value->length()))) {
     return invalid_int_value;
   }

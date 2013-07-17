@@ -56,8 +56,8 @@ void AddSubMenuResponse::Run() {
     return;
   }
 
-  const uint64_t correlation_id = (*message_)[strings::params]
-                                 [strings::correlation_id].asUint64();
+  const unsigned int correlation_id = (*message_)[strings::params]
+                                 [strings::correlation_id].asUInt();
 
   if (ApplicationManagerImpl::instance()->
       DecreaseMessageChain(correlation_id)) {
