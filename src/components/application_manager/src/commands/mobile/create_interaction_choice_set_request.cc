@@ -93,9 +93,15 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
 
   for (size_t i = 0; i < choice_set.length(); ++i) {
     for (size_t j = 0; j < choice_set.length(); ++j) {
+      if (i == j) {
+        // skip check the same element
+        continue;
+      }
       if (choice_set[i][strings::menu_name].asString() ==
-          choice_set[j][strings::menu_name].asString()) {
-        LOG4CXX_ERROR(logger_, "Incoming choice set has duplicated menu name");
+           choice_set[j][strings::menu_name].asString()) {
+        LOG4CXX_ERROR(logger_, "Incoming choiceset has duplicated menu name " <<
+                      choice_set[i][strings::menu_name].asString() << " " <<
+                      choice_set[j][strings::menu_name].asString());
         return false;
       }
     }
@@ -113,9 +119,16 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
           ++ii) {
         for (size_t jj = 0; jj < choice_set[j][strings::vr_commands].length();
             ++jj) {
+          if (ii == jj) {
+            // skip check the same element
+            continue;
+          }
           if (choice_set[i][strings::vr_commands][ii].asString() ==
               choice_set[j][strings::vr_commands][jj].asString()) {
-            LOG4CXX_ERROR(logger_, "Choice set has duplicated VR synonym");
+            LOG4CXX_ERROR(logger_, "Choice set has duplicated VR synonym " <<
+                          choice_set[i][strings::vr_commands][ii].asString() <<
+                          " " <<
+                          choice_set[j][strings::vr_commands][jj].asString());
             return false;
           }
         }

@@ -95,6 +95,11 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
       smart_objects::SmartObject* j_choice_set =
           app->FindChoiceSetVRCommands(choice_list[j].asInt());
 
+      if (i == j) {
+        // skip check the same element
+        continue;
+      }
+
       if ((!i_choice_set) || (!j_choice_set)) {
         SendResponse(false, mobile_apis::Result::INVALID_ID);
         LOG4CXX_ERROR(logger_, "Invalid ID");
@@ -117,6 +122,7 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
             for (size_t jjj = 0; jjj < jj_vr_commands.length(); ++jjj) {
               if (ii_vr_commands[iii].asString() ==
                   jj_vr_commands[jjj].asString()) {
+                LOG4CXX_ERROR(logger_, "Choice set has duplicated VR synonym");
                 SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
                 return false;
               }
@@ -173,6 +179,11 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
         smart_objects::SmartObject* j_choice_set =
             app->FindChoiceSetVRCommands(choice_list[j].asInt());
 
+        if (i == j) {
+          // skip check the same element
+          continue;
+        }
+
         if ((!i_choice_set) || (!j_choice_set)) {
           SendResponse(false, mobile_apis::Result::INVALID_ID);
           LOG4CXX_ERROR(logger_, "Invalid ID");
@@ -185,6 +196,7 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
             (*j_choice_set)[strings::choice_set][strings::menu_name].asString();
 
         if (i_menu_name == j_menu_name) {
+          LOG4CXX_ERROR(logger_, "Incoming choiceset has duplicated menu name");
           SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
           return false;
         }
