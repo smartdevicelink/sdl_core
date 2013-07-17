@@ -83,7 +83,7 @@ void OnVRCommandNotification::Run() {
     }
 
     app->DeleteChoiceSetVRCommands();
-
+    app->set_perform_interaction_active(false);
   } else {
     (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::eType::OnCommandID;
