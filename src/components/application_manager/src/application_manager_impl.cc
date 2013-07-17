@@ -784,22 +784,21 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   LOG4CXX_INFO(logger_, "Convertion result: " <<
                output_string);
 
-  output.set_function_id(message.getElement(
-                           jhs::S_PARAMS).getElement(
-                           jhs::S_FUNCTION_ID).asInt());
-  // TODO(PV): not always correlation id is present
+  output.set_connection_key(
+     message.getElement(jhs::S_PARAMS).getElement(strings::connection_key).asInt());
+
+  output.set_function_id(message.getElement(jhs::S_PARAMS).getElement(
+      jhs::S_FUNCTION_ID).asInt());
+
   output.set_correlation_id(
-    message.getElement(jhs::S_PARAMS).getElement(
-      jhs::S_CORRELATION_ID).asInt());
-  output.set_message_type(
-    static_cast<MessageType>(
-      message.getElement(jhs::S_PARAMS).getElement(
-        jhs::S_MESSAGE_TYPE).asInt()));
+   message.getElement(jhs::S_PARAMS).getElement(jhs::S_CORRELATION_ID).asInt());
+  output.set_message_type(static_cast<MessageType>(
+   message.getElement(jhs::S_PARAMS).getElement(jhs::S_MESSAGE_TYPE).asInt()));
   output.set_json_message(output_string);
 
   if (message.keyExists(strings::binary_data)) {
     application_manager::BinaryData* binaryData =
-      new application_manager::BinaryData(
+        new application_manager::BinaryData(
       message.getElement(strings::binary_data).asBinary());
 
     if (NULL == binaryData) {

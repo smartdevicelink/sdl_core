@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/create_interaction_choice_set_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -57,13 +56,7 @@ void CreateInteractionChoiceSetResponse::Run() {
     return;
   }
 
-  const uint64_t hmi_correlation_id = (*message_)[strings::params]
-                                 [strings::correlation_id].asUint64();
-
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(hmi_correlation_id)) {
-    SendResponse(true);
-  }
+  SendResponse(true);
 }
 
 }  // namespace commands

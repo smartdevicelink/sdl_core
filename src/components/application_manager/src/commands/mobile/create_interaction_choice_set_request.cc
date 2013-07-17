@@ -83,8 +83,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_CreateInteractionChoiceSet,
-                   msg_params, true);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
