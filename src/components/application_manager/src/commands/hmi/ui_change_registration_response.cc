@@ -49,8 +49,8 @@ UIChangeRegistratioResponse::~UIChangeRegistratioResponse() {
 void UIChangeRegistratioResponse::Run() {
   LOG4CXX_INFO(logger_, "UIChangeRegistratioResponse::Run");
 
-  const uint64_t correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUint64();
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);

@@ -211,28 +211,28 @@ class SmartObject {
    **/
   bool operator==(int Value) const;
 
-  // Support of type: uint64_t
+  // Support of type: unsigned int
   /**
    * @brief Constructor for creating object of type: int
    *
    * @param InitialValue Initial object value
    **/
-  explicit SmartObject(uint64_t InitialValue);
+  explicit SmartObject(unsigned int InitialValue);
 
   /**
    * @brief Conversion operator to type: int
    *
-   * @return uint64_t Value of the object converted to int type or invalid_int_value if
+   * @return unsigned int Value of the object converted to int type or invalid_int_value if
    *         conversion is not possible
    **/
-  operator uint64_t(void) const;
+  operator unsigned int(void) const;
 
   /**
-   * @brief Returns current object converted to uint64_t int
+   * @brief Returns current object converted to unsigned int int
    *
    * @return double
    **/
-  uint64_t asUint64() const;
+  unsigned int asUInt() const;
 
   /**
    * @brief Assignment operator for type: int
@@ -240,15 +240,15 @@ class SmartObject {
    * @param  NewValue New object value
    * @return SmartObject&
    **/
-  SmartObject& operator=(uint64_t NewValue);
+  SmartObject& operator=(unsigned int NewValue);
 
   /**
-   * @brief Comparison operator for comparing object with uint64_t value
+   * @brief Comparison operator for comparing object with unsigned int value
    *
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(uint64_t Value) const;
+  bool operator==(unsigned int Value) const;
 
   /** @} */
 
@@ -659,7 +659,7 @@ class SmartObject {
    * @param  NewValue New object value
    * @return void
    **/
-  inline void set_value_uint64_t(uint64_t NewValue);
+  inline void set_value_unsigned_int(unsigned int NewValue);
 
   /**
    * @brief Converts object to int type
@@ -673,7 +673,7 @@ class SmartObject {
    *
    * @return int Converted value or invalid_int_value if conversion not possible
    **/
-  inline uint64_t convert_uint64_t(void) const;
+  inline unsigned int convert_unsigned_int(void) const;
   /** @} */
 
   /**
@@ -835,12 +835,12 @@ class SmartObject {
   static double convert_string_to_double(const std::string* Value);
 
   /**
-   * @brief Converts string to uint64_t
+   * @brief Converts string to unsigned int
    *
    * @param Value Pointer to string to convert
-   * @return uint64_t int
+   * @return unsigned int int
    **/
-  static uint64_t convert_string_to_uint64_t(const std::string* Value);
+  static unsigned int convert_string_to_unsigned_int(const std::string* Value);
 
   /**
    * @brief Converts double value to string
@@ -889,7 +889,8 @@ class SmartObject {
     double double_value;
     bool bool_value;
     char char_value;
-    uint64_t uint64_t_value;
+    // int int_value;
+    unsigned int unsigned_int_value;
     std::string* str_value;
     SmartArray* array_value;
     SmartMap* map_value;

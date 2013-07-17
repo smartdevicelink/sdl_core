@@ -62,8 +62,8 @@ void DeleteCommandResponse::Run() {
   const int function_id =
       (*message_)[strings::params][strings::function_id].asInt();
 
-  const uint64_t correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUint64();
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
   const mobile_apis::Result::eType code =
       static_cast<mobile_apis::Result::eType>(

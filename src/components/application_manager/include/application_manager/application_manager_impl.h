@@ -78,7 +78,7 @@ typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
 /**
   *@brief Map of messages between mobile app and hmi
 */
-typedef std::map<uint64_t, MessageChainPtr> MessageChains;
+typedef std::map<unsigned int, MessageChainPtr> MessageChains;
 
 
 class ApplicationManagerImpl : public ApplicationManager
@@ -141,7 +141,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return TRUE on success, otherwise FALSE
      */
     bool AddMessageChain( unsigned int connection_key,
-      const unsigned int correlation_id, const uint64_t hmi_correlation_id,
+      const unsigned int correlation_id, const unsigned int hmi_correlation_id,
       const smart_objects::SmartObject* data = NULL);
 
     /*
@@ -151,7 +151,7 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return true if there is no other pending responses
      */
-    bool DecreaseMessageChain(const uint64_t hmi_correlation_id);
+    bool DecreaseMessageChain(const unsigned int hmi_correlation_id);
 
     /*
      * @brief Retrieve MessageChaining object from chain for corresponding
@@ -161,7 +161,7 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return MessageChaining on success, otherwise NULL
      */
-    MessageChaining* GetMessageChain(const uint64_t hmi_correlation_id) const;
+    MessageChaining* GetMessageChain(const unsigned int hmi_correlation_id) const;
 
     /*
      * @brief Converts HMI correlation ID to mobile correlation ID
@@ -170,7 +170,7 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return Correlation ID of the mobile request
      */
-    uint32_t GetMobilecorrelation_id(uint64_t correlation_id) const;
+    unsigned int GetMobilecorrelation_id(unsigned int correlation_id) const;
 
     /*
      * @brief Converts Mobile correlation ID to unique HMI correlation ID
@@ -180,8 +180,8 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return Unique correlation ID for HMI request
      */
-    uint64_t GetHMIcorrelation_id(uint32_t correlation_id,
-                                  uint32_t connection_key) const;
+    unsigned int GetHMIcorrelation_id(unsigned int correlation_id,
+                                  unsigned int connection_key) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request

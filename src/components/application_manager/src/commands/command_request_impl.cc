@@ -99,11 +99,11 @@ void CommandRequestImpl::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const NsSmart::SmartObject& msg_params, bool chaining_required) const {
 
-  const uint64_t correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUint64();
-  const uint64_t connection_key =
-    (*message_)[strings::params][strings::connection_key].asUint64();
-  const uint64_t hmi_correlation_id = ApplicationManagerImpl::instance()->
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
+  const unsigned int connection_key =
+    (*message_)[strings::params][strings::connection_key].asUInt();
+  const unsigned int hmi_correlation_id = ApplicationManagerImpl::instance()->
   GetHMIcorrelation_id(correlation_id, connection_key);
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =

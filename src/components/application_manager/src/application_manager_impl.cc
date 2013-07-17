@@ -328,7 +328,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 }
 
 bool ApplicationManagerImpl::AddMessageChain(unsigned int connection_key,
-    unsigned int correlation_id, const uint64_t hmi_correlation_id,
+    unsigned int correlation_id, const unsigned int hmi_correlation_id,
     const smart_objects::SmartObject* data) {
 
     MessageChains::iterator it =  message_chaining_.find(hmi_correlation_id);
@@ -352,7 +352,7 @@ bool ApplicationManagerImpl::AddMessageChain(unsigned int connection_key,
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
-  const uint64_t hmi_correlation_id) {
+  const unsigned int hmi_correlation_id) {
   bool result = false;
   MessageChains::iterator it =
     message_chaining_.find(hmi_correlation_id);
@@ -369,7 +369,7 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 }
 
 MessageChaining* ApplicationManagerImpl::GetMessageChain(
-  const uint64_t hmi_correlation_id) const {
+  const unsigned int hmi_correlation_id) const {
   MessageChains::const_iterator it =
     message_chaining_.find(hmi_correlation_id);
   if (message_chaining_.end() != it) {
@@ -379,18 +379,18 @@ MessageChaining* ApplicationManagerImpl::GetMessageChain(
   return NULL;
 }
 
-uint32_t ApplicationManagerImpl::GetMobilecorrelation_id(
-  uint64_t correlation_id) const {
-  uint32_t mobile_correlation_id = correlation_id >> 32;
+unsigned int ApplicationManagerImpl::GetMobilecorrelation_id(
+  unsigned int correlation_id) const {
+  unsigned int mobile_correlation_id = correlation_id >> 32;
   return mobile_correlation_id;
 }
 
-uint64_t ApplicationManagerImpl::GetHMIcorrelation_id(
-  uint32_t correlation_id,  uint32_t connection_key) const {
+unsigned int ApplicationManagerImpl::GetHMIcorrelation_id(
+  unsigned int correlation_id,  unsigned int connection_key) const {
   // to avoid warning: left shift count >= width of type
-  uint64_t mobile_correlation_id = correlation_id;
-  uint64_t conn_key = connection_key;
-  uint64_t hmi_correlation_id = connection_key | (mobile_correlation_id << 32);
+  unsigned int mobile_correlation_id = correlation_id;
+  unsigned int conn_key = connection_key;
+  unsigned int hmi_correlation_id = connection_key | (mobile_correlation_id << 32);
   return hmi_correlation_id;
 }
 

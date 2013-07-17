@@ -170,7 +170,7 @@ bool FormatterJsonRpc::SetId(const NsSmartObjects::SmartObject &params,
         strings::S_CORRELATION_ID);
 
     if (NsSmartObjects::SmartType_Integer == id.getType()) {
-      id_container[kId] = id.asInt();
+      id_container[kId] = id.asUInt();
       result = true;
     }
   }
