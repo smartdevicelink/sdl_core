@@ -82,7 +82,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    *
    * * @return TRUE on success, otherwise FALSE
    */
-  bool SendUIPerforminterActionRequest(const ApplicationImpl* app);
+  bool SendUIPerformInteractionRequest(const ApplicationImpl* app);
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };

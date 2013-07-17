@@ -75,7 +75,7 @@ void PerformInteractionRequest::Run() {
   }
 
   if ((true == SendVRAddCommandRequest(app)) &&
-      (true == SendUIPerforminterActionRequest(app))) {
+      (true == SendUIPerformInteractionRequest(app))) {
     app->set_perform_interaction_active(true);
   }
 }
@@ -101,21 +101,31 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
         return false;
       }
 
-      // choice_set pointer contains SmartObject msg_params
-      smart_objects::SmartObject& i_vr_commands =
-          (*i_choice_set)[strings::choice_set][strings::vr_commands];
+      size_t ii = 0;
+      size_t jj = 0;
+      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
+        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
 
-      smart_objects::SmartObject& j_vr_commands =
-          (*j_choice_set)[strings::choice_set][strings::vr_commands];
+          // choice_set pointer contains SmartObject msg_params
+          smart_objects::SmartObject& ii_vr_commands =
+              (*i_choice_set)[strings::choice_set][ii][strings::vr_commands];
 
-      for (size_t ii = 0; ii < i_vr_commands.length(); ++ii) {
-        for (size_t jj = 0; jj < j_vr_commands.length(); ++jj) {
-          if (i_vr_commands[ii].asString() == j_vr_commands[jj].asString()) {
-            SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
-            return false;
+          smart_objects::SmartObject& jj_vr_commands =
+              (*j_choice_set)[strings::choice_set][jj][strings::vr_commands];
+
+          for (size_t iii = 0; iii < ii_vr_commands.length(); ++iii) {
+            for (size_t jjj = 0; jjj < jj_vr_commands.length(); ++jjj) {
+              if (ii_vr_commands[iii].asString() ==
+                  jj_vr_commands[jjj].asString()) {
+                SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+                return false;
+              }
+            }
           }
+
         }
       }
+
     }
   }
 
@@ -130,23 +140,25 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
       return false;
     }
 
-    smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    msg_params[strings::app_id] = app->app_id();
-    msg_params[strings::cmd_id] =
-        (*choice_set)[strings::choice_set][strings::choice_id];
-    msg_params[strings::vr_commands] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-    msg_params[strings::vr_commands] =
-        (*choice_set)[strings::choice_set][strings::vr_commands];
+    for (size_t j = 0; j < choice_list[strings::choice_set].length(); ++j) {
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      msg_params[strings::app_id] = app->app_id();
+      msg_params[strings::cmd_id] =
+          (*choice_set)[strings::choice_set][j][strings::choice_id];
+      msg_params[strings::vr_commands] =
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
+      msg_params[strings::vr_commands] =
+          (*choice_set)[strings::choice_set][j][strings::vr_commands];
 
-    CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, false);
+      CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, false);
+    }
   }
 
   return true;
 }
 
-bool PerformInteractionRequest::SendUIPerforminterActionRequest(
+bool PerformInteractionRequest::SendUIPerformInteractionRequest(
     const ApplicationImpl* app) {
 
   smart_objects::SmartObject& choice_list =

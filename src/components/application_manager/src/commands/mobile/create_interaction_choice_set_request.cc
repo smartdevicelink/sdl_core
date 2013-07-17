@@ -73,7 +73,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   }
 
   if ((false == CheckChoiceSetMenuNames()) ||
-      (false == CheckChoiseSetVRSynonyms())) {
+      (false == CheckChoiceSetVRSynonyms())) {
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
   }
 
@@ -104,7 +104,7 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
   return result;
 }
 
-bool CreateInteractionChoiceSetRequest::CheckChoiseSetVRSynonyms() {
+bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
   bool result = true;
   smart_objects::SmartObject& choice_set =
       (*message_)[strings::msg_params][strings::choice_set];

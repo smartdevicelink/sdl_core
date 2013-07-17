@@ -93,9 +93,7 @@ void UICreateInteractionChoiceSetResponse::Run() {
   smart_objects::SmartObject& choice_set =
       data[strings::msg_params][strings::choice_set];
 
-  if (choice_set.keyExists(strings::vr_commands)) {
-    app->AddChoiceSetVRCommands(choice_set_id, data[strings::msg_params]);
-  }
+  app->AddChoiceSetVRCommands(choice_set_id, data[strings::msg_params]);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =

@@ -79,7 +79,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * return Return TRUE if there are no similar VR synonyms in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiseSetVRSynonyms();
+  bool CheckChoiceSetVRSynonyms();
 
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };
