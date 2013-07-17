@@ -1251,5 +1251,118 @@ SDL.ValidateMessage = Em.Object.create({
 
             return this.resultStruct;
         }
+    }),
+    
+    /**
+     * Object that contains check methods that
+     * returns true if mandatory fields is successful
+     * and returns false if not
+     */
+    VehicleInfo: Em.Object.create({
+
+        resultStruct: {},
+        
+        /**
+         * Validate method for request GetDTCs
+         * 
+         * @param {Object} params
+         */
+        GetDTCs: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.ecuName) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'ecuName' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.ecuName != 'number') {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'ecuName'!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.appId) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appId' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appId != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appId'!"
+                };
+                
+                return this.resultStruct;
+            }
+            
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+            
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request GetVehicleData
+         * 
+         * @param {Object} params
+         */
+        GetVehicleData: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.appId) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appId' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appId != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appId'!"
+                };
+                
+                return this.resultStruct;
+            }
+            
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+            
+            return this.resultStruct;
+        },
+
     })
 });
