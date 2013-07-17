@@ -112,6 +112,14 @@ void CommandRequestImpl::CreateHMIRequest(
   const unsigned int connection_key =
     (*message_)[strings::params][strings::connection_key].asUInt();
 
+
+  // get hmi correlation id for chaining further request from this object
+  if ((0 == hmi_correlation_id_) && (true == chaining_required)) {
+      hmi_correlation_id_ =
+        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  }
+
+
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] = function_id;
@@ -126,13 +134,6 @@ void CommandRequestImpl::CreateHMIRequest(
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   } else if (chaining_required) {
-
-    // get hmi correlation id for chaining further request from this object
-    if (0 == hmi_correlation_id_) {
-        hmi_correlation_id_ =
-          ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-    }
-
     if (!ApplicationManagerImpl::instance()->AddMessageChain(connection_key,
         correlation_id, hmi_correlation_id_, &(*message_))) {
       LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");

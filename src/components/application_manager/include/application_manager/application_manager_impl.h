@@ -157,7 +157,7 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return TRUE on success, otherwise FALSE
      */
-    bool AddMessageChain( unsigned int connection_key,
+    bool AddMessageChain(unsigned int connection_key,
       const unsigned int correlation_id, const unsigned int hmi_correlation_id,
       const smart_objects::SmartObject* data = NULL);
 
