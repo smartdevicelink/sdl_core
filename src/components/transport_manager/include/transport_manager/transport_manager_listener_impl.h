@@ -67,9 +67,9 @@ class TransportManagerListenerImpl: public TransportManagerListener {
                                   const transport_manager::SessionID session_id,
                                   const DisconnectDeviceError& error){};
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id){};
+                                      const DeviceHandle device_id){};
   virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
-                                        const SessionID session_id,
+                                        const DeviceHandle device_id,
                                         const DisconnectDeviceError& error){};
 
   virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,

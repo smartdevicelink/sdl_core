@@ -86,7 +86,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void disconnectDevice(const SessionID &session_id) = 0;
+  virtual void disconnectDevice(const DeviceHandle &device_id) = 0;
 
   /**
    * @brief post new mesage into TM's queue
@@ -125,16 +125,6 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void addEventListener(TransportManagerListener *listener) = 0;
-
-  /**
-   * @brief register listener that would be used to catch adapter's events
-   *
-   * @param event listener
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void addAdapterListener(DeviceAdapter *adapter,
-      transport_manager::DeviceAdapterListener *listener) = 0;
 
   /**
    * @brief remove device from internal storages

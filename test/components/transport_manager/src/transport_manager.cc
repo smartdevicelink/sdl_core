@@ -124,6 +124,10 @@ class MyListener : public TransportManagerListenerImpl {
                                       const SessionID session_id){
     pthread_cond_signal(&task_complete);
   }
+  virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
+                                      const DeviceHandle device_id){
+    pthread_cond_signal(&task_complete);
+  }
 };
 
 static MockDeviceAdapter *mock_da;
@@ -177,12 +181,12 @@ TEST(TransportManagerImplTest, sendReceive)
   pthread_mutex_unlock(&task_mutex);
 }
 
-TEST(TransportManagerImplTest, disconnect)
+TEST(TransportManagerImplTest, disconnectDevice)
 {
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
-  tm->disconnectDevice(42);
-  EXPECT_CALL(*tml, onDisconnectDone(_, _)).Times(1);
+  tm->disconnectDevice(0);
+  EXPECT_CALL(*tml, onDisconnectDeviceDone(_, _)).Times(1);
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
 }
@@ -198,7 +202,6 @@ int main(int argc, char** argv) {
   tml = new MockTransportManagerListener();
   tm->addEventListener(tml);
   tm->addEventListener(new MyListener());
-  tm->addAdapterListener(mock_da, new DeviceAdapterListenerImpl(tm));
 
   mock_da->init(new DeviceHandleGeneratorImpl(),
       NULL);

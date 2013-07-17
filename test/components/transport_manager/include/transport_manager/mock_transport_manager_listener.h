@@ -44,43 +44,44 @@
 
 using namespace transport_manager;
 
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace transport_manager {
 
-class MockTransportManagerListener : public ::transport_manager::TransportManagerListenerImpl
-{
-  public:
+class MockTransportManagerListener :
+    public ::transport_manager::TransportManagerListenerImpl {
+ public:
   MOCK_METHOD2(onDeviceFound, void (const DeviceHandle device,
-                                         const ApplicationList app_list));
+          const ApplicationList app_list));
   MOCK_METHOD0(onSearchDeviceDone, void ());
   MOCK_METHOD2(onSearchDeviceFailed, void (const DeviceAdapter* device_adapter,
-                                           const SearchDeviceError& error));
+          const SearchDeviceError& error));
   MOCK_METHOD2(onConnectDone, void(const DeviceAdapter* device_adapter,
-                             const SessionID session_id));
+          const SessionID session_id));
   MOCK_METHOD3(onDataReceiveDone, void(const DeviceAdapter* device_adapter,
-                                 const SessionID session_id,
-                                 const RawMessageSptr data_container));
+          const SessionID session_id,
+          const RawMessageSptr data_container));
   MOCK_METHOD3(onDataSendDone, void(const DeviceAdapter* device_adapter,
-                              const SessionID session_id,
-                              const RawMessageSptr data_container));
+          const SessionID session_id,
+          const RawMessageSptr data_container));
   MOCK_METHOD3(onDataSendFailed, void(const DeviceAdapter* device_adapter,
-                                const SessionID session_id,
-                                const DataSendError& error));
+          const SessionID session_id,
+          const DataSendError& error));
   MOCK_METHOD3(onDataReceiveFailed, void (const DeviceAdapter* device_adapter,
-                                   const SessionID session_id,
-                                   const DataReceiveError& error));
+          const SessionID session_id,
+          const DataReceiveError& error));
   MOCK_METHOD2(onCommunicationError, void (const DeviceAdapter* device_adapter,
-                                    const SessionID session_id));
-  MOCK_METHOD2(onDisconnectDeviceDone, void(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id));
+          const SessionID session_id));
   MOCK_METHOD2(onDisconnectDone, void(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id));
-  ~MockTransportManagerListener() { }
+          const SessionID session_id));
+  MOCK_METHOD2(onDisconnectDeviceDone, void(const DeviceAdapter* device_adapter,
+          const DeviceHandle device_id));
+  ~MockTransportManagerListener() {}
 
 };
 
-}}}
-
+}
+}
+}
 
 #endif /* MOCK_TRANSPORT_MANAGER_LISTENER_H */

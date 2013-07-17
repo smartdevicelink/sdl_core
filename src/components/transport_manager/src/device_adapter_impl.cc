@@ -70,7 +70,6 @@ DeviceAdapterImpl::Connection::Connection(const DeviceHandle device_handle,
       connection_thread_(),
       notification_pipe_fds_(),
       connection_socket_(-1),
-      frames_to_send_(),
       terminate_flag_(false) {
 }
 
@@ -783,17 +782,4 @@ int DeviceAdapterImpl::Connection::start_connection_thread(
     delete thread_params;
   return error_code;
 }
-
-void DeviceAdapterImpl::broadcastEvent(const DeviceAdapter* device_adapter,
-                                       const SessionID session_id,
-                                       const SearchDeviceError& error) const {
-
-}
-
-void DeviceAdapterImpl::broadcastEvent(
-    const DeviceAdapter* device_adapter, const SessionID session_id,
-    const RawMessageSptr data_container) const {
-
-}
-
 }  // namespace transport_manager

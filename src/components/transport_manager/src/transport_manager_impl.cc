@@ -91,9 +91,6 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
-  device_adapter->addListener(new DeviceAdapterListenerImpl(this));
-  device_adapter->init(new DeviceHandleGeneratorImpl(),
-                       NULL);
   addDeviceAdapter(device_adapter);
   LOG4CXX_INFO(logger_, "TM object with device adapter created.");
 }
@@ -109,7 +106,8 @@ TransportManagerImpl::~TransportManagerImpl() {
   pthread_mutex_destroy(&message_queue_mutex_);
   pthread_mutex_destroy(&event_queue_mutex_);
   pthread_cond_destroy(&device_listener_thread_wakeup_);
-  for(TransportManagerListenerList::iterator it = transport_manager_listener_.begin(); it != transport_manager_listener_.end(); ++it){
+  for (TransportManagerListenerList::iterator it = transport_manager_listener_
+      .begin(); it != transport_manager_listener_.end(); ++it) {
     delete (*it);
   }
   LOG4CXX_INFO(logger_, "TM object destroyed.");
@@ -150,14 +148,21 @@ void TransportManagerImpl::connectDevice(const DeviceHandle &device_id,
   LOG4CXX_INFO(logger_, "Connect complete");
 }
 
-void TransportManagerImpl::disconnectDevice(const SessionID &session_id) {
+void TransportManagerImpl::disconnectDevice(const DeviceHandle &device_id) {
   LOG4CXX_INFO(logger_, "Disconnect device called");
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
     //todo: log error
     return;
   }
-  adapter_handler_.getAdapterBySession(session_id)->disconnect(session_id);
+  DeviceAdapter *da = adapter_handler_.getAdapterByDevice(device_id);
+  if (NULL == da) {
+    //error case
+    LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
+    return;
+  }
+  // TODO: Disconnect'em all
+  //da->disconnect();
   LOG4CXX_INFO(logger_, "Disconnected");
 }
 
@@ -188,6 +193,7 @@ void TransportManagerImpl::receiveEventFromDevice(
   }
   this->postEvent(event);
 }
+
 void TransportManagerImpl::removeDevice(const DeviceHandle &device) {
   adapter_handler_.removeDevice(device);
 }
@@ -195,12 +201,19 @@ void TransportManagerImpl::removeDevice(const DeviceHandle &device) {
 void TransportManagerImpl::addDeviceAdapter(DeviceAdapter *device_adapter) {
   LOG4CXX_INFO(logger_, "Add device adapter " << device_adapter);
   adapter_handler_.addAdapter(device_adapter);
+  device_adapter->addListener(new DeviceAdapterListenerImpl(this));
 }
-void TransportManagerImpl::addAdapterListener(DeviceAdapter *adapter, DeviceAdapterListener *listener){
-  LOG4CXX_INFO(logger_, "Add device adapter listener is called for adapter " << adapter << " listener " << listener);
-  AdapterHandler::AdapterList al = const_cast<AdapterHandler::AdapterList &>(adapter_handler_.device_adapters());
-  AdapterHandler::AdapterList::iterator it = std::find(al.begin(), al.end(), adapter);
-  if(NULL == (*it)){
+
+void TransportManagerImpl::addAdapterListener(DeviceAdapter *adapter,
+                                              DeviceAdapterListener *listener) {
+  LOG4CXX_INFO(
+      logger_,
+      "Add device adapter listener is called for adapter " << adapter << " listener " << listener);
+  AdapterHandler::AdapterList al =
+      const_cast<AdapterHandler::AdapterList &>(adapter_handler_.device_adapters());
+  AdapterHandler::AdapterList::iterator it = std::find(al.begin(), al.end(),
+                                                       adapter);
+  if (NULL == (*it)) {  // FIXME: Don't dereference vector::end()
     LOG4CXX_ERROR(logger_, "Device adapter is not known");
     return;
   }
@@ -260,6 +273,9 @@ void TransportManagerImpl::postMessage(const RawMessageSptr message) {
   //todo: check data copying
   LOG4CXX_INFO(logger_,
                "Post message called serial number " << message->serial_number());
+
+  //auto connection = message->connection_key();
+
   pthread_mutex_lock(&message_queue_mutex_);
   //todo: check that same message is not posted again
   message_queue_.push_back(message);
@@ -322,7 +338,7 @@ void TransportManagerImpl::eventListenerThread(void) {
     LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
     int s = event_queue_.size();
     for (EventQueue::iterator it = event_queue_.begin();
-        it != event_queue_.end(); ) {
+        it != event_queue_.end();) {
 
       //todo: check that data is copied correctly here
       DeviceAdapter *da = (*it).device_adapter();
@@ -347,7 +363,7 @@ void TransportManagerImpl::eventListenerThread(void) {
                 transport_manager_listener_.begin();
                 tml_it != transport_manager_listener_.end(); ++tml_it) {
               (*tml_it)->onDeviceFound((*item),
-                                            da->getApplicationList((*item)));
+                                       da->getApplicationList((*item)));
             }
             LOG4CXX_INFO(logger_, "Callback called");
           }

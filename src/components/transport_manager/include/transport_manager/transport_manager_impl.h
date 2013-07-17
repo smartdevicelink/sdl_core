@@ -103,7 +103,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void disconnectDevice(const SessionID &session_id);
+  virtual void disconnectDevice(const DeviceHandle &device_id);
 
   /**
    * @brief post new mesage into TM's queue
@@ -141,15 +141,6 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void addDeviceAdapter(DeviceAdapter *device_adapter);
-
-  /**
-   * @brief register listener that would be used to catch adapter's events
-   *
-   * @param event listener
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void addAdapterListener(DeviceAdapter *adapter, DeviceAdapterListener *listener);
 
   /**
    * @brief remove device from internal storages
@@ -405,6 +396,15 @@ class TransportManagerImpl : public TransportManager {
   mutable pthread_mutex_t event_queue_mutex_;
 
   bool is_initialized_;
+private:
+  /**
+   * @brief register listener that would be used to catch adapter's events
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void addAdapterListener(DeviceAdapter *adapter, DeviceAdapterListener *listener);
 
 };
 //class

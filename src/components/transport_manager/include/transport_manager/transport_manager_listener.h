@@ -65,9 +65,9 @@ class TransportManagerListener {
                                   const transport_manager::SessionID session_id,
                                   const DisconnectDeviceError& error) = 0;
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id) = 0;
+                                      const DeviceHandle device_id) = 0;
   virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
-                                        const SessionID session_id,
+                                        const DeviceHandle device_id,
                                         const DisconnectDeviceError& error) = 0;
 
   virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,

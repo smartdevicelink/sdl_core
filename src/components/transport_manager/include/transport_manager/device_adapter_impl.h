@@ -572,13 +572,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
 
   bool initialized_;
 
-  void broadcastEvent(const DeviceAdapter* device_adapter,
-                      const SessionID session_id,
-                      const SearchDeviceError& error)const;
-
-  void broadcastEvent(const DeviceAdapter* device_adapter,
-                      const SessionID session_id,
-                      const RawMessageSptr data_container)const;
 };
 
 }  // namespace transport_manager
