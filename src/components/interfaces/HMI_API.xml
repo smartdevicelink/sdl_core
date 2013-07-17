@@ -1127,38 +1127,27 @@
     <function name="OnReady" messagetype="notification">
       <description>HMI notifies SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
-    <function name="GetDeviceList" messagetype="request">
-        <description>Request from HMI to SmartDeviceLink to get the list of devices</description>
+    <function name="onStartDeviceDiscovery" messagetype="notification">
+      <description>Initiated by HMI user.</description>
     </function>
-    <function name="GetDeviceList" messagetype="response">
-        <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
-    </function>
-    <function name="StartDeviceDiscovery" messagetype="request">
-      <description>Initiated by HMI user. In response optional list of found devices - if not provided, not were found.</description>
-    </function>
-    <function name="StartDeviceDiscovery" messagetype="response">
-      <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
-    </function>
-    <function name="OnDeviceListUpdated" messagetype="notification">
+    <function name="UpdateDeviceList" messagetype="request">
         <description>Notification from SmartDeviceLink to HMI about changes in device list.</description>
         <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
     </function>
-    <function name="GetAppList" messagetype="request">
+	<function name="UpdateDeviceList" messagetype="response">
+    </function>
+    <function name="OnFindApplications" messagetype="notification">
         <description>This methos is usually invoked by HMI to get list of registered apps.</description>
+		<param name="deviceInfo" type="Common.DeviceInfo" mandatory="true"/>
     </function>
-    <function name="GetAppList" messagetype="response">
-        <param name="appList" type="Common.HMIApplication" mandatory="false" array="true" minsize="1"/>
-    </function>
-    <function name="ActivateApp" messagetype="request">
-      <description>Invoked by UI component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action. Application is shown on recieving successful response.</description>
+    <function name="onActivateApp" messagetype="notification">
+      <description>Invoked by BasicCommunication component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action. Application is shown on recieving successful response.</description>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of selected application.</description>
       </param>
     </function>
-    <function name="ActivateApp" messagetype="response">
-    </function>
     <function name="OnAppDeactivated" messagetype="notification">
-      <description>Invoked by UI component when user switches to any functionality which is not other mobile application.</description>
+      <description>Invoked by BasicCommunication component when user switches to any functionality which is not other mobile application.</description>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of deactivated application.</description>
       </param>
@@ -1166,30 +1155,31 @@
         <description>Specifies the functionality user switched to.</description>
       </param>
     </function>
-    <function name="OnAppRegistered" messagetype="notification">
-      <description>Issued by SDL to notify HMI about new application registered.</description>
-      <param name="application" type="Common.HMIApplication" mandatory="true"/>
+    <function name="OnDeviceChosen" messagetype="notification">
+      <description>Notification is initiated by HMI on user selecting device in list of devices.</description>
+      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true"/>
+    </function>
+    <function name="UpdateAppList" messagetype="request">
+      <description>Issued by SDL to notify HMI about new applications registered.</description>
+      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true"/>
+    </function>
+	<function name="UpdateAppList" messagetype="response">
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
       <param name="appId" type="Integer" mandatory="true"/>
     </function>
-    <function name="ExitApplication" messagetype="request">
+    <function name="OnExitApplication" messagetype="notification">
       <description>Used by HMI when User chooses to exit application. Sent from HMI to SDL.</description>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of application that requested this RPC.</description>
       </param>
     </function>
-    <function name="ExitApplication" messagetype="response">
-      <description>Success of operation.</description>
-    </function>
-    <function name="ExitAllApplications" messagetype="request">
+    <function name="OnExitAllApplications" messagetype="notification">
       <description>Sent by HMI to SDL to close all registered applications.</description>
       <param name="reason" type="Common.ApplicationsCloseReason" mandatory="true">
         <description>Specifies reason for exiting all apllications.</description>
       </param>
-    </function>
-    <function name="ExitAllApplications" messagetype="response">
     </function>
     <function name="MixingAudioSupported" messagetype="request">
       <description>Request from SDL to HMI to find out if the last one supports mixing audio (ie recording TTS command and playing audio).</description>
@@ -1639,10 +1629,6 @@
       </param>
     </function>
     <function name="SetAppIcon" messagetype="response">
-    </function>
-    <function name="OnDeviceChosen" messagetype="notification">
-      <description>Notification is initiated by HMI on user selecting device in list of devices.</description>
-      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true"/>
     </function>
     <function name="Slider" messagetype="request">
       <description>Creates a full screen or pop-up overlay (depending on platform) with a single user controlled slider.</description>
