@@ -246,10 +246,6 @@ FFW.UI = FFW.RPCObserver.create( {
 
                 break;
             }
-            case "UI.OnAppActivated": {
-
-                break;
-            }
             case "UI.Slider": {
 
                 SDL.SDLModel.uiSlider( request );
@@ -631,24 +627,6 @@ FFW.UI = FFW.RPCObserver.create( {
             "method": "UI.OnSystemContext",
             "params": {
                 "systemContext": systemContextValue
-            }
-        };
-        this.client.send( JSONMessage );
-    },
-
-    /**
-     * Notifies if application was activated
-     * @param {String} appName
-     */
-    OnAppActivated: function( appName ) {
-        Em.Logger.log( "FFW.UI.OnAppActivated" );
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnAppActivated",
-            "params": {
-                "appName": appName
             }
         };
         this.client.send( JSONMessage );
