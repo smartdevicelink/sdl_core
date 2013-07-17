@@ -118,7 +118,7 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
           ++ii) {
         for (size_t jj = 0; jj < choice_set[j][strings::vr_commands].length();
             ++jj) {
-          if (ii == jj) {
+          if ((i == j) && (ii == jj)) {
             // skip check the same element
             continue;
           }
