@@ -76,8 +76,7 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void connectDevice(const DeviceHandle &device_id,
-                             const ApplicationHandle &app_id,
-                             const SessionID &session_id) = 0;
+                             const ApplicationHandle &app_id) = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.

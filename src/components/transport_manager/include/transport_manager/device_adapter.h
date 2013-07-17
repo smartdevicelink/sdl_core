@@ -84,8 +84,7 @@ class DeviceAdapter {
 
   virtual bool isServerOriginatedConnectSupported() const = 0;
   virtual Error connect(const DeviceHandle device_handle,
-                        const ApplicationHandle app_handle,
-                        const int session_id) = 0;
+                        const ApplicationHandle app_handle) = 0;
 
   virtual bool isClientOriginatedConnectSupported() const = 0;
 
