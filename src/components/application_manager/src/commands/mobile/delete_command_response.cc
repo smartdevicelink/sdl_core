@@ -88,9 +88,15 @@ void DeleteCommandResponse::Run() {
   const hmi_apis::Common_Result::eType result_vr =
       msg_chain->vr_response_result();
 
+  const unsigned int mobile_correlation_id = 0;
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id)) {
+      correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
+
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
           ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::app_id]));

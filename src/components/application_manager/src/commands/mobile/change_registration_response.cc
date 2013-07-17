@@ -78,12 +78,14 @@ void ChangeRegistrationResponse::Run() {
   // get stored SmartObject
   smart_objects::SmartObject data = msg_chain->data();
 
+  const unsigned int mobile_correlation_id = 0;
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
+        correlation_id, mobile_correlation_id)) {
 
-    const unsigned int mobile_correlation_id = ApplicationManagerImpl::instance()->
-    GetMobilecorrelation_id(correlation_id);
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
 
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
         ApplicationManagerImpl::instance()->

@@ -58,13 +58,19 @@ void SetMediaClockTimerResponse::Run() {
       return;
     }
 
-    const int hmi_correlation_id = (*message_)[strings::params]
-                                     [strings::correlation_id];
+  const unsigned int hmi_correlation_id = (*message_)[strings::params]
+      [strings::correlation_id].asUInt();
 
-    if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        hmi_correlation_id)) {
-      SendResponse(true);
-    }
+  const unsigned int mobile_correlation_id = 0;
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+      hmi_correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
+
+    SendResponse(true);
+  }
 }
 
 }  // namespace commands

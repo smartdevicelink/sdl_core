@@ -62,8 +62,14 @@ void DeleteSubMenuResponse::Run() {
   smart_objects::SmartObject data = ApplicationManagerImpl::instance()->
     GetMessageChain(hmi_correlation_id)->data();
 
+  const unsigned int mobile_correlation_id = 0;
   if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(hmi_correlation_id)) {
+      DecreaseMessageChain(hmi_correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
+
     SendResponse(true);
   }
 }

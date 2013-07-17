@@ -55,10 +55,11 @@ void SetIconResponse::Run() {
     return;
   }
 
-  const int hmi_request_id = (*message_)[strings::params][strings::function_id];
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
   const MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(hmi_request_id);
+  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     return;
@@ -67,8 +68,14 @@ void SetIconResponse::Run() {
   smart_objects::SmartObject data =
       msg_chain->data();
 
+  const unsigned int mobile_correlation_id = 0;
   if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(hmi_request_id)) {
+      DecreaseMessageChain(correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
+
     if ((*message_)[strings::params][hmi_response::code].asInt()) {
       ApplicationImpl* app = static_cast<ApplicationImpl*>(
           ApplicationManagerImpl::instance()->

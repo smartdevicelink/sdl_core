@@ -117,7 +117,7 @@ void PerformAudioPassThruRequest::Run() {
       (*message_)[str::msg_params][str::audio_type].asInt());
 }
 
-void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) const {
+void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {
   // crate HMI TTS speak request
   smart_objects::SmartObject msg_params;
 

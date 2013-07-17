@@ -67,7 +67,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   /*
    * @brief Sends TTS Speak request
    */
-  void SendSpeakRequest(const int app_id) const;
+  void SendSpeakRequest(const int app_id);
 
   DISALLOW_COPY_AND_ASSIGN(PerformAudioPassThruRequest);
 };

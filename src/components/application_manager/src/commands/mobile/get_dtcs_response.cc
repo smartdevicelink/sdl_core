@@ -56,11 +56,17 @@ void GetDTCsResponse::Run() {
     return;
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
+  const unsigned int mobile_correlation_id = 0;
   if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(correlation_id)) {
+      DecreaseMessageChain(correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
+
     if (mobile_apis::Result::SUCCESS ==
         (*message_)[strings::params][hmi_response::code].asInt()) {
 

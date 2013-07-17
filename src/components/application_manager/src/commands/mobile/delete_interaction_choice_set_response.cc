@@ -64,8 +64,13 @@ void DeleteInteractionChoiceSetResponse::Run() {
   const int code =
     (*message_)[strings::params][hmi_response::code].asInt();
 
+  const unsigned int mobile_correlation_id = 0;
   if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(correlation_id)) {
+      DecreaseMessageChain(correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
 
     SendResponse(true);
   }

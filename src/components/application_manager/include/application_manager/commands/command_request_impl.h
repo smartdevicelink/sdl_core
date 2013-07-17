@@ -62,9 +62,11 @@ class CommandRequestImpl : public CommandImpl {
                     const NsSmart::SmartObject* response_params = NULL) const;
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                    const NsSmart::SmartObject& msg_params,
-                   bool chaining_required = false) const;
+                   bool chaining_required = false);
   void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
                    const NsSmart::SmartObject& msg_params) const;
+ protected:
+  unsigned int    hmi_correlation_id_;
 };
 
 }  // namespace commands

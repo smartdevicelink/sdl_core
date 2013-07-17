@@ -30,6 +30,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <climits>
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/mobile_command_factory.h"
@@ -53,6 +54,8 @@ namespace application_manager {
 
 log4cxx::LoggerPtr ApplicationManagerImpl::logger_   =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
+unsigned int       ApplicationManagerImpl::message_chain_current_id_ = 0;
+const unsigned int ApplicationManagerImpl::message_chain_max_id_ = UINT_MAX;
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
@@ -77,7 +80,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     from_hmh_thread_(NULL),
     to_hmh_thread_(NULL),
     hmi_so_factory_(NULL) {
-  from_mobile_thread_ = new threads::Thread(
+    from_mobile_thread_ = new threads::Thread(
     "application_manager::FromMobileThreadImpl",
     new FromMobileThreadImpl(this));
   if (!InitThread(from_mobile_thread_)) {
@@ -327,16 +330,30 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   ManageHMICommand(is_vr_ready);
 }
 
-bool ApplicationManagerImpl::AddMessageChain(unsigned int connection_key,
-    unsigned int correlation_id, const unsigned int hmi_correlation_id,
+unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
+  if (message_chain_current_id_ < message_chain_max_id_)
+  {
+    message_chain_current_id_++;
+  } else
+  {
+    message_chain_current_id_ = 0;
+  }
+
+  return message_chain_current_id_;
+}
+
+bool ApplicationManagerImpl::AddMessageChain(const unsigned int connection_key,
+    const unsigned int correlation_id, const unsigned int hmi_correlation_id,
     const smart_objects::SmartObject* data) {
 
     MessageChains::iterator it =  message_chaining_.find(hmi_correlation_id);
     if (message_chaining_.end() != it) {
       it->second->IncrementCounter();
     } else {
+
       MessageChaining* chain =
           new MessageChaining(connection_key, correlation_id);
+
       if (chain) {
         if (data) {
           chain->set_data(*data);
@@ -352,17 +369,17 @@ bool ApplicationManagerImpl::AddMessageChain(unsigned int connection_key,
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
-  const unsigned int hmi_correlation_id) {
+  const unsigned int hmi_correlation_id, unsigned int mobile_correlation_id) {
   bool result = false;
-  MessageChains::iterator it =
-    message_chaining_.find(hmi_correlation_id);
+  MessageChains::iterator it = message_chaining_.find(hmi_correlation_id);
 
   if (message_chaining_.end() != it) {
     (*it->second).DecrementCounter();
-    if (!(*it->second).counter()) {
+    if (0 == (*it->second).counter()) {
+      mobile_correlation_id = (*it->second).correlation_id();
+      message_chaining_.erase(it);
       result = true;
     }
-    message_chaining_.erase(it);
   }
 
   return result;
@@ -377,21 +394,6 @@ MessageChaining* ApplicationManagerImpl::GetMessageChain(
   }
 
   return NULL;
-}
-
-unsigned int ApplicationManagerImpl::GetMobilecorrelation_id(
-  unsigned int correlation_id) const {
-  unsigned int mobile_correlation_id = correlation_id >> 32;
-  return mobile_correlation_id;
-}
-
-unsigned int ApplicationManagerImpl::GetHMIcorrelation_id(
-  unsigned int correlation_id,  unsigned int connection_key) const {
-  // to avoid warning: left shift count >= width of type
-  unsigned int mobile_correlation_id = correlation_id;
-  unsigned int conn_key = connection_key;
-  unsigned int hmi_correlation_id = connection_key | (mobile_correlation_id << 32);
-  return hmi_correlation_id;
 }
 
 bool ApplicationManagerImpl::audio_pass_thru_flag() const {

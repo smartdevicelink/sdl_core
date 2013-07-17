@@ -57,8 +57,8 @@ void SetGlobalPropertiesResponse::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -72,9 +72,14 @@ void SetGlobalPropertiesResponse::Run() {
   const bool result_ui = msg_chain->ui_response_result();
   const bool result_tts = msg_chain->tts_response_result();
 
+  const unsigned int mobile_correlation_id = 0;
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
+        correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
 
     if ((mobile_apis::Result::SUCCESS == result_ui) &&
             (mobile_apis::Result::SUCCESS == result_tts)) {

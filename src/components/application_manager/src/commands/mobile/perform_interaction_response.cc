@@ -57,11 +57,16 @@ void PerformInteractionResponse::Run() {
      return;
   }
 
-  const int hmi_request_id = (*message_)[strings::params]
-                                [strings::correlation_id];
+  const unsigned int hmi_correlation_id = (*message_)[strings::params]
+                                [strings::correlation_id].asUInt();
 
+  const unsigned int mobile_correlation_id = 0;
   if (ApplicationManagerImpl::instance()->
-       DecreaseMessageChain(hmi_request_id)) {
+       DecreaseMessageChain(hmi_correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
      (*message_)[strings::params][strings::success] = true;
      (*message_)[strings::params][strings::result_code] =
        mobile_apis::Result::SUCCESS;

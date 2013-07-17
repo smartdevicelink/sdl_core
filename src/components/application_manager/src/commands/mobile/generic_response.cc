@@ -46,9 +46,8 @@ void GenericResponse::Run() {
 
   response[strings::params][strings::message_type] = MessageType::kResponse;
 
-  response[strings::params][strings::correlation_id] = static_cast<unsigned int>(
-      ApplicationManagerImpl::instance()->GetMobilecorrelation_id(
-        (*message_)[strings::params][strings::correlation_id].asUInt()));
+  response[strings::params][strings::correlation_id] =
+      (*message_)[strings::params][strings::correlation_id];
   response[strings::params][strings::protocol_version] =
       (*message_)[strings::params][strings::protocol_version];
   response[strings::params][strings::connection_key] =

@@ -59,14 +59,21 @@ void GetVehicleDataResponse::Run() {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
+  const unsigned int mobile_correlation_id = 0;
   // sending response
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
+        correlation_id, mobile_correlation_id)) {
+
+
     const int code =
       (*message_)[strings::params][hmi_response::code].asInt();
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
 
     if (code) {
       SendResponse(true);

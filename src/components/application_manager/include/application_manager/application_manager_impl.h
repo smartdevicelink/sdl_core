@@ -128,13 +128,30 @@ class ApplicationManagerImpl : public ApplicationManager
     void OnHMIStartedCooperation();
 
     /*
+     * @brief Returns unique correlation ID for HMI request
+     *
+     * @return Unique correlation ID
+     */
+    unsigned int GetNextHMICorrelationID();
+
+    /*
      * @brief Add to the chain amount of requests sent to hmi
      * from mobile request, to ensure that all response were received
      * before sending response to mobile.
      *
-     * @param connection_key Connection key of connection with application
-     * @param correlation_id Correlation id of Mobile request
-     * @param hmi_correlation_id Unique correlation id of HMI request
+     * @param connection_key Connection key of application stored in
+     * MessageChaining object
+     *
+     * @param correlation_id Correlation of Mobile request stored in
+     * MessageChaining object
+     *
+     *
+     * @param hmi_correlation_id Param is map index and it is equeal to hmi
+     * correlation id. Returned from GetNextHMICorrelationID.
+     *
+     * If param is grate then 0, stored  MessageChaining counter incremented,
+     * otherwise new Message chain created.
+     *
      * @param data Temporary SmartObject from mobile request.
      * Sometimes request data is needed in mobile response.
      *
@@ -148,10 +165,13 @@ class ApplicationManagerImpl : public ApplicationManager
      * @brief Decrease chain after response from hmi was received
      *
      * @param hmi_correlation_id Unique HMI correlation id from response
+     * @param mobile_correlation_id Unique correlation id for Mobile response
+     * returned in this parameter
      *
      * @return true if there is no other pending responses
      */
-    bool DecreaseMessageChain(const unsigned int hmi_correlation_id);
+    bool DecreaseMessageChain(const unsigned int hmi_correlation_id,
+                              unsigned int mobile_correlation_id);
 
     /*
      * @brief Retrieve MessageChaining object from chain for corresponding
@@ -161,27 +181,8 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return MessageChaining on success, otherwise NULL
      */
-    MessageChaining* GetMessageChain(const unsigned int hmi_correlation_id) const;
-
-    /*
-     * @brief Converts HMI correlation ID to mobile correlation ID
-     *
-     * @param correlation_id Correlation id of the HMI response
-     *
-     * @return Correlation ID of the mobile request
-     */
-    unsigned int GetMobilecorrelation_id(unsigned int correlation_id) const;
-
-    /*
-     * @brief Converts Mobile correlation ID to unique HMI correlation ID
-     *
-     * @param correlation_id Correlation id of the mobile request
-     * @param connection_key Connection key of the current request
-     *
-     * @return Unique correlation ID for HMI request
-     */
-    unsigned int GetHMIcorrelation_id(unsigned int correlation_id,
-                                  unsigned int connection_key) const;
+    MessageChaining* GetMessageChain(
+        const unsigned int hmi_correlation_id) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request
@@ -406,42 +407,44 @@ class ApplicationManagerImpl : public ApplicationManager
     /**
      * @brief List of applications
      */
-    std::set<Application*> application_list_;
-    MessageChains message_chaining_;
-    bool audio_pass_thru_flag_;
-    threads::Thread* perform_audio_thread_;
-    bool is_distracting_driver_;
-    bool is_vr_session_strated_;
-    bool hmi_cooperating_;
-    bool is_all_apps_allowed_;
-    hmi_apis::Common_Language::eType ui_language_;
-    hmi_apis::Common_Language::eType vr_language_;
-    hmi_apis::Common_Language::eType tts_language_;
-    smart_objects::SmartObject*                  vehicle_type_;
+    std::set<Application*>                        application_list_;
+    MessageChains                                 message_chaining_;
+    bool                                          audio_pass_thru_flag_;
+    threads::Thread*                              perform_audio_thread_;
+    bool                                          is_distracting_driver_;
+    bool                                          is_vr_session_strated_;
+    bool                                          hmi_cooperating_;
+    bool                                          is_all_apps_allowed_;
+    hmi_apis::Common_Language::eType              ui_language_;
+    hmi_apis::Common_Language::eType              vr_language_;
+    hmi_apis::Common_Language::eType              tts_language_;
+    smart_objects::SmartObject*                   vehicle_type_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler*        connection_handler_;
     request_watchdog::Watchdog*                   watchdog_;
 
-    MessageQueue<utils::SharedPtr<Message>> messages_from_mobile_;
-    MessageQueue<utils::SharedPtr<Message>> messages_to_mobile_;
-    MessageQueue<utils::SharedPtr<Message>> messages_from_hmh_;
-    MessageQueue<utils::SharedPtr<Message>> messages_to_hmh_;
+    MessageQueue<utils::SharedPtr<Message>>       messages_from_mobile_;
+    MessageQueue<utils::SharedPtr<Message>>       messages_to_mobile_;
+    MessageQueue<utils::SharedPtr<Message>>       messages_from_hmh_;
+    MessageQueue<utils::SharedPtr<Message>>       messages_to_hmh_;
 
-    threads::Thread* from_mobile_thread_;
+    threads::Thread*                              from_mobile_thread_;
     friend class FromMobileThreadImpl;
-    threads::Thread* to_mobile_thread_;
+    threads::Thread*                              to_mobile_thread_;
     friend class ToMobileThreadImpl;
-    threads::Thread* from_hmh_thread_;
+    threads::Thread*                              from_hmh_thread_;
     friend class FromHMHThreadImpl;
-    threads::Thread* to_hmh_thread_;
+    threads::Thread*                              to_hmh_thread_;
     friend class ToHMHThreadImpl;
 
-    hmi_apis::HMI_API* hmi_so_factory_;
-    mobile_apis::MOBILE_API* mobile_so_factory_;
+    hmi_apis::HMI_API*                            hmi_so_factory_;
+    mobile_apis::MOBILE_API*                      mobile_so_factory_;
 
-    static log4cxx::LoggerPtr logger_;
+    static log4cxx::LoggerPtr                     logger_;
+    static unsigned int                           message_chain_current_id_;
+    static const unsigned int                     message_chain_max_id_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };

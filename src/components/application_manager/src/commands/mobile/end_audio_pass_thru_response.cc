@@ -61,9 +61,14 @@ void EndAudioPassThruResponse::Run() {
   const unsigned int correlation_id =
     (*message_)[strings::params][strings::correlation_id].asUInt();
 
+  const unsigned int mobile_correlation_id = 0;
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
+        correlation_id, mobile_correlation_id)) {
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
 
     SendResponse(true);
   }

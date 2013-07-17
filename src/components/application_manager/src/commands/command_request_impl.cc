@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
-: CommandImpl(message) {
+: CommandImpl(message),
+  hmi_correlation_id_(0) {
 }
 
 CommandRequestImpl::~CommandRequestImpl() {
@@ -97,14 +98,7 @@ void CommandRequestImpl::SendResponse(const bool success,
 
 void CommandRequestImpl::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
-    const NsSmart::SmartObject& msg_params, bool chaining_required) const {
-
-  const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
-  const unsigned int connection_key =
-    (*message_)[strings::params][strings::connection_key].asUInt();
-  const unsigned int hmi_correlation_id = ApplicationManagerImpl::instance()->
-  GetHMIcorrelation_id(correlation_id, connection_key);
+    const NsSmart::SmartObject& msg_params, bool chaining_required) {
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
       new NsSmartDeviceLink::NsSmartObjects::SmartObject;
@@ -113,10 +107,15 @@ void CommandRequestImpl::CreateHMIRequest(
     return;
   }
 
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
+  const unsigned int connection_key =
+    (*message_)[strings::params][strings::connection_key].asUInt();
+
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] = function_id;
-  request[strings::params][strings::correlation_id] = hmi_correlation_id;
+  request[strings::params][strings::correlation_id] = hmi_correlation_id_;
   request[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;
   request[strings::params][strings::protocol_type] =
@@ -127,12 +126,18 @@ void CommandRequestImpl::CreateHMIRequest(
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   } else if (chaining_required) {
-    if (!ApplicationManagerImpl::instance()->AddMessageChain(
-        connection_key, correlation_id, hmi_correlation_id, &(*message_))) {
+
+    // get hmi correlation id for chaining further request from this object
+    if (0 == hmi_correlation_id_) {
+        hmi_correlation_id_ =
+          ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+    }
+
+    if (!ApplicationManagerImpl::instance()->AddMessageChain(connection_key,
+        correlation_id, hmi_correlation_id_, &(*message_))) {
       LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");
     }
   }
-
 }
 
 void CommandRequestImpl::CreateHMINotification(
@@ -157,8 +162,8 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::msg_params]= msg_params;
 
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
-      // SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    }
+    LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
+  }
 }
 
 }  // namespace commands

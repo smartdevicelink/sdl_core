@@ -80,8 +80,13 @@ void AddCommandResponse::Run() {
       msg_chain->vr_response_result();
 
   // sending response
+  const unsigned int mobile_correlation_id = 0;
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
+        correlation_id, mobile_correlation_id)) {
+
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
              ApplicationManagerImpl::instance()->
