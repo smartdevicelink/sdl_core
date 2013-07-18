@@ -468,9 +468,9 @@ FFW.UI = FFW.RPCObserver.create( {
      */
     sendUIResult: function( resultCode, id, method ) {
 
-        Em.Logger.log( "FFW.UI." + method + "Response" );
+        Em.Logger.log( "FFW." + method + "Response" );
 
-        if( resultCode ){
+        if( resultCode === SDL.SDLModel.resultCode["SUCCESS"] ){
 
             // send repsonse
             var JSONMessage = {
