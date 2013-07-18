@@ -53,27 +53,15 @@ void GetVehicleDataResponse::Run() {
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
+  if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  const unsigned int mobile_correlation_id = 0;
-  // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id, mobile_correlation_id)) {
-
-
+  if (!IsPendingResponseExist()) {
     const int code =
       (*message_)[strings::params][hmi_response::code].asInt();
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
 
     if (code) {
       SendResponse(true);

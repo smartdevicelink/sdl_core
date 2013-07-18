@@ -49,7 +49,7 @@ SetIconResponse::~SetIconResponse() {
 void SetIconResponse::Run() {
   LOG4CXX_INFO(logger_, "EncodedSyncPDataResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
+  if ((*message_)[strings::params][strings::success].asBool() == false) {
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
@@ -68,13 +68,7 @@ void SetIconResponse::Run() {
   smart_objects::SmartObject data =
       msg_chain->data();
 
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
+  if (!IsPendingResponseExist()) {
 
     if ((*message_)[strings::params][hmi_response::code].asInt()) {
       ApplicationImpl* app = static_cast<ApplicationImpl*>(

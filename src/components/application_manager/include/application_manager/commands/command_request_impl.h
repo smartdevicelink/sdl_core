@@ -43,7 +43,10 @@ class SmartObject;
 }
 }
 
+
 namespace application_manager {
+
+class MessageChaining;
 
 namespace commands {
 
@@ -66,7 +69,7 @@ class CommandRequestImpl : public CommandImpl {
   void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
                    const NsSmart::SmartObject& msg_params) const;
  protected:
-  unsigned int    hmi_correlation_id_;
+  MessageChaining*  msg_chaining_;
 };
 
 }  // namespace commands

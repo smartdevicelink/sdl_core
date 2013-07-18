@@ -71,6 +71,25 @@ void CommandResponseImpl::SendResponse(bool success) {
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
+bool CommandResponseImpl::IsPendingResponseExist() {
+
+  bool result = true;
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
+
+  unsigned int mobile_correlation_id = 0;
+
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+          correlation_id, mobile_correlation_id)) {
+    result = false;
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+        mobile_correlation_id;
+  }
+
+  return result;
+}
+
 }  // namespace commands
 
 }  // namespace application_manager

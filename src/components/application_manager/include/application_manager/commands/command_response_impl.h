@@ -53,6 +53,7 @@ class CommandResponseImpl : public CommandImpl {
     virtual bool CleanUp();
     virtual void Run();
     void SendResponse(bool success);
+    bool IsPendingResponseExist();
 };
 
 }  // namespace commands

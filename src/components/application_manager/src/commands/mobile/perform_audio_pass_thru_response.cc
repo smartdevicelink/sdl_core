@@ -54,27 +54,16 @@ void PerformAudioPassThruResponse::Run() {
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
+  if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-         correlation_id, mobile_correlation_id)) {
+  if (!IsPendingResponseExist()) {
     ApplicationManagerImpl::instance()->StopAudioPassThruThread();
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
 
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-    (*message_)[strings::msg_params][strings::success] = true;
-    (*message_)[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::SUCCESS;
     SendResponse(true);
   }
 }

@@ -52,7 +52,7 @@ ChangeRegistrationResponse::~ChangeRegistrationResponse() {
 void ChangeRegistrationResponse::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationResponse::Run");
 
-  if ((*message_)[strings::msg_params][strings::success] == false) {
+  if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
     LOG4CXX_ERROR(logger_, "Success = false");
     SendResponse(false);
     return;
@@ -78,14 +78,7 @@ void ChangeRegistrationResponse::Run() {
   // get stored SmartObject
   smart_objects::SmartObject data = msg_chain->data();
 
-  const unsigned int mobile_correlation_id = 0;
-  // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
+  if (!IsPendingResponseExist()) {
 
     ApplicationImpl* application = static_cast<ApplicationImpl*>(
         ApplicationManagerImpl::instance()->

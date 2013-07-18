@@ -50,7 +50,7 @@ DeleteSubMenuResponse::~DeleteSubMenuResponse() {
 void DeleteSubMenuResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
+  if ((*message_)[strings::params][strings::success].asBool() == false) {
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
@@ -62,14 +62,7 @@ void DeleteSubMenuResponse::Run() {
   smart_objects::SmartObject data = ApplicationManagerImpl::instance()->
     GetMessageChain(hmi_correlation_id)->data();
 
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(hmi_correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-
+  if (!IsPendingResponseExist()) {
     SendResponse(true);
   }
 }

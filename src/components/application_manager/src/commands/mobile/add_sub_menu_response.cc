@@ -50,23 +50,13 @@ AddSubMenuResponse::~AddSubMenuResponse() {
 void AddSubMenuResponse::Run() {
   LOG4CXX_INFO(logger_, "AddSubMenuResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
+  if ((*message_)[strings::params][strings::success].asBool() == false) {
     LOG4CXX_ERROR(logger_, "Success = false");
     SendResponse(false);
     return;
   }
 
-  const unsigned int correlation_id = (*message_)[strings::params]
-                                 [strings::correlation_id].asUInt();
-
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-
+  if (!IsPendingResponseExist()) {
     SendResponse(true);
   }
 }

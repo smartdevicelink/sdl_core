@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/alert_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -51,25 +50,14 @@ AlertResponse::~AlertResponse() {
 void AlertResponse::Run() {
   LOG4CXX_INFO(logger_, "AlertResponse::Run");
 
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
+  if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
+  if (!IsPendingResponseExist()) {
 
     // TODO (DK): correct mobile code
     const int code =

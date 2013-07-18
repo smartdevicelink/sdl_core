@@ -50,8 +50,7 @@ DeleteCommandResponse::~DeleteCommandResponse() {
 void DeleteCommandResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteCommandResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false)
-  {
+  if ((*message_)[strings::params][strings::success].asBool() == false) {
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
@@ -59,18 +58,8 @@ void DeleteCommandResponse::Run() {
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-  const int function_id =
-      (*message_)[strings::params][strings::function_id].asInt();
-
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  const mobile_apis::Result::eType code =
-      static_cast<mobile_apis::Result::eType>(
-      (*message_)[strings::params][hmi_response::code].asInt());
-
-  const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
-  const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
 
   MessageChaining* msg_chain =
   ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -88,22 +77,14 @@ void DeleteCommandResponse::Run() {
   const hmi_apis::Common_Result::eType result_vr =
       msg_chain->vr_response_result();
 
-  const unsigned int mobile_correlation_id = 0;
-  // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
+  if (!IsPendingResponseExist()) {
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
           ApplicationManagerImpl::instance()->
           application(data[strings::params][strings::app_id]));
 
     smart_objects::SmartObject* command =
-        app->FindCommand(
-            data[strings::msg_params][strings::cmd_id].asInt());
+        app->FindCommand(data[strings::msg_params][strings::cmd_id].asInt());
 
     if (command) {
       if (hmi_apis::Common_Result::SUCCESS == result_ui) {

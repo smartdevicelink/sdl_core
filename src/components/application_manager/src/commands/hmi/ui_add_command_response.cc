@@ -48,7 +48,7 @@ UIAddCommandResponse::~UIAddCommandResponse() {
 }
 
 void UIAddCommandResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run");
+  LOG4CXX_INFO(logger_, "UIAddCommandResponse::Run");
 
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();

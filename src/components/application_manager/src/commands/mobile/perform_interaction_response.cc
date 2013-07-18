@@ -51,25 +51,13 @@ PerformInteractionResponse::~PerformInteractionResponse() {
 void PerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
+  if ((*message_)[strings::params][strings::success].asBool() == false) {
      SendResponse(false);
      LOG4CXX_ERROR(logger_, "Success = false");
      return;
   }
 
-  const unsigned int hmi_correlation_id = (*message_)[strings::params]
-                                [strings::correlation_id].asUInt();
-
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->
-       DecreaseMessageChain(hmi_correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-     (*message_)[strings::params][strings::success] = true;
-     (*message_)[strings::params][strings::result_code] =
-       mobile_apis::Result::SUCCESS;
+  if (!IsPendingResponseExist()) {
      SendResponse(true);
   }
 }

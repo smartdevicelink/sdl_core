@@ -52,26 +52,13 @@ void DeleteInteractionChoiceSetResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetResponse::Run");
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
+  if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
     LOG4CXX_ERROR(logger_, "Success = false");
     SendResponse(false);
     return;
   }
 
-  const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  const int code =
-    (*message_)[strings::params][hmi_response::code].asInt();
-
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-
+  if (!IsPendingResponseExist()) {
     SendResponse(true);
   }
 }

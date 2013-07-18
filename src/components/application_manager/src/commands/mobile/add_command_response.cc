@@ -47,16 +47,19 @@ AddCommandResponse::AddCommandResponse(
 }
 
 AddCommandResponse::~AddCommandResponse() {
+  LOG4CXX_INFO(logger_, "AddCommandResponse::~AddCommandResponse");
 }
 
 void AddCommandResponse::Run() {
   LOG4CXX_INFO(logger_, "AddCommandResponse::Run");
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse(false);
-    return;
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
   const unsigned int correlation_id =
@@ -79,22 +82,15 @@ void AddCommandResponse::Run() {
   const hmi_apis::Common_Result::eType result_vr =
       msg_chain->vr_response_result();
 
-  // sending response
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id, mobile_correlation_id)) {
 
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
+  if (!IsPendingResponseExist()) {
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
              ApplicationManagerImpl::instance()->
              application(connection_key));
 
     smart_objects::SmartObject* command =
-       app->FindCommand(
-           data[strings::msg_params][strings::cmd_id].asInt());
+       app->FindCommand(data[strings::msg_params][strings::cmd_id].asInt());
 
     if (!command) {
       if ((data[strings::msg_params].keyExists(strings::menu_params)) ||
@@ -103,15 +99,19 @@ void AddCommandResponse::Run() {
                               data[strings::msg_params]);
       }
 
+      (*message_)[strings::params][strings::connection_key] =
+          connection_key;
+
       if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
-          (hmi_apis::Common_Result::SUCCESS == result_vr)) {
+          ((hmi_apis::Common_Result::SUCCESS == result_vr) ||
+          (hmi_apis::Common_Result::INVALID_ENUM == result_vr))) {
         SendResponse(true);
-    } else {
-      // TODO: Check Response result code
-      SendResponse(false);
+      } else {
+        // TODO: Check Response result code
+        SendResponse(false);
+      }
     }
   }
-}
 }
 
 }  // namespace commands

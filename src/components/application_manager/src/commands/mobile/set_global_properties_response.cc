@@ -51,7 +51,7 @@ void SetGlobalPropertiesResponse::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesResponse::Run");
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
+  if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "Success = false");
     return;
@@ -68,18 +68,11 @@ void SetGlobalPropertiesResponse::Run() {
     return;
   }
 
-    // we need to retrieve stored response code before message chain decrase
+  // we need to retrieve stored response code before message chain decrase
   const bool result_ui = msg_chain->ui_response_result();
   const bool result_tts = msg_chain->tts_response_result();
 
-  const unsigned int mobile_correlation_id = 0;
-  // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
+  if (!IsPendingResponseExist()) {
 
     if ((mobile_apis::Result::SUCCESS == result_ui) &&
             (mobile_apis::Result::SUCCESS == result_tts)) {

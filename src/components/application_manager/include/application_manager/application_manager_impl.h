@@ -39,6 +39,7 @@
 #include <set>
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
+#include "application_manager/message_chaining.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
 #include "connection_handler/connection_handler_observer.h"
@@ -157,8 +158,10 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return TRUE on success, otherwise FALSE
      */
-    bool AddMessageChain(unsigned int connection_key,
-      const unsigned int correlation_id, const unsigned int hmi_correlation_id,
+    MessageChaining* AddMessageChain(const unsigned int& connection_key,
+      const unsigned int& correlation_id,
+      const unsigned int& hmi_correlation_id,
+      MessageChaining* msg_chaining,
       const smart_objects::SmartObject* data = NULL);
 
     /*
@@ -170,8 +173,8 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return true if there is no other pending responses
      */
-    bool DecreaseMessageChain(const unsigned int hmi_correlation_id,
-                              unsigned int mobile_correlation_id);
+    bool DecreaseMessageChain(const unsigned int& hmi_correlation_id,
+                              unsigned int& mobile_correlation_id);
 
     /*
      * @brief Retrieve MessageChaining object from chain for corresponding
@@ -182,7 +185,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return MessageChaining on success, otherwise NULL
      */
     MessageChaining* GetMessageChain(
-        const unsigned int hmi_correlation_id) const;
+        const unsigned int& hmi_correlation_id) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request
@@ -403,7 +406,7 @@ class ApplicationManagerImpl : public ApplicationManager
     /**
      * @brief Map of connection keys and associated applications
      */
-    std::map<int, Application*> applications_;
+    std::map<int, Application*>                   applications_;
     /**
      * @brief List of applications
      */

@@ -342,34 +342,44 @@ unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
   return message_chain_current_id_;
 }
 
-bool ApplicationManagerImpl::AddMessageChain(const unsigned int connection_key,
-    const unsigned int correlation_id, const unsigned int hmi_correlation_id,
+MessageChaining* ApplicationManagerImpl::AddMessageChain(
+    const unsigned int& connection_key, const unsigned int& correlation_id,
+    const unsigned int& hmi_correlation_id, MessageChaining* msg_chaining,
     const smart_objects::SmartObject* data) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::AddMessageChain");
 
-    MessageChains::iterator it =  message_chaining_.find(hmi_correlation_id);
-    if (message_chaining_.end() != it) {
-      it->second->IncrementCounter();
+  if (NULL == msg_chaining) {
+    MessageChaining* chain =
+        new MessageChaining(connection_key, correlation_id);
+
+    if (chain) {
+      if (data) {
+        chain->set_data(*data);
+      }
+      MessageChainPtr ptr(chain);
+      message_chaining_[hmi_correlation_id] = ptr;
+      return chain;
     } else {
-
-      MessageChaining* chain =
-          new MessageChaining(connection_key, correlation_id);
-
-      if (chain) {
-        if (data) {
-          chain->set_data(*data);
-        }
-        MessageChainPtr ptr(chain);
-        message_chaining_[hmi_correlation_id] = ptr;
-      } else {
-        LOG4CXX_ERROR(logger_, "Null-pointer message received.");
-        return false;
+      LOG4CXX_ERROR(logger_, "Null pointer message received.");
+      return NULL;
+    }
+  } else {
+    MessageChains::iterator it =  message_chaining_.begin();
+    for (; message_chaining_.end() != it; ++it) {
+      if ((*it->second) == *msg_chaining) {
+        it->second->IncrementCounter();
+        message_chaining_[hmi_correlation_id] = it->second;
+        return &(*it->second);
       }
     }
-    return true;
+  }
+  return NULL;
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
-  const unsigned int hmi_correlation_id, unsigned int mobile_correlation_id) {
+  const unsigned int& hmi_correlation_id, unsigned int& mobile_correlation_id) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain");
+
   bool result = false;
   MessageChains::iterator it = message_chaining_.find(hmi_correlation_id);
 
@@ -386,7 +396,9 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 }
 
 MessageChaining* ApplicationManagerImpl::GetMessageChain(
-  const unsigned int hmi_correlation_id) const {
+  const unsigned int& hmi_correlation_id) const {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::GetMessageChain");
+
   MessageChains::const_iterator it =
     message_chaining_.find(hmi_correlation_id);
   if (message_chaining_.end() != it) {
@@ -576,6 +588,13 @@ void ApplicationManagerImpl::SendMessageToMobile(
     LOG4CXX_WARN(logger_, "No Mobile Handler set");
     return;
   }
+
+  LOG4CXX_WARN(logger_, "#### correlation id " <<
+      (*message)[strings::params][strings::correlation_id].asUInt());
+  LOG4CXX_WARN(logger_, "#### function id " <<
+       (*message)[strings::params][strings::function_id].asUInt());
+  LOG4CXX_WARN(logger_, "#### connection key " <<
+          (*message)[strings::params][strings::connection_key].asUInt());
 
   mobile_so_factory().attachSchema(*message);
   LOG4CXX_INFO(logger_, "Attached schema to message, result if valid: "

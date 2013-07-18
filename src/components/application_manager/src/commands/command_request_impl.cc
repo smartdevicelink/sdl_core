@@ -33,6 +33,7 @@
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_chaining.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -41,7 +42,7 @@ namespace commands {
 
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
 : CommandImpl(message),
-  hmi_correlation_id_(0) {
+  msg_chaining_(NULL) {
 }
 
 CommandRequestImpl::~CommandRequestImpl() {
@@ -114,11 +115,13 @@ void CommandRequestImpl::CreateHMIRequest(
 
 
   // get hmi correlation id for chaining further request from this object
-  if ((0 == hmi_correlation_id_) && (true == chaining_required)) {
-      hmi_correlation_id_ =
+  const unsigned int hmi_correlation_id_ =
         ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  }
 
+  LOG4CXX_INFO(logger_, "CommandRequestImpl::connection key " <<
+  (*message_)[strings::params][strings::connection_key].asUInt());
+  LOG4CXX_INFO(logger_, "CommandRequestImpl::correlation id " <<
+  (*message_)[strings::params][strings::correlation_id].asUInt());
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
@@ -134,8 +137,11 @@ void CommandRequestImpl::CreateHMIRequest(
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   } else if (chaining_required) {
-    if (!ApplicationManagerImpl::instance()->AddMessageChain(connection_key,
-        correlation_id, hmi_correlation_id_, &(*message_))) {
+    msg_chaining_ = ApplicationManagerImpl::instance()->AddMessageChain(
+        connection_key, correlation_id, hmi_correlation_id_, msg_chaining_,
+        &(*message_));
+
+    if (!msg_chaining_) {
       LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");
     }
   }
