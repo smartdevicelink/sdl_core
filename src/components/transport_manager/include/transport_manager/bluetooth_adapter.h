@@ -59,6 +59,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   virtual DeviceAdapter::Error init();
   virtual void terminate();
   virtual DeviceAdapter::Error scan();
+  virtual bool isInitialised() const;
  private:
 
   typedef std::vector<uint8_t> RfcommChannelVector;
@@ -73,6 +74,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   bool thread_started_;
   bool shutdown_requested_;
   bool device_scan_requested_;
+  bool ready_;
   pthread_mutex_t device_scan_requested_mutex_;
   pthread_cond_t device_scan_requested_cond_;
 
@@ -150,6 +152,7 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
                                  ApplicationHandle app_handle,
                                  SessionID session_id);
   virtual void terminate();
+  virtual bool isInitialised() const;
   virtual ~BluetoothConnectionFactory();
  private:
   DeviceAdapterController* controller_;
@@ -161,9 +164,6 @@ class BluetoothDeviceAdapter : public DeviceAdapterImpl {
   virtual ~BluetoothDeviceAdapter();
  protected:
   virtual DeviceType getDeviceType() const;
- private:
-  std::auto_ptr<DeviceScanner> device_scanner_;
-  std::auto_ptr<ServerConnectionFactory> server_connection_factory_;
 };
 
 }  // namespace device_adapter

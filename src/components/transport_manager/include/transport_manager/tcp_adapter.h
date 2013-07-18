@@ -62,13 +62,15 @@ class TcpClientListener : public ClientConnectionListener {
   virtual DeviceAdapter::Error declineConnect(
       const DeviceHandle device_handle, const ApplicationHandle app_handle);
   virtual void terminate();
- private:
+  virtual bool isInitialised() const;
+private:
   const uint16_t port_;
   DeviceAdapterController* controller_;
   pthread_t thread_;
   int socket_;
   bool thread_started_;
   bool shutdown_requested_;
+  bool ready_;
 };
 
 class TcpDevice : public Device {
@@ -81,6 +83,8 @@ class TcpDevice : public Device {
    * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
    **/
   TcpDevice(const in_addr& in_addr, const char* name);
+
+  virtual ~TcpDevice();
 
   /**
    * @brief Compare devices.
@@ -122,10 +126,9 @@ class TcpDeviceAdapter : public DeviceAdapterImpl {
  public:
   TcpDeviceAdapter();
   virtual ~TcpDeviceAdapter();
+  static const uint16_t default_port = 1234;
  protected:
   virtual DeviceType getDeviceType() const;
- private:
-  std::auto_ptr<ClientConnectionListener> client_connection_listener_;
 };
 
 }  // namespace device_adapter

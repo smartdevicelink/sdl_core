@@ -50,7 +50,8 @@ TcpClientListener::TcpClientListener(DeviceAdapterController* controller,
       thread_(),
       socket_(-1),
       thread_started_(false),
-      shutdown_requested_(false) {
+      shutdown_requested_(false),
+      ready_(false) {
 }
 
 void* tcpClientListenerThread(void* data) {
@@ -73,6 +74,9 @@ DeviceAdapter::Error TcpClientListener::init() {
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons(port_);
   server_address.sin_addr.s_addr = INADDR_ANY;
+
+  int optval = 1;
+  setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
   if (0 != bind(socket_, (sockaddr*) &server_address, sizeof(server_address))) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "bind() failed");
@@ -110,7 +114,8 @@ DeviceAdapter::Error TcpClientListener::acceptConnect(
     return DeviceAdapter::BAD_PARAM;
 
   ConnectionSptr connection(
-      new TcpSocketConnection(device_handle, app_handle, session_id, controller_));
+      new TcpSocketConnection(device_handle, app_handle, session_id,
+                              controller_));
   controller_->connectionCreated(connection, session_id, device_handle,
                                  app_handle);
   return static_cast<TcpSocketConnection*>(connection.get())->start();
@@ -139,12 +144,17 @@ void TcpClientListener::terminate() {
   }
 }
 
+bool TcpClientListener::isInitialised() const {
+  return ready_;
+}
+
 TcpClientListener::~TcpClientListener() {
 }
 
 void TcpClientListener::thread() {
   LOG4CXX_INFO(logger_, "Tcp client listener thread started");
 
+  ready_ = true;
   while (false == shutdown_requested_) {
     sockaddr_in client_address;
     socklen_t client_address_size = sizeof(client_address);
@@ -177,12 +187,14 @@ void TcpClientListener::thread() {
     controller_->connectRequested(device_handle, app_handle);
   }
 
+  close(socket_);
   LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
 }
 
 TcpDevice::TcpDevice(const in_addr& in_addr, const char* name)
     : Device(name),
       in_addr_(in_addr) {
+  pthread_mutex_init(&applications_mutex_, 0);
 }
 
 bool TcpDevice::isSameAs(const Device* other) const {
@@ -210,6 +222,10 @@ void TcpDevice::removeApplication(const ApplicationHandle app_handle) {
   pthread_mutex_unlock(&applications_mutex_);
 }
 
+TcpDevice::~TcpDevice() {
+  pthread_mutex_destroy(&applications_mutex_);
+}
+
 int TcpDevice::getApplicationSocket(const ApplicationHandle app_handle) const {
   return app_handle;
 }
@@ -230,8 +246,7 @@ bool TcpSocketConnection::establish(ConnectError** error) {
 }
 
 TcpDeviceAdapter::TcpDeviceAdapter()
-    : client_connection_listener_(new TcpClientListener(this, 1234)) {
-  setClientConnectionListener(client_connection_listener_.get());
+    : DeviceAdapterImpl(0, 0, new TcpClientListener(this, default_port)) {
 }
 
 TcpDeviceAdapter::~TcpDeviceAdapter() {

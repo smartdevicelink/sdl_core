@@ -78,6 +78,7 @@ class DeviceAdapter {
    virtual Error LoadState(DeviceAdapterState* state) = 0;
    virtual void SaveState(DeviceAdapterState* state) = 0;
    */
+  virtual bool isInitialised() const = 0;
 
   virtual Error init(DeviceHandleGenerator* handle_generator,
                      Configuration* configuration) = 0;

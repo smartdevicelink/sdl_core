@@ -71,6 +71,7 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
       thread_(),
       thread_started_(false),
       shutdown_requested_(false),
+      ready_(true),
       device_scan_requested_(false),
       device_scan_requested_mutex_(),
       device_scan_requested_cond_() {
@@ -94,6 +95,10 @@ void* bluetoothDeviceScannerThread(void* data) {
   assert(bluetoothDeviceScanner != 0);
   bluetoothDeviceScanner->thread();
   return 0;
+}
+
+bool BluetoothDeviceScanner::isInitialised() const {
+  return thread_started_;
 }
 
 SearchDeviceError* BluetoothDeviceScanner::doInquiry(
@@ -246,14 +251,11 @@ BluetoothDeviceScanner::RfcommChannelVector BluetoothDeviceScanner::discoverSmar
 
     LOG4CXX_INFO(
         logger_,
-        "SmartDeviceLink service was discovered on device "
-            << getUniqueDeviceId(device_address) << " at channel(s): "
-            << rfcomm_channels_string.str().c_str());
+        "SmartDeviceLink service was discovered on device " << getUniqueDeviceId(device_address) << " at channel(s): " << rfcomm_channels_string.str().c_str());
   } else {
     LOG4CXX_INFO(
         logger_,
-        "SmartDeviceLink service was not discovered on device "
-            << getUniqueDeviceId(device_address));
+        "SmartDeviceLink service was not discovered on device " << getUniqueDeviceId(device_address));
   }
 
   return channels;
@@ -262,6 +264,7 @@ BluetoothDeviceScanner::RfcommChannelVector BluetoothDeviceScanner::discoverSmar
 void BluetoothDeviceScanner::thread() {
   LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized");
 
+  ready_ = true;
   while (false == shutdown_requested_) {
     bool device_scan_requested = waitForDeviceScanRequest();
     if (device_scan_requested) {
@@ -365,9 +368,8 @@ DeviceAdapter::Error BluetoothDeviceScanner::scan() {
   return ret;
 }
 
-BluetoothDevice::BluetoothDevice(
-    const bdaddr_t& address, const char* name,
-    const RfcommChannelVector& rfcomm_channels)
+BluetoothDevice::BluetoothDevice(const bdaddr_t& address, const char* name,
+                                 const RfcommChannelVector& rfcomm_channels)
     : Device(name),
       address_(address),
       next_application_handle_(1) {
@@ -397,11 +399,11 @@ bool BluetoothDevice::isSameAs(const Device* other) const {
 
 ApplicationList BluetoothDevice::getApplicationList() const {
   ApplicationList result;
-  for(RfcommChannels::const_iterator it = rfcomm_channels_.begin(); it != rfcomm_channels_.end(); ++it)
+  for (RfcommChannels::const_iterator it = rfcomm_channels_.begin();
+      it != rfcomm_channels_.end(); ++it)
     result.push_back(it->first);
   return result;
 }
-
 
 BluetoothSocketConnection::BluetoothSocketConnection(
     const DeviceHandle device_handle, const ApplicationHandle app_handle,
@@ -420,7 +422,8 @@ bool BluetoothSocketConnection::establish(ConnectError** error) {
       static_cast<BluetoothDevice*>(device.get());
 
   uint8_t rfcomm_channel;
-  if (!bluetooth_device->getRfcommChannel(application_handle(), &rfcomm_channel)) {
+  if (!bluetooth_device->getRfcommChannel(application_handle(),
+                                          &rfcomm_channel)) {
     LOG4CXX_ERROR(logger_,
                   "Application " << application_handle() << " not found");
     *error = new ConnectError();
@@ -467,9 +470,9 @@ DeviceAdapter::Error BluetoothConnectionFactory::init() {
   return DeviceAdapter::OK;
 }
 
-DeviceAdapter::Error BluetoothConnectionFactory::createConnection(DeviceHandle device_handle,
-                                                   ApplicationHandle app_handle,
-                                                   SessionID session_id) {
+DeviceAdapter::Error BluetoothConnectionFactory::createConnection(
+    DeviceHandle device_handle, ApplicationHandle app_handle,
+    SessionID session_id) {
   BluetoothSocketConnection* connection(
       new BluetoothSocketConnection(device_handle, app_handle, session_id,
                                     controller_));
@@ -482,19 +485,19 @@ DeviceAdapter::Error BluetoothConnectionFactory::createConnection(DeviceHandle d
 void BluetoothConnectionFactory::terminate() {
 }
 
+bool BluetoothConnectionFactory::isInitialised() const {
+  return true;
+}
+
 BluetoothConnectionFactory::~BluetoothConnectionFactory() {
 }
 
 BluetoothDeviceAdapter::BluetoothDeviceAdapter()
-    : device_scanner_(new BluetoothDeviceScanner(this)),
-      server_connection_factory_(new BluetoothConnectionFactory(this)) {
-  setDeviceScanner(device_scanner_.get());
-  setServerConnectionFactory(server_connection_factory_.get());
+    : DeviceAdapterImpl(new BluetoothDeviceScanner(this),
+                        new BluetoothConnectionFactory(this), 0) {
 }
 
 BluetoothDeviceAdapter::~BluetoothDeviceAdapter() {
-  device_scanner_->terminate();
-  server_connection_factory_->terminate();
 }
 
 DeviceType BluetoothDeviceAdapter::getDeviceType() const {

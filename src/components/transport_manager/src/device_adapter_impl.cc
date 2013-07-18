@@ -57,7 +57,10 @@ Connection::Connection() {
 Connection::~Connection() {
 }
 
-DeviceAdapterImpl::DeviceAdapterImpl()
+DeviceAdapterImpl::DeviceAdapterImpl(
+    DeviceScanner* device_scanner,
+    ServerConnectionFactory* server_connection_factory,
+    ClientConnectionListener* client_connection_listener)
     : listeners_(),
       handle_generator_(0),
       initialised_(0),
@@ -65,14 +68,26 @@ DeviceAdapterImpl::DeviceAdapterImpl()
       devices_mutex_(),
       connections_(),
       connections_mutex_(),
-      device_scanner_(0),
-      server_connection_factory_(0),
-      client_connection_listener_(0) {
+      device_scanner_(device_scanner),
+      server_connection_factory_(server_connection_factory),
+      client_connection_listener_(client_connection_listener) {
   pthread_mutex_init(&devices_mutex_, 0);
   pthread_mutex_init(&connections_mutex_, 0);
 }
 
 DeviceAdapterImpl::~DeviceAdapterImpl() {
+  if (device_scanner_) {
+    device_scanner_->terminate();
+    delete device_scanner_;
+  }
+  if (server_connection_factory_) {
+    server_connection_factory_->terminate();
+    delete server_connection_factory_;
+  }
+  if (client_connection_listener_) {
+    client_connection_listener_->terminate();
+    delete client_connection_listener_;
+  }
   pthread_mutex_destroy(&connections_mutex_);
   pthread_mutex_destroy(&devices_mutex_);
 }
@@ -96,25 +111,25 @@ DeviceAdapter::Error DeviceAdapterImpl::init(
   if ((error == OK) && client_connection_listener_)
     error = client_connection_listener_->init();
 
-  initialised_ = error == OK;
+  initialised_ = true;
   return error;
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
-  if (!initialised_)
-    return BAD_STATE;
   if (device_scanner_ == 0)
     return NOT_SUPPORTED;
+  if (!device_scanner_->isInitialised())
+    return BAD_STATE;
   return device_scanner_->scan();
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::connect(
     const DeviceHandle device_handle, const ApplicationHandle app_handle,
     const SessionID session_id) {
-  if (!initialised_)
-    return BAD_STATE;
   if (server_connection_factory_ == 0)
     return NOT_SUPPORTED;
+  if (!server_connection_factory_->isInitialised())
+    return BAD_STATE;
 
   return server_connection_factory_->createConnection(device_handle, app_handle,
                                                       session_id);
@@ -267,20 +282,6 @@ void DeviceAdapterImpl::searchDeviceFailed(const SearchDeviceError& error) {
     (*it)->onSearchDeviceFailed(this, error);
 }
 
-void DeviceAdapterImpl::setDeviceScanner(DeviceScanner* device_scanner) {
-  device_scanner_ = device_scanner;
-}
-
-void DeviceAdapterImpl::setServerConnectionFactory(
-    ServerConnectionFactory* server_connection_factory) {
-  server_connection_factory_ = server_connection_factory;
-}
-
-void DeviceAdapterImpl::setClientConnectionListener(
-    ClientConnectionListener* client_connection_listener) {
-  client_connection_listener_ = client_connection_listener;
-}
-
 bool DeviceAdapterImpl::isSearchDevicesSupported() const {
   return device_scanner_ != 0;
 }
@@ -412,22 +413,21 @@ void DeviceAdapterImpl::connectionAborted(const SessionID session_id,
 DeviceAdapter::Error DeviceAdapterImpl::acceptConnect(
     const DeviceHandle device_handle, const ApplicationHandle app_handle,
     const SessionID session_id) {
-  if (NULL != client_connection_listener_) {
-    return client_connection_listener_->acceptConnect(device_handle, app_handle,
-                                                      session_id);
-  } else {
+  if (NULL == client_connection_listener_)
     return DeviceAdapter::NOT_SUPPORTED;
-  }
+  if (!client_connection_listener_->isInitialised())
+    return BAD_STATE;
+  return client_connection_listener_->acceptConnect(device_handle, app_handle,
+                                                    session_id);
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::declineConnect(
     const DeviceHandle device_handle, const ApplicationHandle app_handle) {
-  if (NULL != client_connection_listener_) {
-    return client_connection_listener_->declineConnect(device_handle,
-                                                       app_handle);
-  } else {
+  if (NULL == client_connection_listener_)
     return DeviceAdapter::NOT_SUPPORTED;
-  }
+  if (!client_connection_listener_->isInitialised())
+    return BAD_STATE;
+  return client_connection_listener_->declineConnect(device_handle, app_handle);
 }
 
 void DeviceAdapterImpl::connectRequested(const DeviceHandle device_handle,
@@ -435,6 +435,18 @@ void DeviceAdapterImpl::connectRequested(const DeviceHandle device_handle,
   for (DeviceAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->onConnectRequested(this, device_handle, app_handle);
+}
+
+bool DeviceAdapterImpl::isInitialised() const {
+  if(!initialised_)
+    return false;
+  if(device_scanner_ && !device_scanner_->isInitialised())
+    return false;
+  if(server_connection_factory_ && !server_connection_factory_->isInitialised())
+    return false;
+  if(client_connection_listener_ && !client_connection_listener_->isInitialised())
+    return false;
+  return true;
 }
 
 ConnectionSptr DeviceAdapterImpl::findEstablishedConnection(

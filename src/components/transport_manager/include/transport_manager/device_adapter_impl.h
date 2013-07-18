@@ -168,6 +168,7 @@ class DeviceScanner {
   virtual DeviceAdapter::Error init() = 0;
   virtual DeviceAdapter::Error scan() = 0;
   virtual void terminate() = 0;
+  virtual bool isInitialised() const = 0;
   virtual ~DeviceScanner() {
   }
 };
@@ -179,6 +180,7 @@ class ServerConnectionFactory {
                                                 ApplicationHandle app_handle,
                                                 SessionID session_id) = 0;
   virtual void terminate() = 0;
+  virtual bool isInitialised() const = 0;
   virtual ~ServerConnectionFactory() {
   }
 };
@@ -192,6 +194,7 @@ class ClientConnectionListener {
                                              const SessionID session_id) = 0;
   virtual DeviceAdapter::Error declineConnect(
       const DeviceHandle device_handle, const ApplicationHandle app_handle) = 0;
+  virtual bool isInitialised() const = 0;
   virtual ~ClientConnectionListener() {
   }
 };
@@ -205,12 +208,16 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @brief Constructor.
    *
    **/
-  DeviceAdapterImpl();
+  DeviceAdapterImpl(DeviceScanner* device_scanner,
+                    ServerConnectionFactory* server_connection_factory,
+                    ClientConnectionListener* client_connection_listener);
 
   /**
    * @brief Destructor.
    **/
   virtual ~DeviceAdapterImpl();
+
+  virtual bool isInitialised() const;
 
   /**
    * @brief Run device adapter.
@@ -315,11 +322,6 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
                               RawMessageSptr message, const DataSendError&);
   virtual void connectRequested(const DeviceHandle device_handle,
                                 const ApplicationHandle app_handle);
-  void setDeviceScanner(DeviceScanner* device_scanner);
-  void setServerConnectionFactory(
-      ServerConnectionFactory* server_connection_factory);
-  void setClientConnectionListener(
-      ClientConnectionListener* client_connection_listener);
 
  private:
 
