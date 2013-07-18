@@ -17,4 +17,5 @@ install_manifest.txt
 
 # ctags-generated
 tags
-
+# Mac OS Specific
+.DS_Store
