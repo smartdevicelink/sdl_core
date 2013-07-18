@@ -53,7 +53,6 @@ class MockTransportManagerListener :
  public:
   MOCK_METHOD2(onDeviceFound, void (const DeviceHandle device,
           const ApplicationList app_list));
-  MOCK_METHOD0(onSearchDeviceDone, void ());
   MOCK_METHOD2(onSearchDeviceFailed, void (const DeviceAdapter* device_adapter,
           const SearchDeviceError& error));
   MOCK_METHOD2(onConnectDone, void(const DeviceAdapter* device_adapter,

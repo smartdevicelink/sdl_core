@@ -149,7 +149,11 @@ TEST(TransportManagerImplTest, search)
   EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
 
   tm->searchDevices();
-  pthread_cond_wait(&task_complete, &task_mutex);
+
+  timespec elapsed;
+  clock_gettime(CLOCK_REALTIME, &elapsed);
+  elapsed.tv_sec += 1;
+  pthread_cond_timedwait(&task_complete, &task_mutex, &elapsed);
   pthread_mutex_unlock(&task_mutex);
 }
 
@@ -159,7 +163,11 @@ TEST(TransportManagerImplTest, connect)
   TransportManagerImpl* tm = TransportManagerImpl::instance();
   EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
   tm->connectDevice(hello, hello_app, 42);
-  pthread_cond_wait(&task_complete, &task_mutex);
+
+  timespec elapsed;
+  clock_gettime(CLOCK_REALTIME, &elapsed);
+  elapsed.tv_sec += 1;
+  pthread_cond_timedwait(&task_complete, &task_mutex, &elapsed);
   pthread_mutex_unlock(&task_mutex);
 }
 
@@ -177,7 +185,10 @@ TEST(TransportManagerImplTest, sendReceive)
   EXPECT_CALL(*tml, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(AtLeast(1));
   EXPECT_CALL(*tml, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
 
-  pthread_cond_wait(&task_complete, &task_mutex);
+  timespec elapsed;
+  clock_gettime(CLOCK_REALTIME, &elapsed);
+  elapsed.tv_sec += 1;
+  pthread_cond_timedwait(&task_complete, &task_mutex, &elapsed);
   pthread_mutex_unlock(&task_mutex);
 }
 
@@ -187,7 +198,11 @@ TEST(TransportManagerImplTest, disconnectDevice)
   TransportManagerImpl* tm = TransportManagerImpl::instance();
   tm->disconnectDevice(0);
   EXPECT_CALL(*tml, onDisconnectDeviceDone(_, _)).Times(1);
-  pthread_cond_wait(&task_complete, &task_mutex);
+
+  timespec elapsed;
+  clock_gettime(CLOCK_REALTIME, &elapsed);
+  elapsed.tv_sec += 1;
+  pthread_cond_timedwait(&task_complete, &task_mutex, &elapsed);
   pthread_mutex_unlock(&task_mutex);
 }
 
@@ -209,6 +224,6 @@ int main(int argc, char** argv) {
   mock_da->addDevice("hello");
 
   testing::InitGoogleTest(&argc, argv);
-  RUN_ALL_TESTS();
-  return 0;
+
+  return RUN_ALL_TESTS();
 }
