@@ -154,7 +154,7 @@ void BluetoothAdapter::connectionThread(Connection* connection) {
           << " from connection map");
 
   pthread_mutex_lock(&connections_mutex_);
-  connections_.remove(connection->session_id());
+  connections_.erase(connection->session_id());
   pthread_mutex_unlock(&connections_mutex_);
 
   delete connection;
@@ -277,8 +277,9 @@ void BluetoothAdapter::mainThread() {
 
       std::set<DeviceHandle> connected_devices;
 
-      for (int i = 0; i < connections_.size(); ++i) {
-        Connection* connection = connections_[i];
+      for (ConnectionMap::const_iterator it = connections_.begin();
+          it != connections_.end(); ++it) {
+        const Connection* connection = it->second;
 
         if (connected_devices.end()
             == connected_devices.find(connection->device_handle())) {

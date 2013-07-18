@@ -93,7 +93,8 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void connectDevice(const DeviceHandle &device_id,
-                             const ApplicationHandle &app_id);
+                             const ApplicationHandle &app_id,
+                             const SessionID &session_id);
 
   /**
    * @brief Disconnect from all applications connected on device.

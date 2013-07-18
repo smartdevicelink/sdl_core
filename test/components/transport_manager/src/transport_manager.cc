@@ -103,7 +103,6 @@ DeviceHandle hello;
 ApplicationHandle hello_app;
 pthread_cond_t task_complete;
 pthread_mutex_t task_mutex;
-int connection_id;
 
 class MyListener : public TransportManagerListenerImpl {
   void onDeviceFound(const DeviceHandle device,
@@ -114,7 +113,6 @@ class MyListener : public TransportManagerListenerImpl {
   }
   void onConnectDone(const DeviceAdapter* device_adapter,
                      const transport_manager::SessionID session_id) {
-    connection_id = session_id;
     pthread_cond_signal(&task_complete);
   }
   void onDataReceiveDone(const DeviceAdapter* device_adapter,
@@ -159,8 +157,8 @@ TEST(TransportManagerImplTest, connect)
 {
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
-  EXPECT_CALL(*tml, onConnectDone(_, _)).Times(1);
-  tm->connectDevice(hello, hello_app);
+  EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
+  tm->connectDevice(hello, hello_app, 42);
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
 }
@@ -170,7 +168,7 @@ TEST(TransportManagerImplTest, sendReceive)
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
   const unsigned char data[100] = {99};
-  utils::SharedPtr<RawMessage> srm = new RawMessage(connection_id, 1, const_cast<unsigned char *>(data), 100);
+  utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, const_cast<unsigned char *>(data), 100);
 
   tm->sendMessageToDevice(srm);
 

@@ -36,7 +36,6 @@
 #include <sys/un.h>
 
 #include <list>
-#include <libexplain/bind.h>
 
 #include "transport_manager/mock_device_adapter.h"
 #include "transport_manager/device_adapter_impl.h"

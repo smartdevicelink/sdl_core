@@ -42,7 +42,6 @@
 #include "utils/logger.h"
 
 #include "device_adapter.h"
-#include "fixed_idx_container.h"
 
 namespace transport_manager {
 
@@ -92,7 +91,8 @@ class DeviceAdapterImpl : public DeviceAdapter {
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
    **/
   virtual Error connect(const DeviceHandle device_handle,
-                        const ApplicationHandle app_handle);
+                        const ApplicationHandle app_handle,
+                        const int session_id);
 
   /**
    * @brief Disconnect from specified session.
@@ -210,7 +210,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
      * @param session_id Session identifier.
      **/
     Connection(const DeviceHandle device_handle,
-               const ApplicationHandle app_handle);
+               const ApplicationHandle app_handle, const int session_id);
 
     /**
      * @brief Destructor.
@@ -229,10 +229,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
 
     int session_id() const {
       return session_id_;
-    }
-
-    void session_id(int sid) {
-      session_id_ = sid;
     }
 
     void set_connection_socket(int socket) {
@@ -281,7 +277,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
     /**
      * @brief Session identifier.
      **/
-    SessionID session_id_;
+    const SessionID session_id_;
 
     /**
      * @brief Thread that handles connection.
@@ -361,6 +357,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    **/
   DeviceAdapter::Error createConnection(const DeviceHandle device_handle,
                                         const ApplicationHandle app_handle,
+                                        const int session_id,
                                         Connection** connection);
 
   /**
@@ -452,7 +449,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Connections map.
    **/
-  typedef std::vector<Connection*> ConnectionVector;
+  typedef std::map<SessionID, Connection*> ConnectionMap;
 
   /**
    * @brief Logger.
@@ -514,7 +511,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connections_map
    **/
-  pointer_container<Connection*> connections_;
+  ConnectionMap connections_;
 
   /**
    * @brief Mutex restricting access to connections map.

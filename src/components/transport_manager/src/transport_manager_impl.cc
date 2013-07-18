@@ -123,10 +123,11 @@ TransportManagerImpl* TransportManagerImpl::instance() {
 }
 
 void TransportManagerImpl::connectDevice(const DeviceHandle &device_id,
-                                         const ApplicationHandle &app_id) {
+                                         const ApplicationHandle &app_id,
+                                         const SessionID &session_id) {
   LOG4CXX_INFO(
       logger_,
-      "Connect device called with arguments device_id " << device_id << " app_id " << app_id);
+      "Connect device called with arguments device_id " << device_id << " app_id " << app_id << " session_id " << session_id);
 
   if (false == this->is_initialized_) {
     //todo: log error
@@ -139,7 +140,7 @@ void TransportManagerImpl::connectDevice(const DeviceHandle &device_id,
     LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
     return;
   }
-  if (DeviceAdapter::Error::OK != da->connect(device_id, app_id)) {
+  if (DeviceAdapter::Error::OK != da->connect(device_id, app_id, session_id)) {
     LOG4CXX_ERROR(logger_, "Connect failed");
     //error case
     return;
@@ -176,11 +177,9 @@ void TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {
       "Send message to device called with arguments serial number " << message->serial_number());
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
+    //todo: log error
     return;
   }
-  DeviceAdapter *da = adapter_handler_.getAdapterBySession(message->connection_key());
-  DeviceList dlist = da->getDeviceList();
-
   this->postMessage(message);
   LOG4CXX_INFO(logger_, "Message posted");
 }
@@ -462,7 +461,6 @@ void TransportManagerImpl::messageQueueThread(void) {
 
     u_int serial_number = std::numeric_limits<unsigned int>::max();
     RawMessageSptr active_msg;
-    // TODO: Lock thread on empty queue
     pthread_mutex_lock(&message_queue_mutex_);
     for (MessageQueue::iterator it = message_queue_.begin();
         it != message_queue_.end(); ++it) {

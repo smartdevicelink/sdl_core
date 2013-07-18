@@ -62,9 +62,11 @@ bool DeviceAdapterImpl::Device::isSameAs(const Device* other_device) const {
 }
 
 DeviceAdapterImpl::Connection::Connection(const DeviceHandle device_handle,
-                                          const ApplicationHandle app_handle)
+                                          const ApplicationHandle app_handle,
+                                          const int session_id)
     : device_handle_(device_handle),
       app_handle_(app_handle),
+      session_id_(session_id),
       connection_thread_(),
       notification_pipe_fds_(),
       connection_socket_(-1),
@@ -170,8 +172,10 @@ void DeviceAdapterImpl::waitForThreadsTermination() {
 
   pthread_mutex_lock(&connections_mutex_);
 
-  for (int i = 0; i < connections_.size(); ++i) {
-    Connection* connection = connections_[i];
+  for (ConnectionMap::iterator it = connections_.begin();
+      it != connections_.end(); ++it) {
+    SessionID session_id = it->first;
+    Connection* connection = it->second;
 
     connection->set_terminate_flag(true);
     if (-1 != connection->getNotificationPipeWriteFd()) {
@@ -179,7 +183,7 @@ void DeviceAdapterImpl::waitForThreadsTermination() {
       if (1 != write(connection->getNotificationPipeWriteFd(), &c, 1)) {
         LOG4CXX_ERROR_WITH_ERRNO(
             logger_,
-            "Failed to wake up connection thread for connection " << i);
+            "Failed to wake up connection thread for connection " << session_id);
       }
     }
     connection_threads.push_back(connection->connection_thread());
@@ -199,7 +203,7 @@ void DeviceAdapterImpl::waitForThreadsTermination() {
 
 DeviceAdapter::Error DeviceAdapterImpl::createConnection(
     const DeviceHandle device_handle, const ApplicationHandle app_handle,
-    Connection** connection) {
+    const int session_id, Connection** connection) {
   assert(connection != NULL);
   *connection = NULL;
 
@@ -211,20 +215,23 @@ DeviceAdapter::Error DeviceAdapterImpl::createConnection(
 
   pthread_mutex_lock(&connections_mutex_);
 
-  for (int i = 0; i < connections_.size(); ++i) {
-    const Connection* existing_connection = connections_[i];
+  for (ConnectionMap::const_iterator it = connections_.begin();
+      it != connections_.end(); ++it) {
+    const Connection* existing_connection = it->second;
     if (existing_connection->application_handle() == app_handle
         && existing_connection->device_handle() == device_handle) {
+      error = DeviceAdapter::ALREADY_EXIST;
+      break;
+    }
+    if (existing_connection->session_id() == session_id) {
       error = DeviceAdapter::ALREADY_EXIST;
       break;
     }
   }
 
   if (error == DeviceAdapter::OK) {
-    *connection = new Connection(device_handle, app_handle);
-    // FIXME: Change vector<Connection*> to something more appropriate
-    int id = connections_.add(*connection);
-    (*connection)->session_id(id);
+    *connection = new Connection(device_handle, app_handle, session_id);
+    connections_[session_id] = *connection;
   }
 
   pthread_mutex_unlock(&connections_mutex_);
@@ -236,7 +243,7 @@ void DeviceAdapterImpl::deleteConnection(Connection* connection) {
   assert(connection != 0);
 
   pthread_mutex_lock(&connections_mutex_);
-  connections_.remove(connection->session_id());
+  connections_.erase(connection->session_id());
   pthread_mutex_unlock(&connections_mutex_);
   delete connection;
 }
@@ -613,11 +620,13 @@ DeviceAdapter::Error DeviceAdapterImpl::sendData(const int session_id,
   } else {
     pthread_mutex_lock(&connections_mutex_);
 
-    Connection* connection = connections_[session_id];
+    ConnectionMap::iterator connection_it = connections_.find(session_id);
 
-    if (connection != nullptr) {
+    if (connections_.end() == connection_it) {
       LOG4CXX_ERROR(logger_, "Connection " << session_id << " does not exist");
     } else {
+      Connection* connection = connection_it->second;
+
       connection->frames_to_send().push(data);
 
       if (-1 != connection->getNotificationPipeWriteFd()) {
@@ -652,7 +661,8 @@ void* DeviceAdapterImpl::connectionThreadStartRoutine(void* data) {
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::connect(
-    const DeviceHandle device_handle, const ApplicationHandle app_handle) {
+    const DeviceHandle device_handle, const ApplicationHandle app_handle,
+    const int session_id) {
 
 //TODO check if initialized
 
@@ -668,7 +678,8 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(
 //TODO check app_handle validity???
 
   Connection* connection = 0;
-  Error error = createConnection(device_handle, app_handle, &connection);
+  Error error = createConnection(device_handle, app_handle, session_id,
+                                 &connection);
   if (error != OK) {
     return error;
   }
@@ -686,9 +697,12 @@ DeviceAdapter::Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
 //TODO check if initialized and supported
 
   Error error = OK;
+  Connection* connection = 0;
   pthread_mutex_lock(&connections_mutex_);
-  Connection *connection = connections_[session_id];
-  if (connection == nullptr) {
+  ConnectionMap::const_iterator it = connections_.find(session_id);
+  if (it != connections_.end()) {
+    connection = it->second;
+  } else {
     error = BAD_PARAM;
   }
   pthread_mutex_unlock(&connections_mutex_);
@@ -715,8 +729,9 @@ DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(
 
   std::vector<Connection*> connections_to_terminate;
   pthread_mutex_lock(&connections_mutex_);
-  for (int i = 0; i < connections_.size(); ++i) {
-    Connection* connection = connections_[i];
+  for (ConnectionMap::iterator it = connections_.begin();
+      it != connections_.end(); ++it) {
+    Connection* connection = it->second;
     if (connection->device_handle() == device_handle) {
       connections_to_terminate.push_back(connection);
     }
