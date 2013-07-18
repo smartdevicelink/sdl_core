@@ -93,8 +93,7 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void connectDevice(const DeviceHandle &device_id,
-                             const ApplicationHandle &app_id,
-                             const SessionID &session_id);
+                             const ApplicationHandle &app_id);
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -111,8 +110,10 @@ class TransportManagerImpl : public TransportManager {
    * @param new message container
    *
    * @see @ref components_transportmanager_client_connection_management
+   *
+   * @return true if succeed, false if connection is going to shut down
    **/
-  virtual void sendMessageToDevice(const RawMessageSptr message);
+  virtual bool sendMessageToDevice(const RawMessageSptr message);
 
   /**
    * @brief receive event from device
@@ -150,27 +151,6 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void removeDevice(const DeviceHandle &device);
-
-  /**
-   * @brief accept device originated connection
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void acceptConnect(const DeviceHandle &device_id,
-                             const ApplicationHandle &app_id,
-                             const SessionID &session_id);
-
-  /**
-   * @brief decline device originated connection
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void declineConnect(const DeviceHandle &device_id,
-                              const ApplicationHandle &app_id);
 
   /**
    * @brief interface function to wake up adapter listener thread
@@ -257,34 +237,26 @@ class TransportManagerImpl : public TransportManager {
      * @brief container that used to get adapter id by device id
      * filled after search process done and used in connect function
      **/
+    // FIXME: Team had decided one device cannot be shared between multiple adapters.
+    //         Change multimap to map
     std::multimap<transport_manager::DeviceHandle,
         transport_manager::DeviceAdapter *> device_to_adapter_multimap_;
 
   };
 
   /**
-   * @brief type for mesage queue
+   * @brief type for message queue
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
   typedef std::list<RawMessageSptr> MessageQueue;
 
   /**
-   * @brief type for mesage queue
+   * @brief type for message queue
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
   typedef std::list<DeviceAdapterListenerImpl::DeviceAdapterEvent> EventQueue;
-
-  /**
-   * @brief type for
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  typedef struct {
-    DeviceAdapter *device_adapter;
-    DeviceHandle device_handle;
-  } ConnectionHandle;
 
   /**
    * @brief default constructor
@@ -325,7 +297,7 @@ class TransportManagerImpl : public TransportManager {
 
   static void *eventListenerStartThread(void *);
   /**
-   * @brief whait until event happens
+   * @brief wait until event happens
    *
    * @param
    *
@@ -396,7 +368,16 @@ class TransportManagerImpl : public TransportManager {
   mutable pthread_mutex_t event_queue_mutex_;
 
   bool is_initialized_;
-private:
+ private:
+  struct Connection {
+    bool shutDown;
+
+    Connection()
+        : shutDown(false) {
+    }
+  };
+  int connection_id_counter_;
+  std::map<int, Connection> connections_;
   /**
    * @brief register listener that would be used to catch adapter's events
    *
@@ -404,7 +385,8 @@ private:
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void addAdapterListener(DeviceAdapter *adapter, DeviceAdapterListener *listener);
+  virtual void addAdapterListener(DeviceAdapter *adapter,
+                                  DeviceAdapterListener *listener);
 
 };
 //class

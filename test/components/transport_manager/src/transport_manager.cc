@@ -103,6 +103,10 @@ DeviceHandle hello;
 ApplicationHandle hello_app;
 pthread_cond_t task_complete;
 pthread_mutex_t task_mutex;
+int connection_id;
+
+MockDeviceAdapter *mock_da;
+MockTransportManagerListener *tmListener;
 
 class MyListener : public TransportManagerListenerImpl {
   void onDeviceFound(const DeviceHandle device,
@@ -114,6 +118,8 @@ class MyListener : public TransportManagerListenerImpl {
   void onConnectDone(const DeviceAdapter* device_adapter,
                      const transport_manager::SessionID session_id) {
     pthread_cond_signal(&task_complete);
+    connection_id = session_id;
+    EXPECT_CALL(*tmListener, onConnectDone(_, session_id)).Times(1);
   }
   void onDataReceiveDone(const DeviceAdapter* device_adapter,
                          const transport_manager::SessionID session_id,
@@ -130,10 +136,6 @@ class MyListener : public TransportManagerListenerImpl {
   }
 };
 
-static MockDeviceAdapter *mock_da;
-static MockTransportManagerListener *tml;
-
-
 TEST(TransportManagerImplTest, instance)
 {
   TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
@@ -145,8 +147,8 @@ TEST(TransportManagerImplTest, search)
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
 
-  EXPECT_CALL(*tml, onDeviceFound(_, _)).Times(AtLeast(1));
-  EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
+  EXPECT_CALL(*tmListener, onDeviceFound(_, _)).Times(AtLeast(1));
+  EXPECT_CALL(*tmListener, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
 
   tm->searchDevices();
   pthread_cond_wait(&task_complete, &task_mutex);
@@ -157,8 +159,7 @@ TEST(TransportManagerImplTest, connect)
 {
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
-  EXPECT_CALL(*tml, onConnectDone(_, 42)).Times(1);
-  tm->connectDevice(hello, hello_app, 42);
+  tm->connectDevice(hello, hello_app);
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
 }
@@ -168,14 +169,14 @@ TEST(TransportManagerImplTest, sendReceive)
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
   const unsigned char data[100] = {99};
-  utils::SharedPtr<RawMessage> srm = new RawMessage(42, 1, const_cast<unsigned char *>(data), 100);
+  utils::SharedPtr<RawMessage> srm = new RawMessage(connection_id, 1, const_cast<unsigned char *>(data), 100);
 
   tm->sendMessageToDevice(srm);
 
-  EXPECT_CALL(*tml, onDataSendDone(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(AtLeast(0));
-  EXPECT_CALL(*tml, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(AtLeast(1));
-  EXPECT_CALL(*tml, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
+  EXPECT_CALL(*tmListener, onDataSendDone(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(*tmListener, onDataSendFailed(_, _, _)).Times(AtLeast(0));
+  EXPECT_CALL(*tmListener, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(AtLeast(1));
+  EXPECT_CALL(*tmListener, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
 
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
@@ -186,7 +187,7 @@ TEST(TransportManagerImplTest, disconnectDevice)
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
   tm->disconnectDevice(0);
-  EXPECT_CALL(*tml, onDisconnectDeviceDone(_, _)).Times(1);
+  EXPECT_CALL(*tmListener, onDisconnectDeviceDone(_, _)).Times(1);
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
 }
@@ -199,8 +200,8 @@ int main(int argc, char** argv) {
   mock_da = new MockDeviceAdapter();
   tm->addDeviceAdapter(mock_da);
 
-  tml = new MockTransportManagerListener();
-  tm->addEventListener(tml);
+  tmListener = new MockTransportManagerListener();
+  tm->addEventListener(tmListener);
   tm->addEventListener(new MyListener());
 
   mock_da->init(new DeviceHandleGeneratorImpl(),
@@ -209,6 +210,5 @@ int main(int argc, char** argv) {
   mock_da->addDevice("hello");
 
   testing::InitGoogleTest(&argc, argv);
-  RUN_ALL_TESTS();
-  return 0;
+  return RUN_ALL_TESTS();
 }

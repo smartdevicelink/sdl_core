@@ -63,7 +63,8 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
-      is_initialized_(false) {
+      is_initialized_(false),
+      connection_id_counter_(13) {
 
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, 0);
@@ -85,7 +86,8 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
-      is_initialized_(false) {
+      is_initialized_(false),
+      connection_id_counter_(23) {
 
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, 0);
@@ -99,8 +101,8 @@ TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
 
 TransportManagerImpl::~TransportManagerImpl() {
 
-  pthread_cond_signal(&device_listener_thread_wakeup_);
   all_thread_active_ = false;
+  pthread_cond_signal(&device_listener_thread_wakeup_);
   pthread_join(messsage_queue_thread_, 0);
   pthread_join(event_queue_thread_, 0);
   pthread_mutex_destroy(&message_queue_mutex_);
@@ -123,8 +125,9 @@ TransportManagerImpl* TransportManagerImpl::instance() {
 }
 
 void TransportManagerImpl::connectDevice(const DeviceHandle &device_id,
-                                         const ApplicationHandle &app_id,
-                                         const SessionID &session_id) {
+                                         const ApplicationHandle &app_id) {
+  int session_id = connection_id_counter_++;
+
   LOG4CXX_INFO(
       logger_,
       "Connect device called with arguments device_id " << device_id << " app_id " << app_id << " session_id " << session_id);
@@ -171,17 +174,23 @@ void TransportManagerImpl::addEventListener(
   transport_manager_listener_.push_back(listener);
 }
 
-void TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {
+bool TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {
   LOG4CXX_INFO(
       logger_,
       "Send message to device called with arguments serial number " << message->serial_number());
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
     //todo: log error
-    return;
+    return false;
   }
+
+  if (connections_[message->connection_key()].shutDown) {
+    return false;
+  }
+
   this->postMessage(message);
   LOG4CXX_INFO(logger_, "Message posted");
+  return true;
 }
 
 void TransportManagerImpl::receiveEventFromDevice(
@@ -337,6 +346,9 @@ void TransportManagerImpl::eventListenerThread(void) {
 
     LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
     int s = event_queue_.size();
+    // TODO: Queue is not a real queue now. Locking event_queue_mutex_ does not allow
+    //       event_queue_ modification until the only element is processed.
+    //       It's necessary to rewrite this loop to make queue work properly
     for (EventQueue::iterator it = event_queue_.begin();
         it != event_queue_.end();) {
 
@@ -347,6 +359,7 @@ void TransportManagerImpl::eventListenerThread(void) {
       DeviceList dev_list;
       RawMessageSptr data;
       DataReceiveError *d_err;
+      Connection connection;
       LOG4CXX_INFO(
           logger_,
           "Iterating over event queue items session id" << sid << "type " << (*it).event_type());
@@ -390,6 +403,9 @@ void TransportManagerImpl::eventListenerThread(void) {
               tml_it != transport_manager_listener_.end(); ++tml_it) {
             (*tml_it)->onConnectDone(da, sid);
           }
+
+          connections_.insert(std::make_pair(it->session_id(), connection));
+
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:
           break;
@@ -401,6 +417,7 @@ void TransportManagerImpl::eventListenerThread(void) {
               tml_it != transport_manager_listener_.end(); ++tml_it) {
             (*tml_it)->onDisconnectDone(da, sid);
           }
+          connections_.erase(it->session_id());
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL:
           break;
@@ -596,18 +613,6 @@ void TransportManagerImpl::AdapterHandler::removeDevice(
     const DeviceHandle &device) {
   LOG4CXX_INFO(logger_, "Remove device is called" << device);
   device_to_adapter_multimap_.erase(device);
-}
-
-void TransportManagerImpl::acceptConnect(const DeviceHandle &device_id,
-                                         const ApplicationHandle &app_id,
-                                         const SessionID &session_id) {
-//todo: implement it
-}
-
-void TransportManagerImpl::declineConnect(const DeviceHandle &device_id,
-                                          const ApplicationHandle &app_id) {
-//todo: implement it
-
 }
 
 }  //namespace

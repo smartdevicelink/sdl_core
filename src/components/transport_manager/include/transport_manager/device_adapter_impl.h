@@ -187,19 +187,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
     std::string unique_device_id_;
   };
 
-  /**
-   * @brief Vector of devices.
-   **/
-  typedef std::vector<Device*> DeviceVector;
-
-  /**
-   * @brief Devices map.
-   **/
-  typedef std::map<DeviceHandle, Device*> DeviceMap;
-
-  /**
-   * @brief Application connection.
-   **/
   class Connection {
    public:
     /**
@@ -320,6 +307,20 @@ class DeviceAdapterImpl : public DeviceAdapter {
      **/
     bool terminate_flag_;
   };
+
+  /**
+   * @brief Vector of devices.
+   **/
+  typedef std::vector<Device*> DeviceVector;
+
+  /**
+   * @brief Devices map.
+   **/
+  typedef std::map<DeviceHandle, Device*> DeviceMap;
+
+  /**
+   * @brief Application connection.
+   **/
 
   /**
    * @brief Parameters for starting connection thread.

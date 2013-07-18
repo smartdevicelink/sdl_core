@@ -76,6 +76,7 @@ namespace {
     if (data->sockfd == -1) {
       return NULL;
     }
+    unlink("./mockDevice");
     sockaddr_un my_addr;
     memset(&my_addr, 0, sizeof(my_addr));
     strcpy(my_addr.sun_path, "./mockDevice");
@@ -96,7 +97,7 @@ namespace {
 
     pthread_barrier_wait(&data->barrier);
     while(data->active) {
-      size_t addr_size;
+      socklen_t addr_size;
       sockaddr peer_addr;
 
       int peer_socket = accept(data->sockfd, &peer_addr, &addr_size);

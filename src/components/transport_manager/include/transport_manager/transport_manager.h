@@ -76,8 +76,7 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void connectDevice(const DeviceHandle &device_id,
-                             const ApplicationHandle &app_id,
-                             const SessionID &session_id) = 0;
+                             const ApplicationHandle &app_id) = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -95,7 +94,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void sendMessageToDevice(
+  virtual bool sendMessageToDevice(
       const RawMessageSptr message) = 0;
 
   /**
@@ -134,28 +133,6 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void removeDevice(const DeviceHandle &device) = 0;
-
-  /**
-   * @brief accept device originated connection
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void acceptConnect(const DeviceHandle &device_id,
-                             const ApplicationHandle &app_id,
-                             const SessionID &session_id) = 0;
-
-  /**
-   * @brief decline device originated connection
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void declineConnect(const DeviceHandle &device_id,
-                              const ApplicationHandle &app_id) = 0;
-
 };
 }
 
