@@ -29,19 +29,19 @@
  * 
  */
 
-FFW.RPCObserver = Em.Object.extend( {
+FFW.RPCObserver = Em.Object.extend({
 
     onRPCRegistered: function() {
         // request necessary parameters from Backend
-        Em.Logger.log( "FFW.RPCObserver.Registered" );
+        Em.Logger.log("FFW.RPCObserver.Registered");
     },
 
     onRPCUnregistered: function() {
-        Em.Logger.log( "FFW.RPCObserver.onUnregistered" );
+        Em.Logger.log("FFW.RPCObserver.onUnregistered");
     },
 
     onRPCDisconnected: function() {
-        Em.Logger.log( "FFW.RPCObserver.onRPCDisconnected" );
+        Em.Logger.log("FFW.RPCObserver.onRPCDisconnected");
     },
 
     /*
@@ -50,35 +50,41 @@ FFW.RPCObserver = Em.Object.extend( {
      * previously store reuqestID to determine to which request repsonse belongs
      * to
      */
-    onRPCResult: function( result ) {
+    onRPCResult: function(result) {
         // parse JSON string and set necessary properties
     },
 
     /*
      */
-    onRPCError: function( error ) {
+    onRPCError: function(error) {
         // parse JSON string and set necessary properties
     },
 
     /*
      */
-    onRPCNotification: function( notification ) {
+    onRPCNotification: function(notification) {
         // parse JSON string and set necessary properties
     },
 
-    onRPCRequest: function( request ) {
-        if ( request && request.method ) {
-            var parsedMethod = request.method.split(/[.]/),
+    onRPCRequest: function(request) {
+        //parse JSON string and send back necessary data
+    },
+    
+    validationCheck: function(request) {
+    	if (request && request.method && request.params) {
+        	var parsedMethod = request.method.split(/[.]/),
                 validateFunc,
                 result;
-            validateFunc = SDL.ValidateMessage[parsed[0]][parsed[1]];
+            
+        	validateFunc = SDL.ValidateMessage[parsedMethod[0]][parsedMethod[1]];
             result = validateFunc(request.params);
 
             if (result.resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
-                this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                return;
+                this.sendUIError(result.resultCode, request.id, request.method, result.resultMessage);
+                return false;
+            } else {
+            	return true;
             }
         }
-        //parse JSON string and send back necessary data
     }
-} )
+});

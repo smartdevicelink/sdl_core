@@ -34,7 +34,7 @@
  *
  */
 
-FFW.Navigation = FFW.RPCObserver.create( {
+FFW.Navigation = FFW.RPCObserver.create({
 
     /**
      * If true then Navigation is present and ready to communicate with SDL.
@@ -46,9 +46,9 @@ FFW.Navigation = FFW.RPCObserver.create( {
     /**
      * access to basic RPC functionality
      */
-    client: FFW.RPCClient.create( {
+    client: FFW.RPCClient.create({
         componentName: "Navigation"
-    } ),
+    }),
 
     // temp var for debug
     appId: 1,
@@ -57,7 +57,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
      * connect to RPC bus
      */
     connect: function() {
-        this.client.connect( this, 400 );
+        this.client.connect(this, 400);
     },
 
     /**
@@ -72,7 +72,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
      * time
      */
     onRPCRegistered: function() {
-        Em.Logger.log( "FFW.Navigation.onRPCRegistered" );
+        Em.Logger.log("FFW.Navigation.onRPCRegistered");
         this._super();
 
         // subscribe to notifications
@@ -82,7 +82,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
      * Client is unregistered - no more requests
      */
     onRPCUnregistered: function() {
-        Em.Logger.log( "FFW.Navigation.onRPCUnregistered" );
+        Em.Logger.log("FFW.Navigation.onRPCUnregistered");
         this._super();
 
         // unsubscribe from notifications
@@ -101,27 +101,27 @@ FFW.Navigation = FFW.RPCObserver.create( {
      * previously store reuqestID to determine to which request repsonse belongs
      * to
      */
-    onRPCResult: function( response ) {
-        Em.Logger.log( "FFW.Navigation.onRPCResult" );
+    onRPCResult: function(response) {
+        Em.Logger.log("FFW.Navigation.onRPCResult");
         this._super();
     },
 
     /**
      * handle RPC erros here
      */
-    onRPCError: function( error ) {
-        Em.Logger.log( "FFW.Navigation.onRPCError" );
+    onRPCError: function(error) {
+        Em.Logger.log("FFW.Navigation.onRPCError");
         this._super();
     },
 
     /**
      * handle RPC notifications here
      */
-    onRPCNotification: function( notification ) {
-        Em.Logger.log( "FFW.Navigation.onRPCNotification" );
+    onRPCNotification: function(notification) {
+        Em.Logger.log("FFW.Navigation.onRPCNotification");
         this._super();
         
-        if( notification.method == this.onShowNotificationNotification ){
+        if(notification.method == this.onShowNotificationNotification){
             // to do
         }
     },
@@ -129,52 +129,53 @@ FFW.Navigation = FFW.RPCObserver.create( {
     /**
      * handle RPC requests here
      */
-    onRPCRequest: function( request ) {
-        Em.Logger.log( "FFW.Navigation.onRPCRequest" );
-        this._super();
-
-        var resultCode = null;
-
-        switch( request.method ){
-            case "Navigation.IsReady": {
-
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "available": this.get('isReady'),
-                        "code": SDL.SDLModel.resultCode["SUCCESS"],
-                        "method" : "Navigation.IsReady"
-                    }
-                };
-
-                this.client.send( JSONMessage );
-
-                break;
-            }
-            case "Navigation.ShowConstantTBT": {
-
-                SDL.SDLModel.tbtActivate( request.params );
-                this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                break;
-            }
-            case "Navigation.UpdateTurnList": {
-
-                SDL.SDLModel.tbtTurnListUpdate( request.params );
-                this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                break;
-            }
-            case "Navigation.AlertManeuver": {
-
-                SDL.SDLModel.onNavigationAlertManeuver( request.params );
-
-                this.sendNavigationResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                break;
-            }
+    onRPCRequest: function(request) {
+        Em.Logger.log("FFW.Navigation.onRPCRequest");
+        if (this.validationCheck(request)) {
+	
+	        var resultCode = null;
+	
+	        switch(request.method){
+	            case "Navigation.IsReady": {
+	
+	                // send repsonse
+	                var JSONMessage = {
+	                    "jsonrpc": "2.0",
+	                    "id": request.id,
+	                    "result": {
+	                        "available": this.get('isReady'),
+	                        "code": SDL.SDLModel.resultCode["SUCCESS"],
+	                        "method" : "Navigation.IsReady"
+	                    }
+	                };
+	
+	                this.client.send(JSONMessage);
+	
+	                break;
+	            }
+	            case "Navigation.ShowConstantTBT": {
+	
+	                SDL.SDLModel.tbtActivate(request.params);
+	                this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+	
+	                break;
+	            }
+	            case "Navigation.UpdateTurnList": {
+	
+	                SDL.SDLModel.tbtTurnListUpdate(request.params);
+	                this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+	
+	                break;
+	            }
+	            case "Navigation.AlertManeuver": {
+	
+	                SDL.SDLModel.onNavigationAlertManeuver(request.params);
+	
+	                this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+	
+	                break;
+	            }
+	        }
         }
     },
 
@@ -184,11 +185,11 @@ FFW.Navigation = FFW.RPCObserver.create( {
      * @param {Number} id
      * @param {String} method
      */
-    sendNavigationError: function( resultCode, id, method, message ) {
+    sendNavigationError: function(resultCode, id, method, message) {
 
-        Em.Logger.log( "FFW.Navigation." + method + "Response" );
+        Em.Logger.log("FFW.Navigation." + method + "Response");
 
-        if( resultCode ){
+        if(resultCode){
 
             // send repsonse
             var JSONMessage = {
@@ -202,7 +203,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
                     }
                 }
             };
-            this.client.send( JSONMessage );
+            this.client.send(JSONMessage);
         }
     },
 
@@ -212,11 +213,11 @@ FFW.Navigation = FFW.RPCObserver.create( {
      * @param {Number} id
      * @param {String} method
      */
-    sendNavigationResult: function( resultCode, id, method ) {
+    sendNavigationResult: function(resultCode, id, method) {
 
-        Em.Logger.log( "FFW.UI." + method + "Response" );
+        Em.Logger.log("FFW.UI." + method + "Response");
 
-        if( resultCode ){
+        if(resultCode){
 
             // send repsonse
             var JSONMessage = {
@@ -227,7 +228,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
                     "method": method
                 }
             };
-            this.client.send( JSONMessage );
+            this.client.send(JSONMessage);
         }
     },
 
@@ -236,11 +237,11 @@ FFW.Navigation = FFW.RPCObserver.create( {
      * @param {Number} resultCode
      * @param {Number} id
      */
-    alertResponse: function( resultCode, id ) {
+    alertResponse: function(resultCode, id) {
 
-        Em.Logger.log( "FFW.Navigation.AlertResponse" );
+        Em.Logger.log("FFW.Navigation.AlertResponse");
 
-        if( resultCode ){
+        if(resultCode){
 
             // send repsonse
             var JSONMessage = {
@@ -251,7 +252,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
                     "method": 'Navigation.Alert'
                 }
             };
-            this.client.send( JSONMessage );
+            this.client.send(JSONMessage);
         }
     },
 
@@ -260,8 +261,8 @@ FFW.Navigation = FFW.RPCObserver.create( {
      * @param {String} state
      * @param {Number} appId
      */
-    onTBTClientState: function( state, appId ) {
-        Em.Logger.log( "FFW.Navigation.OnTBTClientState" );
+    onTBTClientState: function(state, appId) {
+        Em.Logger.log("FFW.Navigation.OnTBTClientState");
 
         // send repsonse
         var JSONMessage = {
@@ -272,6 +273,6 @@ FFW.Navigation = FFW.RPCObserver.create( {
                 "appId": appId
             }
         };
-        this.client.send( JSONMessage );
+        this.client.send(JSONMessage);
     }
-} )
+})

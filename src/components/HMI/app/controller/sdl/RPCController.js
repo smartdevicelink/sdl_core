@@ -743,7 +743,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (typeof params.interactionChoiceSetIDList.length < 0 ) {
+            if (typeof params.interactionChoiceSetIDList.length < 0) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -963,7 +963,7 @@ SDL.ValidateMessage = Em.Object.create({
          * 
          * @param {Object} params
          */
-        ChangeRegistration: function(params) {
+        SetAppIcon: function(params) {
 
             if (!params) {
 
@@ -1370,16 +1370,16 @@ SDL.ValidateMessage = Em.Object.create({
      * returns true if mandatory fields is successful
      * and returns false if not
      */
-    BasicCommunication: Em.Object.create({
+    VR: Em.Object.create({
 
         resultStruct: {},
         
         /**
-         * Validate method for request GetDTCs
+         * Validate method for request AddCommand
          * 
          * @param {Object} params
          */
-        GetDTCs: function(params) {
+        AddCommand: function(params) {
 
             if (!params) {
 
@@ -1390,20 +1390,38 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (!params.ecuName) {
+            if (!params.cmdID) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'ecuName' does not exists!"
+                    "resultMessage": "Parameter 'cmdID' does not exists!"
                 };
 
                 return this.resultStruct;
             }
-            if (typeof params.ecuName != 'number') {
+            if (typeof params.cmdID != 'number') {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Wrong type of parameter 'ecuName'!"
+                    "resultMessage": "Wrong type of parameter 'cmdID'!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.vrCommands) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'vrCommands' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.vrCommands.length < 0) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'vrCommands'!"
                 };
 
                 return this.resultStruct;
@@ -1426,26 +1444,44 @@ SDL.ValidateMessage = Em.Object.create({
                 
                 return this.resultStruct;
             }
-            
+
             this.resultStruct = {
                 "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
             };
-            
+
             return this.resultStruct;
         },
         
         /**
-         * Validate method for request GetVehicleData
+         * Validate method for request DeleteCommand
          * 
          * @param {Object} params
          */
-        GetVehicleData: function(params) {
+        DeleteCommand: function(params) {
 
             if (!params) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                     "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.cmdId) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'cmdID' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.cmdId != 'number') {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'cmdID'!"
                 };
 
                 return this.resultStruct;
@@ -1468,11 +1504,71 @@ SDL.ValidateMessage = Em.Object.create({
                 
                 return this.resultStruct;
             }
-            
+
             this.resultStruct = {
                 "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
             };
-            
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request ChangeRegistration
+         * 
+         * @param {Object} params
+         */
+        ChangeRegistration: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.language) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'language' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.language != 'string') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'language'!"
+                };
+                
+                return this.resultStruct;
+            }
+            if (!params.appId) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appId' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appId != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appId'!"
+                };
+                
+                return this.resultStruct;
+            }
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
             return this.resultStruct;
         }
     })
