@@ -46,6 +46,13 @@
 #include "transport_manager/device_adapter_listener_impl.h"
 
 namespace transport_manager {
+
+enum
+{
+  E_SUCCESS = 0,
+  E_TM_IS_NOT_INITIALIZED
+};
+
 const uint MAX_TM_THREADS = 2;
 
 //todo: add no_copy_constr where necessary
@@ -83,7 +90,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_device_management
    **/
-  virtual void searchDevices(void);
+  virtual int searchDevices(void);
 
   /**
    * @brief Connect to all applications discovered on device.
@@ -212,7 +219,7 @@ class TransportManagerImpl : public TransportManager {
     void addSession(transport_manager::DeviceAdapter *da,
                     transport_manager::SessionID sid);
     void addDevice(transport_manager::DeviceAdapter *da,
-                   transport_manager::DeviceHandle did);
+                   transport_manager::DeviceDesc did);
     void addAdapter(transport_manager::DeviceAdapter *da);
     void removeSession(transport_manager::DeviceAdapter *da,
                        transport_manager::SessionID sid);
@@ -239,8 +246,8 @@ class TransportManagerImpl : public TransportManager {
      **/
     // FIXME: Team had decided one device cannot be shared between multiple adapters.
     //         Change multimap to map
-    std::multimap<transport_manager::DeviceHandle,
-        transport_manager::DeviceAdapter *> device_to_adapter_multimap_;
+    std::map<transport_manager::DeviceHandle,
+        transport_manager::DeviceAdapter *> device_to_adapter_map_;
 
   };
 

@@ -41,7 +41,6 @@
 #include <transport_manager/mock_device_adapter_listener.h>
 #include <transport_manager/mock_transport_manager_listener.h>
 #include <protocol_handler/raw_message.h>
-#include "transport_manager/device_handle_generator_impl.h"
 #include "transport_manager/device_adapter_listener_impl.h"
 #include "transport_manager/transport_manager_listener_impl.h"
 
@@ -99,17 +98,17 @@ inline const Matcher<RawMessageSptr> RawMessageSptrEq(const unsigned char* data)
   return MakeMatcher(new RawMessageSptrMatcher(data));
 }
 
-DeviceHandle hello;
+DeviceDesc hello;
 ApplicationHandle hello_app;
 pthread_cond_t task_complete;
 pthread_mutex_t task_mutex;
-int connection_id;
 
 MockDeviceAdapter *mock_da;
 MockTransportManagerListener *tmListener;
+int connection_id;
 
 class MyListener : public TransportManagerListenerImpl {
-  void onDeviceFound(const DeviceHandle device,
+  void onDeviceFound(const DeviceDesc& device,
                           const ApplicationList app_list) {
     hello = device;
     hello_app = *app_list.begin();
@@ -117,9 +116,8 @@ class MyListener : public TransportManagerListenerImpl {
   }
   void onConnectDone(const DeviceAdapter* device_adapter,
                      const transport_manager::SessionID session_id) {
-    pthread_cond_signal(&task_complete);
     connection_id = session_id;
-    EXPECT_CALL(*tmListener, onConnectDone(_, session_id)).Times(1);
+    pthread_cond_signal(&task_complete);
   }
   void onDataReceiveDone(const DeviceAdapter* device_adapter,
                          const transport_manager::SessionID session_id,
@@ -147,8 +145,9 @@ TEST(TransportManagerImplTest, search)
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
 
-  EXPECT_CALL(*tmListener, onDeviceFound(_, _)).Times(AtLeast(1));
-  EXPECT_CALL(*tmListener, onSearchDeviceFailed(_, _)).Times(AtLeast(0));
+  EXPECT_CALL(*tmListener, onDeviceFound(_, _)).Times(1);
+  EXPECT_CALL(*tmListener, onSearchDeviceDone()).Times(1);
+  EXPECT_CALL(*tmListener, onSearchDeviceFailed(_, _)).Times(0);
 
   tm->searchDevices();
   pthread_cond_wait(&task_complete, &task_mutex);
@@ -159,7 +158,10 @@ TEST(TransportManagerImplTest, connect)
 {
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
-  tm->connectDevice(hello, hello_app);
+
+  EXPECT_CALL(*tmListener, onConnectDone(_, _)).Times(1);
+
+  tm->connectDevice(hello.handle, hello_app);
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
 }
@@ -173,10 +175,10 @@ TEST(TransportManagerImplTest, sendReceive)
 
   tm->sendMessageToDevice(srm);
 
-  EXPECT_CALL(*tmListener, onDataSendDone(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(*tmListener, onDataSendFailed(_, _, _)).Times(AtLeast(0));
-  EXPECT_CALL(*tmListener, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(AtLeast(1));
-  EXPECT_CALL(*tmListener, onDataReceiveFailed(_, _, _)).Times(AtLeast(0));
+  EXPECT_CALL(*tmListener, onDataSendDone(_, _, _)).Times(1);
+  EXPECT_CALL(*tmListener, onDataSendFailed(_, _, _)).Times(0);
+  EXPECT_CALL(*tmListener, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(1);
+  EXPECT_CALL(*tmListener, onDataReceiveFailed(_, _, _)).Times(0);
 
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
@@ -186,7 +188,8 @@ TEST(TransportManagerImplTest, disconnectDevice)
 {
   pthread_mutex_lock(&task_mutex);
   TransportManagerImpl* tm = TransportManagerImpl::instance();
-  tm->disconnectDevice(0);
+  tm->disconnectDevice(hello.handle);
+  EXPECT_CALL(*tmListener, onDisconnectDone(_, _)).Times(1);
   EXPECT_CALL(*tmListener, onDisconnectDeviceDone(_, _)).Times(1);
   pthread_cond_wait(&task_complete, &task_mutex);
   pthread_mutex_unlock(&task_mutex);
@@ -204,8 +207,7 @@ int main(int argc, char** argv) {
   tm->addEventListener(tmListener);
   tm->addEventListener(new MyListener());
 
-  mock_da->init(new DeviceHandleGeneratorImpl(),
-      NULL);
+  mock_da->init(NULL);
 
   mock_da->addDevice("hello");
 

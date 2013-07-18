@@ -58,7 +58,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_device_management
    **/
-  virtual void searchDevices(void) = 0;
+  virtual int searchDevices(void) = 0;
 
   /**
    * @brief Start scanning for new devices.

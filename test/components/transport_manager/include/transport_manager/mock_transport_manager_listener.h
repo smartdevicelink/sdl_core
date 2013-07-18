@@ -39,7 +39,6 @@
 #include <gmock/gmock.h>
 #include <transport_manager/common.h>
 #include <transport_manager/device_adapter.h>
-#include <transport_manager/device_handle_generator.h>
 #include <transport_manager/transport_manager_listener_impl.h>
 
 using namespace transport_manager;
@@ -51,7 +50,7 @@ namespace transport_manager {
 class MockTransportManagerListener :
     public ::transport_manager::TransportManagerListenerImpl {
  public:
-  MOCK_METHOD2(onDeviceFound, void (const DeviceHandle device,
+  MOCK_METHOD2(onDeviceFound, void (const DeviceDesc& device,
           const ApplicationList app_list));
   MOCK_METHOD0(onSearchDeviceDone, void ());
   MOCK_METHOD2(onSearchDeviceFailed, void (const DeviceAdapter* device_adapter,

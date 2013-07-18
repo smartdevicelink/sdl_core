@@ -67,7 +67,9 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
     pthread_mutex_t device_started_mutex;
     listenerData_t listener;
    public:
-    MockDevice(const char *name) : Device(name), workerThread(0) { }
+    MockDevice(const char *name) : Device(name), workerThread(0) {
+      unique_device_id_ = "mock-device-0";
+    }
     void start();
     void stop();
   };

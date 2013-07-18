@@ -46,7 +46,7 @@ class TransportManagerListener {
  public:
   virtual ~TransportManagerListener();
 
-  virtual void onDeviceFound(const DeviceHandle device,
+  virtual void onDeviceFound(const DeviceDesc& device,
                                   const ApplicationList app_list) = 0;
   virtual void onSearchDeviceDone() = 0;
   virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,

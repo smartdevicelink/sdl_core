@@ -41,7 +41,6 @@
 #include <list>
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
-#include "transport_manager/device_handle_generator.h"
 #include "protocol_handler/raw_message.h"
 
 namespace transport_manager {
@@ -51,7 +50,7 @@ class DeviceAdapterListener;
 typedef std::string DeviceType;
 typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
+typedef std::vector<DeviceDesc> DeviceList;
 typedef std::list<DeviceAdapterListener *> DeviceAdapterListenerList;
 
 class DeviceAdapter {
@@ -75,8 +74,7 @@ class DeviceAdapter {
    virtual void SaveState(DeviceAdapterState* state) = 0;
    */
 
-  virtual Error init(DeviceHandleGenerator* handle_generator,
-                     Configuration* configuration) = 0;
+  virtual Error init(Configuration* configuration) = 0;
 
   virtual void addListener(DeviceAdapterListener *listener) = 0;
   virtual bool isSearchDevicesSupported() const = 0;

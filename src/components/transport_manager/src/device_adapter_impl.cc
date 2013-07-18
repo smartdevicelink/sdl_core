@@ -78,7 +78,6 @@ DeviceAdapterImpl::Connection::~Connection(void) {
 
 DeviceAdapterImpl::DeviceAdapterImpl()
     : listeners_(0),
-      handle_generator_(0),
       device_scan_requested_(false),
       device_scan_requested_mutex_(),
       device_scan_requested_cond_(),
@@ -108,14 +107,9 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
 
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::init(
-    DeviceHandleGenerator* handle_generator, Configuration* configuration) {
-  if (handle_generator == 0)
-    return BAD_PARAM;
-
+DeviceAdapter::Error DeviceAdapterImpl::init(Configuration* configuration) {
   LOG4CXX_INFO(logger_, "Initializing device adapter");
 
-  handle_generator_ = handle_generator;
   initialized_ = true;
 
   const int thread_start_error = pthread_create(&main_thread_, 0,
@@ -362,7 +356,10 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
 
     pthread_mutex_lock(&devices_mutex_);
 
-    DeviceMap::const_iterator device_it = devices_.find(device_handle);
+    DeviceMap::iterator device_it = devices_.begin();
+    while(device_it != devices_.end() && device_it->first != device_handle) {
+      ++device_it;
+    }
 
     const Device* device = 0;
     if (device_it != devices_.end()) {
@@ -601,7 +598,8 @@ DeviceList DeviceAdapterImpl::getDeviceList() const {
   pthread_mutex_lock(&devices_mutex_);
   for (DeviceMap::const_iterator it = devices_.begin(); it != devices_.end();
       ++it) {
-    result.push_back(it->first);
+    DeviceDesc dd(it->first, it->second->name());
+    result.push_back(dd);
   }
   pthread_mutex_unlock(&devices_mutex_);
 
@@ -667,7 +665,13 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(
 //TODO check if initialized
 
   pthread_mutex_lock(&devices_mutex_);
-  const bool is_device_valid = devices_.end() != devices_.find(device_handle);
+  bool is_device_valid = false;
+  for (auto d : devices_) {
+    if (d.first == device_handle) {
+      is_device_valid = true;
+      break;
+    }
+  }
   pthread_mutex_unlock(&devices_mutex_);
 
   if (!is_device_valid) {
@@ -717,7 +721,13 @@ DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(
   //TODO check if initialized and supported
 
   pthread_mutex_lock(&devices_mutex_);
-  const bool is_device_valid = devices_.end() != devices_.find(device_handle);
+  bool is_device_valid = false;
+  for (auto d : devices_) {
+    if (d.first == device_handle) {
+      is_device_valid = true;
+      break;
+    }
+  }
   pthread_mutex_unlock(&devices_mutex_);
 
   if (!is_device_valid) {

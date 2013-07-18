@@ -44,7 +44,6 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_impl.h"
 #include "transport_manager/device_adapter_listener_impl.h"
-#include "transport_manager/device_handle_generator_impl.h"
 
 namespace transport_manager {
 
@@ -165,7 +164,7 @@ void TransportManagerImpl::disconnectDevice(const DeviceHandle &device_id) {
     return;
   }
   // TODO: Disconnect'em all
-  //da->disconnect();
+  da->disconnectDevice(device_id);
   LOG4CXX_INFO(logger_, "Disconnected");
 }
 
@@ -231,12 +230,12 @@ void TransportManagerImpl::addAdapterListener(DeviceAdapter *adapter,
 
 }
 
-void TransportManagerImpl::searchDevices(void) {
+int TransportManagerImpl::searchDevices(void) {
   LOG4CXX_INFO(logger_, "Search device called");
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized");
     //todo: log error
-    return;
+    return E_TM_IS_NOT_INITIALIZED;
   }
   for (AdapterHandler::AdapterList::const_iterator it = adapter_handler_
       .device_adapters().begin();
@@ -248,6 +247,7 @@ void TransportManagerImpl::searchDevices(void) {
     }
   }
   LOG4CXX_INFO(logger_, "Search complete");
+  return E_SUCCESS;
 }
 
 void TransportManagerImpl::init(void) {
@@ -370,13 +370,13 @@ void TransportManagerImpl::eventListenerThread(void) {
           dev_list = da->getDeviceList();
           for (DeviceList::iterator item = dev_list.begin();
               item != dev_list.end(); ++item) {
-            LOG4CXX_INFO(logger_, "Iterating over device list " << (*item));
+            LOG4CXX_INFO(logger_, "Iterating over device list " << item->handle);
             adapter_handler_.addDevice(da, (*item));
             for (TransportManagerListenerList::iterator tml_it =
                 transport_manager_listener_.begin();
                 tml_it != transport_manager_listener_.end(); ++tml_it) {
-              (*tml_it)->onDeviceFound((*item),
-                                       da->getApplicationList((*item)));
+              (*tml_it)->onDeviceFound(*item,
+                                       da->getApplicationList(item->handle));
             }
             LOG4CXX_INFO(logger_, "Callback called");
           }
@@ -547,7 +547,7 @@ TransportManagerImpl::AdapterHandler::~AdapterHandler() {
   }
   device_adapters_.clear();
   session_to_adapter_map_.clear();
-  device_to_adapter_multimap_.clear();
+  device_to_adapter_map_.clear();
   LOG4CXX_INFO(logger_, "Adapter handler destroyed");
 }
 
@@ -555,8 +555,8 @@ DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterByDevice(
     DeviceHandle device_id) {
   LOG4CXX_INFO(logger_, "Get adapter by device called");
   std::map<DeviceHandle, DeviceAdapter *>::iterator da =
-      device_to_adapter_multimap_.find(device_id);
-  if (da != device_to_adapter_multimap_.end()) {
+      device_to_adapter_map_.find(device_id);
+  if (da != device_to_adapter_map_.end()) {
     LOG4CXX_INFO(logger_, "Device adapter found");
     return (*da).second;
   }
@@ -596,8 +596,8 @@ void TransportManagerImpl::AdapterHandler::removeSession(DeviceAdapter *da,
 }
 
 void TransportManagerImpl::AdapterHandler::addDevice(DeviceAdapter *da,
-                                                     DeviceHandle did) {
-  LOG4CXX_INFO(logger_, "Add device with did " << did << " adapter " << da);
+                                                     DeviceDesc did) {
+  LOG4CXX_INFO(logger_, "Add device with did " << did.handle << " adapter " << da);
   AdapterList::iterator item = std::find(device_adapters_.begin(),
                                          device_adapters_.end(), da);
   if (item == device_adapters_.end()) {
@@ -605,14 +605,14 @@ void TransportManagerImpl::AdapterHandler::addDevice(DeviceAdapter *da,
     //todo: error case: unknown adapter
     return;
   }
-  device_to_adapter_multimap_.insert(std::make_pair(did, da));
+  device_to_adapter_map_.insert(std::make_pair(did.handle, da));
   LOG4CXX_INFO(logger_, "Add device complete");
 }
 
 void TransportManagerImpl::AdapterHandler::removeDevice(
     const DeviceHandle &device) {
   LOG4CXX_INFO(logger_, "Remove device is called" << device);
-  device_to_adapter_multimap_.erase(device);
+  device_to_adapter_map_.erase(device);
 }
 
 }  //namespace

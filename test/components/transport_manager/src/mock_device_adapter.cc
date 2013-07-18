@@ -212,7 +212,7 @@ void MockDeviceAdapter::addDevice(const char *name) {
   static int devid = 100;
   MockDevice* dev = new MockDevice(name);
   dev->start();
-  devices_[devid++] = dev;
+  devices_[dev->unique_device_id()] = dev;
 }
 
 MockDeviceAdapter::~MockDeviceAdapter() {
