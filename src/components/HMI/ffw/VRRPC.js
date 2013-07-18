@@ -144,16 +144,7 @@ FFW.VR = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.addCommandVR( request.params );
 
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                        "method": request.method
-                    }
-                };
-                this.client.send( JSONMessage );
+                this.sendVRResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -161,16 +152,7 @@ FFW.VR = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.deleteCommandVR( request.params.cmdId );
 
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                        "method": request.method
-                    }
-                };
-                this.client.send( JSONMessage );
+                this.sendVRResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -227,16 +209,7 @@ FFW.VR = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.changeRegistrationTTSVR( request.params.language );
 
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                        "method": request.method
-                    }
-                };
-                this.client.send( JSONMessage );
+                this.sendVRResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
 
                 break;
             }
@@ -264,6 +237,59 @@ FFW.VR = FFW.RPCObserver.create( {
             }
         }
 
+    },
+
+    /**
+     * Send error response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     */
+    sendVRError: function( resultCode, id, method, message ) {
+
+        Em.Logger.log( "FFW." + method + "Response" );
+
+        if( resultCode ){
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "error": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "message": message,
+                    "data":{
+                        "method": method
+                    }
+                }
+            };
+            this.client.send( JSONMessage );
+        }
+    },
+
+    /**
+     * send response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     */
+    sendVRResult: function( resultCode, id, method ) {
+
+        Em.Logger.log( "FFW." + method + "Response" );
+
+        if( resultCode === SDL.SDLModel.resultCode["SUCCESS"] ){
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "method": method
+                }
+            };
+            this.client.send( JSONMessage );
+        }
     },
 
     /*

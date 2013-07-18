@@ -440,7 +440,7 @@ FFW.UI = FFW.RPCObserver.create( {
      */
     sendUIError: function( resultCode, id, method, message ) {
 
-        Em.Logger.log( "FFW.UI." + method + "Response" );
+        Em.Logger.log( "FFW." + method + "Response" );
 
         if( resultCode ){
 
