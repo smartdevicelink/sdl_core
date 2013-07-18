@@ -50,7 +50,7 @@
 
 #include "transport_manager/bluetooth_adapter.h"
 #include "transport_manager/device_adapter_listener.h"
-#include "transport_manager/device_handle_generator.h"
+//#include "transport_manager/device_handle_generator.h"
 
 namespace transport_manager {
 

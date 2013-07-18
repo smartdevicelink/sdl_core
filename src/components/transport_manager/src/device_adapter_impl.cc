@@ -78,7 +78,6 @@ DeviceAdapterImpl::Connection::~Connection(void) {
 
 DeviceAdapterImpl::DeviceAdapterImpl()
     : listeners_(0),
-      handle_generator_(0),
       device_scan_requested_(false),
       device_scan_requested_mutex_(),
       device_scan_requested_cond_(),
@@ -108,14 +107,9 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
 
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::init(
-    DeviceHandleGenerator* handle_generator, Configuration* configuration) {
-  if (handle_generator == 0)
-    return BAD_PARAM;
-
+DeviceAdapter::Error DeviceAdapterImpl::init(Configuration* configuration) {
   LOG4CXX_INFO(logger_, "Initializing device adapter");
 
-  handle_generator_ = handle_generator;
   initialized_ = true;
 
   const int thread_start_error = pthread_create(&main_thread_, 0,

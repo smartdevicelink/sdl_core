@@ -46,7 +46,7 @@ namespace transport_manager {
  **/
 typedef int SessionID;
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
-
+typedef std::string DeviceHandle;
 
 }
 

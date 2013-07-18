@@ -46,7 +46,6 @@
 namespace transport_manager {
 
 class DeviceAdapterListener;
-class DeviceHandleGenerator;
 
 /**
  * @brief Base class for @link components_transportmanager_internal_design_device_adapters device adapters @endlink.
@@ -69,8 +68,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * Called from transport manager to start device adapter.
    **/
-  virtual Error init(DeviceHandleGenerator* handle_generator,
-                     Configuration* configuration);
+  virtual Error init(Configuration* configuration);
 
   /**
    * @brief Start scanning for new devices.
@@ -174,17 +172,15 @@ class DeviceAdapterImpl : public DeviceAdapter {
     void set_unique_device_id(const std::string& unique_device_id) {
       unique_device_id_ = unique_device_id;
     }
-
+    /**
+     * @brief Unique device identifier across all devices.
+     **/
+    std::string unique_device_id_;
    private:
     /**
      * @brief Device user-friendly name.
      **/
     std::string name_;
-
-    /**
-     * @brief Unique device identifier across all devices.
-     **/
-    std::string unique_device_id_;
   };
 
   class Connection {
@@ -461,11 +457,6 @@ class DeviceAdapterImpl : public DeviceAdapter {
    * @brief Listener for device adapter notifications.
    **/
   DeviceAdapterListenerList listeners_;
-
-  /**
-   * @brief Handle generator implementation.
-   **/
-  DeviceHandleGenerator* handle_generator_;
 
   /**
    * @brief Flag indicating that device scan was requested.
