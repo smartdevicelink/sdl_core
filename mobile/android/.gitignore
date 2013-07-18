@@ -1,5 +1,11 @@
-# Android: generated files
-bin
-gen
-SyncProxyTester/assets/build.info
+*.iml
+*.iws
+*.ipr
+.idea/
+.gradle/
+local.properties
 
+*/build/
+
+*~
+*.swp
