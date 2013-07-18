@@ -31,13 +31,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdint>
 #include <string>
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -64,7 +64,7 @@ void AddCommandRequest::Run() {
   }
 
   if (app->
-      FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt())) {
+      FindCommand((*message_)[strings::msg_params][strings::cmd_id].asUInt())) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
@@ -78,7 +78,7 @@ void AddCommandRequest::Run() {
       (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::menu_params] =
       (*message_)[strings::msg_params][strings::menu_params];
-    std::string file_path = app->name();
+    std::string file_path = file_system::FullPath(app->name());
     file_path += "/";
     file_path += (*message_)[strings::msg_params][strings::cmd_icon]
         [strings::value].asString();

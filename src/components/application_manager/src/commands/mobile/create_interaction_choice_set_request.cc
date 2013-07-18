@@ -78,10 +78,11 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::app_id] = app->app_id();
+  const int choice_set_id = (*message_)[strings::msg_params]
+      [strings::interaction_choice_set_id].asInt();
+
+  app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
+  app->AddChoiceSetVRCommands(choice_set_id, (*message_)[strings::msg_params]);
 
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
