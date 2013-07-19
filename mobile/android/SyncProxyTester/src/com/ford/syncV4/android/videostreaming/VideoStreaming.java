@@ -9,6 +9,7 @@ import java.io.InputStream;
 public class VideoStreaming {
 
     public byte[] readTestVideoFileFromStream(InputStream stream) throws IOException {
+        if (stream == null) throw new IllegalArgumentException("Input stream should not be null");
         int size = stream.available();
         byte[] buffer = new byte[size];
         stream.read(buffer);

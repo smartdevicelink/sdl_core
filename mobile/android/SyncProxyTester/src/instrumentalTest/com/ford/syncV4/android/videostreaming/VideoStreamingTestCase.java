@@ -5,8 +5,10 @@ import android.test.AndroidTestCase;
 
 import com.ford.syncV4.android.videostreaming.VideoStreaming;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -14,6 +16,7 @@ import java.io.InputStream;
  */
 public class VideoStreamingTestCase extends AndroidTestCase {
 
+    public static final String FILE_NAME = "test_video.mp4";
     private VideoStreaming sut;
 
     public VideoStreamingTestCase() {
@@ -27,9 +30,15 @@ public class VideoStreamingTestCase extends AndroidTestCase {
 
     public void testReadTestVideoFileFromStreamNotNull() throws Exception {
         AssetManager aMnager = this.getContext().getAssets();
-        String[] assets = aMnager.list("");
-        InputStream stream = aMnager.open("test_video.mp4");
+        InputStream stream = aMnager.open(FILE_NAME);
         byte[] bytes =  sut.readTestVideoFileFromStream(stream);
         assertNotNull(bytes);
+    }
+
+    public void testReadFileWithNullStreamShouldThrowsException() throws Exception {
+        try {
+            sut.readTestVideoFileFromStream(null);
+            Assert.fail("read with null stream should throws illegal arg exception");
+        }catch (IllegalArgumentException e){}
     }
 }
