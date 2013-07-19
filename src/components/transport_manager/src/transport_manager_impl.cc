@@ -44,16 +44,19 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_impl.h"
 #include "transport_manager/device_adapter_listener_impl.h"
+#include "transport_manager/timer.h"
 
 namespace transport_manager {
 
 log4cxx::LoggerPtr TransportManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("TransportManager"));
 
+TransportManagerAttr TransportManagerImpl::default_config_;
+
 TransportManager::~TransportManager() {
 }
 
-TransportManagerImpl::TransportManagerImpl()
+TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr &config)
     : message_queue_mutex_(),
       all_thread_active_(false),
       adapter_handler_(),
@@ -62,7 +65,8 @@ TransportManagerImpl::TransportManagerImpl()
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
       is_initialized_(false),
-      connection_id_counter_(0) {
+      connection_id_counter_(0),
+      config_(config){
 
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, 0);
@@ -91,7 +95,7 @@ TransportManagerImpl::~TransportManagerImpl() {
 }
 
 TransportManagerImpl* TransportManagerImpl::instance() {
-  static TransportManagerImpl instance;
+  static TransportManagerImpl instance(default_config_);
   if (false == instance.is_initialized_) {
     instance.init();
   }
@@ -144,8 +148,55 @@ void TransportManagerImpl::disconnectDevice(const DeviceHandle &device_id) {
   LOG4CXX_INFO(logger_, "Disconnected");
 }
 
-void TransportManagerImpl::disconnect(ConnectionId connection) {
-// TODO: disconnect it already
+void TransportManagerImpl::disconnectRoutine(void* p) {
+  TransportManagerImpl *tm = TransportManagerImpl::instance();
+  tm->disconnectForce((static_cast<Connection*>(p))->id);
+}
+
+void TransportManagerImpl::disconnect(const ConnectionId &cid) {
+  // TODO: disconnect it already
+  std::map<ConnectionId, Connection>::iterator cit = connections_.find(cid);
+  if (cit == connections_.end()) {
+    LOG4CXX_ERROR(logger_, "TransportManagerImpl::disconnect: Connection does not exist.");
+    return;
+  }
+  Connection &connection = cit->second;
+  pthread_mutex_lock(&event_queue_mutex_);
+  int messages_count = 0;
+  for (auto e : event_queue_) {
+    if (e.connection_id() == cid) {
+      ++messages_count;
+    }
+  }
+  pthread_mutex_unlock(&event_queue_mutex_);
+  if (messages_count > 0) {
+    connection.messages_count = messages_count;
+    connection.shutDown = true;
+    Timer timer(config_.disconnectTimeout, &disconnectRoutine, &connection);
+    connection.timer = timer;
+    timer.start();
+  } else {
+    DeviceAdapter *da = adapter_handler_.getAdapterBySession(cid);
+    da->disconnect(cid);
+  }
+}
+
+void TransportManagerImpl::disconnectForce(const ConnectionId &connection) {
+  pthread_mutex_lock(&event_queue_mutex_);
+  // Clear messages for this connection
+  // Note that MessageQueue typedef is assumed to be std::list,
+  // or there is a problem here. One more point versus typedefs-everywhere
+  auto e = message_queue_.begin();
+  while (e != message_queue_.end()) {
+    if ((*e)->connection_key() == connection) {
+      e = message_queue_.erase(e);
+    } else {
+      ++e;
+    }
+  }
+  pthread_mutex_unlock(&event_queue_mutex_);
+  DeviceAdapter *da = adapter_handler_.getAdapterBySession(connection);
+  da->disconnect(connection);
 }
 
 void TransportManagerImpl::addEventListener(
@@ -158,23 +209,29 @@ void TransportManagerImpl::removeEventListener(
   transport_manager_listener_.remove(listener);
 }
 
-bool TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {
+int TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {
   LOG4CXX_INFO(
       logger_,
       "Send message to device called with arguments serial number " << message->serial_number());
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
     //todo: log error
-    return false;
+    return E_TM_IS_NOT_INITIALIZED;
   }
 
-  if (connections_[message->connection_key()].shutDown) {
-    return false;
+  std::map<ConnectionId, Connection>::iterator cit = connections_.find(message->connection_key());
+  if (cit == connections_.end()) {
+    LOG4CXX_ERROR(logger_, "TransportManagerImpl::disconnect: Connection does not exist.");
+    return E_INVALID_HANDLE;
+  }
+
+  if (cit->second.shutDown) {
+    return E_CONNECTION_IS_TO_SHUTDOWN;
   }
 
   this->postMessage(message);
   LOG4CXX_INFO(logger_, "Message posted");
-  return true;
+  return E_SUCCESS;
 }
 
 void TransportManagerImpl::receiveEventFromDevice(
@@ -334,15 +391,15 @@ void TransportManagerImpl::eventListenerThread(void) {
 
       //todo: check that data is copied correctly here
       DeviceAdapter *da = (*it).device_adapter();
-      ConnectionId sid = (*it).session_id();
+      ConnectionId cid = (*it).connection_id();
       SearchDeviceError *srch_err;
       DeviceList dev_list;
       RawMessageSptr data;
       DataReceiveError *d_err;
-      Connection connection;
+      Connection connection(cid);
       LOG4CXX_INFO(
           logger_,
-          "Iterating over event queue items session id" << sid << "type " << (*it).event_type());
+          "Iterating over event queue items session id" << cid << "type " << (*it).event_type());
       switch ((*it).event_type()) {
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE:
           LOG4CXX_INFO(logger_, "Get device list for adapter " << da)
@@ -377,26 +434,26 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE:
           adapter_handler_.addSession((*it).device_adapter(),
-                                      (*it).session_id());
+                                      (*it).connection_id());
           for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
               tml_it != transport_manager_listener_.end(); ++tml_it) {
-            (*tml_it)->onConnectDone(da, sid);
+            (*tml_it)->onConnectDone(da, cid);
           }
-          connections_.insert(std::make_pair(it->session_id(), connection));
+          connections_.insert(std::make_pair(it->connection_id(), connection));
 
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE:
           adapter_handler_.removeSession((*it).device_adapter(),
-                                         (*it).session_id());
+                                         (*it).connection_id());
           for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
               tml_it != transport_manager_listener_.end(); ++tml_it) {
-            (*tml_it)->onDisconnectDone(da, sid);
+            (*tml_it)->onDisconnectDone(da, cid);
           }
-          connections_.erase(it->session_id());
+          connections_.erase(it->connection_id());
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL:
           break;
@@ -416,7 +473,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
               tml_it != transport_manager_listener_.end(); ++tml_it) {
-            (*tml_it)->onDataReceiveDone(da, sid, data);
+            (*tml_it)->onDataReceiveDone(da, cid, data);
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL:
@@ -424,7 +481,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
               tml_it != transport_manager_listener_.end(); ++tml_it) {
-            (*tml_it)->onDataReceiveFailed(da, sid, *d_err);
+            (*tml_it)->onDataReceiveFailed(da, cid, *d_err);
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR:

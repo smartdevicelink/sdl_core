@@ -9,6 +9,7 @@ set (SOURCES
 	./src/transport_manager_listener_impl.cc
 	./src/device_adapter_listener_impl.cc
 	./src/device_adapter_impl.cc
+	./src/timer.cc
 )
 
 add_library("TransportManager" ${SOURCES})

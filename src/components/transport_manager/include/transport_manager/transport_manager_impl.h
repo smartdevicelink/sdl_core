@@ -44,13 +44,16 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/device_adapter.h"
 #include "transport_manager/device_adapter_listener_impl.h"
+#include <transport_manager/timer.h>
 
 namespace transport_manager {
 
 enum
 {
   E_SUCCESS = 0,
-  E_TM_IS_NOT_INITIALIZED
+  E_TM_IS_NOT_INITIALIZED,
+  E_INVALID_HANDLE,
+  E_CONNECTION_IS_TO_SHUTDOWN
 };
 
 const uint MAX_TM_THREADS = 2;
@@ -58,11 +61,16 @@ const uint MAX_TM_THREADS = 2;
 //todo: add no_copy_constr where necessary
 //todo: add explicit where necessary
 
+struct TransportManagerAttr {
+  unsigned long disconnectTimeout;
+};
+
 /**
  * @brief Interface of transport manager.
  * @interface TransportManager
  **/
 class TransportManagerImpl : public TransportManager {
+  static TransportManagerAttr default_config_;
  public:
   /**
    * @brief provide default instance of transport manager
@@ -111,7 +119,9 @@ class TransportManagerImpl : public TransportManager {
    **/
   virtual void disconnectDevice(const DeviceHandle &device_id);
 
-  virtual void disconnect(const ConnectionId connection);
+  static void disconnectRoutine(void* p);
+  virtual void disconnect(const ConnectionId &connection);
+  virtual void disconnectForce(const ConnectionId &connection);
   /**
    * @brief post new mesage into TM's queue
    *
@@ -121,7 +131,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return true if succeed, false if connection is going to shut down
    **/
-  virtual bool sendMessageToDevice(const RawMessageSptr message);
+  virtual int sendMessageToDevice(const RawMessageSptr message);
 
   /**
    * @brief receive event from device
@@ -179,7 +189,7 @@ class TransportManagerImpl : public TransportManager {
   pthread_cond_t *getDeviceListenerThreadWakeup(void);
 
  protected:
-
+  TransportManagerAttr config_;
   /**
    * @brief post new mesage into TM's queue
    *
@@ -282,25 +292,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  TransportManagerImpl();
-
-  /**
-   * @brief constructor used to create new TM with device adapter
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  TransportManagerImpl(DeviceAdapter *device_adapter);
-
-  /**
-   * @brief constructor used to create new TM with device adapter
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  TransportManagerImpl(std::vector<DeviceAdapter *> device_adapter_list);
+  TransportManagerImpl(const TransportManagerAttr &config);
 
   static void *messageQueueStartThread(void *data);
   /**
@@ -387,11 +379,16 @@ class TransportManagerImpl : public TransportManager {
   bool is_initialized_;
  private:
   struct Connection {
+    ConnectionId id;
     DeviceHandle device;
+    Timer timer;
     bool shutDown;
+    int messages_count;
 
-    Connection()
-        : shutDown(false) {
+    Connection(ConnectionId id)
+        : id(id),
+          shutDown(false),
+          messages_count(0) {
     }
   };
   int connection_id_counter_;

@@ -59,7 +59,7 @@ class DeviceAdapterListener {
     void set_device_handle(const DeviceHandle &handle);
 
     int event_type(void) const;
-    int session_id(void) const;
+    int connection_id(void) const;
     DeviceAdapter *device_adapter(void) const;
     RawMessageSptr data(void) const;
     DeviceAdapterError *event_error(void) const;
@@ -67,7 +67,7 @@ class DeviceAdapterListener {
 
    private:
     int event_type_;
-    int session_id_;
+    int connection_id_;
     DeviceAdapter *device_adapter_;
     DeviceHandle device_handle_;
     RawMessageSptr event_data_;

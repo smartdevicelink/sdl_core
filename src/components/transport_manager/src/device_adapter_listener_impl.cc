@@ -52,7 +52,7 @@ DeviceAdapterListener::DeviceAdapterEvent::DeviceAdapterEvent(
     int type, int session_id, DeviceAdapter *adapter, const DeviceHandle &device, RawMessageSptr data,
     DeviceAdapterError *error)
     : event_type_(type),
-      session_id_(session_id),
+      connection_id_(session_id),
       device_adapter_(adapter),
       device_handle_(device),
       event_data_(data),
@@ -70,7 +70,7 @@ void DeviceAdapterListener::DeviceAdapterEvent::set_event_type(int type) {
 
 void DeviceAdapterListener::DeviceAdapterEvent::set_session_id(
     ConnectionId id) {
-  session_id_ = id;
+  connection_id_ = id;
 }
 
 void DeviceAdapterListener::DeviceAdapterEvent::set_device_adapter(
@@ -95,9 +95,9 @@ int DeviceAdapterListener::DeviceAdapterEvent::event_type(void) const {
   return event_type_;
 }
 
-ConnectionId DeviceAdapterListener::DeviceAdapterEvent::session_id(
+ConnectionId DeviceAdapterListener::DeviceAdapterEvent::connection_id(
     void) const {
-  return session_id_;
+  return connection_id_;
 }
 
 DeviceAdapter *DeviceAdapterListener::DeviceAdapterEvent::device_adapter(
@@ -287,7 +287,7 @@ void DeviceAdapterListenerImpl::onCommunicationError(
 bool DeviceAdapterListenerImpl::DeviceAdapterEvent::operator ==(
     const DeviceAdapterListenerImpl::DeviceAdapterEvent &other) {
   if (this->event_type_ == other.event_type_
-      && this->session_id_ == other.session_id_
+      && this->connection_id_ == other.connection_id_
       && this->device_adapter_ == other.device_adapter_) {
 
     if (!this->event_data_.valid() && !other.event_data_.valid())

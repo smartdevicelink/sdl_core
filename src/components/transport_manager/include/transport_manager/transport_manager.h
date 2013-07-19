@@ -87,7 +87,7 @@ class TransportManager {
    **/
   virtual void disconnectDevice(const DeviceHandle &device_id) = 0;
 
-  virtual void disconnect(const ConnectionId connection) = 0;
+  virtual void disconnect(const ConnectionId &connection) = 0;
   /**
    * @brief post new mesage into TM's queue
    *
@@ -95,7 +95,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual bool sendMessageToDevice(
+  virtual int sendMessageToDevice(
       const RawMessageSptr message) = 0;
 
   /**
