@@ -144,6 +144,10 @@ void TransportManagerImpl::disconnectDevice(const DeviceHandle &device_id) {
   LOG4CXX_INFO(logger_, "Disconnected");
 }
 
+void TransportManagerImpl::disconnect(ConnectionId connection) {
+// TODO: disconnect it already
+}
+
 void TransportManagerImpl::addEventListener(
     TransportManagerListener *listener) {
   transport_manager_listener_.push_back(listener);
@@ -300,13 +304,8 @@ void TransportManagerImpl::removeEvent(
 
 void TransportManagerImpl::postEvent(
     const DeviceAdapterListenerImpl::DeviceAdapterEvent &event) {
-  DeviceAdapterListenerImpl::DeviceAdapterEvent evt(event.event_type(),
-                                                    event.session_id(),
-                                                    event.device_adapter(),
-                                                    event.data(),
-                                                    event.event_error());
   pthread_mutex_lock(&event_queue_mutex_);
-  event_queue_.push_back(evt);
+  event_queue_.push_back(event);
   pthread_mutex_unlock(&event_queue_mutex_);
 }
 
@@ -335,7 +334,7 @@ void TransportManagerImpl::eventListenerThread(void) {
 
       //todo: check that data is copied correctly here
       DeviceAdapter *da = (*it).device_adapter();
-      SessionID sid = (*it).session_id();
+      ConnectionId sid = (*it).session_id();
       SearchDeviceError *srch_err;
       DeviceList dev_list;
       RawMessageSptr data;
@@ -384,7 +383,6 @@ void TransportManagerImpl::eventListenerThread(void) {
               tml_it != transport_manager_listener_.end(); ++tml_it) {
             (*tml_it)->onConnectDone(da, sid);
           }
-
           connections_.insert(std::make_pair(it->session_id(), connection));
 
           break;
@@ -505,9 +503,9 @@ pthread_cond_t *TransportManagerImpl::getDeviceListenerThreadWakeup(void) {
 }
 
 DeviceAdapter *TransportManagerImpl::AdapterHandler::getAdapterBySession(
-    SessionID session_id) {
+    ConnectionId session_id) {
   LOG4CXX_INFO(logger_, "Add adapter by session called " << session_id);
-  std::map<SessionID, DeviceAdapter *>::iterator it = session_to_adapter_map_
+  std::map<ConnectionId, DeviceAdapter *>::iterator it = session_to_adapter_map_
       .find(session_id);
   if (it != session_to_adapter_map_.end()) {
     LOG4CXX_INFO(logger_, "Device adapter found");
@@ -555,7 +553,7 @@ const TransportManagerImpl::AdapterHandler::AdapterList &TransportManagerImpl::A
   return device_adapters_;
 }
 void TransportManagerImpl::AdapterHandler::addSession(DeviceAdapter *da,
-                                                      SessionID sid) {
+                                                      ConnectionId sid) {
   LOG4CXX_INFO(logger_,
                "Add session called with sid " << sid << " adapter " << da);
   AdapterList::iterator item = std::find(device_adapters_.begin(),
@@ -570,7 +568,7 @@ void TransportManagerImpl::AdapterHandler::addSession(DeviceAdapter *da,
 }
 
 void TransportManagerImpl::AdapterHandler::removeSession(DeviceAdapter *da,
-                                                         SessionID sid) {
+                                                         ConnectionId sid) {
   LOG4CXX_INFO(logger_,
                "Remove session called with sid " << sid << " adapter " << da);
   session_to_adapter_map_.erase(sid);

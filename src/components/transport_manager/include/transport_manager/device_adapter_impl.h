@@ -260,7 +260,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
     /**
      * @brief Session identifier.
      **/
-    const SessionID session_id_;
+    const ConnectionId session_id_;
 
     /**
      * @brief Thread that handles connection.
@@ -446,7 +446,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
   /**
    * @brief Connections map.
    **/
-  typedef std::map<SessionID, Connection*> ConnectionMap;
+  typedef std::map<ConnectionId, Connection*> ConnectionMap;
 
   /**
    * @brief Logger.

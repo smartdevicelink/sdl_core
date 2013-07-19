@@ -43,10 +43,12 @@ namespace transport_manager {
 
 class DeviceAdapterListener {
  public:
+  // TODO: Kill me, please!
   class DeviceAdapterEvent {
    public:
     bool operator ==(const DeviceAdapterEvent &other);
     DeviceAdapterEvent(int type, int session_id, DeviceAdapter *adapter,
+                       const DeviceHandle &device,
                        RawMessageSptr data, DeviceAdapterError *error);
     ~DeviceAdapterEvent();
     void set_event_type(int type);
@@ -54,17 +56,20 @@ class DeviceAdapterListener {
     void set_device_adapter(DeviceAdapter *device_adapter);
     void set_data(RawMessageSptr data);
     void set_error(DeviceAdapterError *error);
+    void set_device_handle(const DeviceHandle &handle);
 
     int event_type(void) const;
     int session_id(void) const;
     DeviceAdapter *device_adapter(void) const;
     RawMessageSptr data(void) const;
     DeviceAdapterError *event_error(void) const;
+    const DeviceHandle &device_handle() const;
 
    private:
     int event_type_;
     int session_id_;
     DeviceAdapter *device_adapter_;
+    DeviceHandle device_handle_;
     RawMessageSptr event_data_;
     DeviceAdapterError *event_error_;
   };
@@ -76,40 +81,42 @@ class DeviceAdapterListener {
 
   virtual void onConnectDone(
       const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id) = 0;
+      const DeviceHandle device,
+      const ConnectionId session_id) = 0;
   virtual void onConnectFailed(const DeviceAdapter* device_adapter,
-                               const transport_manager::SessionID session_id,
+                               const DeviceHandle device,
+                               const ConnectionId session_id,
                                const ConnectError& error) = 0;
 
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
-                                const SessionID session_id) = 0;
+                                const ConnectionId session_id) = 0;
   virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
-                                  const SessionID session_id,
+                                  const ConnectionId session_id,
                                   const DisconnectError& error) = 0;
 
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id) = 0;
+                                      const ConnectionId session_id) = 0;
   virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
-                                        const SessionID session_id,
+                                        const ConnectionId session_id,
                                         const DisconnectDeviceError& error) = 0;
 
   virtual void onDataSendDone(const DeviceAdapter* device_adapter,
-                              const SessionID session_id,
+                              const ConnectionId session_id,
                               const RawMessageSptr data_container) = 0;
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
-                                const SessionID session_id,
+                                const ConnectionId session_id,
                                 const RawMessageSptr data_container,
                                 const DataSendError& error) = 0;
 
   virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,
-                                 const SessionID session_id,
+                                 const ConnectionId session_id,
                                  const RawMessageSptr data_container) = 0;
   virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter,
-                                   const SessionID session_id,
+                                   const ConnectionId session_id,
                                    const DataReceiveError& error) = 0;
 
   virtual void onCommunicationError(const DeviceAdapter* device_adapter,
-                                    const SessionID session_id) = 0;
+                                    const ConnectionId session_id) = 0;
 };
 }  //namespace
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER

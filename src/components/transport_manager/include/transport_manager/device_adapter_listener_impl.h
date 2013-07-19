@@ -67,41 +67,43 @@ class DeviceAdapterListenerImpl : public DeviceAdapterListener {
                                     const SearchDeviceError& error);
 
   virtual void onConnectDone(const DeviceAdapter* device_adapter,
-                             const transport_manager::SessionID session_id);
+                             const DeviceHandle device,
+                             const ConnectionId session_id);
   virtual void onConnectFailed(const DeviceAdapter* device_adapter,
+                               const DeviceHandle device,
                                const int session_id, const ConnectError& error);
 
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
-                                const transport_manager::SessionID session_id);
+                                const ConnectionId session_id);
   virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
-                                  const SessionID session_id,
+                                  const ConnectionId session_id,
                                   const DisconnectError& error);
 
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id);
+                                      const ConnectionId session_id);
   virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
-                                        const SessionID session_id,
+                                        const ConnectionId session_id,
                                         const DisconnectDeviceError& error);
 
   virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,
-                                 const transport_manager::SessionID session_id,
+                                 const ConnectionId session_id,
                                  const RawMessageSptr data_container);
   virtual void onDataReceiveFailed(
       const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id,
+      const ConnectionId session_id,
       const DataReceiveError& error);
 
   virtual void onDataSendDone(const DeviceAdapter* device_adapter,
-                              const transport_manager::SessionID session_id,
+                              const ConnectionId session_id,
                               const RawMessageSptr data_container);
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
-                                const transport_manager::SessionID session_id,
+                                const ConnectionId session_id,
                                 const RawMessageSptr data_container,
                                 const DataSendError& error);
 
   virtual void onCommunicationError(
       const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id);
+      const ConnectionId session_id);
 
  private:
   /**

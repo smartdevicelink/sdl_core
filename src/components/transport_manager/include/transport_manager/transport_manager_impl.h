@@ -111,6 +111,7 @@ class TransportManagerImpl : public TransportManager {
    **/
   virtual void disconnectDevice(const DeviceHandle &device_id);
 
+  virtual void disconnect(const ConnectionId connection);
   /**
    * @brief post new mesage into TM's queue
    *
@@ -222,16 +223,16 @@ class TransportManagerImpl : public TransportManager {
    public:
     typedef std::vector<transport_manager::DeviceAdapter *> AdapterList;
     transport_manager::DeviceAdapter *getAdapterBySession(
-        transport_manager::SessionID sid);
+        ConnectionId sid);
     transport_manager::DeviceAdapter *getAdapterByDevice(
         transport_manager::DeviceHandle did);
     void addSession(transport_manager::DeviceAdapter *da,
-                    transport_manager::SessionID sid);
+                    ConnectionId sid);
     void addDevice(transport_manager::DeviceAdapter *da,
                    transport_manager::DeviceDesc did);
     void addAdapter(transport_manager::DeviceAdapter *da);
     void removeSession(transport_manager::DeviceAdapter *da,
-                       transport_manager::SessionID sid);
+                       ConnectionId sid);
     void removeDevice(const transport_manager::DeviceHandle &device);
     const AdapterList &device_adapters(void);
 
@@ -247,7 +248,7 @@ class TransportManagerImpl : public TransportManager {
     /**
      * @brief container that used to get device id by session id
      **/
-    std::map<transport_manager::SessionID, transport_manager::DeviceAdapter *> session_to_adapter_map_;
+    std::map<ConnectionId, transport_manager::DeviceAdapter *> session_to_adapter_map_;
 
     /**
      * @brief container that used to get adapter id by device id
@@ -386,6 +387,7 @@ class TransportManagerImpl : public TransportManager {
   bool is_initialized_;
  private:
   struct Connection {
+    DeviceHandle device;
     bool shutDown;
 
     Connection()
@@ -393,7 +395,7 @@ class TransportManagerImpl : public TransportManager {
     }
   };
   int connection_id_counter_;
-  std::map<int, Connection> connections_;
+  std::map<ConnectionId, Connection> connections_;
   /**
    * @brief register listener that would be used to catch adapter's events
    *

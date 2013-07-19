@@ -55,16 +55,16 @@ class TransportManagerListenerImpl: public TransportManagerListener {
                                     const SearchDeviceError& error){};
 
   virtual void onConnectDone(const DeviceAdapter* device_adapter,
-                             const transport_manager::SessionID session_id){};
+                             const ConnectionId session_id){};
   virtual void onConnectFailed(const DeviceAdapter* device_adapter,
-                               const transport_manager::SessionID session_id,
+                               const ConnectionId session_id,
                                const ConnectError& error) {};
 
   virtual void onDisconnectDone(
       const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id) {};
+      const ConnectionId session_id) {};
   virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
-                                  const transport_manager::SessionID session_id,
+                                  const ConnectionId session_id,
                                   const DisconnectDeviceError& error){};
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
                                       const DeviceHandle device_id){};
@@ -73,23 +73,23 @@ class TransportManagerListenerImpl: public TransportManagerListener {
                                         const DisconnectDeviceError& error){};
 
   virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,
-                                 const transport_manager::SessionID session_id,
+                                 const ConnectionId session_id,
                                  const RawMessageSptr data_container){};
   virtual void onDataReceiveFailed(
       const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id,
+      const ConnectionId session_id,
       const DataReceiveError& error) {};
 
   virtual void onDataSendDone(const DeviceAdapter* device_adapter,
-                              const transport_manager::SessionID session_id,
+                              const ConnectionId session_id,
                               const RawMessageSptr data_container){};
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
-                                const transport_manager::SessionID session_id,
+                                const ConnectionId session_id,
                                 const DataSendError& error){};
 
   virtual void onCommunicationError(
       const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id) {};
+      const ConnectionId session_id) {};
 };
 }  //namespace
 #endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL

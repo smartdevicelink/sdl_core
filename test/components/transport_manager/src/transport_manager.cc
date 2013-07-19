@@ -115,17 +115,17 @@ class MyListener : public TransportManagerListenerImpl {
     pthread_cond_signal(&task_complete);
   }
   void onConnectDone(const DeviceAdapter* device_adapter,
-                     const transport_manager::SessionID session_id) {
+                     const transport_manager::ConnectionId session_id) {
     connection_id = session_id;
     pthread_cond_signal(&task_complete);
   }
   void onDataReceiveDone(const DeviceAdapter* device_adapter,
-                         const transport_manager::SessionID session_id,
+                         const transport_manager::ConnectionId session_id,
                          const RawMessageSptr data_container) {
     pthread_cond_signal(&task_complete);
   }
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id){
+                                      const ConnectionId session_id){
     pthread_cond_signal(&task_complete);
   }
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,

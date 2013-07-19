@@ -168,7 +168,7 @@ void DeviceAdapterImpl::waitForThreadsTermination() {
 
   for (ConnectionMap::iterator it = connections_.begin();
       it != connections_.end(); ++it) {
-    SessionID session_id = it->first;
+    ConnectionId session_id = it->first;
     Connection* connection = it->second;
 
     connection->set_terminate_flag(true);
@@ -391,7 +391,7 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
               "Connection " << connection->session_id() << " to remote device " << device->unique_device_id() << " established");
           for (DeviceAdapterListenerList::iterator it = listeners_.begin();
               it != listeners_.end(); ++it) {
-            (*it)->onConnectDone(this, connection->session_id());
+            (*it)->onConnectDone(this, device_handle, connection->session_id());
           }
           is_connection_succeeded = true;
 
@@ -571,7 +571,7 @@ void DeviceAdapterImpl::handleCommunication(Connection* connection) {
   if (!is_connection_succeeded) {
     for (DeviceAdapterListenerList::iterator it = listeners_.begin();
         it != listeners_.end(); ++it) {
-      (*it)->onConnectFailed(this, connection->session_id(), ConnectError());
+      (*it)->onConnectFailed(this, device_handle, connection->session_id(), ConnectError());
     }
   }
 
@@ -697,7 +697,7 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(
   return OK;
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::disconnect(const SessionID session_id) {
+DeviceAdapter::Error DeviceAdapterImpl::disconnect(const ConnectionId session_id) {
 //TODO check if initialized and supported
 
   Error error = OK;

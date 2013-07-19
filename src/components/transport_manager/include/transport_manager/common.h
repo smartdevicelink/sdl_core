@@ -44,9 +44,9 @@ namespace transport_manager {
  *
  * @see @ref components_transportmanager_client_connection_management
  **/
-typedef int SessionID;
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 typedef std::string DeviceHandle;
+typedef int ConnectionId;
 
 struct DeviceDesc {
   DeviceHandle handle;
