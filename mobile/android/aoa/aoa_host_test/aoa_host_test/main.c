@@ -32,13 +32,21 @@
 #define IN 0x85
 #define OUT 0x07
 
-#define VID 0x18D1
-#define PID 0x4E22
+#define VID_NEXUSS 0x18D1
+#define PID_NEXUSS 0x4E22
+
+#define VID_NEXUS7 0x18d1
+#define PID_NEXUS7 0x4e42
+
+#define VID VID_NEXUS7
+#define PID PID_NEXUS7
 
 #define ACCESSORY_PID 0x2D01
 #define ACCESSORY_PID_ALT 0x2D00
 
 #define LEN 2
+
+#define ERR_DEVICE_NOT_OPEN -2
 
 /*
  If you are on Ubuntu you will require libusb as well as the headers...
@@ -60,27 +68,45 @@ static int setupAccessory(
                           const char* version,
                           const char* uri,
                           const char* serialNumber);
+static int connectToAccessory();
 
 //static
 static struct libusb_device_handle* handle;
-static char stop;
-static char success = 0;
+//static char stop;
+//static char success = 0;
 
 int main (int argc, char *argv[]){
-	if(init() < 0)
-		return -1;
-	//doTransfer();
-	if(setupAccessory(
-                      "Manufacturer",
-                      "Model",
-                      "Description",
-                      "VersionName",
-                      "http://neuxs-computing.ch",
-                      "2254711SerialNo.") < 0){
-		fprintf(stdout, "Error setting up accessory\n");
-		deInit();
-		return -1;
-	};
+	int ret = init();
+    switch (ret) {
+        case ERR_DEVICE_NOT_OPEN: {
+            if (connectToAccessory() < 0) {
+                fprintf(stdout, "Error connecting to accessory\n");
+                deInit();
+                return -1;
+            }
+            break;
+        }
+            
+        case 0: {
+            //doTransfer();
+            if(setupAccessory(
+                              "Nexus-Computing GmbH",
+                              "osciprime",
+                              "Description",
+                              "antilope",
+                              "http://android.serverbox.ch/?p=262",
+                              "2254711SerialNo.") < 0){
+                fprintf(stdout, "Error setting up accessory\n");
+                deInit();
+                return -1;
+            };
+            break;
+        }
+            
+        default:
+            // other error
+            return -1;
+    }
 	if(mainPhase() < 0){
 		fprintf(stdout, "Error during main phase\n");
 		deInit();
@@ -107,13 +133,37 @@ static int mainPhase(){
 
 
 static int init(){
-	libusb_init(NULL);
+	int response = libusb_init(NULL);
+    if (response != 0) {
+        error(response);
+        return -1;
+    }
 	if((handle = libusb_open_device_with_vid_pid(NULL, VID, PID)) == NULL){
-		fprintf(stdout, "Problem acquireing handle\n");
-		return -1;
+		fprintf(stdout, "Problem acquiring handle for device\n");
+		return ERR_DEVICE_NOT_OPEN;
 	}
 	libusb_claim_interface(handle, 0);
 	return 0;
+}
+
+static int connectToAccessory() {
+    fprintf(stdout, "Waiting for accessory\n");
+    int tries = 10;
+	for(;;){//attempt to connect to new PID, if that doesn't work try ACCESSORY_PID_ALT
+		tries--;
+		if((handle = libusb_open_device_with_vid_pid(NULL, VID, ACCESSORY_PID)) == NULL){
+			if(tries < 0){
+                fprintf(stdout, "Problem acquiring handle for accessory\n");
+				return -1;
+			}
+		}else{
+			break;
+		}
+		sleep(1);
+	}
+	libusb_claim_interface(handle, 0);
+	fprintf(stdout, "Interface claimed, ready to transfer data\n");
+    return 0;
 }
 
 static int deInit(){
@@ -137,7 +187,6 @@ static int setupAccessory(
 	unsigned char ioBuffer[2];
 	int devVersion;
 	int response;
-	int tries = 5;
     
 	response = libusb_control_transfer(
                                        handle, //handle
@@ -170,31 +219,17 @@ static int setupAccessory(
 	response = libusb_control_transfer(handle,0x40,52,0,5,(char*)serialNumber,strlen(serialNumber)+1,0);
 	if(response < 0){error(response);return -1;}
     
-	fprintf(stdout,"Accessory Identification sent\n", devVersion);
+	fprintf(stdout,"Accessory Identification %d sent\n", devVersion);
     
 	response = libusb_control_transfer(handle,0x40,53,0,0,NULL,0,0);
 	if(response < 0){error(response);return -1;}
     
-	fprintf(stdout,"Attempted to put device into accessory mode\n", devVersion);
+	fprintf(stdout,"Attempted to put device into accessory mode %d\n", devVersion);
     
 	if(handle != NULL)
 		libusb_release_interface (handle, 0);
     
-    
-	for(;;){//attempt to connect to new PID, if that doesn't work try ACCESSORY_PID_ALT
-		tries--;
-		if((handle = libusb_open_device_with_vid_pid(NULL, VID, ACCESSORY_PID)) == NULL){
-			if(tries < 0){
-				return -1;
-			}
-		}else{
-			break;
-		}
-		sleep(1);
-	}
-	libusb_claim_interface(handle, 0);
-	fprintf(stdout, "Interface claimed, ready to transfer data\n");
-	return 0;
+    return connectToAccessory();
 }
 
 static void error(int code){

@@ -56,15 +56,19 @@ public class UsbTest extends Activity {
         	mFout = new FileOutputStream(fd);
         }else{
         	UsbAccessory[] accessories = UsbManager.getInstance(this).getAccessoryList();
-        	for(UsbAccessory a : accessories){
-        		l("accessory: "+a.getManufacturer());
-        		if(a.getManufacturer().equals("Nexus-Computing GmbH")){
-        			mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent("ch.serverbox.android.usbtest.USBPERMISSION"),0);
-        			UsbManager.getInstance(this).requestPermission(a,mPermissionIntent);
-        			Log.d("USB", "permission requested");
-        			break;
-        		}
-        	}
+			if (accessories != null) {
+				for(UsbAccessory a : accessories){
+					l("accessory: "+a.getManufacturer());
+					if(a.getManufacturer().equals("Nexus-Computing GmbH")){
+						mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent("ch.serverbox.android.usbtest.USBPERMISSION"),0);
+						UsbManager.getInstance(this).requestPermission(a,mPermissionIntent);
+						Log.d("USB", "permission requested");
+						break;
+					}
+				}
+			} else {
+				l("accessories not found");
+			}
         }
         
         mBtSend = (Button)(findViewById(R.id.btSebd));
