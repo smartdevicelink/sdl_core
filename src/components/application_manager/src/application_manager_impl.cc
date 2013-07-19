@@ -370,7 +370,6 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
     MessageChains::iterator it =  message_chaining_.begin();
     for (; message_chaining_.end() != it; ++it) {
       if ((*it->second) == *msg_chaining) {
-        it->second->IncrementCounter();
         message_chaining_[hmi_correlation_id] = it->second;
         return &(*it->second);
       }

@@ -70,6 +70,16 @@ void AddCommandRequest::Run() {
     return;
   }
 
+  // we should specify amount of required responses in the 1st request
+  unsigned int chaining_counter = 0;
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
+    ++chaining_counter;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
+    ++chaining_counter;
+  }
+
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
 
     smart_objects::SmartObject msg_params =
@@ -86,7 +96,8 @@ void AddCommandRequest::Run() {
 
     msg_params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true);
+    CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true,
+                     chaining_counter);
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {

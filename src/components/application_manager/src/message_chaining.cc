@@ -75,6 +75,10 @@ int MessageChaining::counter() const {
   return counter_;
 }
 
+void MessageChaining::set_counter(const unsigned int& counter) {
+  counter_ = counter;
+}
+
 void MessageChaining::set_data(const smart_objects::SmartObject& data) {
   data_ = data;
 }

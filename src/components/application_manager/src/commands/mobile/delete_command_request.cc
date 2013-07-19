@@ -78,8 +78,19 @@ void DeleteCommandRequest::Run() {
   msg_params[strings::app_id] = application->app_id();
 
 
+  // we should specify amount of required responses in the 1st request
+  unsigned int chaining_counter = 0;
   if ((*command).keyExists(strings::menu_params)) {
-    CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, msg_params, true);
+    ++chaining_counter;
+  }
+
+  if ((*command).keyExists(strings::vr_commands)) {
+    ++chaining_counter;
+  }
+
+  if ((*command).keyExists(strings::menu_params)) {
+    CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand,
+                     msg_params, true, chaining_counter);
   }
 
   // check vr params

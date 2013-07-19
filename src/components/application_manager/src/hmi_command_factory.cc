@@ -175,7 +175,7 @@ log4cxx::LoggerPtr HMICommandFactory::logger_   =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
-  const MessageSharedPtr& message) {
+    const MessageSharedPtr& message) {
   LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand function_id: " <<
                (*message)[strings::params][strings::function_id].asInt());
 

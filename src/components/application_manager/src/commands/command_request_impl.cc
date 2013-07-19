@@ -99,7 +99,8 @@ void CommandRequestImpl::SendResponse(const bool success,
 
 void CommandRequestImpl::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
-    const NsSmart::SmartObject& msg_params, bool require_chaining) {
+    const NsSmart::SmartObject& msg_params, bool require_chaining,
+    unsigned int chaining_counter) {
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
       new NsSmartDeviceLink::NsSmartObjects::SmartObject;
@@ -137,6 +138,10 @@ void CommandRequestImpl::CreateHMIRequest(
     if (!msg_chaining_) {
       LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    }
+
+    if (0 < chaining_counter) {
+      msg_chaining_->set_counter(chaining_counter);
     }
   }
 
