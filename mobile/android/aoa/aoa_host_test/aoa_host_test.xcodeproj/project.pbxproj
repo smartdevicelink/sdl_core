@@ -1,0 +1,220 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BA1AE010179953CF00FEBC57 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BA1AE00F179953CF00FEBC57 /* main.c */; };
+		BA1AE01B17995A0F00FEBC57 /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BA1AE01A17995A0F00FEBC57 /* libusb-1.0.0.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BA1AE00C179953CF00FEBC57 /* aoa_host_test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = aoa_host_test; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA1AE00F179953CF00FEBC57 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		BA1AE01A17995A0F00FEBC57 /* libusb-1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libusb-1.0.0.dylib"; path = "/usr/local/Cellar/libusb/1.0.9/lib/libusb-1.0.0.dylib"; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BA1AE009179953CF00FEBC57 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA1AE01B17995A0F00FEBC57 /* libusb-1.0.0.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BA1AE003179953CF00FEBC57 = {
+			isa = PBXGroup;
+			children = (
+				BA1AE00E179953CF00FEBC57 /* aoa_host_test */,
+				BA1AE00D179953CF00FEBC57 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BA1AE00D179953CF00FEBC57 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BA1AE00C179953CF00FEBC57 /* aoa_host_test */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BA1AE00E179953CF00FEBC57 /* aoa_host_test */ = {
+			isa = PBXGroup;
+			children = (
+				BA1AE00F179953CF00FEBC57 /* main.c */,
+				BA1AE01A17995A0F00FEBC57 /* libusb-1.0.0.dylib */,
+			);
+			path = aoa_host_test;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BA1AE00B179953CF00FEBC57 /* aoa_host_test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA1AE015179953CF00FEBC57 /* Build configuration list for PBXNativeTarget "aoa_host_test" */;
+			buildPhases = (
+				BA1AE008179953CF00FEBC57 /* Sources */,
+				BA1AE009179953CF00FEBC57 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = aoa_host_test;
+			productName = aoa_host_test;
+			productReference = BA1AE00C179953CF00FEBC57 /* aoa_host_test */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BA1AE004179953CF00FEBC57 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = yes;
+			};
+			buildConfigurationList = BA1AE007179953CF00FEBC57 /* Build configuration list for PBXProject "aoa_host_test" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = BA1AE003179953CF00FEBC57;
+			productRefGroup = BA1AE00D179953CF00FEBC57 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BA1AE00B179953CF00FEBC57 /* aoa_host_test */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BA1AE008179953CF00FEBC57 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA1AE010179953CF00FEBC57 /* main.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		BA1AE013179953CF00FEBC57 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "/usr/local/include/libusb-1.0/";
+				LIBRARY_SEARCH_PATHS = /usr/local/lib/;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		BA1AE014179953CF00FEBC57 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "/usr/local/include/libusb-1.0/";
+				LIBRARY_SEARCH_PATHS = /usr/local/lib/;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		BA1AE016179953CF00FEBC57 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libusb/1.0.9/lib,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		BA1AE017179953CF00FEBC57 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libusb/1.0.9/lib,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BA1AE007179953CF00FEBC57 /* Build configuration list for PBXProject "aoa_host_test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA1AE013179953CF00FEBC57 /* Debug */,
+				BA1AE014179953CF00FEBC57 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BA1AE015179953CF00FEBC57 /* Build configuration list for PBXNativeTarget "aoa_host_test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA1AE016179953CF00FEBC57 /* Debug */,
+				BA1AE017179953CF00FEBC57 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BA1AE004179953CF00FEBC57 /* Project object */;
+}
