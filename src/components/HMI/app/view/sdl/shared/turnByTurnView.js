@@ -57,7 +57,7 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
             'turnIconImage'
         ],
 
-    appId: -1,
+    appID: -1,
     navigationText2: null,
     eta: null,
     totalDistance: null,
@@ -96,7 +96,7 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
             if (params.maneuverComplete){
                 this.set( 'maneuverComplete', params.maneuverComplete );
             }
-            this.set( 'appId', params.appId );
+            this.set( 'appID', params.appID );
             this.set( 'turnIcon', params.turnIcon );
             this.set( 'distanceToManeuver', params.distanceToManeuver );
             this.set( 'distanceToManeuverScale', params.distanceToManeuverScale );
@@ -123,11 +123,11 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
     } ),
 
     turnList: SDL.Button.create( {
-        elementId: 'turnList',
+        elementID: 'turnList',
         classNames: 'turnList btn',
         text: 'Turn List',
         action: function() {
-            SDL.SDLController.tbtTurnList( this._parentView.appId );
+            SDL.SDLController.tbtTurnList( this._parentView.appID );
         },
         target: '',
         onDown: false,

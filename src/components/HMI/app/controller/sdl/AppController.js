@@ -54,19 +54,19 @@ SDL.SDLAppController = Em.Object.create( {
     onCommand: function( element ) {
 
         // if submenu
-        if( element.menuId ){
+        if( element.menuID ){
 
             // activate driver destruction if necessary
             if( SDL.SDLModel.driverDistractionState ){
                 SDL.DriverDistraction.activate();
             }else{
-                this.onSubMenu( element.menuId );
+                this.onSubMenu( element.menuID );
             }
 
             return;
         }
 
-        FFW.UI.onCommand( element.commandId, this.model.appId );
+        FFW.UI.onCommand( element.commandID, this.model.appID );
     },
 
     /**
@@ -84,7 +84,7 @@ SDL.SDLAppController = Em.Object.create( {
      * @param element: SDL.Button
      */
     onVRCommand: function( element ) {
-        FFW.VR.onCommand( element.commandId, element.appId );
+        FFW.VR.onCommand( element.commandID, element.appID );
     },
 
     /**
@@ -95,7 +95,7 @@ SDL.SDLAppController = Em.Object.create( {
      */
     onChoiceInteraction: function( element ) {
 
-        FFW.UI.interactionResponse( 'SUCCESS', element.performInteractionRequestId, element.choiceId );
+        FFW.UI.interactionResponse( 'SUCCESS', element.performInteractionRequestId, element.choiceID );
 
         SDL.InteractionChoicesView.deactivate( false );
     },
@@ -114,7 +114,7 @@ SDL.SDLAppController = Em.Object.create( {
     deactivateApp: function() {
 
         if( this.model ){
-            SDL.SDLModel.onDeactivateApp( SDL.States.nextState, this.model.appId );
+            SDL.SDLModel.onDeactivateApp( SDL.States.nextState, this.model.appID );
         }
 
     },
@@ -127,7 +127,7 @@ SDL.SDLAppController = Em.Object.create( {
 
         for( i = 0; i < apps.length; i++ ){
             SDL.SDLModel.onAppUnregistered( {
-                "appId": apps[i].appId
+                "appID": apps[i].appID
             } );
         }
     }

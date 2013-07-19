@@ -39,7 +39,7 @@ SDL.SDLAppModel = Em.Object.extend( {
      * 
      * @type {Number}
      */
-    appId: null,
+    appID: null,
 
     /**
      * Application name
@@ -133,7 +133,7 @@ SDL.SDLAppModel = Em.Object.extend( {
      * @return {String}
      */
     currentSubMenuLabel: function() {
-        var submenu = this.get( 'commandsList' ).filterProperty( 'menuId', this.get( 'currentSubMenuId' ) );
+        var submenu = this.get( 'commandsList' ).filterProperty( 'menuID', this.get( 'currentSubMenuId' ) );
         return submenu.length ? submenu[0].name : 'Options';
     }.property( 'this.currentSubMenuId' ),
 
@@ -166,7 +166,7 @@ SDL.SDLAppModel = Em.Object.extend( {
 
         if (params.menuParams) {
             this.get( 'commandsList' ).pushObject( {
-                commandId: params.cmdID,
+                commandID: params.cmdID,
                 name: params.menuParams.menuName ? params.menuParams.menuName : "",
                 parent: params.menuParams.parentID ? params.menuParams.parentID : 0,
                 position: params.menuParams.position ? params.menuParams.position : 0,
@@ -174,7 +174,7 @@ SDL.SDLAppModel = Em.Object.extend( {
             } );
         } else {
             this.get( 'commandsList' ).pushObject( {
-                commandId: params.cmdID,
+                commandID: params.cmdID,
                 name: '',
                 parent: 0,
                 position: 0,
@@ -188,9 +188,9 @@ SDL.SDLAppModel = Em.Object.extend( {
      * 
      * @param {Number}
      */
-    deleteCommand: function( commandId ) {
+    deleteCommand: function( commandID ) {
 
-        this.get( 'commandsList' ).removeObjects( this.get( 'commandsList' ).filterProperty( 'commandId', commandId ) );
+        this.get( 'commandsList' ).removeObjects( this.get( 'commandsList' ).filterProperty( 'commandID', commandID ) );
     },
 
     /**
@@ -201,7 +201,7 @@ SDL.SDLAppModel = Em.Object.extend( {
     addSubMenu: function( params ) {
 
         this.get( 'commandsList' ).pushObject( {
-            menuId: params.menuID,
+            menuID: params.menuID,
             name: params.menuParams.menuName ? params.menuParams.menuName : '',
             parent: 0,
             position: params.menuParams.position ? params.menuParams.position : 0
@@ -213,19 +213,19 @@ SDL.SDLAppModel = Em.Object.extend( {
      * 
      * @param {Number}
      */
-    deleteSubMenu: function( menuId ) {
+    deleteSubMenu: function( menuID ) {
 
         // don't delete if current submenu active
-        if( this.get( 'currentSubMenuId' ) == menuId ){
+        if( this.get( 'currentSubMenuId' ) == menuID ){
             return 'IN_USE';
             // SDL.SDLAppController.onSubMenu(0);
         }
 
         // remove submenu
-        this.get( 'commandsList' ).removeObjects( this.get( 'commandsList' ).filterProperty( 'menuId', menuId ) );
+        this.get( 'commandsList' ).removeObjects( this.get( 'commandsList' ).filterProperty( 'menuID', menuID ) );
 
         // remove commands from deleted submenu
-        this.get( 'commandsList' ).removeObjects( this.get( 'commandsList' ).filterProperty( 'parent', menuId ) );
+        this.get( 'commandsList' ).removeObjects( this.get( 'commandsList' ).filterProperty( 'parent', menuID ) );
 
         return SDL.SDLModel.resultCode['SUCCESS'];
     },
@@ -244,10 +244,10 @@ SDL.SDLAppModel = Em.Object.extend( {
         SDL.InteractionChoicesView.clean();
 
         for( i = 0; i < length; i++ ){
-            var choiceSetId = message.interactionChoiceSetIDList[i];
-            SDL.InteractionChoicesView.preformChoices( this.interactionChoices[choiceSetId], performInteractionRequestId, message.timeout );
+            var choiceSetID = message.interactionChoiceSetIDList[i];
+            SDL.InteractionChoicesView.preformChoices( this.interactionChoices[choiceSetID], performInteractionRequestId, message.timeout );
 
-            //SDL.VRPopUp.CreateInteractionChoise( this.interactionChoices[choiceSetId], performInteractionRequestId );
+            //SDL.VRPopUp.CreateInteractionChoise( this.interactionChoices[choiceSetID], performInteractionRequestId );
         }
 
         SDL.InteractionChoicesView.activate( message.initialText );

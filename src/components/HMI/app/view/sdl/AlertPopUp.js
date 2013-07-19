@@ -146,7 +146,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
      * @desc Function creates Soft Buttons on AlertPoUp
      * @param {Object} params
      */
-    addSoftButtons: function(params, appId) {
+    addSoftButtons: function(params, appID) {
 
         var count = this.get('softbuttons.buttons.childViews').length - 1;
         for(var i = count; i >= 0; i--){
@@ -181,7 +181,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
                     classNames: 'list-item softButton ' + softButtonsClass,
                     elementId: 'softButton' + i,
                     templateName: params[i].image ? 'rightIcon' : 'text',
-                    appId: appId
+                    appID: appID
                 }));
             }
         }
@@ -193,10 +193,10 @@ SDL.AlertPopUp = Em.ContainerView.create({
         this.set('alertRequestId', alertRequestId);
 
         if (message.softButtons) {
-            this.addSoftButtons(message.softButtons, message.appId);
+            this.addSoftButtons(message.softButtons, message.appID);
         }
 
-        this.set('appName', SDL.SDLController.getApplicationModel(message.appId).appName);
+        this.set('appName', SDL.SDLController.getApplicationModel(message.appID).appName);
 
         for (var i = 0; i < params.alertStrings.length; i++) {
             switch (params.alertStrings[i]) {

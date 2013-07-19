@@ -173,7 +173,7 @@ SDL.AlertManeuverPopUp = Em.ContainerView.create( {
             this.addSoftButtons( message.softButtons );
         }
 
-        this.set( 'appName', SDL.SDLController.getApplicationModel( message.appId ).appName );
+        this.set( 'appName', SDL.SDLController.getApplicationModel( message.appID ).appName );
 
         this.set( 'activate', true );
 

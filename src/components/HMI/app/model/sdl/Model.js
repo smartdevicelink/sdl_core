@@ -175,7 +175,7 @@ SDL.SDLModel = Em.Object.create( {
 
     /**
      * List of registered applications, To prevent errors without registered
-     * application "-1" used as test appId
+     * application "-1" used as test appID
      *
      * @type object
      */
@@ -187,7 +187,7 @@ SDL.SDLModel = Em.Object.create( {
      * @type {Object}
      */
     listOfIcons: {
-        // appId: syncFileName
+        // appID: syncFileName
         0: "images/media/ico_li.png"
     },
 
@@ -285,8 +285,8 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Object}
      */
     tbtTurnListUpdate: function( params ) {
-        SDL.SDLController.getApplicationModel( params.appId ).turnList = params.turnList;
-        SDL.TBTTurnList.updateList( params.appId );
+        SDL.SDLController.getApplicationModel( params.appID ).turnList = params.turnList;
+        SDL.TBTTurnList.updateList( params.appID );
     },
 
     /**
@@ -318,7 +318,7 @@ SDL.SDLModel = Em.Object.create( {
     onAppRegistered: function( params ) {
         var applicationType = 1;
 
-        if( SDL.SDLController.getApplicationModel( params.appId ) ){
+        if( SDL.SDLController.getApplicationModel( params.appID ) ){
             return;
         }
 
@@ -328,7 +328,7 @@ SDL.SDLModel = Em.Object.create( {
 
         SDL.SDLController.registerApplication( params, applicationType );
 
-        SDL.VRPopUp.AddActivateApp( params.appId, params.appName );
+        SDL.VRPopUp.AddActivateApp( params.appID, params.appName );
     },
 
     /**
@@ -338,11 +338,11 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Object}
      */
     onAppUnregistered: function( params ) {
-        if( SDL.SDLController.getApplicationModel( params.appId ) ){
+        if( SDL.SDLController.getApplicationModel( params.appID ) ){
 
-            SDL.VRPopUp.DeleteActivateApp( params.appId );
+            SDL.VRPopUp.DeleteActivateApp( params.appID );
 
-            SDL.SDLController.unregisterApplication( params.appId );
+            SDL.SDLController.unregisterApplication( params.appID );
         }
     },
 
@@ -359,7 +359,7 @@ SDL.SDLModel = Em.Object.create( {
             if( SDL.SDLModel.driverDistractionState ){
                 SDL.DriverDistraction.activate();
             }else{
-                SDL.ScrollableMessage.activate( SDL.SDLController.getApplicationModel( params.appId ).appName, params, messageRequestId );
+                SDL.ScrollableMessage.activate( SDL.SDLController.getApplicationModel( params.appID ).appName, params, messageRequestId );
             }
         }else{
             SDL.SDLController.scrollableMessageResponse( 'REJECTED', messageRequestId );
@@ -437,7 +437,7 @@ SDL.SDLModel = Em.Object.create( {
         var img = new Image();
         img.onload = function() {
             // code to set the src on success
-            SDL.SDLController.getApplicationModel( message.appId ).set( 'appIcon', message.syncFileName );
+            SDL.SDLController.getApplicationModel( message.appID ).set( 'appIcon', message.syncFileName );
             FFW.UI.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], id, method );
         };
         img.onerror = function( event ) {
@@ -482,7 +482,7 @@ SDL.SDLModel = Em.Object.create( {
     uiPerformInteraction: function( message, performInteractionRequestId ) {
 
         if( !SDL.InteractionChoicesView.active ){
-            SDL.SDLController.getApplicationModel( message.appId ).onPreformInteraction( message, performInteractionRequestId );
+            SDL.SDLController.getApplicationModel( message.appID ).onPreformInteraction( message, performInteractionRequestId );
         }else{
             SDL.SDLController.interactionChoiseCloseResponse( 'ABORTED', performInteractionRequestId );
         }
@@ -496,7 +496,7 @@ SDL.SDLModel = Em.Object.create( {
     uiSlider: function( message ) {
 
         if( !SDL.SliderView.active ){
-            SDL.SDLController.getApplicationModel( message.params.appId ).onSlider( message );
+            SDL.SDLController.getApplicationModel( message.params.appID ).onSlider( message );
         }else{
             FFW.UI.sendSliderResult( 'ABORTED', message.id );
         }
@@ -548,7 +548,7 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Object}
      */
     addCommandVR: function( message ) {
-        SDL.VRPopUp.AddCommand( message.cmdId, message.vrCommands, message.appId );
+        SDL.VRPopUp.AddCommand( message.cmdID, message.vrCommands, message.appID );
     },
 
     /**
@@ -557,11 +557,11 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @param {Number}
      */
-    deleteCommandVR: function( commandId ) {
-        SDL.VRPopUp.DeleteCommand( commandId );
+    deleteCommandVR: function( commandID ) {
+        SDL.VRPopUp.DeleteCommand( commandID );
     },
 
-    onDeactivateApp: function( target, appId ) {
+    onDeactivateApp: function( target, appID ) {
 
         /**
          * Close Options menu if opened
@@ -595,6 +595,6 @@ SDL.SDLModel = Em.Object.create( {
             }
         }
 
-        FFW.BasicCommunication.DeactivateApp( reason, appId );
+        FFW.BasicCommunication.DeactivateApp( reason, appID );
     }
 } );

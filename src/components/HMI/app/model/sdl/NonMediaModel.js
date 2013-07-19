@@ -60,8 +60,8 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend( {
      * 
      * @param {Number}
      */
-    onDeleteApplication: function( appId ) {
-        SDL.NonMediaController.onDeleteApplication( appId );
+    onDeleteApplication: function( appID ) {
+        SDL.NonMediaController.onDeleteApplication( appID );
     },
 
     /**

@@ -67,13 +67,13 @@ SDL.NonMediaController = Em.Object.create( {
     activateApp: function( applicationModel ) {
 
         // store active application id
-        this.set( 'currentAppId', applicationModel.appId );
+        this.set( 'currentAppId', applicationModel.appID );
 
         // set active model
         SDL.SDLAppController.set( 'model', applicationModel );
 
         // send response
-        // FFW.BasicCommunication.ActivateApp( applicationModel.appId );
+        // FFW.BasicCommunication.ActivateApp( applicationModel.appID );
 
         // Go to SDL state
         SDL.States.goToStates( 'info.nonMedia' );
@@ -83,7 +83,7 @@ SDL.NonMediaController = Em.Object.create( {
      * Restore current application to active state
      */
     restoreCurrentApp: function() {
-        if( SDL.SDLAppController.model.appId === this.currentAppId ){
+        if( SDL.SDLAppController.model.appID === this.currentAppId ){
             FFW.BasicCommunication.ActivateApp( this.currentAppId );
             return;
         }
@@ -95,8 +95,8 @@ SDL.NonMediaController = Em.Object.create( {
      * 
      * @param {Number}
      */
-    onDeleteApplication: function( appId ) {
-        if( this.currentAppId == appId ){
+    onDeleteApplication: function( appID ) {
+        if( this.currentAppId == appID ){
             if( SDL.States.info.nonMedia.active ){
                 SDL.States.goToStates( 'info.apps' );
             }

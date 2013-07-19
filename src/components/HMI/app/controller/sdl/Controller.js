@@ -98,11 +98,11 @@ SDL.SDLController = Em.Object.create({
                 break;
             }
             case "NonMediaView": {
-                SDL.SDLController.getApplicationModel(element.appId).clearAppOverLay();
+                SDL.SDLController.getApplicationModel(element.appID).clearAppOverLay();
                 break;
             }
             case "MediaView": {
-                SDL.SDLController.getApplicationModel(element.appId).clearAppOverLay();
+                SDL.SDLController.getApplicationModel(element.appID).clearAppOverLay();
                 break;
             }
 
@@ -127,12 +127,12 @@ SDL.SDLController = Em.Object.create({
 
             case "AlertPopUp": {
                 SDL.AlertPopUp.deactivate();
-                SDL.SDLController.getApplicationModel(element.appId).turnOnSDL();
+                SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
                 break;
             }
             case "ScrollableMessage": {
                 SDL.ScrollableMessage.deactivate();
-                SDL.SDLController.getApplicationModel(element.appId).turnOnSDL();
+                SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
                 break;
             }
 
@@ -170,10 +170,10 @@ SDL.SDLController = Em.Object.create({
     /**
      * Method to open Turn List view from TBT
      * 
-     * @param {Number} appId AppId of activated sdl application
+     * @param {Number} appID AppID of activated sdl application
      */
-    tbtTurnList: function(appId) {
-        SDL.TBTTurnList.activate(appId);
+    tbtTurnList: function(appID) {
+        SDL.TBTTurnList.activate(appID);
     },
 
     /**
@@ -182,24 +182,24 @@ SDL.SDLController = Em.Object.create({
      * @param {String}
      */
     tbtClientStateSeleced: function(state) {
-        FFW.Navigation.onTBTClientState(state, SDL.SDLAppController.model.appId);
+        FFW.Navigation.onTBTClientState(state, SDL.SDLAppController.model.appID);
     },
 
     /**
      * Method to sent notification ABORTED for PerformInteractionChoise
      */
-    interactionChoiseCloseResponse: function(result, performInteractionRequestId) {
-        FFW.UI.interactionResponse(result, performInteractionRequestId);
+    interactionChoiseCloseResponse: function(result, performInteractionRequestID) {
+        FFW.UI.interactionResponse(result, performInteractionRequestID);
     },
 
     /**
      * Method to sent notification for Alert
      * 
      * @param {String} result
-     * @param {Number} alertRequestId
+     * @param {Number} alertRequestID
      */
-    alertResponse: function(result, alertRequestId) {
-        FFW.UI.alertResponse(result, alertRequestId);
+    alertResponse: function(result, alertRequestID) {
+        FFW.UI.alertResponse(result, alertRequestID);
     },
 
     /**
@@ -268,7 +268,7 @@ SDL.SDLController = Em.Object.create({
     registerApplication: function(params, applicationType) {
 
         SDL.SDLModel.get('registeredApps').pushObject(SDL.SDLController.applicationModels[applicationType].create({
-            appId: params.appId,
+            appID: params.appID,
             appName: params.appName,
             deviceName: params.deviceName
         }));
@@ -278,15 +278,15 @@ SDL.SDLController = Em.Object.create({
     /**
      * Unregister application
      * 
-     * @param {Number} appId
+     * @param {Number} appID
      */
-    unregisterApplication: function(appId) {
+    unregisterApplication: function(appID) {
 
-        this.getApplicationModel(appId).onDeleteApplication(appId);
+        this.getApplicationModel(appID).onDeleteApplication(appID);
 
-        this.getApplicationModel(appId).set('active', false);
+        this.getApplicationModel(appID).set('active', false);
 
-        var index = SDL.SDLModel.registeredApps.indexOf(SDL.SDLModel.registeredApps.filterProperty('appId', appId)[0]);
+        var index = SDL.SDLModel.registeredApps.indexOf(SDL.SDLModel.registeredApps.filterProperty('appID', appID)[0]);
 
         SDL.SDLModel.registeredApps.replace(index, 1);
 
@@ -322,7 +322,7 @@ SDL.SDLController = Em.Object.create({
      * @param {Number}
      */
     getApplicationModel: function(applicationId) {
-        return SDL.SDLModel.registeredApps.filterProperty('appId', applicationId)[0];
+        return SDL.SDLModel.registeredApps.filterProperty('appID', applicationId)[0];
     },
 
     /**
@@ -374,8 +374,8 @@ SDL.SDLController = Em.Object.create({
      * @param {Object}
      */
     onActivateSDLApp: function(element) {
-    	//FFW.BasicCommunication.ActivateApp(element.appId);
-    	SDL.SDLController.getApplicationModel(element.appId).turnOnSDL();
+    	//FFW.BasicCommunication.ActivateApp(element.appID);
+    	SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
     },
 
     /**

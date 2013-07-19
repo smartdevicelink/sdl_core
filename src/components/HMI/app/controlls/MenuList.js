@@ -39,7 +39,7 @@ SDL.MenuList = Em.ContainerView.extend( {
      * 
      * @param buttons: SoftButton[]
      */
-    addItems: function( buttons, appId ) {
+    addItems: function( buttons, appID ) {
 
         this.deleteItems();
 
@@ -48,10 +48,10 @@ SDL.MenuList = Em.ContainerView.extend( {
                 this.get( 'content.childViews' ).pushObject( SDL.Button.create( SDL.PresetEventsCustom, {
                     text: buttons[i].text,
                     icon: buttons[i].image,
-                    softButtonId: buttons[i].softButtonID,
+                    softButtonID: buttons[i].softButtonID,
                     systemAction: buttons[i].systemAction,
                     groupName: this.groupName,
-                    appId: appId
+                    appID: appID
                 } ) );
             }
         }
@@ -62,7 +62,7 @@ SDL.MenuList = Em.ContainerView.extend( {
      */
     deleteItems: function() {
 
-        this.get( 'content.childViews' ).removeObjects( this.get( 'content.childViews' ).filterProperty( 'softButtonId' ) );
+        this.get( 'content.childViews' ).removeObjects( this.get( 'content.childViews' ).filterProperty( 'softButtonID' ) );
     },
 
     classNames:

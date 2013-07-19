@@ -40,17 +40,17 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         componentName: "BasicCommunicationClient"
     }),
 
-    getAppListRequestId: -1,
-    getDeviceListRequestId: -1,
-    activateAppRequestId: -1,
+    getAppListRequestID: -1,
+    getDeviceListRequestID: -1,
+    activateAppRequestID: -1,
     
-    onAppRegisteredSubscribeRequestId: -1,
-    onAppUnregisteredSubscribeRequestId: -1,
-    onPlayToneSubscribeRequestId: -1,
+    onAppRegisteredSubscribeRequestID: -1,
+    onAppUnregisteredSubscribeRequestID: -1,
+    onPlayToneSubscribeRequestID: -1,
     
-    onAppRegisteredUnsubscribeRequestId: -1,
-    onAppUnregisteredUnsubscribeRequestId: -1,
-    onPlayToneUnsubscribeRequestId: -1,
+    onAppRegisteredUnsubscribeRequestID: -1,
+    onAppUnregisteredUnsubscribeRequestID: -1,
+    onPlayToneUnsubscribeRequestID: -1,
 
     // const
     onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
@@ -88,10 +88,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         this._super();
 
         // subscribe to notifications
-        this.onAppRegisteredSubscribeRequestId = this.client.subscribeToNotification(this.onAppRegisteredNotification);
-        this.onAppUnregisteredSubscribeRequestId = this.client.subscribeToNotification(this.onAppUnregisteredNotification);
-        this.onDeviceListUpdatedNotificationId = this.client.subscribeToNotification(this.onDeviceListUpdatedNotification);
-        this.onPlayToneNotificationId = this.client.subscribeToNotification(this.onPlayToneNotification);
+        this.onAppRegisteredSubscribeRequestID = this.client.subscribeToNotification(this.onAppRegisteredNotification);
+        this.onAppUnregisteredSubscribeRequestID = this.client.subscribeToNotification(this.onAppUnregisteredNotification);
+        this.onDeviceListUpdatedNotificationID = this.client.subscribeToNotification(this.onDeviceListUpdatedNotification);
+        this.onPlayToneNotificationID = this.client.subscribeToNotification(this.onPlayToneNotification);
         
         
         // notify other components that UI is ready
@@ -107,10 +107,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         this._super();
 
         // unsubscribe from notifications
-        this.onAppRegusteredUnsubscribeRequestId = this.client.unsubscribeFromNotification(this.onAppRegisteredNotification);
-        this.onAppUnregusteredUnsubscribeRequestId = this.client.unsubscribeFromNotification(this.onAppUnregisteredNotification);
-        this.onDeviceListUpdatedNotificationId = this.client.unsubscribeFromNotification(this.onDeviceListUpdatedNotification);
-        this.onPlayToneUpdatedNotificationId = this.client.unsubscribeFromNotification(this.onPlayToneUpdatedNotification);
+        this.onAppRegusteredUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onAppRegisteredNotification);
+        this.onAppUnregusteredUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onAppUnregisteredNotification);
+        this.onDeviceListUpdatedNotificationID = this.client.unsubscribeFromNotification(this.onDeviceListUpdatedNotification);
+        this.onPlayToneUpdatedNotificationID = this.client.unsubscribeFromNotification(this.onPlayToneUpdatedNotification);
     },
 
     /**
@@ -146,7 +146,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
         if(response.result.method == "BasicCommunication.OnAppActivated"){
         	if (response.result.code == SDL.SDLModel.resultCode["SUCCESS"]) {
-        		SDL.SDLController.getApplicationModel(element.appId).turnOnSDL();
+        		SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
         	}
         }
     },
@@ -223,7 +223,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * Send request if application was activated
      * @param {String} appName
      */
-    ActivateApp: function(appId) {
+    ActivateApp: function(appID) {
         Em.Logger.log("FFW.BasicCommunication.ActivateApp");
 
         // send repsonse
@@ -231,7 +231,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             "jsonrpc": "2.0",
             "method": "BasicCommunication.ActivateApp",
             "params": {
-                "appId": appId
+                "appID": appID
             }
         };
         this.client.send(JSONMessage);
@@ -241,10 +241,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * This methos is request to get list of registered apps.
      */
     getAppList: function() {
-        this.getAppListRequestId = this.client.generateId();
+        this.getAppListRequestID = this.client.generateId();
 
         var JSONMessage = {
-            "id": this.getAppListRequestId,
+            "id": this.getAppListRequestID,
             "jsonrpc": "2.0",
             "method": "BasicCommunication.GetAppList"
         };
@@ -255,10 +255,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * Request for list of avaliable devices
      */
     getDeviceList: function() {
-        this.getDeviceListRequestId = this.client.generateId();
+        this.getDeviceListRequestID = this.client.generateID();
 
         var JSONMessage = {
-            "id": this.getDeviceListRequestId,
+            "id": this.getDeviceListRequestID,
             "jsonrpc": "2.0",
             "method": "BasicCommunication.GetDeviceList"
         };
@@ -270,7 +270,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * 
      * @params {Number}
      */
-    ActivateApp: function(appId) {
+    ActivateApp: function(appID) {
         Em.Logger.log("FFW.BasicCommunication.ActivateApp");
 
         // send request
@@ -280,7 +280,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             "id": this.client.idStart,
             "method": "BasicCommunication.ActivateApp",
             "params": {
-                "appId": appId
+                "appID": appID
             }
         };
         this.client.send(JSONMessage);
@@ -292,7 +292,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * @params {String}
      * @params {Number}
      */
-    DeactivateApp: function(reason, appId) {
+    DeactivateApp: function(reason, appID) {
         Em.Logger.log("FFW.BasicCommunication.OnAppDeactivated");
 
         // send request
@@ -301,7 +301,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             "jsonrpc": "2.0",
             "method": "BasicCommunication.OnAppDeactivated",
             "params": {
-                "appId": appId,
+                "appID": appID,
                 "reason": reason
             }
         };
@@ -329,7 +329,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * 
      * @params {Number}
      */
-    ExitApplication: function(appId) {
+    ExitApplication: function(appID) {
         Em.Logger.log("FFW.BasicCommunication.ExitApplication");
 
         // send request
@@ -339,7 +339,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             "jsonrpc": "2.0",
             "method": "BasicCommunication.ExitApplication",
             "params": {
-                "appId": appId
+                "appID": appID
             }
         };
         this.client.send(JSONMessage);

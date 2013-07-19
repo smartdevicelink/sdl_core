@@ -61,24 +61,24 @@ SDL.SDLMediaController = Em.Object.create( {
 
     /** Call notification OnCommand on UIRPC */
     onCommand: function( element ) {
-        FFW.UI.onCommand( element.commandId, element.appId );
+        FFW.UI.onCommand( element.commandID, element.appID );
     },
 
     /** Call notification OnCommandSoftButton on UIRPC */
     onCommandSoftButton: function( element ) {
-        FFW.UI.onCommandSoftButton( element.softButtonID, element.appId );
+        FFW.UI.onCommandSoftButton( element.softButtonID, element.appID );
     },
 
     /** Switching on Application */
     activateApp: function( applicationModel ) {
 
         // store active application id
-        this.set( 'currentAppId', applicationModel.appId );
+        this.set( 'currentAppId', applicationModel.appID );
 
         // set active model
         SDL.SDLAppController.set( 'model', applicationModel );
 
-        // FFW.BasicCommunication.ActivateApp( applicationModel.appId );
+        // FFW.BasicCommunication.ActivateApp( applicationModel.appID );
 
         // SDL.MediaController.listDown();
 
@@ -91,7 +91,7 @@ SDL.SDLMediaController = Em.Object.create( {
      */
     restoreCurrentApp: function() {
 
-        if( SDL.SDLAppController.model.appId === this.currentAppId ){
+        if( SDL.SDLAppController.model.appID === this.currentAppId ){
             FFW.BasicCommunication.ActivateApp( this.currentAppId );
             return;
         }
@@ -123,8 +123,8 @@ SDL.SDLMediaController = Em.Object.create( {
      * 
      * @param {Number}
      */
-    onDeleteApplication: function( appId ) {
-        if( this.currentAppId == appId ){
+    onDeleteApplication: function( appID ) {
+        if( this.currentAppId == appID ){
 
             if( SDL.States.media.sdlmedia.active || SDL.SDLAppController.model.active ){
 

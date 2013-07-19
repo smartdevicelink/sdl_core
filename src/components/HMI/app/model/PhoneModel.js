@@ -62,7 +62,7 @@ SDL.PhoneModel = Em.Object.create( {
 
         if( SDL.SDLModel.phoneCall ){
             SDL.SDLModel.set( 'phoneCall', false );
-            SDL.SDLController.getApplicationModel( SDL.SDLAppController.model.appId ).turnOnSDL();
+            SDL.SDLController.getApplicationModel( SDL.SDLAppController.model.appID ).turnOnSDL();
         }
     },
 
