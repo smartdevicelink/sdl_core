@@ -6,6 +6,8 @@ import com.ford.syncV4.android.videostreaming.AssetsReader;
 
 import junit.framework.Assert;
 
+import java.io.InputStream;
+
 /**
  * Created by admin on 7/19/13.
  */
@@ -24,8 +26,8 @@ public class AssetsReaderTestCase extends AndroidTestCase {
     }
 
     public void testAssetsReaderShouldReadFromAssets() throws Exception {
-        byte[] buffer = sut.readFileFromAssets(FILE_NAME);
-        assertNotNull("Be null buffer should not", buffer);
+        InputStream inputStream = sut.readFileFromAssets(FILE_NAME);
+        assertNotNull("Be null inputStream should not", inputStream);
     }
 
     public void testAssertReaderShouldHaveContextInitialised() throws Exception {

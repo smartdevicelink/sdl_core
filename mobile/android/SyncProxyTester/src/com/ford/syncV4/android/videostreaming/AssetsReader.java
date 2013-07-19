@@ -28,20 +28,14 @@ public class AssetsReader {
         this.context = context;
     }
 
-    public byte[] readFileFromAssets(String fileName) {
-        byte[] buffer = null;
+    public InputStream readFileFromAssets(String fileName) {
+        InputStream inputStream = null;
         try {
-            buffer = getBytesFromStream(fileName);
+            inputStream = getInputStreamForFile(fileName);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return buffer;
-    }
-
-    private byte[] getBytesFromStream(String fileName) throws IOException {
-        InputStream stream = this.getInputStreamForFile(fileName);
-        byte[] buffer = videoStreaming.readTestVideoFileFromStream(stream);
-        return buffer;
+        return inputStream;
     }
 
     private InputStream getInputStreamForFile(String fileName) throws IOException {
