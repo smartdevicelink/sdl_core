@@ -54,9 +54,9 @@ AlertRequest::~AlertRequest() {
 void AlertRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(app_id));
+  unsigned int app_id =
+    (*message_)[strings::params][strings::connection_key].asInt();
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -70,13 +70,12 @@ void AlertRequest::Run() {
 }
 
 void AlertRequest::SendAlertRequest(int app_id) {
-
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   // alert1
   msg_params[hmi_request::alert_strings] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
   msg_params[hmi_request::alert_strings][0]
   [hmi_request::field_name] = TextFieldName::ALERT_TEXT1;
   msg_params[hmi_request::alert_strings][0]
@@ -85,13 +84,13 @@ void AlertRequest::SendAlertRequest(int app_id) {
 
   // alert2
   msg_params[hmi_request::alert_strings][1][hmi_request::field_name] =
-      TextFieldName::ALERT_TEXT2;
+    TextFieldName::ALERT_TEXT2;
   msg_params[hmi_request::alert_strings][1][hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::alert_text2];
 
   // alert3
   msg_params[hmi_request::alert_strings][2][hmi_request::field_name] =
-      TextFieldName::ALERT_TEXT3;
+    TextFieldName::ALERT_TEXT3;
   msg_params[hmi_request::alert_strings][2][hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::alert_text3];
 
@@ -113,10 +112,10 @@ void AlertRequest::SendSpeakRequest(int app_id) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       // crate HMI basic communication playtone request
       smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
 
       msg_params[hmi_request::tts_chunks] =
-          smart_objects::SmartObject(smart_objects::SmartType_Array);
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
       msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
       CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
@@ -130,7 +129,7 @@ void AlertRequest::SendPlayToneRequest(int app_id) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
       CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_PlayTone,
-          smart_objects::SmartObject());
+                            smart_objects::SmartObject());
     }
   }
 }

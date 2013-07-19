@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 UICreateInteractionChoiceSetResponse::UICreateInteractionChoiceSetResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UICreateInteractionChoiceSetResponse::~UICreateInteractionChoiceSetResponse() {
@@ -74,9 +74,8 @@ void UICreateInteractionChoiceSetResponse::Run() {
   msg_chain->set_ui_response_result(code);
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -84,7 +83,7 @@ void UICreateInteractionChoiceSetResponse::Run() {
   }
 
   const int choice_set_id =
-      data[strings::msg_params][strings::interaction_choice_set_id].asInt();
+    data[strings::msg_params][strings::interaction_choice_set_id].asInt();
 
   if (hmi_apis::Common_Result::SUCCESS == code) {
     app->AddChoiceSet(choice_set_id, data[strings::msg_params]);

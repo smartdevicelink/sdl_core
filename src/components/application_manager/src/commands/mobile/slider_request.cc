@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 SliderRequest::SliderRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+  : CommandRequestImpl(message) {
 }
 
 SliderRequest::~SliderRequest() {
@@ -51,9 +51,9 @@ SliderRequest::~SliderRequest() {
 void SliderRequest::Run() {
   LOG4CXX_INFO(logger_, "SliderRequest::Run");
 
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::connection_key]));
+  Application* application_impl =
+    application_manager::ApplicationManagerImpl::instance()->
+    application((*message_)[strings::msg_params][strings::connection_key]);
 
   if (NULL == application_impl) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -62,7 +62,7 @@ void SliderRequest::Run() {
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application_impl->app_id();
 

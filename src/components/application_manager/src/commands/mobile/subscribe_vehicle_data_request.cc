@@ -54,9 +54,9 @@ SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {
 void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(
-          (*message_)[str::params][str::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->application(
+      (*message_)[str::params][str::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

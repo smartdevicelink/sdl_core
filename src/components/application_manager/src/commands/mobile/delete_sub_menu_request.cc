@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 DeleteSubMenuRequest::DeleteSubMenuRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {
@@ -50,9 +50,9 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 void DeleteSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
 
-  ApplicationImpl* app =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -61,17 +61,17 @@ void DeleteSubMenuRequest::Run() {
   }
 
   if (!app->FindSubMenu(
-      (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
+        (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::menu_id] =
-      (*message_)[strings::msg_params][strings::menu_id];
+    (*message_)[strings::msg_params][strings::menu_id];
   msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, msg_params, true);

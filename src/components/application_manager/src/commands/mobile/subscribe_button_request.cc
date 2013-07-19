@@ -53,8 +53,7 @@ void SubscribeButtonRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeButtonRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -62,8 +61,9 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  const unsigned int btn_id = static_cast<unsigned int>
-      ((*message_)[str::params][str::button_name].asInt());
+  const unsigned int btn_id =
+    static_cast<unsigned int>
+    ((*message_)[str::params][str::button_name].asInt());
 
   if (app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button " << btn_id);

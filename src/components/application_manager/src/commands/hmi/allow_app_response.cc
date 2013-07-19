@@ -46,9 +46,11 @@ AllowAppResponse::~AllowAppResponse() {
 void AllowAppResponse::Run() {
   LOG4CXX_INFO(logger_, "AllowAppResponse::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  unsigned int connection_key =
+    (*message_)[strings::params][strings::connection_key].asInt();
+
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(connection_key);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

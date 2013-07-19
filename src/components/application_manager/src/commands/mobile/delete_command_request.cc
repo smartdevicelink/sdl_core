@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 DeleteCommandRequest::DeleteCommandRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 DeleteCommandRequest::~DeleteCommandRequest() {
@@ -51,9 +51,9 @@ DeleteCommandRequest::~DeleteCommandRequest() {
 void DeleteCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteCommandRequest::Run");
 
-  ApplicationImpl* application = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application((*message_)
-      [strings::params][strings::connection_key]));
+  Application* application =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -65,9 +65,9 @@ void DeleteCommandRequest::Run() {
         FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!command) {
-      SendResponse(false, mobile_apis::Result::INVALID_ID);
-      LOG4CXX_ERROR(logger_, "Invalid ID");
-      return;
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
+    LOG4CXX_ERROR(logger_, "Invalid ID");
+    return;
   }
 
   smart_objects::SmartObject msg_params =
@@ -92,7 +92,6 @@ void DeleteCommandRequest::Run() {
     CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand,
                      msg_params, true, chaining_counter);
   }
-
   // check vr params
   if ((*command).keyExists(strings::vr_commands)) {
     CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params, true);

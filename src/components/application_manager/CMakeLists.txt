@@ -21,7 +21,6 @@ set (SOURCES
 ./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc
-./src/application_command_factory.cc
 ./src/audio_pass_thru_thread_impl.cc
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
@@ -31,6 +30,7 @@ set (SOURCES
 ./src/to_mobile_thread_impl.cc
 ./src/from_hmh_thread_impl.cc
 ./src/to_hmh_thread_impl.cc
+./src/application_data_impl.cc
 )
 
 set (POLICIES_MANAGER

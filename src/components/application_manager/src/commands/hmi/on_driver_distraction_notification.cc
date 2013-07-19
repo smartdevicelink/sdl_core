@@ -61,7 +61,7 @@ void OnDriverDistractionNotification::Run() {
 
   std::set<Application*>::const_iterator it = app_list.begin();
   for (; app_list.end() != it; ++it) {
-    const ApplicationImpl* app = static_cast<const ApplicationImpl*>(*it);
+    const Application* app = *it;
     if (NULL != app) {
       const mobile_api::HMILevel::eType hmiLevel = app->hmi_level();
       if (mobile_api::HMILevel::HMI_FULL == hmiLevel ||
@@ -74,7 +74,7 @@ void OnDriverDistractionNotification::Run() {
 }
 
 void OnDriverDistractionNotification::NotifyMobileApp(
-  const ApplicationImpl* app) {
+  const Application* app) {
   smart_objects::SmartObject* on_driver_distraction =
     new smart_objects::SmartObject();
 

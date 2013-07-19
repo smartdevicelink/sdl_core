@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 AlertManeuverRequest::AlertManeuverRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 AlertManeuverRequest::~AlertManeuverRequest() {
@@ -50,9 +50,9 @@ AlertManeuverRequest::~AlertManeuverRequest() {
 void AlertManeuverRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertManeuverRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -61,7 +61,7 @@ void AlertManeuverRequest::Run() {
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[hmi_request::soft_buttons] =
     (*message_)[strings::msg_params][strings::soft_buttons];

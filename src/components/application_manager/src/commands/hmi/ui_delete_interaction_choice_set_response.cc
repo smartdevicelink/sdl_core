@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 UIDeleteInteractionChoiceSetResponse::UIDeleteInteractionChoiceSetResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UIDeleteInteractionChoiceSetResponse::~UIDeleteInteractionChoiceSetResponse() {
@@ -73,10 +73,10 @@ void UIDeleteInteractionChoiceSetResponse::Run() {
 
   msg_chain->set_ui_response_result(code);
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  unsigned int app_id = (*message_)[strings::params]
+                        [strings::connection_key].asInt();
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 UpdateTurnListRequest::UpdateTurnListRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {
@@ -52,9 +52,9 @@ UpdateTurnListRequest::~UpdateTurnListRequest() {
 void UpdateTurnListRequest::Run() {
   LOG4CXX_INFO(logger_, "UpdateTurnListRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -65,12 +65,12 @@ void UpdateTurnListRequest::Run() {
   std::string file_path;
 
   const size_t turn_list_size = (*message_)[strings::msg_params]
-                                           [strings::turn_list].length();
+                                [strings::turn_list].length();
 
   for (int i = 0; i < turn_list_size; ++i) {
     file_path = app->name() + "/" +
-        (*message_)[strings::msg_params][strings::turn_list][i]
-                   [strings::turn_icon][strings::value].asString();
+                (*message_)[strings::msg_params][strings::turn_list][i]
+                [strings::turn_icon][strings::value].asString();
     file_path = file_system::FullPath(file_path);
 
     if (!file_system::FileExists(file_path)) {
@@ -80,11 +80,11 @@ void UpdateTurnListRequest::Run() {
     }
 
     (*message_)[strings::msg_params][strings::turn_list][i]
-               [strings::turn_icon][strings::value] = file_path;
+    [strings::turn_icon][strings::value] = file_path;
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList,

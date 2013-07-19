@@ -39,7 +39,7 @@
 
 namespace application_manager {
 
-class ApplicationImpl;
+class Application;
 
 namespace commands {
 
@@ -47,44 +47,44 @@ namespace commands {
  * @brief PerformInteractionRequest command class
  **/
 class PerformInteractionRequest : public CommandRequestImpl {
- public:
-  /**
-   * @brief PerformInteractionRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit PerformInteractionRequest(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief PerformInteractionRequest class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit PerformInteractionRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief PerformInteractionRequest class destructor
-   **/
-  virtual ~PerformInteractionRequest();
+    /**
+     * @brief PerformInteractionRequest class destructor
+     **/
+    virtual ~PerformInteractionRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  /*
-   * @brief Sends VR AddCommand request to HMI
-   *
-   * @param app_id Application ID
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool SendVRAddCommandRequest(const ApplicationImpl* app);
+  private:
+    /*
+     * @brief Sends VR AddCommand request to HMI
+     *
+     * @param app_id Application ID
+     *
+     * @return TRUE on success, otherwise FALSE
+     */
+    bool SendVRAddCommandRequest(const Application* app);
 
-  /*
-   * @brief Sends UI PerformInteraction request to HMI
-   *
-   * @param app_id Application ID
-   *
-   * * @return TRUE on success, otherwise FALSE
-   */
-  bool SendUIPerformInteractionRequest(const ApplicationImpl* app);
+    /*
+     * @brief Sends UI PerformInteraction request to HMI
+     *
+     * @param app_id Application ID
+     *
+     * * @return TRUE on success, otherwise FALSE
+     */
+    bool SendUIPerformInteractionRequest(const Application* app);
 
-  DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
+    DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 
 }  // namespace commands

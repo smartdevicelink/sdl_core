@@ -51,9 +51,9 @@ DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {
 void DeleteInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -62,7 +62,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
   }
 
   const int choise_set_id = (*message_)[strings::msg_params]
-      [strings::interaction_choice_set_id].asInt();
+                            [strings::interaction_choice_set_id].asInt();
 
   if (!app->FindChoiceSet(choise_set_id)) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
@@ -71,7 +71,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::interaction_choice_set_id] = choise_set_id;
   msg_params[strings::app_id] = app->app_id();

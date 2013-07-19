@@ -52,9 +52,9 @@ ShowRequest::~ShowRequest() {
 void ShowRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::connection_key]));
+  Application* app =
+    application_manager::ApplicationManagerImpl::instance()->
+    application((*message_)[strings::msg_params][strings::connection_key]);
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
@@ -64,57 +64,53 @@ void ShowRequest::Run() {
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params = (*message_)[strings::msg_params];
 
   msg_params[hmi_request::show_strings] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   if (msg_params.keyExists(strings::main_field_1)) {
     // erase useless parametr
     msg_params.erase(strings::main_field_1);
     msg_params[hmi_request::show_strings][0][hmi_request::field_name] =
-        TextFieldName::MAIN_FILED1;
+      TextFieldName::MAIN_FILED1;
     msg_params[hmi_request::show_strings][0][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::main_field_1];
-
+      (*message_)[strings::msg_params][strings::main_field_1];
   }
 
   if (msg_params.keyExists(strings::main_field_2)) {
     // erase useless param
     msg_params.erase(strings::main_field_2);
     msg_params[hmi_request::show_strings][1][hmi_request::field_name] =
-        TextFieldName::MAIN_FILED2;
+      TextFieldName::MAIN_FILED2;
     msg_params[hmi_request::show_strings][1][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::main_field_2];
-
+      (*message_)[strings::msg_params][strings::main_field_2];
   }
 
   if (msg_params.keyExists(strings::main_field_3)) {
     // erase useless param
     msg_params.erase(strings::main_field_3);
     msg_params[hmi_request::show_strings][2][hmi_request::field_name] =
-        TextFieldName::MAIN_FILED3;
+      TextFieldName::MAIN_FILED3;
     msg_params[hmi_request::show_strings][2][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::main_field_3];
-
+      (*message_)[strings::msg_params][strings::main_field_3];
   }
 
   if (msg_params.keyExists(strings::main_field_4)) {
     // erase useless param
     msg_params.erase(strings::main_field_4);
     msg_params[hmi_request::show_strings][3][hmi_request::field_name] =
-        TextFieldName::MAIN_FILED4;
+      TextFieldName::MAIN_FILED4;
     msg_params[hmi_request::show_strings][3][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::main_field_4];
-
+      (*message_)[strings::msg_params][strings::main_field_4];
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true);
 
   MessageSharedPtr persistentData =
-      new smart_objects::SmartObject((*message_)[strings::msg_params]);
+    new smart_objects::SmartObject((*message_)[strings::msg_params]);
   app->set_show_command(*persistentData);
 }
 

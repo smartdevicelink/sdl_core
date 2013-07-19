@@ -45,9 +45,9 @@ namespace commands {
 void ScrollabeMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "ScrollabeMessageRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id]));
+  Application* app =
+    application_manager::ApplicationManagerImpl::instance()->
+    application((*message_)[strings::msg_params][strings::app_id]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -56,17 +56,17 @@ void ScrollabeMessageRequest::Run() {
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[hmi_request::initial_text][hmi_request::field_name] =
-      TextFieldName::SCROLLABLE_MSG_BODY;
+    TextFieldName::SCROLLABLE_MSG_BODY;
   msg_params[hmi_request::initial_text][hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::soft_buttons] =
-      (*message_)[strings::msg_params][strings::soft_buttons];
+    (*message_)[strings::msg_params][strings::soft_buttons];
   msg_params[strings::timeout] =
-      (*message_)[strings::msg_params][strings::timeout];
+    (*message_)[strings::msg_params][strings::timeout];
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage,
                    msg_params, true);

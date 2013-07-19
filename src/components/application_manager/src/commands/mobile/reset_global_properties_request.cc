@@ -51,9 +51,8 @@ void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application(app_id));
+  Application* app =
+    ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -88,7 +87,8 @@ void ResetGlobalPropertiesRequest::Run() {
       }
       default: {
         LOG4CXX_ERROR(logger_, "Unknown global property 0x%02X value" <<
-            (*message_)[strings::msg_params][strings::properties][i].asInt());
+                      (*message_)[strings::msg_params]
+                      [strings::properties][i].asInt());
         break;
       }
     }
@@ -100,7 +100,7 @@ void ResetGlobalPropertiesRequest::Run() {
   */
 }
 
-void ResetGlobalPropertiesRequest::ResetHelpPromt(ApplicationImpl* const app,
+void ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app,
     bool is_timeout_promp) {
   if (NULL == app) {
     return;
@@ -128,12 +128,12 @@ void ResetGlobalPropertiesRequest::ResetHelpPromt(ApplicationImpl* const app,
 }
 
 void ResetGlobalPropertiesRequest::ResetTimeoutPromt(
-  ApplicationImpl* const app) {
+  Application* const app) {
   ResetHelpPromt(app, true);
 }
 
 void ResetGlobalPropertiesRequest::ResetVrHelpTitle(
-  ApplicationImpl* const app) {
+  Application* const app) {
   if (NULL == app) {
     return;
   }
@@ -143,7 +143,7 @@ void ResetGlobalPropertiesRequest::ResetVrHelpTitle(
 }
 
 void ResetGlobalPropertiesRequest::ResetVrHelpItems(
-  ApplicationImpl* const app) {
+  Application* const app) {
 }
 
 }  // namespace commands

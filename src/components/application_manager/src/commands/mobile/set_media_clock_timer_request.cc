@@ -52,9 +52,9 @@ SetMediaClockRequest::~SetMediaClockRequest() {
 void SetMediaClockRequest::Run() {
   LOG4CXX_INFO(logger_, "SetMediaClockRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id]));
+  Application* app =
+    application_manager::ApplicationManagerImpl::instance()->
+    application((*message_)[strings::msg_params][strings::app_id]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -63,7 +63,7 @@ void SetMediaClockRequest::Run() {
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   // copy entirely msg
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();

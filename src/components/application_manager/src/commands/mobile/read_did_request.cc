@@ -53,9 +53,9 @@ ReadDIDRequest::~ReadDIDRequest() {
 void ReadDIDRequest::Run() {
   LOG4CXX_INFO(logger_, "ReadDIDRequest::Run");
 
-  ApplicationImpl* app =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-          application((*message_)[str::params][str::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[str::params][str::connection_key]);
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
@@ -71,7 +71,7 @@ void ReadDIDRequest::Run() {
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::ecu_name] =
     (*message_)[str::msg_params][str::ecu_name];

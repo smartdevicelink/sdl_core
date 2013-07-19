@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 UISetIconResponse::UISetIconResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UISetIconResponse::~UISetIconResponse() {
@@ -71,9 +71,8 @@ void UISetIconResponse::Run() {
   msg_chain->set_ui_response_result(code);
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

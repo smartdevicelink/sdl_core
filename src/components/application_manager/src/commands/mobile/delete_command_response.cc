@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 DeleteCommandResponse::DeleteCommandResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 DeleteCommandResponse::~DeleteCommandResponse() {
@@ -65,7 +65,7 @@ void DeleteCommandResponse::Run() {
       (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
@@ -78,16 +78,15 @@ void DeleteCommandResponse::Run() {
   // we need to retrieve stored response code before message chain decrease
 
   const hmi_apis::Common_Result::eType result_ui =
-      msg_chain->ui_response_result();
+    msg_chain->ui_response_result();
   const hmi_apis::Common_Result::eType result_vr =
-      msg_chain->vr_response_result();
+    msg_chain->vr_response_result();
 
   if (!IsPendingResponseExist()) {
 
     (*message_)[strings::params][strings::connection_key] =
         connection_key;
 
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
         ApplicationManagerImpl::instance()->application(connection_key));
 
     if (!app) {

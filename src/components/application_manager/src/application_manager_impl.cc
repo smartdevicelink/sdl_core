@@ -293,6 +293,43 @@ bool ApplicationManagerImpl::LoadAppDataToHMI(Application* application) {
 }
 
 bool ApplicationManagerImpl::ActivateApplication(Application* application) {
+  DCHECK(application);
+
+  if (!application) {
+    LOG4CXX_ERROR(logger_, "Null-pointer application received.");
+    return false;
+  }
+
+  bool is_new_app_media = application->is_media_application();
+
+  for (std::set<Application*>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    Application* app = *it;
+    if (app->app_id() == application->app_id()) {
+      if (app->IsFullscreen()) {
+        LOG4CXX_WARN(logger_, "Application is already active.");
+        return false;
+      }
+      if (application->HasBeenActivated()) {
+        MessageHelper::SendAppDataToHMI(application);
+      }
+      if (!application->MakeFullscreen()) {
+        return false;
+      }
+      MessageHelper::SendHMIStatusNotification(*application);
+    } else {
+      if (is_new_app_media) {
+        if (app->IsAudible()) {
+          app->MakeNotAudible();
+          MessageHelper::SendHMIStatusNotification(*app);
+        }
+      }
+      if (app->IsFullscreen()) {
+        MessageHelper::RemoveAppDataFromHMI(app);
+      }
+    }
+  }
   return true;
 }
 
@@ -326,8 +363,6 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4444;
   so_to_send[jhs::S_MSG_PARAMS] =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-  //  ApplicationManagerImpl::hmi_so_factory_.attachSchema(so_to_send);
 
   ManageHMICommand(is_vr_ready);
 }
@@ -372,7 +407,6 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
       if ((*it->second) == *msg_chaining) {
         message_chaining_[hmi_correlation_id] = it->second;
         return &(*it->second);
-      }
     }
   }
   return NULL;
@@ -739,10 +773,10 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());
       output[strings::params][strings::connection_key] =
-          message.connection_key();
+        message.connection_key();
       if (message.binary_data()) {
         output[strings::params][strings::binary_data] =
-            message.binary_data();
+          message.binary_data();
       }
       break;
     }

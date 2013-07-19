@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 SetIconResponse::SetIconResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 SetIconResponse::~SetIconResponse() {
@@ -66,17 +66,17 @@ void SetIconResponse::Run() {
   }
 
   smart_objects::SmartObject data =
-      msg_chain->data();
+    msg_chain->data();
 
   if (!IsPendingResponseExist()) {
 
     if ((*message_)[strings::params][hmi_response::code].asInt()) {
-      ApplicationImpl* app = static_cast<ApplicationImpl*>(
-          ApplicationManagerImpl::instance()->
-          application(data[strings::msg_params][strings::app_id]));
+      Application* app =
+        ApplicationManagerImpl::instance()->
+        application(data[strings::msg_params][strings::app_id]);
 
       app->set_app_icon_path(data[strings::msg_params]
-                                 [strings::sync_file_name]);
+                             [strings::sync_file_name]);
 
       SendResponse(true);
     } else {

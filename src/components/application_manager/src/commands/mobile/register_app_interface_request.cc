@@ -43,53 +43,55 @@ namespace commands {
 
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run");
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run" << (*message_)[strings::params][strings::connection_key].asInt());
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run"
+               << (*message_)[strings::params]
+               [strings::connection_key].asInt());
   if (ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key])) {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     LOG4CXX_ERROR_EXT(logger_,
                       "Application "
                       << (*message_)[strings::msg_params]
-                                    [strings::app_name].asString()
+                      [strings::app_name].asString()
                       << " is already registered!");
   } else {
-    ApplicationImpl* application_impl = new ApplicationImpl(
-        (*message_)[strings::params][strings::connection_key]);
+    Application* application_impl = new ApplicationImpl(
+      (*message_)[strings::params][strings::connection_key]);
 
     if (!application_impl) {
-       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-       LOG4CXX_ERROR_EXT(logger_, "NULL pointer!");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+      LOG4CXX_ERROR_EXT(logger_, "NULL pointer!");
     }
 
     Version version;
     version.min_supported_api_version =
-        static_cast<APIVersion>((*message_)[strings::msg_params]
-                    [strings::sync_msg_version]
-                     [strings::minor_version].asInt());
+      static_cast<APIVersion>((*message_)[strings::msg_params]
+                              [strings::sync_msg_version]
+                              [strings::minor_version].asInt());
     version.max_supported_api_version =
-        static_cast<APIVersion>((*message_)[strings::msg_params]
-                    [strings::sync_msg_version]
-                     [strings::major_version].asInt());
+      static_cast<APIVersion>((*message_)[strings::msg_params]
+                              [strings::sync_msg_version]
+                              [strings::major_version].asInt());
     application_impl->set_version(version);
 
     application_impl->set_name(
-        (*message_)[strings::msg_params][strings::app_name]);
+      (*message_)[strings::msg_params][strings::app_name]);
 
     application_impl->set_mobile_app_id(
-           (*message_)[strings::msg_params][strings::app_id]);
+      (*message_)[strings::msg_params][strings::app_id]);
 
     application_impl->set_is_media_application(
-        (*message_)[strings::msg_params][strings::is_media_application]);
+      (*message_)[strings::msg_params][strings::is_media_application]);
 
     if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
       application_impl->set_vr_synonyms(
-          (*message_)[strings::msg_params][strings::vr_synonyms]);
+        (*message_)[strings::msg_params][strings::vr_synonyms]);
     }
 
     if ((*message_)[strings::msg_params].keyExists(
-        strings::ngn_media_screen_app_name)) {
+          strings::ngn_media_screen_app_name)) {
       application_impl->set_ngn_media_screen_name(
-          (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
+        (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
     }
 
     application_impl->set_language(
@@ -98,28 +100,28 @@ void RegisterAppInterfaceRequest::Run() {
     application_impl->set_ui_language(
       static_cast<mobile_api::Language::eType>(
         (*message_)[strings::msg_params]
-                   [strings::hmi_display_language_desired].asInt()));
+        [strings::hmi_display_language_desired].asInt()));
 
     if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
       application_impl->set_tts_name(
-          (*message_)[strings::msg_params][strings::tts_name]);
+        (*message_)[strings::msg_params][strings::tts_name]);
     }
 
     if ((*message_)[strings::msg_params].keyExists(strings::app_type)) {
       application_impl->set_app_types(
-          (*message_)[strings::msg_params][strings::app_type]);
+        (*message_)[strings::msg_params][strings::app_type]);
     }
 
     bool register_application_result =
-        ApplicationManagerImpl::instance()->
-        RegisterApplication(application_impl);
+      ApplicationManagerImpl::instance()->
+      RegisterApplication(application_impl);
 
     if (!register_application_result) {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       LOG4CXX_ERROR_EXT(
-          logger_,
-          "Application " << application_impl->name() <<
-          "  hasn't been registered!");
+        logger_,
+        "Application " << application_impl->name() <<
+        "  hasn't been registered!");
     } else {
       SendRegisterAppInterfaceResponseToMobile(*application_impl);
       MessageHelper::SendOnAppRegisteredNotificationToHMI(*application_impl);
@@ -129,8 +131,7 @@ void RegisterAppInterfaceRequest::Run() {
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-    const ApplicationImpl& application_impl) {
-
+  const Application& application_impl) {
   mobile_apis::Result::eType result =  mobile_apis::Result::SUCCESS;
 
   smart_objects::SmartObject* result_so = new smart_objects::SmartObject;
@@ -140,24 +141,23 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ApplicationManagerImpl* app_manager =  ApplicationManagerImpl::instance();
 
   response_params[strings::msg_params]
-                 [strings::sync_msg_version]
-                 [strings::major_version] =
-                     application_impl.version().max_supported_api_version;
+  [strings::sync_msg_version]
+  [strings::major_version] =
+    application_impl.version().max_supported_api_version;
   response_params[strings::msg_params]
-                 [strings::sync_msg_version]
-                 [strings::minor_version] =
-                     application_impl.version().min_supported_api_version;
+  [strings::sync_msg_version]
+  [strings::minor_version] =
+    application_impl.version().min_supported_api_version;
 
   response_params[strings::msg_params][strings::language] =
-      app_manager->active_vr_language();
+    app_manager->active_vr_language();
   response_params[strings::msg_params][strings::hmi_display_language] =
-      app_manager->active_ui_language();
+    app_manager->active_ui_language();
 
   if ((*message_)[strings::msg_params][strings::language_desired].asInt()
       != app_manager->active_vr_language()
       || (*message_)[strings::msg_params][strings::hmi_display_language_desired]
-          .asInt() != app_manager->active_ui_language())
-  {
+      .asInt() != app_manager->active_ui_language()) {
     LOG4CXX_WARN_EXT(logger_, "Wrong language on registering application "
                      << application_impl.name());
     result = mobile_apis::Result::WRONG_LANGUAGE;
@@ -172,11 +172,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       app_manager->button_capabilities();
   }
   if (app_manager->soft_button_capabilities()) {
-    response_params[strings::msg_params][hmi_response::soft_button_capabilities] =
+    response_params[strings::msg_params]
+    [hmi_response::soft_button_capabilities] =
       app_manager->soft_button_capabilities();
   }
   if (app_manager->preset_bank_capabilities()) {
-    response_params[strings::msg_params][hmi_response::preset_bank_capabilities] =
+    response_params[strings::msg_params]
+    [hmi_response::preset_bank_capabilities] =
       app_manager->preset_bank_capabilities();
   }
   if (app_manager->hmi_zone_capabilities()) {
@@ -189,15 +191,17 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
   if (app_manager->vr_capabilities()) {
     response_params[strings::msg_params][strings::vr_capabilities] = app_manager
-      ->vr_capabilities();
+        ->vr_capabilities();
   }
   if (app_manager->audio_pass_thru_capabilities()) {
-    response_params[strings::msg_params][strings::audio_pass_thru_capabilities] =
+    response_params[strings::msg_params]
+    [strings::audio_pass_thru_capabilities] =
       app_manager->audio_pass_thru_capabilities();
   }
   if (app_manager->vehicle_type()) {
-    response_params[strings::msg_params][hmi_response::vehicle_type] = app_manager
-      ->vehicle_type();
+    response_params[strings::msg_params]
+    [hmi_response::vehicle_type] = app_manager
+                                   ->vehicle_type();
   }
 
   SendResponse(true, result, "", result_so);

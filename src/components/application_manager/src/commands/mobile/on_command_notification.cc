@@ -50,16 +50,17 @@ OnCommandNotification::~OnCommandNotification() {
 void OnCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnCommandNotification::Run");
 
-  ApplicationImpl* app =
-    static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-        application((*message_)[strings::msg_params][strings::app_id].asInt()));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     return;
   }
 
-  const unsigned int cmd_id = static_cast<unsigned int>(
+  const unsigned int cmd_id =
+    static_cast<unsigned int>(
       (*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!app->FindCommand(cmd_id)) {
@@ -71,7 +72,7 @@ void OnCommandNotification::Run() {
   SendOnMenuCommand(app);
 }
 
-void OnCommandNotification::SendOnMenuCommand(const ApplicationImpl* app) {
+void OnCommandNotification::SendOnMenuCommand(const Application* app) {
   smart_objects::SmartObject* on_menu_cmd =
     new smart_objects::SmartObject();
 

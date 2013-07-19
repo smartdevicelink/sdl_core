@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 ShowConstantTBTRequest::ShowConstantTBTRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 ShowConstantTBTRequest::~ShowConstantTBTRequest() {
@@ -52,9 +52,9 @@ ShowConstantTBTRequest::~ShowConstantTBTRequest() {
 void ShowConstantTBTRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -65,30 +65,28 @@ void ShowConstantTBTRequest::Run() {
   app->set_tbt_show_command((*message_)[strings::msg_params]);
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
   msg_params[hmi_request::navi_texts] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   if (msg_params.keyExists(strings::navigation_text_1)) {
     // erase useless parametr
     msg_params.erase(strings::navigation_text_1);
     msg_params[hmi_request::navi_texts][0][hmi_request::field_name] =
-        TextFieldName::NAVI_TEXT1;
+      TextFieldName::NAVI_TEXT1;
     msg_params[hmi_request::navi_texts][0][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::navigation_text_1];
-
+      (*message_)[strings::msg_params][strings::navigation_text_1];
   }
 
   if (msg_params.keyExists(strings::navigation_text_2)) {
     // erase useless param
     msg_params.erase(strings::navigation_text_2);
     msg_params[hmi_request::navi_texts][1][hmi_request::field_name] =
-        TextFieldName::NAVI_TEXT2;
+      TextFieldName::NAVI_TEXT2;
     msg_params[hmi_request::navi_texts][1][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::navigation_text_2];
-
+      (*message_)[strings::msg_params][strings::navigation_text_2];
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,

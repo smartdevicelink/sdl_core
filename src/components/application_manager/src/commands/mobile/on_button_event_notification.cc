@@ -54,8 +54,8 @@ void OnButtonEventNotification::Run() {
         hmi_response::custom_button_id)) {
     LOG4CXX_INFO_EXT(logger_, "No subscription for custom buttons requires");
 
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->active_application());
+    Application* app =
+      ApplicationManagerImpl::instance()->active_application();
 
     if (NULL == app) {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent came but no app is active.");
@@ -74,7 +74,7 @@ void OnButtonEventNotification::Run() {
 
   std::vector<Application*>::const_iterator it = subscribedApps.begin();
   for (; subscribedApps.end() != it; ++it) {
-    ApplicationImpl* subscribed_app = static_cast<ApplicationImpl*>(*it);
+    Application* subscribed_app = *it;
     if (!subscribed_app) {
       LOG4CXX_WARN_EXT(logger_, "Null pointer to subscribed app.");
       continue;
@@ -91,7 +91,7 @@ void OnButtonEventNotification::Run() {
   }
 }
 
-void OnButtonEventNotification::SendButtonEvent(const ApplicationImpl* app,
+void OnButtonEventNotification::SendButtonEvent(const Application* app,
     bool is_custom_btn_id) {
   smart_objects::SmartObject* on_btn_event =
     new smart_objects::SmartObject();

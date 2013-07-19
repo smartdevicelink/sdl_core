@@ -52,8 +52,7 @@ void SetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -71,9 +70,8 @@ void SetGlobalPropertiesRequest::Run() {
   // check TTS params
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
-
     smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     msg_params[strings::help_prompt] = app->vr_help_title();
     msg_params[strings::timeout_prompt] = app->vr_help();
@@ -85,9 +83,8 @@ void SetGlobalPropertiesRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
       (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-
     smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     msg_params[strings::vr_help_title] = app->vr_help_title();
     msg_params[strings::vr_help] = app->vr_help();

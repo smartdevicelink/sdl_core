@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
@@ -52,9 +52,9 @@ CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
 void CreateInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -62,9 +62,9 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-
   const int choise_set_id =
-  (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
+    (*message_)[strings::msg_params]
+    [strings::interaction_choice_set_id].asInt();
 
   if (app->FindChoiceSet(choise_set_id)) {
     LOG4CXX_ERROR(logger_, "Invalid ID");
@@ -89,7 +89,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
   smart_objects::SmartObject& choice_set =
-      (*message_)[strings::msg_params][strings::choice_set];
+    (*message_)[strings::msg_params][strings::choice_set];
 
   for (size_t i = 0; i < choice_set.length(); ++i) {
     for (size_t j = 0; j < choice_set.length(); ++j) {
@@ -111,12 +111,12 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
   smart_objects::SmartObject& choice_set =
-      (*message_)[strings::msg_params][strings::choice_set];
+    (*message_)[strings::msg_params][strings::choice_set];
 
   for (size_t i = 0; i < choice_set.length(); ++i) {
     for (size_t j = 0; j < choice_set.length(); ++j) {
       for (size_t ii = 0; ii < choice_set[i][strings::vr_commands].length();
-          ++ii) {
+           ++ii) {
         for (size_t jj = 0; jj < choice_set[j][strings::vr_commands].length();
             ++jj) {
           if ((i == j) && (ii == jj)) {

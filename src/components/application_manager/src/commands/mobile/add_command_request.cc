@@ -53,9 +53,9 @@ AddCommandRequest::~AddCommandRequest() {
 void AddCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "AddCommandRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -81,9 +81,8 @@ void AddCommandRequest::Run() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
-
     smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::menu_params] =
@@ -91,7 +90,7 @@ void AddCommandRequest::Run() {
     std::string file_path = file_system::FullPath(app->name());
     file_path += "/";
     file_path += (*message_)[strings::msg_params][strings::cmd_icon]
-        [strings::value].asString();
+                 [strings::value].asString();
     msg_params[strings::cmd_icon] = file_path;
 
     msg_params[strings::app_id] = app->app_id();
@@ -101,13 +100,12 @@ void AddCommandRequest::Run() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
-
     smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::cmd_id] =
-        (*message_)[strings::msg_params][strings::cmd_id];
+      (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::vr_commands] =
-       (*message_)[strings::msg_params][strings::vr_commands];
+      (*message_)[strings::msg_params][strings::vr_commands];
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, true);

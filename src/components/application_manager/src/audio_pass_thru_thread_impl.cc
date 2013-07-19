@@ -102,14 +102,14 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
 
       (*error_response)[strings::msg_params][strings::success] = false;
       (*error_response)[strings::msg_params][strings::result_code] =
-          mobile_apis::Result::OUT_OF_MEMORY;
+        mobile_apis::Result::OUT_OF_MEMORY;
       FactoryCreateCommand(error_response);
     }
     return false;
   }
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(session_key_));
+  Application* app = ApplicationManagerImpl::instance()->application(
+                       session_key_);
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");

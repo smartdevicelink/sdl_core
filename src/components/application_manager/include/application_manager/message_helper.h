@@ -35,7 +35,7 @@
 
 #include <map>
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 
@@ -123,7 +123,7 @@ class MessageHelper {
      *
      **/
     static void SendHMIStatusNotification(
-      const ApplicationImpl& application_impl);
+      const Application& application_impl);
 
     /**
      * @brief Sends OnDeviceListUpdated notification to HMI
@@ -141,7 +141,7 @@ class MessageHelper {
      *
      **/
     static void SendOnAppRegisteredNotificationToHMI(
-      const ApplicationImpl& application_impl);
+      const Application& application_impl);
 
     /**
      * @brief Sends OnAppInterfaceUnregistered notification to mobile
@@ -171,6 +171,12 @@ class MessageHelper {
      */
     static smart_objects::SmartObject* CreateDeviceListSO(
       const connection_handler::DeviceList& devices);
+
+    static smart_objects::SmartObject* CreateSetAppIcon(
+      const std::string& path_to_icon, unsigned int app_id);
+
+    static void SendAppDataToHMI(const Application* app);
+    static void RemoveAppDataFromHMI(const Application* app);
 
   private:
     MessageHelper();

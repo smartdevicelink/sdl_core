@@ -31,6 +31,7 @@
  */
 
 #include <set>
+#include <string>
 #include "application_manager/message_helper.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/smart_object_keys.h"
@@ -71,7 +72,7 @@ const VehicleData MessageHelper::vehicle_data_ = {
 };
 
 void MessageHelper::SendHMIStatusNotification(
-  const ApplicationImpl& application_impl) {
+  const Application& application_impl) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -129,7 +130,7 @@ void MessageHelper::SendDeviceListUpdatedNotificationToHMI(
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
-  const ApplicationImpl& application_impl) {
+  const Application& application_impl) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -229,5 +230,57 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
   return device_list_so;
 }
 
+smart_objects::SmartObject* MessageHelper::CreateSetAppIcon(
+  const std::string& path_to_icon, unsigned int app_id) {
+  smart_objects::SmartObject* set_icon = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+
+  if (!set_icon) {
+    return NULL;
+  }
+
+  smart_objects::SmartObject& object = *set_icon;
+  object[strings::sync_file_name][strings::value] = path_to_icon;
+  // TODO(PV): need to store actual image type
+  object[strings::sync_file_name][strings::image_type] =
+    mobile_api::ImageType::DYNAMIC;
+  object[strings::app_id] = (uint64_t)app_id;
+
+  return set_icon;
+}
+
+void MessageHelper::SendAppDataToHMI(const Application* app) {
+  unsigned int id = app->app_id();
+
+  utils::SharedPtr<smart_objects::SmartObject> set_app_icon(
+    new smart_objects::SmartObject);
+  if (set_app_icon) {
+    smart_objects::SmartObject& so_to_send = *set_app_icon;
+    so_to_send[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::UI_SetAppIcon;
+    so_to_send[strings::params][strings::message_type] =
+      hmi_apis::messageType::request;
+    so_to_send[strings::params][strings::protocol_version] = 2;
+    so_to_send[strings::params][strings::protocol_type] = 1;
+    so_to_send[strings::params][strings::correlation_id] =
+      4444;
+    so_to_send[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject* msg_params = MessageHelper::CreateSetAppIcon(
+          app->app_icon_path(), id);
+    if (msg_params) {
+      so_to_send[strings::msg_params] = *msg_params;
+    }
+    // TODO(PV): appropriate handling of result
+    ApplicationManagerImpl::instance()->ManageHMICommand(set_app_icon);
+  }
+
+  // TODO(PV): add help_prompt; timeout_promt; vr_help_title; vr_help;
+  // show_command, tbt_show_command; CommandsMap& commands_map();
+}
+
+void MessageHelper::RemoveAppDataFromHMI(const Application* app) {
+  // TODO(PV): implement
+}
 
 }  //  namespace application_manager

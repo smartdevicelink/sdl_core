@@ -77,16 +77,14 @@ void AddCommandResponse::Run() {
 
   // we need to retrieve stored response code before message chain decrease
   const hmi_apis::Common_Result::eType result_ui =
-      msg_chain->ui_response_result();
+    msg_chain->ui_response_result();
   const hmi_apis::Common_Result::eType result_vr =
-      msg_chain->vr_response_result();
+    msg_chain->vr_response_result();
 
 
   if (!IsPendingResponseExist()) {
-
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-             ApplicationManagerImpl::instance()->
-             application(connection_key));
+    Application* app = ApplicationManagerImpl::instance()->
+                       application(connection_key);
 
     if (!app) {
       SendResponse(false);
@@ -100,7 +98,7 @@ void AddCommandResponse::Run() {
       if ((data[strings::msg_params].keyExists(strings::menu_params)) ||
           (data[strings::msg_params].keyExists(strings::vr_commands))) {
         app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),
-                              data[strings::msg_params]);
+                        data[strings::msg_params]);
       }
 
       (*message_)[strings::params][strings::connection_key] =

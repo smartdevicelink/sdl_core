@@ -37,34 +37,32 @@
 
 namespace application_manager {
 
-class ApplicationImpl;
-
 namespace commands {
 
 /**
  * @brief OnPlayToneNotification command class
  **/
 class OnPlayToneNotification : public NotificationToHMI {
- public:
-  /**
-   * @brief OnPlayToneNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnPlayToneNotification(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief OnPlayToneNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnPlayToneNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnPlayToneNotification class destructor
-   **/
-  virtual ~OnPlayToneNotification();
+    /**
+     * @brief OnPlayToneNotification class destructor
+     **/
+    virtual ~OnPlayToneNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnPlayToneNotification);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnPlayToneNotification);
 };
 
 }  // namespace commands

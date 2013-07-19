@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 AddSubMenuRequest::AddSubMenuRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 AddSubMenuRequest::~AddSubMenuRequest() {
@@ -50,9 +50,9 @@ AddSubMenuRequest::~AddSubMenuRequest() {
 void AddSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
 
-  ApplicationImpl* app =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -61,28 +61,28 @@ void AddSubMenuRequest::Run() {
   }
 
   if (app->FindSubMenu(
-      (*message_)[strings::msg_params][strings::menu_id].asInt())) {
+        (*message_)[strings::msg_params][strings::menu_id].asInt())) {
     LOG4CXX_ERROR(logger_, "INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
   if (app->IsSubMenuNameAlreadyExist(
-      (*message_)[strings::msg_params][strings::menu_name].asString())) {
+        (*message_)[strings::msg_params][strings::menu_name].asString())) {
     LOG4CXX_ERROR(logger_, "DUPLICATE_NAME");
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::menu_id] =
-      (*message_)[strings::msg_params][strings::menu_id];
+    (*message_)[strings::msg_params][strings::menu_id];
   msg_params[strings::menu_params][strings::position] =
-      (*message_)[strings::msg_params][strings::position];
+    (*message_)[strings::msg_params][strings::position];
   msg_params[strings::menu_params][strings::menu_name] =
-      (*message_)[strings::msg_params][strings::menu_name];
+    (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, msg_params, true);

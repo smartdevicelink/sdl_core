@@ -51,9 +51,8 @@ void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -70,14 +69,14 @@ void OnVRCommandNotification::Run() {
     ChoiceSetVRCmdMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
       smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::app_id] = app->app_id();
 
       const smart_objects::SmartObject& choice_set =
-          (*it->second).getElement(strings::choice_set);
+        (*it->second).getElement(strings::choice_set);
 
       msg_params[strings::cmd_id] =
-          choice_set.getElement(strings::choice_id);
+        choice_set.getElement(strings::choice_id);
 
       CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
     }
