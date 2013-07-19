@@ -124,7 +124,7 @@ FFW.VR = FFW.RPCObserver.create({
             "jsonrpc": "2.0",
             "method": "VR.OnCommand",
             "params": {
-                "commandId": element.commandId
+                "commandID": element.commandID
             }
         };
         this.client.send(JSONMessage);
@@ -150,7 +150,7 @@ FFW.VR = FFW.RPCObserver.create({
 	            }
 	            case "VR.DeleteCommand": {
 	
-	                SDL.SDLModel.deleteCommandVR(request.params.cmdId);
+	                SDL.SDLModel.deleteCommandVR(request.params.cmdID);
 	
 	                this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 	
@@ -276,14 +276,14 @@ FFW.VR = FFW.RPCObserver.create({
     /*
      * send notification when command was triggered from VR
      */
-    onChoise: function(commandId) {
+    onChoise: function(commandID) {
         Em.Logger.log("FFW.VR.PerformInteraction");
 
         var JSONMessage = {
             "jsonrpc": "2.0",
             "method": "VR.OnChoise",
             "params": {
-                "choiceID": commandId
+                "choiceID": commandID
             }
         };
 
@@ -319,15 +319,15 @@ FFW.VR = FFW.RPCObserver.create({
     /**
      * send notification when command was triggered
      */
-    onCommand: function(commandId, appId) {
+    onCommand: function(commandID, appID) {
         Em.Logger.log("FFW.VR.onCommand");
 
         var JSONMessage = {
             "jsonrpc": "2.0",
             "method": "VR.OnCommand",
             "params": {
-                "cmdID": commandId,
-                "appId": appId
+                "cmdID": commandID,
+                "appID": appID
             }
         };
         this.client.send(JSONMessage);

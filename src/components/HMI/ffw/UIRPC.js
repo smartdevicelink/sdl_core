@@ -51,13 +51,13 @@ FFW.UI = FFW.RPCObserver.create({
     }),
 
     // temp var for debug
-    appId: 1,
+    appID: 1,
 
-    onVRChoiseSubscribeRequestId: -1,
-    onShowNotificationSubscribeRequestId: -1,
+    onVRChoiseSubscribeRequestID: -1,
+    onShowNotificationSubscribeRequestID: -1,
     
-    onVRChoiseUnsubscribeRequestId: -1,
-    onShowNotificationUnsubscribeRequestId: -1,
+    onVRChoiseUnsubscribeRequestID: -1,
+    onShowNotificationUnsubscribeRequestID: -1,
 
     // const
     onVRChoiseNotification: "VR.OnChoise",
@@ -66,8 +66,8 @@ FFW.UI = FFW.RPCObserver.create({
     /**
      * ids for requests AudioPassThru
      */
-    performAudioPassThruRequestId: -1,
-    endAudioPassThruRequestId: -1,
+    performAudioPassThruRequestID: -1,
+    endAudioPassThruRequestID: -1,
 
     /**
      * connect to RPC bus
@@ -92,8 +92,8 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         // subscribe to notifications
-        this.onVRChoiseSubscribeRequestId = this.client.subscribeToNotification(this.onVRChoiseNotification);
-        this.onShowNotificationSubscribeRequestId = this.client.subscribeToNotification(this.onShowNotificationNotification);
+        this.onVRChoiseSubscribeRequestID = this.client.subscribeToNotification(this.onVRChoiseNotification);
+        this.onShowNotificationSubscribeRequestID = this.client.subscribeToNotification(this.onShowNotificationNotification);
     },
 
     /**
@@ -104,8 +104,8 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         // unsubscribe from notifications
-        this.onVRChoiseUnsubscribeRequestId = this.client.unsubscribeFromNotification(this.onVRChoiseNotification);
-        this.onShowNotificationUnsubscribeRequestId = this.client.unsubscribeFromNotification(this.onShowNotificationNotification);
+        this.onVRChoiseUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onVRChoiseNotification);
+        this.onShowNotificationUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onShowNotificationNotification);
     },
 
     /**
@@ -142,7 +142,7 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         if(notification.method == this.onVRChoiseNotification){
-            this.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"], notification.params.choiceId);
+            this.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"], notification.params.choiceID);
         }
         
         if(notification.method == this.onShowNotificationNotification){
@@ -164,7 +164,7 @@ FFW.UI = FFW.RPCObserver.create({
 	            case "UI.Show": {
 	
 	                SDL.TurnByTurnView.deactivate();
-	                SDL.SDLController.getApplicationModel(request.params.appId).onSDLUIShow(request.params);
+	                SDL.SDLController.getApplicationModel(request.params.appID).onSDLUIShow(request.params);
 	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 	
 	                break;
@@ -194,42 +194,42 @@ FFW.UI = FFW.RPCObserver.create({
 	            }
 	            case "UI.AddCommand": {
 	
-	                SDL.SDLController.getApplicationModel(request.params.appId).addCommand(request.params);
+	                SDL.SDLController.getApplicationModel(request.params.appID).addCommand(request.params);
 	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 	
 	                break;
 	            }
 	            case "UI.DeleteCommand": {
 	
-	                SDL.SDLController.getApplicationModel(request.params.appId).deleteCommand(request.params.cmdId);
+	                SDL.SDLController.getApplicationModel(request.params.appID).deleteCommand(request.params.cmdID);
 	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 	
 	                break;
 	            }
 	            case "UI.AddSubMenu": {
 	
-	                SDL.SDLController.getApplicationModel(request.params.appId).addSubMenu(request.params);
+	                SDL.SDLController.getApplicationModel(request.params.appID).addSubMenu(request.params);
 	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 	
 	                break;
 	            }
 	            case "UI.DeleteSubMenu": {
 	
-	                var resultCode = SDL.SDLController.getApplicationModel(request.params.appId).deleteSubMenu(request.params.menuID);
+	                var resultCode = SDL.SDLController.getApplicationModel(request.params.appID).deleteSubMenu(request.params.menuID);
 	                this.sendUIResult(resultCode, request.id, request.method);
 	
 	                break;
 	            }
 	            case "UI.CreateInteractionChoiceSet": {
 	
-	                SDL.SDLController.getApplicationModel(request.params.appId).onCreateInteraction(request.params);
+	                SDL.SDLController.getApplicationModel(request.params.appID).onCreateInteraction(request.params);
 	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 	
 	                break;
 	            }
 	            case "UI.DeleteInteractionChoiceSet": {
 	
-	                SDL.SDLController.getApplicationModel(request.params.appId).onDeleteInteraction(request.params);
+	                SDL.SDLController.getApplicationModel(request.params.appID).onDeleteInteraction(request.params);
 	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 	
 	                break;
@@ -242,7 +242,7 @@ FFW.UI = FFW.RPCObserver.create({
 	            }
 	            case "UI.SetMediaClockTimer": {
 	
-	                var resultCode = SDL.SDLController.getApplicationModel(request.params.appId).sdlSetMediaClockTimer(request.params);
+	                var resultCode = SDL.SDLController.getApplicationModel(request.params.appID).sdlSetMediaClockTimer(request.params);
 	                this.sendUIResult(resultCode, request.id, request.method);
 	
 	                break;
@@ -274,14 +274,14 @@ FFW.UI = FFW.RPCObserver.create({
 	            }
 	            case "UI.PerformAudioPassThru": {
 	
-	                this.performAudioPassThruRequestId = request.id;
+	                this.performAudioPassThruRequestID = request.id;
 	                SDL.SDLModel.UIPerformAudioPassThru(request.params);
 	
 	                break;
 	            }
 	            case "UI.EndAudioPassThru": {
 	
-	                    this.endAudioPassThruRequestId = request.id;
+	                    this.endAudioPassThruRequestID = request.id;
 	
 	                    SDL.SDLModel.UIEndAudioPassThru();
 	
@@ -514,13 +514,13 @@ FFW.UI = FFW.RPCObserver.create({
     /**
      * send response from onRPCRequest
      * @param {Number} resultCode
-     * @param {Number} sliderRequestId
+     * @param {Number} sliderRequestID
      * @param {Number} sliderPosition
      */
-    sendSliderResult: function(resultCode, sliderRequestId, sliderPosition) {
+    sendSliderResult: function(resultCode, sliderRequestID, sliderPosition) {
         var JSONMessage = {
             "jsonrpc": "2.0",
-            "id": sliderRequestId,
+            "id": sliderRequestID,
             "result": {
                 "code": resultCode, // type (enum) from SDL protocol
                 "method": "UI.SliderResponse"
@@ -536,18 +536,18 @@ FFW.UI = FFW.RPCObserver.create({
 
     /**
      * send notification when command was triggered
-     * @param {Number} commandId
-     * @param {Number} appId
+     * @param {Number} commandID
+     * @param {Number} appID
      */
-    onCommand: function(commandId, appId) {
+    onCommand: function(commandID, appID) {
         Em.Logger.log("FFW.UI.onCommand");
 
         var JSONMessage = {
             "jsonrpc": "2.0",
             "method": "UI.OnCommand",
             "params": {
-                "cmdID": commandId,
-                "appId": appId
+                "cmdID": commandID,
+                "appID": appID
             }
         };
         this.client.send(JSONMessage);
@@ -556,17 +556,17 @@ FFW.UI = FFW.RPCObserver.create({
     /**
      * send notification when command was triggered
      * @param {Number} softButtonID
-     * @param {Number} appId
+     * @param {Number} appID
      */
-    onCommandSoftButton: function(softButtonID, appId) {
+    onCommandSoftButton: function(softButtonID, appID) {
         Em.Logger.log("FFW.UI.onCommand");
 
         var JSONMessage = {
             "jsonrpc": "2.0",
             "method": "UI.OnCommand",
             "params": {
-                "commandId": softButtonID,
-                "appId": appId
+                "commandID": softButtonID,
+                "appID": appID
             }
         };
         this.client.send(JSONMessage);
@@ -575,24 +575,24 @@ FFW.UI = FFW.RPCObserver.create({
     /**
      * send notification when command was triggered
      * @param {Number} resultCode
-     * @param {Number} performInteractionRequestId
-     * @param {Number} commandId
+     * @param {Number} performInteractionRequestID
+     * @param {Number} commandID
      */
-    interactionResponse: function(resultCode, performInteractionRequestId, commandId) {
+    interactionResponse: function(resultCode, performInteractionRequestID, commandID) {
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
         // send repsonse
         var JSONMessage = {
             "jsonrpc": "2.0",
-            "id": performInteractionRequestId,
+            "id": performInteractionRequestID,
             "result": {
                 "code": resultCode,
                 "method": "UI.PerformInteractionResponse"
             }
         };
 
-        if(commandId){
-            JSONMessage.result.choiceID = commandId;
+        if(commandID){
+            JSONMessage.result.choiceID = commandID;
         }
 
         this.client.send(JSONMessage);
@@ -637,9 +637,9 @@ FFW.UI = FFW.RPCObserver.create({
     /**
      * Notifies if device was choosed
      * @param {String} deviceName
-     * @param {Number} appId
+     * @param {Number} appID
      */
-    OnDeviceChosen: function(deviceName, appId) {
+    OnDeviceChosen: function(deviceName, appID) {
         Em.Logger.log("FFW.UI.OnDeviceChosen");
 
         // send repsonse
@@ -649,7 +649,7 @@ FFW.UI = FFW.RPCObserver.create({
             "params": {
                 "deviceInfo": {
                     "name": deviceName,
-                    "id": appId
+                    "id": appID
                 }
             }
         };

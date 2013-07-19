@@ -51,7 +51,7 @@ FFW.Navigation = FFW.RPCObserver.create({
     }),
 
     // temp var for debug
-    appId: 1,
+    appID: 1,
 
     /**
      * connect to RPC bus
@@ -259,9 +259,9 @@ FFW.Navigation = FFW.RPCObserver.create({
     /**
      * Notifies if TBTClientState was activated
      * @param {String} state
-     * @param {Number} appId
+     * @param {Number} appID
      */
-    onTBTClientState: function(state, appId) {
+    onTBTClientState: function(state, appID) {
         Em.Logger.log("FFW.Navigation.OnTBTClientState");
 
         // send repsonse
@@ -270,7 +270,7 @@ FFW.Navigation = FFW.RPCObserver.create({
             "method": "Navigation.OnTBTClientState",
             "params": {
                 "state": state,
-                "appId": appId
+                "appID": appID
             }
         };
         this.client.send(JSONMessage);
