@@ -48,6 +48,7 @@
 #include "transport_manager/device_handle_generator_impl.h"
 
 namespace transport_manager {
+//todo: add verification of is_initialized_ to call of each interface or public functions
 
 log4cxx::LoggerPtr TransportManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("TransportManager"));
