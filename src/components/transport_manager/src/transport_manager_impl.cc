@@ -52,7 +52,6 @@ log4cxx::LoggerPtr TransportManagerImpl::logger_ = log4cxx::LoggerPtr(
 
 TransportManager::~TransportManager() {
 }
-;
 
 TransportManagerImpl::TransportManagerImpl()
     : message_queue_mutex_(),
@@ -63,7 +62,7 @@ TransportManagerImpl::TransportManagerImpl()
       device_listener_thread_wakeup_(),
       transport_manager_listener_(),
       is_initialized_(false),
-      connection_id_counter_(13) {
+      connection_id_counter_(0) {
 
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, 0);
@@ -77,25 +76,6 @@ TransportManagerImpl::TransportManagerImpl()
   LOG4CXX_INFO(logger_, "TM object created.");
 }
 
-TransportManagerImpl::TransportManagerImpl(DeviceAdapter *device_adapter)
-    : message_queue_mutex_(),
-      all_thread_active_(false),
-      adapter_handler_(),
-      messsage_queue_thread_(),
-      event_queue_thread_(),
-      device_listener_thread_wakeup_(),
-      transport_manager_listener_(),
-      is_initialized_(false),
-      connection_id_counter_(23) {
-
-  LOG4CXX_INFO(logger_, "==============================================");
-  pthread_mutex_init(&message_queue_mutex_, 0);
-  pthread_mutex_init(&event_queue_mutex_, 0);
-  pthread_cond_init(&device_listener_thread_wakeup_, NULL);
-  addDeviceAdapter(device_adapter);
-  LOG4CXX_INFO(logger_, "TM object with device adapter created.");
-}
-
 //todo: more constructors
 
 TransportManagerImpl::~TransportManagerImpl() {
@@ -107,10 +87,6 @@ TransportManagerImpl::~TransportManagerImpl() {
   pthread_mutex_destroy(&message_queue_mutex_);
   pthread_mutex_destroy(&event_queue_mutex_);
   pthread_cond_destroy(&device_listener_thread_wakeup_);
-  for (TransportManagerListenerList::iterator it = transport_manager_listener_
-      .begin(); it != transport_manager_listener_.end(); ++it) {
-    delete (*it);
-  }
   LOG4CXX_INFO(logger_, "TM object destroyed.");
 }
 
@@ -171,6 +147,11 @@ void TransportManagerImpl::disconnectDevice(const DeviceHandle &device_id) {
 void TransportManagerImpl::addEventListener(
     TransportManagerListener *listener) {
   transport_manager_listener_.push_back(listener);
+}
+
+void TransportManagerImpl::removeEventListener(
+    TransportManagerListener *listener) {
+  transport_manager_listener_.remove(listener);
 }
 
 bool TransportManagerImpl::sendMessageToDevice(const RawMessageSptr message) {

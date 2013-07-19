@@ -142,6 +142,15 @@ class TransportManagerImpl : public TransportManager {
   virtual void addEventListener(TransportManagerListener *listener);
 
   /**
+   * @brief unregister event listener
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void removeEventListener(TransportManagerListener *listener);
+
+  /**
    * @brief add new device adapter
    *
    * @param device adapter

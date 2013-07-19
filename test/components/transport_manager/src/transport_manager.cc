@@ -205,12 +205,19 @@ int main(int argc, char** argv) {
 
   tmListener = new MockTransportManagerListener();
   tm->addEventListener(tmListener);
-  tm->addEventListener(new MyListener());
+  MyListener *mylistener = new MyListener();
+  tm->addEventListener(mylistener);
 
   mock_da->init(NULL);
 
   mock_da->addDevice("hello");
 
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+
+  int rc = RUN_ALL_TESTS();
+
+  tm->removeEventListener(tmListener);
+  tm->removeEventListener(mylistener);
+  delete tmListener;
+  delete mylistener;
 }

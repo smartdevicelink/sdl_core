@@ -126,6 +126,15 @@ class TransportManager {
   virtual void addEventListener(TransportManagerListener *listener) = 0;
 
   /**
+   * @brief unregister event listener
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void removeEventListener(TransportManagerListener *listener) = 0;
+
+  /**
    * @brief remove device from internal storages
    *
    * @param event device id
