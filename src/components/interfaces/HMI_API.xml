@@ -708,7 +708,7 @@
       <description>True, if highlighted</description>
       <description>False, if not highlighted</description>
     </param>
-    <param name="softButtonID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+    <param name="softButtonId" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Value which is returned via OnButtonPress / OnButtonEvent</description>
     </param>
     <param name="systemAction" type="Common.SystemAction" mandatory="false">
@@ -755,8 +755,8 @@
 </struct>
 
 <struct name="MenuParams">
-  <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
-    <description>unique ID of the sub menu, the command will be added to.</description>
+  <param name="parentId" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+    <description>unique Id of the sub menu, the command will be added to.</description>
     <description>If not provided, it will be provided to the top level of the in application menu.</description>
   </param>
   <param name="position" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
@@ -773,7 +773,7 @@
 
 <struct name="Choice">
   <description>A choice is an option given to the user which can be selected either by menu, or through voice recognition system.</description>
-  <param name="choiceID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true"/>
+  <param name="choiceId" type="Integer" minvalue="0" maxvalue="65535" mandatory="true"/>
   <param name="menuName" type="String" maxlength="500" mandatory="false"/>
   <param name="image" type="Common.Image" mandatory="false"/>
 </struct>
@@ -1108,8 +1108,8 @@
     	<param name="mode" type="Common.ButtonEventMode" mandatory="true">
             <description>Indicates whether this is an UP or DOWN event.</description>
     	</param>
-    	<param name="customButtonID" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
-    		<description>If ButtonName is “CUSTOM_BUTTON", this references the integer ID passed by a custom button. (e.g. softButtonName)</description>
+    	<param name="customButtonId" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
+    		<description>If ButtonName is “CUSTOM_BUTTON", this references the integer Id passed by a custom button. (e.g. softButtonName)</description>
     	</param>
     </function>
     <function name="OnButtonPress" messagetype="notification">
@@ -1117,7 +1117,7 @@
         <param name="mode" type="Common.ButtonPressMode" mandatory="true">
             <description>Indicates whether this is a LONG or SHORT button press event.</description>
         </param>
-        <param name="customButtonID" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
+        <param name="customButtonId" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
             <description>If ButtonName is “CUSTOM_BUTTON", this references the string passed by a custom button. (e.g. softButtonName)</description>
         </param>
     </function>
@@ -1261,7 +1261,7 @@
   </function>
   <function name="OnCommand" messagetype="notification">
     <description>Notifies SDL about command trigerred via VR</description>
-    <param name="cmdID" type="Integer" mandatory="true">
+    <param name="cmdId" type="Integer" mandatory="true">
       <description>Id of list of commands which trigerred command belongs to.</description>
     </param>
     <param name="appId" type="Integer" mandatory="true">
@@ -1444,8 +1444,8 @@
     </function>
     <function name="AddCommand" messagetype="request">
       <description>Adds a command to the application menu.</description>
-      <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-        <description>ID of the command to add.</description>
+      <param name="cmdId" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+        <description>Id of the command to add.</description>
       </param>
       <param name="menuParams" type="Common.MenuParams" mandatory="false">
         <description>Optional sub value containing menu parameters</description>
@@ -1473,8 +1473,8 @@
     </function>
     <function name="AddSubMenu" messagetype="request">
       <description>Adds a sub menu to the in-application menu.</description>
-      <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-        <description>ID of the sub menu to add. Unique for the application.</description>
+      <param name="menuId" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+        <description>Id of the sub menu to add. Unique for the application.</description>
       </param>
       <param name="menuParams" type="Common.MenuParams" mandatory="true">
         <description>Position and name of the added menu.'parent' field is ommited for this API. </description>
@@ -1487,8 +1487,8 @@
     </function>
     <function name="DeleteSubMenu" messagetype="request">
       <description>Deletes a submenu from the in-application menu.</description>
-      <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000">
-        <description>The "menuID" of the submenu to delete. (See addSubMenu.menuID)</description>
+      <param name="menuId" type="Integer" minvalue="0" maxvalue="2000000000">
+        <description>The "menuId" of the submenu to delete. (See addSubMenu.menuId)</description>
       </param>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of application that requested this RPC.</description>
@@ -1498,8 +1498,8 @@
     </function>
     <function name="CreateInteractionChoiceSet" messagetype="request">
       <description>Creates interaction choice set to be used later by performInteraction</description>
-      <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
-        <description>Unique ID used for this interaction choice set.</description>
+      <param name="interactionChoiceSetId" type="Integer" minvalue="0" maxvalue="2000000000">
+        <description>Unique Id used for this interaction choice set.</description>
       </param>
       <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" />
       <param name="appId" type="Integer" mandatory="true">
@@ -1511,8 +1511,8 @@
     <function name="DeleteInteractionChoiceSet" messagetype="request">
       <description>Deletes interaction choice set that has been created with "CreateInteractionChoiceSet".</description>
       <description>The interaction may only be deleted when not currently in use by a "performInteraction".</description>
-      <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
-        <description>ID of the interaction choice set to delete.</description>
+      <param name="interactionChoiceSetId" type="Integer" minvalue="0" maxvalue="2000000000">
+        <description>Id of the interaction choice set to delete.</description>
       </param>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of application that requested this RPC.</description>
@@ -1525,8 +1525,8 @@
       <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
         <description>Uses initialInteractionText. See TextFieldStruct.</description>
       </param>
-      <param name="interactionChoiceSetIDList" type="Integer" minsize="1" maxsize="100" minvalue="0" maxvalue="2000000000" array="true" mandatory="true">
-        <description>List of interaction choice set IDs to use with an interaction.</description>
+      <param name="interactionChoiceSetIdList" type="Integer" minsize="1" maxsize="100" minvalue="0" maxvalue="2000000000" array="true" mandatory="true">
+        <description>List of interaction choice set Ids to use with an interaction.</description>
       </param>
       <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="false">
         <description>Timeout in milliseconds.</description>
@@ -1537,8 +1537,8 @@
       </param>
     </function>
     <function name="PerformInteraction" messagetype="response">
-      <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
-        <description>ID of the choice that was selected in response to PerformInteraction.</description>
+      <param name="choiceId" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+        <description>Id of the choice that was selected in response to PerformInteraction.</description>
       </param>
     </function>
     <function name="SetMediaClockTimer" messagetype="request">
@@ -1575,8 +1575,8 @@
     </function>
     <function name="OnCommand" messagetype="notification">
       <description>Notification is initiated by HMI on user choosing menu item.</description>
-      <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-        <description>Command ID, which is related to a specific menu entry.</description>
+      <param name="cmdId" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+        <description>Command Id, which is related to a specific menu entry.</description>
       </param>
       <param name="appId" type="Integer" mandatory="true">
         <description>Id of application that requested this RPC.</description>
