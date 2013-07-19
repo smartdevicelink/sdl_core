@@ -13,6 +13,7 @@ include_directories (
   ../src/components/application_manager/include
   ../src/components/mobile_message_handler/include
   ../src/components/request_watchdog/include
+  ../src/components/audio_manager/include
   ../src/components/protocol_handler/include
   ../src/components/TransportManager/include
   ../src/components/connection_handler/include
@@ -23,6 +24,7 @@ include_directories (
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
+  ../test/components/audio_manager/include
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
   ../test/components/json_handler/include
@@ -40,6 +42,7 @@ set(LIBRARIES
     gmock
     gmock_main
     RequestWatchdog
+    AudioManager
     formatters
     HMI_API
     SmartObjects
