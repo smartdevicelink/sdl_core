@@ -58,7 +58,6 @@ struct DeviceDesc {
       name(name) {
   }
 };
-
 }
 
 #endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
