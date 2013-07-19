@@ -8,10 +8,16 @@ buildscript {
 }
 apply plugin: 'android'
 
+repositories {
+    mavenCentral()
+    mavenRepo(url: new File(System.properties['user.home'], '.m2/repository').toURI().toURL())
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':SyncProxyAndroid')
     compile project(':FileExplorer')
+    compile 'com.google.guava:guava:13.0'
 }
 
 android {
@@ -28,7 +34,5 @@ android {
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
-
-        instrumentTest.setRoot('tests')
     }
 }
