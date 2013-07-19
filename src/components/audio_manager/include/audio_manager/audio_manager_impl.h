@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_H_
 
+#include <net/if.h>
 #include <string>
 #include "utils/logger.h"
 #include "utils/macro.h"
@@ -52,11 +53,10 @@ class AudioManagerImpl : AudioManager {
  public:
   static AudioManager* getAudioManager();
 
-  virtual void addA2DPSource(const std::string& device);
-  virtual void removeA2DPSource(const std::string& device);
-
-  virtual void playA2DPSource(const std::string& device);
-  virtual void stopA2DPSource(const std::string& device);
+  virtual void addA2DPSource(const sockaddr& device);
+  virtual void removeA2DPSource(const sockaddr& device);
+  virtual void playA2DPSource(const sockaddr& device);
+  virtual void stopA2DPSource(const sockaddr& device);
 
   virtual ~AudioManagerImpl();
 
@@ -88,8 +88,12 @@ class AudioManagerImpl : AudioManager {
 
   std::map<std::string, threads::Thread*> sources_;
 
+  const int MAC_ADDRESS_LENGTH_;
   static AudioManagerImpl* sInstance_;
   static log4cxx::LoggerPtr logger_;
+  static const std::string sA2DPSourcePrefix_;
+
+  std::string sockAddr2SourceAddr(const sockaddr& device);
 
   DISALLOW_COPY_AND_ASSIGN(AudioManagerImpl);
 };

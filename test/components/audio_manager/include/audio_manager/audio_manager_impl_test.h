@@ -64,8 +64,17 @@ TEST_F(AudioManagerTest, AddAndPlayStream) {
   audio_manager::AudioManager* audioManager =
       audio_manager::AudioManagerImpl::getAudioManager();
 
-  audioManager->addA2DPSource("bluez_source.F8_D0_BD_AC_B4_5D");
-  audioManager->playA2DPSource("bluez_source.F8_D0_BD_AC_B4_5D");
+  sockaddr device;
+
+  device.sa_data[0] = 0xf8;
+  device.sa_data[1] = 0xd0;
+  device.sa_data[2] = 0xbd;
+  device.sa_data[3] = 0xac;
+  device.sa_data[4] = 0xb4;
+  device.sa_data[5] = 0x5d;
+
+  audioManager->addA2DPSource(device);
+  audioManager->playA2DPSource(device);
 
   sleep(10000000);
 }

@@ -33,8 +33,7 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 #include <string.h>
-#include <net/if.h>
-
+#include <algorithm>
 #include <iterator>
 #include "audio_manager/audio_manager_impl.h"
 
@@ -45,6 +44,14 @@ log4cxx::LoggerPtr AudioManagerImpl::logger_ = log4cxx::LoggerPtr(
 
 AudioManagerImpl* AudioManagerImpl::sInstance_ = 0;
 
+const std::string AudioManagerImpl::sA2DPSourcePrefix_ = "bluez_source.";
+
+const pa_sample_spec AudioManagerImpl::A2DPSourcePlayerThread::
+      sSampleFormat_ = {
+      /*format*/    PA_SAMPLE_S16LE,
+      /*rate*/      44100,
+      /*channels*/  2 };
+
 AudioManager* AudioManagerImpl::getAudioManager() {
   if (0 == sInstance_) {
     sInstance_ = new AudioManagerImpl;
@@ -53,27 +60,61 @@ AudioManager* AudioManagerImpl::getAudioManager() {
   return sInstance_;
 }
 
-AudioManagerImpl::AudioManagerImpl() {
+AudioManagerImpl::AudioManagerImpl()
+// Six hex-pairs + five underscores + '\n'
+ : MAC_ADDRESS_LENGTH_(12 + 5 + 1)  {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
 }
 
-void AudioManagerImpl::addA2DPSource(const std::string& device) {
+void AudioManagerImpl::addA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
-  if (sources_.find(device) == sources_.end()) {
+
+  std::string source = sockAddr2SourceAddr(device);
+
+  LOG4CXX_TRACE(logger_, "Got string MAC");
+
+  if (sources_.find(source) == sources_.end()) {
     sources_.insert(std::pair<std::string, threads::Thread*>(
-        device, NULL));
+        source, NULL));
   }
 }
 
-void AudioManagerImpl::removeA2DPSource(const std::string& device) {
+std::string AudioManagerImpl::sockAddr2SourceAddr(const sockaddr& device) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  char mac[MAC_ADDRESS_LENGTH_];
+
+  sprintf(mac, "%02x_%02x_%02x_%02x_%02x_%02x",
+          (unsigned char)device.sa_data[0],
+          (unsigned char)device.sa_data[1],
+          (unsigned char)device.sa_data[2],
+          (unsigned char)device.sa_data[3],
+          (unsigned char)device.sa_data[4],
+          (unsigned char)device.sa_data[5]);
+
+  std::string ret = std::string(mac);
+
+  std::transform(ret.begin(), ret.end(), ret.begin(), toupper);
+
+  ret = sA2DPSourcePrefix_ + ret;
+
+  LOG4CXX_TRACE(logger_, "Mac : " << ret);
+
+  return ret;
 }
 
-void AudioManagerImpl::playA2DPSource(const std::string& device) {
+void AudioManagerImpl::removeA2DPSource(const sockaddr& device) {
+}
+
+void AudioManagerImpl::playA2DPSource(const sockaddr& device) {
+
+  std::string source = sockAddr2SourceAddr(device);
+
   LOG4CXX_TRACE_ENTER(logger_);
   std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(device);
+      sources_.find(source);
 
   if (it != sources_.end()) {
     (*it).second = new threads::Thread((*it).first.c_str(),
@@ -83,15 +124,8 @@ void AudioManagerImpl::playA2DPSource(const std::string& device) {
   }
 }
 
-void AudioManagerImpl::stopA2DPSource(const std::string& device) {
+void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
 }
-
-const pa_sample_spec AudioManagerImpl::A2DPSourcePlayerThread::
-      sSampleFormat_ = {
-      /*format*/    PA_SAMPLE_S16LE,
-      /*rate*/      44100,
-      /*channels*/  2 };
-
 
 AudioManagerImpl::A2DPSourcePlayerThread::A2DPSourcePlayerThread(
     const std::string& device)

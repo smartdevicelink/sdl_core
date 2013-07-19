@@ -40,10 +40,10 @@ class string;
 class AudioManager {
  public:
 
-  virtual void addA2DPSource(const std::string& device) = 0;
-  virtual void removeA2DPSource(const std::string& device) = 0;
-  virtual void playA2DPSource(const std::string& device) = 0;
-  virtual void stopA2DPSource(const std::string& device) = 0;
+  virtual void addA2DPSource(const sockaddr& device) = 0;
+  virtual void removeA2DPSource(const sockaddr& device) = 0;
+  virtual void playA2DPSource(const sockaddr& device) = 0;
+  virtual void stopA2DPSource(const sockaddr& device) = 0;
 
   virtual ~AudioManager() {
   }
