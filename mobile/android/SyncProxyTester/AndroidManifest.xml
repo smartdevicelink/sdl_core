@@ -17,6 +17,10 @@
         android:debuggable="true"
         android:icon="@drawable/fiesta"
         android:label="@string/tester_app_name" >
+
+        <!-- Required to support the USB Accessory mode with API Level 10 -->
+        <uses-library android:name="com.android.future.usb.accessory" />
+
         <activity
             android:name=".activity.SyncProxyTester"
             android:label="@string/tester_app_name"
@@ -57,9 +61,13 @@
         </activity>
     </application>
 
-    <uses-sdk android:minSdkVersion="5" />
+    <!-- Version 10 is minimum to support the add-on library for the USB Accessory mode -->
+    <uses-sdk android:minSdkVersion="10" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
     </uses-permission>
+
+    <!-- Required to use the USB Accessory mode -->
+    <uses-feature android:name="android.hardware.usb.accessory" />
 
 </manifest>
