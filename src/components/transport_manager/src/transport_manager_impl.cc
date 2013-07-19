@@ -260,6 +260,7 @@ void TransportManagerImpl::init(void) {
       "Event queue thread is not created exit with error code " << error_code);
     return;
   }
+  //todo: move initialized assign to each thread and mark TM initialized only after all threads have been started.
   is_initialized_ = true;
   LOG4CXX_INFO(logger_, "Init complete");
 }
