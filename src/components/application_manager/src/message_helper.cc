@@ -244,7 +244,7 @@ smart_objects::SmartObject* MessageHelper::CreateSetAppIcon(
   // TODO(PV): need to store actual image type
   object[strings::sync_file_name][strings::image_type] =
     mobile_api::ImageType::DYNAMIC;
-  object[strings::app_id] = (uint64_t)app_id;
+  object[strings::app_id] = app_id;
 
   return set_icon;
 }

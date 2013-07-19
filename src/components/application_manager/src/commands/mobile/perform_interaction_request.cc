@@ -173,22 +173,26 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
       smart_objects::SmartObject* j_choice_set =
         app->FindChoiceSetVRCommands(choice_list[j].asInt());
 
-        if (i == j) {
-          // skip check the same element
-          continue;
-        }
+      if (i == j) {
+        // skip check the same element
+        continue;
+      }
 
+      if (!i_choice_set || !j_choice_set) {
+        SendResponse(false, mobile_apis::Result::INVALID_ID);
+        LOG4CXX_ERROR(logger_, "Invalid ID");
+        return false;
+      }
 
       std::string i_menu_name =
         (*i_choice_set)[strings::choice_set][strings::menu_name].asString();
       std::string j_menu_name =
         (*j_choice_set)[strings::choice_set][strings::menu_name].asString();
 
-        if (i_menu_name == j_menu_name) {
-          LOG4CXX_ERROR(logger_, "Incoming choiceset has duplicated menu name");
-          SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
-          return false;
-        }
+      if (i_menu_name == j_menu_name) {
+        LOG4CXX_ERROR(logger_, "Incoming choiceset has duplicated menu name");
+        SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+        return false;
       }
     }
   }
@@ -205,7 +209,7 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
     (*message_)[strings::msg_params][strings::timeout];
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::interaction_choice_set_id_list] =
-  (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+    (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
                    msg_params, true);

@@ -80,7 +80,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     from_hmh_thread_(NULL),
     to_hmh_thread_(NULL),
     hmi_so_factory_(NULL) {
-    from_mobile_thread_ = new threads::Thread(
+  from_mobile_thread_ = new threads::Thread(
     "application_manager::FromMobileThreadImpl",
     new FromMobileThreadImpl(this));
   if (!InitThread(from_mobile_thread_)) {
@@ -368,11 +368,9 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 }
 
 unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
-  if (message_chain_current_id_ < message_chain_max_id_)
-  {
+  if (message_chain_current_id_ < message_chain_max_id_) {
     message_chain_current_id_++;
-  } else
-  {
+  } else {
     message_chain_current_id_ = 0;
   }
 
@@ -380,15 +378,15 @@ unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
 }
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(
-    const unsigned int& connection_key, const unsigned int& correlation_id,
-    const unsigned int& hmi_correlation_id, MessageChaining* msg_chaining,
-    const smart_objects::SmartObject* data) {
+  const unsigned int& connection_key, const unsigned int& correlation_id,
+  const unsigned int& hmi_correlation_id, MessageChaining* msg_chaining,
+  const smart_objects::SmartObject* data) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::AddMessageChain id "
                << hmi_correlation_id);
 
   if (NULL == msg_chaining) {
     MessageChaining* chain =
-        new MessageChaining(connection_key, correlation_id);
+      new MessageChaining(connection_key, correlation_id);
 
     if (chain) {
       if (data) {
@@ -407,9 +405,10 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
       if ((*it->second) == *msg_chaining) {
         message_chaining_[hmi_correlation_id] = it->second;
         return &(*it->second);
+      }
     }
+    return NULL;
   }
-  return NULL;
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
@@ -438,7 +437,7 @@ MessageChaining* ApplicationManagerImpl::GetMessageChain(
                << hmi_correlation_id);
 
   MessageChains::const_iterator it =
-      message_chaining_.find(hmi_correlation_id);
+    message_chaining_.find(hmi_correlation_id);
 
   if (message_chaining_.end() != it) {
     return &(*it->second);
@@ -850,20 +849,20 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
                output_string);
 
   output.set_connection_key(
-     message.getElement(jhs::S_PARAMS).getElement(strings::connection_key).asInt());
+    message.getElement(jhs::S_PARAMS).getElement(strings::connection_key).asInt());
 
   output.set_function_id(message.getElement(jhs::S_PARAMS).getElement(
-      jhs::S_FUNCTION_ID).asInt());
+                           jhs::S_FUNCTION_ID).asInt());
 
   output.set_correlation_id(
-   message.getElement(jhs::S_PARAMS).getElement(jhs::S_CORRELATION_ID).asInt());
+    message.getElement(jhs::S_PARAMS).getElement(jhs::S_CORRELATION_ID).asInt());
   output.set_message_type(static_cast<MessageType>(
-   message.getElement(jhs::S_PARAMS).getElement(jhs::S_MESSAGE_TYPE).asInt()));
+                            message.getElement(jhs::S_PARAMS).getElement(jhs::S_MESSAGE_TYPE).asInt()));
   output.set_json_message(output_string);
 
   if (message.keyExists(strings::binary_data)) {
     application_manager::BinaryData* binaryData =
-        new application_manager::BinaryData(
+      new application_manager::BinaryData(
       message.getElement(strings::binary_data).asBinary());
 
     if (NULL == binaryData) {

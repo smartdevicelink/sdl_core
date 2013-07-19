@@ -80,9 +80,9 @@ void ChangeRegistrationResponse::Run() {
 
   if (!IsPendingResponseExist()) {
 
-    ApplicationImpl* application = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->
-        application(data[strings::params][strings::connection_key]));
+    Application* application =
+      ApplicationManagerImpl::instance()->
+      application(data[strings::params][strings::connection_key]);
 
     if (hmi_apis::Common_Result::SUCCESS == result_ui) {
       application->set_language(

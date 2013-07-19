@@ -62,7 +62,7 @@ void DeleteCommandResponse::Run() {
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -83,32 +83,32 @@ void DeleteCommandResponse::Run() {
     msg_chain->vr_response_result();
 
   if (!IsPendingResponseExist()) {
-
     (*message_)[strings::params][strings::connection_key] =
-        connection_key;
+      connection_key;
 
-        ApplicationManagerImpl::instance()->application(connection_key));
+    Application* app = ApplicationManagerImpl::instance()->application(
+                         connection_key);
 
     if (!app) {
       SendResponse(false);
     }
 
     smart_objects::SmartObject* command =
-        app->FindCommand(data[strings::msg_params][strings::cmd_id].asInt());
+      app->FindCommand(data[strings::msg_params][strings::cmd_id].asInt());
 
     if (command) {
       if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
           ((hmi_apis::Common_Result::SUCCESS == result_vr) ||
-          (hmi_apis::Common_Result::INVALID_ENUM == result_vr))) {
-          app->RemoveCommand(
-              data[strings::msg_params][strings::cmd_id].asInt());
+           (hmi_apis::Common_Result::INVALID_ENUM == result_vr))) {
+        app->RemoveCommand(
+          data[strings::msg_params][strings::cmd_id].asInt());
 
-          SendResponse(true);
+        SendResponse(true);
       } else {
         SendResponse(false);
       }
     } else {
-       // TODO(VS): check ui and vr response code
+      // TODO(VS): check ui and vr response code
     }
   }
 }
