@@ -68,14 +68,16 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   terminate_flag_ = true;
   notify();
   pthread_join(thread_, 0);
-  close(notification_pipe_read_fd_);
-  close(notification_pipe_write_fd_);
+  if (-1 != notification_pipe_read_fd_)
+    close(notification_pipe_read_fd_);
+  if (-1 != notification_pipe_write_fd_)
+    close(notification_pipe_write_fd_);
   pthread_mutex_destroy(&frames_to_send_mutex_);
 }
 
 void ThreadedSocketConnection::abort() {
-  terminate_flag_ = true;
   unexpected_disconnect_ = true;
+  terminate_flag_ = true;
 }
 
 void* startThreadedSocketConnection(void* v) {
@@ -95,17 +97,24 @@ DeviceAdapter::Error ThreadedSocketConnection::start() {
     return DeviceAdapter::FAIL;
   }
 
-  if (pthread_create(&thread_, 0, &startThreadedSocketConnection, this))
+  const int fcntl_ret = fcntl(
+      notification_pipe_read_fd_, F_SETFL,
+      fcntl(notification_pipe_read_fd_, F_GETFL) | O_NONBLOCK);
+  if (0 != fcntl_ret) {
+    return DeviceAdapter::FAIL;
+  }
+
+  if (0 == pthread_create(&thread_, 0, &startThreadedSocketConnection, this))
     return DeviceAdapter::OK;
   else
     return DeviceAdapter::FAIL;
 }
 
 void ThreadedSocketConnection::finalise() {
-  if(unexpected_disconnect_)
-    controller_->connectionFinished(session_id());
-  else
+  if (unexpected_disconnect_)
     controller_->connectionAborted(session_id(), CommunicationError());
+  else
+    controller_->connectionFinished(session_id());
   close(socket_);
 }
 
@@ -123,7 +132,8 @@ DeviceAdapter::Error ThreadedSocketConnection::notify() const {
   return DeviceAdapter::FAIL;
 }
 
-DeviceAdapter::Error ThreadedSocketConnection::sendData(RawMessageSptr message) {
+DeviceAdapter::Error ThreadedSocketConnection::sendData(
+    RawMessageSptr message) {
   pthread_mutex_lock(&frames_to_send_mutex_);
   frames_to_send_.push(message);
   pthread_mutex_unlock(&frames_to_send_mutex_);

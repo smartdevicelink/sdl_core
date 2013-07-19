@@ -47,6 +47,10 @@ class ThreadedSocketConnection : public Connection {
   DeviceAdapter::Error disconnect();
 
   DeviceAdapter::Error start();
+
+  void set_socket(int socket) {
+    socket_ = socket;
+  }
  protected:
   ThreadedSocketConnection(const DeviceHandle device_handle,
                            const ApplicationHandle app_handle,
@@ -70,10 +74,6 @@ class ThreadedSocketConnection : public Connection {
 
   ApplicationHandle application_handle() const {
     return app_handle_;
-  }
-
-  void set_socket(int socket) {
-    socket_ = socket;
   }
 
  private:

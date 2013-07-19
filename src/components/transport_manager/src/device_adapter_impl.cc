@@ -88,6 +88,19 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
     client_connection_listener_->terminate();
     delete client_connection_listener_;
   }
+
+  pthread_mutex_lock(&connections_mutex_);
+  ConnectionMap connections;
+  std::swap(connections, connections_);
+  pthread_mutex_unlock(&connections_mutex_);
+  connections.clear();
+
+  pthread_mutex_lock(&devices_mutex_);
+  DeviceMap devices;
+  std::swap(devices, devices_);
+  pthread_mutex_unlock(&devices_mutex_);
+  devices.clear();
+
   pthread_mutex_destroy(&connections_mutex_);
   pthread_mutex_destroy(&devices_mutex_);
 }
@@ -438,13 +451,15 @@ void DeviceAdapterImpl::connectRequested(const DeviceHandle device_handle,
 }
 
 bool DeviceAdapterImpl::isInitialised() const {
-  if(!initialised_)
+  if (!initialised_)
     return false;
-  if(device_scanner_ && !device_scanner_->isInitialised())
+  if (device_scanner_ && !device_scanner_->isInitialised())
     return false;
-  if(server_connection_factory_ && !server_connection_factory_->isInitialised())
+  if (server_connection_factory_
+      && !server_connection_factory_->isInitialised())
     return false;
-  if(client_connection_listener_ && !client_connection_listener_->isInitialised())
+  if (client_connection_listener_
+      && !client_connection_listener_->isInitialised())
     return false;
   return true;
 }

@@ -250,6 +250,16 @@ void DeviceAdapterListenerImpl::onDataSendFailed(
   pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
+void DeviceAdapterListenerImpl::onConnectRequested(
+    const device_adapter::DeviceAdapter* device_adapter,
+    const DeviceHandle device_handle, const ApplicationHandle app_handle) {
+}
+
+void DeviceAdapterListenerImpl::onUnexpectedDisconnect(
+    const device_adapter::DeviceAdapter* device_adapter,
+    const SessionID session_id, const CommunicationError& error) {
+}
+
 void DeviceAdapterListenerImpl::onCommunicationError(
     const device_adapter::DeviceAdapter* device_adapter,
     const transport_manager::SessionID session_id) {

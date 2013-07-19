@@ -61,7 +61,7 @@ class RawMessage {
              unsigned char* data, unsigned int dataSize);
 
   RawMessage(int connectionKey, unsigned int protocolVersion, int serialNumber,
-             unsigned char* data, unsigned int dataSize);
+             const unsigned char* data, unsigned int dataSize);
 
   bool operator ==(RawMessage &other)const;
 

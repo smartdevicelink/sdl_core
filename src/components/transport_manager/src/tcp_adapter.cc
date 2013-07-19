@@ -113,12 +113,14 @@ DeviceAdapter::Error TcpClientListener::acceptConnect(
   if (socket == -1)
     return DeviceAdapter::BAD_PARAM;
 
-  ConnectionSptr connection(
+  TcpSocketConnection* connection(
       new TcpSocketConnection(device_handle, app_handle, session_id,
                               controller_));
-  controller_->connectionCreated(connection, session_id, device_handle,
-                                 app_handle);
-  return static_cast<TcpSocketConnection*>(connection.get())->start();
+  connection->set_socket(socket);
+  const DeviceAdapter::Error error = connection->start();
+  if (error != DeviceAdapter::OK)
+    delete connection;
+  return error;
 }
 
 DeviceAdapter::Error TcpClientListener::declineConnect(
@@ -137,6 +139,8 @@ DeviceAdapter::Error TcpClientListener::declineConnect(
 
 void TcpClientListener::terminate() {
   shutdown_requested_ = true;
+  if (socket_ != -1)
+    shutdown(socket_, SHUT_RDWR);
 
   if (true == thread_started_) {
     pthread_join(thread_, 0);
@@ -187,7 +191,6 @@ void TcpClientListener::thread() {
     controller_->connectRequested(device_handle, app_handle);
   }
 
-  close(socket_);
   LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
 }
 
