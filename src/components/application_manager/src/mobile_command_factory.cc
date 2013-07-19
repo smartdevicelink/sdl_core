@@ -33,6 +33,8 @@
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/commands/mobile/add_command_response.h"
+#include "application_manager/commands/mobile/delete_command_request.h"
+#include "application_manager/commands/mobile/delete_command_response.h"
 #include "application_manager/commands/mobile/add_sub_menu_request.h"
 #include "application_manager/commands/mobile/add_sub_menu_response.h"
 #include "application_manager/commands/mobile/alert_request.h"
@@ -172,6 +174,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::AddCommandResponse(message));
       } else {
         command.reset(new commands::AddCommandRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::DeleteCommandID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::DeleteCommandResponse(message));
+      } else {
+        command.reset(new commands::DeleteCommandRequest(message));
       }
       break;
     }

@@ -48,7 +48,7 @@ UIDeleteCommandResponse::~UIDeleteCommandResponse() {
 }
 
 void UIDeleteCommandResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIDeleteCommandRequest::Run");
+  LOG4CXX_INFO(logger_, "UIDeleteCommandResponse::Run");
 
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();

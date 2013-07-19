@@ -47,7 +47,6 @@ AddCommandResponse::AddCommandResponse(
 }
 
 AddCommandResponse::~AddCommandResponse() {
-  LOG4CXX_INFO(logger_, "AddCommandResponse::~AddCommandResponse");
 }
 
 void AddCommandResponse::Run() {
@@ -89,10 +88,15 @@ void AddCommandResponse::Run() {
              ApplicationManagerImpl::instance()->
              application(connection_key));
 
+    if (!app) {
+      SendResponse(false);
+    }
+
     smart_objects::SmartObject* command =
        app->FindCommand(data[strings::msg_params][strings::cmd_id].asInt());
 
     if (!command) {
+
       if ((data[strings::msg_params].keyExists(strings::menu_params)) ||
           (data[strings::msg_params].keyExists(strings::vr_commands))) {
         app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),

@@ -50,10 +50,13 @@ DeleteCommandResponse::~DeleteCommandResponse() {
 void DeleteCommandResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteCommandResponse::Run");
 
-  if ((*message_)[strings::params][strings::success].asBool() == false) {
-    SendResponse(false);
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -70,8 +73,10 @@ void DeleteCommandResponse::Run() {
   }
 
   smart_objects::SmartObject data = msg_chain->data();
+  const unsigned int connection_key =  msg_chain->connection_key();
 
   // we need to retrieve stored response code before message chain decrease
+
   const hmi_apis::Common_Result::eType result_ui =
       msg_chain->ui_response_result();
   const hmi_apis::Common_Result::eType result_vr =
@@ -79,34 +84,36 @@ void DeleteCommandResponse::Run() {
 
   if (!IsPendingResponseExist()) {
 
+    (*message_)[strings::params][strings::connection_key] =
+        connection_key;
+
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
-          ApplicationManagerImpl::instance()->
-          application(data[strings::params][strings::app_id]));
+        ApplicationManagerImpl::instance()->application(connection_key));
+
+    if (!app) {
+      SendResponse(false);
+    }
 
     smart_objects::SmartObject* command =
         app->FindCommand(data[strings::msg_params][strings::cmd_id].asInt());
 
     if (command) {
-      if (hmi_apis::Common_Result::SUCCESS == result_ui) {
-        (*command).erase(strings::menu_params);
-      }
+      if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
+          ((hmi_apis::Common_Result::SUCCESS == result_vr) ||
+          (hmi_apis::Common_Result::INVALID_ENUM == result_vr))) {
+          app->RemoveCommand(
+              data[strings::msg_params][strings::cmd_id].asInt());
 
-      if (hmi_apis::Common_Result::SUCCESS == result_vr) {
-        (*command).erase(strings::vr_commands);
+          SendResponse(true);
+      } else {
+        SendResponse(false);
       }
-
-      if (!(*command).keyExists(strings::menu_params) &&
-          !(*command).keyExists(strings::vr_commands)) {
-        app->RemoveCommand(data[strings::msg_params][strings::cmd_id].asInt());
-
-        SendResponse(true);
-      }
-      else {
+    } else {
        // TODO(VS): check ui and vr response code
-      }
     }
   }
 }
+
 }  // namespace commands
 
 }  // namespace application_manager

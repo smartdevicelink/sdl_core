@@ -43,7 +43,6 @@ class SmartObject;
 }
 }
 
-
 namespace application_manager {
 
 class MessageChaining;
@@ -63,11 +62,14 @@ class CommandRequestImpl : public CommandImpl {
                     const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
                     const NsSmart::SmartObject* response_params = NULL) const;
+
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                    const NsSmart::SmartObject& msg_params,
-                   bool chaining_required = false);
+                   bool require_chaining = false);
+
   void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
                    const NsSmart::SmartObject& msg_params) const;
+
  protected:
   MessageChaining*  msg_chaining_;
 };

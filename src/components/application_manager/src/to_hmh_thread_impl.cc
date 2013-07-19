@@ -49,7 +49,7 @@ ToHMHThreadImpl::~ToHMHThreadImpl() {
 void ToHMHThreadImpl::threadMain() {
   while (1) {
     while (!handler_->messages_to_hmh_.empty()) {
-      LOG4CXX_INFO(logger_, "Received message from hmi");
+      LOG4CXX_INFO(logger_, "Received message to hmi");
       utils::SharedPtr<Message> message =
         handler_->messages_to_hmh_.pop();
 

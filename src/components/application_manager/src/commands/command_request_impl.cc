@@ -99,7 +99,7 @@ void CommandRequestImpl::SendResponse(const bool success,
 
 void CommandRequestImpl::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
-    const NsSmart::SmartObject& msg_params, bool chaining_required) {
+    const NsSmart::SmartObject& msg_params, bool require_chaining) {
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
       new NsSmartDeviceLink::NsSmartObjects::SmartObject;
@@ -118,11 +118,6 @@ void CommandRequestImpl::CreateHMIRequest(
   const unsigned int hmi_correlation_id_ =
         ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
-  LOG4CXX_INFO(logger_, "CommandRequestImpl::connection key " <<
-  (*message_)[strings::params][strings::connection_key].asUInt());
-  LOG4CXX_INFO(logger_, "CommandRequestImpl::correlation id " <<
-  (*message_)[strings::params][strings::correlation_id].asUInt());
-
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] = function_id;
@@ -134,17 +129,22 @@ void CommandRequestImpl::CreateHMIRequest(
 
   request[strings::msg_params] = msg_params;
 
-  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-  } else if (chaining_required) {
+  if (require_chaining) {
     msg_chaining_ = ApplicationManagerImpl::instance()->AddMessageChain(
         connection_key, correlation_id, hmi_correlation_id_, msg_chaining_,
         &(*message_));
 
     if (!msg_chaining_) {
       LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
   }
+
+  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+    LOG4CXX_ERROR(logger_, "Unable to send request");
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+  }
+
 }
 
 void CommandRequestImpl::CreateHMINotification(

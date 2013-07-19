@@ -162,6 +162,8 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
     delete to_mobile_thread_;
     to_mobile_thread_ = NULL;
   }
+
+  message_chaining_.clear();
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -346,7 +348,8 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
     const unsigned int& connection_key, const unsigned int& correlation_id,
     const unsigned int& hmi_correlation_id, MessageChaining* msg_chaining,
     const smart_objects::SmartObject* data) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::AddMessageChain");
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::AddMessageChain id "
+               << hmi_correlation_id);
 
   if (NULL == msg_chaining) {
     MessageChaining* chain =
@@ -378,7 +381,8 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
   const unsigned int& hmi_correlation_id, unsigned int& mobile_correlation_id) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain");
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain id "
+               << hmi_correlation_id);
 
   bool result = false;
   MessageChains::iterator it = message_chaining_.find(hmi_correlation_id);
@@ -397,10 +401,12 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 
 MessageChaining* ApplicationManagerImpl::GetMessageChain(
   const unsigned int& hmi_correlation_id) const {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::GetMessageChain");
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::GetMessageChain id "
+               << hmi_correlation_id);
 
   MessageChains::const_iterator it =
-    message_chaining_.find(hmi_correlation_id);
+      message_chaining_.find(hmi_correlation_id);
+
   if (message_chaining_.end() != it) {
     return &(*it->second);
   }
@@ -578,6 +584,8 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 
 void ApplicationManagerImpl::SendMessageToMobile(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToHMI");
+
   DCHECK(message);
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
@@ -588,13 +596,6 @@ void ApplicationManagerImpl::SendMessageToMobile(
     LOG4CXX_WARN(logger_, "No Mobile Handler set");
     return;
   }
-
-  LOG4CXX_WARN(logger_, "#### correlation id " <<
-      (*message)[strings::params][strings::correlation_id].asUInt());
-  LOG4CXX_WARN(logger_, "#### function id " <<
-       (*message)[strings::params][strings::function_id].asUInt());
-  LOG4CXX_WARN(logger_, "#### connection key " <<
-          (*message)[strings::params][strings::connection_key].asUInt());
 
   mobile_so_factory().attachSchema(*message);
   LOG4CXX_INFO(logger_, "Attached schema to message, result if valid: "
@@ -612,6 +613,8 @@ void ApplicationManagerImpl::SendMessageToMobile(
 
 bool ApplicationManagerImpl::ManageMobileCommand(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ManageMobileCommand");
+
   DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
@@ -639,6 +642,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
 void ApplicationManagerImpl::SendMessageToHMI(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToHMI");
+
   DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
@@ -670,6 +675,8 @@ void ApplicationManagerImpl::SendMessageToHMI(
 
 bool ApplicationManagerImpl::ManageHMICommand(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ManageMobileCommand");
+
   DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");

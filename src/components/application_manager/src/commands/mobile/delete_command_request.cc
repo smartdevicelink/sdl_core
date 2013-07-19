@@ -51,15 +51,16 @@ DeleteCommandRequest::~DeleteCommandRequest() {
 void DeleteCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteCommandRequest::Run");
 
-  ApplicationImpl* application =
-        static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-            application((*message_)[strings::params][strings::connection_key]));
+  ApplicationImpl* application = static_cast<ApplicationImpl*>(
+      ApplicationManagerImpl::instance()->application((*message_)
+      [strings::params][strings::connection_key]));
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
+
   smart_objects::SmartObject* command = application->
         FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt());
 
@@ -69,32 +70,22 @@ void DeleteCommandRequest::Run() {
       return;
   }
 
-  if ((*command)[strings::msg_params].keyExists(strings::menu_params)) {
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-      smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+  msg_params[strings::app_id] = application->app_id();
 
-      msg_params[strings::cmd_id] =
-          (*message_)[strings::msg_params][strings::cmd_id];
-      msg_params[strings::app_id] = application->app_id();
 
-      CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand,
-                       msg_params, true);
-    }
+  if ((*command).keyExists(strings::menu_params)) {
+    CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, msg_params, true);
+  }
 
-    // check vr params
-    if ((*command)[strings::msg_params].keyExists(strings::vr_commands)) {
-
-      smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-      msg_params[strings::cmd_id] =
-          (*message_)[strings::msg_params][strings::cmd_id];
-      msg_params[strings::app_id] = application->app_id();
-
-      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand,
-                       msg_params, true);
-    }
+  // check vr params
+  if ((*command).keyExists(strings::vr_commands)) {
+    CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params, true);
+  }
 }
 
 }  // namespace commands

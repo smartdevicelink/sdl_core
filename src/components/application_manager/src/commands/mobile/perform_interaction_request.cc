@@ -214,6 +214,8 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
   msg_params[strings::timeout] =
       (*message_)[strings::msg_params][strings::timeout];
   msg_params[strings::app_id] = app->app_id();
+  msg_params[strings::interaction_choice_set_id_list] =
+  (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
                    msg_params, true);
