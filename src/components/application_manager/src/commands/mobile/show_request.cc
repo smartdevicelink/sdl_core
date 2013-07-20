@@ -52,9 +52,10 @@ ShowRequest::~ShowRequest() {
 void ShowRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowRequest::Run");
 
-  Application* app =
-    application_manager::ApplicationManagerImpl::instance()->
-    application((*message_)[strings::msg_params][strings::connection_key]);
+
+  Application* app = application_manager::ApplicationManagerImpl::instance()->
+      application((*message_)[strings::params]
+      [strings::connection_key].asInt());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
@@ -107,7 +108,7 @@ void ShowRequest::Run() {
       (*message_)[strings::msg_params][strings::main_field_4];
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true, 1);
 
   MessageSharedPtr persistentData =
     new smart_objects::SmartObject((*message_)[strings::msg_params]);

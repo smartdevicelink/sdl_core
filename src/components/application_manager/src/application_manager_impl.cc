@@ -799,6 +799,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       LOG4CXX_WARN(logger_, "Application used unsupported protocol.");
       return false;
   }
+
   LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
   return true;
 }

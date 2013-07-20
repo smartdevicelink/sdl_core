@@ -50,17 +50,14 @@ DeleteSubMenuResponse::~DeleteSubMenuResponse() {
 void DeleteSubMenuResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuResponse::Run");
 
-  if ((*message_)[strings::params][strings::success].asBool() == false) {
-    SendResponse(false);
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
-
-  const unsigned int hmi_correlation_id = (*message_)[strings::params]
-                                 [strings::correlation_id].asUInt();
-
-  smart_objects::SmartObject data = ApplicationManagerImpl::instance()->
-    GetMessageChain(hmi_correlation_id)->data();
 
   if (!IsPendingResponseExist()) {
     SendResponse(true);

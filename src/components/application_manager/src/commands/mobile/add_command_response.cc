@@ -101,9 +101,6 @@ void AddCommandResponse::Run() {
                         data[strings::msg_params]);
       }
 
-      (*message_)[strings::params][strings::connection_key] =
-          connection_key;
-
       if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
           ((hmi_apis::Common_Result::SUCCESS == result_vr) ||
           (hmi_apis::Common_Result::INVALID_ENUM == result_vr))) {

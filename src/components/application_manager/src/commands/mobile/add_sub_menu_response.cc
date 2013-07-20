@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-AddSubMenuResponse::AddSubMenuResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+AddSubMenuResponse::AddSubMenuResponse(const MessageSharedPtr& message)
+: CommandResponseImpl(message) {
 }
 
 AddSubMenuResponse::~AddSubMenuResponse() {
@@ -50,10 +50,13 @@ AddSubMenuResponse::~AddSubMenuResponse() {
 void AddSubMenuResponse::Run() {
   LOG4CXX_INFO(logger_, "AddSubMenuResponse::Run");
 
-  if ((*message_)[strings::params][strings::success].asBool() == false) {
-    LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse(false);
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
   if (!IsPendingResponseExist()) {

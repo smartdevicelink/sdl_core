@@ -43,8 +43,8 @@ namespace application_manager {
 
 namespace commands {
 
-AddCommandRequest::AddCommandRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
 }
 
 AddCommandRequest::~AddCommandRequest() {

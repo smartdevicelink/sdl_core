@@ -316,6 +316,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::ShowID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::ShowResponse(message));
+      } else {
+        command.reset(new commands::ShowRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::SubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {

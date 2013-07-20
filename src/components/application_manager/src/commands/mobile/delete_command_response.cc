@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/delete_command_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 
 namespace application_manager {
 
@@ -83,8 +82,6 @@ void DeleteCommandResponse::Run() {
     msg_chain->vr_response_result();
 
   if (!IsPendingResponseExist()) {
-    (*message_)[strings::params][strings::connection_key] =
-      connection_key;
 
     Application* app = ApplicationManagerImpl::instance()->application(
                          connection_key);

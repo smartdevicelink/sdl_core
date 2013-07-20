@@ -40,18 +40,17 @@ namespace application_manager {
 
 namespace commands {
 
-AddSubMenuRequest::AddSubMenuRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
 }
 
 AddSubMenuRequest::~AddSubMenuRequest() {
 }
 
 void AddSubMenuRequest::Run() {
-  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
+  LOG4CXX_INFO(logger_, "AddSubMenuRequest::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
+  Application* app = ApplicationManagerImpl::instance()->
     application((*message_)[strings::params][strings::connection_key]);
 
   if (!app) {
@@ -85,7 +84,7 @@ void AddSubMenuRequest::Run() {
     (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, msg_params, true, 1);
 }
 
 }  // namespace commands

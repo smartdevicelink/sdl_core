@@ -65,7 +65,9 @@ void CommandResponseImpl::SendResponse(bool success) {
     (*message_)[strings::msg_params][strings::result_code] =
                   mobile_apis::Result::SUCCESS;
   } else {
-    // TODO Process unsuccessful case
+    (*message_)[strings::msg_params][strings::success] = false;
+    (*message_)[strings::msg_params][strings::result_code] =
+                  mobile_apis::Result::GENERIC_ERROR;
   }
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
@@ -79,12 +81,23 @@ bool CommandResponseImpl::IsPendingResponseExist() {
 
   unsigned int mobile_correlation_id = 0;
 
+  MessageChaining* msg_chain =
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+
+  int connection_key = 0;
+  if (msg_chain) {
+    connection_key = msg_chain->connection_key();
+  }
+
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
           correlation_id, mobile_correlation_id)) {
     result = false;
     // change correlation id to mobile
     (*message_)[strings::params][strings::correlation_id] =
         mobile_correlation_id;
+
+    (*message_)[strings::params][strings::connection_key] =
+        connection_key;
   }
 
   return result;

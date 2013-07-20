@@ -74,7 +74,7 @@ void DeleteSubMenuRequest::Run() {
     (*message_)[strings::msg_params][strings::menu_id];
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, msg_params, true, 1);
 }
 
 }  // namespace commands

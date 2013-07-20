@@ -73,10 +73,10 @@ void UIDeleteSubmenuResponse::Run() {
 
   msg_chain->set_ui_response_result(code);
 
-  unsigned int app_id = (*message_)[strings::params]
-                        [strings::connection_key].asInt();
+  const int connection_key = msg_chain->connection_key();
+
   Application* app = ApplicationManagerImpl::instance()->
-                     application(app_id);
+                     application(connection_key);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
