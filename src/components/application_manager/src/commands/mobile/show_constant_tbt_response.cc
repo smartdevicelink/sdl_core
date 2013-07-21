@@ -32,8 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/show_constant_tbt_response.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -47,16 +47,26 @@ ShowConstantTBTResponse::~ShowConstantTBTResponse() {
 }
 
 void ShowConstantTBTResponse::Run() {
-  LOG4CXX_INFO(logger_, "SetMediaClockTimerResponse::Run");
+  LOG4CXX_INFO(logger_, "ShowConstantTBTResponse::Run");
 
-  if ((*message_)[strings::params][strings::success].asBool() == false) {
-    SendResponse(false);
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
   if (!IsPendingResponseExist()) {
-    SendResponse(true);
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
+
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      SendResponse(true);
+    } else {
+      // TODO(VS): Some logic
+      SendResponse(false);
+    }
   }
 }
 

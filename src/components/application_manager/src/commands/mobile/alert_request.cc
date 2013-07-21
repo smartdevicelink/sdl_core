@@ -118,6 +118,7 @@ void AlertRequest::SendSpeakRequest(int app_id) {
         smart_objects::SmartObject(smart_objects::SmartType_Array);
       msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
+      msg_params[strings::app_id] = app_id;
       CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
     }
   }

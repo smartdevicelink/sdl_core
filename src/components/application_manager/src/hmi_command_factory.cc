@@ -593,9 +593,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case  hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       if ((*message)[strings::params][strings::message_type] ==
           MessageType::kResponse) {
-        command.reset(new commands::VIReadDIDResponse(message));
+        command.reset(new commands::VIGetVehicleDataResponse(message));
       } else {
-        command.reset(new commands::VIReadDIDRequest(message));
+        command.reset(new commands::VIGetVehicleDataRequest(message));
       }
       break;
     }

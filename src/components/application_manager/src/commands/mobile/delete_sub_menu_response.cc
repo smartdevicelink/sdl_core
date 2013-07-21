@@ -34,14 +34,14 @@
 #include "application_manager/commands/mobile/delete_sub_menu_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuResponse::DeleteSubMenuResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+DeleteSubMenuResponse::DeleteSubMenuResponse(const MessageSharedPtr& message)
+  : CommandResponseImpl(message) {
 }
 
 DeleteSubMenuResponse::~DeleteSubMenuResponse() {
@@ -60,7 +60,14 @@ void DeleteSubMenuResponse::Run() {
   }
 
   if (!IsPendingResponseExist()) {
-    SendResponse(true);
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
+
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      SendResponse(true);
+    } else {
+      // TODO(DK): Some logic
+      SendResponse(false);
+    }
   }
 }
 

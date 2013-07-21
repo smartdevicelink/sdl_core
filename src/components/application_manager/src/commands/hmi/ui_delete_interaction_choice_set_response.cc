@@ -48,7 +48,7 @@ UIDeleteInteractionChoiceSetResponse::~UIDeleteInteractionChoiceSetResponse() {
 }
 
 void UIDeleteInteractionChoiceSetResponse::Run() {
-  LOG4CXX_INFO(logger_, "UICreateInteractionChoiceSetResponse::Run");
+  LOG4CXX_INFO(logger_, "UIDeleteInteractionChoiceSetResponse::Run");
 
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
@@ -73,10 +73,9 @@ void UIDeleteInteractionChoiceSetResponse::Run() {
 
   msg_chain->set_ui_response_result(code);
 
-  unsigned int app_id = (*message_)[strings::params]
-                        [strings::connection_key].asInt();
+  unsigned int connection_key = msg_chain->connection_key();
   Application* app = ApplicationManagerImpl::instance()->
-                     application(app_id);
+                     application(connection_key);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

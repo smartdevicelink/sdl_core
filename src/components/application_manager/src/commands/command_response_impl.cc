@@ -55,19 +55,20 @@ bool CommandResponseImpl::CleanUp() {
 void CommandResponseImpl::Run() {
 }
 
-void CommandResponseImpl::SendResponse(bool success) {
+void CommandResponseImpl::SendResponse(bool success,
+      const mobile_apis::Result::eType& result_code) {
 
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+  (*message_)[strings::msg_params][strings::success] = success;
 
-  if(success) {
-    (*message_)[strings::msg_params][strings::success] = true;
+  if (success) {
     (*message_)[strings::msg_params][strings::result_code] =
                   mobile_apis::Result::SUCCESS;
   } else {
-    (*message_)[strings::msg_params][strings::success] = false;
-    (*message_)[strings::msg_params][strings::result_code] =
-                  mobile_apis::Result::GENERIC_ERROR;
+    if (mobile_apis::Result::INVALID_ENUM != result_code) {
+      (*message_)[strings::msg_params][strings::result_code] = result_code;
+    }
   }
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);

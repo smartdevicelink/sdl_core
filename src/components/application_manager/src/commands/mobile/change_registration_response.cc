@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/change_registration_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -52,10 +51,13 @@ ChangeRegistrationResponse::~ChangeRegistrationResponse() {
 void ChangeRegistrationResponse::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationResponse::Run");
 
-  if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-    LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse(false);
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
   const unsigned int correlation_id =
@@ -77,22 +79,24 @@ void ChangeRegistrationResponse::Run() {
 
   // get stored SmartObject
   smart_objects::SmartObject data = msg_chain->data();
+  const int connection_key =  msg_chain->connection_key();
 
   if (!IsPendingResponseExist()) {
+    Application* application = ApplicationManagerImpl::instance()->
+      application(connection_key);
 
-    Application* application =
-      ApplicationManagerImpl::instance()->
-      application(data[strings::params][strings::connection_key]);
+    if (NULL == application) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
 
     if (hmi_apis::Common_Result::SUCCESS == result_ui) {
-      application->set_language(
-        static_cast<mobile_api::Language::eType>(
+      application->set_language(static_cast<mobile_api::Language::eType>(
           data[strings::msg_params][strings::language].asInt()));
     }
 
     if (hmi_apis::Common_Result::SUCCESS == result_vr) {
-      application->set_ui_language(
-        static_cast<mobile_api::Language::eType>(
+      application->set_ui_language(static_cast<mobile_api::Language::eType>(
           data[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
@@ -100,6 +104,7 @@ void ChangeRegistrationResponse::Run() {
         (hmi_apis::Common_Result::SUCCESS == result_vr)) {
       SendResponse(true);
     } else {
+      SendResponse(false);
       // TODO(VS): check ui and vr response code
     }
   }

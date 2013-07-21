@@ -53,7 +53,7 @@ void SliderRequest::Run() {
 
   Application* application_impl =
     application_manager::ApplicationManagerImpl::instance()->
-    application((*message_)[strings::msg_params][strings::connection_key]);
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == application_impl) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);

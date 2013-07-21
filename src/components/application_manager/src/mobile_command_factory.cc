@@ -223,6 +223,24 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SpeakID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SpeakResponse(message));
+      } else {
+        command.reset(new commands::SpeakRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SliderID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SliderResponse(message));
+      } else {
+        command.reset(new commands::SliderRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::PerformAudioPassThruID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {

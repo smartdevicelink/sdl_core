@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/subscribe_button_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -51,13 +50,13 @@ SubscribeButtonResponse::~SubscribeButtonResponse() {
 void SubscribeButtonResponse::Run() {
   LOG4CXX_INFO(logger_, "SubscribeButtonResponse::Run");
 
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse(false);
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
   // TODO(DK): Some logic

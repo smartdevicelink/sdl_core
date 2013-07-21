@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/add_command_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -42,8 +41,8 @@ namespace application_manager {
 
 namespace commands {
 
-AddCommandResponse::AddCommandResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+AddCommandResponse::AddCommandResponse(const MessageSharedPtr& message):
+  CommandResponseImpl(message) {
 }
 
 AddCommandResponse::~AddCommandResponse() {
