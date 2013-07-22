@@ -30,6 +30,8 @@
   sudo pip install -r tools/InterfaceGenerator/requirements.txt
   For logging Apache log4cxx library is used. Install required packages with the following command:
   sudo apt-get install liblog4cxx10 liblog4cxx10-dev
+  For installing the development files for pulseaudio run:
+  sudo apt-get install libpulse-dev
   To start web-based HMI we need web-browser with web-socket RFC6455 support.
   For example Google Chromium. Install it using:
   sudo apt-get install chromium-browser
