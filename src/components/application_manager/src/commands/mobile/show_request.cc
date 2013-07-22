@@ -71,6 +71,7 @@ void ShowRequest::Run() {
 
   msg_params[hmi_request::show_strings] =
     smart_objects::SmartObject(smart_objects::SmartType_Array);
+  msg_params[strings::app_id] = app->app_id();
 
   if (msg_params.keyExists(strings::main_field_1)) {
     // erase useless parametr

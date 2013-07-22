@@ -1525,10 +1525,10 @@
       <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
         <description>Uses initialInteractionText. See TextFieldStruct.</description>
       </param>
-      <param name="interactionChoiceSetIDList" type="Integer" minsize="1" maxsize="100" minvalue="0" maxvalue="2000000000" array="true" mandatory="true">
+      <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
         <description>List of interaction choice set IDs to use with an interaction.</description>
       </param>
-      <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="false">
+      <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
         <description>Timeout in milliseconds.</description>
         <description>If omitted a standard value of 10000 milliseconds is used.</description>
       </param>
