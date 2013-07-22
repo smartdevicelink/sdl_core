@@ -185,9 +185,9 @@ FFW.Navigation = FFW.RPCObserver.create({
      * @param {Number} id
      * @param {String} method
      */
-    sendNavigationError: function(resultCode, id, method, message) {
+    sendError: function(resultCode, id, method, message) {
 
-        Em.Logger.log("FFW.Navigation." + method + "Response");
+        Em.Logger.log("FFW." + method + "Response");
 
         if(resultCode){
 
