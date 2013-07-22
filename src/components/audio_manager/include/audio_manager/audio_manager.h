@@ -45,6 +45,11 @@ class AudioManager {
   virtual void playA2DPSource(const sockaddr& device) = 0;
   virtual void stopA2DPSource(const sockaddr& device) = 0;
 
+  virtual void addA2DPSource(const string& device) = 0;
+  virtual void removeA2DPSource(const string& device) = 0;
+  virtual void playA2DPSource(const string& device) = 0;
+  virtual void stopA2DPSource(const string& device) = 0;
+
   virtual ~AudioManager() {
   }
 };

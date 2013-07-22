@@ -35,6 +35,7 @@
 
 #include <net/if.h>
 #include <string>
+#include <map>
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "audio_manager/audio_manager.h"
@@ -44,12 +45,11 @@
 
 namespace audio_manager {
 
-// TODO: Introduce base class for SourcePlayerThread with different specific
-// implementations if there are several different audio source types present.
+// TODO(PK): Introduce base class for SourcePlayerThread with different
+// specific implementations if there are several different audio source
+// types present.
 
 class AudioManagerImpl : AudioManager {
- public:
-
  public:
   static AudioManager* getAudioManager();
 
@@ -58,6 +58,11 @@ class AudioManagerImpl : AudioManager {
   virtual void playA2DPSource(const sockaddr& device);
   virtual void stopA2DPSource(const sockaddr& device);
 
+  virtual void addA2DPSource(const string& device);
+  virtual void removeA2DPSource(const string& device);
+  virtual void playA2DPSource(const string& device);
+  virtual void stopA2DPSource(const string& device);
+
   virtual ~AudioManagerImpl();
 
  protected:
@@ -65,18 +70,21 @@ class AudioManagerImpl : AudioManager {
 
   class A2DPSourcePlayerThread : public threads::ThreadDelegate {
    public:
-    A2DPSourcePlayerThread(const std::string& device);
+    explicit A2DPSourcePlayerThread(const std::string& device);
 
     void threadMain();
 
-   private:
+    void exitThreadMain();
 
-     /* The Sample format to use */
+   private:
+     // The Sample format to use
      static const pa_sample_spec sSampleFormat_;
 
      const int BUFSIZE_;
      pa_simple *s_in, *s_out;
      std::string device_;
+     bool shouldBeStoped_;
+     sync_primitives::SynchronisationPrimitives stopFlagMutex_;
 
      void freeStreams();
 
@@ -85,7 +93,6 @@ class AudioManagerImpl : AudioManager {
 
 
  private:
-
   std::map<std::string, threads::Thread*> sources_;
 
   const int MAC_ADDRESS_LENGTH_;

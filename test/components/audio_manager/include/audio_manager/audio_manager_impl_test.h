@@ -66,17 +66,47 @@ TEST_F(AudioManagerTest, AddAndPlayStream) {
 
   sockaddr device;
 
-  device.sa_data[0] = 0xf8;
-  device.sa_data[1] = 0xd0;
-  device.sa_data[2] = 0xbd;
-  device.sa_data[3] = 0xac;
-  device.sa_data[4] = 0xb4;
-  device.sa_data[5] = 0x5d;
+  //device.sa_data[0] = 0xf8;
+  //device.sa_data[1] = 0xd0;
+  //device.sa_data[2] = 0xbd;
+  //device.sa_data[3] = 0xac;
+  //device.sa_data[4] = 0xb4;
+  //device.sa_data[5] = 0x5d;
+
+  device.sa_data[0] = 0x38;
+  device.sa_data[1] = 0xe7;
+  device.sa_data[2] = 0xd8;
+  device.sa_data[3] = 0x45;
+  device.sa_data[4] = 0x48;
+  device.sa_data[5] = 0x27;
 
   audioManager->addA2DPSource(device);
   audioManager->playA2DPSource(device);
 
-  sleep(10000000);
+  usleep(10000000);
+
+  audioManager->removeA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->addA2DPSource(device);
+  audioManager->playA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->stopA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->playA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->stopA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->removeA2DPSource(device);
 }
 
 }  //  namespace audio_manager_test
