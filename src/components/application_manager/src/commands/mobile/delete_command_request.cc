@@ -94,7 +94,8 @@ void DeleteCommandRequest::Run() {
   }
   // check vr params
   if ((*command).keyExists(strings::vr_commands)) {
-    CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params, true);
+    CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params, true
+      , chaining_counter);
   }
 }
 

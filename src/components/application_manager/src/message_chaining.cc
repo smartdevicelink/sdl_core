@@ -51,8 +51,7 @@ MessageChaining::~MessageChaining() {
 
 bool MessageChaining::operator==(const MessageChaining& other) const {
     return ((correlation_id_ == other.correlation_id_) &&
-            (connection_key_ == other.connection_key_) &&
-            (data_ == other.data_));
+            (connection_key_ == other.connection_key_));
 }
 
 const unsigned int MessageChaining::correlation_id() const {
