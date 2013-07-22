@@ -88,6 +88,7 @@ DeviceAdapterImpl::DeviceAdapterImpl()
       shutdown_flag_(false),
       main_thread_(),
       main_thread_started_(false),
+      device_handle_generator_(NULL),
       initialized_(false) {
   pthread_cond_init(&device_scan_requested_cond_, 0);
   pthread_mutex_init(&device_scan_requested_mutex_, 0);
@@ -107,10 +108,12 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
 
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::init(Configuration* configuration) {
+DeviceAdapter::Error DeviceAdapterImpl::init(DeviceHandleGenerator *handle_generator, Configuration* configuration) {
   LOG4CXX_INFO(logger_, "Initializing device adapter");
 
   initialized_ = true;
+
+  device_handle_generator_ = handle_generator;
 
   const int thread_start_error = pthread_create(&main_thread_, 0,
                                                 &mainThreadStartRoutine, this);

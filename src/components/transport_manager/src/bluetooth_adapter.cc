@@ -262,7 +262,7 @@ void BluetoothAdapter::mainThread() {
         pthread_mutex_unlock(&devices_mutex_);
 
         if (!device_found) {
-          device_handle = handle_generator_->generate();
+          device_handle = device_handle_generator_->generate();
 
           LOG4CXX_INFO(
               logger_,

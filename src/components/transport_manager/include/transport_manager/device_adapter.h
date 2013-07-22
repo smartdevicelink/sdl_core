@@ -42,6 +42,7 @@
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
 #include "protocol_handler/raw_message.h"
+#include "transport_manager/device_handle_generator.h"
 
 namespace transport_manager {
 
@@ -74,7 +75,7 @@ class DeviceAdapter {
    virtual void SaveState(DeviceAdapterState* state) = 0;
    */
 
-  virtual Error init(Configuration* configuration) = 0;
+  virtual Error init(DeviceHandleGenerator *handle_generator, Configuration* configuration) = 0;
 
   virtual void addListener(DeviceAdapterListener *listener) = 0;
   virtual bool isSearchDevicesSupported() const = 0;

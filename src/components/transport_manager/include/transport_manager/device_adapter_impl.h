@@ -42,6 +42,8 @@
 #include "utils/logger.h"
 
 #include "device_adapter.h"
+#include "transport_manager/device_handle_generator.h"
+#include "transport_manager/device_handle_generator_impl.h"
 
 namespace transport_manager {
 
@@ -68,7 +70,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * Called from transport manager to start device adapter.
    **/
-  virtual Error init(Configuration* configuration);
+  virtual Error init(DeviceHandleGenerator *handle_generator, Configuration* configuration);
 
   /**
    * @brief Start scanning for new devices.
@@ -563,6 +565,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
   bool main_thread_started_;
 
   bool initialized_;
+  DeviceHandleGenerator *device_handle_generator_;
 
 };
 
