@@ -87,12 +87,15 @@ void AddCommandRequest::Run() {
       (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::menu_params] =
       (*message_)[strings::msg_params][strings::menu_params];
+    msg_params[strings::cmd_icon] =
+      (*message_)[strings::msg_params][strings::cmd_icon];
+
     std::string file_path = file_system::FullPath(app->name());
     file_path += "/";
     file_path += (*message_)[strings::msg_params][strings::cmd_icon]
-                 [strings::value].asString();
-    msg_params[strings::cmd_icon] = file_path;
+        [strings::value].asString();
 
+    msg_params[strings::cmd_icon][strings::value] = file_path;
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true,
