@@ -133,7 +133,7 @@ const char image_type[] = "imageType";
 const char filenames[] = "filenames";
 
 const char hmi_display_language_desired[] = "hmiDisplayLanguageDesired";
-const char ecu_name[] = "ecuName";
+const char ecu_name[] = "ecuname";
 const char dtc_mask[] = "dtcMask";
 const char did_location[] = "didLocation";
 const char app_list[] = "appList";
