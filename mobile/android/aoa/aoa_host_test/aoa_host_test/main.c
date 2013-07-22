@@ -38,9 +38,13 @@
 #define VID_NEXUS7 0x18d1
 #define PID_NEXUS7 0x4e42
 
+#define VID_MOTOROLA_RAZR 0x22b8
+#define PID_MOTOROLA_RAZR 0x4362
+
 #define VID VID_NEXUS7
 #define PID PID_NEXUS7
 
+#define ACCESSORY_VID 0x18d1
 #define ACCESSORY_PID 0x2D01
 #define ACCESSORY_PID_ALT 0x2D00
 
@@ -151,7 +155,8 @@ static int connectToAccessory() {
     int tries = 10;
 	for(;;){//attempt to connect to new PID, if that doesn't work try ACCESSORY_PID_ALT
 		tries--;
-		if((handle = libusb_open_device_with_vid_pid(NULL, VID, ACCESSORY_PID)) == NULL){
+        fprintf(stdout, "%d ", tries);
+		if((handle = libusb_open_device_with_vid_pid(NULL, ACCESSORY_VID, ACCESSORY_PID)) == NULL){
 			if(tries < 0){
                 fprintf(stdout, "Problem acquiring handle for accessory\n");
 				return -1;
