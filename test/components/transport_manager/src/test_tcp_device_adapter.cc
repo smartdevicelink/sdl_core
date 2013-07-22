@@ -26,16 +26,17 @@ TEST(TcpAdapterBasicTest, Basic) {
 TEST(TcpAdapterBasicTest, NotInitialised) {
   using transport_manager::device_adapter::TcpDeviceAdapter;
   using transport_manager::device_adapter::DeviceAdapter;
+  using transport_manager::DeviceHandle;
 
   DeviceAdapter* device_adapter =
       static_cast<DeviceAdapter*>(new TcpDeviceAdapter);
 
   EXPECT_EQ(DeviceAdapter::NOT_SUPPORTED, device_adapter->searchDevices());
-  EXPECT_EQ(DeviceAdapter::NOT_SUPPORTED, device_adapter->connect(1, 2, 3));
-  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->acceptConnect(1, 2, 3));
-  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->declineConnect(1, 2));
+  EXPECT_EQ(DeviceAdapter::NOT_SUPPORTED, device_adapter->connect(DeviceHandle("xxx"), 2, 3));
+  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->acceptConnect(DeviceHandle("xxx"), 2, 3));
+  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->declineConnect(DeviceHandle("xxx"), 2));
   EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->disconnect(1));
-  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->disconnectDevice(1));
+  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->disconnectDevice(DeviceHandle("xxx")));
 }
 
 class ClientTcpSocket {
