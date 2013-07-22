@@ -480,7 +480,6 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Number} performInteractionRequestId Id of current handled request
      */
     uiPerformInteraction: function( message, performInteractionRequestId ) {
-
         if( !SDL.InteractionChoicesView.active ){
             SDL.SDLController.getApplicationModel( message.appID ).onPreformInteraction( message, performInteractionRequestId );
         }else{
