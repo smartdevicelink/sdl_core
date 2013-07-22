@@ -74,14 +74,19 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  if ((true == SendUIPerformInteractionRequest(app)) &&
-      (true == SendVRAddCommandRequest(app))) {
-        app->set_perform_interaction_active(true);
+  if (!SendVRAddCommandRequest(app)) {
+    LOG4CXX_INFO(logger_, "Unable to send VR AddCommand");
+  }
+
+  if (SendUIPerformInteractionRequest(app)) {
+     app->set_perform_interaction_active(true);
   }
 }
 
 bool PerformInteractionRequest::SendVRAddCommandRequest(
-  const Application* app) {
+    const Application* app) {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVRAddCommandRequest");
+
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -132,6 +137,7 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
   }
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
+    LOG4CXX_INFO(logger_, "SendVRAddCommandRequest###1");
     smart_objects::SmartObject* choice_set =
       app->FindChoiceSetVRCommands(choice_list[i].asInt());
 
@@ -141,7 +147,7 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
       return false;
     }
 
-    for (size_t j = 0; j < choice_list[strings::choice_set].length(); ++j) {
+    for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
       smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::app_id] = app->app_id();
@@ -188,13 +194,14 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
       size_t jj = 0;
       for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
         for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
-          std::string ii_menu_name =
-            (*i_choice_set)[strings::choice_set][ii][strings::menu_name].asString();
-          std::string jj_menu_name =
-            (*j_choice_set)[strings::choice_set][jj][strings::menu_name].asString();
+          std::string ii_menu_name = (*i_choice_set)[strings::choice_set][ii]
+              [strings::menu_name].asString();
+          std::string jj_menu_name = (*j_choice_set)[strings::choice_set][jj]
+              [strings::menu_name].asString();
 
           if (ii_menu_name == jj_menu_name) {
-            LOG4CXX_ERROR(logger_, "Incoming choiceset has duplicated menu name");
+            LOG4CXX_ERROR(logger_,
+                          "Incoming choiceset has duplicated menu name");
             SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
             return false;
           }
@@ -220,7 +227,8 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
     if (choice_set) {
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
         int index = msg_params[strings::choice_set].length();
-        msg_params[strings::choice_set][index] = (*choice_set)[strings::choice_set][j];
+        msg_params[strings::choice_set][index] =
+            (*choice_set)[strings::choice_set][j];
       }
     }
   }
@@ -230,7 +238,7 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
   msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
-                   msg_params, true);
+                   msg_params, true, 1);
   return true;
 }
 
