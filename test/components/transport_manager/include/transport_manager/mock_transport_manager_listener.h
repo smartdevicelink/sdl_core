@@ -44,7 +44,7 @@
 #include "transport_manager/transport_manager_listener.h"
 
 using ::transport_manager::ApplicationList;
-using ::transport_manager::DeviceAdapter;
+using ::transport_manager::device_adapter::DeviceAdapter;
 using ::transport_manager::DeviceHandle;
 using ::transport_manager::SearchDeviceError;
 using ::transport_manager::SessionID;

@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
 
 #include "transport_manager/common.h"
+
 namespace transport_manager
 {
 

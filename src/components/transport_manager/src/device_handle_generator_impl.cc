@@ -52,8 +52,9 @@ DeviceHandle DeviceHandleGeneratorImpl::generate() {
   DeviceHandle output_device_handle;
 
   pthread_mutex_lock(&device_handle_generation_mutex_);
-  ++last_used_device_handle_;
-  output_device_handle = last_used_device_handle_;
+  //todo: remove this when unique device id will be created
+  //++last_used_device_handle_;
+//  output_device_handle = last_used_device_handle_;
   pthread_mutex_unlock(&device_handle_generation_mutex_);
 
   return output_device_handle;

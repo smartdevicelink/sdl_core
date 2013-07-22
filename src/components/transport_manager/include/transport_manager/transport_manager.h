@@ -37,6 +37,7 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/device_adapter.h"
+#include "transport_manager/device_adapter_event.h"
 #include "transport_manager/device_adapter_listener.h"
 #include "transport_manager/transport_manager_listener.h"
 
@@ -104,8 +105,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void receiveEventFromDevice(
-      const DeviceAdapterListener::DeviceAdapterEvent &event) = 0;
+  virtual void receiveEventFromDevice(const DeviceAdapterEvent &event) = 0;
 
   /**
    * @brief add new device adapter
@@ -114,7 +114,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void addDeviceAdapter(DeviceAdapter *device_adapter) = 0;
+  virtual void addDeviceAdapter(device_adapter::DeviceAdapter *device_adapter) = 0;
 
   /**
    * @brief register event listener that would be called when something happened in TM
@@ -124,6 +124,17 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void addEventListener(TransportManagerListener *listener) = 0;
+
+  /**
+   * @brief register listener that would be used to catch adapter's events
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+//todo: discuss with Alexandr and Polina - do we nedd this feature?
+//  virtual void addAdapterListener(device_adapter::DeviceAdapter *adapter,
+//      device_adapter::DeviceAdapterListener *listener) = 0;
 
   /**
    * @brief remove device from internal storages

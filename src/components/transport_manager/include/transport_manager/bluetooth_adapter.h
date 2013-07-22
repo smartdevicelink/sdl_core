@@ -36,102 +36,137 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
 
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
+#include <bluetooth/sdp.h>
+#include <bluetooth/sdp_lib.h>
+#include <bluetooth/rfcomm.h>
+
+#include "device_adapter_socket_communication.h"
 #include "device_adapter_impl.h"
 
 namespace transport_manager {
 
-class BluetoothAdapter : public DeviceAdapterImpl {
+namespace device_adapter {
+
+class BluetoothDeviceScanner : public DeviceScanner {
  public:
-  BluetoothAdapter();
-  virtual ~BluetoothAdapter();
-
+  BluetoothDeviceScanner(DeviceAdapterController* controller);
+  ~BluetoothDeviceScanner();
+  void thread();
  protected:
-
-  virtual DeviceType getDeviceType() const;
-
-  virtual bool isSearchDevicesSupported() const;
-
-  virtual bool isServerOriginatedConnectSupported() const;
-
-  virtual bool isClientOriginatedConnectSupported() const;
-
-  virtual void connectionThread(Connection* connection);
-
-  virtual ApplicationList getApplicationList(
-      const DeviceHandle device_handle) const;
-
-  virtual void mainThread();
+  virtual DeviceAdapter::Error init();
+  virtual void terminate();
+  virtual DeviceAdapter::Error scan();
+  virtual bool isInitialised() const;
+ private:
 
   typedef std::vector<uint8_t> RfcommChannelVector;
-  void discoverSmartDeviceLinkRfcommChannels(const bdaddr_t& device_address,
-                                             RfcommChannelVector* channels);
+
+  bool waitForDeviceScanRequest();
+  RfcommChannelVector discoverSmartDeviceLinkRfcommChannels(
+      const bdaddr_t& device_address);
+  SearchDeviceError* doInquiry(DeviceVector* discovered_devices);
+
+  DeviceAdapterController* controller_;
+  pthread_t thread_;
+  bool thread_started_;
+  bool shutdown_requested_;
+  bool device_scan_requested_;
+  bool ready_;
+  pthread_mutex_t device_scan_requested_mutex_;
+  pthread_cond_t device_scan_requested_cond_;
 
   /**
-   * @brief Get unique device ID.
-   *
-   * Get TransportManager-unique identifier of
-   * bluetooth device based on its bluetooth address.
-   *
-   * @param DeviceAddress Address of device.
-   *
-   * @return Unique device identifier.
+   * @brief UUID of SmartDeviceLink service.
    **/
-  static std::string getUniqueDeviceId(const bdaddr_t& DeviceAddress);
-
- protected:
-  typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
-
-  class BluetoothDevice : public Device {
-   public:
-    /**
-     * @brief Constructor.
-     *
-     * @param address Bluetooth address.
-     * @param name Human-readable device name.
-     * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
-     **/
-    BluetoothDevice(const bdaddr_t& address, const char* name,
-                    const RfcommChannelVector& rfcomm_channels);
-
-    /**
-     * @brief Compare devices.
-     *
-     * This method checks whether two SBluetoothDevice structures
-     * refer to the same device.
-     *
-     * @param other Device to compare with.
-     *
-     * @return true if devices are equal, false otherwise.
-     **/
-    virtual bool isSameAs(const Device* other) const;
-
-    const RfcommChannels& rfcomm_channels() const {
-      return rfcomm_channels_;
-    }
-
-    const bdaddr_t& address() const {
-      return address_;
-    }
-
-   private:
-    /**
-     * @brief Device bluetooth address.
-     **/
-    bdaddr_t address_;
-
-    /**
-     * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
-     **/
-    RfcommChannels rfcomm_channels_;
-
-    ApplicationHandle next_application_handle_;
-  };
-
- private:
-  bool initialized_;
-
   uuid_t smart_device_link_service_uuid_;
 };
+
+typedef std::vector<uint8_t> RfcommChannelVector;
+typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
+class BluetoothDevice : public Device {
+ public:
+  /**
+   * @brief Constructor.
+   *
+   * @param address Bluetooth address.
+   * @param name Human-readable device name.
+   * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
+   **/
+  BluetoothDevice(const bdaddr_t& address, const char* name,
+                  const RfcommChannelVector& rfcomm_channels);
+
+  /**
+   * @brief Compare devices.
+   *
+   * This method checks whether two SBluetoothDevice structures
+   * refer to the same device.
+   *
+   * @param other Device to compare with.
+   *
+   * @return true if devices are equal, false otherwise.
+   **/
+  virtual bool isSameAs(const Device* other) const;
+
+  bool getRfcommChannel(const ApplicationHandle app_handle, uint8_t* channel_out);
+
+  virtual ApplicationList getApplicationList() const;
+
+  const bdaddr_t& address() const {
+    return address_;
+  }
+
+ private:
+  /**
+   * @brief Device bluetooth address.
+   **/
+  bdaddr_t address_;
+
+  /**
+   * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
+   **/
+  RfcommChannels rfcomm_channels_;
+
+  ApplicationHandle next_application_handle_;
+};
+
+class BluetoothSocketConnection : public ThreadedSocketConnection {
+ public:
+  BluetoothSocketConnection(const DeviceHandle device_handle,
+                            const ApplicationHandle app_handle,
+                            const SessionID session_id,
+                            DeviceAdapterController* controller);
+  virtual ~BluetoothSocketConnection();
+ protected:
+  virtual bool establish(ConnectError** error);
+};
+
+class BluetoothConnectionFactory : public ServerConnectionFactory {
+ public:
+  BluetoothConnectionFactory(DeviceAdapterController* controller);
+ protected:
+  virtual DeviceAdapter::Error init();
+  virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle,
+                                 ApplicationHandle app_handle,
+                                 SessionID session_id);
+  virtual void terminate();
+  virtual bool isInitialised() const;
+  virtual ~BluetoothConnectionFactory();
+ private:
+  DeviceAdapterController* controller_;
+};
+
+class BluetoothDeviceAdapter : public DeviceAdapterImpl {
+ public:
+  BluetoothDeviceAdapter();
+  virtual ~BluetoothDeviceAdapter();
+ protected:
+  virtual DeviceType getDeviceType() const;
+};
+
+}  // namespace device_adapter
 
 }  // namespace transport_manager
 

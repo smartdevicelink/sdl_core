@@ -145,7 +145,7 @@ void MockDeviceAdapter::MockDevice::stop() {
   unlink("./mockDevice");
 }
 
-DeviceType MockDeviceAdapter::getDeviceType() const {
+::transport_manager::device_adapter::DeviceType MockDeviceAdapter::getDeviceType() const {
   return "mock-adapter";
 }
 
@@ -167,15 +167,12 @@ ApplicationList MockDeviceAdapter::getApplicationList(const DeviceHandle device_
   return rc;
 }
 
-void MockDeviceAdapter::connectionThread(Connection *connection) {
+void MockDeviceAdapter::connectionThread(::transport_manager::device_adapter::Connection *connection) {
   assert(connection != 0);
-  LOG4CXX_INFO(
-      logger_,
-      "Connection thread started for session " << connection->session_id());
-
-  const DeviceHandle device_handle = connection->device_handle();
-  const ApplicationHandle app_handle = connection->application_handle();
-  const int session_id = connection->session_id();
+///*todo: uncomment afer test fix
+//  const DeviceHandle device_handle = connection->device_handle();
+//  const ApplicationHandle app_handle = connection->application_handle();
+//  const int session_id = connection->session_id();
 
   int peer_sock = socket(AF_UNIX, SOCK_STREAM, 0);
   sockaddr_un my_addr;
@@ -187,12 +184,13 @@ void MockDeviceAdapter::connectionThread(Connection *connection) {
   if (res == -1) {
     return;
   }
-  connection->set_connection_socket(peer_sock);
+//  connection->set_connection_socket(peer_sock);
 
-  handleCommunication(connection);
+//  handleCommunication(connection);
 }
 
 void MockDeviceAdapter::mainThread() {
+/*todo: uncomment after test fix
   while (!shutdown_flag_) {
       DeviceMap new_devices;
       DeviceVector discovered_devices;
@@ -206,19 +204,22 @@ void MockDeviceAdapter::mainThread() {
         device_scan_requested_ = false;
       }
   }
+*/
 }
 
 void MockDeviceAdapter::addDevice(const char *name) {
   static int devid = 100;
-  MockDevice* dev = new MockDevice(name);
-  dev->start();
-  devices_[dev->unique_device_id()] = dev;
+///*todo: uncomment afer test fix
+  //  MockDevice* dev = new MockDevice(name);
+//  dev->start();
+//  devices_[dev->unique_device_id()] = dev;
 }
 
 MockDeviceAdapter::~MockDeviceAdapter() {
-  for (auto d : devices_) {
-    static_cast<MockDevice*>(d.second)->stop();
-  };
+///*todo: uncomment afer test fix
+  //  for (auto d : devices_) {
+//    static_cast<MockDevice*>(d.second)->stop();
+//  };
 }
 }
 }

@@ -50,7 +50,7 @@ namespace test  {
 namespace components  {
 namespace transport_manager {
 
-class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
+class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdapterImpl {
  public:
   virtual ~MockDeviceAdapter();
 
@@ -62,19 +62,19 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
   };
  protected:
 
-  class MockDevice : public Device {
+  class MockDevice : public ::transport_manager::device_adapter::Device {
     pthread_t workerThread;
     pthread_mutex_t device_started_mutex;
     listenerData_t listener;
    public:
     MockDevice(const char *name) : Device(name), workerThread(0) {
-      unique_device_id_ = "mock-device-0";
+      set_unique_device_id("mock-device-0");
     }
     void start();
     void stop();
   };
 
-   virtual DeviceType getDeviceType() const;
+   virtual ::transport_manager::device_adapter::DeviceType getDeviceType() const;
 
    virtual bool isSearchDevicesSupported() const;
 
@@ -82,7 +82,7 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
 
    virtual bool isClientOriginatedConnectSupported() const;
 
-   virtual void connectionThread(Connection* connection);
+   virtual void connectionThread(::transport_manager::device_adapter::Connection* connection);
 
    virtual ApplicationList getApplicationList(
        const DeviceHandle device_handle) const;

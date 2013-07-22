@@ -1,6 +1,6 @@
 /**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+ * \file device_adapter_event.h
+ * \brief DeviceAdapterEvent class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,28 +32,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-
-#include <vector>
-#include <string>
-
-#include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
 
 namespace transport_manager {
-/**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
- **/
-typedef int SessionID;
-typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
-typedef std::string DeviceHandle;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
 
+namespace device_adapter {
+class DeviceAdapter;
 }
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+class DeviceAdapterEvent {
+ public:
+  bool operator ==(const DeviceAdapterEvent &other);
+  DeviceAdapterEvent(int type, SessionID session_id,
+                     device_adapter::DeviceAdapter *device_adapter, RawMessageSptr data,
+                     BaseError *error);
+  ~DeviceAdapterEvent();
+  void set_event_type(int type);
+  void set_session_id(int id);
+  void set_device_adapter(device_adapter::DeviceAdapter *device_adapter);
+  void set_data(RawMessageSptr data);
+  void set_error(BaseError *error);
+
+  int event_type(void) const;
+  int session_id(void) const;
+  device_adapter::DeviceAdapter *device_adapter(void) const;
+  RawMessageSptr data(void) const;
+  BaseError *event_error(void) const;
+
+ private:
+  int event_type_;
+  int session_id_;
+  device_adapter::DeviceAdapter *device_adapter_;
+  RawMessageSptr event_data_;
+  BaseError *event_error_;
+};
+
+}  // namespace
+
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
