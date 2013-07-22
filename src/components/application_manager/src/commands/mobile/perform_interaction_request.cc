@@ -85,8 +85,6 @@ void PerformInteractionRequest::Run() {
 
 bool PerformInteractionRequest::SendVRAddCommandRequest(
     const Application* app) {
-  LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVRAddCommandRequest");
-
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -137,7 +135,6 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
   }
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
-    LOG4CXX_INFO(logger_, "SendVRAddCommandRequest###1");
     smart_objects::SmartObject* choice_set =
       app->FindChoiceSetVRCommands(choice_list[i].asInt());
 
