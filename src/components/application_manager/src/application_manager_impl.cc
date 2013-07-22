@@ -775,7 +775,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         message.connection_key();
       if (message.binary_data()) {
         output[strings::params][strings::binary_data] =
-          message.binary_data();
+          *(message.binary_data());
       }
       break;
     }
