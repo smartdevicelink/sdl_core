@@ -1,27 +1,22 @@
 package ch.serverbox.android.usbtest;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-
-import com.android.future.usb.UsbAccessory;
-import com.android.future.usb.UsbManager;
-
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.nfc.NfcManager;
+import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class UsbTest extends Activity {
 	private UsbAccessory mAccessory = null;
@@ -40,14 +35,15 @@ public class UsbTest extends Activity {
         i.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
         i.addAction("ch.serverbox.android.usbtest.USBPERMISSION");
         registerReceiver(mUsbReceiver,i);
-        
-        if(getIntent().getAction().equals("android.hardware.usb.action.USB_ACCESSORY_ATTACHED")){
+
+		Intent intent = getIntent();
+        if(intent.getAction().equals("android.hardware.usb.action.USB_ACCESSORY_ATTACHED")){
         	Log.d("USB","Action is usb");
-        	UsbAccessory accessory = UsbManager.getAccessory(getIntent());
+        	UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         	mAccessory = accessory;
         	FileDescriptor fd = null;
         	try{
-        		fd = UsbManager.getInstance(this).openAccessory(accessory).getFileDescriptor();
+        		fd = ((UsbManager) getSystemService(Context.USB_SERVICE)).openAccessory(accessory).getFileDescriptor();
         	}catch(IllegalArgumentException e){
         		finish();
         	}catch(NullPointerException e){
@@ -55,13 +51,13 @@ public class UsbTest extends Activity {
         	}
         	mFout = new FileOutputStream(fd);
         }else{
-        	UsbAccessory[] accessories = UsbManager.getInstance(this).getAccessoryList();
+        	UsbAccessory[] accessories = ((UsbManager) getSystemService(Context.USB_SERVICE)).getAccessoryList();
 			if (accessories != null) {
 				for(UsbAccessory a : accessories){
 					l("accessory: "+a.getManufacturer());
 					if(a.getManufacturer().equals("Nexus-Computing GmbH")){
 						mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent("ch.serverbox.android.usbtest.USBPERMISSION"),0);
-						UsbManager.getInstance(this).requestPermission(a,mPermissionIntent);
+						((UsbManager) getSystemService(Context.USB_SERVICE)).requestPermission(a,mPermissionIntent);
 						Log.d("USB", "permission requested");
 						break;
 					}
@@ -112,7 +108,7 @@ public class UsbTest extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)) {
-					UsbAccessory accessory = UsbManager.getAccessory(intent);
+					UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 					Log.d("USB","Attached!");
 					if (intent.getBooleanExtra(
 							UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
@@ -120,7 +116,7 @@ public class UsbTest extends Activity {
 						mAccessory = accessory;
 			        	FileDescriptor fd = null;
 			        	try{
-			        		fd = UsbManager.getInstance(getApplicationContext()).openAccessory(accessory).getFileDescriptor();
+			        		fd = ((UsbManager) getSystemService(Context.USB_SERVICE)).openAccessory(accessory).getFileDescriptor();
 			        	}catch(IllegalArgumentException e){
 			        		finish();
 			        	}catch(NullPointerException e){
@@ -133,7 +129,7 @@ public class UsbTest extends Activity {
 								+ accessory);
 					}
 			} else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
-				UsbAccessory accessory = UsbManager.getAccessory(intent);
+				UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 				if (accessory != null && accessory.equals(mAccessory)) {
 					if(mFout != null)
 						try {
@@ -147,14 +143,14 @@ public class UsbTest extends Activity {
 			}else if("ch.serverbox.android.usbtest.USBPERMISSION".equals(action)){
 				l("permission answered");
 				if(intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)){
-		        	UsbAccessory[] accessories = UsbManager.getInstance(getApplicationContext()).getAccessoryList();
+		        	UsbAccessory[] accessories = ((UsbManager) getSystemService(Context.USB_SERVICE)).getAccessoryList();
 		        	for(UsbAccessory a : accessories){
 		        		l("accessory: "+a.getManufacturer());
 		        		if(a.getManufacturer().equals("Nexus-Computing GmbH")){
 		        			mAccessory = a;
 		                	FileDescriptor fd = null;
 		                	try{
-		                		fd = UsbManager.getInstance(getApplicationContext()).openAccessory(a).getFileDescriptor();
+		                		fd = ((UsbManager) getSystemService(Context.USB_SERVICE)).openAccessory(a).getFileDescriptor();
 		                	}catch(IllegalArgumentException e){
 		                		finish();
 		                	}catch(NullPointerException e){
