@@ -707,7 +707,7 @@ void ApplicationManagerImpl::SendMessageToHMI(
 
 bool ApplicationManagerImpl::ManageHMICommand(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ManageMobileCommand");
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ManageHMICommand");
 
   DCHECK(message);
   if (!message) {
