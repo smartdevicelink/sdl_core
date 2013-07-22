@@ -209,6 +209,8 @@ void TransportManagerImpl::removeDevice(const DeviceHandle &device) {
 void TransportManagerImpl::addDeviceAdapter(device_adapter::DeviceAdapter *device_adapter) {
   LOG4CXX_INFO(logger_, "Add device adapter " << device_adapter);
   adapter_handler_.addAdapter(device_adapter);
+  //todo: add verification if listener already added into adapter then dont add listener here.
+  //if(!device_adapter->isListenerInitialized())add default listener
   device_adapter->addListener(new DeviceAdapterListenerImpl(this));
 }
 
