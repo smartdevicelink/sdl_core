@@ -132,8 +132,6 @@ class TcpAdapterTest : public ::testing::Test {
     const DeviceAdapter::Error error = device_adapter_->init(0);
     ASSERT_EQ(DeviceAdapter::OK, error);
     device_adapter_->addListener(&mock_dal_);
-    //ON_CALL(mock_dal_, onConnectDone(device_adapter_, _, _))                         // #3
-    //      .WillByDefault(Return(1));
     while (!device_adapter_->isInitialised())
       sleep(0);
   }
@@ -196,8 +194,8 @@ TEST_F(TcpAdapterTest, Receive) {
     EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _));
     EXPECT_CALL(
         mock_dal_,
-        onDataReceiveDone(device_adapter_, _, _, ContainsMessage("abcd"))).
-        WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
+        onDataReceiveDone(device_adapter_, _, _, ContainsMessage("abcd")))
+        .WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
   EXPECT_TRUE(client_.send("abcd"));
@@ -237,10 +235,9 @@ TEST_F(TcpAdapterTest, DisconnectFromClient) {
   {
     ::testing::InSequence seq;
     EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _));
-    EXPECT_CALL(mock_dal_,
-                onUnexpectedDisconnect(device_adapter_, _, _, _));
-    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, _, _)).
-        WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
+    EXPECT_CALL(mock_dal_, onUnexpectedDisconnect(device_adapter_, _, _, _));
+    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, _, _)).WillOnce(
+        InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
   client_.disconnect();
@@ -251,8 +248,8 @@ TEST_F(TcpAdapterTest, DisconnectFromServer) {
     ::testing::InSequence seq;
     EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _)).WillOnce(
         Invoke(disconnect));
-    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, _, _)).
-        WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
+    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, _, _)).WillOnce(
+        InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
 }

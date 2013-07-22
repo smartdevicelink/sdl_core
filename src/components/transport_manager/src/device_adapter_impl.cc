@@ -200,9 +200,7 @@ DeviceList DeviceAdapterImpl::getDeviceList() const {
   return devices;
 }
 
-std::pair<DeviceHandle, DeviceSptr> DeviceAdapterImpl::addDevice(
-    DeviceSptr device) {
-  DeviceHandle handle;
+DeviceSptr DeviceAdapterImpl::addDevice(DeviceSptr device) {
   DeviceSptr existing_device;
   bool same_device_found = false;
   pthread_mutex_lock(&devices_mutex_);
@@ -219,9 +217,9 @@ std::pair<DeviceHandle, DeviceSptr> DeviceAdapterImpl::addDevice(
   }
   pthread_mutex_unlock(&devices_mutex_);
   if (same_device_found)
-    return std::make_pair(handle, existing_device);
+    return existing_device;
   else
-    return std::make_pair(handle, device);
+    return device;
 }
 
 void DeviceAdapterImpl::searchDeviceDone(const DeviceVector& devices) {

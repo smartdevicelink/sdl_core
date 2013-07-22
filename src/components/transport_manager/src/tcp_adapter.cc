@@ -147,15 +147,13 @@ void TcpClientListener::thread() {
     LOG4CXX_INFO(logger_, "Connected client " << device_name);
 
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr, device_name);
-    std::pair<DeviceHandle, DeviceSptr> device_pair = controller_->addDevice(
-        tcp_device);
-    DeviceHandle device_handle = device_pair.first;
-    tcp_device = static_cast<TcpDevice*>(device_pair.second.get());
+    DeviceSptr device = controller_->addDevice(tcp_device);
+    tcp_device = static_cast<TcpDevice*>(device.get());
     const ApplicationHandle app_handle = tcp_device->addApplication(
         connection_fd);
 
     TcpSocketConnection* connection(
-        new TcpSocketConnection(device_handle, app_handle, controller_));
+        new TcpSocketConnection(device->unique_device_id(), app_handle, controller_));
     connection->set_socket(connection_fd);
     const DeviceAdapter::Error error = connection->start();
     if (error != DeviceAdapter::OK)
