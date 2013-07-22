@@ -19,6 +19,6 @@ set (LIBRARIES
     AudioManager
 )
 
-create_test("test_AudioManager" "${SOURCES}" "${LIBRARIES}")
+#create_test("test_AudioManager" "${SOURCES}" "${LIBRARIES}")
 
 add_library("test_AudioManagerTest" "${SOURCES}")
