@@ -80,7 +80,7 @@ class DeviceAdapter {
    */
   virtual bool isInitialised() const = 0;
 
-  virtual Error init(DeviceHandleGenerator *handle_generator, Configuration* configuration) = 0;
+  virtual Error init(Configuration* configuration) = 0;
 
   virtual void addListener(DeviceAdapterListener *listener) = 0;
   virtual bool isSearchDevicesSupported() const = 0;
@@ -88,20 +88,17 @@ class DeviceAdapter {
 
   virtual bool isServerOriginatedConnectSupported() const = 0;
   virtual Error connect(const DeviceHandle device_handle,
-                        const ApplicationHandle app_handle,
-                        const int session_id) = 0;
+                        const ApplicationHandle app_handle) = 0;
 
   virtual bool isClientOriginatedConnectSupported() const = 0;
-  virtual Error acceptConnect(const DeviceHandle device_handle,
-                              const ApplicationHandle app_handle,
-                              const SessionID session_id) = 0;
-  virtual Error declineConnect(const DeviceHandle device_handle,
-                               const ApplicationHandle app_handle) = 0;
 
-  virtual Error disconnect(const int session_id) = 0;
+  virtual Error disconnect(const DeviceHandle device_handle,
+                           const ApplicationHandle app_handle) = 0;
   virtual Error disconnectDevice(const DeviceHandle device_handle) = 0;
 
-  virtual Error sendData(const int session_id, const RawMessageSptr data) = 0;
+  virtual Error sendData(const DeviceHandle device_handle,
+                         const ApplicationHandle app_handle,
+                         const RawMessageSptr data) = 0;
 
   virtual DeviceList getDeviceList() const = 0;
   virtual ApplicationList getApplicationList(

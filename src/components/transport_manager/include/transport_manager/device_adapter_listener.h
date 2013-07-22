@@ -53,50 +53,55 @@ class DeviceAdapterListener {
   virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
                                     const SearchDeviceError& error) = 0;
 
-  virtual void onConnectDone(
-      const DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id) = 0;
+  virtual void onConnectDone(const DeviceAdapter* device_adapter,
+                             const DeviceHandle device_handle,
+                             const ApplicationHandle app_handle) = 0;
   virtual void onConnectFailed(const DeviceAdapter* device_adapter,
-                               const transport_manager::SessionID session_id,
+                               const DeviceHandle device_handle,
+                               const ApplicationHandle app_handle,
                                const ConnectError& error) = 0;
 
-  virtual void onConnectRequested(const DeviceAdapter* device_adapter,
-                                  const DeviceHandle device_handle,
-                                  const ApplicationHandle app_handle) = 0;
-
   virtual void onUnexpectedDisconnect(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id,
+                                      const DeviceHandle device_handle,
+                                      const ApplicationHandle app_handle,
                                       const CommunicationError& error) = 0;
 
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
-                                const SessionID session_id) = 0;
+                                const DeviceHandle device_handle,
+                                const ApplicationHandle app_handle) = 0;
   virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
-                                  const SessionID session_id,
+                                  const DeviceHandle device_handle,
+                                  const ApplicationHandle app_handle,
                                   const DisconnectError& error) = 0;
 
   virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
-                                      const SessionID session_id) = 0;
+                                      const DeviceHandle device_handle) = 0;
   virtual void onDisconnectDeviceFailed(const DeviceAdapter* device_adapter,
-                                        const SessionID session_id,
+                                        const DeviceHandle device_handle,
                                         const DisconnectDeviceError& error) = 0;
 
   virtual void onDataSendDone(const DeviceAdapter* device_adapter,
-                              const SessionID session_id,
+                              const DeviceHandle device_handle,
+                              const ApplicationHandle app_handle,
                               const RawMessageSptr data_container) = 0;
   virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
-                                const SessionID session_id,
+                                const DeviceHandle device_handle,
+                                const ApplicationHandle app_handle,
                                 const RawMessageSptr data_container,
                                 const DataSendError& error) = 0;
 
   virtual void onDataReceiveDone(const DeviceAdapter* device_adapter,
-                                 const SessionID session_id,
+                                 const DeviceHandle device_handle,
+                                 const ApplicationHandle app_handle,
                                  const RawMessageSptr data_container) = 0;
   virtual void onDataReceiveFailed(const DeviceAdapter* device_adapter,
-                                   const SessionID session_id,
+                                   const DeviceHandle device_handle,
+                                   const ApplicationHandle app_handle,
                                    const DataReceiveError& error) = 0;
 
   virtual void onCommunicationError(const DeviceAdapter* device_adapter,
-                                    const SessionID session_id) = 0;
+                                    const DeviceHandle device_handle,
+                                    const ApplicationHandle app_handle) = 0;
 };
 
 }  // device_adapter namespace
