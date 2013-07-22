@@ -76,15 +76,21 @@ FFW.RPCObserver = Em.Object.extend({
                 validateFunc,
                 result;
             
-        	validateFunc = SDL.ValidateMessage[parsedMethod[0]][parsedMethod[1]];
-            result = validateFunc(request.params);
-
-            if (result.resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
-                this.sendUIError(result.resultCode, request.id, request.method, result.resultMessage);
-                return false;
-            } else {
-            	return true;
-            }
+        	if (SDL.ValidateMessage[parsedMethod[0]][parsedMethod[1]]){
+	        	validateFunc = SDL.ValidateMessage[parsedMethod[0]][parsedMethod[1]];
+	            result = validateFunc(request.params);
+	
+	            if (result.resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
+	                this.sendError(result.resultCode, request.id, request.method, result.resultMessage);
+	                return false;
+	            } else {
+	            	return true;
+	            }
+        	} else {
+        		this.sendError(SDL.SDLModel.resultCode["UNSUPPORTED_REQUEST"], request.id, request.method, 'Unsupported incoming request! ' + parsedMethod[0] + '.' + parsedMethod[1]);
+        		Em.Logger.error( 'No method "' + parsedMethod[0] + '.' + parsedMethod[1] + '"' );
+        		return false;
+        	}
         }
     }
 });

@@ -41,8 +41,6 @@ namespace application_manager {
 
 namespace commands {
 
-namespace str = strings;
-
 ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message)
   : CommandRequestImpl(message) {
 }
@@ -55,7 +53,7 @@ void ReadDIDRequest::Run() {
 
   Application* app =
     ApplicationManagerImpl::instance()->
-    application((*message_)[str::params][str::connection_key]);
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
@@ -74,12 +72,12 @@ void ReadDIDRequest::Run() {
     smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::ecu_name] =
-    (*message_)[str::msg_params][str::ecu_name];
+    (*message_)[strings::msg_params][strings::ecu_name];
   msg_params[strings::did_location] =
-    (*message_)[str::msg_params][str::did_location];
+    (*message_)[strings::msg_params][strings::did_location];
 
   CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_ReadDID,
-                   msg_params, true);
+                   msg_params, true, 1);
 }
 
 }  // namespace commands
