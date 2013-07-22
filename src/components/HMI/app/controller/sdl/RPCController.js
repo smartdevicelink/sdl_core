@@ -563,144 +563,6 @@ SDL.ValidateMessage = Em.Object.create({
         },
         
         /**
-         * Validate method for request CreateInteractionChoiceSet
-         * 
-         * @param {Object} params
-         */
-        CreateInteractionChoiceSet: function(params) {
-
-            if (!params) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'params' does not exists!"
-                };
-
-                return this.resultStruct;
-            }
-            if (!params.interactionChoiceSetID) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'interactionChoiceSetID' does not exists!"
-                };
-
-                return this.resultStruct;
-            }
-            if (typeof params.interactionChoiceSetID != 'number') {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Wrong type of parameter 'interactionChoiceSetID'!"
-                };
-
-                return this.resultStruct;
-            }
-            if (!params.choiceSet) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'choiceSet' does not exists!"
-                };
-
-                return this.resultStruct;
-            }
-            if (typeof params.choiceSet.length < 1) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Wrong type of parameter 'choiceSet'!"
-                };
-
-                return this.resultStruct;
-            }
-            if (!params.appID) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'appID' does not exists!"
-                };
-
-                return this.resultStruct;
-            }
-            if (typeof params.appID != 'number') {
-                
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Wrong type of parameter 'appID'!"
-                };
-                
-                return this.resultStruct;
-            }
-
-            this.resultStruct = {
-                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-            };
-
-            return this.resultStruct;
-        },
-        
-        /**
-         * Validate method for request DeleteInteractionChoiceSet
-         * 
-         * @param {Object} params
-         */
-        DeleteInteractionChoiceSet: function(params) {
-
-            if (!params) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'params' does not exists!"
-                };
-
-                return this.resultStruct;
-            }
-            if (!params.interactionChoiceSetID) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'interactionChoiceSetID' does not exists!"
-                };
-
-                return this.resultStruct;
-            }
-            if (typeof params.interactionChoiceSetID != 'number') {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Wrong type of parameter 'interactionChoiceSetID'!"
-                };
-
-                return this.resultStruct;
-            }
-            if (!params.appID) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'appID' does not exists!"
-                };
-
-                return this.resultStruct;
-            }
-            if (typeof params.appID != 'number') {
-                
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Wrong type of parameter 'appID'!"
-                };
-                
-                return this.resultStruct;
-            }
-
-            this.resultStruct = {
-                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-            };
-
-            return this.resultStruct;
-        },
-        
-        /**
          * Validate method for request PerformInteraction
          * 
          * @param {Object} params
@@ -734,7 +596,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (!params.interactionChoiceSetIDList) {
+            if (!params.choiceSet) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -743,7 +605,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (typeof params.interactionChoiceSetIDList.length < 0) {
+            if (typeof params.choiceSet.length < 0) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1261,6 +1123,84 @@ SDL.ValidateMessage = Em.Object.create({
     VehicleInfo: Em.Object.create({
 
         resultStruct: {},
+        
+        /**
+         * Validate method for request ReadDID
+         * 
+         * @param {Object} params
+         */
+        ReadDID: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.ecuName) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'ecuName' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.ecuName != 'number') {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'ecuName'!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.didLocation) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'didLocation' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.didLocation.length < 0) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'didLocation'!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.appID) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appID' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appID != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appID'!"
+                };
+                
+                return this.resultStruct;
+            }
+            
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+            
+            return this.resultStruct;
+        },
         
         /**
          * Validate method for request GetDTCs

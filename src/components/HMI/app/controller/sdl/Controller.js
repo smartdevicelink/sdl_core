@@ -305,16 +305,16 @@ SDL.SDLController = Em.Object.create({
         }
     }.observes('SDL.SDLModel.driverDistractionState'),
 
-    /**
-     * SDL Protocol Version 2 ON/OFF switcher
-     */
-    selectProtocolVersion: function() {
-        if(SDL.SDLModel.protocolVersion2State){
-            FFW.BasicCommunication.OnVersionChanged(2);
-        }else{
-            FFW.BasicCommunication.OnVersionChanged(1);
-        }
-    }.observes('SDL.SDLModel.protocolVersion2State'),
+//    /**
+//     * SDL Protocol Version 2 ON/OFF switcher
+//     */
+//    selectProtocolVersion: function() {
+//        if(SDL.SDLModel.protocolVersion2State){
+//            FFW.BasicCommunication.OnVersionChanged(2);
+//        }else{
+//            FFW.BasicCommunication.OnVersionChanged(1);
+//        }
+//    }.observes('SDL.SDLModel.protocolVersion2State'),
 
     /**
      * Get application model

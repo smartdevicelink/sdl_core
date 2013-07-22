@@ -95,7 +95,7 @@ SDL.SDLAppController = Em.Object.create( {
      */
     onChoiceInteraction: function( element ) {
 
-        FFW.UI.interactionResponse( 'SUCCESS', element.performInteractionRequestId, element.choiceID );
+        FFW.UI.interactionResponse( SDL.SDLModel.resultCode["SUCCESS"], element.performInteractionRequestID, element.choiceID );
 
         SDL.InteractionChoicesView.deactivate( false );
     },

@@ -239,20 +239,11 @@ SDL.SDLAppModel = Em.Object.extend( {
      */
     onPreformInteraction: function( message, performInteractionRequestId ) {
 
-        var i = 0, length = message.interactionChoiceSetIDList.length;
-
         SDL.InteractionChoicesView.clean();
+        
+        SDL.InteractionChoicesView.preformChoices( message.choiceSet, performInteractionRequestId, message.timeout );
 
-        for( i = 0; i < length; i++ ){
-            SDL.InteractionChoicesView.preformChoices( message.choiceSet, performInteractionRequestId, message.timeout );
-
-            //SDL.VRPopUp.CreateInteractionChoise( this.interactionChoices[choiceSetID], performInteractionRequestId );
-        }
-
-        SDL.InteractionChoicesView.activate( message.initialText );
-
-        // Show Initial prompt
-       //SDL.SDLModel.onPrompt( message.initialPrompt );
+        SDL.InteractionChoicesView.activate( message.initialText.fieldText );
     },
 
     /**

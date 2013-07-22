@@ -237,10 +237,12 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
 
         for( var i = 0; i < params.didLocation.length; i++ ){
             if( i < 10 ){
+            	didResult[i] = {};
                 didResult[i].resultCode = 'SUCCESS';
                 didResult[i].didLocation = params.didLocation[i];
                 didResult[i].data = '0';
             }else{
+            	didResult[i] = {};
                 didResult[i].resultCode = "VEHICLE_DATA_NOT_AVAILABLE";
                 didResult[i].didLocation = params.didLocation[i];
                 didResult[i].data = '0';
