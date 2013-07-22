@@ -25,7 +25,7 @@ set (SOURCES
    ./src/mock_device_adapter.cc
 )
 
-#create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")
+create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")
 create_test("test_TcpDeviceAdapter" "src/test_tcp_device_adapter.cc" "${LIBRARIES}")
-#target_link_libraries("test_TransportManagerTest" TransportManager)
+target_link_libraries("test_TransportManagerTest" TransportManager)
 endif()
