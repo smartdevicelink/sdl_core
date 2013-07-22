@@ -48,7 +48,7 @@ class DeviceAdapter;
 class DeviceAdapterListener {
  public:
 
-  virtual ~DeviceAdapterListener();
+  virtual ~DeviceAdapterListener() {}
   virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter) = 0;
   virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
                                     const SearchDeviceError& error) = 0;

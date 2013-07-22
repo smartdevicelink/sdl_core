@@ -102,41 +102,6 @@ DeviceAdapter::Error TcpClientListener::init() {
   return DeviceAdapter::OK;
 }
 
-DeviceAdapter::Error TcpClientListener::acceptConnect(
-    const DeviceHandle device_handle, const ApplicationHandle app_handle,
-    const SessionID session_id) {
-  DeviceSptr device = controller_->findDevice(device_handle);
-  if (device.get() == 0)
-    return DeviceAdapter::BAD_PARAM;
-  TcpDevice* tcp_device = static_cast<TcpDevice*>(device.get());
-  const int socket = tcp_device->getApplicationSocket(app_handle);
-  if (socket == -1)
-    return DeviceAdapter::BAD_PARAM;
-
-  TcpSocketConnection* connection(
-      new TcpSocketConnection(device_handle, app_handle, session_id,
-                              controller_));
-  connection->set_socket(socket);
-  const DeviceAdapter::Error error = connection->start();
-  if (error != DeviceAdapter::OK)
-    delete connection;
-  return error;
-}
-
-DeviceAdapter::Error TcpClientListener::declineConnect(
-    const DeviceHandle device_handle, const ApplicationHandle app_handle) {
-  DeviceSptr device = controller_->findDevice(device_handle);
-  if (device.get() == 0)
-    return DeviceAdapter::BAD_PARAM;
-  TcpDevice* tcp_device = static_cast<TcpDevice*>(device.get());
-  const int socket = tcp_device->getApplicationSocket(app_handle);
-  if (socket == -1)
-    return DeviceAdapter::BAD_PARAM;
-
-  close(socket);
-  return DeviceAdapter::OK;
-}
-
 void TcpClientListener::terminate() {
   shutdown_requested_ = true;
   if (socket_ != -1)
@@ -188,14 +153,20 @@ void TcpClientListener::thread() {
     tcp_device = static_cast<TcpDevice*>(device_pair.second.get());
     const ApplicationHandle app_handle = tcp_device->addApplication(
         connection_fd);
-    controller_->connectRequested(device_handle, app_handle);
+
+    TcpSocketConnection* connection(
+        new TcpSocketConnection(device_handle, app_handle, controller_));
+    connection->set_socket(connection_fd);
+    const DeviceAdapter::Error error = connection->start();
+    if (error != DeviceAdapter::OK)
+      delete connection;
   }
 
   LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
 }
 
 TcpDevice::TcpDevice(const in_addr& in_addr, const char* name)
-    : Device(name),
+    : Device(name, name),
       in_addr_(in_addr) {
   pthread_mutex_init(&applications_mutex_, 0);
 }
@@ -235,10 +206,8 @@ int TcpDevice::getApplicationSocket(const ApplicationHandle app_handle) const {
 
 TcpSocketConnection::TcpSocketConnection(const DeviceHandle device_handle,
                                          const ApplicationHandle app_handle,
-                                         const SessionID session_id,
                                          DeviceAdapterController* controller)
-    : ThreadedSocketConnection(device_handle, app_handle, session_id,
-                               controller) {
+    : ThreadedSocketConnection(device_handle, app_handle, controller) {
 }
 
 TcpSocketConnection::~TcpSocketConnection() {
