@@ -36,8 +36,14 @@
 #ifndef TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MATCHERS_H_
 #define TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MATCHERS_H_
 
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "protocol_handler/raw_message.h"
 #include "transport_manager/common.h"
+
+using ::testing::MatcherInterface;
+using ::testing::MatchResultListener;
+using ::testing::Matcher;
 
 using ::protocol_handler::RawMessage;
 using ::transport_manager::RawMessageSptr;
