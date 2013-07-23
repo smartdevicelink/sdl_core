@@ -127,7 +127,7 @@ class DeviceAdapterController {
   virtual ~DeviceAdapterController() {
   }
 
-  virtual std::pair<DeviceHandle, DeviceSptr> addDevice(DeviceSptr device) = 0;
+  virtual DeviceSptr addDevice(DeviceSptr device) = 0;
   virtual void searchDeviceDone(const DeviceVector& devices) = 0;
   virtual void searchDeviceFailed(const SearchDeviceError& error) = 0;
   virtual DeviceSptr findDevice(const DeviceHandle& device_handle) const = 0;
@@ -286,7 +286,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
 
   virtual void searchDeviceDone(const DeviceVector& devices);
   virtual void searchDeviceFailed(const SearchDeviceError& error);
-  virtual std::pair<DeviceHandle, DeviceSptr> addDevice(DeviceSptr device);
+  virtual DeviceSptr addDevice(DeviceSptr device);
 
   virtual void connectionCreated(ConnectionSptr connection,
                                  const DeviceHandle& device_handle,
