@@ -127,7 +127,7 @@ TEST_F(TransportManagerTest, SearchDeviceDone)
   EXPECT_CALL(*tml, onSearchDeviceDone()).Times(1)
       .WillOnce(WaitTest(&test_mutex, &test_cond));
 
-  mock_da->addDevice("TestDevice");
+  mock_da->device_scanner()->addDevice("TestDevice");
   TransportManagerImpl::instance()->searchDevices();
   EXPECT_TRUE(waitCond(1));
 }

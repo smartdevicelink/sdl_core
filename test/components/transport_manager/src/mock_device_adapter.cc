@@ -59,7 +59,7 @@ static void *mockDeviceWorker(void* p) {
   pthread_mutex_lock(&data->mutex);
   while (data->active) {
     pthread_cond_wait(&data->cond, &data->mutex);
-    int len = recv(data->sockfd, buf, 4096, 0);
+    ssize_t len = recv(data->sockfd, buf, 4096, 0);
     if (len > 0) {
       send(data->sockfd, buf, len, 0);
     }
@@ -71,8 +71,8 @@ static void *mockDeviceWorker(void* p) {
 }
 
 static void *mockDeviceListenerThreadRoutine(void *p) {
-  test::components::transport_manager::MockDeviceAdapter::listenerData_t *data =
-      static_cast<test::components::transport_manager::MockDeviceAdapter::listenerData_t*>(p);
+  test::components::transport_manager::listenerData_t *data =
+      static_cast<test::components::transport_manager::listenerData_t*>(p);
   data->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
   if (data->sockfd == -1) {
     return NULL;
@@ -123,11 +123,18 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
+MockDeviceScanner::MockDeviceScanner(DeviceAdapterController* controller)
+    : is_initialized(false),
+      controller_(controller) {
+}
+
 DeviceAdapter::Error MockDeviceScanner::init() {
+  is_initialized = true;
   return DeviceAdapter::OK;
 }
 
 DeviceAdapter::Error MockDeviceScanner::scan() {
+  controller_->searchDeviceDone(devices_);
   return DeviceAdapter::OK;
 }
 
@@ -135,7 +142,18 @@ void MockDeviceScanner::terminate() {
 }
 
 bool MockDeviceScanner::isInitialised() const {
-  return true;
+  return is_initialized;
+}
+
+void MockDeviceScanner::addDevice(const std::string& name) {
+  static int devid = 100;
+  MockDevice* dev = new MockDevice(name, name);
+  dev->start();
+  devices_.push_back(dev);
+}
+
+MockConnectionFactory::MockConnectionFactory(DeviceAdapterController* controller)
+:controller_(controller){
 }
 
 DeviceAdapter::Error MockConnectionFactory::init() {
@@ -154,7 +172,7 @@ bool MockConnectionFactory::isInitialised() const {
   return true;
 }
 
-void MockDeviceAdapter::MockDevice::start() {
+void MockDevice::start() {
   listener.active = true;
   pthread_mutex_init(&listener.mutex, NULL);
   pthread_barrier_init(&listener.barrier, NULL, 2);
@@ -164,7 +182,8 @@ void MockDeviceAdapter::MockDevice::start() {
   pthread_barrier_wait(&listener.barrier);
 }
 
-void MockDeviceAdapter::MockDevice::stop() {
+void
+MockDevice::stop() {
   listener.active = false;
   close(listener.sockfd);
   for (int i = 0; i < 5; ++i) {
@@ -244,12 +263,12 @@ void MockDeviceAdapter::mainThread() {
    */
 }
 
-void MockDeviceAdapter::addDevice(const char *name) {
-  static int devid = 100;
-///*todo: uncomment afer test fix
-  //  MockDevice* dev = new MockDevice(name);
-//  dev->start();
-//  devices_[dev->unique_device_id()] = dev;
+bool MockDevice::isSameAs(const Device* other) const {
+  return unique_device_id() == other->unique_device_id();
+}
+
+ApplicationList MockDevice::getApplicationList() const {
+  return applications_;
 }
 
 MockDeviceAdapter::~MockDeviceAdapter() {

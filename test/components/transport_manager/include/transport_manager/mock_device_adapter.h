@@ -45,52 +45,72 @@
 #include <transport_manager/transport_manager_impl.h>
 
 using namespace transport_manager;
+using transport_manager::device_adapter::DeviceAdapterController;
+using transport_manager::device_adapter::DeviceVector;
 
 namespace test  {
 namespace components  {
 namespace transport_manager {
 
 class MockDeviceScanner : public ::transport_manager::device_adapter::DeviceScanner {
+ public:
+  MockDeviceScanner(DeviceAdapterController* controller);
   virtual DeviceAdapter::Error init();
   virtual DeviceAdapter::Error scan();
   virtual void terminate();
   virtual bool isInitialised() const;
+
+  void addDevice(const std::string& name);
  private:
   bool is_initialized;
+  DeviceAdapterController* controller_;
+  DeviceVector devices_;
 };
 
 class MockConnectionFactory : public ::transport_manager::device_adapter::ServerConnectionFactory {
+ public:
+  MockConnectionFactory(DeviceAdapterController* controller);
   virtual DeviceAdapter::Error init();
   virtual DeviceAdapter::Error createConnection(const DeviceHandle& device_handle,
                                                 const ApplicationHandle& app_handle);
   virtual void terminate();
   virtual bool isInitialised() const;
+ private:
+  DeviceAdapterController* controller_;
+};
+
+struct listenerData_t {
+  pthread_mutex_t mutex;
+  pthread_barrier_t barrier;
+  int sockfd;
+  bool active;
+};
+
+class MockDevice : public ::transport_manager::device_adapter::Device {
+  pthread_t workerThread;
+  pthread_mutex_t device_started_mutex;
+  listenerData_t listener;
+  ApplicationList applications_;
+ public:
+  MockDevice(const std::string& name, const std::string& id) : Device(name, id), workerThread(0) {
+  }
+  void start();
+  void stop();
+  bool isSameAs(const Device* other) const;
+  ApplicationList getApplicationList() const;
 };
 
 class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdapterImpl {
  public:
   MockDeviceAdapter()
-   : DeviceAdapterImpl(new MockDeviceScanner(), new MockConnectionFactory(), NULL) { }
+   : DeviceAdapterImpl(new MockDeviceScanner(this), new MockConnectionFactory(this), nullptr) { }
   virtual ~MockDeviceAdapter();
 
-  struct listenerData_t {
-    pthread_mutex_t mutex;
-    pthread_barrier_t barrier;
-    int sockfd;
-    bool active;
-  };
- protected:
+  MockDeviceScanner *device_scanner() const {
+    return static_cast<MockDeviceScanner*>(device_scanner_);
+  }
 
-  class MockDevice : public ::transport_manager::device_adapter::Device {
-    pthread_t workerThread;
-    pthread_mutex_t device_started_mutex;
-    listenerData_t listener;
-   public:
-    MockDevice(const std::string& name, const std::string& id) : Device(name, id), workerThread(0) {
-    }
-    void start();
-    void stop();
-  };
+ protected:
 
    virtual ::transport_manager::device_adapter::DeviceType getDeviceType() const;
 
@@ -106,8 +126,6 @@ class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdap
        const DeviceHandle device_handle) const;
 
    virtual void mainThread();
-public:
-   void addDevice(const char *name);
 };
 
 }}}
