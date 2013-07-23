@@ -51,13 +51,12 @@ ReadDIDRequest::~ReadDIDRequest() {
 void ReadDIDRequest::Run() {
   LOG4CXX_INFO(logger_, "ReadDIDRequest::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  unsigned int app_id =
+    (*message_)[strings::params][strings::connection_key].asUInt();
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
-                      " is not registered.");
+    LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
