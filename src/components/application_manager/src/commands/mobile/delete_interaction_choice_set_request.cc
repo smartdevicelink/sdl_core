@@ -76,8 +76,8 @@ void DeleteInteractionChoiceSetRequest::Run() {
   msg_params[strings::interaction_choice_set_id] = choise_set_id;
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet,
-                   msg_params, true);
+  /*CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet,
+                   msg_params, true);*/
 }
 
 }  // namespace commands
