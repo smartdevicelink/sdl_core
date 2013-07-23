@@ -48,8 +48,8 @@ namespace transport_manager {
 namespace device_adapter {
 
 ThreadedSocketConnection::ThreadedSocketConnection(
-    const DeviceHandle device_handle, const ApplicationHandle app_handle,
-    const ConnectionId session_id, DeviceAdapterController* controller)
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle,
+    DeviceAdapterController* controller)
     : controller_(controller),
       frames_to_send_(),
       notification_pipe_read_fd_(-1),
@@ -59,7 +59,6 @@ ThreadedSocketConnection::ThreadedSocketConnection(
       socket_(-1),
       device_handle_(device_handle),
       app_handle_(app_handle),
-      session_id_(session_id),
       thread_() {
   pthread_mutex_init(&frames_to_send_mutex_, 0);
 }
@@ -111,10 +110,12 @@ DeviceAdapter::Error ThreadedSocketConnection::start() {
 }
 
 void ThreadedSocketConnection::finalise() {
-  if (unexpected_disconnect_)
-    controller_->connectionAborted(session_id(), CommunicationError());
-  else
-    controller_->connectionFinished(session_id());
+  if (unexpected_disconnect_) {
+    controller_->connectionAborted(device_handle(), application_handle(),
+                                   CommunicationError());
+  } else {
+    controller_->connectionFinished(device_handle(), application_handle());
+  }
   close(socket_);
 }
 
@@ -126,7 +127,7 @@ DeviceAdapter::Error ThreadedSocketConnection::notify() const {
     } else {
       LOG4CXX_ERROR_WITH_ERRNO(
           logger_,
-          "Failed to wake up connection thread for connection " << session_id());
+          "Failed to wake up connection thread for connection " << this);
     }
   }
   return DeviceAdapter::FAIL;
@@ -146,18 +147,18 @@ DeviceAdapter::Error ThreadedSocketConnection::disconnect() {
 }
 
 void ThreadedSocketConnection::thread() {
-  controller_->connectionCreated(this, session_id(), device_handle_,
-                                 app_handle_);
+  controller_->connectionCreated(this, device_handle_, app_handle_);
   ConnectError* connect_error;
   if (establish(&connect_error)) {
-    controller_->connectDone(session_id());
+    controller_->connectDone(device_handle(), application_handle());
     while (!terminate_flag_)
       transmit();
     finalise();
     //TODO clear queue controller_->dataSendFailed
-    controller_->disconnectDone(session_id());
+    controller_->disconnectDone(device_handle(), application_handle());
   } else {
-    controller_->connectFailed(session_id(), *connect_error);
+    controller_->connectFailed(device_handle(), application_handle(),
+                               *connect_error);
     delete connect_error;
   }
 }
@@ -172,22 +173,20 @@ void ThreadedSocketConnection::transmit() {
   const int poll_status = poll(poll_fds, sizeof(poll_fds) / sizeof(poll_fds[0]),
                                -1);
   if (poll_status == -1) {
-    LOG4CXX_ERROR_WITH_ERRNO(logger_,
-                             "poll() failed for connection " << session_id());
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll() failed for connection " << this);
     abort();
     return;
   }
 
   if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
-    LOG4CXX_INFO(logger_, "Connection " << session_id() << " terminated");
+    LOG4CXX_INFO(logger_, "Connection " << this << " terminated");
     abort();
     return;
   }
 
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Notification pipe for connection " << session_id() << " terminated");
+    LOG4CXX_ERROR(logger_,
+                  "Notification pipe for connection " << this << " terminated");
     abort();
     return;
   }
@@ -225,27 +224,27 @@ bool ThreadedSocketConnection::receive() {
     if (bytes_read > 0) {
       LOG4CXX_INFO(
           logger_,
-          "Received " << bytes_read << " bytes for connection " << session_id());
+          "Received " << bytes_read << " bytes for connection " << this);
       unsigned char* data = new unsigned char[bytes_read];
       if (data) {
         memcpy(data, buffer, bytes_read);
         RawMessageSptr frame(
-            new protocol_handler::RawMessage(session_id(), 0, data,
-                                             bytes_read));
-        controller_->dataReceiveDone(session_id(), frame);
+            new protocol_handler::RawMessage(0, 0, data, bytes_read));
+        controller_->dataReceiveDone(device_handle(), application_handle(),
+                                     frame);
       } else {
-        controller_->dataReceiveFailed(session_id(), DataReceiveError());
+        controller_->dataReceiveFailed(device_handle(), application_handle(),
+                                       DataReceiveError());
       }
     } else if (bytes_read < 0) {
       if (EAGAIN != errno && EWOULDBLOCK != errno) {
-        LOG4CXX_ERROR_WITH_ERRNO(
-            logger_, "recv() failed for connection " << session_id());
+        LOG4CXX_ERROR_WITH_ERRNO(logger_,
+                                 "recv() failed for connection " << this);
 
         return false;
       }
     } else {
-      LOG4CXX_INFO(logger_,
-                   "Connection " << session_id() << " closed by remote peer");
+      LOG4CXX_INFO(logger_, "Connection " << this << " closed by remote peer");
       return false;
     }
   } while (bytes_read > 0);
@@ -261,8 +260,7 @@ bool ThreadedSocketConnection::clearNotificationPipe() {
 
   if ((bytes_read < 0) && (EAGAIN != errno)) {
     LOG4CXX_ERROR_WITH_ERRNO(
-        logger_,
-        "Failed to clear notification pipe for connection " << session_id());
+        logger_, "Failed to clear notification pipe for connection " << this);
     return false;
   }
   return true;
@@ -288,16 +286,15 @@ bool ThreadedSocketConnection::send() {
         //TODO isn't it OK?
         LOG4CXX_ERROR(
             logger_,
-            "Sent " << bytes_sent << " bytes while " << frame->data_size() << " had been requested for connection " << session_id());
+            "Sent " << bytes_sent << " bytes while " << frame->data_size() << " had been requested for connection " << this);
       } else {
-        LOG4CXX_ERROR_WITH_ERRNO(logger_,
-                                 "Send failed for connection " << session_id());
+        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Send failed for connection " << this);
       }
     }
     if (frame_sent) {
-      controller_->dataSendDone(session_id(), frame);
+      controller_->dataSendDone(device_handle(), application_handle(), frame);
     } else {
-      controller_->dataSendFailed(session_id(), frame, DataSendError());
+      controller_->dataSendFailed(device_handle(), application_handle(), frame, DataSendError());
     }
   }
   return true;

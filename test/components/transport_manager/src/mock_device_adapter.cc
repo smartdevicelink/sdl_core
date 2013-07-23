@@ -143,8 +143,7 @@ DeviceAdapter::Error MockConnectionFactory::init() {
 }
 
 DeviceAdapter::Error MockConnectionFactory::createConnection(
-    DeviceHandle device_handle, ApplicationHandle app_handle,
-    ConnectionId session_id) {
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle) {
   return DeviceAdapter::OK;
 }
 

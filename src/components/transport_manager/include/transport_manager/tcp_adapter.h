@@ -56,14 +56,9 @@ class TcpClientListener : public ClientConnectionListener {
  protected:
   virtual ~TcpClientListener();
   virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error acceptConnect(const DeviceHandle device_handle,
-                                             const ApplicationHandle app_handle,
-                                             const ConnectionId session_id);
-  virtual DeviceAdapter::Error declineConnect(
-      const DeviceHandle device_handle, const ApplicationHandle app_handle);
   virtual void terminate();
   virtual bool isInitialised() const;
-private:
+ private:
   const uint16_t port_;
   DeviceAdapterController* controller_;
   pthread_t thread_;
@@ -113,9 +108,8 @@ class TcpDevice : public Device {
 
 class TcpSocketConnection : public ThreadedSocketConnection {
  public:
-  TcpSocketConnection(const DeviceHandle device_handle,
-                      const ApplicationHandle app_handle,
-                      const ConnectionId session_id,
+  TcpSocketConnection(const DeviceHandle& device_handle,
+                      const ApplicationHandle& app_handle,
                       DeviceAdapterController* controller);
   virtual ~TcpSocketConnection();
  protected:

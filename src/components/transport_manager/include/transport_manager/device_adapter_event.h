@@ -61,7 +61,7 @@ class DeviceAdapterEvent {
 
   const DeviceHandle &device_handle() const;
   int event_type(void) const;
-  ConnectionId connection_id(void) const;
+  ApplicationHandle application_id(void) const;
   device_adapter::DeviceAdapter *device_adapter(void) const;
   RawMessageSptr data(void) const;
   BaseError *event_error(void) const;
@@ -69,7 +69,7 @@ class DeviceAdapterEvent {
  private:
   DeviceHandle device_handle_;
   int event_type_;
-  int connection_id_;
+  ApplicationHandle application_id_;
   device_adapter::DeviceAdapter *device_adapter_;
   RawMessageSptr event_data_;
   BaseError *event_error_;

@@ -52,9 +52,8 @@ class ThreadedSocketConnection : public Connection {
     socket_ = socket;
   }
  protected:
-  ThreadedSocketConnection(const DeviceHandle device_handle,
-                           const ApplicationHandle app_handle,
-                           const ConnectionId session_id,
+  ThreadedSocketConnection(const DeviceHandle& device_handle,
+                           const ApplicationHandle& app_handle,
                            DeviceAdapterController* controller);
   virtual ~ThreadedSocketConnection();
 
@@ -62,10 +61,6 @@ class ThreadedSocketConnection : public Connection {
 
   DeviceAdapterController* getController() {
     return controller_;
-  }
-
-  ConnectionId session_id() const {
-    return session_id_;
   }
 
   DeviceHandle device_handle() const {
@@ -105,7 +100,6 @@ class ThreadedSocketConnection : public Connection {
   bool unexpected_disconnect_;
   const DeviceHandle device_handle_;
   const ApplicationHandle app_handle_;
-  const ConnectionId session_id_;
 };
 
 /*

@@ -40,7 +40,7 @@ DeviceHandleGenerator::~DeviceHandleGenerator() {
 }
 
 DeviceHandleGeneratorImpl::DeviceHandleGeneratorImpl()
-    : last_used_device_handle_(0) {
+    : last_used_device_handle_() {
   pthread_mutex_init(&device_handle_generation_mutex_, 0);
 }
 

@@ -370,10 +370,9 @@ DeviceAdapter::Error BluetoothDeviceScanner::scan() {
 
 BluetoothDevice::BluetoothDevice(const bdaddr_t& address, const char* name,
                                  const RfcommChannelVector& rfcomm_channels)
-    : Device(name),
+    : Device(name, getUniqueDeviceId(address)),
       address_(address),
       next_application_handle_(1) {
-  set_unique_device_id(getUniqueDeviceId(address));
   for (RfcommChannelVector::const_iterator it = rfcomm_channels.begin();
       it != rfcomm_channels.end(); ++it) {
     rfcomm_channels_[next_application_handle_++] = *it;
@@ -406,10 +405,9 @@ ApplicationList BluetoothDevice::getApplicationList() const {
 }
 
 BluetoothSocketConnection::BluetoothSocketConnection(
-    const DeviceHandle device_handle, const ApplicationHandle app_handle,
-    const ConnectionId session_id, DeviceAdapterController* controller)
-    : ThreadedSocketConnection(device_handle, app_handle, session_id,
-                               controller) {
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle,
+    DeviceAdapterController* controller)
+    : ThreadedSocketConnection(device_handle, app_handle, controller) {
 }
 
 BluetoothSocketConnection::~BluetoothSocketConnection() {
@@ -452,7 +450,7 @@ bool BluetoothSocketConnection::establish(ConnectError** error) {
   if (0 != connect_status) {
     LOG4CXX_ERROR_WITH_ERRNO(
         logger_,
-        "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << session_id());
+        "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
     *error = new ConnectError();
     return false;
   }
@@ -471,11 +469,9 @@ DeviceAdapter::Error BluetoothConnectionFactory::init() {
 }
 
 DeviceAdapter::Error BluetoothConnectionFactory::createConnection(
-    DeviceHandle device_handle, ApplicationHandle app_handle,
-    ConnectionId session_id) {
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle) {
   BluetoothSocketConnection* connection(
-      new BluetoothSocketConnection(device_handle, app_handle, session_id,
-                                    controller_));
+      new BluetoothSocketConnection(device_handle, app_handle, controller_));
   DeviceAdapter::Error error = connection->start();
   if (error != DeviceAdapter::OK)
     delete connection;

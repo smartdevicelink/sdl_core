@@ -110,7 +110,8 @@ class BluetoothDevice : public Device {
    **/
   virtual bool isSameAs(const Device* other) const;
 
-  bool getRfcommChannel(const ApplicationHandle app_handle, uint8_t* channel_out);
+  bool getRfcommChannel(const ApplicationHandle app_handle,
+                        uint8_t* channel_out);
 
   virtual ApplicationList getApplicationList() const;
 
@@ -134,9 +135,8 @@ class BluetoothDevice : public Device {
 
 class BluetoothSocketConnection : public ThreadedSocketConnection {
  public:
-  BluetoothSocketConnection(const DeviceHandle device_handle,
-                            const ApplicationHandle app_handle,
-                            const ConnectionId session_id,
+  BluetoothSocketConnection(const DeviceHandle& device_handle,
+                            const ApplicationHandle& app_handle,
                             DeviceAdapterController* controller);
   virtual ~BluetoothSocketConnection();
  protected:
@@ -148,9 +148,8 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
   BluetoothConnectionFactory(DeviceAdapterController* controller);
  protected:
   virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle,
-                                 ApplicationHandle app_handle,
-                                 ConnectionId session_id);
+  virtual DeviceAdapter::Error createConnection(const DeviceHandle& device_handle,
+                                                const ApplicationHandle& app_handle);
   virtual void terminate();
   virtual bool isInitialised() const;
   virtual ~BluetoothConnectionFactory();

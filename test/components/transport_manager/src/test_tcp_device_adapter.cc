@@ -8,12 +8,11 @@
 
 #include "transport_manager/tcp_adapter.h"
 #include "transport_manager/device_adapter_listener.h"
-#include "transport_manager/device_handle_generator_impl.h"
+
+namespace transport_manager {
+namespace device_adapter {
 
 TEST(TcpAdapterBasicTest, Basic) {
-  using transport_manager::device_adapter::TcpDeviceAdapter;
-  using transport_manager::device_adapter::DeviceAdapter;
-
   DeviceAdapter* device_adapter =
       static_cast<DeviceAdapter*>(new TcpDeviceAdapter);
 
@@ -24,18 +23,16 @@ TEST(TcpAdapterBasicTest, Basic) {
 }
 
 TEST(TcpAdapterBasicTest, NotInitialised) {
-  using transport_manager::device_adapter::TcpDeviceAdapter;
-  using transport_manager::device_adapter::DeviceAdapter;
-
   DeviceAdapter* device_adapter =
       static_cast<DeviceAdapter*>(new TcpDeviceAdapter);
 
   EXPECT_EQ(DeviceAdapter::NOT_SUPPORTED, device_adapter->searchDevices());
-  EXPECT_EQ(DeviceAdapter::NOT_SUPPORTED, device_adapter->connect(1, 2, 3));
-  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->acceptConnect(1, 2, 3));
-  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->declineConnect(1, 2));
-  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->disconnect(1));
-  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->disconnectDevice(1));
+  EXPECT_EQ(DeviceAdapter::NOT_SUPPORTED,
+            device_adapter->connect(DeviceHandle("xxx"), 2));
+  EXPECT_EQ(DeviceAdapter::BAD_STATE,
+            device_adapter->disconnect(DeviceHandle("xxx"), 2));
+  EXPECT_EQ(DeviceAdapter::BAD_STATE,
+            device_adapter->disconnectDevice(DeviceHandle("xxx")));
 }
 
 class ClientTcpSocket {
@@ -77,65 +74,49 @@ class ClientTcpSocket {
   int socket_;
 };
 
-namespace transport_manager {
-namespace device_adapter {
 class MockDeviceAdapterListener : public DeviceAdapterListener {
  public:
   MOCK_METHOD1(onSearchDeviceDone,
       void(const DeviceAdapter* device_adapter));
   MOCK_METHOD2(onSearchDeviceFailed,
       void(const DeviceAdapter* device_adapter, const SearchDeviceError& error));
-  MOCK_METHOD2(onConnectDone,
-      void(const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id));
-  MOCK_METHOD3(onConnectFailed,
-      void(const DeviceAdapter* device_adapter, const transport_manager::SessionID session_id, const ConnectError& error));
-  MOCK_METHOD3(onConnectRequested,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle));
-  MOCK_METHOD3(onUnexpectedDisconnect,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id, const CommunicationError& error));
-  MOCK_METHOD2(onDisconnectDone,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id));
-  MOCK_METHOD3(onDisconnectFailed,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id, const DisconnectError& error));
+  MOCK_METHOD3(onConnectDone,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle));
+  MOCK_METHOD4(onConnectFailed,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const ConnectError& error));
+  MOCK_METHOD4(onUnexpectedDisconnect,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const CommunicationError& error));
+  MOCK_METHOD3(onDisconnectDone,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle));
+  MOCK_METHOD4(onDisconnectFailed,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const DisconnectError& error));
   MOCK_METHOD2(onDisconnectDeviceDone,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle));
   MOCK_METHOD3(onDisconnectDeviceFailed,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id, const DisconnectDeviceError& error));
-  MOCK_METHOD3(onDataSendDone,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id, const RawMessageSptr data_container));
-  MOCK_METHOD4(onDataSendFailed,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id, const RawMessageSptr data_container, const DataSendError& error));
-  MOCK_METHOD3(onDataReceiveDone,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id, const RawMessageSptr data_container));
-  MOCK_METHOD3(onDataReceiveFailed,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id, const DataReceiveError& error));
-  MOCK_METHOD2(onCommunicationError,
-      void(const DeviceAdapter* device_adapter, const SessionID session_id));
-};}
-}
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const DisconnectDeviceError& error));
+  MOCK_METHOD4(onDataSendDone,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container));
+  MOCK_METHOD5(onDataSendFailed,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container, const DataSendError& error));
+  MOCK_METHOD4(onDataReceiveDone,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container));
+  MOCK_METHOD4(onDataReceiveFailed,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const DataReceiveError& error));
+  MOCK_METHOD3(onCommunicationError,
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle));
+  MOCK_METHOD3(onConnectRequested, void(const DeviceAdapter*, const DeviceHandle&, const ApplicationHandle&));
+};
 
-using transport_manager::device_adapter::TcpDeviceAdapter;
-using transport_manager::device_adapter::DeviceAdapter;
-using transport_manager::device_adapter::MockDeviceAdapterListener;
-using transport_manager::DeviceHandleGeneratorImpl;
 using ::testing::_;
 using ::testing::Invoke;
 
-static const transport_manager::SessionID session_id = 999;
-void acceptConnection(const DeviceAdapter* device_adapter,
-                      const transport_manager::DeviceHandle device_handle,
-                      const transport_manager::ApplicationHandle app_handle) {
+void disconnect(const DeviceAdapter* device_adapter,
+                const DeviceHandle device_handle,
+                const ApplicationHandle app_handle) {
   EXPECT_EQ(
       DeviceAdapter::OK,
-      const_cast<DeviceAdapter*>(device_adapter)->acceptConnect(device_handle,
-                                                                app_handle,
-                                                                session_id));
-}
-
-void disconnect(const DeviceAdapter* device_adapter,
-                const transport_manager::SessionID session_id) {
-  EXPECT_EQ(DeviceAdapter::OK,
-            const_cast<DeviceAdapter*>(device_adapter)->disconnect(session_id));
+      const_cast<DeviceAdapter*>(device_adapter)->disconnect(device_handle,
+                                                             app_handle));
 }
 
 class TcpAdapterTest : public ::testing::Test {
@@ -149,10 +130,11 @@ class TcpAdapterTest : public ::testing::Test {
   }
 
   virtual void SetUp() {
-    const DeviceAdapter::Error error = device_adapter_->init(
-        new DeviceHandleGeneratorImpl, 0);
+    const DeviceAdapter::Error error = device_adapter_->init(0);
     ASSERT_EQ(DeviceAdapter::OK, error);
     device_adapter_->addListener(&mock_dal_);
+    //ON_CALL(mock_dal_, onConnectDone(device_adapter_, _, _))                         // #3
+    //      .WillByDefault(Return(1));
     while (!device_adapter_->isInitialised())
       sleep(0);
   }
@@ -203,9 +185,7 @@ MATCHER_P(ContainsMessage, str, ""){ return strlen(str) == arg->data_size() && 0
 TEST_F(TcpAdapterTest, Connect) {
   {
     ::testing::InSequence seq;
-    EXPECT_CALL(mock_dal_, onConnectRequested(device_adapter_,_,_)).WillOnce(
-        Invoke(acceptConnection));
-    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, session_id)).WillOnce(
+    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _)).WillOnce(
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
@@ -214,13 +194,11 @@ TEST_F(TcpAdapterTest, Connect) {
 TEST_F(TcpAdapterTest, Receive) {
   {
     ::testing::InSequence seq;
-    EXPECT_CALL(mock_dal_, onConnectRequested(device_adapter_,_,_)).WillOnce(
-        Invoke(acceptConnection));
-    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, session_id));
+    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _));
     EXPECT_CALL(
         mock_dal_,
-        onDataReceiveDone(device_adapter_, session_id, ContainsMessage("abcd")))
-        .WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
+        onDataReceiveDone(device_adapter_, _, _, ContainsMessage("abcd"))).
+        WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
   EXPECT_TRUE(client_.send("abcd"));
@@ -229,10 +207,12 @@ TEST_F(TcpAdapterTest, Receive) {
 TEST_F(TcpAdapterTest, Send) {
   struct Helper {
     void sendMessage(const DeviceAdapter* device_adapter,
-                     const transport_manager::SessionID session_id) {
+                     const DeviceHandle device_handle,
+                     const ApplicationHandle app_handle) {
       EXPECT_EQ(
           DeviceAdapter::OK,
-          const_cast<DeviceAdapter*>(device_adapter)->sendData(session_id,
+          const_cast<DeviceAdapter*>(device_adapter)->sendData(device_handle,
+                                                               app_handle,
                                                                message));
     }
     transport_manager::RawMessageSptr message;
@@ -243,12 +223,10 @@ TEST_F(TcpAdapterTest, Send) {
 
   {
     ::testing::InSequence seq;
-    EXPECT_CALL(mock_dal_, onConnectRequested(device_adapter_,_,_)).WillOnce(
-        Invoke(acceptConnection));
-    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, session_id)).WillOnce(
+    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _)).WillOnce(
         Invoke(&helper, &Helper::sendMessage));
     EXPECT_CALL(mock_dal_,
-        onDataSendDone(device_adapter_, session_id, helper.message)).WillOnce(
+        onDataSendDone(device_adapter_, _, _, helper.message)).WillOnce(
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
 
@@ -259,12 +237,10 @@ TEST_F(TcpAdapterTest, Send) {
 TEST_F(TcpAdapterTest, DisconnectFromClient) {
   {
     ::testing::InSequence seq;
-    EXPECT_CALL(mock_dal_, onConnectRequested(device_adapter_,_,_)).WillOnce(
-        Invoke(acceptConnection));
-    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, session_id));
+    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _));
     EXPECT_CALL(mock_dal_,
-                onUnexpectedDisconnect(device_adapter_, session_id, _));
-    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, session_id)).
+                onUnexpectedDisconnect(device_adapter_, _, _, _));
+    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, _, _)).
         WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
@@ -274,13 +250,14 @@ TEST_F(TcpAdapterTest, DisconnectFromClient) {
 TEST_F(TcpAdapterTest, DisconnectFromServer) {
   {
     ::testing::InSequence seq;
-    EXPECT_CALL(mock_dal_, onConnectRequested(device_adapter_,_,_)).WillOnce(
-        Invoke(acceptConnection));
-    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, session_id)).WillOnce(
+    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _)).WillOnce(
         Invoke(disconnect));
-    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, session_id)).WillOnce(
-        InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
+    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, _, _)).
+        WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
 }
+
+}  // namespace
+}  // namespace
 

@@ -49,8 +49,7 @@
 
 namespace transport_manager {
 
-enum
-{
+enum {
   E_SUCCESS = 0,
   E_TM_IS_NOT_INITIALIZED,
   E_INVALID_HANDLE,
@@ -179,7 +178,6 @@ class TransportManagerImpl : public TransportManager {
    **/
 //todo: discuss with Alexandr and Polina - do we nedd this feature?
 //  virtual void addAdapterListener(device_adapter::DeviceAdapter *adapter, device_adapter::DeviceAdapterListener *listener);
-
   /**
    * @brief remove device from internal storages
    *
@@ -242,14 +240,11 @@ class TransportManagerImpl : public TransportManager {
   class AdapterHandler {
    public:
     typedef std::vector<device_adapter::DeviceAdapter *> AdapterList;
-    device_adapter::DeviceAdapter *getAdapterBySession(
-        ConnectionId sid);
+    device_adapter::DeviceAdapter *getAdapterBySession(ConnectionId sid);
     device_adapter::DeviceAdapter *getAdapterByDevice(
         transport_manager::DeviceHandle did);
-    void addSession(device_adapter::DeviceAdapter *da,
-                    ConnectionId sid);
-    void removeSession(device_adapter::DeviceAdapter *da,
-                       ConnectionId sid);
+    void addSession(device_adapter::DeviceAdapter *da, ConnectionId sid);
+    void removeSession(device_adapter::DeviceAdapter *da, ConnectionId sid);
     void addDevice(device_adapter::DeviceAdapter *da,
                    transport_manager::DeviceHandle did);
     void addAdapter(device_adapter::DeviceAdapter *da);
@@ -277,8 +272,7 @@ class TransportManagerImpl : public TransportManager {
      **/
     // FIXME: Team had decided one device cannot be shared between multiple adapters.
     //         Change multimap to map
-    std::map<transport_manager::DeviceHandle,
-        device_adapter::DeviceAdapter *> device_to_adapter_map_;
+    std::map<transport_manager::DeviceHandle, device_adapter::DeviceAdapter *> device_to_adapter_map_;
 
   };
 
@@ -295,7 +289,6 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   typedef std::vector<DeviceAdapterEvent> EventQueue;
-
 
   /**
    * @brief default constructor
@@ -403,18 +396,33 @@ class TransportManagerImpl : public TransportManager {
   struct Connection {
     ConnectionId id;
     DeviceHandle device;
+    ApplicationHandle application;
     Timer timer;
     bool shutDown;
     int messages_count;
 
-    Connection(ConnectionId id)
+    Connection(const ConnectionId &id, const DeviceHandle &dev_id,
+               const ApplicationHandle &app_id)
         : id(id),
+          device(dev_id),
+          application(app_id),
           shutDown(false),
           messages_count(0) {
     }
+    Connection()
+        : id(-1),
+          application(-1),
+          shutDown(false),
+          messages_count(-1) {
+    }
   };
   int connection_id_counter_;
-  std::map<ConnectionId, Connection> connections_;
+  std::map<ConnectionId, Connection> id_to_connections_map_;
+  std::map<std::pair<DeviceHandle, ApplicationHandle>, Connection> dev_app_to_connections_map_;
+
+  Connection& getConnection(const ConnectionId &id);
+  Connection& getConnection(const DeviceHandle& device,
+                                  const ApplicationHandle& application);
 };
 //class
 }//namespace
