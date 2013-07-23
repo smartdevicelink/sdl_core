@@ -61,14 +61,12 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  const unsigned int btn_id =
-    static_cast<unsigned int>
-    ((*message_)[str::params][str::button_name].asInt());
+  const unsigned int btn_id = ((*message_)[str::msg_params]
+                                          [str::button_name].asUInt());
 
   if (app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button " << btn_id);
-    SendResponse(false,
-                 mobile_apis::Result::SUBSCRIBED_ALREADY);
+    SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
