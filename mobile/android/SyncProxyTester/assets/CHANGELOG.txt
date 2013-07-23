@@ -1,4 +1,5 @@
 [CW30]
+* AddCommand dialog: the user can omit sending parentID parameter.
 + Add the EncodedSyncPData dialog.
 
 [CW28]

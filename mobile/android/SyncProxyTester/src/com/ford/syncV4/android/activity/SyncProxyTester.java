@@ -1291,85 +1291,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.AddCommand) {
-							//something
-							AlertDialog.Builder builder;
-							AlertDialog addCommandDialog;
-
-							Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.addcommand,
-									(ViewGroup) findViewById(R.id.itemRoot));
-
-							final EditText er = (EditText) layout.findViewById(R.id.command);
-							final EditText editVrSynonym = (EditText) layout.findViewById(R.id.command2);
-							final Spinner s = (Spinner) layout.findViewById(R.id.availableSubmenus);
-							s.setAdapter(_submenuAdapter);
-							final CheckBox chkUseIcon = (CheckBox) layout.findViewById(R.id.addcommand_useIcon);
-							final EditText editIconValue = (EditText) layout.findViewById(R.id.addcommand_iconValue);
-							final Spinner spnIconType = (Spinner) layout.findViewById(R.id.addcommand_iconType);
-							
-							if (!v2Features) {
-								int visibility = android.view.View.GONE;
-								View[] views = { chkUseIcon, editIconValue, spnIconType };
-								for (View view : views) {
-									view.setVisibility(visibility);
-								}
-							}
-							
-							ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
-									mContext, android.R.layout.simple_spinner_item, ImageType.values());
-							imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-							spnIconType.setAdapter(imageTypeAdapter);
-							
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									AddCommand msg = new AddCommand();
-									msg.setCorrelationID(autoIncCorrId++);
-									String itemText = er.getText().toString();
-									SyncSubMenu sm = new SyncSubMenu();
-									sm = (SyncSubMenu) s.getSelectedItem();
-									MenuParams menuParams = new MenuParams();
-									menuParams.setMenuName(itemText);
-									menuParams.setPosition(0);
-									menuParams.setParentID(sm.getSubMenuId());
-									msg.setMenuParams(menuParams);
-									
-									String vrSynonym = editVrSynonym.getText().toString();
-									if (vrSynonym.length() > 0) {
-										Vector<String> vrCommands = new Vector<String>();
-										vrCommands.add(vrSynonym);
-										msg.setVrCommands(vrCommands);
-									}
-									
-									if (v2Features && chkUseIcon.isChecked()) {
-										Image icon = new Image();
-										icon.setValue(editIconValue.getText().toString());
-										icon.setImageType((ImageType) spnIconType.getSelectedItem());
-										msg.setCmdIcon(icon);
-									}
-									
-									int cmdID = itemcmdID++;
-									msg.setCmdID(cmdID);
-									
-									try {
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-									addCommandToList(cmdID, menuParams.getParentID());
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							addCommandDialog = builder.create();
-							addCommandDialog.show();
+                            sendAddCommand();
 						} else if (adapter.getItem(which) == Names.DeleteCommand) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
@@ -2113,6 +2035,89 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 						messageSelectCount.put(function, curCount + 1);
 					}
+
+                   /**
+                    * Opens the dialog for AddCommand message and sends it.
+                    */
+                   private void sendAddCommand() {
+                       final Context mContext = adapter.getContext();
+                       LayoutInflater inflater = (LayoutInflater) mContext
+                               .getSystemService(LAYOUT_INFLATER_SERVICE);
+                       View layout = inflater.inflate(R.layout.addcommand,
+                               (ViewGroup) findViewById(R.id.itemRoot));
+
+                       final EditText er = (EditText) layout.findViewById(R.id.addcommand_commandName);
+                       final EditText editVrSynonym = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
+                       final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
+                       final Spinner s = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
+                       s.setAdapter(_submenuAdapter);
+                       final CheckBox chkUseIcon = (CheckBox) layout.findViewById(R.id.addcommand_useIcon);
+                       final EditText editIconValue = (EditText) layout.findViewById(R.id.addcommand_iconValue);
+                       final Spinner spnIconType = (Spinner) layout.findViewById(R.id.addcommand_iconType);
+
+                       if (!v2Features) {
+                           int visibility = View.GONE;
+                           View[] views = { chkUseIcon, editIconValue, spnIconType };
+                           for (View view : views) {
+                               view.setVisibility(visibility);
+                           }
+                       }
+
+                       ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
+                               mContext, android.R.layout.simple_spinner_item, ImageType.values());
+                       imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                       spnIconType.setAdapter(imageTypeAdapter);
+
+                       AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                       builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               AddCommand msg = new AddCommand();
+                               msg.setCorrelationID(autoIncCorrId++);
+                               String itemText = er.getText().toString();
+                               MenuParams menuParams = new MenuParams();
+                               menuParams.setMenuName(itemText);
+                               menuParams.setPosition(0);
+                               if (chkUseParentID.isChecked()) {
+                                   SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
+                                   menuParams.setParentID(sm.getSubMenuId());
+                               }
+                               msg.setMenuParams(menuParams);
+
+                               String vrSynonym = editVrSynonym.getText().toString();
+                               if (vrSynonym.length() > 0) {
+                                   Vector<String> vrCommands = new Vector<String>();
+                                   vrCommands.add(vrSynonym);
+                                   msg.setVrCommands(vrCommands);
+                               }
+
+                               if (v2Features && chkUseIcon.isChecked()) {
+                                   Image icon = new Image();
+                                   icon.setValue(editIconValue.getText().toString());
+                                   icon.setImageType((ImageType) spnIconType.getSelectedItem());
+                                   msg.setCmdIcon(icon);
+                               }
+
+                               int cmdID = itemcmdID++;
+                               msg.setCmdID(cmdID);
+
+                               try {
+                                   _msgAdapter.logMessage(msg, true);
+                                   ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                               } catch (SyncException e) {
+                                   _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                               }
+
+                               addCommandToList(cmdID, menuParams.getParentID());
+                           }
+                       });
+                       builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               dialog.cancel();
+                           }
+                       });
+                       builder.setView(layout);
+                       builder.show();
+                   }
 
                    /**
                     * Opens the dialog for EncodedSyncPData message and sends it.
@@ -3271,9 +3276,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * @param submenuID
 	 *            ID of the command's parent submenu
 	 */
-	private void addCommandToList(int cmdID, int submenuID) {
+	private void addCommandToList(Integer cmdID, Integer submenuID) {
 		_commandAdapter.add(cmdID);
-		_commandIdToParentSubmenuMap.put(cmdID, submenuID);
+        if (null != submenuID) {
+			_commandIdToParentSubmenuMap.put(cmdID, submenuID);
+        }
 	}
 
 	/**
@@ -3282,7 +3289,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * @param cmdID
 	 *            ID of the command
 	 */
-	private void removeCommandFromList(int cmdID) {
+	private void removeCommandFromList(Integer cmdID) {
 		_commandAdapter.remove(cmdID);
 		_commandIdToParentSubmenuMap.remove(cmdID);
 	}

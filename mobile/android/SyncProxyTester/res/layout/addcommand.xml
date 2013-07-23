@@ -1,85 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/itemRoot"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="10dip"
-    android:layout_marginRight="10dip"
-    android:orientation="vertical"
-    android:paddingLeft="20dip"
-    android:paddingRight="20dip" >
+              android:id="@+id/itemRoot"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="10dip"
+              android:layout_marginRight="10dip"
+              android:orientation="vertical"
+              android:paddingLeft="20dip"
+              android:paddingRight="20dip">
 
-		<TextView
-            android:id="@+id/toptext"
+    <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-        	android:text="Command to add to menu" >
-        </TextView>
+            android:text="@string/addcommand_commandName"/>
 
-		<EditText
-		    android:id="@+id/command"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:freezesText="true"
-		    android:inputType="textCapWords"
-		    android:text="Item To Add"
-		    android:visibility="visible" >
-
-		</EditText>
-		<TextView
-            android:id="@+id/toptext2"
+    <EditText
+            android:id="@+id/addcommand_commandName"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="textCapWords"
+            android:text="@string/addcommand_commandNameDefault"
+            android:visibility="visible"/>
+
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:textStyle="bold"
-        	android:text="VR Synonym (optional)">
-        </TextView>
+            android:text="@string/addcommand_vrSynonym"/>
 
-		<EditText
-		    android:id="@+id/command2"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:freezesText="true"
-		    android:inputType="textCapSentences"
-		    android:text=""
-		    android:visibility="visible" >
-
-		</EditText>
-		<TextView
-            android:id="@+id/toptext3"
+    <EditText
+            android:id="@+id/addcommand_vrSynonym"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textStyle="bold"
-        	android:text="Add this item to:">
-        </TextView>
-		<Spinner 
-			android:id="@+id/availableSubmenus" 
-			android:layout_width="fill_parent" 
-			android:layout_height="wrap_content">
-		</Spinner>
+            android:freezesText="true"
+            android:inputType="textCapSentences"
+            android:text="@string/addcommand_vrSynonymDefault"
+            android:visibility="visible"/>
 
-		<CheckBox
-		    android:id="@+id/addcommand_useIcon"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:checked="true"
-		    android:text="Use icon:" />
+    <CheckBox
+            android:id="@+id/addcommand_useParentID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/addcommand_useParentID"/>
 
-		<EditText
-		    android:id="@+id/addcommand_iconValue"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:ems="10"
-		    android:freezesText="true"
-		    android:inputType="text"
-		    android:text="@string/addcommand_iconFilename"
-		    android:visibility="visible" />
+    <Spinner
+            android:id="@+id/addcommand_availableSubmenus"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
 
-		<Spinner
-		    android:id="@+id/addcommand_iconType"
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content" />
+    <CheckBox
+            android:id="@+id/addcommand_useIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/addcommand_useIcon"/>
+
+    <EditText
+            android:id="@+id/addcommand_iconValue"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:freezesText="true"
+            android:inputType="text"
+            android:text="@string/addcommand_iconFilename"
+            android:visibility="visible"/>
+
+    <Spinner
+            android:id="@+id/addcommand_iconType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
 </LinearLayout>

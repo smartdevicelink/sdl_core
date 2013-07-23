@@ -24,6 +24,12 @@
     <string name="updateturnlist_iconList">Icon List (comma-separated, one for each turn)</string>
     <string name="updateturnlist_defaultIconList">turn_left.png,turn_right.png,turn_forward.png</string>
     <string name="addcommand_iconFilename">action.png</string>
+    <string name="addcommand_commandName">Command to add to menu</string>
+    <string name="addcommand_commandNameDefault">Item To Add</string>
+    <string name="addcommand_vrSynonym">VR Synonym (optional)</string>
+    <string name="addcommand_vrSynonymDefault"/>
+    <string name="addcommand_useParentID">Add this item to:</string>
+    <string name="addcommand_useIcon">Use icon:</string>
     <string name="performinteraction_initialText">Initial Text</string>
     <string name="performinteraction_initialTextDefault">Pick number:</string>
     <string name="performinteraction_initialPrompt">Initial Prompt (comma-separated)</string>
