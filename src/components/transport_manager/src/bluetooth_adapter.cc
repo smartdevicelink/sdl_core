@@ -405,7 +405,7 @@ ApplicationList BluetoothDevice::getApplicationList() const {
 }
 
 BluetoothSocketConnection::BluetoothSocketConnection(
-    const DeviceHandle device_handle, const ApplicationHandle app_handle,
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle,
     DeviceAdapterController* controller)
     : ThreadedSocketConnection(device_handle, app_handle, controller) {
 }
@@ -469,7 +469,7 @@ DeviceAdapter::Error BluetoothConnectionFactory::init() {
 }
 
 DeviceAdapter::Error BluetoothConnectionFactory::createConnection(
-    DeviceHandle device_handle, ApplicationHandle app_handle) {
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle) {
   BluetoothSocketConnection* connection(
       new BluetoothSocketConnection(device_handle, app_handle, controller_));
   DeviceAdapter::Error error = connection->start();

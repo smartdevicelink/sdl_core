@@ -50,8 +50,27 @@ namespace test  {
 namespace components  {
 namespace transport_manager {
 
+class MockDeviceScanner : public ::transport_manager::device_adapter::DeviceScanner {
+  virtual DeviceAdapter::Error init();
+  virtual DeviceAdapter::Error scan();
+  virtual void terminate();
+  virtual bool isInitialised() const;
+ private:
+  bool is_initialized;
+};
+
+class MockConnectionFactory : public ::transport_manager::device_adapter::ServerConnectionFactory {
+  virtual DeviceAdapter::Error init();
+  virtual DeviceAdapter::Error createConnection(const DeviceHandle& device_handle,
+                                                const ApplicationHandle& app_handle);
+  virtual void terminate();
+  virtual bool isInitialised() const;
+};
+
 class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdapterImpl {
  public:
+  MockDeviceAdapter()
+   : DeviceAdapterImpl(new MockDeviceScanner(), new MockConnectionFactory(), NULL) { }
   virtual ~MockDeviceAdapter();
 
   struct listenerData_t {
@@ -67,8 +86,7 @@ class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdap
     pthread_mutex_t device_started_mutex;
     listenerData_t listener;
    public:
-    MockDevice(const char *name) : Device(name), workerThread(0) {
-      set_unique_device_id("mock-device-0");
+    MockDevice(const std::string& name, const std::string& id) : Device(name, id), workerThread(0) {
     }
     void start();
     void stop();

@@ -108,8 +108,8 @@ class TcpDevice : public Device {
 
 class TcpSocketConnection : public ThreadedSocketConnection {
  public:
-  TcpSocketConnection(const DeviceHandle device_handle,
-                      const ApplicationHandle app_handle,
+  TcpSocketConnection(const DeviceHandle& device_handle,
+                      const ApplicationHandle& app_handle,
                       DeviceAdapterController* controller);
   virtual ~TcpSocketConnection();
  protected:

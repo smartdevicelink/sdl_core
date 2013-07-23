@@ -45,8 +45,6 @@
 
 namespace transport_manager {
 
-class DeviceHandleGenerator;
-
 namespace device_adapter {
 
 class Configuration;
@@ -54,7 +52,7 @@ class DeviceAdapterListener;
 typedef std::string DeviceType;
 typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
+typedef std::vector<DeviceDesc> DeviceList;
 typedef std::list<DeviceAdapterListener *> DeviceAdapterListenerList;
 
 class DeviceAdapter {
@@ -87,22 +85,22 @@ class DeviceAdapter {
   virtual Error searchDevices() = 0;
 
   virtual bool isServerOriginatedConnectSupported() const = 0;
-  virtual Error connect(const DeviceHandle device_handle,
-                        const ApplicationHandle app_handle) = 0;
+  virtual Error connect(const DeviceHandle& device_handle,
+                        const ApplicationHandle& app_handle) = 0;
 
   virtual bool isClientOriginatedConnectSupported() const = 0;
 
-  virtual Error disconnect(const DeviceHandle device_handle,
-                           const ApplicationHandle app_handle) = 0;
-  virtual Error disconnectDevice(const DeviceHandle device_handle) = 0;
+  virtual Error disconnect(const DeviceHandle& device_handle,
+                           const ApplicationHandle& app_handle) = 0;
+  virtual Error disconnectDevice(const DeviceHandle& device_handle) = 0;
 
-  virtual Error sendData(const DeviceHandle device_handle,
-                         const ApplicationHandle app_handle,
+  virtual Error sendData(const DeviceHandle& device_handle,
+                         const ApplicationHandle& app_handle,
                          const RawMessageSptr data) = 0;
 
   virtual DeviceList getDeviceList() const = 0;
   virtual ApplicationList getApplicationList(
-      const DeviceHandle device_handle) const = 0;
+      const DeviceHandle& device_handle) const = 0;
 };
 
 }  // namespace device_adapter

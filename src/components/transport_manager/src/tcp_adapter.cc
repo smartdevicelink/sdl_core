@@ -202,8 +202,8 @@ int TcpDevice::getApplicationSocket(const ApplicationHandle app_handle) const {
   return app_handle;
 }
 
-TcpSocketConnection::TcpSocketConnection(const DeviceHandle device_handle,
-                                         const ApplicationHandle app_handle,
+TcpSocketConnection::TcpSocketConnection(const DeviceHandle& device_handle,
+                                         const ApplicationHandle& app_handle,
                                          DeviceAdapterController* controller)
     : ThreadedSocketConnection(device_handle, app_handle, controller) {
 }

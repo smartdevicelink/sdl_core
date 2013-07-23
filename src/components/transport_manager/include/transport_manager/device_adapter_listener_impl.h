@@ -61,61 +61,64 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
   DeviceAdapterListenerImpl(transport_manager::TransportManagerImpl *tm);
   virtual ~DeviceAdapterListenerImpl();
 
-  virtual void onSearchDeviceDone(
-      const device_adapter::DeviceAdapter* device_adapter);
-  virtual void onSearchDeviceFailed(
-      const device_adapter::DeviceAdapter* device_adapter,
-      const SearchDeviceError& error);
+  virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter);
+  virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
+                                    const SearchDeviceError& error);
 
-  virtual void onConnectDone(
-      const device_adapter::DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id);
-  virtual void onConnectFailed(
-      const device_adapter::DeviceAdapter* device_adapter, const int session_id,
-      const ConnectError& error);
-  virtual void onConnectRequested(
-      const device_adapter::DeviceAdapter* device_adapter,
-      const DeviceHandle device_handle, const ApplicationHandle app_handle);
+  virtual void onConnectDone(const DeviceAdapter* device_adapter,
+                             const DeviceHandle& device_handle,
+                             const ApplicationHandle& app_id);
+  virtual void onConnectFailed(const DeviceAdapter* device_adapter,
+                               const DeviceHandle& device,
+                               const ApplicationHandle& app_id,
+                               const ConnectError& error);
 
-  virtual void onUnexpectedDisconnect(
-      const device_adapter::DeviceAdapter* device_adapter,
-      const SessionID session_id, const CommunicationError& error);
-  virtual void onDisconnectDone(
-      const device_adapter::DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id);
-  virtual void onDisconnectFailed(
-      const device_adapter::DeviceAdapter* device_adapter,
-      const SessionID session_id, const DisconnectError& error);
+  virtual void onConnectRequested(const DeviceAdapter* device_adapter,
+                                  const DeviceHandle& device_handle,
+                                  const ApplicationHandle& app_handle);
+
+  virtual void onUnexpectedDisconnect(const DeviceAdapter* device_adapter,
+                                      const DeviceHandle& device,
+                                      const ApplicationHandle& app_id,
+                                      const CommunicationError& error);
+  virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
+                                const DeviceHandle& device_id,
+                                const ApplicationHandle& app_id);
+  virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
+                                  const DeviceHandle& device,
+                                  const ApplicationHandle& app_id,
+                                  const DisconnectError& error);
 
   virtual void onDisconnectDeviceDone(
       const device_adapter::DeviceAdapter* device_adapter,
-      const SessionID session_id);
+      const DeviceHandle& devic);
   virtual void onDisconnectDeviceFailed(
       const device_adapter::DeviceAdapter* device_adapter,
-      const SessionID session_id, const DisconnectDeviceError& error);
+      const DeviceHandle& device, const DisconnectDeviceError& error);
 
   virtual void onDataReceiveDone(
       const device_adapter::DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id,
-      const RawMessageSptr data_container);
+      const DeviceHandle& device,
+      const ApplicationHandle& app_id, const RawMessageSptr data_container);
   virtual void onDataReceiveFailed(
       const device_adapter::DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id,
-      const DataReceiveError& error);
+      const DeviceHandle& device,
+      const ApplicationHandle& app_id, const DataReceiveError& error);
 
-  virtual void onDataSendDone(
-      const device_adapter::DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id,
-      const RawMessageSptr data_container);
-  virtual void onDataSendFailed(
-      const device_adapter::DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id,
-      const RawMessageSptr data_container, const DataSendError& error);
+  virtual void onDataSendDone(const DeviceAdapter* device_adapter,
+                              const DeviceHandle& device,
+                              const ApplicationHandle& app_id,
+                              const RawMessageSptr data_container);
+  virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
+                                const DeviceHandle& device,
+                                const ApplicationHandle& app_id,
+                                const RawMessageSptr data_container,
+                                const DataSendError& error);
 
   virtual void onCommunicationError(
       const device_adapter::DeviceAdapter* device_adapter,
-      const transport_manager::SessionID session_id);
-
+      const DeviceHandle& device,
+      const ApplicationHandle& app_id);
  private:
   /**
    * \brief For logging.

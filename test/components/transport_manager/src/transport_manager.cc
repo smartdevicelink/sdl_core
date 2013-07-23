@@ -69,10 +69,9 @@ class TransportManagerTest : public ::testing::Test {
   static void SetUpTestCase() {
     pthread_mutex_init(&test_mutex, NULL);
     pthread_cond_init(&test_cond, NULL);
-    //todo: uncomment after test fix
-    //tml = new MockTransportManagerListener();
-    //mock_da = new MockDeviceAdapter();
-    //mock_da->init(new DeviceHandleGeneratorImpl(), NULL);
+    tml = new MockTransportManagerListener();
+    mock_da = new MockDeviceAdapter();
+    mock_da->init(NULL);
     TransportManager* tm = TransportManagerImpl::instance();
     tm->addEventListener(tml);
     tm->addDeviceAdapter(mock_da);
@@ -135,8 +134,7 @@ TEST_F(TransportManagerTest, SearchDeviceDone)
 
 TEST_F(TransportManagerTest, ConnectDeviceDone)
 {
-  using ::transport_manager::SessionID;
-  const SessionID kSession = 42;
+  const ConnectionId kSession = 42;
   EXPECT_CALL(*tml, onConnectFailed(_, kSession, _)).Times(0);
   EXPECT_CALL(*tml, onConnectDone(_, kSession)).Times(1)
       .WillOnce(WaitTest(&test_mutex, &test_cond));
@@ -149,8 +147,7 @@ TEST_F(TransportManagerTest, ConnectDeviceDone)
 
 TEST_F(TransportManagerTest, ConnectDeviceFailed)
 {
-  using ::transport_manager::SessionID;
-  const SessionID kSession = 333;
+  const ConnectionId kSession = 333;
   EXPECT_CALL(*tml, onConnectDone(_, kSession)).Times(0);
   EXPECT_CALL(*tml, onConnectFailed(_, kSession, _)).Times(1)
       .WillOnce(WaitTest(&test_mutex, &test_cond));
@@ -189,8 +186,7 @@ TEST_F(TransportManagerTest, DisconnectDeviceDone)
 
 TEST_F(TransportManagerTest, SendReceive)
 {
-  using ::transport_manager::SessionID;
-  const SessionID kSession = 42;
+  const ConnectionId kSession = 42;
   const int kVersionProtocol = 1;
   const unsigned int kSize = 100;
   unsigned char data[kSize] = {99};

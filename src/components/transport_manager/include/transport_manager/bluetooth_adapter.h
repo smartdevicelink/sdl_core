@@ -135,8 +135,8 @@ class BluetoothDevice : public Device {
 
 class BluetoothSocketConnection : public ThreadedSocketConnection {
  public:
-  BluetoothSocketConnection(const DeviceHandle device_handle,
-                            const ApplicationHandle app_handle,
+  BluetoothSocketConnection(const DeviceHandle& device_handle,
+                            const ApplicationHandle& app_handle,
                             DeviceAdapterController* controller);
   virtual ~BluetoothSocketConnection();
  protected:
@@ -148,8 +148,8 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
   BluetoothConnectionFactory(DeviceAdapterController* controller);
  protected:
   virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle,
-                                                ApplicationHandle app_handle);
+  virtual DeviceAdapter::Error createConnection(const DeviceHandle& device_handle,
+                                                const ApplicationHandle& app_handle);
   virtual void terminate();
   virtual bool isInitialised() const;
   virtual ~BluetoothConnectionFactory();

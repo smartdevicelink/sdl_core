@@ -130,34 +130,34 @@ class DeviceAdapterController {
   virtual DeviceSptr addDevice(DeviceSptr device) = 0;
   virtual void searchDeviceDone(const DeviceVector& devices) = 0;
   virtual void searchDeviceFailed(const SearchDeviceError& error) = 0;
-  virtual DeviceSptr findDevice(const DeviceHandle device_handle) const = 0;
+  virtual DeviceSptr findDevice(const DeviceHandle& device_handle) const = 0;
 
   virtual void connectionCreated(ConnectionSptr connection,
-                                 const DeviceHandle device_handle,
-                                 const ApplicationHandle app_handle) = 0;
-  virtual void connectDone(const DeviceHandle device_handle,
-                           const ApplicationHandle app_handle) = 0;
-  virtual void connectFailed(const DeviceHandle device_handle,
-                             const ApplicationHandle app_handle,
+                                 const DeviceHandle& device_handle,
+                                 const ApplicationHandle& app_handle) = 0;
+  virtual void connectDone(const DeviceHandle& device_handle,
+                           const ApplicationHandle& app_handle) = 0;
+  virtual void connectFailed(const DeviceHandle& device_handle,
+                             const ApplicationHandle& app_handle,
                              const ConnectError& error) = 0;
-  virtual void connectionFinished(const DeviceHandle device_handle,
-                                  const ApplicationHandle app_handle) = 0;
-  virtual void connectionAborted(const DeviceHandle device_handle,
-                                 const ApplicationHandle app_handle,
+  virtual void connectionFinished(const DeviceHandle& device_handle,
+                                  const ApplicationHandle& app_handle) = 0;
+  virtual void connectionAborted(const DeviceHandle& device_handle,
+                                 const ApplicationHandle& app_handle,
                                  const CommunicationError& error) = 0;
-  virtual void disconnectDone(const DeviceHandle device_handle,
-                              const ApplicationHandle app_handle) = 0;
-  virtual void dataReceiveDone(const DeviceHandle device_handle,
-                               const ApplicationHandle app_handle,
+  virtual void disconnectDone(const DeviceHandle& device_handle,
+                              const ApplicationHandle& app_handle) = 0;
+  virtual void dataReceiveDone(const DeviceHandle& device_handle,
+                               const ApplicationHandle& app_handle,
                                RawMessageSptr message) = 0;
-  virtual void dataReceiveFailed(const DeviceHandle device_handle,
-                                 const ApplicationHandle app_handle,
+  virtual void dataReceiveFailed(const DeviceHandle& device_handle,
+                                 const ApplicationHandle& app_handle,
                                  const DataReceiveError&) = 0;
-  virtual void dataSendDone(const DeviceHandle device_handle,
-                            const ApplicationHandle app_handle,
+  virtual void dataSendDone(const DeviceHandle& device_handle,
+                            const ApplicationHandle& app_handle,
                             RawMessageSptr message) = 0;
-  virtual void dataSendFailed(const DeviceHandle device_handle,
-                              const ApplicationHandle app_handle,
+  virtual void dataSendFailed(const DeviceHandle& device_handle,
+                              const ApplicationHandle& app_handle,
                               RawMessageSptr message, const DataSendError&) = 0;
 };
 
@@ -175,7 +175,7 @@ class ServerConnectionFactory {
  public:
   virtual DeviceAdapter::Error init() = 0;
   virtual DeviceAdapter::Error createConnection(
-      DeviceHandle device_handle, ApplicationHandle app_handle) = 0;
+      const DeviceHandle& device_handle, const ApplicationHandle& app_handle) = 0;
   virtual void terminate() = 0;
   virtual bool isInitialised() const = 0;
   virtual ~ServerConnectionFactory() {
@@ -211,6 +211,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
 
   virtual bool isInitialised() const;
 
+ public:
   /**
    * @brief Run device adapter.
    *
@@ -237,8 +238,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
    **/
-  virtual DeviceAdapter::Error connect(const DeviceHandle device_handle,
-                                       const ApplicationHandle app_handle);
+  virtual DeviceAdapter::Error connect(const DeviceHandle& device_handle,
+                                       const ApplicationHandle& app_handle);
 
   /**
    * @brief Disconnect from specified session.
@@ -247,8 +248,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
-  virtual DeviceAdapter::Error disconnect(const DeviceHandle device_handle,
-                                          const ApplicationHandle app_handle);
+  virtual DeviceAdapter::Error disconnect(const DeviceHandle& device_handle,
+                                          const ApplicationHandle& app_handle);
 
   /**
    * @brief Disconnect from all sessions on specified device.
@@ -258,7 +259,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
   virtual DeviceAdapter::Error disconnectDevice(
-      const DeviceHandle device_handle);
+      const DeviceHandle& device_handle);
 
   /**
    * @brief Send frame.
@@ -270,8 +271,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  virtual DeviceAdapter::Error sendData(const DeviceHandle device_handle,
-                                        const ApplicationHandle app_handle,
+  virtual DeviceAdapter::Error sendData(const DeviceHandle& device_handle,
+                                        const ApplicationHandle& app_handle,
                                         const RawMessageSptr data);
 
   virtual bool isSearchDevicesSupported() const;
@@ -280,43 +281,43 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
 
   virtual DeviceList getDeviceList() const;
   virtual ApplicationList getApplicationList(
-      const DeviceHandle device_handle) const;
-  virtual DeviceSptr findDevice(DeviceHandle device_handle) const;
+      const DeviceHandle& device_handle) const;
+  virtual DeviceSptr findDevice(const DeviceHandle& device_handle) const;
 
   virtual void searchDeviceDone(const DeviceVector& devices);
   virtual void searchDeviceFailed(const SearchDeviceError& error);
   virtual DeviceSptr addDevice(DeviceSptr device);
 
   virtual void connectionCreated(ConnectionSptr connection,
-                                 const DeviceHandle device_handle,
-                                 const ApplicationHandle app_handle);
-  virtual void connectionFinished(const DeviceHandle device_handle,
-                                  const ApplicationHandle app_handle);
-  virtual void connectionAborted(const DeviceHandle device_handle,
-                                 const ApplicationHandle app_handle,
+                                 const DeviceHandle& device_handle,
+                                 const ApplicationHandle& app_handle);
+  virtual void connectionFinished(const DeviceHandle& device_handle,
+                                  const ApplicationHandle& app_handle);
+  virtual void connectionAborted(const DeviceHandle& device_handle,
+                                 const ApplicationHandle& app_handle,
                                  const CommunicationError& error);
-  virtual void connectDone(const DeviceHandle device_handle,
-                           const ApplicationHandle app_handle);
-  virtual void connectFailed(const DeviceHandle device_handle,
-                             const ApplicationHandle app_handle,
+  virtual void connectDone(const DeviceHandle& device_handle,
+                           const ApplicationHandle& app_handle);
+  virtual void connectFailed(const DeviceHandle& device_handle,
+                             const ApplicationHandle& app_handle,
                              const ConnectError& error);
-  virtual void disconnectDone(const DeviceHandle device_handle,
-                              const ApplicationHandle app_handle);
-  virtual void dataReceiveDone(const DeviceHandle device_handle,
-                               const ApplicationHandle app_handle,
+  virtual void disconnectDone(const DeviceHandle& device_handle,
+                              const ApplicationHandle& app_handle);
+  virtual void dataReceiveDone(const DeviceHandle& device_handle,
+                               const ApplicationHandle& app_handle,
                                RawMessageSptr message);
-  virtual void dataReceiveFailed(const DeviceHandle device_handle,
-                                 const ApplicationHandle app_handle,
+  virtual void dataReceiveFailed(const DeviceHandle& device_handle,
+                                 const ApplicationHandle& app_handle,
                                  const DataReceiveError&);
-  virtual void dataSendDone(const DeviceHandle device_handle,
-                            const ApplicationHandle app_handle, RawMessageSptr message);
-  virtual void dataSendFailed(const DeviceHandle device_handle,
-                              const ApplicationHandle app_handle,
+  virtual void dataSendDone(const DeviceHandle& device_handle,
+                            const ApplicationHandle& app_handle, RawMessageSptr message);
+  virtual void dataSendFailed(const DeviceHandle& device_handle,
+                              const ApplicationHandle& app_handle,
                               RawMessageSptr message, const DataSendError&);
  private:
 
-  ConnectionSptr findEstablishedConnection(const DeviceHandle device_handle,
-                                           const ApplicationHandle app_handle);
+  ConnectionSptr findEstablishedConnection(const DeviceHandle& device_handle,
+                                           const ApplicationHandle& app_handle);
 
   /**
    * @brief Listener for device adapter notifications.

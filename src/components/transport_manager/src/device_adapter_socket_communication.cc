@@ -48,7 +48,7 @@ namespace transport_manager {
 namespace device_adapter {
 
 ThreadedSocketConnection::ThreadedSocketConnection(
-    const DeviceHandle device_handle, const ApplicationHandle app_handle,
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle,
     DeviceAdapterController* controller)
     : controller_(controller),
       frames_to_send_(),

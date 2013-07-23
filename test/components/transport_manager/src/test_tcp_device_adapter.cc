@@ -81,29 +81,30 @@ class MockDeviceAdapterListener : public DeviceAdapterListener {
   MOCK_METHOD2(onSearchDeviceFailed,
       void(const DeviceAdapter* device_adapter, const SearchDeviceError& error));
   MOCK_METHOD3(onConnectDone,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle));
   MOCK_METHOD4(onConnectFailed,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle, const ConnectError& error));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const ConnectError& error));
   MOCK_METHOD4(onUnexpectedDisconnect,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle, const CommunicationError& error));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const CommunicationError& error));
   MOCK_METHOD3(onDisconnectDone,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle));
   MOCK_METHOD4(onDisconnectFailed,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle, const DisconnectError& error));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const DisconnectError& error));
   MOCK_METHOD2(onDisconnectDeviceDone,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle));
   MOCK_METHOD3(onDisconnectDeviceFailed,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const DisconnectDeviceError& error));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const DisconnectDeviceError& error));
   MOCK_METHOD4(onDataSendDone,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle, const RawMessageSptr data_container));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container));
   MOCK_METHOD5(onDataSendFailed,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle, const RawMessageSptr data_container, const DataSendError& error));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container, const DataSendError& error));
   MOCK_METHOD4(onDataReceiveDone,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle, const RawMessageSptr data_container));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container));
   MOCK_METHOD4(onDataReceiveFailed,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle, const DataReceiveError& error));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle, const DataReceiveError& error));
   MOCK_METHOD3(onCommunicationError,
-      void(const DeviceAdapter* device_adapter, const DeviceHandle device_handle, const ApplicationHandle app_handle));
+      void(const DeviceAdapter* device_adapter, const DeviceHandle& device_handle, const ApplicationHandle& app_handle));
+  MOCK_METHOD3(onConnectRequested, void(const DeviceAdapter*, const DeviceHandle&, const ApplicationHandle&));
 };
 
 using ::testing::_;

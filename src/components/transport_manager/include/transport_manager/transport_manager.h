@@ -59,7 +59,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_device_management
    **/
-  virtual void searchDevices(void) = 0;
+  virtual int searchDevices(void) = 0;
 
   /**
    * @brief Start scanning for new devices.
@@ -88,6 +88,7 @@ class TransportManager {
    **/
   virtual void disconnectDevice(const DeviceHandle &device_id) = 0;
 
+  virtual void disconnect(const ConnectionId &connection) = 0;
   /**
    * @brief post new mesage into TM's queue
    *
@@ -95,7 +96,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual bool sendMessageToDevice(
+  virtual int sendMessageToDevice(
       const RawMessageSptr message) = 0;
 
   /**
@@ -126,16 +127,13 @@ class TransportManager {
   virtual void addEventListener(TransportManagerListener *listener) = 0;
 
   /**
-   * @brief register listener that would be used to catch adapter's events
+   * @brief unregister event listener
    *
    * @param event listener
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-//todo: discuss with Alexandr and Polina - do we nedd this feature?
-//  virtual void addAdapterListener(device_adapter::DeviceAdapter *adapter,
-//      device_adapter::DeviceAdapterListener *listener) = 0;
-
+  virtual void removeEventListener(TransportManagerListener *listener) = 0;
   /**
    * @brief remove device from internal storages
    *

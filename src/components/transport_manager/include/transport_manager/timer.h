@@ -1,6 +1,7 @@
-/**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+/*
+ * \file timer.h
+ * \brief 
+ *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,38 +33,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+#ifndef TIMER_H_
+#define TIMER_H_
 
-#include <vector>
-#include <string>
-
-#include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
+#include <pthread.h>
 
 namespace transport_manager {
-/**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
- **/
-typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
-typedef std::string DeviceHandle;
-typedef int ConnectionId;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
 
-struct DeviceDesc {
-  DeviceHandle handle;
-  std::string name;
-
-  DeviceDesc() { }
-  DeviceDesc(const DeviceHandle &handle, const std::string& name)
-    : handle(handle),
-      name(name) {
-  }
+class Timer {
+  pthread_t thread_;
+  pthread_cond_t cond_;
+  pthread_mutex_t mutex_;
+  unsigned long milliseconds;
+  void (*routine)(void*);
+  void *routineParam;
+  static void *threadRoutine(void*);
+  volatile bool need_to_process;
+ public:
+  Timer();
+  Timer(unsigned long milliseconds, void (*routine)(void*), void *param);
+  void start();
+  void stop();
 };
 }
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+#endif /* TIMER_H_ */

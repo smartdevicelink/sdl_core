@@ -45,18 +45,32 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/device_adapter.h"
 #include "transport_manager/device_adapter_listener_impl.h"
+#include <transport_manager/timer.h>
 
 namespace transport_manager {
+
+enum {
+  E_SUCCESS = 0,
+  E_TM_IS_NOT_INITIALIZED,
+  E_INVALID_HANDLE,
+  E_CONNECTION_IS_TO_SHUTDOWN
+};
+
 const uint MAX_TM_THREADS = 2;
 
 //todo: add no_copy_constr where necessary
 //todo: add explicit where necessary
+
+struct TransportManagerAttr {
+  unsigned long disconnectTimeout;
+};
 
 /**
  * @brief Interface of transport manager.
  * @interface TransportManager
  **/
 class TransportManagerImpl : public TransportManager {
+  static TransportManagerAttr default_config_;
  public:
   /**
    * @brief provide default instance of transport manager
@@ -84,7 +98,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_device_management
    **/
-  virtual void searchDevices(void);
+  virtual int searchDevices(void);
 
   /**
    * @brief Connect to all applications discovered on device.
@@ -105,6 +119,9 @@ class TransportManagerImpl : public TransportManager {
    **/
   virtual void disconnectDevice(const DeviceHandle &device_id);
 
+  static void disconnectRoutine(void* p);
+  virtual void disconnect(const ConnectionId &connection);
+  virtual void disconnectForce(const ConnectionId &connection);
   /**
    * @brief post new mesage into TM's queue
    *
@@ -114,7 +131,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return true if succeed, false if connection is going to shut down
    **/
-  virtual bool sendMessageToDevice(const RawMessageSptr message);
+  virtual int sendMessageToDevice(const RawMessageSptr message);
 
   /**
    * @brief receive event from device
@@ -135,6 +152,15 @@ class TransportManagerImpl : public TransportManager {
   virtual void addEventListener(TransportManagerListener *listener);
 
   /**
+   * @brief unregister event listener
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  virtual void removeEventListener(TransportManagerListener *listener);
+
+  /**
    * @brief add new device adapter
    *
    * @param device adapter
@@ -152,7 +178,6 @@ class TransportManagerImpl : public TransportManager {
    **/
 //todo: discuss with Alexandr and Polina - do we nedd this feature?
 //  virtual void addAdapterListener(device_adapter::DeviceAdapter *adapter, device_adapter::DeviceAdapterListener *listener);
-
   /**
    * @brief remove device from internal storages
    *
@@ -172,7 +197,7 @@ class TransportManagerImpl : public TransportManager {
   pthread_cond_t *getDeviceListenerThreadWakeup(void);
 
  protected:
-
+  TransportManagerAttr config_;
   /**
    * @brief post new mesage into TM's queue
    *
@@ -215,17 +240,14 @@ class TransportManagerImpl : public TransportManager {
   class AdapterHandler {
    public:
     typedef std::vector<device_adapter::DeviceAdapter *> AdapterList;
-    device_adapter::DeviceAdapter *getAdapterBySession(
-        transport_manager::SessionID sid);
+    device_adapter::DeviceAdapter *getAdapterBySession(ConnectionId sid);
     device_adapter::DeviceAdapter *getAdapterByDevice(
         transport_manager::DeviceHandle did);
-    void addSession(device_adapter::DeviceAdapter *da,
-                    transport_manager::SessionID sid);
+    void addSession(device_adapter::DeviceAdapter *da, ConnectionId sid);
+    void removeSession(device_adapter::DeviceAdapter *da, ConnectionId sid);
     void addDevice(device_adapter::DeviceAdapter *da,
                    transport_manager::DeviceHandle did);
     void addAdapter(device_adapter::DeviceAdapter *da);
-    void removeSession(device_adapter::DeviceAdapter *da,
-                       transport_manager::SessionID sid);
     void removeDevice(const transport_manager::DeviceHandle &device);
     const AdapterList &device_adapters(void);
 
@@ -241,7 +263,8 @@ class TransportManagerImpl : public TransportManager {
     /**
      * @brief container that used to get device id by session id
      **/
-    std::map<transport_manager::SessionID, device_adapter::DeviceAdapter *> session_to_adapter_map_;
+
+    std::map<ConnectionId, device_adapter::DeviceAdapter *> session_to_adapter_map_;
 
     /**
      * @brief container that used to get adapter id by device id
@@ -249,8 +272,7 @@ class TransportManagerImpl : public TransportManager {
      **/
     // FIXME: Team had decided one device cannot be shared between multiple adapters.
     //         Change multimap to map
-    std::multimap<transport_manager::DeviceHandle,
-        device_adapter::DeviceAdapter *> device_to_adapter_multimap_;
+    std::map<transport_manager::DeviceHandle, device_adapter::DeviceAdapter *> device_to_adapter_map_;
 
   };
 
@@ -268,7 +290,6 @@ class TransportManagerImpl : public TransportManager {
    **/
   typedef std::vector<DeviceAdapterEvent> EventQueue;
 
-
   /**
    * @brief default constructor
    *
@@ -276,16 +297,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  TransportManagerImpl();
-
-  /**
-   * @brief constructor used to create new TM with device adapter
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  TransportManagerImpl(device_adapter::DeviceAdapter *device_adapter);
+  TransportManagerImpl(const TransportManagerAttr &config);
 
   /**
    * @brief constructor used to create new TM with device adapter
@@ -382,14 +394,35 @@ class TransportManagerImpl : public TransportManager {
   bool is_initialized_;
  private:
   struct Connection {
+    ConnectionId id;
+    DeviceHandle device;
+    ApplicationHandle application;
+    Timer timer;
     bool shutDown;
+    int messages_count;
 
+    Connection(const ConnectionId &id, const DeviceHandle &dev_id,
+               const ApplicationHandle &app_id)
+        : id(id),
+          device(dev_id),
+          application(app_id),
+          shutDown(false),
+          messages_count(0) {
+    }
     Connection()
-        : shutDown(false) {
+        : id(-1),
+          application(-1),
+          shutDown(false),
+          messages_count(-1) {
     }
   };
   int connection_id_counter_;
-  std::map<int, Connection> connections_;
+  std::map<ConnectionId, Connection> id_to_connections_map_;
+  std::map<std::pair<DeviceHandle, ApplicationHandle>, Connection> dev_app_to_connections_map_;
+
+  Connection& getConnection(const ConnectionId &id);
+  Connection& getConnection(const DeviceHandle& device,
+                                  const ApplicationHandle& application);
 };
 //class
 }//namespace

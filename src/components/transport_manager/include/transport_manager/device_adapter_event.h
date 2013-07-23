@@ -41,28 +41,35 @@ namespace device_adapter {
 class DeviceAdapter;
 }
 
+using device_adapter::DeviceAdapter;
+
 class DeviceAdapterEvent {
  public:
   bool operator ==(const DeviceAdapterEvent &other);
-  DeviceAdapterEvent(int type, SessionID session_id,
-                     device_adapter::DeviceAdapter *device_adapter, RawMessageSptr data,
+  DeviceAdapterEvent(int type, ConnectionId session_id,
+                     DeviceAdapter *device_adapter,
+                     const DeviceHandle &device_handle,
+                     RawMessageSptr data,
                      BaseError *error);
   ~DeviceAdapterEvent();
   void set_event_type(int type);
-  void set_session_id(int id);
+  void set_connection_id(int id);
   void set_device_adapter(device_adapter::DeviceAdapter *device_adapter);
   void set_data(RawMessageSptr data);
   void set_error(BaseError *error);
+  void set_device_handle(const DeviceHandle &device_handle);
 
+  const DeviceHandle &device_handle() const;
   int event_type(void) const;
-  int session_id(void) const;
+  ApplicationHandle application_id(void) const;
   device_adapter::DeviceAdapter *device_adapter(void) const;
   RawMessageSptr data(void) const;
   BaseError *event_error(void) const;
 
  private:
+  DeviceHandle device_handle_;
   int event_type_;
-  int session_id_;
+  ApplicationHandle application_id_;
   device_adapter::DeviceAdapter *device_adapter_;
   RawMessageSptr event_data_;
   BaseError *event_error_;

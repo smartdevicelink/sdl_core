@@ -52,8 +52,8 @@ class ThreadedSocketConnection : public Connection {
     socket_ = socket;
   }
  protected:
-  ThreadedSocketConnection(const DeviceHandle device_handle,
-                           const ApplicationHandle app_handle,
+  ThreadedSocketConnection(const DeviceHandle& device_handle,
+                           const ApplicationHandle& app_handle,
                            DeviceAdapterController* controller);
   virtual ~ThreadedSocketConnection();
 
