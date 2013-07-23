@@ -65,7 +65,7 @@ void SubscribeButtonRequest::Run() {
                                           [str::button_name].asUInt());
 
   if (app->IsSubscribedToButton(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Already subscibed to button " << btn_id);
+    LOG4CXX_ERROR_EXT(logger_, "Already subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }

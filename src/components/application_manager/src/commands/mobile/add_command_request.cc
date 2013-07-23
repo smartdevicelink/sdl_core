@@ -63,6 +63,13 @@ void AddCommandRequest::Run() {
     return;
   }
 
+  if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id)))
+  {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   if (app->
       FindCommand((*message_)[strings::msg_params][strings::cmd_id].asUInt())) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
@@ -76,8 +83,15 @@ void AddCommandRequest::Run() {
     ++chaining_counter;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands) &&
+      (*message_)[strings::msg_params][strings::vr_commands].length() > 0) {
     ++chaining_counter;
+  }
+
+  if (!chaining_counter) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
@@ -87,16 +101,23 @@ void AddCommandRequest::Run() {
       (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::menu_params] =
       (*message_)[strings::msg_params][strings::menu_params];
-    msg_params[strings::cmd_icon] =
-      (*message_)[strings::msg_params][strings::cmd_icon];
 
-    std::string file_path = file_system::FullPath(app->name());
-    file_path += "/";
-    file_path += (*message_)[strings::msg_params][strings::cmd_icon]
-        [strings::value].asString();
-
-    msg_params[strings::cmd_icon][strings::value] = file_path;
     msg_params[strings::app_id] = app->app_id();
+
+    if ((*message_)[strings::msg_params]
+                   [strings::cmd_icon].keyExists(strings::value) &&
+         0 < (*message_)[strings::msg_params][strings::cmd_icon]
+                                             [strings::value].length()) {
+      msg_params[strings::cmd_icon] =
+         (*message_)[strings::msg_params][strings::cmd_icon];
+
+       std::string file_path = file_system::FullPath(app->name());
+       file_path += "/";
+       file_path += (*message_)[strings::msg_params][strings::cmd_icon]
+           [strings::value].asString();
+
+       msg_params[strings::cmd_icon][strings::value] = file_path;
+    }
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true,
                      chaining_counter);
