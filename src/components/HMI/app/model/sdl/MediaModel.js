@@ -262,7 +262,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         }
 
         if(params.graphic){
-            this.appInfo.set('trackIcon', params.graphic);
+            this.appInfo.set('trackIcon', params.graphic.value);
         }else{
             this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
         }

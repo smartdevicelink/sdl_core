@@ -137,6 +137,8 @@ FFW.Navigation = FFW.RPCObserver.create({
 	
 	        switch(request.method){
 	            case "Navigation.IsReady": {
+	                
+	            	Em.Logger.log("FFW." + method + "Response");
 	
 	                // send repsonse
 	                var JSONMessage = {

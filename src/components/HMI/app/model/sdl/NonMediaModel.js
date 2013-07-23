@@ -130,7 +130,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend( {
             }
         }
 
-        if( params.graphic ){
+        if( params.graphic.value ){
             this.appInfo.set( 'mainImage', params.graphic );
         }else{
             this.appInfo.set( 'mainImage', 'images/sdl/audio_icon.jpg' );

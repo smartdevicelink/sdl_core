@@ -127,6 +127,8 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 	        switch(request.method){
 	            case "VehicleInfo.GetVehicleData": {
 	                
+	            	Em.Logger.log("FFW." + method + "Response");
+	                
 	                var vehicleData = SDL.SDLVehicleInfoModel.getVehicleData(request.params),
 	                    resultCode;
 	
@@ -178,6 +180,8 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 	            }
 	            
 	            case "VehicleInfo.IsReady": {
+	                
+	            	Em.Logger.log("FFW." + method + "Response");
 	                
 	                // send repsonse
 	                var JSONMessage = {
@@ -280,7 +284,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
      * @type {int} id
      */
     vehicleInfoReadDIDResponse: function(didResult, resultCode, id) {
-        Em.Logger.log("FFW.VehicleInfo.ReadDID");
+        Em.Logger.log("FFW.VehicleInfo.ReadDIDResponse");
 
         var JSONMessage;
         // send repsonse
@@ -305,7 +309,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
      * @type {Number} id
      */
     vehicleInfoGetDTCsResponse: function(ecuHeader, dtc, result, id) {
-        Em.Logger.log("FFW.VehicleInfo.GetDTCs");
+        Em.Logger.log("FFW.VehicleInfo.GetDTCsResponse");
 
         var JSONMessage;
         // send repsonse
