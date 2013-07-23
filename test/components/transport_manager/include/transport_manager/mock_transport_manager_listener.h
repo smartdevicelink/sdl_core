@@ -40,6 +40,7 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/device_adapter.h"
+#include "transport_manager/device_handle_generator.h"
 #include "transport_manager/transport_manager_listener.h"
 
 using ::transport_manager::ApplicationList;

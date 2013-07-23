@@ -23,6 +23,7 @@ set (LIBRARIES
 set (SOURCES
    ./src/transport_manager.cc
    ./src/mock_device_adapter.cc
+   ./src/raw_message_matcher.cc
 )
 
 create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")

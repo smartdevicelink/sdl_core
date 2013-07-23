@@ -1,6 +1,6 @@
 /*
- * \file matchers.cc
- * \brief customers matchers for gmock
+ * \file raw_message_matcher.h
+ * \brief matcher RawMessagePtr
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -32,3 +32,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#ifndef TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MATCHERS_H_
+#define TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MATCHERS_H_
+
+#include <gmock/gmock.h>
+
+#include "protocol_handler/raw_message.h"
+#include "transport_manager/common.h"
+
+using ::transport_manager::RawMessageSptr;
+
+using ::testing::Matcher;
+using ::testing::MatcherInterface;
+using ::testing::MatchResultListener;
+
+namespace test {
+namespace components {
+namespace transport_manager {
+
+class RawMessageMatcher : public MatcherInterface<RawMessageSptr> {
+ public:
+  explicit RawMessageMatcher(RawMessageSptr ptr);
+
+  virtual bool MatchAndExplain(const RawMessageSptr ptr,
+                                   MatchResultListener* listener) const;
+  virtual void DescribeTo(::std::ostream* os) const;
+  virtual void DescribeNegationTo(::std::ostream* os) const;
+
+ private:
+  const RawMessageSptr ptr_;
+};
+
+inline const Matcher<RawMessageSptr> RawMessageEq(RawMessageSptr msg) {
+  return MakeMatcher(new RawMessageMatcher(msg));
+}
+
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
+
+#endif /* TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MATCHERS_H_ */

@@ -1,6 +1,6 @@
 /*
- * \file MockDeviceAdapter.h
- * \brief MockDeviceAdapter
+ * \file mock_device_adapter.h
+ * \brief Fake for DeviceAdapter
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -71,6 +71,7 @@ class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdap
  public:
   MockDeviceAdapter()
    : DeviceAdapterImpl(new MockDeviceScanner(), new MockConnectionFactory(), NULL) { }
+
   virtual ~MockDeviceAdapter();
 
   struct listenerData_t {
