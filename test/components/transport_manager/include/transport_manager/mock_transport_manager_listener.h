@@ -44,9 +44,16 @@
 #include "transport_manager/transport_manager_listener.h"
 
 using ::transport_manager::ApplicationList;
+using ::transport_manager::ApplicationHandle;
 using ::transport_manager::device_adapter::DeviceAdapter;
 using ::transport_manager::DeviceHandle;
 using ::transport_manager::SearchDeviceError;
+using ::transport_manager::ConnectionId;
+using ::transport_manager::DeviceDesc;
+using ::transport_manager::ConnectError;
+using ::transport_manager::DisconnectDeviceError;
+using ::transport_manager::DataSendError;
+using ::transport_manager::DataReceiveError;
 
 namespace test {
 namespace components {
@@ -61,11 +68,16 @@ class MockTransportManagerListener
   MOCK_METHOD0(onSearchDeviceDone, void());
   MOCK_METHOD2(onSearchDeviceFailed, void(const DeviceAdapter* device_adapter,
                                            const SearchDeviceError& error));
-  MOCK_METHOD2(onConnectDone, void(const DeviceAdapter* device_adapter,
+
+  MOCK_METHOD4(onConnectDone, void(const DeviceAdapter* device_adapter,
+                                    const DeviceHandle device_id,
+                                    const ApplicationHandle app_id,
                                     const ConnectionId session_id));
-  MOCK_METHOD3(onConnectFailed, void(const DeviceAdapter* device_adapter,
-                                      const ConnectionId session_id,
+  MOCK_METHOD4(onConnectFailed, void(const DeviceAdapter* device_adapter,
+                                      const DeviceHandle device_id,
+                                      const ApplicationHandle app_id,
                                       const ConnectError& error));
+
   MOCK_METHOD2(onDisconnectDone, void(const DeviceAdapter* device_adapter,
                                        const ConnectionId session_id));
   MOCK_METHOD2(onDisconnectDeviceDone, void(const DeviceAdapter* device_adapter,
@@ -73,9 +85,12 @@ class MockTransportManagerListener
   MOCK_METHOD3(onDisconnectFailed, void(const DeviceAdapter* device_adapter,
                                          const ConnectionId session_id,
                                          const DisconnectDeviceError& error));
+  MOCK_METHOD2(onDisconnectDeviceDone, void(const DeviceAdapter* device_adapter,
+                                             const ConnectionId session_id));
   MOCK_METHOD3(onDisconnectDeviceFailed, void(const DeviceAdapter* device_adapter,
                                                const DeviceHandle &device_id,
                                                const DisconnectDeviceError& error));
+
   MOCK_METHOD3(onDataReceiveDone, void(const DeviceAdapter* device_adapter,
                                         const ConnectionId session_id,
                                         const RawMessageSptr data_container));

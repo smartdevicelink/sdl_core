@@ -415,10 +415,6 @@ void TransportManagerImpl::eventListenerThread(void) {
       RawMessageSptr data;
       DataReceiveError *d_err;
       Connection connection = getConnection(device_handle, app_handle);
-      if (connection.id < 0) {
-        connection = Connection(connection_id_counter_++, device_handle,
-                                app_handle);
-      }
 
       switch ((*it).event_type()) {
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE:
@@ -452,6 +448,8 @@ void TransportManagerImpl::eventListenerThread(void) {
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE:
+          connection = Connection(connection_id_counter_++, device_handle,
+                                  app_handle);
           adapter_handler_.addSession((*it).device_adapter(),
                                       (*it).application_id());
           id_to_connections_map_.insert(
@@ -463,7 +461,8 @@ void TransportManagerImpl::eventListenerThread(void) {
           for (TransportManagerListenerList::iterator tml_it =
               transport_manager_listener_.begin();
               tml_it != transport_manager_listener_.end(); ++tml_it) {
-            (*tml_it)->onConnectDone(da, connection.id);
+            (*tml_it)->onConnectDone(da, connection.device,
+                                     connection.application, connection.id);
           }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:

@@ -1,6 +1,6 @@
 /*
- * \file raw_message_matcher.h
- * \brief matcher RawMessagePtr
+ * \file fake_device_adapter.h
+ * \brief Fake device adapter for test without real devices
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,43 +33,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_
 
-#include <gmock/gmock.h>
+#include "transport_manager/device_adapter_impl.h"
 
-#include "protocol_handler/raw_message.h"
-#include "transport_manager/common.h"
-
-using ::transport_manager::RawMessageSptr;
-
-using ::testing::Matcher;
-using ::testing::MatcherInterface;
-using ::testing::MatchResultListener;
+using ::transport_manager::device_adapter::DeviceAdapterImpl;
+using ::transport_manager::device_adapter::DeviceType;
+using ::transport_manager::device_adapter::DeviceVector;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class RawMessageMatcher : public MatcherInterface<RawMessageSptr> {
+class FakeDeviceAdapter : public DeviceAdapterImpl {
  public:
-  explicit RawMessageMatcher(RawMessageSptr ptr);
+  FakeDeviceAdapter();
+  ~FakeDeviceAdapter() {}
+  DeviceType getDeviceType() const { return "fake-adapter"; }
+  void addDevice(std::string name);
 
-  virtual bool MatchAndExplain(const RawMessageSptr ptr,
-                                   MatchResultListener* listener) const;
-  virtual void DescribeTo(::std::ostream* os) const;
-  virtual void DescribeNegationTo(::std::ostream* os) const;
-
- private:
-  const RawMessageSptr ptr_;
+  DeviceVector devices_;
 };
-
-inline const Matcher<RawMessageSptr> RawMessageEq(RawMessageSptr msg) {
-  return MakeMatcher(new RawMessageMatcher(msg));
-}
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
 
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_ */

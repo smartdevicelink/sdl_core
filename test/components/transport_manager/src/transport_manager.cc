@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "protocol_handler/raw_message.h"
 #include "transport_manager/common.h"
@@ -42,11 +42,15 @@
 #include "transport_manager/device_handle_generator_impl.h"
 
 #include "transport_manager/raw_message_matcher.h"
-#include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/fake_device_adapter.h"
 #include "transport_manager/mock_transport_manager_listener.h"
 
 using ::testing::_;
 using ::protocol_handler::RawMessage;
+using ::transport_manager::TransportManager;
+using ::transport_manager::TransportManagerImpl;
+using ::transport_manager::DeviceHandle;
+using ::transport_manager::ApplicationHandle;
 
 namespace test {
 namespace components {
@@ -63,14 +67,14 @@ class TransportManagerTest : public ::testing::Test {
  protected:
   static pthread_mutex_t test_mutex;
   static pthread_cond_t test_cond;
-  static MockDeviceAdapter *fake_adapter;
+  static FakeDeviceAdapter *fake_adapter;
   static MockTransportManagerListener *tm_listener;
 
   static void SetUpTestCase() {
     pthread_mutex_init(&test_mutex, NULL);
     pthread_cond_init(&test_cond, NULL);
     tm_listener = new MockTransportManagerListener();
-    fake_adapter = new MockDeviceAdapter();
+    fake_adapter = new FakeDeviceAdapter();
     fake_adapter->init(NULL);
     TransportManager* tm = TransportManagerImpl::instance();
     tm->addEventListener(tm_listener);
@@ -78,6 +82,7 @@ class TransportManagerTest : public ::testing::Test {
   }
 
   static void TearDownTestCase() {
+    delete tm_listener;
     pthread_cond_destroy(&test_cond);
     pthread_mutex_destroy(&test_mutex);
   }
@@ -100,10 +105,10 @@ class TransportManagerTest : public ::testing::Test {
 
 pthread_mutex_t TransportManagerTest::test_mutex;
 pthread_cond_t TransportManagerTest::test_cond;
-MockDeviceAdapter *TransportManagerTest::fake_adapter = 0;
+FakeDeviceAdapter *TransportManagerTest::fake_adapter = 0;
 MockTransportManagerListener *TransportManagerTest::tm_listener = 0;
 
-TEST_F(TransportManagerTest, instance)
+TEST_F(TransportManagerTest, Instance)
 {
   TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
   ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
@@ -134,26 +139,25 @@ TEST_F(TransportManagerTest, SearchDeviceDone)
 
 TEST_F(TransportManagerTest, ConnectDeviceDone)
 {
-  const ConnectionId kSession = 42;
-  EXPECT_CALL(*tm_listener, onConnectFailed(_, kSession, _)).Times(0);
-  EXPECT_CALL(*tm_listener, onConnectDone(_, kSession)).Times(1)
+  const DeviceHandle kDevice = "TestDevice";
+  const ApplicationHandle kApplication = 1;
+  EXPECT_CALL(*tm_listener, onConnectFailed(_, kDevice, kApplication, _)).Times(0);
+  EXPECT_CALL(*tm_listener, onConnectDone(_, kDevice, kApplication, _)).Times(1)
       .WillOnce(WaitTest(&test_mutex, &test_cond));
 
-  const DeviceHandle kDevice = "1";
-  const ApplicationHandle kApplication = 1;
   TransportManagerImpl::instance()->connectDevice(kDevice, kApplication);
   EXPECT_TRUE(waitCond(1));
 }
 
 TEST_F(TransportManagerTest, ConnectDeviceFailed)
 {
-  const ConnectionId kSession = 333;
-  EXPECT_CALL(*tm_listener, onConnectDone(_, kSession)).Times(0);
-  EXPECT_CALL(*tm_listener, onConnectFailed(_, kSession, _)).Times(1)
+  const DeviceHandle kDevice = "NoDevice";
+  const ApplicationHandle kApplication = 0;
+  EXPECT_CALL(*tm_listener, onConnectDone(_, kDevice, kApplication, _)).Times(0);
+  EXPECT_CALL(*tm_listener, onConnectFailed(_, kDevice, kApplication, _)).Times(1)
       .WillOnce(WaitTest(&test_mutex, &test_cond));
 
-  const DeviceHandle kDevice = "333";
-  const ApplicationHandle kApplication = 333;
+
   TransportManagerImpl::instance()->connectDevice(kDevice, kApplication);
   EXPECT_TRUE(waitCond(1));
 }
