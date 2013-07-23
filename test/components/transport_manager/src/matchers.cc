@@ -1,6 +1,7 @@
-/**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+/*
+ * \file matchers.cc
+ * \brief customers matchers for gmock
+ *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,39 +32,3 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-
-#include <vector>
-#include <string>
-
-#include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
-
-namespace transport_manager {
-/**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
- **/
-typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
-typedef std::string DeviceHandle;
-typedef int ConnectionId;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
-
-struct DeviceDesc {
-  DeviceHandle handle;
-  std::string name;
-
-  DeviceDesc() { }
-  DeviceDesc(const DeviceHandle &handle, const std::string& name)
-    : handle(handle),
-      name(name) {
-  }
-};
-}
-
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON

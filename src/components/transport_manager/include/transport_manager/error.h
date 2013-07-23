@@ -1,6 +1,6 @@
 /**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+ * \file error.h
+ * \brief Transport manager error types definition.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,38 +32,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-
-#include <vector>
-#include <string>
-
-#include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
 
 namespace transport_manager {
-/**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
- **/
-typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
-typedef std::string DeviceHandle;
-typedef int ConnectionId;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
 
-struct DeviceDesc {
-  DeviceHandle handle;
-  std::string name;
-
-  DeviceDesc() { }
-  DeviceDesc(const DeviceHandle &handle, const std::string& name)
-    : handle(handle),
-      name(name) {
-  }
+class BaseError {
 };
-}
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+class SearchDeviceError : public BaseError {
+};
+
+class ConnectError : public BaseError {
+};
+
+class DisconnectError : public BaseError {
+};
+
+class DisconnectDeviceError : public BaseError {
+};
+
+class DataReceiveError : public BaseError {
+};
+
+class DataSendError : public BaseError {
+};
+
+class CommunicationError : public BaseError {
+};
+
+}  // namespace
+
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR

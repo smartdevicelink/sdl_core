@@ -1,6 +1,7 @@
 /**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+ * \file handle_generator.h
+ * \brief HandleGeneratorImpl class header file.
+ *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,38 +33,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR_IMPL
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR_IMPL
 
-#include <vector>
-#include <string>
+#include <pthread.h>
 
-#include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
+#include "device_handle_generator.h"
 
 namespace transport_manager {
+
 /**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
+ * @brief Interface for device handle generator.
+ * @interface DeviceHandleGenerator
  **/
-typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
-typedef std::string DeviceHandle;
-typedef int ConnectionId;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
+class DeviceHandleGeneratorImpl : public DeviceHandleGenerator {
+ public:
 
-struct DeviceDesc {
-  DeviceHandle handle;
-  std::string name;
+  DeviceHandleGeneratorImpl();
 
-  DeviceDesc() { }
-  DeviceDesc(const DeviceHandle &handle, const std::string& name)
-    : handle(handle),
-      name(name) {
-  }
+  /**
+   * @brief Destructor.
+   **/
+  virtual ~DeviceHandleGeneratorImpl();
+
+  /**
+   * @brief Generate new device handle.
+   *
+   * Method used for generation of unique device handle.
+   *
+   * @return New device handle.
+   **/
+  virtual DeviceHandle generate();
+
+ private:
+  /**
+   * @brief Mutex restricting access to new device handle generation
+   **/
+  mutable pthread_mutex_t device_handle_generation_mutex_;
+
+  /**
+   * @brief Last used device handle
+   *
+   * Used during device handle generation
+   **/
+  DeviceHandle last_used_device_handle_;
+
 };
-}
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+}  // namespace transport_manager
+
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR_IMPL

@@ -37,43 +37,16 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER
 
 #include "transport_manager/common.h"
-#include "transport_manager/device_adapter.h"
+#include "transport_manager/error.h"
 
 namespace transport_manager {
 
+namespace device_adapter {
+
+class DeviceAdapter;
+
 class DeviceAdapterListener {
  public:
-  // TODO: Kill me, please!
-  class DeviceAdapterEvent {
-   public:
-    bool operator ==(const DeviceAdapterEvent &other);
-    DeviceAdapterEvent(int type, int session_id, DeviceAdapter *adapter,
-                       const DeviceHandle &device,
-                       RawMessageSptr data, DeviceAdapterError *error);
-    ~DeviceAdapterEvent();
-    void set_event_type(int type);
-    void set_session_id(int id);
-    void set_device_adapter(DeviceAdapter *device_adapter);
-    void set_data(RawMessageSptr data);
-    void set_error(DeviceAdapterError *error);
-    void set_device_handle(const DeviceHandle &handle);
-
-    int event_type(void) const;
-    int connection_id(void) const;
-    DeviceAdapter *device_adapter(void) const;
-    RawMessageSptr data(void) const;
-    DeviceAdapterError *event_error(void) const;
-    const DeviceHandle &device_handle() const;
-
-   private:
-    int event_type_;
-    int connection_id_;
-    DeviceAdapter *device_adapter_;
-    DeviceHandle device_handle_;
-    RawMessageSptr event_data_;
-    DeviceAdapterError *event_error_;
-  };
-
   virtual ~DeviceAdapterListener();
   virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter) = 0;
   virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
@@ -81,12 +54,20 @@ class DeviceAdapterListener {
 
   virtual void onConnectDone(
       const DeviceAdapter* device_adapter,
-      const DeviceHandle device,
+      const DeviceHandle &device,
       const ConnectionId session_id) = 0;
   virtual void onConnectFailed(const DeviceAdapter* device_adapter,
-                               const DeviceHandle device,
+                               const DeviceHandle &device,
                                const ConnectionId session_id,
                                const ConnectError& error) = 0;
+
+  virtual void onConnectRequested(const DeviceAdapter* device_adapter,
+                                  const DeviceHandle device_handle,
+                                  const ApplicationHandle app_handle) = 0;
+
+  virtual void onUnexpectedDisconnect(const DeviceAdapter* device_adapter,
+                                      const ConnectionId session_id,
+                                      const CommunicationError& error) = 0;
 
   virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
                                 const ConnectionId session_id) = 0;
@@ -118,5 +99,8 @@ class DeviceAdapterListener {
   virtual void onCommunicationError(const DeviceAdapter* device_adapter,
                                     const ConnectionId session_id) = 0;
 };
-}  //namespace
+
+}  // device_adapter namespace
+
+}  //transport_manager namespace
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER

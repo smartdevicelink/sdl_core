@@ -53,7 +53,7 @@ RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
 }
 
 RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
-                       int serialNumber, unsigned char* data,
+                       int serialNumber, const unsigned char* data,
                        unsigned int data_size)
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),

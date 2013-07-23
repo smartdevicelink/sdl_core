@@ -41,9 +41,11 @@
 #include <list>
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
-#include "protocol_handler/raw_message.h"
+#include "transport_manager/error.h"
 
 namespace transport_manager {
+
+namespace device_adapter {
 
 class Configuration;
 class DeviceAdapterListener;
@@ -65,7 +67,8 @@ class DeviceAdapter {
   };
 
  public:
-  virtual ~DeviceAdapter() { }
+  virtual ~DeviceAdapter() {
+  }
 
   virtual DeviceType getDeviceType() const = 0;
 
@@ -73,6 +76,7 @@ class DeviceAdapter {
    virtual Error LoadState(DeviceAdapterState* state) = 0;
    virtual void SaveState(DeviceAdapterState* state) = 0;
    */
+  virtual bool isInitialised() const = 0;
 
   virtual Error init(Configuration* configuration) = 0;
 
@@ -86,6 +90,11 @@ class DeviceAdapter {
                         const int session_id) = 0;
 
   virtual bool isClientOriginatedConnectSupported() const = 0;
+  virtual Error acceptConnect(const DeviceHandle device_handle,
+                              const ApplicationHandle app_handle,
+                              const ConnectionId session_id) = 0;
+  virtual Error declineConnect(const DeviceHandle device_handle,
+                               const ApplicationHandle app_handle) = 0;
 
   virtual Error disconnect(const int session_id) = 0;
   virtual Error disconnectDevice(const DeviceHandle device_handle) = 0;
@@ -97,36 +106,8 @@ class DeviceAdapter {
       const DeviceHandle device_handle) const = 0;
 };
 
-class DeviceAdapterError {
-};
+}  // namespace device_adapter
 
-class SearchDeviceError : public DeviceAdapterError {
-};
-
-class ConnectError : public DeviceAdapterError {
-};
-
-class DisconnectError : public DeviceAdapterError {
-};
-
-class DisconnectDeviceError : public DeviceAdapterError {
-};
-
-class DataReceiveError : public DeviceAdapterError {
-};
-
-class DataSendError : public DeviceAdapterError {
-};
-
-class CommunicationError : public DeviceAdapterError {
-};
-/*
- class DataContainer
- {
- public:
- DataContainer(void* data, int data_size);
- };
- */
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER

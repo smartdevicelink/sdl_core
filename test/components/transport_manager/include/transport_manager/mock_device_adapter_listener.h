@@ -37,8 +37,9 @@
 #define MOCK_DEVICE_ADAPTER_LISTENER_H_
 
 #include <gmock/gmock.h>
-#include <transport_manager/common.h>
-#include <transport_manager/device_adapter_listener.h>
+
+#include "transport_manager/common.h"
+#include "transport_manager/device_adapter_listener.h"
 
 using namespace transport_manager;
 

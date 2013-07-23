@@ -36,188 +36,177 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <transport_manager/transport_manager_impl.h>
-#include <transport_manager/mock_device_adapter.h>
-#include <transport_manager/mock_device_adapter_listener.h>
-#include <transport_manager/mock_transport_manager_listener.h>
-#include <protocol_handler/raw_message.h>
-#include "transport_manager/device_adapter_listener_impl.h"
-#include "transport_manager/transport_manager_listener_impl.h"
+#include "protocol_handler/raw_message.h"
+#include "transport_manager/common.h"
+#include "transport_manager/transport_manager_impl.h"
+#include "transport_manager/device_handle_generator_impl.h"
 
-using namespace transport_manager;
-using namespace test::components::transport_manager;
-using protocol_handler::RawMessage;
+//#include "transport_manager/matchers.h"
+#include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_transport_manager_listener.h"
 
-using testing::_;
-using ::testing::Eq;
-using ::testing::Pointee;
-using ::testing::Property;
-using ::testing::AtLeast;
-using ::testing::MatcherInterface;
-using ::testing::MatchResultListener;
-using ::testing::Matcher;
+using ::testing::_;
+using ::protocol_handler::RawMessage;
 
-class RawMessageSptrMatcher : public MatcherInterface<RawMessageSptr> {
- public:
-  explicit RawMessageSptrMatcher(const unsigned char* data)
-      : data_(data), data_size_(0) {}
+namespace test {
+namespace components {
+namespace transport_manager {
 
-  virtual bool MatchAndExplain(const RawMessageSptr ptr,
-                               MatchResultListener* listener) const {
-    unsigned char *d = ptr->data();
-    unsigned int count = 0;
-    data_size_ = ptr->data_size();
-    for(int i = 0; i < ptr->data_size(); ++i){
-      if(d[i] == data_[i])
-        ++count;
-    }
-    return count == ptr->data_size();
-  }
-
-  virtual void DescribeTo(::std::ostream* os) const {
-    *os << "data_ =  " ;
-    for(int i = 0; i < data_size_; ++i){
-      if(0 != data_[i])
-        *os << data_[i];
-    }
-  }
-
-  virtual void DescribeNegationTo(::std::ostream* os) const {
-    *os << "data_ =  " ;
-    for(int i = 0; i < data_size_; ++i){
-      if (0 != data_[i])
-      *os << data_[i];
-    }
-  }
- private:
-  const unsigned char *data_;
-  mutable unsigned int data_size_;
-};
-
-inline const Matcher<RawMessageSptr> RawMessageSptrEq(const unsigned char* data) {
-  return MakeMatcher(new RawMessageSptrMatcher(data));
+ACTION_P2(WaitTest, mutex, cond)
+{
+  pthread_mutex_lock(mutex);
+  pthread_cond_signal(cond);
+  pthread_mutex_unlock(mutex);
 }
 
-DeviceDesc hello;
-ApplicationHandle hello_app;
-pthread_cond_t task_complete;
-pthread_mutex_t task_mutex;
+class TransportManagerTest : public ::testing::Test {
+ protected:
+  static pthread_mutex_t test_mutex;
+  static pthread_cond_t test_cond;
+  static MockDeviceAdapter *mock_da;
+  static MockTransportManagerListener *tml;
 
-MockDeviceAdapter *mock_da;
-MockTransportManagerListener *tmListener;
-int connection_id;
+  static void SetUpTestCase() {
+    pthread_mutex_init(&test_mutex, NULL);
+    pthread_cond_init(&test_cond, NULL);
+    tml = new MockTransportManagerListener();
+    mock_da = new MockDeviceAdapter();
+    mock_da->init(NULL);
+    TransportManager* tm = TransportManagerImpl::instance();
+    tm->addEventListener(tml);
+    tm->addDeviceAdapter(mock_da);
+  }
 
-class MyListener : public TransportManagerListenerImpl {
-  void onDeviceFound(const DeviceDesc& device,
-                          const ApplicationList app_list) {
-    hello = device;
-    hello_app = *app_list.begin();
-    pthread_cond_signal(&task_complete);
+  static void TearDownTestCase() {
+    pthread_cond_destroy(&test_cond);
+    pthread_mutex_destroy(&test_mutex);
   }
-  void onConnectDone(const DeviceAdapter* device_adapter,
-                     const transport_manager::ConnectionId session_id) {
-    connection_id = session_id;
-    pthread_cond_signal(&task_complete);
+
+  virtual void SetUp() {
+    pthread_mutex_lock(&test_mutex);
   }
-  void onDataReceiveDone(const DeviceAdapter* device_adapter,
-                         const transport_manager::ConnectionId session_id,
-                         const RawMessageSptr data_container) {
-    pthread_cond_signal(&task_complete);
+
+  virtual void TearDown() {
+    pthread_mutex_unlock(&test_mutex);
   }
-  virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
-                                      const ConnectionId session_id){
-    pthread_cond_signal(&task_complete);
-  }
-  virtual void onDisconnectDeviceDone(const DeviceAdapter* device_adapter,
-                                      const DeviceHandle device_id){
-    pthread_cond_signal(&task_complete);
+
+  bool waitCond(int seconds) {
+    timespec elapsed;
+    clock_gettime(CLOCK_REALTIME, &elapsed);
+    elapsed.tv_sec += seconds;
+    return pthread_cond_timedwait(&test_cond, &test_mutex, &elapsed) == 0;
   }
 };
 
-TEST(TransportManagerImplTest, instance)
+pthread_mutex_t TransportManagerTest::test_mutex;
+pthread_cond_t TransportManagerTest::test_cond;
+MockDeviceAdapter *TransportManagerTest::mock_da = 0;
+MockTransportManagerListener *TransportManagerTest::tml = 0;
+
+TEST_F(TransportManagerTest, instance)
 {
   TransportManagerImpl* prev_impl = TransportManagerImpl::instance();
   ASSERT_EQ(prev_impl, TransportManagerImpl::instance());
 }
 
-TEST(TransportManagerImplTest, search)
+TEST_F(TransportManagerTest, SearchDeviceFailed)
 {
-  pthread_mutex_lock(&task_mutex);
-  TransportManagerImpl* tm = TransportManagerImpl::instance();
+  EXPECT_CALL(*tml, onDeviceFound(_, _)).Times(0);
+  EXPECT_CALL(*tml, onSearchDeviceDone()).Times(0);
+  EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(1)
+      .WillOnce(WaitTest(&test_mutex, &test_cond));
 
-  EXPECT_CALL(*tmListener, onDeviceFound(_, _)).Times(1);
-  EXPECT_CALL(*tmListener, onSearchDeviceDone()).Times(1);
-  EXPECT_CALL(*tmListener, onSearchDeviceFailed(_, _)).Times(0);
-
-  tm->searchDevices();
-  pthread_cond_wait(&task_complete, &task_mutex);
-  pthread_mutex_unlock(&task_mutex);
+  TransportManagerImpl::instance()->searchDevices();
+  EXPECT_TRUE(waitCond(1));
 }
 
-TEST(TransportManagerImplTest, connect)
+TEST_F(TransportManagerTest, SearchDeviceDone)
 {
-  pthread_mutex_lock(&task_mutex);
-  TransportManagerImpl* tm = TransportManagerImpl::instance();
+  EXPECT_CALL(*tml, onSearchDeviceFailed(_, _)).Times(0);
+  EXPECT_CALL(*tml, onDeviceFound(_, _)).Times(1);
+  EXPECT_CALL(*tml, onSearchDeviceDone()).Times(1)
+      .WillOnce(WaitTest(&test_mutex, &test_cond));
 
-  EXPECT_CALL(*tmListener, onConnectDone(_, _)).Times(1);
-
-  tm->connectDevice(hello.handle, hello_app);
-  pthread_cond_wait(&task_complete, &task_mutex);
-  pthread_mutex_unlock(&task_mutex);
+  mock_da->addDevice("TestDevice");
+  TransportManagerImpl::instance()->searchDevices();
+  EXPECT_TRUE(waitCond(1));
 }
 
-TEST(TransportManagerImplTest, sendReceive)
+TEST_F(TransportManagerTest, ConnectDeviceDone)
 {
-  pthread_mutex_lock(&task_mutex);
-  TransportManagerImpl* tm = TransportManagerImpl::instance();
-  const unsigned char data[100] = {99};
-  utils::SharedPtr<RawMessage> srm = new RawMessage(connection_id, 1, const_cast<unsigned char *>(data), 100);
+  const ConnectionId kSession = 42;
+  EXPECT_CALL(*tml, onConnectFailed(_, kSession, _)).Times(0);
+  EXPECT_CALL(*tml, onConnectDone(_, kSession)).Times(1)
+      .WillOnce(WaitTest(&test_mutex, &test_cond));
 
-  tm->sendMessageToDevice(srm);
-
-  EXPECT_CALL(*tmListener, onDataSendDone(_, _, _)).Times(1);
-  EXPECT_CALL(*tmListener, onDataSendFailed(_, _, _)).Times(0);
-  EXPECT_CALL(*tmListener, onDataReceiveDone(_, _, RawMessageSptrEq(data))).Times(1);
-  EXPECT_CALL(*tmListener, onDataReceiveFailed(_, _, _)).Times(0);
-
-  pthread_cond_wait(&task_complete, &task_mutex);
-  pthread_mutex_unlock(&task_mutex);
+  const DeviceHandle kDevice = "1";
+  const ApplicationHandle kApplication = 1;
+  TransportManagerImpl::instance()->connectDevice(kDevice, kApplication);
+  EXPECT_TRUE(waitCond(1));
 }
 
-TEST(TransportManagerImplTest, disconnectDevice)
+TEST_F(TransportManagerTest, ConnectDeviceFailed)
 {
-  pthread_mutex_lock(&task_mutex);
-  TransportManagerImpl* tm = TransportManagerImpl::instance();
-  tm->disconnectDevice(hello.handle);
-  EXPECT_CALL(*tmListener, onDisconnectDone(_, _)).Times(1);
-  EXPECT_CALL(*tmListener, onDisconnectDeviceDone(_, _)).Times(1);
-  pthread_cond_wait(&task_complete, &task_mutex);
-  pthread_mutex_unlock(&task_mutex);
+  const ConnectionId kSession = 333;
+  EXPECT_CALL(*tml, onConnectDone(_, kSession)).Times(0);
+  EXPECT_CALL(*tml, onConnectFailed(_, kSession, _)).Times(1)
+      .WillOnce(WaitTest(&test_mutex, &test_cond));
+
+  const DeviceHandle kDevice = "333";
+  const ApplicationHandle kApplication = 333;
+  TransportManagerImpl::instance()->connectDevice(kDevice, kApplication);
+  EXPECT_TRUE(waitCond(1));
 }
+
+TEST_F(TransportManagerTest, DisconnectDeviceFailed)
+{
+  const DeviceHandle kDevice = "0";
+  EXPECT_CALL(*tml, onDisconnectDone(_, _)).Times(0);
+  EXPECT_CALL(*tml, onDisconnectDeviceDone(_, kDevice)).Times(0);
+  EXPECT_CALL(*tml, onDisconnectFailed(_, _, _)).Times(1);
+  EXPECT_CALL(*tml, onDisconnectDeviceFailed(_, kDevice, _)).Times(1)
+    .WillOnce(WaitTest(&test_mutex, &test_cond));
+
+  TransportManagerImpl::instance()->disconnectDevice(kDevice);
+  EXPECT_TRUE(waitCond(1));
+}
+
+TEST_F(TransportManagerTest, DisconnectDeviceDone)
+{
+  const DeviceHandle kDevice = "1";
+  EXPECT_CALL(*tml, onDisconnectFailed(_, _, _)).Times(0);
+  EXPECT_CALL(*tml, onDisconnectDeviceFailed(_, kDevice, _)).Times(0);
+  EXPECT_CALL(*tml, onDisconnectDone(_, _)).Times(1);
+  EXPECT_CALL(*tml, onDisconnectDeviceDone(_, kDevice)).Times(1)
+    .WillOnce(WaitTest(&test_mutex, &test_cond));
+
+  TransportManagerImpl::instance()->disconnectDevice(kDevice);
+  EXPECT_TRUE(waitCond(1));
+}
+
+TEST_F(TransportManagerTest, SendReceive)
+{
+  const ConnectionId kSession = 42;
+  const int kVersionProtocol = 1;
+  const unsigned int kSize = 100;
+  unsigned char data[kSize] = {99};
+  RawMessageSptr message = new RawMessage(kSession, kVersionProtocol, data, kSize);
+
+  EXPECT_CALL(*tml, onDataSendFailed(_, _, _)).Times(0);
+  EXPECT_CALL(*tml, onDataReceiveFailed(_, _, _)).Times(0);
+  EXPECT_CALL(*tml, onDataSendDone(_, kSession, message)).Times(1);
+  EXPECT_CALL(*tml, onDataReceiveDone(_, kSession, message)).Times(1)
+    .WillOnce(WaitTest(&test_mutex, &test_cond));
+
+  TransportManagerImpl::instance()->sendMessageToDevice(message);
+  EXPECT_TRUE(waitCond(1));
+}
+
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
 int main(int argc, char** argv) {
-  pthread_mutex_init(&task_mutex, NULL);
-  pthread_cond_init(&task_complete, NULL);
-
-  TransportManagerImpl* tm = TransportManagerImpl::instance();
-  mock_da = new MockDeviceAdapter();
-  tm->addDeviceAdapter(mock_da);
-
-  tmListener = new MockTransportManagerListener();
-  tm->addEventListener(tmListener);
-  MyListener *mylistener = new MyListener();
-  tm->addEventListener(mylistener);
-
-  mock_da->init(NULL);
-
-  mock_da->addDevice("hello");
-
   testing::InitGoogleTest(&argc, argv);
-
-  int rc = RUN_ALL_TESTS();
-
-  tm->removeEventListener(tmListener);
-  tm->removeEventListener(mylistener);
-  delete tmListener;
-  delete mylistener;
+  return RUN_ALL_TESTS();
 }

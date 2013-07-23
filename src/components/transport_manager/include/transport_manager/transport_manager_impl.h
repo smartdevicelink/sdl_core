@@ -40,6 +40,7 @@
 #include <list>
 
 #include "utils/logger.h"
+#include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/device_adapter.h"
@@ -140,8 +141,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void receiveEventFromDevice(
-      const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
+  virtual void receiveEventFromDevice(const DeviceAdapterEvent &event);
 
   /**
    * @brief register event listener
@@ -168,7 +168,17 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void addDeviceAdapter(DeviceAdapter *device_adapter);
+  virtual void addDeviceAdapter(device_adapter::DeviceAdapter *device_adapter);
+
+  /**
+   * @brief register listener that would be used to catch adapter's events
+   *
+   * @param event listener
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+//todo: discuss with Alexandr and Polina - do we nedd this feature?
+//  virtual void addAdapterListener(device_adapter::DeviceAdapter *adapter, device_adapter::DeviceAdapterListener *listener);
 
   /**
    * @brief remove device from internal storages
@@ -218,7 +228,7 @@ class TransportManagerImpl : public TransportManager {
    **/
   void removeMessage(const RawMessageSptr message);
 
-  void removeEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
+  void removeEvent(const DeviceAdapterEvent &event);
 
   /**
    * @brief post new event from device
@@ -227,22 +237,22 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  void postEvent(const DeviceAdapterListenerImpl::DeviceAdapterEvent &event);
+  void postEvent(const DeviceAdapterEvent &event);
 
   class AdapterHandler {
    public:
-    typedef std::vector<transport_manager::DeviceAdapter *> AdapterList;
-    transport_manager::DeviceAdapter *getAdapterBySession(
+    typedef std::vector<device_adapter::DeviceAdapter *> AdapterList;
+    device_adapter::DeviceAdapter *getAdapterBySession(
         ConnectionId sid);
-    transport_manager::DeviceAdapter *getAdapterByDevice(
+    device_adapter::DeviceAdapter *getAdapterByDevice(
         transport_manager::DeviceHandle did);
-    void addSession(transport_manager::DeviceAdapter *da,
+    void addSession(device_adapter::DeviceAdapter *da,
                     ConnectionId sid);
-    void addDevice(transport_manager::DeviceAdapter *da,
-                   transport_manager::DeviceDesc did);
-    void addAdapter(transport_manager::DeviceAdapter *da);
-    void removeSession(transport_manager::DeviceAdapter *da,
+    void removeSession(device_adapter::DeviceAdapter *da,
                        ConnectionId sid);
+    void addDevice(device_adapter::DeviceAdapter *da,
+                   transport_manager::DeviceHandle did);
+    void addAdapter(device_adapter::DeviceAdapter *da);
     void removeDevice(const transport_manager::DeviceHandle &device);
     const AdapterList &device_adapters(void);
 
@@ -258,7 +268,8 @@ class TransportManagerImpl : public TransportManager {
     /**
      * @brief container that used to get device id by session id
      **/
-    std::map<ConnectionId, transport_manager::DeviceAdapter *> session_to_adapter_map_;
+
+    std::map<ConnectionId, device_adapter::DeviceAdapter *> session_to_adapter_map_;
 
     /**
      * @brief container that used to get adapter id by device id
@@ -267,7 +278,7 @@ class TransportManagerImpl : public TransportManager {
     // FIXME: Team had decided one device cannot be shared between multiple adapters.
     //         Change multimap to map
     std::map<transport_manager::DeviceHandle,
-        transport_manager::DeviceAdapter *> device_to_adapter_map_;
+        device_adapter::DeviceAdapter *> device_to_adapter_map_;
 
   };
 
@@ -283,7 +294,8 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  typedef std::list<DeviceAdapterListenerImpl::DeviceAdapterEvent> EventQueue;
+  typedef std::vector<DeviceAdapterEvent> EventQueue;
+
 
   /**
    * @brief default constructor
@@ -293,6 +305,16 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   TransportManagerImpl(const TransportManagerAttr &config);
+
+  /**
+   * @brief constructor used to create new TM with device adapter
+   *
+   * @param
+   *
+   * @see @ref components_transportmanager_client_connection_management
+   **/
+  TransportManagerImpl(
+      std::vector<device_adapter::DeviceAdapter *> device_adapter_list);
 
   static void *messageQueueStartThread(void *data);
   /**
@@ -393,16 +415,6 @@ class TransportManagerImpl : public TransportManager {
   };
   int connection_id_counter_;
   std::map<ConnectionId, Connection> connections_;
-  /**
-   * @brief register listener that would be used to catch adapter's events
-   *
-   * @param event listener
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void addAdapterListener(DeviceAdapter *adapter,
-                                  DeviceAdapterListener *listener);
-
 };
 //class
 }//namespace

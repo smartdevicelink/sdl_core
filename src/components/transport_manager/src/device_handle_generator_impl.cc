@@ -1,6 +1,6 @@
 /**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+ * \file device_handle_generator_impl.cpp
+ * \brief Class DeviceHandleGeneratorImpl.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,38 +32,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-
-#include <vector>
-#include <string>
-
-#include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
+#include "transport_manager/device_handle_generator_impl.h"
 
 namespace transport_manager {
-/**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
- **/
-typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
-typedef std::string DeviceHandle;
-typedef int ConnectionId;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
 
-struct DeviceDesc {
-  DeviceHandle handle;
-  std::string name;
-
-  DeviceDesc() { }
-  DeviceDesc(const DeviceHandle &handle, const std::string& name)
-    : handle(handle),
-      name(name) {
-  }
-};
+DeviceHandleGenerator::~DeviceHandleGenerator() {
 }
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+DeviceHandleGeneratorImpl::DeviceHandleGeneratorImpl()
+    : last_used_device_handle_(0) {
+  pthread_mutex_init(&device_handle_generation_mutex_, 0);
+}
+
+DeviceHandleGeneratorImpl::~DeviceHandleGeneratorImpl() {
+  pthread_mutex_destroy(&device_handle_generation_mutex_);
+}
+
+DeviceHandle DeviceHandleGeneratorImpl::generate() {
+  DeviceHandle output_device_handle;
+
+  pthread_mutex_lock(&device_handle_generation_mutex_);
+  //todo: remove this when unique device id will be created
+  //++last_used_device_handle_;
+//  output_device_handle = last_used_device_handle_;
+  pthread_mutex_unlock(&device_handle_generation_mutex_);
+
+  return output_device_handle;
+}
+
+}  // namespace transport_manager
+

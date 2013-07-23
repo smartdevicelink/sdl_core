@@ -1,6 +1,7 @@
 /**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+ * \file handle_generator.h
+ * \brief HandleGenerator class header file.
+ *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,38 +33,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
 
-#include <vector>
-#include <string>
+#include "transport_manager/common.h"
 
-#include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
+namespace transport_manager
+{
 
-namespace transport_manager {
 /**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
+ * @brief Interface for device handle generator.
+ * @interface DeviceHandleGenerator
  **/
-typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
-typedef std::string DeviceHandle;
-typedef int ConnectionId;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
+class DeviceHandleGenerator
+{
+public:
 
-struct DeviceDesc {
-  DeviceHandle handle;
-  std::string name;
+  /**
+   * @brief Destructor.
+   **/
+  virtual ~DeviceHandleGenerator();
 
-  DeviceDesc() { }
-  DeviceDesc(const DeviceHandle &handle, const std::string& name)
-    : handle(handle),
-      name(name) {
-  }
+  /**
+   * @brief Generate new device handle.
+   *
+   * Method used for generation of unique device handle.
+   *
+   * @return New device handle.
+   **/
+  virtual DeviceHandle generate() = 0;
 };
-}
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+} // namespace transport_manager
+
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR

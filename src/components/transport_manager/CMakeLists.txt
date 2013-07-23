@@ -10,6 +10,9 @@ set (SOURCES
 	./src/device_adapter_listener_impl.cc
 	./src/device_adapter_impl.cc
 	./src/timer.cc
+	./src/bluetooth_adapter.cc
+	./src/tcp_adapter.cc
+	./src/device_adapter_socket_communication.cc
 )
 
 add_library("TransportManager" ${SOURCES})

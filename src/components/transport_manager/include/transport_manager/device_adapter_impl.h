@@ -35,9 +35,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_IMPL_H_
 
-#include <pthread.h>
 #include <queue>
-#include <time.h>
+#include <set>
+#include <memory>
 
 #include "utils/logger.h"
 
@@ -45,30 +45,189 @@
 
 namespace transport_manager {
 
+class DeviceHandleGenerator;
+
+namespace device_adapter {
 class DeviceAdapterListener;
 
 /**
- * @brief Base class for @link components_transportmanager_internal_design_device_adapters device adapters @endlink.
+ * @brief Internal class describing device.
  **/
-class DeviceAdapterImpl : public DeviceAdapter {
+class Device {
  public:
   /**
    * @brief Constructor.
    *
+   * @param Name User-friendly device name.
    **/
-  DeviceAdapterImpl();
+  Device(const char* name);
+
+  /**
+   * @brief Destructor.
+   **/
+  virtual ~Device();
+
+  /**
+   * @brief Compare devices.
+   *
+   * This method checks whether two SDevice structures
+   * refer to the same device.
+   *
+   * @param OtherDevice Device to compare with.
+   *
+   * @return true if devices are equal, false otherwise.
+   **/
+  virtual bool isSameAs(const Device* other_device) const = 0;
+
+  virtual ApplicationList getApplicationList() const = 0;
+
+  const std::string& unique_device_id() const {
+    return unique_device_id_;
+  }
+
+  const std::string& name() const {
+    return name_;
+  }
+
+ protected:
+
+  void set_unique_device_id(const std::string& unique_device_id) {
+    unique_device_id_ = unique_device_id;
+  }
+
+ private:
+  /**
+   * @brief Device user-friendly name.
+   **/
+  std::string name_;
+
+  /**
+   * @brief Unique device identifier across all devices.
+   **/
+  std::string unique_device_id_;
+};
+
+/**
+ * @brief Application connection.
+ **/
+class Connection {
+ public:
+  Connection();
+  /**
+   * @brief Destructor.
+   *
+   * Clears map of frames to send.
+   **/
+  virtual ~Connection();
+
+  virtual DeviceAdapter::Error sendData(RawMessageSptr message) = 0;
+
+  virtual DeviceAdapter::Error disconnect() = 0;
+};
+
+typedef utils::SharedPtr<Connection> ConnectionSptr;
+typedef utils::SharedPtr<Device> DeviceSptr;
+typedef std::vector<DeviceSptr> DeviceVector;
+
+class DeviceAdapterController {
+ public:
+
+  virtual ~DeviceAdapterController() {
+  }
+
+  virtual std::pair<DeviceHandle, DeviceSptr> addDevice(DeviceSptr device) = 0;
+  virtual void searchDeviceDone(const DeviceVector& devices) = 0;
+  virtual void searchDeviceFailed(const SearchDeviceError& error) = 0;
+  virtual DeviceSptr findDevice(const DeviceHandle device_handle) const = 0;
+
+  virtual void connectionCreated(ConnectionSptr connection,
+                                 const ConnectionId session_id,
+                                 const DeviceHandle device_handle,
+                                 const ApplicationHandle app_handle) = 0;
+  virtual void connectDone(const ConnectionId session_id) = 0;
+  virtual void connectFailed(const ConnectionId session_id,
+                             const ConnectError& error) = 0;
+  virtual void connectionFinished(const ConnectionId session_id) = 0;
+  virtual void connectionAborted(const ConnectionId session_id,
+                                 const CommunicationError& error) = 0;
+  virtual void disconnectDone(const ConnectionId session_id) = 0;
+  virtual void dataReceiveDone(const ConnectionId session_id,
+                               RawMessageSptr message) = 0;
+  virtual void dataReceiveFailed(const ConnectionId session_id,
+                                 const DataReceiveError&) = 0;
+  virtual void dataSendDone(const ConnectionId session_id,
+                            RawMessageSptr message) = 0;
+  virtual void dataSendFailed(const ConnectionId session_id,
+                              RawMessageSptr message, const DataSendError&) = 0;
+  virtual void connectRequested(const DeviceHandle device_handle,
+                                const ApplicationHandle app_handle) = 0;
+};
+
+class DeviceScanner {
+ public:
+  virtual DeviceAdapter::Error init() = 0;
+  virtual DeviceAdapter::Error scan() = 0;
+  virtual void terminate() = 0;
+  virtual bool isInitialised() const = 0;
+  virtual ~DeviceScanner() {
+  }
+};
+
+class ServerConnectionFactory {
+ public:
+  virtual DeviceAdapter::Error init() = 0;
+  virtual DeviceAdapter::Error createConnection(DeviceHandle device_handle,
+                                                ApplicationHandle app_handle,
+                                                ConnectionId session_id) = 0;
+  virtual void terminate() = 0;
+  virtual bool isInitialised() const = 0;
+  virtual ~ServerConnectionFactory() {
+  }
+};
+
+class ClientConnectionListener {
+ public:
+  virtual DeviceAdapter::Error init() = 0;
+  virtual void terminate() = 0;
+  virtual DeviceAdapter::Error acceptConnect(const DeviceHandle device_handle,
+                                             const ApplicationHandle app_handle,
+                                             const ConnectionId session_id) = 0;
+  virtual DeviceAdapter::Error declineConnect(
+      const DeviceHandle device_handle, const ApplicationHandle app_handle) = 0;
+  virtual bool isInitialised() const = 0;
+  virtual ~ClientConnectionListener() {
+  }
+};
+
+/*
+ * @brief Base class for @link components_transportmanager_internal_design_device_adapters device adapters @endlink.
+ **/
+class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
+ protected:
+  /**
+   * @brief Constructor.
+   *
+   **/
+  DeviceAdapterImpl(DeviceScanner* device_scanner,
+                    ServerConnectionFactory* server_connection_factory,
+                    ClientConnectionListener* client_connection_listener);
 
   /**
    * @brief Destructor.
    **/
   virtual ~DeviceAdapterImpl();
 
+  virtual bool isInitialised() const;
+
   /**
    * @brief Run device adapter.
    *
    * Called from transport manager to start device adapter.
    **/
-  virtual Error init(Configuration* configuration);
+ public:
+  virtual DeviceAdapter::Error init(Configuration* configuration);
+
+  virtual void addListener(DeviceAdapterListener *listener);
 
   /**
    * @brief Start scanning for new devices.
@@ -77,7 +236,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
    **/
-  virtual Error searchDevices();
+  virtual DeviceAdapter::Error searchDevices();
 
   /**
    * @brief Connect to the specified application discovered on device.
@@ -88,9 +247,9 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
    **/
-  virtual Error connect(const DeviceHandle device_handle,
-                        const ApplicationHandle app_handle,
-                        const int session_id);
+  virtual DeviceAdapter::Error connect(const DeviceHandle device_handle,
+                                       const ApplicationHandle app_handle,
+                                       const ConnectionId session_id);
 
   /**
    * @brief Disconnect from specified session.
@@ -99,7 +258,7 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
-  virtual Error disconnect(const int session_id);
+  virtual DeviceAdapter::Error disconnect(const ConnectionId session_id);
 
   /**
    * @brief Disconnect from all sessions on specified device.
@@ -108,7 +267,8 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
    **/
-  virtual Error disconnectDevice(const DeviceHandle device_handle);
+  virtual DeviceAdapter::Error disconnectDevice(
+      const DeviceHandle device_handle);
 
   /**
    * @brief Send frame.
@@ -120,338 +280,51 @@ class DeviceAdapterImpl : public DeviceAdapter {
    *
    * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
    **/
-  virtual Error sendData(const int session_id, const RawMessageSptr data);
+  virtual DeviceAdapter::Error sendData(const ConnectionId session_id,
+                                        const RawMessageSptr data);
 
-  virtual void addListener(DeviceAdapterListener *listener);
+  virtual Error acceptConnect(const DeviceHandle device_handle,
+                              const ApplicationHandle app_handle,
+                              const ConnectionId session_id);
+  virtual Error declineConnect(const DeviceHandle device_handle,
+                               const ApplicationHandle app_handle);
 
- protected:
-  /**
-   * @brief Frame queue.
-   **/
-  typedef std::queue<RawMessageSptr> FrameQueue;
-
-  /**
-   * @brief Internal class describing device.
-   **/
-  class Device {
-   public:
-    /**
-     * @brief Constructor.
-     *
-     * @param Name User-friendly device name.
-     **/
-    Device(const char* name);
-
-    /**
-     * @brief Destructor.
-     **/
-    virtual ~Device();
-
-    /**
-     * @brief Compare devices.
-     *
-     * This method checks whether two SDevice structures
-     * refer to the same device.
-     *
-     * @param OtherDevice Device to compare with.
-     *
-     * @return true if devices are equal, false otherwise.
-     **/
-    virtual bool isSameAs(const Device* other_device) const;
-
-    const std::string& unique_device_id() const {
-      return unique_device_id_;
-    }
-
-    const std::string& name() const {
-      return name_;
-    }
-
-   protected:
-
-    void set_unique_device_id(const std::string& unique_device_id) {
-      unique_device_id_ = unique_device_id;
-    }
-    /**
-     * @brief Unique device identifier across all devices.
-     **/
-    std::string unique_device_id_;
-   private:
-    /**
-     * @brief Device user-friendly name.
-     **/
-    std::string name_;
-  };
-
-  class Connection {
-   public:
-    /**
-     * @brief Constructor.
-     *
-     * @param device_handle Device handle.
-     * @param app_handle Application handle.
-     * @param session_id Session identifier.
-     **/
-    Connection(const DeviceHandle device_handle,
-               const ApplicationHandle app_handle, const int session_id);
-
-    /**
-     * @brief Destructor.
-     *
-     * Clears map of frames to send.
-     **/
-    virtual ~Connection();
-
-    DeviceHandle device_handle() const {
-      return device_handle_;
-    }
-
-    ApplicationHandle application_handle() const {
-      return app_handle_;
-    }
-
-    int session_id() const {
-      return session_id_;
-    }
-
-    void set_connection_socket(int socket) {
-      connection_socket_ = socket;
-    }
-
-    int connection_socket() const {
-      return connection_socket_;
-    }
-
-    bool terminate_flag() const {
-      return terminate_flag_;
-    }
-
-    void set_terminate_flag(bool terminate_flag) {
-      terminate_flag_ = terminate_flag;
-    }
-
-    bool createNotificationPipe();
-    void closeNotificationPipe();
-
-    int getNotificationPipeReadFd() const;
-    int getNotificationPipeWriteFd() const;
-
-    pthread_t connection_thread() const {
-      return connection_thread_;
-    }
-
-    int start_connection_thread(DeviceAdapterImpl* device_adapter);
-
-    FrameQueue& frames_to_send() {
-      return frames_to_send_;
-    }
-
-   private:
-    /**
-     * @brief Device handle.
-     **/
-    const DeviceHandle device_handle_;
-
-    /**
-     * @brief Application handle.
-     **/
-    const ApplicationHandle app_handle_;
-
-    /**
-     * @brief Session identifier.
-     **/
-    const ConnectionId session_id_;
-
-    /**
-     * @brief Thread that handles connection.
-     **/
-    pthread_t connection_thread_;
-
-    /**
-     * @brief File descriptors of notification pipe.
-     *
-     * Notification pipe is used to wake up connection thread
-     * on external event (e.g. new data is available to send or
-     * connection is requested to be terminated).
-     *
-     * mNotificationPipeFds[0] is a descriptor of the read end of the pipe
-     * (the one that is used in poll() by connection thread) and
-     * mNotificationPipeFds[1] is a descriptor of the write end of the pipe
-     * (the one that is used in methods exposed to transport manager to
-     * wake up connection thread when necessary).
-     *
-     * @note eventfd cannot be used instead of a pipe because it does not
-     *       conform to POSIX (eventfd is Linux-specific).
-     **/
-    int notification_pipe_fds_[2];
-
-    /**
-     * @brief Descriptor of connection socket.
-     **/
-    int connection_socket_;
-
-    /**
-     * @brief Frames that must be sent to remote device.
-     **/
-    FrameQueue frames_to_send_;
-
-    /**
-     * @brief Terminate flag.
-     *
-     * This flag is set to notify connection thread that connection
-     * must be closed and connection thread must be terminated.
-     **/
-    bool terminate_flag_;
-  };
-
-  /**
-   * @brief Vector of devices.
-   **/
-  typedef std::vector<Device*> DeviceVector;
-
-  /**
-   * @brief Devices map.
-   **/
-  typedef std::map<DeviceHandle, Device*> DeviceMap;
-
-  /**
-   * @brief Application connection.
-   **/
-
-  /**
-   * @brief Parameters for starting connection thread.
-   **/
-  struct ConnectionThreadParameters {
-    /**
-     * @brief Pointer to device adapter.
-     **/
-    DeviceAdapterImpl* device_adapter;
-    Connection* connection;
-  };
-
-  /**
-   * @brief Wait until all device adapter threads are terminated.
-   *
-   * Every device adapter must call this method in destructor to wait
-   * for other threads to terminate before destroying device adapter.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_threads_termination
-   **/
-  void waitForThreadsTermination();
-
-  /**
-   * @brief Create connection.
-   *
-   * Check if connection is not in connection map
-   * and if it's not, add it to map.
-   *
-   * @param device_handle Device handle.
-   * @param app_handle Application handle.
-   * @param session_id Session identifier.
-   * @param connection Output pointer created connection or 0 in case of error.
-   *
-   * @return Status.
-   **/
-  DeviceAdapter::Error createConnection(const DeviceHandle device_handle,
-                                        const ApplicationHandle app_handle,
-                                        const int session_id,
-                                        Connection** connection);
-
-  /**
-   * @brief Delete connection.
-   *
-   * Destroy connection object and remove it from map.
-   *
-   * @param connection Connection to delete.
-   **/
-  void deleteConnection(Connection* connection);
-
-  /**
-   * @brief Start connection.
-   *
-   * Start connection thread.
-   *
-   * @param connection Connection to start.
-   *
-   * @return true if connection thread has been started, false otherwise.
-   **/
-  Error startConnection(Connection* connection);
-
-  /**
-   * @brief Stop connection.
-   *
-   * This method only initiates connection termination. It returns immediately
-   * without waiting for actual termination of the connection.
-   *
-   * @param connection Connection to stop.
-   **/
-  Error stopConnection(Connection* connection);
-
-  /**
-   * @brief Wait for device scan request.
-   *
-   * Wait until scanForNewDevices() is called or timeout
-   * expires.
-   *
-   * @param Timeout Timeout value in seconds. 0 means no
-   *                timeout.
-   *
-   * @return true if scanForNewDevices() has been called,
-   *         false if timeout expired.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
-   **/
-  bool waitForDeviceScanRequest(const time_t timeout);
-
-  /**
-   * @brief Handle communication.
-   *
-   * Handle communication for specified connection (send/receive data
-   * to/from connection socket).
-   *
-   * This method must be called from connection thread implementation
-   * when connection is established and connection socket descriptor
-   * is set for the connection.
-   *
-   * This methods returns when connection is terminated.
-   *
-   * @param ConnectionHandle Connection handle.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
-   **/
-  void handleCommunication(Connection* connection);
-
-  /**
-   * @brief Device adapter main thread.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
-   **/
-  virtual void mainThread() = 0;
-
-  /**
-   * @brief Connection thread.
-   *
-   * This method is responsible for establishing connection and communicating
-   * with remote device via specified connection. It must remove itself from
-   * connection map when connection is terminated before terminating connection thread.
-   *
-   * @param connection Connection.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
-   **/
-  virtual void connectionThread(Connection* connection) = 0;
+  virtual bool isSearchDevicesSupported() const;
+  virtual bool isServerOriginatedConnectSupported() const;
+  virtual bool isClientOriginatedConnectSupported() const;
 
   virtual DeviceList getDeviceList() const;
+  virtual ApplicationList getApplicationList(
+      const DeviceHandle device_handle) const;
+  virtual DeviceSptr findDevice(DeviceHandle device_handle) const;
 
-  /**
-   * @brief Connections map.
-   **/
-  typedef std::map<ConnectionId, Connection*> ConnectionMap;
+  virtual void searchDeviceDone(const DeviceVector& devices);
+  virtual void searchDeviceFailed(const SearchDeviceError& error);
+  virtual std::pair<DeviceHandle, DeviceSptr> addDevice(DeviceSptr device);
 
-  /**
-   * @brief Logger.
-   **/
-  static log4cxx::LoggerPtr logger_;
+  virtual void connectionCreated(ConnectionSptr connection,
+                                 const ConnectionId session_id,
+                                 const DeviceHandle device_handle,
+                                 const ApplicationHandle app_handle);
+  virtual void connectionFinished(const ConnectionId session_id);
+  virtual void connectionAborted(const ConnectionId session_id,
+                                 const CommunicationError& error);
+  virtual void connectDone(const ConnectionId session_id);
+  virtual void connectFailed(const ConnectionId session_id,
+                             const ConnectError& error);
+  virtual void disconnectDone(const ConnectionId session_id);
+  virtual void dataReceiveDone(const ConnectionId session_id,
+                               RawMessageSptr message);
+  virtual void dataReceiveFailed(const ConnectionId session_id,
+                                 const DataReceiveError&);
+  virtual void dataSendDone(const ConnectionId session_id, RawMessageSptr message);
+  virtual void dataSendFailed(const ConnectionId session_id,
+                              RawMessageSptr message, const DataSendError&);
+  virtual void connectRequested(const DeviceHandle device_handle,
+                                const ApplicationHandle app_handle);
+ private:
+
+  ConnectionSptr findEstablishedConnection(const ConnectionId session_id);
 
   /**
    * @brief Listener for device adapter notifications.
@@ -459,28 +332,29 @@ class DeviceAdapterImpl : public DeviceAdapter {
   DeviceAdapterListenerList listeners_;
 
   /**
-   * @brief Flag indicating that device scan was requested.
-   *
-   * This flag is set in scanForNewDevices and reset after requested
-   * device scan is completed.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
+   * @brief Handle generator implementation.
    **/
-  bool device_scan_requested_;
+  DeviceHandleGenerator* handle_generator_;
+
+  bool initialised_;
 
   /**
-   * @brief Mutex restricting access to DeviceScanRequested flag.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
+   * @brief Devices map.
    **/
-  pthread_mutex_t device_scan_requested_mutex_;
+  typedef std::map<DeviceHandle, DeviceSptr> DeviceMap;
 
-  /**
-   * @brief Conditional variable for signaling discovery thread about requested device scan.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
-   **/
-  pthread_cond_t device_scan_requested_cond_;
+  struct ConnectionInfo {
+    ConnectionSptr connection;
+    DeviceHandle device_handle;
+    ApplicationHandle app_handle;
+    enum {
+      NEW,
+      ESTABLISHED,
+      FINALISING
+    } state;
+  };
+
+  typedef std::map<ConnectionId, ConnectionInfo> ConnectionMap;
 
   /**
    * @brief Map of device handle to device.
@@ -512,59 +386,14 @@ class DeviceAdapterImpl : public DeviceAdapter {
    **/
   mutable pthread_mutex_t connections_mutex_;
 
-  /**
-   * @brief Shutdown flag.
-   *
-   * This flag is set to true on shutdown to inform all device adapter
-   * threads that device adapter shutdown is in progress. After setting
-   * this flag device adapter waits until all its threads are terminated.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_threads_termination
-   **/
-  volatile bool shutdown_flag_;
-
- private:
-  /**
-   * @brief Start routine for device adapter main thread.
-   *
-   * @param Data Must be pointer to CDeviceAdapter instance.
-   *
-   * @return Thread return value.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
-   **/
-  static void* mainThreadStartRoutine(void* data);
-
-  /**
-   * @brief Connection thread start routine.
-   *
-   * @param Data Must be pointer to SConnectionThreadParameters. Ownership
-   *             of connection thread parameters is passed to connection thread, i.e.
-   *             connection thread is responsible for freeing this object.
-   *
-   * @return Thread return value.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
-   **/
-  static void* connectionThreadStartRoutine(void *data);
-
-  /**
-   * @brief ID of device adapter main thread.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
-   **/
-  pthread_t main_thread_;
-
-  /**
-   * @brief Flag indicating whether the device adapter main thread has been started successfully.
-   *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
-   **/
-  bool main_thread_started_;
-
-  bool initialized_;
-
+  DeviceScanner* device_scanner_;
+  ServerConnectionFactory* server_connection_factory_;
+  ClientConnectionListener* client_connection_listener_;
 };
+
+extern log4cxx::LoggerPtr logger_;
+
+}  // namespace device_adapter
 
 }  // namespace transport_manager
 
