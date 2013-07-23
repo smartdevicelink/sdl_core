@@ -154,7 +154,11 @@ void ThreadedSocketConnection::thread() {
     while (!terminate_flag_)
       transmit();
     finalise();
-    //TODO clear queue controller_->dataSendFailed
+    while(!frames_to_send_.empty()) {
+      RawMessageSptr message = frames_to_send_.front();
+      frames_to_send_.pop();
+      controller_->dataSendFailed(device_handle(), application_handle(), message, DataSendError());
+    }
     controller_->disconnectDone(device_handle(), application_handle());
   } else {
     controller_->connectFailed(device_handle(), application_handle(),
