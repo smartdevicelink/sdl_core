@@ -131,6 +131,7 @@ const char persistent_file[] = "persistentFile";
 const char file_data[] = "fileData";
 const char space_available[] = "spaceAvailable";
 const char image_type[] = "imageType";
+const char image[] = "image";
 
 const char filenames[] = "filenames";
 

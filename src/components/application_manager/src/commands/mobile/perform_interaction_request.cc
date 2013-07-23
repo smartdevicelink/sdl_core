@@ -38,6 +38,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -75,7 +76,7 @@ void PerformInteractionRequest::Run() {
   }
 
   if (!SendVRAddCommandRequest(app)) {
-    LOG4CXX_INFO(logger_, "Unable to send VR AddCommand");
+    LOG4CXX_ERROR(logger_, "Failed to send VR Addcommand");
   }
 
   if (SendUIPerformInteractionRequest(app)) {
@@ -84,18 +85,18 @@ void PerformInteractionRequest::Run() {
 }
 
 bool PerformInteractionRequest::SendVRAddCommandRequest(
-    const Application* app) {
+    Application* const app) {
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
     // choice_set contains SmartObject msg_params
     smart_objects::SmartObject* i_choice_set =
-      app->FindChoiceSetVRCommands(choice_list[i].asInt());
+      app->FindChoiceSet(choice_list[i].asInt());
 
     for (size_t j = 0; j < choice_list.length(); ++j) {
       smart_objects::SmartObject* j_choice_set =
-        app->FindChoiceSetVRCommands(choice_list[j].asInt());
+        app->FindChoiceSet(choice_list[j].asInt());
 
       if (i == j) {
         // skip check the same element
@@ -136,13 +137,17 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
     smart_objects::SmartObject* choice_set =
-      app->FindChoiceSetVRCommands(choice_list[i].asInt());
+      app->FindChoiceSet(choice_list[i].asInt());
 
     if (!choice_set) {
       LOG4CXX_ERROR(logger_, "Invalid ID");
       SendResponse(false, mobile_apis::Result::INVALID_ID);
       return false;
     }
+
+    // save choice set for sent VR commands
+    app->AddChoiceSetVRCommands(choice_list[i].asInt(),
+                                *choice_set);
 
     for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
       smart_objects::SmartObject msg_params =
@@ -163,18 +168,18 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
 }
 
 bool PerformInteractionRequest::SendUIPerformInteractionRequest(
-  const Application* app) {
+  Application* const app) {
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
     // choice_set contains SmartObject msg_params
     smart_objects::SmartObject* i_choice_set =
-      app->FindChoiceSetVRCommands(choice_list[i].asInt());
+      app->FindChoiceSet(choice_list[i].asInt());
 
     for (size_t j = 0; j < choice_list.length(); ++j) {
       smart_objects::SmartObject* j_choice_set =
-        app->FindChoiceSetVRCommands(choice_list[j].asInt());
+        app->FindChoiceSet(choice_list[j].asInt());
 
       if (i == j) {
         // skip check the same element
@@ -214,25 +219,30 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
     TextFieldName::INITIAL_INTERACTION_TEXT;
   msg_params[hmi_request::initial_text][hmi_request::field_text] =
     (*message_)[strings::msg_params][hmi_request::initial_text];
+  msg_params[strings::timeout] =
+      (*message_)[strings::msg_params][strings::timeout];
+  msg_params[strings::app_id] = app->app_id();
 
   msg_params[strings::choice_set] =
     smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
     smart_objects::SmartObject* choice_set =
-      app->FindChoiceSetVRCommands(choice_list[i].asInt());
+      app->FindChoiceSet(choice_list[i].asInt());
     if (choice_set) {
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
         int index = msg_params[strings::choice_set].length();
         msg_params[strings::choice_set][index] =
             (*choice_set)[strings::choice_set][j];
+        std::string file_path = file_system::FullPath(app->name());
+        file_path += "/";
+        file_path += msg_params[strings::choice_set][index]
+            [strings::image][strings::value].asString();
+        msg_params[strings::choice_set][index][strings::image][strings::value] =
+            file_path;
       }
     }
   }
-
-  msg_params[strings::timeout] =
-    (*message_)[strings::msg_params][strings::timeout];
-  msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
                    msg_params, true, 1);

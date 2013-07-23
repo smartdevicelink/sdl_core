@@ -60,8 +60,7 @@ void OnCommandNotification::Run() {
   }
 
   const unsigned int cmd_id =
-    static_cast<unsigned int>(
-      (*message_)[strings::msg_params][strings::cmd_id].asInt());
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
   if (!app->FindCommand(cmd_id)) {
     LOG4CXX_ERROR_EXT(logger_,

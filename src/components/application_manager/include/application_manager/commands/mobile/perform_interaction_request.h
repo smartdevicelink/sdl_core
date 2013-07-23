@@ -73,7 +73,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
      *
      * @return TRUE on success, otherwise FALSE
      */
-    bool SendVRAddCommandRequest(const Application* app);
+    bool SendVRAddCommandRequest(Application* const app);
 
     /*
      * @brief Sends UI PerformInteraction request to HMI
@@ -82,7 +82,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
      *
      * * @return TRUE on success, otherwise FALSE
      */
-    bool SendUIPerformInteractionRequest(const Application* app);
+    bool SendUIPerformInteractionRequest(Application* const app);
 
     DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };

@@ -33,6 +33,7 @@
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -50,9 +51,20 @@ OnVRCommandNotification::~OnVRCommandNotification() {
 void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
+
+  MessageChaining* msg_chain =
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+
+  if (NULL == msg_chain) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
+  const int connection_key =  msg_chain->connection_key();
   Application* app = ApplicationManagerImpl::instance()->
-                     application(app_id);
+                     application(connection_key);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -68,17 +80,20 @@ void OnVRCommandNotification::Run() {
 
     ChoiceSetVRCmdMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
-      smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-      msg_params[strings::app_id] = app->app_id();
 
       const smart_objects::SmartObject& choice_set =
         (*it->second).getElement(strings::choice_set);
 
-      msg_params[strings::cmd_id] =
-        choice_set.getElement(strings::choice_id);
+      for (size_t j = 0; j < choice_set.length(); ++j) {
 
-      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+        smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+        msg_params[strings::app_id] = app->app_id();
+        msg_params[strings::cmd_id] =
+            choice_set.getElement(j).getElement(strings::choice_id);
+
+        CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+      }
     }
 
     app->DeleteChoiceSetVRCommands();

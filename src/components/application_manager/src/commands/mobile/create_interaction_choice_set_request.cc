@@ -82,7 +82,6 @@ void CreateInteractionChoiceSetRequest::Run() {
       [strings::interaction_choice_set_id].asInt();
 
   app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
-  app->AddChoiceSetVRCommands(choice_set_id, (*message_)[strings::msg_params]);
 
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
