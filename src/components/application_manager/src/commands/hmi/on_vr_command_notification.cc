@@ -33,7 +33,6 @@
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -51,20 +50,10 @@ OnVRCommandNotification::~OnVRCommandNotification() {
 void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
 
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
-
-  if (NULL == msg_chain) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  const int connection_key =  msg_chain->connection_key();
+  const unsigned int app_id =
+      (*message_)[strings::msg_params][strings::app_id].asUInt();
   Application* app = ApplicationManagerImpl::instance()->
-                     application(connection_key);
+                     application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -95,9 +84,8 @@ void OnVRCommandNotification::Run() {
         CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
       }
     }
-
-    app->DeleteChoiceSetVRCommands();
-    app->set_perform_interaction_active(false);
+    CreateHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp,
+                     smart_objects::SmartObject(smart_objects::SmartType_Map));
   } else {
     (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::eType::OnCommandID;

@@ -72,9 +72,14 @@ void NotificationFromHMI::CreateHMIRequest(
       return;
     }
 
+    // get hmi correlation id for chaining further request from this object
+    const unsigned int hmi_correlation_id_ =
+          ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
     NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
     request[strings::params][strings::message_type] = MessageType::kRequest;
     request[strings::params][strings::function_id] = function_id;
+    request[strings::params][strings::correlation_id] = hmi_correlation_id_;
     request[strings::params][strings::protocol_version] =
         CommandImpl::protocol_version_;
     request[strings::params][strings::protocol_type] =
@@ -82,7 +87,10 @@ void NotificationFromHMI::CreateHMIRequest(
 
     request[strings::msg_params] = msg_params;
 
-    ApplicationManagerImpl::instance()->ManageHMICommand(result);
+    if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+      LOG4CXX_ERROR(logger_, "Unable to send request");
+      return;
+    }
 }
 
 }  // namespace commands
