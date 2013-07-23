@@ -554,6 +554,16 @@ SDL.ValidateMessage = Em.Object.create({
                 
                 return this.resultStruct;
             }
+            // don't delete if current submenu active
+            if( SDL.SDLController.getApplicationModel(params.appID).get( 'currentSubMenuId' ) == params.menuID ){
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["IN_USE"],
+                    "resultMessage": "SubMenu is already in use!"
+                };
+
+                return this.resultStruct;
+            }
 
             this.resultStruct = {
                 "resultCode": SDL.SDLModel.resultCode["SUCCESS"]

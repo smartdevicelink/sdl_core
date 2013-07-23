@@ -127,7 +127,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 	        switch(request.method){
 	            case "VehicleInfo.GetVehicleData": {
 	                
-	            	Em.Logger.log("FFW." + method + "Response");
+	            	Em.Logger.log("FFW." + request.method + "Response");
 	                
 	                var vehicleData = SDL.SDLVehicleInfoModel.getVehicleData(request.params),
 	                    resultCode;
@@ -181,7 +181,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 	            
 	            case "VehicleInfo.IsReady": {
 	                
-	            	Em.Logger.log("FFW." + method + "Response");
+	            	Em.Logger.log("FFW." + request.method + "Response");
 	                
 	                // send repsonse
 	                var JSONMessage = {

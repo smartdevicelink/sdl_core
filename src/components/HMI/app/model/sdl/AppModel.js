@@ -215,12 +215,6 @@ SDL.SDLAppModel = Em.Object.extend( {
      */
     deleteSubMenu: function( menuID ) {
 
-        // don't delete if current submenu active
-        if( this.get( 'currentSubMenuId' ) == menuID ){
-            return 'IN_USE';
-            // SDL.SDLAppController.onSubMenu(0);
-        }
-
         // remove submenu
         this.get( 'commandsList' ).removeObjects( this.get( 'commandsList' ).filterProperty( 'menuID', menuID ) );
 

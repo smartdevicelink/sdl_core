@@ -216,7 +216,7 @@ FFW.UI = FFW.RPCObserver.create({
 	            case "UI.DeleteSubMenu": {
 	
 	                var resultCode = SDL.SDLController.getApplicationModel(request.params.appID).deleteSubMenu(request.params.menuID);
-	                this.sendUIResult(resultCode, request.id, request.method);
+	                this.sendUIResult(SDL.SDLModel.resultCode[resultCode], request.id, request.method);
 	
 	                break;
 	            }
@@ -411,6 +411,8 @@ FFW.UI = FFW.RPCObserver.create({
 	                break;
 	            }
 	            case "UI.ClosePopUp": {
+	            	
+	            	SDL.SDLController.closePopUp();
 	
 	                // send repsonse
 	                var JSONMessage = {
@@ -587,7 +589,7 @@ FFW.UI = FFW.RPCObserver.create({
             "id": performInteractionRequestID,
             "result": {
                 "code": resultCode,
-                "method": "UI.PerformInteractionResponse"
+                "method": "UI.PerformInteraction"
             }
         };
 

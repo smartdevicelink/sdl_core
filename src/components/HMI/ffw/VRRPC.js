@@ -158,7 +158,7 @@ FFW.VR = FFW.RPCObserver.create({
 	            }
 	            case "VR.GetSupportedLanguages": {
 	                
-	            	Em.Logger.log("FFW." + method + "Response");
+	            	Em.Logger.log("FFW." + request.method + "Response");
 	
 	                var JSONMessage = {
 	                    "jsonrpc": "2.0",
@@ -175,7 +175,7 @@ FFW.VR = FFW.RPCObserver.create({
 	            }
 	            case "VR.GetLanguage": {
 	                
-	            	Em.Logger.log("FFW." + method + "Response");
+	            	Em.Logger.log("FFW." + request.method + "Response");
 	
 	                var JSONMessage = {
 	                    "jsonrpc": "2.0",
@@ -200,7 +200,7 @@ FFW.VR = FFW.RPCObserver.create({
 	            }
 	            case "VR.IsReady": {
 	                
-	            	Em.Logger.log("FFW." + method + "Response");
+	            	Em.Logger.log("FFW." + request.method + "Response");
 	                
 	                // send repsonse
 	                var JSONMessage = {

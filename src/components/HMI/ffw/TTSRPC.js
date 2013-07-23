@@ -122,7 +122,7 @@ FFW.TTS = FFW.RPCObserver.create( {
         switch( request.method ){
             case "TTS.Speak": {
                 
-            	Em.Logger.log("FFW." + method + "Response");
+            	Em.Logger.log("FFW." + request.method + "Response");
             	
                 SDL.SDLModel.onPrompt( request.params.ttsChunks.splice( 0, 1 ) );
 
@@ -141,7 +141,7 @@ FFW.TTS = FFW.RPCObserver.create( {
             }
             case "TTS.SetGlobalProperties": {
                 
-            	Em.Logger.log("FFW." + method + "Response");
+            	Em.Logger.log("FFW." + request.method + "Response");
 
                 SDL.SDLModel.setProperties( request.params );
 
@@ -160,7 +160,7 @@ FFW.TTS = FFW.RPCObserver.create( {
             }
             case "TTS.StopSpeaking": {
                 
-            	Em.Logger.log("FFW." + method + "Response");
+            	Em.Logger.log("FFW." + request.method + "Response");
 
                 // send repsonse
                 var JSONMessage = {
@@ -177,7 +177,7 @@ FFW.TTS = FFW.RPCObserver.create( {
             }
             case "TTS.GetCapabilities": {
                 
-            	Em.Logger.log("FFW." + method + "Response");
+            	Em.Logger.log("FFW." + request.method + "Response");
 
                 // send repsonse
                 var JSONMessage = {
@@ -200,7 +200,7 @@ FFW.TTS = FFW.RPCObserver.create( {
             }
             case "TTS.GetSupportedLanguages": {
                 
-            	Em.Logger.log("FFW." + method + "Response");
+            	Em.Logger.log("FFW." + request.method + "Response");
 
                 var JSONMessage = {
                     "jsonrpc": "2.0",
@@ -217,7 +217,7 @@ FFW.TTS = FFW.RPCObserver.create( {
             }
             case "TTS.GetLanguage": {
                 
-            	Em.Logger.log("FFW." + method + "Response");
+            	Em.Logger.log("FFW." + request.method + "Response");
 
                 var JSONMessage = {
                     "jsonrpc": "2.0",
@@ -234,7 +234,7 @@ FFW.TTS = FFW.RPCObserver.create( {
             }
             case "TTS.ChangeRegistration": {
                 
-            	Em.Logger.log("FFW." + method + "Response");
+            	Em.Logger.log("FFW." + request.method + "Response");
 
                 SDL.SDLModel.changeRegistrationTTSVR( request.params.language );
 
@@ -255,7 +255,7 @@ FFW.TTS = FFW.RPCObserver.create( {
             
             case "TTS.IsReady": {
                 
-            	Em.Logger.log("FFW." + method + "Response");
+            	Em.Logger.log("FFW." + request.method + "Response");
             	
                 // send repsonse
                 var JSONMessage = {

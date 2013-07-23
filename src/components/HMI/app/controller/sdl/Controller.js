@@ -161,6 +161,34 @@ SDL.SDLController = Em.Object.create({
     },
 
     /**
+     * Action for ClosePopUp request
+     * that triggers deactivate function from opened popUp
+     */
+    closePopUp: function() {
+
+        if(SDL.AlertPopUp.active){
+        	SDL.AlertPopUp.deactivate(true);
+        }
+
+        if (SDL.AudioPassThruPopUp.active) {
+        	SDL.AudioPassThruPopUp.deactivate();
+            SDL.SDLController.performAudioPassThruResponse( "SUCCESS" );
+        }
+
+        if(SDL.InteractionChoicesView.active){
+        	SDL.InteractionChoicesView.deactivate(true);
+        }
+
+        if(SDL.ScrollableMessage.active){
+        	SDL.ScrollableMessage.deactivate(true);
+        }
+
+        if(SDL.SliderView.active){
+        	SDL.SliderView.deactivate(true);
+        }
+    },
+
+    /**
      * Method to close AlertMeneuverPopUp view
      */
     closeAlertMeneuverPopUp: function() {
@@ -239,7 +267,7 @@ SDL.SDLController = Em.Object.create({
      */
     performAudioPassThruResponse: function(result) {
         SDL.SDLModel.set('AudioPassThruState', false);
-        FFW.UI.sendUIResult(result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru");
+        FFW.UI.sendUIResult(SDL.SDLModel.resultCode[result], FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru");
     },
 
     /**
