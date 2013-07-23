@@ -154,10 +154,11 @@ void ThreadedSocketConnection::thread() {
     while (!terminate_flag_)
       transmit();
     finalise();
-    while(!frames_to_send_.empty()) {
+    while (!frames_to_send_.empty()) {
       RawMessageSptr message = frames_to_send_.front();
       frames_to_send_.pop();
-      controller_->dataSendFailed(device_handle(), application_handle(), message, DataSendError());
+      controller_->dataSendFailed(device_handle(), application_handle(),
+                                  message, DataSendError());
     }
     controller_->disconnectDone(device_handle(), application_handle());
   } else {
@@ -277,28 +278,26 @@ bool ThreadedSocketConnection::send() {
   pthread_mutex_unlock(&frames_to_send_mutex_);
 
   bool frame_sent = false;
-  for (; false == frames_to_send.empty(); frames_to_send.pop()) {
+  size_t offset = 0;
+  while (!frames_to_send.empty()) {
     RawMessageSptr frame = frames_to_send.front();
 
-    const ssize_t bytes_sent = ::send(socket_, frame->data(),
-                                      frame->data_size(), 0);
+    const ssize_t bytes_sent = ::send(socket_, frame->data() + offset,
+                                      frame->data_size() - offset, 0);
 
-    if (static_cast<size_t>(bytes_sent) == frame->data_size()) {
-      frame_sent = true;
-    } else {
-      if (bytes_sent >= 0) {
-        //TODO isn't it OK?
-        LOG4CXX_ERROR(
-            logger_,
-            "Sent " << bytes_sent << " bytes while " << frame->data_size() << " had been requested for connection " << this);
-      } else {
-        LOG4CXX_ERROR_WITH_ERRNO(logger_, "Send failed for connection " << this);
+    if (bytes_sent >= 0) {
+      offset += bytes_sent;
+      if (offset == frame->data_size()) {
+        frames_to_send.pop();
+        offset = 0;
+        controller_->dataSendDone(device_handle(), application_handle(), frame);
       }
-    }
-    if (frame_sent) {
-      controller_->dataSendDone(device_handle(), application_handle(), frame);
     } else {
-      controller_->dataSendFailed(device_handle(), application_handle(), frame, DataSendError());
+      LOG4CXX_ERROR_WITH_ERRNO(logger_, "Send failed for connection " << this);
+      frames_to_send.pop();
+      offset = 0;
+      controller_->dataSendFailed(device_handle(), application_handle(), frame,
+                                  DataSendError());
     }
   }
   return true;
