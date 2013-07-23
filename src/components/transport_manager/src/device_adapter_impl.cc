@@ -162,7 +162,7 @@ DeviceAdapter::Error DeviceAdapterImpl::disconnectDevice(
       it != connections_.end(); ++it) {
     ConnectionInfo& info = it->second;
     if (info.device_handle == device_handle
-        && info.state == ConnectionInfo::ESTABLISHED) {
+        && info.state != ConnectionInfo::FINALISING) {
       if (OK != info.connection->disconnect()) {
         error = FAIL;
       }
@@ -309,12 +309,23 @@ void DeviceAdapterImpl::connectionCreated(ConnectionSptr connection,
 
 void DeviceAdapterImpl::disconnectDone(const DeviceHandle device_handle,
                                        const ApplicationHandle app_handle) {
+  bool device_disconnected = true;
   pthread_mutex_lock(&connections_mutex_);
   connections_.erase(std::make_pair(device_handle, app_handle));
+  for(ConnectionMap::const_iterator it = connections_.begin(); it != connections_.end(); ++it) {
+    if(it->first.first == device_handle) {
+      device_disconnected = false;
+      break;
+    }
+  }
   pthread_mutex_unlock(&connections_mutex_);
   for (DeviceAdapterListenerList::iterator it = listeners_.begin();
-      it != listeners_.end(); ++it)
-    (*it)->onDisconnectDone(this, device_handle, app_handle);
+      it != listeners_.end(); ++it) {
+    DeviceAdapterListener* listener = *it;
+    listener->onDisconnectDone(this, device_handle, app_handle);
+    if(device_disconnected)
+      listener->onDisconnectDeviceDone(this, device_handle);
+  }
 }
 
 void DeviceAdapterImpl::dataReceiveDone(const DeviceHandle device_handle,
