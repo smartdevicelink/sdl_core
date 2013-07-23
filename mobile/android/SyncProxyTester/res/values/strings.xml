@@ -106,5 +106,7 @@
     <string name="showconstanttbt_distanceToManeuverScale">Distance To Maneuver Scale</string>
     <string name="showconstanttbt_distanceToManeuverScaleDefault">100</string>
     <string name="showconstanttbt_isManeuverComplete">Maneuver Complete?</string>
+    <string name="encodedsyncpdata_filename">Local File Name</string>
+    <string name="encodedsyncpdata_selectFileButton">…</string>
 
 </resources>

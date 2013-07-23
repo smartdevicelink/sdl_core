@@ -135,6 +135,7 @@ import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
 
@@ -162,7 +163,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
 	private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
 
-	private static final int REQUEST_PUTFILE_OPEN = 50;
+	private static final int REQUEST_FILE_OPEN = 50;
 	private final static int REQUEST_CHOOSE_XML_TEST = 51;
 	
 	private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
@@ -1561,20 +1562,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						} else if (adapter.getItem(which) == Names.PerformInteraction) {
 							sendPerformInteraction();
 						} else if (adapter.getItem(which) == Names.EncodedSyncPData) {
-							//EncodedSyncPData
-							EncodedSyncPData msg = new EncodedSyncPData();
-							Vector<String> syncPData = new Vector<String>();
-							syncPData.add("AAM4AAkAAAAAAAAAAAA=");
-							msg.setData(syncPData);
-							msg.setCorrelationID(autoIncCorrId++);
-							
-							_msgAdapter.logMessage(msg, true);
-							
-							try {
-								ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-							} catch (SyncException e) {
-								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-							}
+							sendEncodedSyncPData();
 						} else if (adapter.getItem(which) == Names.Slider) {
 							sendSlider();
 						} else if (adapter.getItem(which) == Names.ScrollableMessage) {
@@ -1720,7 +1708,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									intent.putExtra(FileDialog.START_PATH, "/sdcard");
 									intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
 									intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
-									startActivityForResult(intent, REQUEST_PUTFILE_OPEN);
+									startActivityForResult(intent, REQUEST_FILE_OPEN);
 								}
 							});
 							
@@ -2125,6 +2113,66 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 						messageSelectCount.put(function, curCount + 1);
 					}
+
+                   /**
+                    * Opens the dialog for EncodedSyncPData message and sends it.
+                    */
+                   private void sendEncodedSyncPData() {
+                       final Context mContext = adapter.getContext();
+                       LayoutInflater inflater = (LayoutInflater) mContext
+                               .getSystemService(LAYOUT_INFLATER_SERVICE);
+                       View layout = inflater.inflate(R.layout.encodedsyncpdata, null);
+
+                       txtLocalFileName = (EditText) layout.findViewById(R.id.encodedsyncpdata_localFileName);
+                       final Button btnSelectLocalFile = (Button) layout.findViewById(R.id.encodedsyncpdata_selectFileButton);
+                       btnSelectLocalFile.setOnClickListener(new OnClickListener() {
+                           @Override
+                           public void onClick(View v) {
+                               // show Choose File dialog
+                               Intent intent = new Intent(mContext, FileDialog.class);
+                               intent.putExtra(FileDialog.START_PATH, "/sdcard");
+                               intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+                               intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
+                               startActivityForResult(intent, REQUEST_FILE_OPEN);
+                           }
+                       });
+
+                       AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                       builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                           @Override
+                           public void onClick(DialogInterface dialog, int id) {
+                               String filename = txtLocalFileName.getText().toString();
+                               byte[] data = contentsOfFile(filename);
+                               if (data != null) {
+                                   String base64Data = Base64.encode(data);
+                                   EncodedSyncPData msg = new EncodedSyncPData();
+                                   Vector<String> syncPData = new Vector<String>();
+                                   syncPData.add(base64Data);
+                                   msg.setData(syncPData);
+                                   msg.setCorrelationID(autoIncCorrId++);
+
+                                   _msgAdapter.logMessage(msg, true);
+
+                                   try {
+                                       ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                                   } catch (SyncException e) {
+                                       _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                                   }
+                               } else {
+                                   Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
+                               }
+                               txtLocalFileName = null;
+                           }
+                       });
+                       builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               txtLocalFileName = null;
+                               dialog.cancel();
+                           }
+                       });
+                       builder.setView(layout);
+                       builder.show();
+                   }
 
 					/**
 					 * Opens the dialog for ShowConstantTBT message and sends it.
@@ -3579,7 +3627,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 			break;
 
-		case REQUEST_PUTFILE_OPEN:
+		case REQUEST_FILE_OPEN:
 			if (resultCode == RESULT_OK) {
 				String fileName = data.getStringExtra(FileDialog.RESULT_PATH);
 				if (txtLocalFileName != null) {
