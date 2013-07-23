@@ -437,6 +437,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SetMediaClockTimerID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SetMediaClockTimerResponse(message));
+      } else {
+        command.reset(new commands::SetMediaClockRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::OnButtonEventID: {
       command.reset(new commands::OnButtonEventNotification(message));
       break;

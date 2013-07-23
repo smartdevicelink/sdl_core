@@ -52,9 +52,9 @@ SetMediaClockRequest::~SetMediaClockRequest() {
 void SetMediaClockRequest::Run() {
   LOG4CXX_INFO(logger_, "SetMediaClockRequest::Run");
 
-  Application* app =
-    application_manager::ApplicationManagerImpl::instance()->
-    application((*message_)[strings::msg_params][strings::app_id]);
+  unsigned int app_id =
+    (*message_)[strings::params][strings::connection_key].asUInt();
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
