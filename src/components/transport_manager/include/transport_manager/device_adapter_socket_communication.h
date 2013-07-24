@@ -74,7 +74,7 @@ class ThreadedSocketConnection : public Connection {
  private:
   void thread();
   void transmit();
-  void finalise();
+  void finalize();
   DeviceAdapter::Error notify() const;
   bool receive();
   bool send();

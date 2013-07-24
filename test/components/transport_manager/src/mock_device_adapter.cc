@@ -38,6 +38,7 @@
 #include <list>
 
 #include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_connection.h"
 #include "transport_manager/device_adapter_impl.h"
 
 namespace {
@@ -134,7 +135,11 @@ DeviceAdapter::Error MockDeviceScanner::init() {
 }
 
 DeviceAdapter::Error MockDeviceScanner::scan() {
-  controller_->searchDeviceDone(devices_);
+  if (devices_.empty()) {
+    controller_->searchDeviceFailed(SearchDeviceError());
+  } else {
+    controller_->searchDeviceDone(devices_);
+  }
   return DeviceAdapter::OK;
 }
 
@@ -162,6 +167,8 @@ DeviceAdapter::Error MockConnectionFactory::init() {
 
 DeviceAdapter::Error MockConnectionFactory::createConnection(
     const DeviceHandle& device_handle, const ApplicationHandle& app_handle) {
+  using ::transport_manager::device_adapter::Connection;
+  MockConnection *connection = new MockConnection(device_handle, app_handle, controller_);
   return DeviceAdapter::OK;
 }
 

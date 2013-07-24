@@ -22,6 +22,8 @@ set (LIBRARIES
 
 set (SOURCES
    ./src/transport_manager.cc
+   ./src/matchers.cc
+   ./src/mock_connection.cc
    ./src/mock_device_adapter.cc
 )
 
