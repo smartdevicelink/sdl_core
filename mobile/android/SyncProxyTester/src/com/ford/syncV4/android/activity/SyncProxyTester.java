@@ -2054,6 +2054,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                        View layout = inflater.inflate(R.layout.addcommand,
                                (ViewGroup) findViewById(R.id.itemRoot));
 
+                       final EditText editCmdID = (EditText) layout.findViewById(R.id.addcommand_commandID);
                        final EditText er = (EditText) layout.findViewById(R.id.addcommand_commandName);
                        final EditText editVrSynonym = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
                        final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
@@ -2062,6 +2063,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                        final CheckBox chkUseIcon = (CheckBox) layout.findViewById(R.id.addcommand_useIcon);
                        final EditText editIconValue = (EditText) layout.findViewById(R.id.addcommand_iconValue);
                        final Spinner spnIconType = (Spinner) layout.findViewById(R.id.addcommand_iconType);
+
+                       // set suggested value
+                       editCmdID.setText(String.valueOf(itemcmdID++));
 
                        if (!v2Features) {
                            int visibility = View.GONE;
@@ -2076,8 +2080,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                            public void onClick(DialogInterface dialog, int id) {
+                               String cmdIDString = editCmdID.getText().toString();
+                               int cmdID = -1;
+                               try {
+                                   cmdID = Integer.parseInt(cmdIDString);
+                               } catch (NumberFormatException e) {
+                                   Toast.makeText(mContext, "Couldn't parse number " + cmdIDString, Toast.LENGTH_LONG)
+                                           .show();
+                                   return;
+                               }
+
                                AddCommand msg = new AddCommand();
                                msg.setCorrelationID(autoIncCorrId++);
+                               msg.setCmdID(cmdID);
+
                                String itemText = er.getText().toString();
                                MenuParams menuParams = new MenuParams();
                                menuParams.setMenuName(itemText);
@@ -2101,9 +2117,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                                    icon.setImageType((ImageType) spnIconType.getSelectedItem());
                                    msg.setCmdIcon(icon);
                                }
-
-                               int cmdID = itemcmdID++;
-                               msg.setCmdID(cmdID);
 
                                try {
                                    _msgAdapter.logMessage(msg, true);

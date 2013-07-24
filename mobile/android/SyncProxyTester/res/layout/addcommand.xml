@@ -13,6 +13,22 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
+            android:text="@string/addcommand_commandID"/>
+
+    <EditText
+            android:id="@+id/addcommand_commandID"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="number"
+            android:maxLength="10"
+            android:text="@string/addcommand_commandIDDefault"
+            android:visibility="visible"/>
+
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:text="@string/addcommand_commandName"/>
 
     <EditText
