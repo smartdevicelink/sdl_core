@@ -616,7 +616,7 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 
 void ApplicationManagerImpl::SendMessageToMobile(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToHMI");
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToMobile");
 
   DCHECK(message);
   if (!message) {

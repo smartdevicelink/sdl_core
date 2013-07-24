@@ -70,10 +70,17 @@ void CommandResponseImpl::SendResponse(bool success,
   (*response)[strings::params][strings::protocol_version] = protocol_version_;
   (*response)[strings::msg_params][strings::success] = success;
   (*response)[strings::params][strings::message_type] = MessageType::kResponse;
+  (*response)[strings::params][strings::connection_key] =
+    (*message_)[strings::params][strings::connection_key];
 
   if (success) {
-    (*response)[strings::msg_params][strings::result_code] =
+    if ((*message_)[strings::msg_params].keyExists(strings::result_code)) {
+      (*response)[strings::msg_params][strings::result_code] =
+          (*message_)[strings::msg_params][strings::result_code];
+    } else {
+      (*response)[strings::msg_params][strings::result_code] =
                   mobile_apis::Result::SUCCESS;
+    }
   } else {
     if (mobile_apis::Result::INVALID_ENUM != result_code) {
       (*response)[strings::msg_params][strings::result_code] = result_code;
