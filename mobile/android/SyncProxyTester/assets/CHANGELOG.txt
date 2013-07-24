@@ -1,4 +1,5 @@
 [CW30]
++ Show dialog: add graphic's image type parameter.
 * AddCommand dialog: the user can omit sending parentID parameter.
 + Add the EncodedSyncPData dialog.
 

@@ -261,8 +261,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * during this app launch.
 	 */
 	private static boolean isFirstActivityRun = true;
-	
-	/**
+
+    /**
+     * Shared ArrayAdapter containing ImageType values.
+     */
+    private ArrayAdapter<ImageType> imageTypeAdapter;
+
+    /**
 	 * A custom {@link RPCRequest} subclass that is not present in the
 	 * specification. Used to test that the response is {@link GenericResponse}.
 	 */
@@ -297,7 +302,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		_vehicleDataType
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-		_listview = (ListView) findViewById(R.id.messageList);
+        imageTypeAdapter = new ArrayAdapter<ImageType>(this, android.R.layout.simple_spinner_item, ImageType.values());
+        imageTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        _listview = (ListView) findViewById(R.id.messageList);
 		_msgAdapter = new logAdapter(logTag, false, this, R.layout.row, _logMessages);
 		
 		_listview.setClickable(true);
@@ -2063,9 +2071,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                            }
                        }
 
-                       ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
-                               mContext, android.R.layout.simple_spinner_item, ImageType.values());
-                       imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                        spnIconType.setAdapter(imageTypeAdapter);
 
                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -2200,10 +2205,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
 						final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
 						
-						final ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
-								mContext, android.R.layout.simple_spinner_item, ImageType.values());
-						imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-						
 						if (v2Features) {
 							spnTurnIconType.setAdapter(imageTypeAdapter);
 						} else {
@@ -2318,10 +2319,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final EditText image1Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image1Value);
 						final EditText image2Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image2Value);
 						final EditText image3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image3Value);
-						
-						final ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
-								mContext, android.R.layout.simple_spinner_item, ImageType.values());
-						imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 						
 						if (v2Features) {
 							image1Type.setAdapter(imageTypeAdapter);
@@ -2443,6 +2440,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final CheckBox mediaTrackCheck = (CheckBox) layout.findViewById(R.id.show_mediaTrackCheck);
 						final EditText mediaTrack = (EditText) layout.findViewById(R.id.show_mediaTrack);
 						final CheckBox graphicCheck = (CheckBox) layout.findViewById(R.id.show_graphicCheck);
+                        final Spinner graphicType = (Spinner) layout.findViewById(R.id.show_graphicType);
 						final EditText graphic = (EditText) layout.findViewById(R.id.show_graphic);
 						chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
 						final Button softButtons = (Button) layout.findViewById(R.id.show_btnSoftButtons);
@@ -2466,18 +2464,16 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 						
 						if (!v2Features) {
-							int visibility = android.view.View.GONE;
-							mainField3Check.setVisibility(visibility);
-							mainField3.setVisibility(visibility);
-							mainField4Check.setVisibility(visibility);
-							mainField4.setVisibility(visibility);
-							graphicCheck.setVisibility(visibility);
-							graphic.setVisibility(visibility);
-							chkIncludeSoftButtons.setVisibility(visibility);
-							softButtons.setVisibility(visibility);
-							customPresetsCheck.setVisibility(visibility);
-							customPresets.setVisibility(visibility);
+                            View[] views = { mainField3Check, mainField3, mainField4Check, mainField4, graphicCheck,
+                                    graphicType, graphic, chkIncludeSoftButtons, softButtons, customPresetsCheck,
+                                    customPresets };
+
+                            for (View view : views) {
+                                view.setVisibility(View.GONE);
+                            }
 						} else {
+                            graphicType.setAdapter(imageTypeAdapter);
+
 							SoftButton sb1 = new SoftButton();
 							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb1.setText("KeepContext");
@@ -2550,7 +2546,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									}
 									if (v2Features && graphicCheck.isChecked()) {
 										Image image = new Image();
-										image.setImageType(ImageType.STATIC);
+										image.setImageType((ImageType) graphicType.getSelectedItem());
 										image.setValue(graphic.getText().toString());
 										msg.setGraphic(image);
 									}

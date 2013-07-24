@@ -148,13 +148,25 @@
                 android:text="@string/show_mediaClockDefault" />
         </LinearLayout>
 
-        <CheckBox
-            android:id="@+id/show_graphicCheck"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/show_graphic"
-            android:textStyle="bold" />
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+            <CheckBox
+                    android:id="@+id/show_graphicCheck"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:checked="true"
+                    android:text="@string/show_graphic"
+                    android:textStyle="bold" />
+
+            <Spinner
+                    android:id="@+id/show_graphicType"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/show_graphic"
