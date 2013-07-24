@@ -58,17 +58,23 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
-ACTION_P2(WaitTest, mutex, cond)
-{
-  pthread_mutex_lock(mutex);
-  pthread_cond_signal(cond);
-  pthread_mutex_unlock(mutex);
+ACTION_P(SignalTest, test) {
+  if (test->thread_id != pthread_self()) {
+    pthread_mutex_lock(&test->test_mutex);
+    pthread_cond_signal(&test->test_cond);
+    pthread_mutex_unlock(&test->test_mutex);
+  } else {
+    test->one_thread = true;
+  }
 }
 
 class TransportManagerTest : public ::testing::Test {
- protected:
+ public:
+  volatile bool one_thread;
+  pthread_t thread_id;
   static pthread_mutex_t test_mutex;
   static pthread_cond_t test_cond;
+ protected:
   static FakeDeviceAdapter *fake_adapter;
   static MockTransportManagerListener *tm_listener;
 
@@ -90,6 +96,8 @@ class TransportManagerTest : public ::testing::Test {
   }
 
   virtual void SetUp() {
+    one_thread = false;
+    thread_id = pthread_self();
     pthread_mutex_lock(&test_mutex);
   }
 
@@ -98,6 +106,8 @@ class TransportManagerTest : public ::testing::Test {
   }
 
   bool waitCond(int seconds) {
+    if (one_thread)
+      return true;
     timespec elapsed;
     clock_gettime(CLOCK_REALTIME, &elapsed);
     elapsed.tv_sec += seconds;
@@ -121,7 +131,7 @@ TEST_F(TransportManagerTest, SearchDeviceFailed)
   EXPECT_CALL(*tm_listener, onDeviceFound(_, _)).Times(0);
   EXPECT_CALL(*tm_listener, onSearchDeviceDone()).Times(0);
   EXPECT_CALL(*tm_listener, onSearchDeviceFailed(_, _)).Times(1)
-      .WillOnce(WaitTest(&test_mutex, &test_cond));
+      .WillOnce(SignalTest(this));
 
   fake_adapter->clearDevices();
   TransportManagerImpl::instance()->searchDevices();
@@ -132,8 +142,8 @@ TEST_F(TransportManagerTest, SearchDeviceDone)
 {
   EXPECT_CALL(*tm_listener, onSearchDeviceFailed(_, _)).Times(0);
   EXPECT_CALL(*tm_listener, onDeviceFound(_, _)).Times(1);
-  EXPECT_CALL(*tm_listener, onSearchDeviceDone()).Times(1)
-      .WillOnce(WaitTest(&test_mutex, &test_cond));
+  EXPECT_CALL(*tm_listener,onSearchDeviceDone()).Times(1)
+      .WillOnce(SignalTest(this));
 
   fake_adapter->addDevice("TestDevice");
   TransportManagerImpl::instance()->searchDevices();
@@ -147,7 +157,7 @@ TEST_F(TransportManagerTest, ConnectDeviceDone)
   const ApplicationHandle kApplication = 1;
   EXPECT_CALL(*tm_listener, onConnectFailed(_, kDevice, kApplication, _)).Times(0);
   EXPECT_CALL(*tm_listener, onConnectDone(_, kDevice, kApplication, _)).Times(1)
-      .WillOnce(WaitTest(&test_mutex, &test_cond));
+      .WillOnce(SignalTest(this));
 
   fake_adapter->addDevice("TestDevice");
   TransportManagerImpl::instance()->connectDevice(kDevice, kApplication);
@@ -160,8 +170,8 @@ TEST_F(TransportManagerTest, ConnectDeviceFailed)
   const DeviceHandle kDevice = "NoDevice";
   const ApplicationHandle kApplication = 0;
   EXPECT_CALL(*tm_listener, onConnectDone(_, kDevice, kApplication, _)).Times(0);
-  EXPECT_CALL(*tm_listener, onConnectFailed(_, kDevice, kApplication, _)).Times(1)
-      .WillOnce(WaitTest(&test_mutex, &test_cond));
+  EXPECT_CALL(*tm_listener, onConnectFailed(_, kDevice, kApplication, _)).Times(0)
+      .WillOnce(SignalTest(this));
 
   fake_adapter->clearDevices();
   TransportManagerImpl::instance()->connectDevice(kDevice, kApplication);
@@ -175,7 +185,7 @@ TEST_F(TransportManagerTest, DISABLED_DisconnectDeviceFailed)
   EXPECT_CALL(*tm_listener, onDisconnectDeviceDone(_, kDevice)).Times(0);
   EXPECT_CALL(*tm_listener, onDisconnectFailed(_, _, _)).Times(1);
   EXPECT_CALL(*tm_listener, onDisconnectDeviceFailed(_, kDevice, _)).Times(1)
-    .WillOnce(WaitTest(&test_mutex, &test_cond));
+    .WillOnce(SignalTest(this));
 
   TransportManagerImpl::instance()->disconnectDevice(kDevice);
   EXPECT_TRUE(waitCond(1));
@@ -189,7 +199,7 @@ TEST_F(TransportManagerTest, DISABLED_DisconnectDeviceDone)
   EXPECT_CALL(*tm_listener, onDisconnectDeviceFailed(_, kDevice, _)).Times(0);
   EXPECT_CALL(*tm_listener, onDisconnectDone(_, _)).Times(1);
   EXPECT_CALL(*tm_listener, onDisconnectDeviceDone(_, kDevice)).Times(1)
-    .WillOnce(WaitTest(&test_mutex, &test_cond));
+        .WillOnce(SignalTest(this));
 
   fake_adapter->addConnection("TestDevice", kApplication);
   TransportManagerImpl::instance()->disconnectDevice(kDevice);
@@ -209,7 +219,7 @@ TEST_F(TransportManagerTest, DISABLED_SendReceive)
   EXPECT_CALL(*tm_listener, onDataReceiveFailed(_, _, _)).Times(0);
   EXPECT_CALL(*tm_listener, onDataSendDone(_, kSession, RawMessageEq(kMessage))).Times(1);
   EXPECT_CALL(*tm_listener, onDataReceiveDone(_, kSession, RawMessageEq(kMessage))).Times(1)
-    .WillOnce(WaitTest(&test_mutex, &test_cond));
+  .WillOnce(SignalTest(this));
 
   TransportManagerImpl::instance()->sendMessageToDevice(kMessage);
   EXPECT_TRUE(waitCond(1));

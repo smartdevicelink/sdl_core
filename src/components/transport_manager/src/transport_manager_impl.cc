@@ -114,7 +114,8 @@ void TransportManagerImpl::connectDevice(const DeviceHandle &device_id,
   if (false == this->is_initialized_) {
     //todo: log error
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
-    raiseEvent(&TransportManagerListener::onConnectFailed, nullptr, device_id, app_id, ConnectError());
+    raiseEvent(&TransportManagerListener::onConnectFailed, nullptr, device_id,
+               app_id, ConnectError());
     return;
   }
 
@@ -123,12 +124,14 @@ void TransportManagerImpl::connectDevice(const DeviceHandle &device_id,
   if (NULL == da) {
     //error case
     LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
-    raiseEvent(&TransportManagerListener::onConnectFailed, nullptr, device_id, app_id, ConnectError());
+    raiseEvent(&TransportManagerListener::onConnectFailed, nullptr, device_id,
+               app_id, ConnectError());
     return;
   }
   if (device_adapter::DeviceAdapter::OK != da->connect(device_id, app_id)) {
     LOG4CXX_ERROR(logger_, "Connect failed");
-    raiseEvent(&TransportManagerListener::onConnectFailed, da, device_id, app_id, ConnectError());
+    raiseEvent(&TransportManagerListener::onConnectFailed, da, device_id,
+               app_id, ConnectError());
     //error case
     return;
   }
@@ -437,7 +440,8 @@ void TransportManagerImpl::eventListenerThread(void) {
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL:
           //error happened in real search process (external error)
           srch_err = static_cast<SearchDeviceError *>((*it).event_error());
-          raiseEvent(&TransportManagerListener::onSearchDeviceFailed, da, *srch_err);
+          raiseEvent(&TransportManagerListener::onSearchDeviceFailed, da,
+                     *srch_err);
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE:
           connection = Connection(connection_id_counter_++, device_handle,
@@ -450,15 +454,16 @@ void TransportManagerImpl::eventListenerThread(void) {
               std::make_pair(
                   std::make_pair(connection.device, connection.application),
                   connection));
-          raiseEvent(&TransportManagerListener::onConnectDone, da, connection.device,
-                     connection.application, connection.id);
+          raiseEvent(&TransportManagerListener::onConnectDone, da,
+                     connection.device, connection.application, connection.id);
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE:
           adapter_handler_.removeSession((*it).device_adapter(),
                                          (*it).application_id());
-          raiseEvent(&TransportManagerListener::onDisconnectDone, da, connection.id);
+          raiseEvent(&TransportManagerListener::onDisconnectDone, da,
+                     connection.id);
           id_to_connections_map_.erase(connection.id);
           dev_app_to_connections_map_.erase(
               std::make_pair(device_handle, app_handle));
@@ -479,11 +484,13 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE:
           data = (*it).data();
-          raiseEvent(&TransportManagerListener::onDataReceiveDone, da, connection.id, data);
+          raiseEvent(&TransportManagerListener::onDataReceiveDone, da,
+                     connection.id, data);
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL:
           d_err = static_cast<DataReceiveError *>((*it).event_error());
-          raiseEvent(&TransportManagerListener::onDataReceiveFailed, da, connection.id, *d_err);
+          raiseEvent(&TransportManagerListener::onDataReceiveFailed, da,
+                     connection.id, *d_err);
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR:
           break;
@@ -542,8 +549,7 @@ void TransportManagerImpl::messageQueueThread(void) {
         Connection& connection = getConnection(active_msg->connection_key());
         if (device_adapter::DeviceAdapter::Error::OK
             == device_adapter->sendData(connection.device,
-                                        connection.application,
-                                        active_msg)) {
+                                        connection.application, active_msg)) {
           LOG4CXX_INFO(logger_, "Data sent to adapter");
           active_msg->set_waiting(true);
         } else {
