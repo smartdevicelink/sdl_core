@@ -458,7 +458,7 @@ void TransportManagerImpl::messageQueueThread(void) {
         serial_number = (*it)->serial_number();
       }
     }
-    if (active_msg.valid() && false == active_msg->isWaiting()) {
+    if (active_msg.valid() && false == active_msg->IsWaiting()) {
       DeviceAdapter* device_adapter = adapter_handler_.getAdapterBySession(
                                         active_msg->connection_key());
       LOG4CXX_INFO(

@@ -9,28 +9,10 @@ else()
 add_subdirectory(./TransportManager)
 endif()
 
-# --- AppMgr
-if(NOT BUILD_ONLY_TM)
-add_subdirectory(./AppMgr)
-endif()
-
-# --- JSONHandler
-if(NOT BUILD_ONLY_TM)
-add_subdirectory(./JSONHandler)
-endif()
-
 # --- formatters
 add_subdirectory(./formatters)
 
-# --- ProtocolHandler
-if(NOT BUILD_ONLY_TM)
-add_subdirectory(./protocol_handler)
-endif()
-
-# --- ConnectionHandler
-if(NOT BUILD_ONLY_TM)
 add_subdirectory(./connection_handler)
-endif()
 
 # --- Utils
 add_subdirectory(./utils)

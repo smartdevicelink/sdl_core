@@ -49,13 +49,18 @@ class TransportManagerListenerImpl: public TransportManagerListener {
     virtual void OnAccessRequested(const DeviceInfo& device) {}
     virtual void OnScanDevicesFinished() {}
     virtual void OnScanDevicesFailed(const SearchDeviceError& error) {}
-    virtual void OnConnectionEstablished() {}
-    virtual void OnConnectionFailed(const ConnectError& error) {}
-    virtual void OnConnectionClosed(SessionID connection_id) {}
-    virtual void OnConnectionClosedFailure(SessionID connection_id,
+    virtual void OnConnectionEstablished(const DeviceInfo& device,
+                                         ConnectionUID connection_id) {}
+    virtual void OnConnectionFailed(const DeviceInfo& device,
+                                    ConnectionUID connection_id,
+                                    const ConnectError& error) {}
+    virtual void OnConnectionClosed(ConnectionUID connection_id) {}
+    virtual void OnConnectionClosedFailure(ConnectionUID connection_id,
                                            const DisconnectError& error) {}
-    virtual void OnDeviceDisconnected(const DeviceInfo& device,
-                                      const DisconnectDeviceError& error) {}
+    virtual void OnDeviceConnectionLost(const DeviceInfo& device,
+                                        const DisconnectDeviceError& error) {}
+    virtual void OnDisconnectFailed(const DeviceInfo& device,
+                                    const DisconnectDeviceError& error) {}
     virtual void OnTMMessageReceived(
       const RawMessageSptr& message) {}
     virtual void OnTMMessageReceiveFailed(

@@ -47,11 +47,13 @@ namespace transport_manager {
  * @see @ref components_transportmanager_client_connection_management
  **/
 typedef int SessionID;
+typedef unsigned int ConnectionUID;
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 
 struct DeviceInfo {
   std::string name;
   unsigned int handle;
+  std::string mac_address;
 };
 typedef std::set<DeviceInfo> Devices;
 

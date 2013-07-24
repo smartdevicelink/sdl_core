@@ -1,6 +1,6 @@
 include_directories (
   ./include/
-  ../TransportManager/include/
+  ../transport_manager/include/
   ../protocol_handler/include/
   ../utils/include/
 )

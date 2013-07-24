@@ -49,18 +49,60 @@ class TransportManagerListener {
     virtual void OnAccessRequested(const DeviceInfo& device) = 0;
     virtual void OnScanDevicesFinished() = 0;
     virtual void OnScanDevicesFailed(const SearchDeviceError& error) = 0;
-    virtual void OnConnectionEstablished() = 0;
-    virtual void OnConnectionFailed(const ConnectError& error) = 0;
-    virtual void OnConnectionClosed(SessionID connection_id) = 0;
-    virtual void OnConnectionClosedFailure(SessionID connection_id,
+    virtual void OnConnectionEstablished(
+      const DeviceInfo& device,
+      ConnectionUID connection_id) = 0;
+    virtual void OnConnectionFailed(const DeviceInfo& device,
+                                    ConnectionUID connection_id,
+                                    const ConnectError& error) = 0;
+    virtual void OnConnectionClosed(ConnectionUID connection_id) = 0;
+    virtual void OnConnectionClosedFailure(ConnectionUID connection_id,
                                            const DisconnectError& error) = 0;
-    virtual void OnDeviceDisconnected(const DeviceInfo& device,
-                                      const DisconnectDeviceError& error) = 0;
+
+    /**
+     * \brief Informs about loosing connection with device
+     * \param device Information about disconnected device
+     * \param error Information about possible reason of loosing connection
+     */
+    virtual void OnDeviceConnectionLost(const DeviceInfo& device,
+                                        const DisconnectDeviceError& error) = 0;
+
+    /**
+     * \brief Informs about failure during DisconnectDevice procedure of TM
+     * \param device Information about disconnected device
+     * \param error Information about possible reason of loosing connection
+     */
+    virtual void OnDisconnectFailed(const DeviceInfo& device,
+                                    const DisconnectDeviceError& error) = 0;
+    /**
+     * @brief Notifies about recieving message from TM.
+     *
+     * @param message Recieved message
+     **/
     virtual void OnTMMessageReceived(
       const RawMessageSptr& message) = 0;
+
+    /**
+     * @brief Notifies about error on receiving message from TM.
+     *
+     * @param error Occured error
+     **/
     virtual void OnTMMessageReceiveFailed(
       const DataReceiveError& error) = 0;
+
+    /**
+     * @brief Notifies about successfully sending message.
+     *
+     **/
     virtual void OnTMMessageSend() = 0;
+
+    /**
+     * @brief Notifies about error occured during
+     * sending message.
+     *
+     * @param error Describes occured error.
+     * @param message Message during sending which error occured.
+     **/
     virtual void OnTMMessageSendFailed(
       const DataSendError& error,
       const RawMessageSptr& message) = 0;

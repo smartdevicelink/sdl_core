@@ -34,11 +34,11 @@
 
 namespace protocol_handler {
 log4cxx::LoggerPtr MessagesFromMobileAppHandler::logger_ =
-      log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ProtocolHandler"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ProtocolHandler"));
 
 MessagesFromMobileAppHandler::MessagesFromMobileAppHandler(
-    ProtocolHandlerImpl* handler)
-    : handler_(handler) {
+  ProtocolHandlerImpl* handler)
+  : handler_(handler) {
   CHECK(handler_);
 }
 
@@ -48,35 +48,31 @@ MessagesFromMobileAppHandler::~MessagesFromMobileAppHandler() {
 void MessagesFromMobileAppHandler::threadMain() {
   while (1) {
     while (!handler_->messages_from_mobile_app_.empty()) {
-      ProtocolHandlerImpl::IncomingMessage* message = handler_
-          ->messages_from_mobile_app_.pop();
+      const RawMessageSptr& message = handler_
+                                      ->messages_from_mobile_app_.pop();
       LOG4CXX_INFO_EXT(
-          logger_,
-          "Message " << message->data << " from mobile app received of size "
-              << message->data_size);
+        logger_,
+        "Message " << message->data() << " from mobile app received of size "
+        << message->data_size());
 
-      // TODO(PV): check for ConnectionHandle.
-      // TODO(PV): check for data size - crash is possible.
-      if ((0 != message->data) && (0 != message->data_size)
+      if ((0 != message->data()) && (0 != message->data_size())
           && (MAXIMUM_FRAME_DATA_SIZE + PROTOCOL_HEADER_V2_SIZE
-              >= message->data_size)) {
-        ProtocolPacket * packet = new ProtocolPacket;
+              >= message->data_size())) {
+        ProtocolPacket* packet = new ProtocolPacket;
         LOG4CXX_INFO_EXT(logger_, "Data: " << packet->data());
-        if (packet->deserializePacket(message->data, message->data_size)
+        if (packet->deserializePacket(message->data(), message->data_size())
             == RESULT_FAIL) {
           LOG4CXX_ERROR(logger_, "Failed to parse received message.");
           delete packet;
         } else {
           LOG4CXX_INFO_EXT(logger_,
-                             "Packet: dataSize " << packet->data_size());
-          handler_->handleMessage(message->connection_handle, packet);
+                           "Packet: dataSize " << packet->data_size());
+          handler_->HandleMessage(message, packet);
         }
       } else {
         LOG4CXX_WARN(
-            logger_, "handleMessagesFromMobileApp() - incorrect or NULL data");
+          logger_, "handleMessagesFromMobileApp() - incorrect or NULL data");
       }
-
-      delete message;
     }
     handler_->messages_from_mobile_app_.wait();
   }
