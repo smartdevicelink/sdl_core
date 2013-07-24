@@ -42,16 +42,18 @@
 
 using ::transport_manager::ApplicationList;
 using ::transport_manager::ApplicationHandle;
+using ::transport_manager::ConnectError;
 using ::transport_manager::DeviceHandle;
+using ::transport_manager::SearchDeviceError;
+using ::transport_manager::RawMessageSptr;
+using ::transport_manager::device_adapter::Connection;
 using ::transport_manager::device_adapter::Device;
-using ::transport_manager::device_adapter::DeviceSptr;
 using ::transport_manager::device_adapter::DeviceAdapter;
+using ::transport_manager::device_adapter::DeviceAdapterController;
 using ::transport_manager::device_adapter::DeviceScanner;
+using ::transport_manager::device_adapter::DeviceSptr;
 using ::transport_manager::device_adapter::DeviceVector;
 using ::transport_manager::device_adapter::ServerConnectionFactory;
-using ::transport_manager::device_adapter::DeviceAdapterController;
-using ::transport_manager::SearchDeviceError;
-using ::transport_manager::ConnectError;
 
 namespace test {
 namespace components {
@@ -68,9 +70,41 @@ class FakeDevice : public Device {
   }
 };
 
+class FakeConnection : public Connection {
+ public:
+  FakeConnection(const DeviceHandle& device_handle,
+                 const ApplicationHandle& app_handle,
+                 FakeDeviceAdapter *adapter)
+    : adapter_(adapter),
+      device_handle_(device_handle),
+      app_handle_(app_handle) {}
+  DeviceAdapter::Error sendData(RawMessageSptr message) {
+    return DeviceAdapter::OK;
+  }
+  DeviceAdapter::Error disconnect() {
+    ::std::pair<DeviceHandle, ApplicationHandle> con = ::std::make_pair(device_handle_, app_handle_);
+    if (::std::find(adapter_->connections_.begin(),
+                    adapter_->connections_.end(),
+                    con) != adapter_->connections_.end()) {
+      adapter_->connections_.remove(con);
+      adapter_->disconnectDone(device_handle_, app_handle_);
+//      if (::std::find_if(adapter_->connections_.begin(),
+//                         adapter_->connections_.end()))
+      adapter_->disconnectDevice(device_handle_);
+    } else {
+      // TODO: add disconnect failed
+    }
+    return DeviceAdapter::OK;
+  }
+ private:
+  FakeDeviceAdapter *adapter_;
+  const DeviceHandle device_handle_;
+  const ApplicationHandle app_handle_;
+};
+
 class FakeDeviceScanner : public DeviceScanner {
  public:
-  FakeDeviceScanner(FakeDeviceAdapter *adapter) { adapter_ = adapter; }
+  FakeDeviceScanner(FakeDeviceAdapter *adapter) : adapter_(adapter) {}
  protected:
   DeviceAdapter::Error init() { return DeviceAdapter::OK; }
   DeviceAdapter::Error scan() {
@@ -99,7 +133,7 @@ struct Search : public ::std::unary_function<DeviceSptr, bool> {
 
 class FakeConnectionFactory : public ServerConnectionFactory {
  public:
-  FakeConnectionFactory(FakeDeviceAdapter *adapter) { adapter_ = adapter; }
+  FakeConnectionFactory(FakeDeviceAdapter *adapter) : adapter_(adapter) {}
   DeviceAdapter::Error init() { return DeviceAdapter::OK; }
   DeviceAdapter::Error createConnection(const DeviceHandle& device_handle,
                                           const ApplicationHandle& app_handle) {
@@ -113,7 +147,7 @@ class FakeConnectionFactory : public ServerConnectionFactory {
     }
     return DeviceAdapter::OK;
   }
-  void terminate() {};
+  void terminate() {}
   bool isInitialised() const { return true; }
   ~FakeConnectionFactory() {}
  private:
@@ -126,6 +160,21 @@ FakeDeviceAdapter::FakeDeviceAdapter()
 
 void FakeDeviceAdapter::addDevice(std::string name) {
   devices_.push_back(new FakeDevice(name));
+}
+
+void FakeDeviceAdapter::clearDevices() {
+  devices_.clear();
+}
+
+void FakeDeviceAdapter::addConnection(const DeviceHandle& device_id,
+                                      const ApplicationHandle& app_id) {
+  DeviceAdapterImpl::connectionCreated(new FakeConnection(device_id, app_id,this),
+                                       device_id, app_id);
+  connections_.push_back(::std::make_pair(device_id, app_id));
+}
+
+void FakeDeviceAdapter::clearConnection() {
+  connections_.clear();
 }
 
 }  // namespace transport_manager
