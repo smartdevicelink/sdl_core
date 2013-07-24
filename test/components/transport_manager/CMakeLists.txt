@@ -25,6 +25,8 @@ set (SOURCES
    ./src/matchers.cc
    ./src/mock_connection.cc
    ./src/mock_device_adapter.cc
+   ./src/raw_message_matcher.cc
+   ./src/fake_device_adapter.cc
 )
 
 create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")

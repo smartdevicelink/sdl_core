@@ -56,10 +56,13 @@ class TransportManagerListener {
 
   virtual void onConnectDone(
       const device_adapter::DeviceAdapter* device_adapter,
+      const DeviceHandle device_id,
+      const ApplicationHandle app_id,
       const ConnectionId session_id) = 0;
   virtual void onConnectFailed(
       const device_adapter::DeviceAdapter* device_adapter,
-      const ConnectionId session_id,
+      const DeviceHandle device_id,
+      const ApplicationHandle app_id,
       const ConnectError& error) = 0;
 
   virtual void onDisconnectDone(
