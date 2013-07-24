@@ -30,8 +30,9 @@ namespace NsMessageBroker
       INVALID_REQUEST     = -32600, /**< The received JSON not a valid MessageBroker Request. */
       METHOD_NOT_FOUND    = -32601, /**< The requested remote-procedure does not exist / is not available. */
       INVALID_PARAMS      = -32602, /**< Invalid method parameters. */
-      INTERNAL_ERROR      = -32603  /**< Internal MessageBroker error. */
-   }; 
+      INTERNAL_ERROR      = -32603, /**< Internal MessageBroker error. */
+      UNSUPPORTED_RESOURCE  = 2       /**< Controller doesn't registered. */
+   };
 
    /**
     * \brief Forward declaration of the private class.

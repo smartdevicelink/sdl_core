@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message.h"
 
 namespace application_manager {
 
@@ -58,20 +59,31 @@ void CommandResponseImpl::Run() {
 void CommandResponseImpl::SendResponse(bool success,
       const mobile_apis::Result::eType& result_code) {
 
-  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
-  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
-  (*message_)[strings::msg_params][strings::success] = success;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject* response =
+    new NsSmartDeviceLink::NsSmartObjects::SmartObject;
+    if (!response) {
+      LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+      return;
+    }
+
+  (*response)[strings::params][strings::protocol_type] = mobile_protocol_type_;
+  (*response)[strings::params][strings::protocol_version] = protocol_version_;
+  (*response)[strings::msg_params][strings::success] = success;
 
   if (success) {
-    (*message_)[strings::msg_params][strings::result_code] =
+    (*response)[strings::msg_params][strings::result_code] =
                   mobile_apis::Result::SUCCESS;
   } else {
     if (mobile_apis::Result::INVALID_ENUM != result_code) {
-      (*message_)[strings::msg_params][strings::result_code] = result_code;
-    }
+      (*response)[strings::msg_params][strings::result_code] = result_code;
+    } else if ((*message_)[strings::params][strings::message_type] ==
+        MessageType::kErrorResponse) {
+          (*response)[strings::msg_params][strings::result_code] =
+              (*message_)[strings::params][hmi_response::code];
+        }
   }
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  ApplicationManagerImpl::instance()->SendMessageToMobile(response);
 }
 
 bool CommandResponseImpl::IsPendingResponseExist() {

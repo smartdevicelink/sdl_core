@@ -90,7 +90,7 @@ void ShowConstantTBTRequest::Run() {
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,
-                   msg_params, true);
+                   msg_params, true, 1);
 }
 
 }  // namespace commands

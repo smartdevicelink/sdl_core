@@ -42,8 +42,16 @@ namespace application_manager {
 
 namespace commands {
 
-void ScrollabeMessageRequest::Run() {
-  LOG4CXX_INFO(logger_, "ScrollabeMessageRequest::Run");
+ScrollabelMessageRequest::ScrollabelMessageRequest(
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
+
+}
+
+ScrollabelMessageRequest::~ScrollabelMessageRequest(){
+}
+
+void ScrollabelMessageRequest::Run() {
+  LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::Run");
 
   Application* app =
     application_manager::ApplicationManagerImpl::instance()->

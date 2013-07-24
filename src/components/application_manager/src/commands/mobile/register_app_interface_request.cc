@@ -133,78 +133,69 @@ void RegisterAppInterfaceRequest::Run() {
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   const Application& application_impl) {
   mobile_apis::Result::eType result =  mobile_apis::Result::SUCCESS;
-
-  smart_objects::SmartObject* result_so = new smart_objects::SmartObject;
-  // TODO(VS) : add null check.
-  smart_objects::SmartObject& response_params = *result_so;
+  smart_objects::SmartObject response_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   ApplicationManagerImpl* app_manager =  ApplicationManagerImpl::instance();
 
-  response_params[strings::msg_params]
-  [strings::sync_msg_version]
-  [strings::major_version] =
+  response_params[strings::sync_msg_version][strings::major_version] =
     application_impl.version().max_supported_api_version;
-  response_params[strings::msg_params]
-  [strings::sync_msg_version]
-  [strings::minor_version] =
+  response_params[strings::sync_msg_version][strings::minor_version] =
     application_impl.version().min_supported_api_version;
 
-  response_params[strings::msg_params][strings::language] =
-    app_manager->active_vr_language();
-  response_params[strings::msg_params][strings::hmi_display_language] =
+  response_params[strings::language] = app_manager->active_vr_language();
+  response_params[strings::hmi_display_language] =
     app_manager->active_ui_language();
 
   if ((*message_)[strings::msg_params][strings::language_desired].asInt()
-      != app_manager->active_vr_language()
-      || (*message_)[strings::msg_params][strings::hmi_display_language_desired]
+      != app_manager->active_vr_language() ||
+      (*message_)[strings::msg_params][strings::hmi_display_language_desired]
       .asInt() != app_manager->active_ui_language()) {
     LOG4CXX_WARN_EXT(logger_, "Wrong language on registering application "
                      << application_impl.name());
+    LOG4CXX_ERROR_EXT(
+           logger_,"vr " << (*message_)[strings::msg_params][strings::language_desired].asInt() << " - " <<
+           app_manager->active_vr_language() << "ui " << (*message_)[strings::msg_params][strings::hmi_display_language_desired].asInt()
+           << " - " << app_manager->active_ui_language());
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
   if (app_manager->display_capabilities()) {
-    response_params[strings::msg_params][hmi_response::display_capabilities] =
+    response_params[hmi_response::display_capabilities] =
       app_manager->display_capabilities();
   }
   if (app_manager->button_capabilities()) {
-    response_params[strings::msg_params][hmi_response::button_capabilities] =
+    response_params[hmi_response::button_capabilities] =
       app_manager->button_capabilities();
   }
   if (app_manager->soft_button_capabilities()) {
-    response_params[strings::msg_params]
-    [hmi_response::soft_button_capabilities] =
+    response_params[hmi_response::soft_button_capabilities] =
       app_manager->soft_button_capabilities();
   }
   if (app_manager->preset_bank_capabilities()) {
-    response_params[strings::msg_params]
-    [hmi_response::preset_bank_capabilities] =
+    response_params[hmi_response::preset_bank_capabilities] =
       app_manager->preset_bank_capabilities();
   }
   if (app_manager->hmi_zone_capabilities()) {
-    response_params[strings::msg_params][hmi_response::hmi_zone_capabilities] =
+    response_params[hmi_response::hmi_zone_capabilities] =
       app_manager->hmi_zone_capabilities();
   }
   if (app_manager->speech_capabilities()) {
-    response_params[strings::msg_params][strings::speech_capabilities] =
+    response_params[strings::speech_capabilities] =
       app_manager->speech_capabilities();
   }
   if (app_manager->vr_capabilities()) {
-    response_params[strings::msg_params][strings::vr_capabilities] = app_manager
-        ->vr_capabilities();
+    response_params[strings::vr_capabilities] = app_manager->vr_capabilities();
   }
   if (app_manager->audio_pass_thru_capabilities()) {
-    response_params[strings::msg_params]
-    [strings::audio_pass_thru_capabilities] =
+    response_params[strings::audio_pass_thru_capabilities] =
       app_manager->audio_pass_thru_capabilities();
   }
   if (app_manager->vehicle_type()) {
-    response_params[strings::msg_params]
-    [hmi_response::vehicle_type] = app_manager
-                                   ->vehicle_type();
+    response_params[hmi_response::vehicle_type] = app_manager->vehicle_type();
   }
 
-  SendResponse(true, result, "", result_so);
+  SendResponse(true, result, "", &response_params);
 }
 
 }  // namespace commands

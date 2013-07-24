@@ -85,25 +85,17 @@ void OnCommandNotification::SendOnMenuCommand(const Application* app) {
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
+  (*on_menu_cmd)[strings::params][strings::connection_key] =
+      app->app_id();
 
   (*on_menu_cmd)[strings::params][strings::message_type] =
     MessageType::kNotification;
 
-  (*on_menu_cmd)[strings::msg_params][strings::app_id] =
-    app->app_id();
-
   (*on_menu_cmd)[strings::msg_params][strings::cmd_id] =
     (*message_)[strings::msg_params][strings::cmd_id];
 
-  (*on_menu_cmd)[strings::msg_params][strings::success] = true;
-  (*on_menu_cmd)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::SUCCESS;
-
-  // msg trigger_source param is set in HMI notification
+  (*on_menu_cmd)[strings::msg_params][strings::trigger_source] =
+      (*message_)[strings::msg_params][strings::trigger_source];
 
   message_.reset(on_menu_cmd);
   SendNotification();

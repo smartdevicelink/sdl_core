@@ -383,6 +383,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::ScrollableMessageID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::ScrollableMessageResponse(message));
+      } else {
+        command.reset(new commands::ScrollabelMessageRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::AlertManeuverID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
