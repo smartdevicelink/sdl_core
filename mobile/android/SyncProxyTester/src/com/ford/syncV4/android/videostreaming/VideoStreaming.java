@@ -17,4 +17,16 @@ public class VideoStreaming {
         return buffer;
     }
 
+    public byte[] readTestVideoFileFromStream(InputStream stream, FileStreamReaderListener listener) throws IOException {
+        if (stream == null) throw new IllegalArgumentException("Input stream should not be null");
+        listener.fileReadWillBegin(this);
+        int size = stream.available();
+        byte[] buffer = new byte[size];
+        stream.read(buffer);
+        listener.chunkIsReadFromFile(this, buffer);
+        stream.close();
+        listener.fileReadEnded(this);
+        return buffer;
+    }
+
 }
