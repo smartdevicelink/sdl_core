@@ -69,6 +69,7 @@ void CommandResponseImpl::SendResponse(bool success,
   (*response)[strings::params][strings::protocol_type] = mobile_protocol_type_;
   (*response)[strings::params][strings::protocol_version] = protocol_version_;
   (*response)[strings::msg_params][strings::success] = success;
+  (*response)[strings::params][strings::message_type] = MessageType::kResponse;
 
   if (success) {
     (*response)[strings::msg_params][strings::result_code] =
