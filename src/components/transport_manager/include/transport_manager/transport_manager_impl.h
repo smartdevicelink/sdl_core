@@ -198,6 +198,20 @@ class TransportManagerImpl : public TransportManager {
 
  protected:
   TransportManagerAttr config_;
+
+/*  void raiseEvent(void (TransportManagerListener::*proc)(...)) {
+    for (auto l : transport_manager_listener_) {
+      (l->*proc)();
+    }
+  }*/
+
+  template<class Proc, class ... Args>
+  void raiseEvent(Proc proc, Args ... args) {
+    for (auto l : transport_manager_listener_) {
+      (l->*proc)(args...);
+    }
+  }
+
   /**
    * @brief post new mesage into TM's queue
    *
