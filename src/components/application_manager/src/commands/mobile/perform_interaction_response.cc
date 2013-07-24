@@ -34,7 +34,10 @@
 #include "application_manager/commands/mobile/perform_interaction_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_chaining.h"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -59,12 +62,29 @@ void PerformInteractionResponse::Run() {
     }
   }
 
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
+
+  MessageChaining* msg_chain =
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+
+  if (NULL == msg_chain) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
+  smart_objects::SmartObject data =
+    msg_chain->data();
+
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
-    if (mobile_apis::Result::SUCCESS == code) {
+    if (hmi_apis::Common_Result::SUCCESS == code) {
       SendResponse(true);
-    } else {
+    } else if (hmi_apis::Common_Result::ABORTED == code) {
+      SendResponse(true);
+    }
+    else {
       // TODO(DK): Some logic
       SendResponse(false);
     }
