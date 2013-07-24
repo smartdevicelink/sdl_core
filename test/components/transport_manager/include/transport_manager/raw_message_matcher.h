@@ -1,6 +1,6 @@
 /*
- * \file matchers.h
- * \brief customers matchers for gmock
+ * \file raw_message_matcher.h
+ * \brief matcher RawMessagePtr
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,62 +33,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MATCHERS_H_
-#define TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MATCHERS_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
 
-#include "protocol_handler/raw_message.h"
+#include <gmock/gmock.h>
+
 #include "transport_manager/common.h"
+#include "protocol_handler/raw_message.h"
 
 using ::protocol_handler::RawMessage;
 using ::transport_manager::RawMessageSptr;
+
+using ::testing::Matcher;
+using ::testing::MatcherInterface;
+using ::testing::MatchResultListener;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class RawMessageSptrMatcher : public MatcherInterface<RawMessageSptr> {
+class RawMessageMatcher : public MatcherInterface<RawMessageSptr> {
  public:
-  explicit RawMessageSptrMatcher(const unsigned char* data)
-      : data_(data), data_size_(0) {}
+  explicit RawMessageMatcher(RawMessageSptr ptr);
 
   virtual bool MatchAndExplain(const RawMessageSptr ptr,
-                               MatchResultListener* listener) const {
-    unsigned char *d = ptr->data();
-    unsigned int count = 0;
-    data_size_ = ptr->data_size();
-    for(int i = 0; i < ptr->data_size(); ++i){
-      if(d[i] == data_[i])
-        ++count;
-    }
-    return count == ptr->data_size();
-  }
+                                   MatchResultListener* listener) const;
+  virtual void DescribeTo(::std::ostream* os) const;
+  virtual void DescribeNegationTo(::std::ostream* os) const;
 
-  virtual void DescribeTo(::std::ostream* os) const {
-    *os << "data_ =  " ;
-    for(int i = 0; i < data_size_; ++i){
-      if(0 != data_[i])
-        *os << data_[i];
-    }
-  }
-
-  virtual void DescribeNegationTo(::std::ostream* os) const {
-    *os << "data_ =  " ;
-    for(int i = 0; i < data_size_; ++i){
-      if (0 != data_[i])
-      *os << data_[i];
-    }
-  }
  private:
-  const unsigned char *data_;
-  mutable unsigned int data_size_;
+  const RawMessageSptr ptr_;
 };
 
-inline const Matcher<RawMessageSptr> RawMessageSptrEq(const unsigned char* data) {
-  return MakeMatcher(new RawMessageSptrMatcher(data));
+inline const Matcher<RawMessageSptr> RawMessageEq(RawMessageSptr msg) {
+  return MakeMatcher(new RawMessageMatcher(msg));
 }
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
 
-#endif /* TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MATCHERS_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_ */

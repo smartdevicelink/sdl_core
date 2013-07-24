@@ -32,3 +32,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include "transport_manager/raw_message_matcher.h"
+
+using ::transport_manager::RawMessageSptr;
+
+namespace test {
+namespace components {
+namespace transport_manager {
+
+RawMessageMatcher::RawMessageMatcher(RawMessageSptr ptr)
+      : ptr_(ptr) {}
+
+bool RawMessageMatcher::MatchAndExplain(const RawMessageSptr msg,
+                                             MatchResultListener* listener) const {
+  if (msg->data_size() != ptr_->data_size()) {
+    return ::std::equal(msg->data(), msg->data() + msg->data_size(), ptr_->data());
+  } else
+    return false;
+}
+
+void RawMessageMatcher::DescribeTo(::std::ostream* os) const {
+  *os << "data_ is " ;
+  ::std::ostream_iterator<unsigned char> out(*os);
+  ::std::copy(ptr_->data(), ptr_->data() + ptr_->data_size(), out);
+}
+
+void RawMessageMatcher::DescribeNegationTo(::std::ostream* os) const {
+  *os << "data_ is not " ;
+  ::std::ostream_iterator<unsigned char> out(*os);
+  ::std::copy(ptr_->data(), ptr_->data() + ptr_->data_size(), out);
+}
+
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test

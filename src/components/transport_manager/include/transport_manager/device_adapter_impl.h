@@ -374,6 +374,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    **/
   mutable pthread_mutex_t connections_mutex_;
 
+ protected:
   DeviceScanner* device_scanner_;
   ServerConnectionFactory* server_connection_factory_;
   ClientConnectionListener* client_connection_listener_;
