@@ -1,6 +1,6 @@
 /*
- * \file MockDeviceAdapter.h
- * \brief MockDeviceAdapter
+ * \file mock_device_scanner.cc
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,59 +33,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCKDEVICEADAPTER_H_
-#define MOCKDEVICEADAPTER_H_
-
-#include <map>
-
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include <transport_manager/transport_manager.h>
-#include <transport_manager/device_adapter_impl.h>
-#include <transport_manager/transport_manager_impl.h>
-#include <transport_manager/mock_device_scanner.h>
-#include <transport_manager/mock_connection_factory.h>
+#include <transport_manager/mock_device_adapter.h>
 #include <transport_manager/mock_device_scanner.h>
 
-using namespace transport_manager;
-using ::transport_manager::device_adapter::DeviceAdapterController;
-using ::transport_manager::device_adapter::DeviceVector;
-
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdapterImpl {
- public:
-  MockDeviceAdapter()
-   : DeviceAdapterImpl(new MockDeviceScanner(this), new MockConnectionFactory(this), nullptr) { }
-  virtual ~MockDeviceAdapter();
+MockDeviceScanner::MockDeviceScanner(DeviceAdapterController* controller)
+    : is_initialized(false),
+      controller_(controller) {
+}
 
-  MockDeviceScanner *device_scanner() const {
-    return static_cast<MockDeviceScanner*>(device_scanner_);
+DeviceAdapter::Error MockDeviceScanner::init() {
+  is_initialized = true;
+  return DeviceAdapter::OK;
+}
+
+DeviceAdapter::Error MockDeviceScanner::scan() {
+  if (devices_.empty()) {
+    controller_->searchDeviceFailed(SearchDeviceError());
+  } else {
+    controller_->searchDeviceDone(devices_);
   }
+  return DeviceAdapter::OK;
+}
 
- protected:
+void MockDeviceScanner::terminate() {
+}
 
-   virtual ::transport_manager::device_adapter::DeviceType getDeviceType() const;
+bool MockDeviceScanner::isInitialised() const {
+  return is_initialized;
+}
 
-   virtual bool isSearchDevicesSupported() const;
-
-   virtual bool isServerOriginatedConnectSupported() const;
-
-   virtual bool isClientOriginatedConnectSupported() const;
-
-   virtual void connectionThread(::transport_manager::device_adapter::Connection* connection);
-
-   virtual ApplicationList getApplicationList(
-       const DeviceHandle device_handle) const;
-
-   virtual void mainThread();
-};
+void MockDeviceScanner::addDevice(const std::string& name) {
+  static int devid = 100;
+  MockDevice* dev = new MockDevice(name, name);
+  dev->start();
+  devices_.push_back(dev);
+}
 
 } // namespace transport_manager
 } // namespace components
 } // namespace test
-
-
-#endif /* MOCKDEVICEADAPTER_H_ */

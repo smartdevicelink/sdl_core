@@ -1,6 +1,6 @@
 /*
- * \file MockDeviceAdapter.h
- * \brief MockDeviceAdapter
+ * \file mock_connection_factory.cc
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,59 +33,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCKDEVICEADAPTER_H_
-#define MOCKDEVICEADAPTER_H_
-
-#include <map>
-
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include <transport_manager/transport_manager.h>
-#include <transport_manager/device_adapter_impl.h>
-#include <transport_manager/transport_manager_impl.h>
-#include <transport_manager/mock_device_scanner.h>
 #include <transport_manager/mock_connection_factory.h>
-#include <transport_manager/mock_device_scanner.h>
 
-using namespace transport_manager;
-using ::transport_manager::device_adapter::DeviceAdapterController;
-using ::transport_manager::device_adapter::DeviceVector;
-
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdapterImpl {
- public:
-  MockDeviceAdapter()
-   : DeviceAdapterImpl(new MockDeviceScanner(this), new MockConnectionFactory(this), nullptr) { }
-  virtual ~MockDeviceAdapter();
+MockConnectionFactory::MockConnectionFactory(DeviceAdapterController* controller)
+:controller_(controller){
+}
 
-  MockDeviceScanner *device_scanner() const {
-    return static_cast<MockDeviceScanner*>(device_scanner_);
-  }
+DeviceAdapter::Error MockConnectionFactory::init() {
+  return DeviceAdapter::OK;
+}
 
- protected:
+DeviceAdapter::Error MockConnectionFactory::createConnection(
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle) {
+  using ::transport_manager::device_adapter::Connection;
+  MockConnection *connection = new MockConnection(device_handle, app_handle, controller_);
+  return DeviceAdapter::OK;
+}
 
-   virtual ::transport_manager::device_adapter::DeviceType getDeviceType() const;
+void MockConnectionFactory::terminate() {
+}
 
-   virtual bool isSearchDevicesSupported() const;
-
-   virtual bool isServerOriginatedConnectSupported() const;
-
-   virtual bool isClientOriginatedConnectSupported() const;
-
-   virtual void connectionThread(::transport_manager::device_adapter::Connection* connection);
-
-   virtual ApplicationList getApplicationList(
-       const DeviceHandle device_handle) const;
-
-   virtual void mainThread();
-};
+bool MockConnectionFactory::isInitialised() const {
+  return true;
+}
 
 } // namespace transport_manager
 } // namespace components
 } // namespace test
-
-
-#endif /* MOCKDEVICEADAPTER_H_ */

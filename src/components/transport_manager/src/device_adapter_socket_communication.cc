@@ -109,7 +109,7 @@ DeviceAdapter::Error ThreadedSocketConnection::start() {
     return DeviceAdapter::FAIL;
 }
 
-void ThreadedSocketConnection::finalise() {
+void ThreadedSocketConnection::finalize() {
   if (unexpected_disconnect_) {
     controller_->connectionAborted(device_handle(), application_handle(),
                                    CommunicationError());
@@ -153,7 +153,7 @@ void ThreadedSocketConnection::thread() {
     controller_->connectDone(device_handle(), application_handle());
     while (!terminate_flag_)
       transmit();
-    finalise();
+    finalize();
     while(!frames_to_send_.empty()) {
       RawMessageSptr message = frames_to_send_.front();
       frames_to_send_.pop();

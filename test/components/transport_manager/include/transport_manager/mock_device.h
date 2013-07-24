@@ -1,6 +1,6 @@
 /*
- * \file MockDeviceAdapter.h
- * \brief MockDeviceAdapter
+ * \file mock_device.h
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCKDEVICEADAPTER_H_
-#define MOCKDEVICEADAPTER_H_
+#ifndef MOCK_DEVICE_H_
+#define MOCK_DEVICE_H_
 
 #include <map>
 
@@ -44,48 +44,34 @@
 #include <transport_manager/device_adapter_impl.h>
 #include <transport_manager/transport_manager_impl.h>
 #include <transport_manager/mock_device_scanner.h>
-#include <transport_manager/mock_connection_factory.h>
-#include <transport_manager/mock_device_scanner.h>
-
-using namespace transport_manager;
-using ::transport_manager::device_adapter::DeviceAdapterController;
-using ::transport_manager::device_adapter::DeviceVector;
 
 namespace test  {
 namespace components  {
 namespace transport_manager {
 
-class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdapterImpl {
+struct listenerData_t {
+  pthread_mutex_t mutex;
+  pthread_barrier_t barrier;
+  int sockfd;
+  bool active;
+};
+
+class MockDevice : public ::transport_manager::device_adapter::Device {
+  pthread_t workerThread;
+  pthread_mutex_t device_started_mutex;
+  listenerData_t listener;
+  ApplicationList applications_;
  public:
-  MockDeviceAdapter()
-   : DeviceAdapterImpl(new MockDeviceScanner(this), new MockConnectionFactory(this), nullptr) { }
-  virtual ~MockDeviceAdapter();
-
-  MockDeviceScanner *device_scanner() const {
-    return static_cast<MockDeviceScanner*>(device_scanner_);
+  MockDevice(const std::string& name, const std::string& id) : Device(name, id), workerThread(0) {
   }
-
- protected:
-
-   virtual ::transport_manager::device_adapter::DeviceType getDeviceType() const;
-
-   virtual bool isSearchDevicesSupported() const;
-
-   virtual bool isServerOriginatedConnectSupported() const;
-
-   virtual bool isClientOriginatedConnectSupported() const;
-
-   virtual void connectionThread(::transport_manager::device_adapter::Connection* connection);
-
-   virtual ApplicationList getApplicationList(
-       const DeviceHandle device_handle) const;
-
-   virtual void mainThread();
+  void start();
+  void stop();
+  bool isSameAs(const Device* other) const;
+  ApplicationList getApplicationList() const;
 };
 
 } // namespace transport_manager
 } // namespace components
 } // namespace test
 
-
-#endif /* MOCKDEVICEADAPTER_H_ */
+#endif /* MOCK_DEVICE_H_ */
