@@ -184,7 +184,7 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      */
     onPRNDLSelected: function() {
         if( this.prndlSelectState ) {
-            this.set( 'vehicleData.VEHICLEDATA_PRNDLSTATUS.data', this.prndlSelectState );
+            this.set( 'vehicleData.prndl', this.prndlSelectState );
         }
     }.observes( 'this.prndlSelectState' ),
 
