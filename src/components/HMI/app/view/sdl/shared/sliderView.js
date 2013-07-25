@@ -91,7 +91,9 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
             icon: 'images/common/minus-ico.png',
             actionDown: function() {
                 this._super();
-                this.set( 'parentView.sliderValue.value', this._parentView.sliderValue.value - 1 );
+                if (this._parentView.sliderValue.value > 1) {
+                	this.set( 'parentView.sliderValue.value', this._parentView.sliderValue.value - 1 );
+                }
             }
         } ),
 
@@ -107,7 +109,9 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
             icon: 'images/common/plus-ico.png',
             actionDown: function() {
                 this._super();
-                this.set( 'parentView.sliderValue.value', this._parentView.sliderValue.value + 1 );
+                if (this._parentView.sliderValue.value < this._parentView.sliderValue.range) {
+                	this.set( 'parentView.sliderValue.value', this._parentView.sliderValue.value + 1 );
+                }
             }
         } )
     } ),

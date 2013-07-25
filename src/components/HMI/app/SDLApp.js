@@ -69,6 +69,7 @@ SDL = Em.Application.create( {
         FFW.BasicCommunication.connect();
         FFW.UI.connect();
         FFW.VehicleInfo.connect();
+        FFW.Navigation.connect();
 
         this._super();
     },

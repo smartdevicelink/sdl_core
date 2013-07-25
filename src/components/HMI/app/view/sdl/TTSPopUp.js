@@ -71,7 +71,7 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         contentBinding: 'parentView.content'
     } ),
 
-    ActivateTTS: function( msg, delay ) {
+    ActivateTTS: function( msg ) {
         var self = this;
 
         // play audio alert
@@ -83,7 +83,7 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         clearTimeout( this.timer );
         this.timer = setTimeout( function() {
             self.set( 'active', false );
-        }, delay ? delay : 10000 );
+        }, delay ? delay : 2000 );
     },
     
     /**

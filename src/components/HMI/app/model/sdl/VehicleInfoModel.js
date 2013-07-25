@@ -129,7 +129,7 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
             'monoAudioOutputMuted': false,
             'signalLevelStatus': "NOT_PROVIDED",
             'primaryAudioSource': "NO_SOURCE_SELECTED",
-            'eCallEventActive': false,
+            'eCallEventActive': false
         },
         'driverBraking': "NOT_SUPPORTED",
         'wiperStatus': "NO_DATA_EXISTS",
@@ -275,9 +275,9 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
 
         var jsonData = {};
         for( var i in this.vehicleData ){
-            jsonData[this.vehicleData[i].type] = this.vehicleData[i].data;
+            jsonData[i] = this.vehicleData[i];
         }
         FFW.VehicleInfo.OnVehicleData( jsonData );
 
-    }.observes( 'this.vehicleData.VEHICLEDATA_PRNDLSTATUS.data' )
+    }.observes( 'this.vehicleData.prndl' )
 } );
