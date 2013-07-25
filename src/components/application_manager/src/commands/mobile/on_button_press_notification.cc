@@ -106,21 +106,11 @@ void OnButtonPressNotification::SendButtonPress(const Application* app,
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-
   (*on_btn_press)[strings::params][strings::message_type] =
     MessageType::kNotification;
-  (*on_btn_press)[strings::params][strings::correlation_id] =
-    correlation_id;
-
-  (*on_btn_press)[strings::params][strings::app_id] =
-    app->app_id();
 
   (*on_btn_press)[strings::params][strings::connection_key] =
-    connection_key;
+      app->app_id();
   (*on_btn_press)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::eType::OnButtonEventID;
   (*on_btn_press)[strings::msg_params][strings::button_name] =
@@ -134,10 +124,6 @@ void OnButtonPressNotification::SendButtonPress(const Application* app,
   } else {
     (*on_btn_press)[strings::msg_params][strings::custom_button_id] = 0;
   }
-
-  (*on_btn_press)[strings::msg_params][strings::success] = true;
-  (*on_btn_press)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::SUCCESS;
 
   message_.reset(on_btn_press);
   SendNotification();

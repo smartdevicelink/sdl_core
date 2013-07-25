@@ -73,7 +73,7 @@ void PutFileRequest::Run() {
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
-    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     LOG4CXX_ERROR(logger_, "Binary data empty");
     return;
   }
