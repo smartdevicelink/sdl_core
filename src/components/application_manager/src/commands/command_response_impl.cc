@@ -61,51 +61,27 @@ void CommandResponseImpl::SendResponse(
   const mobile_apis::Result::eType& result_code) {
   LOG4CXX_INFO(logger_, "Trying to send response");
 
-  NsSmartDeviceLink::NsSmartObjects::SmartObject* response =
-    new NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+  (*message_)[strings::msg_params][strings::success] = success;
 
-  if (!response) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
-  }
-
-  (*response)[strings::params][strings::protocol_type] = mobile_protocol_type_;
-  (*response)[strings::params][strings::protocol_version] = protocol_version_;
-  if (!(*response)[strings::msg_params].keyExists(strings::success)) {
-    (*response)[strings::msg_params][strings::success] = success;
-  }
-  (*response)[strings::params][strings::message_type] = MessageType::kResponse;
-  (*response)[strings::params][strings::connection_key] =
-    (*message_)[strings::params][strings::connection_key];
-  (*response)[strings::params][strings::function_id] =
-    (*message_)[strings::params][strings::function_id];
-  (*response)[strings::params][strings::correlation_id] =
-    (*message_)[strings::params][strings::correlation_id];
 
   if (success) {
-    if ((*message_)[strings::msg_params].keyExists(strings::result_code)) {
-      (*response)[strings::msg_params][strings::result_code] =
-        (*message_)[strings::msg_params][strings::result_code];
-    } else {
-      (*response)[strings::msg_params][strings::result_code] =
+    if (!(*message_)[strings::msg_params].keyExists(strings::result_code)) {
+      (*message_)[strings::msg_params][strings::result_code] =
         mobile_apis::Result::SUCCESS;
     }
   } else {
-    if (!(*response)[strings::msg_params].keyExists(strings::result_code)) {
       if (mobile_apis::Result::INVALID_ENUM != result_code) {
-        (*response)[strings::msg_params][strings::result_code] = result_code;
+        (*message_)[strings::msg_params][strings::result_code] = result_code;
       } else if ((*message_)[strings::params][strings::message_type] ==
                  MessageType::kErrorResponse) {
-        (*response)[strings::msg_params][strings::result_code] =
+        (*message_)[strings::msg_params][strings::result_code] =
           (*message_)[strings::params][hmi_response::code];
       }
-    } else {
-      (*response)[strings::params][strings::result_code] =
-        (*message_)[strings::params][strings::result_code];
-    }
   }
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(response);
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 bool CommandResponseImpl::IsPendingResponseExist() {
