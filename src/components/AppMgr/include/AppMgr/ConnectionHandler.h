@@ -33,12 +33,13 @@
 #ifndef APPCONNECTIONHANDLER_H
 #define APPCONNECTIONHANDLER_H
 
+#include <string>
 #include "utils/logger.h"
 
 
 namespace connection_handler {
 class DevicesDiscoveryStarter;
-typedef int DeviceHandle;
+typedef std::string DeviceHandle;
 }
 
 namespace NsAppManager {
