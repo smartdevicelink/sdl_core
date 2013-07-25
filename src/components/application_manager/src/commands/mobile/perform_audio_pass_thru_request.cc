@@ -59,7 +59,7 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -80,6 +80,8 @@ void PerformAudioPassThruRequest::Run() {
   // create HMI request
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[str::app_id] = app_id;
 
   msg_params[hmi_request::audio_pass_display_texts] =
     smart_objects::SmartObject(smart_objects::SmartType_Array);
