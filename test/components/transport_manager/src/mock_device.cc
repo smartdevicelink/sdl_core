@@ -1,6 +1,5 @@
 /*
  * \file mock_device.cc
- * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -43,108 +42,24 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
-namespace {
-
-struct workerData_t {
-  pthread_t tid;
-  pthread_mutex_t mutex;
-  pthread_cond_t cond;
-  int sockfd;
-  bool active;
-};
-
-workerData_t workerData[5];
-
-static void *mockDeviceWorker(void* p) {
-  workerData_t *data = static_cast<workerData_t*>(p);
-
-  unsigned char *buf = new unsigned char[4096];
-  pthread_mutex_lock(&data->mutex);
-  while (data->active) {
-    pthread_cond_wait(&data->cond, &data->mutex);
-    ssize_t len = recv(data->sockfd, buf, 4096, 0);
-    if (len > 0) {
-      send(data->sockfd, buf, len, 0);
-    }
-  }
-
-  pthread_mutex_unlock(&data->mutex);
-  delete[] buf;
-  return NULL;
-}
-
-void *mockDeviceListenerThreadRoutine(void *p) {
-  test::components::transport_manager::listenerData_t *data =
-      static_cast<test::components::transport_manager::listenerData_t*>(p);
-  data->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (data->sockfd == -1) {
-    return NULL;
-  }
-  unlink("./mockDevice");
-  sockaddr_un my_addr;
-  memset(&my_addr, 0, sizeof(my_addr));
-  strcpy(my_addr.sun_path, "./mockDevice");
-  my_addr.sun_family = AF_UNIX;
-  int res = bind(data->sockfd, reinterpret_cast<sockaddr*>(&my_addr),
-                 sizeof(my_addr));
-  if (res == -1) {
-    return NULL;
-  }
-
-  res = listen(data->sockfd, 5);
-
-  for (int i = 0; i < 5; ++i) {
-    workerData[i].active = true;
-    workerData[i].sockfd = 0;
-    pthread_mutex_init(&workerData[i].mutex, NULL);
-    pthread_create(&workerData[i].tid, NULL, mockDeviceWorker, &workerData[i]);
-  }
-
-  pthread_barrier_wait(&data->barrier);
-  while (data->active) {
-    socklen_t addr_size;
-    sockaddr peer_addr;
-
-    int peer_socket = accept(data->sockfd, &peer_addr, &addr_size);
-
-    if (peer_socket != 0) {
-      for (int i = 0; i < 5; ++i) {
-        if (workerData[i].sockfd == 0) {
-          workerData[i].sockfd = peer_socket;
-          pthread_cond_signal(&workerData[i].cond);
-          break;
-        }
-      }
-    }
-  }
-
-  return NULL;
-}
+const ApplicationHandle MockDevice::addApplication() {
+  MockApplication app(this, applications_cnt_++);
+  app.device = this;
+  app.active = false;
+  applications_.push_back(app);
+  return app.handle;
 }
 
 void MockDevice::start() {
-  listener.active = true;
-  pthread_mutex_init(&listener.mutex, NULL);
-  pthread_barrier_init(&listener.barrier, NULL, 2);
-  pthread_mutex_lock(&listener.mutex);
-  pthread_create(&workerThread, NULL, mockDeviceListenerThreadRoutine,
-                 &listener);
-  pthread_barrier_wait(&listener.barrier);
+  for (auto app : applications_) {
+    app.start();
+  }
 }
 
 void MockDevice::stop() {
-  listener.active = false;
-  close(listener.sockfd);
-  for (int i = 0; i < 5; ++i) {
-    close(workerData[i].sockfd);
-    workerData[i].active = false;
-    pthread_cond_signal(&workerData[i].cond);
+  for (auto app : applications_) {
+    app.stop();
   }
-  for (int i = 0; i < 5; ++i) {
-    pthread_join(workerData[i].tid, NULL);
-  }
-
-  unlink("./mockDevice");
 }
 
 bool MockDevice::isSameAs(const Device* other) const {
@@ -152,7 +67,11 @@ bool MockDevice::isSameAs(const Device* other) const {
 }
 
 ApplicationList MockDevice::getApplicationList() const {
-  return applications_;
+  ApplicationList rc;
+  std::transform(
+      applications_.begin(), applications_.end(), rc.begin(),
+      [](const MockApplication& app) {return app.handle;});
+  return rc;
 }
 
 }  // namespace transport_manager

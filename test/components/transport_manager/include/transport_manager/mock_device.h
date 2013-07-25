@@ -44,34 +44,34 @@
 #include <transport_manager/device_adapter_impl.h>
 #include <transport_manager/transport_manager_impl.h>
 #include <transport_manager/mock_device_scanner.h>
+#include <transport_manager/mock_application.h>
 
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace transport_manager {
 
-struct listenerData_t {
-  pthread_mutex_t mutex;
-  pthread_barrier_t barrier;
-  int sockfd;
-  bool active;
-};
-
 class MockDevice : public ::transport_manager::device_adapter::Device {
-  pthread_t workerThread;
+
   pthread_mutex_t device_started_mutex;
-  listenerData_t listener;
-  ApplicationList applications_;
+  std::vector<MockApplication> applications_;
+  int applications_cnt_;
+  DeviceAdapterController *controller_;
  public:
-  MockDevice(const std::string& name, const std::string& id) : Device(name, id), workerThread(0) {
+  MockDevice(const std::string& name, const std::string& id,
+             DeviceAdapterController * controller)
+      : Device(name, id),
+        applications_cnt_(0),
+        controller_(controller) {
   }
+  const ApplicationHandle addApplication();
   void start();
   void stop();
   bool isSameAs(const Device* other) const;
   ApplicationList getApplicationList() const;
 };
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
 #endif /* MOCK_DEVICE_H_ */

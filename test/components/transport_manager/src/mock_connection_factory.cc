@@ -34,6 +34,7 @@
  */
 
 #include <transport_manager/mock_connection_factory.h>
+#include <transport_manager/mock_connection.h>
 
 namespace test {
 namespace components {

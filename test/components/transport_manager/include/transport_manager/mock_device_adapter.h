@@ -59,7 +59,6 @@ class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdap
  public:
   MockDeviceAdapter()
    : DeviceAdapterImpl(new MockDeviceScanner(this), new MockConnectionFactory(this), nullptr) { }
-  virtual ~MockDeviceAdapter();
 
   MockDeviceScanner *device_scanner() const {
     return static_cast<MockDeviceScanner*>(device_scanner_);
@@ -74,13 +73,6 @@ class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdap
    virtual bool isServerOriginatedConnectSupported() const;
 
    virtual bool isClientOriginatedConnectSupported() const;
-
-   virtual void connectionThread(::transport_manager::device_adapter::Connection* connection);
-
-   virtual ApplicationList getApplicationList(
-       const DeviceHandle device_handle) const;
-
-   virtual void mainThread();
 };
 
 } // namespace transport_manager

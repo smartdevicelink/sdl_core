@@ -1,6 +1,5 @@
 /*
- * \file mock_connection.cc
- * \brief 
+ * mock_application.h
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,37 +32,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/socket.h>
-#include <sys/un.h>
+#ifndef MOCK_APPLICATION_H_
+#define MOCK_APPLICATION_H_
 
-#include "transport_manager/common.h"
-#include "transport_manager/mock_connection.h"
+#include <pthread.h>
 
-using namespace transport_manager;
-using namespace transport_manager::device_adapter;
+#include <sstream>
+#include <string>
+
+#include <transport_manager/common.h>
+#include <transport_manager/transport_manager.h>
+#include <transport_manager/device_adapter_impl.h>
+#include <transport_manager/transport_manager_impl.h>
+#include <transport_manager/mock_device_scanner.h>
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-bool MockConnection::establish(ConnectError **error) {
-  int peer_sock = socket(AF_UNIX, SOCK_STREAM, 0);
-  sockaddr_un my_addr;
-  memset(&my_addr, 0, sizeof(my_addr));
-  std::ostringstream iss;
-  iss << "mockDevice-" << device_handle() << "-" << application_handle();
-  strcpy(my_addr.sun_path, iss.str().c_str());
-  my_addr.sun_family = AF_UNIX;
-  int res = ::connect(peer_sock, reinterpret_cast<sockaddr*>(&my_addr),
-                      sizeof(my_addr));
-  if (res != -1) {
-    set_socket(res);
-    return true;
+class MockDevice;
+
+class MockApplication {
+ public:
+  const MockDevice *device;
+  ApplicationHandle handle;
+  pthread_t workerThread;
+  int sockfd;
+  bool active;
+ private:
+  std::string socket_name_;
+ public:
+  MockApplication(const MockDevice* device, ApplicationHandle id);
+  void start();
+  void stop();
+  const std::string &socket_name() const {
+    return socket_name_;
   }
-  return false;
-}
+};
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
 
+#endif /* MOCK_APPLICATION_H_ */

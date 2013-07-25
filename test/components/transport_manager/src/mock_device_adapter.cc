@@ -62,62 +62,6 @@ bool MockDeviceAdapter::isClientOriginatedConnectSupported() const {
   return true;
 }
 
-ApplicationList MockDeviceAdapter::getApplicationList(
-    const DeviceHandle device_handle) const {
-  ApplicationList rc;
-  rc.push_back(100);
-  return rc;
-}
-
-void MockDeviceAdapter::connectionThread(
-    ::transport_manager::device_adapter::Connection *connection) {
-  assert(connection != 0);
-///*todo: uncomment afer test fix
-//  const DeviceHandle device_handle = connection->device_handle();
-//  const ApplicationHandle app_handle = connection->application_handle();
-//  const int session_id = connection->session_id();
-
-  int peer_sock = socket(AF_UNIX, SOCK_STREAM, 0);
-  sockaddr_un my_addr;
-  memset(&my_addr, 0, sizeof(my_addr));
-  strcpy(my_addr.sun_path, "./mockDevice");
-  my_addr.sun_family = AF_UNIX;
-  int res = ::connect(peer_sock, reinterpret_cast<sockaddr*>(&my_addr),
-                      sizeof(my_addr));
-
-  if (res == -1) {
-    return;
-  }
-//  connection->set_connection_socket(peer_sock);
-
-//  handleCommunication(connection);
-}
-
-void MockDeviceAdapter::mainThread() {
-  /*todo: uncomment after test fix
-   while (!shutdown_flag_) {
-   DeviceMap new_devices;
-   DeviceVector discovered_devices;
-
-   bool device_scan_requested = waitForDeviceScanRequest(0);
-
-   if(device_scan_requested) {
-   for(DeviceAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it){
-   (*it)->onSearchDeviceDone(this);
-   }
-   device_scan_requested_ = false;
-   }
-   }
-   */
-}
-
-MockDeviceAdapter::~MockDeviceAdapter() {
-///*todo: uncomment afer test fix
-  //  for (auto d : devices_) {
-//    static_cast<MockDevice*>(d.second)->stop();
-//  };
-}
-
 } // namespace transport_manager
 } // namespace components
 } // namespace test

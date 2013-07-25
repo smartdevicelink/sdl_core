@@ -216,7 +216,7 @@ bool TcpSocketConnection::establish(ConnectError** error) {
 }
 
 TcpDeviceAdapter::TcpDeviceAdapter()
-    : DeviceAdapterImpl(0, 0, new TcpClientListener(this, default_port)) {
+    : DeviceAdapterImpl(nullptr, nullptr, new TcpClientListener(this, default_port)) {
 }
 
 TcpDeviceAdapter::~TcpDeviceAdapter() {

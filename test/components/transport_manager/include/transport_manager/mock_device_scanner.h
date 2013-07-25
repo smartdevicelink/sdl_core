@@ -61,6 +61,7 @@ class MockDeviceScanner : public ::transport_manager::device_adapter::DeviceScan
   virtual bool isInitialised() const;
 
   void addDevice(const std::string& name);
+  void removeDevice(const std::string& name);
  private:
   bool is_initialized;
   DeviceAdapterController* controller_;

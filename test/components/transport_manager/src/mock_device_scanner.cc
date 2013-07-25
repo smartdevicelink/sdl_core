@@ -35,6 +35,7 @@
 
 #include <transport_manager/mock_device_adapter.h>
 #include <transport_manager/mock_device_scanner.h>
+#include <transport_manager/mock_device.h>
 
 namespace test {
 namespace components {
@@ -51,11 +52,7 @@ DeviceAdapter::Error MockDeviceScanner::init() {
 }
 
 DeviceAdapter::Error MockDeviceScanner::scan() {
-  if (devices_.empty()) {
-    controller_->searchDeviceFailed(SearchDeviceError());
-  } else {
-    controller_->searchDeviceDone(devices_);
-  }
+  controller_->searchDeviceDone(devices_);
   return DeviceAdapter::OK;
 }
 
@@ -67,12 +64,21 @@ bool MockDeviceScanner::isInitialised() const {
 }
 
 void MockDeviceScanner::addDevice(const std::string& name) {
-  static int devid = 100;
-  MockDevice* dev = new MockDevice(name, name);
+  MockDevice* dev = new MockDevice(name, name, controller_);
+  dev->addApplication();
   dev->start();
   devices_.push_back(dev);
 }
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+void MockDeviceScanner::removeDevice(const std::string& name) {
+  for (DeviceVector::iterator t = devices_.begin(); t != devices_.end(); ++t) {
+    if ((*t)->name() == name) {
+      devices_.erase(t);
+      break;
+    }
+  }
+}
+
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
