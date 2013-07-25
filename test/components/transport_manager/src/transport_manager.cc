@@ -154,14 +154,15 @@ TEST_F(TransportManagerTest, SearchDeviceDone)
   EXPECT_TRUE(waitCond(1));
 }
 
-TEST_F(TransportManagerTest, SearchMonyDeviceDone)
+TEST_F(TransportManagerTest, SearchManyDeviceDone)
 {
   EXPECT_CALL(*tm_listener, onSearchDeviceFailed(_, _)).Times(0);
-  EXPECT_CALL(*tm_listener, onDeviceFound(_, _)).Times(1);
+  EXPECT_CALL(*tm_listener, onDeviceFound(_, _)).Times(2);
   EXPECT_CALL(*tm_listener,onSearchDeviceDone()).Times(1)
       .WillOnce(SignalTest(this));
 
-  mock_adapter->get_device_scanner()->addDevice("TestDevice");
+  mock_adapter->get_device_scanner()->addDevice("TestDevice1");
+  mock_adapter->get_device_scanner()->addDevice("TestDevice2");
   TransportManagerImpl::instance()->searchDevices();
   EXPECT_TRUE(waitCond(1));
 }
