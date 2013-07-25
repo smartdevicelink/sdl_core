@@ -45,7 +45,8 @@ namespace transport_manager {
 
 MockDeviceScanner::MockDeviceScanner(MockDeviceAdapter *controller)
     : controller_(controller),
-      is_initialized_(false) {
+      is_initialized_(false),
+      is_search_failed_(false) {
 }
 
 DeviceAdapter::Error MockDeviceScanner::init() {
@@ -54,11 +55,19 @@ DeviceAdapter::Error MockDeviceScanner::init() {
 }
 
 DeviceAdapter::Error MockDeviceScanner::scan() {
+  if (is_search_failed_) {
+    controller_->searchDeviceFailed(SearchDeviceError());
+  }
   controller_->searchDeviceDone(devices_);
   return DeviceAdapter::OK;
 }
 
 void MockDeviceScanner::terminate() {
+}
+
+void MockDeviceScanner::reset() {
+  is_search_failed_ = false;
+  devices_.clear();
 }
 
 bool MockDeviceScanner::isInitialised() const {

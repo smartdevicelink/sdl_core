@@ -51,8 +51,11 @@ class MockDeviceAdapter;
 class MockDeviceScanner : public DeviceScanner {
  public:
   MockDeviceScanner(MockDeviceAdapter *adapter);
+  void reset();
   void addDevice(const std::string& name);
   void removeDevice(const std::string& name);
+  void set_is_search_failed() { is_search_failed_ = true; }
+
  protected:
   DeviceAdapter::Error init();
   DeviceAdapter::Error scan();
@@ -63,6 +66,7 @@ class MockDeviceScanner : public DeviceScanner {
   MockDeviceAdapter *controller_;
   DeviceVector devices_;
   bool is_initialized_;
+  bool is_search_failed_;
 };
 
 }  // namespace transport_manager

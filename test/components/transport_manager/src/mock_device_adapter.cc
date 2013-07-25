@@ -43,6 +43,18 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+MockDeviceAdapter::MockDeviceAdapter()
+    : DeviceAdapterImpl(new MockDeviceScanner(this),
+                        new MockConnectionFactory(this), nullptr) {}
+
+void MockDeviceAdapter::reset() {
+  get_device_scanner()->reset();
+}
+
+MockDeviceScanner* MockDeviceAdapter::get_device_scanner() const {
+  return static_cast<MockDeviceScanner*>(device_scanner_);
+}
+
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test

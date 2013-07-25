@@ -43,27 +43,33 @@ const ApplicationHandle MockDevice::addApplication() {
   app.device = this;
   app.active = false;
   applications_.push_back(app);
+  MockApplication& test = applications_.back();
   return app.handle;
 }
 
 void MockDevice::start() {
-  for (auto app : applications_) {
-    app.start();
+  for (std::vector<MockApplication>::iterator it = applications_.begin();
+      it != applications_.end();
+      ++it) {
+    it->start();
   }
 }
 
 void MockDevice::stop() {
-  for (auto app : applications_) {
-    app.stop();
-  }
-}
+  for (std::vector<MockApplication>::iterator it = applications_.begin();
+      it != applications_.end();
+      ++it) {
+    it->stop();
+  }}
 
 bool MockDevice::isSameAs(const Device* other) const {
   return unique_device_id() == other->unique_device_id();
 }
 
+
+
 ApplicationList MockDevice::getApplicationList() const {
-  ApplicationList rc;
+  ApplicationList rc(applications_.size());
   std::transform(
       applications_.begin(), applications_.end(), rc.begin(),
       [](const MockApplication& app) {return app.handle;});

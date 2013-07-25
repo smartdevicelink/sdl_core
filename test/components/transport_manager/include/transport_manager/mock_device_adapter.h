@@ -37,36 +37,22 @@
 #define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
 
 #include "transport_manager/device_adapter_impl.h"
-#include "transport_manager/mock_device_scanner.h"
-#include "transport_manager/mock_connection_factory.h"
 
-using ::transport_manager::ApplicationHandle;
-using ::transport_manager::DeviceHandle;
 using ::transport_manager::device_adapter::DeviceAdapterImpl;
 using ::transport_manager::device_adapter::DeviceType;
-using ::transport_manager::device_adapter::DeviceVector;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
+class MockDeviceScanner;
+
 class MockDeviceAdapter : public DeviceAdapterImpl {
  public:
-
-  MockDeviceAdapter()
-      : DeviceAdapterImpl(new MockDeviceScanner(this),
-                          new MockConnectionFactory(this), nullptr) {
-  }
-
-  ~MockDeviceAdapter() {
-  }
-
-  MockDeviceScanner *device_scanner() const {
-    return static_cast<MockDeviceScanner*>(device_scanner_);
-  }
-  DeviceType getDeviceType() const {
-    return "fake-adapter";
-  }
+  MockDeviceAdapter();
+  MockDeviceScanner* get_device_scanner() const;
+  DeviceType getDeviceType() const { return "mock-adapter"; }
+  void reset();
 };
 
 }  // namespace transport_manager
