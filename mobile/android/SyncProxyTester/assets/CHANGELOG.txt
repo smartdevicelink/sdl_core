@@ -1,5 +1,5 @@
 [CW30]
-* Update VehicleData values.
+* Update VehicleData and Language values.
 * ButtonSubscriptions dialog: add ButtonName.CUSTOM_NAME value.
 + AddSubMenu dialog: add subMenuID and position parameters.
 + AddCommand dialog: add commandID parameter.
