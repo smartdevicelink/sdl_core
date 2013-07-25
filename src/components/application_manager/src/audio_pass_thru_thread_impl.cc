@@ -259,14 +259,11 @@ void AudioPassThruThreadImpl::threadMain() {
     (*on_audio_pass)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnAudioPassThruID;
 
-    (*on_audio_pass)[strings::msg_params][strings::success] = true;
-    (*on_audio_pass)[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::SUCCESS;
-
     // binary data
-    (*on_audio_pass)[strings::binary_data] =
+    (*on_audio_pass)[strings::params][strings::binary_data] =
       smart_objects::SmartObject(std::vector<unsigned char>(from, to));
 
+    FactoryCreateCommand(on_audio_pass);
 #if defined(OS_POSIX) && defined(OS_LINUX)
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 #endif

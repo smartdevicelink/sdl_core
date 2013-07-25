@@ -83,7 +83,7 @@ void SetIconRequest::Run() {
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::sync_file_name] = full_file_path;
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, msg_params, true, 1);
 }
 
 }  // namespace commands

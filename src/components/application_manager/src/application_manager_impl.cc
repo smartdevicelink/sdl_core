@@ -870,10 +870,11 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
                               jhs::S_MESSAGE_TYPE).asInt()));
   output.set_json_message(output_string);
 
-  if (message.keyExists(strings::binary_data)) {
+  if (message.getElement(jhs::S_PARAMS).keyExists(strings::binary_data)) {
     application_manager::BinaryData* binaryData =
       new application_manager::BinaryData(
-      message.getElement(strings::binary_data).asBinary());
+      message.getElement(jhs::S_PARAMS).getElement(
+          strings::binary_data).asBinary());
 
     if (NULL == binaryData) {
       LOG4CXX_ERROR(logger_, "Null pointer");
