@@ -49,7 +49,6 @@ using ::transport_manager::device_adapter::DeviceAdapter;
 using ::transport_manager::DeviceHandle;
 using ::transport_manager::SearchDeviceError;
 using ::transport_manager::ConnectionUID;
-using ::transport_manager::DeviceDesc;
 using ::transport_manager::ConnectError;
 using ::transport_manager::DisconnectError;
 using ::transport_manager::DisconnectDeviceError;
@@ -64,25 +63,25 @@ class MockTransportManagerListener :
     public ::transport_manager::TransportManagerListener {
  public:
 
-  MOCK_METHOD2(OnDeviceFound, void(const DeviceDesc &device,
+  MOCK_METHOD2(OnDeviceFound, void(const DeviceHandle &device,
           const ApplicationList &app_list));
   MOCK_METHOD0(OnScanDevicesFinished, void());
   MOCK_METHOD1(OnScanDevicesFailed, void(const SearchDeviceError& error));
 
-  MOCK_METHOD3(OnConnectionEstablished, void(const DeviceDesc& device,
-                                       const ApplicationHandle &app_id,
-                                       ConnectionUID connection_id));
-  MOCK_METHOD3(OnConnectionFailed, void(const DeviceDesc& device,
+  MOCK_METHOD3(OnConnectionEstablished, void(const DeviceHandle& device,
+          const ApplicationHandle &app_id,
+          ConnectionUID connection_id));
+  MOCK_METHOD3(OnConnectionFailed, void(const DeviceHandle& device,
           const ApplicationHandle &app_id,
           const ConnectError& error));
 
   MOCK_METHOD1(OnConnectionClosed, void(const ConnectionUID connection_id));
   MOCK_METHOD2(OnConnectionClosedFailure, void (ConnectionUID connection_id,
-                                           const DisconnectError& error));
-  MOCK_METHOD2(OnDeviceConnectionLost, void (const DeviceDesc& device,
-                                        const DisconnectDeviceError& error));
-  MOCK_METHOD2(OnDisconnectFailed, void (const DeviceDesc& device,
-                                    const DisconnectDeviceError& error));
+          const DisconnectError& error));
+  MOCK_METHOD2(OnDeviceConnectionLost, void (const DeviceHandle& device,
+          const DisconnectDeviceError& error));
+  MOCK_METHOD2(OnDisconnectFailed, void (const DeviceHandle& device,
+          const DisconnectDeviceError& error));
 
   MOCK_METHOD1(OnTMMessageReceived, void(const RawMessageSptr data_container));
   MOCK_METHOD2(OnTMMessageReceiveFailed, void(ConnectionUID connection_id,

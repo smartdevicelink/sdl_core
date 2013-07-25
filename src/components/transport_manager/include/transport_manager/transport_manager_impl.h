@@ -199,18 +199,12 @@ class TransportManagerImpl : public TransportManager {
  protected:
   TransportManagerAttr config_;
 
-  /*  void raiseEvent(void (TransportManagerListener::*proc)(...)) {
-   for (auto l : transport_manager_listener_) {
-   (l->*proc)();
-   }
-   }*/
-
   template<class Proc, class ... Args>
   void raiseEvent(Proc proc, Args ... args) {
     //todo(YK) change it to c++2003 std.
-    //for (auto l : transport_manager_listener_) {
-    //  (l->*proc)(args...);
-    //}
+    for (TransportManagerListenerList::iterator  it = transport_manager_listener_.begin(); it != transport_manager_listener_.end(); ++it) {
+      ((*it)->*proc)(args...);
+    }
   }
 
   /**

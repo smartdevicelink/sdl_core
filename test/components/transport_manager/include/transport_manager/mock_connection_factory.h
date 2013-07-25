@@ -1,6 +1,6 @@
 /*
  * \file mock_connection_factory.h
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,41 +33,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCK_CONNECTION_FACTORY_H_
-#define MOCK_CONNECTION_FACTORY_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTIONFACTORY_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTIONFACTORY_H_
 
-#include <map>
+#include "transport_manager/device_adapter_impl.h"
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include <transport_manager/transport_manager.h>
-#include <transport_manager/device_adapter_impl.h>
-#include <transport_manager/transport_manager_impl.h>
-#include <transport_manager/mock_device_scanner.h>
+using ::transport_manager::ApplicationHandle;
+using ::transport_manager::DeviceHandle;
+using ::transport_manager::device_adapter::DeviceAdapter;
+using ::transport_manager::device_adapter::ServerConnectionFactory;
 
-using namespace transport_manager;
-using ::transport_manager::device_adapter::DeviceAdapterController;
-using ::transport_manager::device_adapter::DeviceVector;
-
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace transport_manager {
 
-class MockConnectionFactory : public ::transport_manager::device_adapter::ServerConnectionFactory {
+class MockDeviceAdapter;
+
+class MockConnectionFactory : public ServerConnectionFactory {
  public:
-  MockConnectionFactory(DeviceAdapterController* controller);
-  virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error createConnection(const DeviceHandle& device_handle,
-                                                const ApplicationHandle& app_handle);
-  virtual void terminate();
-  virtual bool isInitialised() const;
+  MockConnectionFactory(MockDeviceAdapter *adapter);
+  DeviceAdapter::Error init() { return DeviceAdapter::OK; }
+  DeviceAdapter::Error createConnection(const DeviceHandle& device_handle,
+                                          const ApplicationHandle& app_handle);
+  void terminate() {}
+  bool isInitialised() const { return true; }
+
  private:
-  DeviceAdapterController* controller_;
+  MockDeviceAdapter *adapter_;
 };
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
-
-#endif /* MOCK_CONNECTION_FACTORY_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTIONFACTORY_H_ */

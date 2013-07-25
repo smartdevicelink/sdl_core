@@ -91,7 +91,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    *
    * \param DeviceList New list of available devices.
    **/
-  virtual void OnDeviceFound(const transport_manager::DeviceDesc& device,
+  virtual void OnDeviceFound(const transport_manager::DeviceHandle& device,
                              const transport_manager::ApplicationList &app_list);
 
   virtual void OnScanDevicesFinished();
@@ -104,11 +104,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param connection_id ID of new connection.
    **/
   virtual void OnConnectionEstablished(
-      const transport_manager::DeviceDesc& device,
+      const transport_manager::DeviceHandle& device,
       const transport_manager::ApplicationHandle &app_id,
       transport_manager::ConnectionUID connection_id);
   virtual void OnConnectionFailed(
-      const transport_manager::DeviceDesc& device,
+      const transport_manager::DeviceHandle& device,
       const transport_manager::ApplicationHandle &app_id,
       const transport_manager::ConnectError& error);
   virtual void OnConnectionClosed(
@@ -118,7 +118,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
       const transport_manager::DisconnectError& error);
 
   virtual void OnDeviceConnectionLost(
-      const transport_manager::DeviceDesc& device,
+      const transport_manager::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
   virtual void OnTMMessageReceived(const transport_manager::RawMessageSptr message);
   virtual void OnTMMessageReceiveFailed(transport_manager::ConnectionUID connection_id,
@@ -133,7 +133,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param error Information about possible reason of loosing connection
    */
   virtual void OnDisconnectFailed(
-      const transport_manager::DeviceDesc& device,
+      const transport_manager::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
 
   /**
@@ -245,7 +245,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param DeviceHandle Handle of device for checking.
    */
   void AddDeviceInDeviceListIfNotExist(
-      const transport_manager::DeviceDesc& device_info);
+      const transport_manager::DeviceHandle& device_info);
 
   /**
    * \brief Disconnect application.

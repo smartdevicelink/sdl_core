@@ -33,34 +33,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <transport_manager/mock_connection_factory.h>
+
+#include <transport_manager/mock_connection.h>
+#include "transport_manager/mock_connection_factory.h"
+
+#include <algorithm>
+
+#include "transport_manager/mock_device.h"
+#include "transport_manager/mock_device_adapter.h"
+
+using ::transport_manager::device_adapter::DeviceSptr;
+using ::transport_manager::ConnectError;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-MockConnectionFactory::MockConnectionFactory(DeviceAdapterController* controller)
-:controller_(controller){
-}
-
-DeviceAdapter::Error MockConnectionFactory::init() {
-  return DeviceAdapter::OK;
-}
+MockConnectionFactory::MockConnectionFactory(MockDeviceAdapter *adapter)
+    : adapter_(adapter) {}
 
 DeviceAdapter::Error MockConnectionFactory::createConnection(
-    const DeviceHandle& device_handle, const ApplicationHandle& app_handle) {
-  using ::transport_manager::device_adapter::Connection;
-  MockConnection *connection = new MockConnection(device_handle, app_handle, controller_);
+    const DeviceHandle& device_handle,
+    const ApplicationHandle& app_handle) {
   return DeviceAdapter::OK;
 }
 
-void MockConnectionFactory::terminate() {
-}
-
-bool MockConnectionFactory::isInitialised() const {
-  return true;
-}
-
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test

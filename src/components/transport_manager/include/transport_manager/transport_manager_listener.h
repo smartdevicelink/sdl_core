@@ -46,13 +46,13 @@ class TransportManagerListener {
   virtual ~TransportManagerListener() {
   }
 
-  virtual void OnDeviceFound(const DeviceDesc& device, const ApplicationList &app_list) = 0;
+  virtual void OnDeviceFound(const DeviceHandle& device, const ApplicationList &app_list) = 0;
   virtual void OnScanDevicesFinished() = 0;
   virtual void OnScanDevicesFailed(const SearchDeviceError& error) = 0;
-  virtual void OnConnectionEstablished(const DeviceDesc& device,
+  virtual void OnConnectionEstablished(const DeviceHandle& device,
                                        const ApplicationHandle &app_id,
                                        ConnectionUID connection_id) = 0;
-  virtual void OnConnectionFailed(const DeviceDesc& device,
+  virtual void OnConnectionFailed(const DeviceHandle& device,
                                   const ApplicationHandle &app_id,
                                   const ConnectError& error) = 0;
   virtual void OnConnectionClosed(ConnectionUID connection_id) = 0;
@@ -64,7 +64,7 @@ class TransportManagerListener {
    * \param device Information about disconnected device
    * \param error Information about possible reason of loosing connection
    */
-  virtual void OnDeviceConnectionLost(const DeviceDesc& device,
+  virtual void OnDeviceConnectionLost(const DeviceHandle& device,
                                       const DisconnectDeviceError& error) = 0;
 
   /**
@@ -72,7 +72,7 @@ class TransportManagerListener {
    * \param device Information about disconnected device
    * \param error Information about possible reason of loosing connection
    */
-  virtual void OnDisconnectFailed(const DeviceDesc& device,
+  virtual void OnDisconnectFailed(const DeviceHandle& device,
                                   const DisconnectDeviceError& error) = 0;
   /**
    * @brief Notifies about recieving message from TM.

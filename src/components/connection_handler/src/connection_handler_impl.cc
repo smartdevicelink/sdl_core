@@ -78,10 +78,10 @@ void ConnectionHandlerImpl::OnTMMessageSendFailed(const transport_manager::DataS
 void ConnectionHandlerImpl::OnTMMessageSend(){}
 
 void ConnectionHandlerImpl::OnDeviceFound(
-    const transport_manager::DeviceDesc& device,
+    const transport_manager::DeviceHandle& device,
     const transport_manager::ApplicationList &app_list) {
   LOG4CXX_INFO(logger_, "CConnectionHandler::onDeviceListUpdated()");
-  DeviceList::iterator it = device_list_.find(device.handle);
+  DeviceList::iterator it = device_list_.find(device);
   if(it != device_list_.end()){
 //  for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
 //      ++itr)
@@ -91,7 +91,7 @@ void ConnectionHandlerImpl::OnDeviceFound(
       // 1. Delete all the connections and sessions of this device
       // 2. Delete device from a list
       // 3. Let observer know that device has been deleted.
-      connection_handler::DeviceHandle device_for_remove_handle = device.handle;
+      connection_handler::DeviceHandle device_for_remove_handle = device;
       for (ConnectionListIterator it = connection_list_.begin();
           it != connection_list_.end(); ++it) {
         if (device_for_remove_handle
@@ -129,13 +129,13 @@ bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
 }
 
 void ConnectionHandlerImpl::AddDeviceInDeviceListIfNotExist(
-    const transport_manager::DeviceDesc& device_info) {
-  DeviceListIterator it = device_list_.find(device_info.handle);
+    const transport_manager::DeviceHandle& device_info) {
+  DeviceListIterator it = device_list_.find(device_info);
   if (device_list_.end() == it) {
     LOG4CXX_INFO(logger_, "Adding new device!");
     device_list_.insert(
-        DeviceList::value_type(device_info.handle,
-                               Device(device_info.handle, device_info.name)));
+        DeviceList::value_type(device_info,
+                               Device(device_info, "")));//todo(YK) pass name here somehow
   }
 }
 
@@ -150,11 +150,11 @@ void ConnectionHandlerImpl::OnScanDevicesFailed(
 }
 
 void ConnectionHandlerImpl::OnConnectionEstablished(
-    const transport_manager::DeviceDesc& device,
+    const transport_manager::DeviceHandle& device,
     const transport_manager::ApplicationHandle &app_id,
     transport_manager::ConnectionUID connection_id) {
   LOG4CXX_INFO(logger_, "CConnectionHandler::onApplicationConnected()");
-  DeviceListIterator it = device_list_.find(device.handle);
+  DeviceListIterator it = device_list_.find(device);
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown device!");
     return;
@@ -162,11 +162,11 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
   LOG4CXX_INFO(logger_, "Add Connection:" << connection_id << " to the list.");
   connection_list_.insert(
       ConnectionList::value_type(connection_id,
-                                 Connection(connection_id, device.handle)));
+                                 Connection(connection_id, device)));
 }
 
 void ConnectionHandlerImpl::OnConnectionFailed(
-    const transport_manager::DeviceDesc& device,
+    const transport_manager::DeviceHandle& device,
     const transport_manager::ApplicationHandle &app_id,
     const transport_manager::ConnectError& error) {
   // TODO(PV): implement
@@ -206,14 +206,14 @@ void ConnectionHandlerImpl::OnConnectionClosedFailure(
 }
 
 void ConnectionHandlerImpl::OnDeviceConnectionLost(
-    const transport_manager::DeviceDesc& device,
+    const transport_manager::DeviceHandle& device,
     const transport_manager::DisconnectDeviceError& error) {
   // TODO(PV): implement
-  LOG4CXX_ERROR(logger_, "Lost connection with device " << device.name);
+  LOG4CXX_ERROR(logger_, "Lost connection with device " << device);
 }
 
 void ConnectionHandlerImpl::OnDisconnectFailed(
-    const transport_manager::DeviceDesc& device,
+    const transport_manager::DeviceHandle& device,
     const transport_manager::DisconnectDeviceError& error) {
   // TODO(PV): implement
   LOG4CXX_ERROR(logger_, "Trying to disconnect device failed.");

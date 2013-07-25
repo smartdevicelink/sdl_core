@@ -38,7 +38,7 @@
 namespace protocol_handler {
 
 RawMessage::RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
-                       unsigned char* data, unsigned int data_size)
+                       const unsigned char* data, unsigned int data_size)
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),
       serial_number_(0),
@@ -56,7 +56,7 @@ RawMessage::RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
 }
 
 RawMessage::RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
-                       unsigned int serialNumber, unsigned char* data,
+                       unsigned int serialNumber, const unsigned char* data,
                        unsigned int data_size)
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),

@@ -1,6 +1,6 @@
 /*
  * \file mock_device_scanner.h
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,42 +33,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCK_DEVICE_SCANNER_H_
-#define MOCK_DEVICE_SCANNER_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_
 
-#include <map>
+#include "transport_manager/device_adapter_impl.h"
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include <transport_manager/transport_manager.h>
-#include <transport_manager/device_adapter_impl.h>
-#include <transport_manager/transport_manager_impl.h>
+using ::transport_manager::device_adapter::DeviceAdapter;
+using ::transport_manager::device_adapter::DeviceScanner;
+using ::transport_manager::device_adapter::DeviceVector;
 
-using namespace transport_manager;
-using transport_manager::device_adapter::DeviceAdapterController;
-using transport_manager::device_adapter::DeviceVector;
-
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace transport_manager {
 
-class MockDeviceScanner : public ::transport_manager::device_adapter::DeviceScanner {
- public:
-  MockDeviceScanner(DeviceAdapterController* controller);
-  virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error scan();
-  virtual void terminate();
-  virtual bool isInitialised() const;
+class MockDeviceAdapter;
 
+class MockDeviceScanner : public DeviceScanner {
+ public:
+  MockDeviceScanner(MockDeviceAdapter *adapter);
+  void reset();
   void addDevice(const std::string& name);
+  void removeDevice(const std::string& name);
+  void set_is_search_failed() { is_search_failed_ = true; }
+
+ protected:
+  DeviceAdapter::Error init();
+  DeviceAdapter::Error scan();
+  void terminate();
+  bool isInitialised() const;
+
  private:
-  bool is_initialized;
-  DeviceAdapterController* controller_;
+  MockDeviceAdapter *controller_;
   DeviceVector devices_;
+  bool is_initialized_;
+  bool is_search_failed_;
 };
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
-#endif /* MOCK_DEVICE_SCANNER_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_ */

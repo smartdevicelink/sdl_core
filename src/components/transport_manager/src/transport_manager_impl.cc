@@ -429,7 +429,7 @@ void TransportManagerImpl::eventListenerThread(void) {
               item != dev_list.end(); ++item) {
             LOG4CXX_INFO(logger_, "Iterating over device list " << item->handle);
             adapter_handler_.addDevice(da, item->handle);
-            raiseEvent(&TransportManagerListener::OnDeviceFound, *item,
+            raiseEvent(&TransportManagerListener::OnDeviceFound, item->handle,
                        da->getApplicationList(item->handle));
             LOG4CXX_INFO(logger_, "Callback called");
           }

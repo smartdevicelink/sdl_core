@@ -60,10 +60,10 @@ class RawMessage {
    * \param dataSize Message size
    */
   RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
-             unsigned char* data, unsigned int dataSize);
+             const unsigned char* data, unsigned int dataSize);
 
   RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
-             unsigned int serialNumber, unsigned char* data,
+             unsigned int serialNumber, const unsigned char* data,
              unsigned int dataSize);
 
   bool operator==(const RawMessage& other) const;

@@ -121,7 +121,7 @@ DeviceAdapter::Error DeviceAdapterImpl::init(Configuration* configuration) {
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
-  if (device_scanner_ == 0)
+  if (device_scanner_ == nullptr)
     return NOT_SUPPORTED;
   if (!device_scanner_->isInitialised())
     return BAD_STATE;
@@ -382,10 +382,6 @@ void DeviceAdapterImpl::connectDone(const DeviceHandle& device_handle,
   if (it != connections_.end()) {
     ConnectionInfo& info = it->second;
     info.state = ConnectionInfo::ESTABLISHED;
-
-    for (DeviceAdapterListenerList::iterator it = listeners_.begin();
-        it != listeners_.end(); ++it)
-      (*it)->onConnectDone(this, info.device_handle, app_handle);
   }
   pthread_mutex_unlock(&connections_mutex_);
 

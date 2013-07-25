@@ -1,6 +1,6 @@
 /*
- * \file MockDeviceAdapter.h
- * \brief MockDeviceAdapter
+ * \file mock_device_adapter.h
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,59 +33,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCKDEVICEADAPTER_H_
-#define MOCKDEVICEADAPTER_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
 
-#include <map>
+#include "transport_manager/device_adapter_impl.h"
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include <transport_manager/transport_manager.h>
-#include <transport_manager/device_adapter_impl.h>
-#include <transport_manager/transport_manager_impl.h>
-#include <transport_manager/mock_device_scanner.h>
-#include <transport_manager/mock_connection_factory.h>
-#include <transport_manager/mock_device_scanner.h>
+using ::transport_manager::device_adapter::DeviceAdapterImpl;
+using ::transport_manager::device_adapter::DeviceType;
 
-using namespace transport_manager;
-using ::transport_manager::device_adapter::DeviceAdapterController;
-using ::transport_manager::device_adapter::DeviceVector;
-
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdapterImpl {
+class MockDeviceScanner;
+
+class MockDeviceAdapter : public DeviceAdapterImpl {
  public:
-  MockDeviceAdapter()
-   : DeviceAdapterImpl(new MockDeviceScanner(this), new MockConnectionFactory(this), nullptr) { }
-  virtual ~MockDeviceAdapter();
-
-  MockDeviceScanner *device_scanner() const {
-    return static_cast<MockDeviceScanner*>(device_scanner_);
-  }
-
- protected:
-
-   virtual ::transport_manager::device_adapter::DeviceType getDeviceType() const;
-
-   virtual bool isSearchDevicesSupported() const;
-
-   virtual bool isServerOriginatedConnectSupported() const;
-
-   virtual bool isClientOriginatedConnectSupported() const;
-
-   virtual void connectionThread(::transport_manager::device_adapter::Connection* connection);
-
-   virtual ApplicationList getApplicationList(
-       const DeviceHandle device_handle) const;
-
-   virtual void mainThread();
+  MockDeviceAdapter();
+  MockDeviceScanner* get_device_scanner() const;
+  DeviceType getDeviceType() const { return "mock-adapter"; }
+  void reset();
 };
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
-
-#endif /* MOCKDEVICEADAPTER_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_ */

@@ -1,6 +1,6 @@
 /*
  * \file mock_connection.cc
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -32,21 +32,51 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include <sys/socket.h>
+#include <sys/un.h>
+
 #include "transport_manager/common.h"
 #include "transport_manager/mock_connection.h"
 
-using namespace transport_manager;
-using namespace transport_manager::device_adapter;
+#include <algorithm>
+
+#include "transport_manager/mock_device_adapter.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-bool MockConnection::establish(ConnectError **error) {
-  return true;
+MockConnection::MockConnection(const DeviceHandle& device_handle,
+                               const ApplicationHandle& app_handle,
+                               MockDeviceAdapter* controller)
+    : ThreadedSocketConnection(device_handle, app_handle, controller) {
 }
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+bool MockConnection::establish(ConnectError **error) {
+  int peer_sock = socket(AF_UNIX, SOCK_STREAM, 0);
+  sockaddr_un my_addr;
+  memset(&my_addr, 0, sizeof(my_addr));
+  std::ostringstream iss;
+  iss << "mockDevice-" << device_handle() << "-" << application_handle();
+  strcpy(my_addr.sun_path, iss.str().c_str());
+  my_addr.sun_family = AF_UNIX;
+  int res = ::connect(peer_sock, reinterpret_cast<sockaddr*>(&my_addr),
+                      sizeof(my_addr));
+  if (res != -1) {
+    set_socket(res);
+    return true;
+  }
+  return false;
+}
 
+DeviceAdapter::Error MockConnection::sendData(RawMessageSptr message) {
+  return DeviceAdapter::OK;
+}
+
+DeviceAdapter::Error MockConnection::disconnect() {
+  return DeviceAdapter::OK;
+}
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test

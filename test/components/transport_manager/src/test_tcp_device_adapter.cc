@@ -195,36 +195,41 @@ TEST_F(TcpAdapterTest, Receive) {
     EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _));
     EXPECT_CALL(
         mock_dal_,
-        onDataReceiveDone(device_adapter_, _, _, ContainsMessage("abcd")))
-        .WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
+        onDataReceiveDone(device_adapter_, _, _, ContainsMessage("abcd"))).
+        WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
   EXPECT_TRUE(client_.send("abcd"));
 }
 
-TEST_F(TcpAdapterTest, Send) {
-  struct Helper {
-    void sendMessage(const DeviceAdapter* device_adapter,
-                     const DeviceHandle device_handle,
-                     const ApplicationHandle app_handle) {
-      EXPECT_EQ(
-          DeviceAdapter::OK,
-          const_cast<DeviceAdapter*>(device_adapter)->sendData(device_handle,
-                                                               app_handle,
-                                                               message));
-    }
-    transport_manager::RawMessageSptr message;
-  };
-  Helper helper;
-  helper.message = new protocol_handler::RawMessage(
-      1, 1, 1, reinterpret_cast<unsigned char*>(const_cast<char*>("efgh")), 4);
+struct SendHelper {
+  explicit SendHelper(DeviceAdapter::Error expected_error)
+      : expected_error_(expected_error),
+        message_(
+            new protocol_handler::RawMessage(
+                1, 1, 1, reinterpret_cast<const unsigned char*>("efgh"), 4)) {
+  }
+  void sendMessage(const DeviceAdapter* device_adapter,
+                   const DeviceHandle device_handle,
+                   const ApplicationHandle app_handle) {
+    EXPECT_EQ(
+        expected_error_,
+        const_cast<DeviceAdapter*>(device_adapter)->sendData(device_handle,
+                                                             app_handle,
+                                                             message_));
+  }
+  DeviceAdapter::Error expected_error_;
+  transport_manager::RawMessageSptr message_;
+};
 
+TEST_F(TcpAdapterTest, Send) {
+  SendHelper helper(DeviceAdapter::OK);
   {
     ::testing::InSequence seq;
     EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _)).WillOnce(
-        Invoke(&helper, &Helper::sendMessage));
+        Invoke(&helper, &SendHelper::sendMessage));
     EXPECT_CALL(mock_dal_,
-        onDataSendDone(device_adapter_, _, _, helper.message)).WillOnce(
+        onDataSendDone(device_adapter_, _, _, helper.message_)).WillOnce(
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
 
@@ -253,6 +258,38 @@ TEST_F(TcpAdapterTest, DisconnectFromServer) {
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
+}
+
+TEST_F(TcpAdapterTest, SendToDisconnected) {
+  SendHelper* helper = new SendHelper(DeviceAdapter::BAD_PARAM);
+  {
+    ::testing::InSequence seq;
+    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _)).WillOnce(
+        Invoke(disconnect));
+    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, _, _)).WillOnce(
+        ::testing::DoAll(Invoke(helper, &SendHelper::sendMessage),
+                         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp)));
+  }
+  EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
+}
+
+TEST_F(TcpAdapterTest, SendFailed) {
+  static unsigned char zzz[2000000];  //2000000 is much more than socket buffer
+  SendHelper* helper = new SendHelper(DeviceAdapter::OK);
+  helper->message_ = new protocol_handler::RawMessage(1, 1, 1, zzz,
+                                                      sizeof(zzz));
+  {
+    ::testing::InSequence seq;
+    EXPECT_CALL(mock_dal_, onConnectDone(device_adapter_, _, _)).WillOnce(
+        Invoke(helper, &SendHelper::sendMessage));
+    EXPECT_CALL(mock_dal_,
+                onDataSendFailed(device_adapter_, _, _, helper->message_, _));
+    EXPECT_CALL(mock_dal_, onDisconnectDone(device_adapter_, _, _)).WillOnce(
+        InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
+  }
+  EXPECT_TRUE(client_.connect(TcpDeviceAdapter::default_port));
+  client_.receive(2);
+  client_.disconnect();
 }
 
 }  // namespace
