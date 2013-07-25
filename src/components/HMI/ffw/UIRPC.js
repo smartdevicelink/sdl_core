@@ -216,7 +216,7 @@ FFW.UI = FFW.RPCObserver.create({
 	            case "UI.DeleteSubMenu": {
 	
 	                var resultCode = SDL.SDLController.getApplicationModel(request.params.appID).deleteSubMenu(request.params.menuID);
-	                this.sendUIResult(SDL.SDLModel.resultCode[resultCode], request.id, request.method);
+	                this.sendUIResult(resultCode, request.id, request.method);
 	
 	                break;
 	            }
@@ -446,7 +446,7 @@ FFW.UI = FFW.RPCObserver.create({
 
         Em.Logger.log("FFW." + method + "Response");
 
-        if(resultCode){
+        if(resultCode != 0){
 
             // send repsonse
             var JSONMessage = {
@@ -498,7 +498,7 @@ FFW.UI = FFW.RPCObserver.create({
 
         Em.Logger.log("FFW.UI.AlertResponse");
 
-        if(resultCode){
+        if(resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
 
             // send repsonse
             var JSONMessage = {

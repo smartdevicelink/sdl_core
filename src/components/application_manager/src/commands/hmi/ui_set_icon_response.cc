@@ -70,7 +70,7 @@ void UISetIconResponse::Run() {
 
   msg_chain->set_ui_response_result(code);
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  int app_id = msg_chain->connection_key();
   Application* app = ApplicationManagerImpl::instance()->
                      application(app_id);
 
