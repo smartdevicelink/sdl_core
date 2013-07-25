@@ -525,7 +525,7 @@ FFW.UI = FFW.RPCObserver.create({
             "id": sliderRequestID,
             "result": {
                 "code": resultCode, // type (enum) from SDL protocol
-                "method": "UI.SliderResponse"
+                "method": "UI.Slider"
             }
         };
 
