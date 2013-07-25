@@ -748,7 +748,7 @@ bool ApplicationManagerImpl::CheckHMIMatrix(
 
 bool ApplicationManagerImpl::ConvertMessageToSO(
   const Message& message, smart_objects::SmartObject& output) {
-  LOG4CXX_INFO(logger_, "Message to convert: protocol " <<
+  LOG4CXX_INFO(logger_, "\t\t\tMessage to convert: protocol " <<
                message.protocol_version() <<
                "; json " << message.json_message());
 
@@ -759,18 +759,22 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
             output,
             message.function_id(),
             message.type(),
-            message.correlation_id())) {
+            message.correlation_id()) ||
+          !mobile_so_factory().attachSchema(output) ||
+          output.validate() != smart_objects::Errors::OK) {
         LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
+        utils::SharedPtr<smart_objects::SmartObject> response(
+          MessageHelper::CreateNegativeResponse(
+            message.connection_key(),
+            message.function_id(),
+            message.correlation_id(),
+            mobile_apis::Result::INVALID_DATA));
+        ManageMobileCommand(response);
         return false;
       }
       LOG4CXX_INFO(logger_, "Convertion result for sdl object is true" <<
                    " function_id " <<
                    output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-      if (!mobile_so_factory().attachSchema(output)) {
-        LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
-        return false;
-      }
-      LOG4CXX_INFO(logger_, "Is object valid? " << output.isValid());
       output[strings::params][strings::connection_key] =
         message.connection_key();
       if (message.binary_data()) {
@@ -796,7 +800,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
     default:
       // TODO(PV):
       //  removed NOTREACHED() because some app can still have vesion 1.
-      LOG4CXX_WARN(logger_, "Application used unsupported protocol.");
+      LOG4CXX_WARN(logger_, "Application used unsupported protocol " <<
+                   message.protocol_version() << ".");
       return false;
   }
 
@@ -850,15 +855,19 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
                output_string);
 
   output.set_connection_key(
-    message.getElement(jhs::S_PARAMS).getElement(strings::connection_key).asInt());
+    message.getElement(jhs::S_PARAMS).getElement(
+      strings::connection_key).asInt());
 
   output.set_function_id(message.getElement(jhs::S_PARAMS).getElement(
                            jhs::S_FUNCTION_ID).asInt());
 
   output.set_correlation_id(
-    message.getElement(jhs::S_PARAMS).getElement(jhs::S_CORRELATION_ID).asInt());
+    message.getElement(jhs::S_PARAMS).getElement(
+      jhs::S_CORRELATION_ID).asInt());
   output.set_message_type(static_cast<MessageType>(
-                            message.getElement(jhs::S_PARAMS).getElement(jhs::S_MESSAGE_TYPE).asInt()));
+                            message.getElement(
+                              jhs::S_PARAMS).getElement(
+                              jhs::S_MESSAGE_TYPE).asInt()));
   output.set_json_message(output_string);
 
   if (message.keyExists(strings::binary_data)) {

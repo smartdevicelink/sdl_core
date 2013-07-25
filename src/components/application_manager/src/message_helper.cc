@@ -283,4 +283,26 @@ void MessageHelper::RemoveAppDataFromHMI(const Application* app) {
   // TODO(PV): implement
 }
 
+smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
+  unsigned int connection_key,
+  int function_id,
+  unsigned int correlation_id,
+  int result_code) {
+  smart_objects::SmartObject* response = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  smart_objects::SmartObject& response_data = *response;
+  response_data[strings::params][strings::function_id] =
+    function_id;
+  response_data[strings::params][strings::message_type] =
+    mobile_apis::messageType::response;
+  response_data[strings::params][strings::correlation_id] =
+    correlation_id;
+  response_data[strings::msg_params][strings::result_code] =
+    response_data[strings::msg_params][strings::success] = false;
+  response_data[strings::params][strings::connection_key] = connection_key;
+
+  return response;
+}
+
+
 }  //  namespace application_manager
