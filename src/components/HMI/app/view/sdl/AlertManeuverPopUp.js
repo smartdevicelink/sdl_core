@@ -167,19 +167,17 @@ SDL.AlertManeuverPopUp = Em.ContainerView.create( {
     },
 
     AlertManeuverActive: function( message ) {
-        var self = this;
-
-        if (message.softButtons) {
-            this.addSoftButtons( message.softButtons );
-        }
-
-        this.set( 'appName', SDL.SDLController.getApplicationModel( message.appID ).appName );
-
-        this.set( 'activate', true );
-
-        clearTimeout( this.timer );
-        this.timer = setTimeout( function() {
-            self.set( 'activate', false );
-        }, 5000 );
+//        var self = this;
+//
+//        if (message.softButtons) {
+//            this.addSoftButtons( message.softButtons );
+//        }
+//
+//        this.set( 'activate', true );
+//
+//        clearTimeout( this.timer );
+//        this.timer = setTimeout( function() {
+//            self.set( 'activate', false );
+//        }, 5000 );
     }
 } );

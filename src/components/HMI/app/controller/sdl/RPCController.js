@@ -198,6 +198,20 @@ SDL.ValidateMessage = Em.Object.create({
             };
             
             return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request Navigation.AlertManeuver
+         * 
+         * @param {Object} params
+         */
+        AlertManeuver: function(params) {
+            
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+            
+            return this.resultStruct;
         }
 
     }),

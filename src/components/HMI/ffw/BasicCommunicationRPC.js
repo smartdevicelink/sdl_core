@@ -442,7 +442,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
         Em.Logger.log("FFW." + method + "Response");
 
-        if(resultCode){
+        if(resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
 
             // send repsonse
             var JSONMessage = {
