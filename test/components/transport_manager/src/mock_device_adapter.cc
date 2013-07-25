@@ -45,25 +45,14 @@ namespace transport_manager {
 
 MockDeviceAdapter::MockDeviceAdapter()
     : DeviceAdapterImpl(new MockDeviceScanner(this),
-                        new MockConnectionFactory(this), 0) {}
+                        new MockConnectionFactory(this), nullptr) {}
 
-void MockDeviceAdapter::addDevice(std::string name) {
-  devices_.push_back(new MockDevice(name));
+void MockDeviceAdapter::reset() {
+  get_device_scanner()->reset();
 }
 
-void MockDeviceAdapter::clearDevices() {
-  devices_.clear();
-}
-
-void MockDeviceAdapter::addConnection(const DeviceHandle& device_id,
-                                      const ApplicationHandle& app_id) {
-  DeviceAdapterImpl::connectionCreated(new MockConnection(device_id, app_id,this),
-                                       device_id, app_id);
-  connections_.push_back(::std::make_pair(device_id, app_id));
-}
-
-void MockDeviceAdapter::clearConnection() {
-  connections_.clear();
+MockDeviceScanner* MockDeviceAdapter::get_device_scanner() const {
+  return static_cast<MockDeviceScanner*>(device_scanner_);
 }
 
 }  // namespace transport_manager

@@ -38,6 +38,7 @@
 #include <queue>
 #include <set>
 #include <memory>
+#include <string>
 
 #include "utils/logger.h"
 

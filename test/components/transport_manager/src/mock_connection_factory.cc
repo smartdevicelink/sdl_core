@@ -33,6 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+#include <transport_manager/mock_connection.h>
 #include "transport_manager/mock_connection_factory.h"
 
 #include <algorithm>
@@ -53,13 +55,6 @@ MockConnectionFactory::MockConnectionFactory(MockDeviceAdapter *adapter)
 DeviceAdapter::Error MockConnectionFactory::createConnection(
     const DeviceHandle& device_handle,
     const ApplicationHandle& app_handle) {
-  if (adapter_->devices_.end() != ::std::find(adapter_->devices_.begin(),
-                                                 adapter_->devices_.end(),
-                                                 new MockDevice(device_handle))) {
-    adapter_->connectDone(device_handle, app_handle);
-  } else {
-    adapter_->connectFailed(device_handle, app_handle, ConnectError());
-  }
   return DeviceAdapter::OK;
 }
 

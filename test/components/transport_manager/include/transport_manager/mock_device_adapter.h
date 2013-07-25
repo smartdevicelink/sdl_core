@@ -38,28 +38,21 @@
 
 #include "transport_manager/device_adapter_impl.h"
 
-using ::transport_manager::ApplicationHandle;
-using ::transport_manager::DeviceHandle;
 using ::transport_manager::device_adapter::DeviceAdapterImpl;
 using ::transport_manager::device_adapter::DeviceType;
-using ::transport_manager::device_adapter::DeviceVector;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
+class MockDeviceScanner;
+
 class MockDeviceAdapter : public DeviceAdapterImpl {
  public:
   MockDeviceAdapter();
-  ~MockDeviceAdapter() {}
-  DeviceType getDeviceType() const { return "fake-adapter"; }
-  void addDevice(std::string name);
-  void clearDevices();
-  void addConnection(const DeviceHandle &device_id, const ApplicationHandle &app_id);
-  void clearConnection();
-
-  DeviceVector devices_;
-  ::std::list< ::std::pair<DeviceHandle, ApplicationHandle> > connections_;
+  MockDeviceScanner* get_device_scanner() const;
+  DeviceType getDeviceType() const { return "mock-adapter"; }
+  void reset();
 };
 
 }  // namespace transport_manager

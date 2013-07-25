@@ -1,6 +1,5 @@
 /*
- * \file mock_connection.h
- * \brief 
+ * mock_application.h
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,40 +32,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTION_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTION_H_
+#ifndef MOCK_APPLICATION_H_
+#define MOCK_APPLICATION_H_
 
-#include "transport_manager/common.h"
-#include "transport_manager/error.h"
-#include "transport_manager/device_adapter_impl.h"
-#include "transport_manager/device_adapter_socket_communication.h"
+#include <pthread.h>
 
-using ::transport_manager::ApplicationHandle;
-using ::transport_manager::DeviceHandle;
-using ::transport_manager::device_adapter::Connection;
-using ::transport_manager::device_adapter::DeviceAdapter;
-using ::transport_manager::ConnectError;
-using ::transport_manager::RawMessageSptr;
-using ::transport_manager::device_adapter::ThreadedSocketConnection;
+#include <sstream>
+#include <string>
+
+#include <transport_manager/common.h>
+#include <transport_manager/transport_manager.h>
+#include <transport_manager/device_adapter_impl.h>
+#include <transport_manager/transport_manager_impl.h>
+#include <transport_manager/mock_device_scanner.h>
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter;
+class MockDevice;
+using ::transport_manager::ApplicationHandle;
 
-class MockConnection : public ThreadedSocketConnection{
+class MockApplication {
  public:
-  MockConnection(const DeviceHandle& device_handle,
-                 const ApplicationHandle& app_handle,
-                 MockDeviceAdapter *adapter);
-  DeviceAdapter::Error sendData(RawMessageSptr message);
-  DeviceAdapter::Error disconnect();
-  bool establish(ConnectError **error);
+  const MockDevice *device;
+  ApplicationHandle handle;
+  pthread_t workerThread;
+  int sockfd;
+  bool active;
+ private:
+  std::string socket_name_;
+ public:
+  MockApplication(const MockDevice* device, ApplicationHandle id);
+  void start();
+  void stop();
+  const std::string &socket_name() const {
+    return socket_name_;
+  }
 };
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
 
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTION_H_ */
+#endif /* MOCK_APPLICATION_H_ */

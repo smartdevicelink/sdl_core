@@ -40,6 +40,7 @@
 
 using ::transport_manager::device_adapter::DeviceAdapter;
 using ::transport_manager::device_adapter::DeviceScanner;
+using ::transport_manager::device_adapter::DeviceVector;
 
 namespace test {
 namespace components {
@@ -50,15 +51,22 @@ class MockDeviceAdapter;
 class MockDeviceScanner : public DeviceScanner {
  public:
   MockDeviceScanner(MockDeviceAdapter *adapter);
+  void reset();
+  void addDevice(const std::string& name);
+  void removeDevice(const std::string& name);
+  void set_is_search_failed() { is_search_failed_ = true; }
 
  protected:
-  DeviceAdapter::Error init() { return DeviceAdapter::OK; }
+  DeviceAdapter::Error init();
   DeviceAdapter::Error scan();
-  void terminate() {}
-  bool isInitialised() const { return true; }
+  void terminate();
+  bool isInitialised() const;
 
  private:
-  MockDeviceAdapter *adapter_;
+  MockDeviceAdapter *controller_;
+  DeviceVector devices_;
+  bool is_initialized_;
+  bool is_search_failed_;
 };
 
 }  // namespace transport_manager

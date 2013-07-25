@@ -1,6 +1,5 @@
 /*
  * \file mock_device.cc
- * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -39,18 +38,46 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
-MockDevice::MockDevice(std::string name) : Device(name, name) {}
+const ApplicationHandle MockDevice::addApplication() {
+  MockApplication app(this, applications_cnt_++);
+  app.device = this;
+  app.active = false;
+  applications_.push_back(app);
+  MockApplication& test = applications_.back();
+  return app.handle;
+}
+
+void MockDevice::start() {
+  for (std::vector<MockApplication>::iterator it = applications_.begin();
+      it != applications_.end();
+      ++it) {
+    it->start();
+  }
+}
+
+void MockDevice::stop() {
+  for (std::vector<MockApplication>::iterator it = applications_.begin();
+      it != applications_.end();
+      ++it) {
+    it->stop();
+  }}
 
 bool MockDevice::isSameAs(const Device* other) const {
   return unique_device_id() == other->unique_device_id();
 }
 
+
+
 ApplicationList MockDevice::getApplicationList() const {
-  return ApplicationList();
+  ApplicationList rc(applications_.size());
+  std::transform(
+      applications_.begin(), applications_.end(), rc.begin(),
+      [](const MockApplication& app) {return app.handle;});
+  return rc;
 }
 
-bool MockDevice::operator ==(const MockDevice* other) {
-  return isSameAs(other);
+bool MockDevice::operator ==(const MockDevice& other) {
+  return isSameAs(&other);
 }
 
 }  // namespace transport_manager

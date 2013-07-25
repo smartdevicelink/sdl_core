@@ -35,6 +35,7 @@
 
 #include "transport_manager/mock_device_scanner.h"
 #include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_device.h"
 
 using ::transport_manager::SearchDeviceError;
 
@@ -42,18 +43,53 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
-MockDeviceScanner::MockDeviceScanner(MockDeviceAdapter *adapter)
-    : adapter_(adapter) {}
+MockDeviceScanner::MockDeviceScanner(MockDeviceAdapter *controller)
+    : controller_(controller),
+      is_initialized_(false),
+      is_search_failed_(false) {
+}
 
-DeviceAdapter::Error MockDeviceScanner::scan() {
-  if (!adapter_->devices_.empty()) {
-    adapter_->searchDeviceDone(adapter_->devices_);
-  } else {
-    adapter_->searchDeviceFailed(SearchDeviceError());
-  }
+DeviceAdapter::Error MockDeviceScanner::init() {
+  is_initialized_ = true;
   return DeviceAdapter::OK;
 }
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+DeviceAdapter::Error MockDeviceScanner::scan() {
+  if (is_search_failed_) {
+    controller_->searchDeviceFailed(SearchDeviceError());
+  }
+  controller_->searchDeviceDone(devices_);
+  return DeviceAdapter::OK;
+}
+
+void MockDeviceScanner::terminate() {
+}
+
+void MockDeviceScanner::reset() {
+  is_search_failed_ = false;
+  devices_.clear();
+}
+
+bool MockDeviceScanner::isInitialised() const {
+  return is_initialized_;
+}
+
+void MockDeviceScanner::addDevice(const std::string& name) {
+  MockDevice* dev = new MockDevice(name, name, controller_);
+  dev->addApplication();
+  dev->start();
+  devices_.push_back(dev);
+}
+
+void MockDeviceScanner::removeDevice(const std::string& name) {
+  for (DeviceVector::iterator t = devices_.begin(); t != devices_.end(); ++t) {
+    if ((*t)->name() == name) {
+      devices_.erase(t);
+      break;
+    }
+  }
+}
+
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test

@@ -121,7 +121,7 @@ DeviceAdapter::Error DeviceAdapterImpl::init(Configuration* configuration) {
 }
 
 DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
-  if (device_scanner_ == 0)
+  if (device_scanner_ == nullptr)
     return NOT_SUPPORTED;
   if (!device_scanner_->isInitialised())
     return BAD_STATE;
