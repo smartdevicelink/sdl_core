@@ -297,8 +297,8 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
     mobile_apis::messageType::response;
   response_data[strings::params][strings::correlation_id] =
     correlation_id;
-  response_data[strings::msg_params][strings::result_code] =
-    response_data[strings::msg_params][strings::success] = false;
+  response_data[strings::msg_params][strings::result_code] = result_code;
+  response_data[strings::msg_params][strings::success] = false;
   response_data[strings::params][strings::connection_key] = connection_key;
 
   return response;

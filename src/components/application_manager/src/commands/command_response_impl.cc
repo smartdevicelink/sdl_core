@@ -65,13 +65,11 @@ void CommandResponseImpl::SendResponse(
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   (*message_)[strings::msg_params][strings::success] = success;
 
-
-  if (success) {
-    if (!(*message_)[strings::msg_params].keyExists(strings::result_code)) {
+  if (!(*message_)[strings::msg_params].keyExists(strings::result_code)) {
+    if (success) {
       (*message_)[strings::msg_params][strings::result_code] =
         mobile_apis::Result::SUCCESS;
-    }
-  } else {
+    } else {
       if (mobile_apis::Result::INVALID_ENUM != result_code) {
         (*message_)[strings::msg_params][strings::result_code] = result_code;
       } else if ((*message_)[strings::params][strings::message_type] ==
@@ -79,8 +77,8 @@ void CommandResponseImpl::SendResponse(
         (*message_)[strings::msg_params][strings::result_code] =
           (*message_)[strings::params][hmi_response::code];
       }
+    }
   }
-
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
