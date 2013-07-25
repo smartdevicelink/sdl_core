@@ -33,18 +33,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCK_DEVICE_H_
-#define MOCK_DEVICE_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_
 
-#include <map>
+#include "transport_manager/common.h"
+#include "transport_manager/device_adapter_impl.h"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include <transport_manager/transport_manager.h>
 #include <transport_manager/device_adapter_impl.h>
 #include <transport_manager/transport_manager_impl.h>
 #include <transport_manager/mock_device_scanner.h>
 #include <transport_manager/mock_application.h>
+
+using ::transport_manager::ApplicationList;
+using ::transport_manager::device_adapter::Device;
+using ::transport_manager::device_adapter::DeviceAdapterController;
 
 namespace test {
 namespace components {
@@ -68,10 +72,11 @@ class MockDevice : public ::transport_manager::device_adapter::Device {
   void stop();
   bool isSameAs(const Device* other) const;
   ApplicationList getApplicationList() const;
+  bool operator == (const MockDevice &other);
 };
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
 
-#endif /* MOCK_DEVICE_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_ */

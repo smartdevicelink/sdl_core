@@ -32,37 +32,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <sys/socket.h>
-#include <sys/un.h>
 
-#include <list>
-
-#include "transport_manager/mock_device_adapter.h"
 #include "transport_manager/mock_connection.h"
-#include "transport_manager/device_adapter_impl.h"
-
+#include "transport_manager/mock_device.h"
+#include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_device_scanner.h"
+#include "transport_manager/mock_connection_factory.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-::transport_manager::device_adapter::DeviceType MockDeviceAdapter::getDeviceType() const {
-  return "mock-adapter";
-}
-
-bool MockDeviceAdapter::isSearchDevicesSupported() const {
-  return true;
-}
-
-bool MockDeviceAdapter::isServerOriginatedConnectSupported() const {
-  return true;
-}
-
-bool MockDeviceAdapter::isClientOriginatedConnectSupported() const {
-  return true;
-}
-
 } // namespace transport_manager
 } // namespace components
 } // namespace test
-

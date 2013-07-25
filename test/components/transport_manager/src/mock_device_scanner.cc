@@ -33,21 +33,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <transport_manager/mock_device_adapter.h>
-#include <transport_manager/mock_device_scanner.h>
-#include <transport_manager/mock_device.h>
+#include "transport_manager/mock_device_scanner.h"
+#include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_device.h"
+
+using ::transport_manager::SearchDeviceError;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-MockDeviceScanner::MockDeviceScanner(DeviceAdapterController* controller)
-    : is_initialized(false),
-      controller_(controller) {
+MockDeviceScanner::MockDeviceScanner(MockDeviceAdapter *controller)
+    : controller_(controller),
+      is_initialized_(false) {
 }
 
 DeviceAdapter::Error MockDeviceScanner::init() {
-  is_initialized = true;
+  is_initialized_ = true;
   return DeviceAdapter::OK;
 }
 
@@ -60,7 +62,7 @@ void MockDeviceScanner::terminate() {
 }
 
 bool MockDeviceScanner::isInitialised() const {
-  return is_initialized;
+  return is_initialized_;
 }
 
 void MockDeviceScanner::addDevice(const std::string& name) {

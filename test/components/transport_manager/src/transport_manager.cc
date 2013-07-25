@@ -77,18 +77,18 @@ class TransportManagerTest : public ::testing::Test {
   static pthread_mutex_t test_mutex;
   static pthread_cond_t test_cond;
  protected:
-  static MockDeviceAdapter *fake_adapter;
+  static MockDeviceAdapter *mock_adapter;
   static MockTransportManagerListener *tm_listener;
 
   static void SetUpTestCase() {
     pthread_mutex_init(&test_mutex, NULL);
     pthread_cond_init(&test_cond, NULL);
     tm_listener = new MockTransportManagerListener();
-    fake_adapter = new MockDeviceAdapter();
-    fake_adapter->init(NULL);
+    mock_adapter = new MockDeviceAdapter();
+    mock_adapter->init(NULL);
     TransportManager* tm = TransportManagerImpl::instance();
     tm->addEventListener(tm_listener);
-    tm->addDeviceAdapter(fake_adapter);
+    tm->addDeviceAdapter(mock_adapter);
   }
 
   static void TearDownTestCase() {
@@ -119,8 +119,9 @@ class TransportManagerTest : public ::testing::Test {
 
 pthread_mutex_t TransportManagerTest::test_mutex;
 pthread_cond_t TransportManagerTest::test_cond;
-MockDeviceAdapter *TransportManagerTest::fake_adapter = 0;
-MockTransportManagerListener *TransportManagerTest::tm_listener = 0;
+
+MockDeviceAdapter *TransportManagerTest::mock_adapter = nullptr;
+MockTransportManagerListener *TransportManagerTest::tm_listener = nullptr;
 
 TEST_F(TransportManagerTest, Instance)
 {
@@ -146,10 +147,10 @@ TEST_F(TransportManagerTest, SearchDeviceDone)
   EXPECT_CALL(*tm_listener,onSearchDeviceDone()).Times(1)
       .WillOnce(SignalTest(this));
 
-  fake_adapter->device_scanner()->addDevice("TestDevice");
+  mock_adapter->device_scanner()->addDevice("TestDevice");
   TransportManagerImpl::instance()->searchDevices();
   EXPECT_TRUE(waitCond(1));
-  fake_adapter->device_scanner()->removeDevice("TestDevice");
+  mock_adapter->device_scanner()->removeDevice("TestDevice");
 }
 
 TEST_F(TransportManagerTest, ConnectDeviceDone)
@@ -160,10 +161,10 @@ TEST_F(TransportManagerTest, ConnectDeviceDone)
   EXPECT_CALL(*tm_listener, onConnectDone(_, kDevice, kApplication, _)).Times(1)
       .WillOnce(SignalTest(this));
 
-  fake_adapter->device_scanner()->addDevice("TestDevice");
+  mock_adapter->device_scanner()->addDevice("TestDevice");
   TransportManagerImpl::instance()->connectDevice(kDevice, kApplication);
   EXPECT_TRUE(waitCond(1));
-//  fake_adapter->clearDevices();
+  mock_adapter->device_scanner()->removeDevice("TestDevice");
 }
 
 TEST_F(TransportManagerTest, ConnectDeviceFailed)
@@ -174,7 +175,6 @@ TEST_F(TransportManagerTest, ConnectDeviceFailed)
   EXPECT_CALL(*tm_listener, onConnectFailed(_, kDevice, kApplication, _)).Times(1)
       .WillOnce(SignalTest(this));
 
-//  fake_adapter->clearDevices();
   TransportManagerImpl::instance()->connectDevice(kDevice, kApplication);
   EXPECT_TRUE(waitCond(1));
 }
@@ -202,10 +202,9 @@ TEST_F(TransportManagerTest, DISABLED_DisconnectDeviceDone)
   EXPECT_CALL(*tm_listener, onDisconnectDeviceDone(_, kDevice)).Times(1)
         .WillOnce(SignalTest(this));
 
-  fake_adapter->connect("TestDevice", kApplication);
+  mock_adapter->connect("TestDevice", kApplication);
   TransportManagerImpl::instance()->disconnectDevice(kDevice);
   EXPECT_TRUE(waitCond(1));
-//  fake_adapter->clearConnection();
 }
 
 TEST_F(TransportManagerTest, DISABLED_SendReceive)

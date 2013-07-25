@@ -21,15 +21,14 @@ set (LIBRARIES
 )
 
 set (SOURCES
-   ./src/transport_manager.cc
    ./src/mock_connection.cc
    ./src/mock_connection_factory.cc
-   ./src/mock_device_adapter.cc
-   ./src/mock_device.cc
-   ./src/mock_device_scanner.cc
    ./src/mock_application.cc
+   ./src/mock_device.cc
+   ./src/mock_device_adapter.cc
+   ./src/mock_device_scanner.cc
    ./src/raw_message_matcher.cc
-   ./src/fake_device_adapter.cc
+   ./src/transport_manager.cc
 )
 
 create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")

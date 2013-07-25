@@ -51,6 +51,7 @@ namespace components {
 namespace transport_manager {
 
 class MockDevice;
+using ::transport_manager::ApplicationHandle;
 
 class MockApplication {
  public:

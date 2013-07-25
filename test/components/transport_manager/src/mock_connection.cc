@@ -1,6 +1,6 @@
 /*
  * \file mock_connection.cc
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -39,12 +39,19 @@
 #include "transport_manager/common.h"
 #include "transport_manager/mock_connection.h"
 
-using namespace transport_manager;
-using namespace transport_manager::device_adapter;
+#include <algorithm>
+
+#include "transport_manager/mock_device_adapter.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
+
+MockConnection::MockConnection(const DeviceHandle& device_handle,
+                               const ApplicationHandle& app_handle,
+                               MockDeviceAdapter* controller)
+    : ThreadedSocketConnection(device_handle, app_handle, controller) {
+}
 
 bool MockConnection::establish(ConnectError **error) {
   int peer_sock = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -63,7 +70,13 @@ bool MockConnection::establish(ConnectError **error) {
   return false;
 }
 
+DeviceAdapter::Error MockConnection::sendData(RawMessageSptr message) {
+  return DeviceAdapter::OK;
+}
+
+DeviceAdapter::Error MockConnection::disconnect() {
+  return DeviceAdapter::OK;
+}
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
-

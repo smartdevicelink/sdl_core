@@ -32,11 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pthread.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <transport_manager/mock_device.h>
+#include "transport_manager/mock_device.h"
 
 namespace test {
 namespace components {
@@ -74,7 +70,10 @@ ApplicationList MockDevice::getApplicationList() const {
   return rc;
 }
 
+bool MockDevice::operator ==(const MockDevice& other) {
+  return isSameAs(&other);
+}
+
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
-
