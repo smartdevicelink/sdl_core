@@ -68,6 +68,8 @@ void ShowConstantTBTRequest::Run() {
     smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
+  msg_params[strings::app_id] = app->app_id();
+
   msg_params[hmi_request::navi_texts] =
     smart_objects::SmartObject(smart_objects::SmartType_Array);
 
