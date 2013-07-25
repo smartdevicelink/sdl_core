@@ -2091,6 +2091,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                        final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
                        final Spinner s = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
                        s.setAdapter(_submenuAdapter);
+                       final CheckBox chkUseMenuPos = (CheckBox) layout.findViewById(R.id.addcommand_useMenuPos);
+                       final EditText editMenuPos = (EditText) layout.findViewById(R.id.addcommand_menuPos);
                        final CheckBox chkUseIcon = (CheckBox) layout.findViewById(R.id.addcommand_useIcon);
                        final EditText editIconValue = (EditText) layout.findViewById(R.id.addcommand_iconValue);
                        final Spinner spnIconType = (Spinner) layout.findViewById(R.id.addcommand_iconType);
@@ -2121,6 +2123,18 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                                    return;
                                }
 
+                               int pos = -1;
+                               if (chkUseMenuPos.isChecked()) {
+                                   String posString = editMenuPos.getText().toString();
+                                   try {
+                                       pos = Integer.parseInt(posString);
+                                   } catch (NumberFormatException e) {
+                                       Toast.makeText(mContext, "Couldn't parse number " + posString,
+                                               Toast.LENGTH_LONG).show();
+                                       return;
+                                   }
+                               }
+
                                AddCommand msg = new AddCommand();
                                msg.setCorrelationID(autoIncCorrId++);
                                msg.setCmdID(cmdID);
@@ -2128,7 +2142,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                                String itemText = er.getText().toString();
                                MenuParams menuParams = new MenuParams();
                                menuParams.setMenuName(itemText);
-                               menuParams.setPosition(0);
+                               if (chkUseMenuPos.isChecked()) {
+                                   menuParams.setPosition(pos);
+                               }
                                if (chkUseParentID.isChecked()) {
                                    SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
                                    menuParams.setParentID(sm.getSubMenuId());

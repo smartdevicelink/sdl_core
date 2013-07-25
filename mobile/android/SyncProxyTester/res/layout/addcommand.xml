@@ -69,6 +69,23 @@
             android:layout_height="wrap_content"/>
 
     <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/addcommand_menuPos"
+            android:id="@+id/addcommand_useMenuPos"
+            android:layout_gravity="left|center_vertical"/>
+
+    <EditText
+            android:text="@string/addcommand_menuPosDefault"
+            android:id="@+id/addcommand_menuPos"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="4"
+            android:freezesText="true"
+            android:inputType="number"/>
+
+    <CheckBox
             android:id="@+id/addcommand_useIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

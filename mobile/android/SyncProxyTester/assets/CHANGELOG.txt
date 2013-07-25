@@ -2,7 +2,7 @@
 * Update VehicleData and Language values.
 * ButtonSubscriptions dialog: add ButtonName.CUSTOM_NAME value.
 + AddSubMenu dialog: add subMenuID and position parameters.
-+ AddCommand dialog: add commandID parameter.
++ AddCommand dialog: add commandID and position parameters.
 + Show dialog: add graphic's image type parameter.
 * AddCommand dialog: the user can omit sending parentID parameter.
 + Add the EncodedSyncPData dialog.

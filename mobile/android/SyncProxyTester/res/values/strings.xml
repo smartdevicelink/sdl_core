@@ -32,6 +32,8 @@
     <string name="addcommand_vrSynonymDefault"/>
     <string name="addcommand_useParentID">Add this item to:</string>
     <string name="addcommand_useIcon">Use icon:</string>
+    <string name="addcommand_menuPos">Menu Position</string>
+    <string name="addcommand_menuPosDefault">1000</string>
     <string name="performinteraction_initialText">Initial Text</string>
     <string name="performinteraction_initialTextDefault">Pick number:</string>
     <string name="performinteraction_initialPrompt">Initial Prompt (comma-separated)</string>
