@@ -116,5 +116,11 @@
     <string name="showconstanttbt_isManeuverComplete">Maneuver Complete?</string>
     <string name="encodedsyncpdata_filename">Local File Name</string>
     <string name="encodedsyncpdata_selectFileButton">…</string>
+    <string name="addsubmenu_menuName">Submenu Name</string>
+    <string name="addsubmenu_menuNameDefault">SubmenuName</string>
+    <string name="addsubmenu_menuID">Submenu ID</string>
+    <string name="addsubmenu_menuIDDefault">42</string>
+    <string name="addsubmenu_menuPos">Submenu Position</string>
+    <string name="addsubmenu_menuPosDefault">1000</string>
 
 </resources>

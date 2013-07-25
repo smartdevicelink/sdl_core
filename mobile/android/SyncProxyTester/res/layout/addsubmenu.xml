@@ -1,22 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout 
-	xmlns:android="http://schemas.android.com/apk/res/android" 
-	android:layout_width="fill_parent"
-	android:orientation="vertical" 
-	android:id="@+id/submenu_Root" android:paddingLeft="20dip" android:paddingRight="20dip" android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
-		<TextView
-            android:id="@+id/submenu_toptext"
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:orientation="vertical"
+        android:id="@+id/submenu_Root"
+        android:paddingLeft="20dip"
+        android:paddingRight="20dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:layout_height="wrap_content">
+
+    <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-        	android:text="Submenu to add" >
-        </TextView>
-		<EditText 
-			android:text="SubmenuName" 
-			android:id="@+id/submenu_item" 
-			android:layout_width="fill_parent" 
-			android:layout_height="wrap_content" 
-			android:visibility="visible" 
-			android:freezesText="true">
-		</EditText>
+            android:text="@string/addsubmenu_menuName"/>
+
+    <EditText
+            android:text="@string/addsubmenu_menuNameDefault"
+            android:id="@+id/addsubmenu_menuName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="500"
+            android:freezesText="true"
+            android:inputType="textCapWords"/>
+
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/addsubmenu_menuID"/>
+
+    <EditText
+            android:text="@string/addsubmenu_menuIDDefault"
+            android:id="@+id/addsubmenu_menuID"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="10"
+            android:freezesText="true"
+            android:inputType="number"/>
+
+    <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/addsubmenu_menuPos"
+            android:id="@+id/addsubmenu_useMenuPos"
+            android:layout_gravity="left|center_vertical"/>
+
+    <EditText
+            android:text="@string/addsubmenu_menuPosDefault"
+            android:id="@+id/addsubmenu_menuPos"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="4"
+            android:freezesText="true"
+            android:inputType="number"/>
+
 </LinearLayout>

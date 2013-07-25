@@ -1322,50 +1322,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.AddSubMenu) {
-							//something
-							AlertDialog.Builder builder;
-							AlertDialog addSubMenuDialog;
-
-							Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.addsubmenu,
-									(ViewGroup) findViewById(R.id.submenu_Root));
-
-							final EditText subMenu = (EditText) layout.findViewById(R.id.submenu_item);
-
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									AddSubMenu msg = new AddSubMenu();
-									msg.setCorrelationID(autoIncCorrId++);
-									SyncSubMenu sm = new SyncSubMenu();
-									sm.setName(subMenu.getText().toString());
-									sm.setSubMenuId(submenucmdID++);
-									msg.setMenuID(sm.getSubMenuId());
-									msg.setMenuName(sm.getName());
-									msg.setPosition(null);
-									try {
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-									
-									if (_latestAddSubmenu != null) {
-										Log.w(logTag, "Latest addSubmenu should be null, but equals to " + _latestAddSubmenu);
-									}
-									_latestAddSubmenu = sm;
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							addSubMenuDialog = builder.create();
-							addSubMenuDialog.show();
+                            sendAddSubmenu();
 						} else if (adapter.getItem(which) == Names.DeleteSubMenu) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
@@ -2043,6 +2000,83 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 						messageSelectCount.put(function, curCount + 1);
 					}
+
+                   /**
+                    * Opens the dialog for AddSubMenu message and sends it.
+                    */
+                   private void sendAddSubmenu() {
+                       final Context mContext = adapter.getContext();
+                       LayoutInflater inflater = (LayoutInflater) mContext
+                               .getSystemService(LAYOUT_INFLATER_SERVICE);
+                       View layout = inflater.inflate(R.layout.addsubmenu,
+                               (ViewGroup) findViewById(R.id.submenu_Root));
+
+                       final EditText editMenuName = (EditText) layout.findViewById(R.id.addsubmenu_menuName);
+                       final EditText editMenuID = (EditText) layout.findViewById(R.id.addsubmenu_menuID);
+                       final CheckBox chkUseMenuPos = (CheckBox) layout.findViewById(R.id.addsubmenu_useMenuPos);
+                       final EditText editMenuPos = (EditText) layout.findViewById(R.id.addsubmenu_menuPos);
+
+                       // set suggested value
+                       editMenuID.setText(String.valueOf(submenucmdID++));
+
+                       AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                       builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               String subMenuIDString = editMenuID.getText().toString();
+                               int subMenuID = -1;
+                               try {
+                                   subMenuID = Integer.parseInt(subMenuIDString);
+                               } catch (NumberFormatException e) {
+                                   Toast.makeText(mContext, "Couldn't parse number " + subMenuIDString,
+                                           Toast.LENGTH_LONG).show();
+                                   return;
+                               }
+
+                               int pos = -1;
+                               if (chkUseMenuPos.isChecked()) {
+                                   String posString = editMenuPos.getText().toString();
+                                   try {
+                                       pos = Integer.parseInt(posString);
+                                   } catch (NumberFormatException e) {
+                                       Toast.makeText(mContext, "Couldn't parse number " + posString,
+                                               Toast.LENGTH_LONG).show();
+                                       return;
+                                   }
+                               }
+
+                               AddSubMenu msg = new AddSubMenu();
+                               msg.setCorrelationID(autoIncCorrId++);
+
+                               SyncSubMenu sm = new SyncSubMenu();
+                               sm.setName(editMenuName.getText().toString());
+                               sm.setSubMenuId(subMenuID);
+                               msg.setMenuID(sm.getSubMenuId());
+                               msg.setMenuName(sm.getName());
+                               if (chkUseMenuPos.isChecked()) {
+                                   msg.setPosition(pos);
+                               }
+
+                               try {
+                                   _msgAdapter.logMessage(msg, true);
+                                   ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                               } catch (SyncException e) {
+                                   _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                               }
+
+                               if (_latestAddSubmenu != null) {
+                                   Log.w(logTag, "Latest addSubmenu should be null, but equals to " + _latestAddSubmenu);
+                               }
+                               _latestAddSubmenu = sm;
+                           }
+                       });
+                       builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               dialog.cancel();
+                           }
+                       });
+                       builder.setView(layout);
+                       builder.show();
+                   }
 
                    /**
                     * Opens the dialog for AddCommand message and sends it.
