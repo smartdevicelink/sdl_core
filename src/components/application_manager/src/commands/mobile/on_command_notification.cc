@@ -68,36 +68,9 @@ void OnCommandNotification::Run() {
     return;
   }
 
-  SendOnMenuCommand(app);
-}
-
-void OnCommandNotification::SendOnMenuCommand(const Application* app) {
-  smart_objects::SmartObject* on_menu_cmd =
-    new smart_objects::SmartObject();
-
-  if (!on_menu_cmd) {
-    LOG4CXX_ERROR_EXT(logger_, "OnCommandNotification NULL pointer");
-    return;
-  }
-
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "OnCommandNotification NULL pointer");
-    return;
-  }
-
-  (*on_menu_cmd)[strings::params][strings::connection_key] =
+  (*message_)[strings::params][strings::connection_key] =
       app->app_id();
 
-  (*on_menu_cmd)[strings::params][strings::message_type] =
-    MessageType::kNotification;
-
-  (*on_menu_cmd)[strings::msg_params][strings::cmd_id] =
-    (*message_)[strings::msg_params][strings::cmd_id];
-
-  (*on_menu_cmd)[strings::msg_params][strings::trigger_source] =
-      (*message_)[strings::msg_params][strings::trigger_source];
-
-  message_.reset(on_menu_cmd);
   SendNotification();
 }
 

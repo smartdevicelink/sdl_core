@@ -67,12 +67,6 @@ class OnCommandNotification : public CommandNotificationImpl {
     virtual void Run();
 
   private:
-    /*
-     * @brief Send notification to the mobile device
-     *
-     * @param app Application to receive notification
-     */
-    void SendOnMenuCommand(const Application* app);
 
     DISALLOW_COPY_AND_ASSIGN(OnCommandNotification);
 };
