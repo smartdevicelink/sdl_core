@@ -3091,16 +3091,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder.show();
 					}
 
-					private String[] vehicleDataTypeNames() {
-						final String[] vehicleDataTypeNames = new String[] {
-								"GPS", "Speed", "Fuel Level", "Fuel Economy",
-								"Engine RPM", "Battery Voltage", "Rain Sensor",
-								"Odometer", "VIN", "External Temp", "PRNDL Status",
-								"Tire Pressure", "Battery Voltage", "Battery Current",
-								"Battery Temperature", "Satellite ESN"
-						};
-						return vehicleDataTypeNames;
-					}
+                   private String[] vehicleDataTypeNames() {
+                       final String[] vehicleDataTypeNames = new String[]{
+                               "GPS", "Speed", "RPM", "Fuel Level", "Fuel Level State",
+                               "Instant Fuel Consumption", "External Temp", "PRNDL Status",
+                               "Tire Pressure", "Odometer", "Belt Status", "Body Information",
+                               "Device Status", "Driver Braking", "Wiper Status", "Head Lamp Status",
+                               "Engine Torque", "Acc Pedal Position", "Steering Wheel Angle",
+                               "ECall Info", "Airbag Status", "Emergency Event", "Cluster Mode Status", "MyKey"
+                       };
+                       return vehicleDataTypeNames;
+                   }
 
 					private void sendSetGlobalProperties() {
 						AlertDialog.Builder builder;
