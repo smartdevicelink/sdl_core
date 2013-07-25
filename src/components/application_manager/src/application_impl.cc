@@ -41,9 +41,9 @@ ApplicationImpl::ApplicationImpl(int app_id)
     active_message_(NULL),
     is_media_(false),
     allowed_support_navigation_(false),
-    hmi_level_(mobile_api::HMILevel::INVALID_ENUM),
-    system_context_(mobile_api::SystemContext::INVALID_ENUM),
-    audio_streaming_state_(mobile_api::AudioStreamingState::INVALID_ENUM),
+    hmi_level_(mobile_api::HMILevel::HMI_NONE),
+    system_context_(mobile_api::SystemContext::SYSCTXT_MAIN),  // TODO(AK): Is it correct?
+    audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
     is_app_allowed_(true),
     has_been_activated_(false) {
 }
