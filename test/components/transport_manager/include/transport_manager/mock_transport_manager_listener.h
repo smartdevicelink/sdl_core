@@ -62,7 +62,6 @@ namespace transport_manager {
 class MockTransportManagerListener
     : public ::transport_manager::TransportManagerListener {
  public:
-
   MOCK_METHOD2(onDeviceFound, void(const DeviceDesc &device,
                                     const ApplicationList app_list));
   MOCK_METHOD0(onSearchDeviceDone, void());

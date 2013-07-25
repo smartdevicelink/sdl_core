@@ -1,6 +1,6 @@
 /*
- * \file fake_device_adapter.h
- * \brief Fake device adapter for test without real devices
+ * \file mock_device_scanner.h
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,31 +33,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_
 
 #include "transport_manager/device_adapter_impl.h"
 
-using ::transport_manager::device_adapter::DeviceAdapterImpl;
-using ::transport_manager::device_adapter::DeviceType;
-using ::transport_manager::device_adapter::DeviceVector;
+using ::transport_manager::device_adapter::DeviceAdapter;
+using ::transport_manager::device_adapter::DeviceScanner;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class FakeDeviceAdapter : public DeviceAdapterImpl {
- public:
-  FakeDeviceAdapter();
-  ~FakeDeviceAdapter() {}
-  DeviceType getDeviceType() const { return "fake-adapter"; }
-  void addDevice(std::string name);
+class MockDeviceAdapter;
 
-  DeviceVector devices_;
+class MockDeviceScanner : public DeviceScanner {
+ public:
+  MockDeviceScanner(MockDeviceAdapter *adapter);
+
+ protected:
+  DeviceAdapter::Error init() { return DeviceAdapter::OK; }
+  DeviceAdapter::Error scan();
+  void terminate() {}
+  bool isInitialised() const { return true; }
+
+ private:
+  MockDeviceAdapter *adapter_;
 };
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
 
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_ */

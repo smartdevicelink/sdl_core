@@ -1,6 +1,6 @@
 /*
- * \file mock_device_adapter.h
- * \brief
+ * \file mock_device.cc
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,37 +33,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
-
-#include "transport_manager/device_adapter_impl.h"
-
-using ::transport_manager::ApplicationHandle;
-using ::transport_manager::DeviceHandle;
-using ::transport_manager::device_adapter::DeviceAdapterImpl;
-using ::transport_manager::device_adapter::DeviceType;
-using ::transport_manager::device_adapter::DeviceVector;
+#include "transport_manager/mock_device.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter : public DeviceAdapterImpl {
- public:
-  MockDeviceAdapter();
-  ~MockDeviceAdapter() {}
-  DeviceType getDeviceType() const { return "fake-adapter"; }
-  void addDevice(std::string name);
-  void clearDevices();
-  void addConnection(const DeviceHandle &device_id, const ApplicationHandle &app_id);
-  void clearConnection();
+MockDevice::MockDevice(std::string name) : Device(name, name) {}
 
-  DeviceVector devices_;
-  ::std::list< ::std::pair<DeviceHandle, ApplicationHandle> > connections_;
-};
+bool MockDevice::isSameAs(const Device* other) const {
+  return unique_device_id() == other->unique_device_id();
+}
+
+ApplicationList MockDevice::getApplicationList() const {
+  return ApplicationList();
+}
+
+bool MockDevice::operator ==(const MockDevice* other) {
+  return isSameAs(other);
+}
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
-
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_ */

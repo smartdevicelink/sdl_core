@@ -1,6 +1,6 @@
 /*
- * \file mock_device_adapter.h
- * \brief
+ * \file mock_device.h
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,37 +33,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_
 
+#include "transport_manager/common.h"
 #include "transport_manager/device_adapter_impl.h"
 
-using ::transport_manager::ApplicationHandle;
-using ::transport_manager::DeviceHandle;
-using ::transport_manager::device_adapter::DeviceAdapterImpl;
-using ::transport_manager::device_adapter::DeviceType;
-using ::transport_manager::device_adapter::DeviceVector;
+using ::transport_manager::ApplicationList;
+using ::transport_manager::device_adapter::Device;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter : public DeviceAdapterImpl {
+class MockDevice : public Device {
  public:
-  MockDeviceAdapter();
-  ~MockDeviceAdapter() {}
-  DeviceType getDeviceType() const { return "fake-adapter"; }
-  void addDevice(std::string name);
-  void clearDevices();
-  void addConnection(const DeviceHandle &device_id, const ApplicationHandle &app_id);
-  void clearConnection();
-
-  DeviceVector devices_;
-  ::std::list< ::std::pair<DeviceHandle, ApplicationHandle> > connections_;
+  MockDevice(std::string name);
+  bool isSameAs(const Device *other) const;
+  ApplicationList getApplicationList() const;
+  bool operator == (const MockDevice *other);
 };
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
 
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_ */

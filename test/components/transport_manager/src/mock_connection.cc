@@ -1,5 +1,5 @@
 /*
- * \file mock_device_adapter.h
+ * \file mock_connection.cc
  * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -33,37 +33,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
+#include "transport_manager/mock_connection.h"
 
-#include "transport_manager/device_adapter_impl.h"
+#include <algorithm>
 
-using ::transport_manager::ApplicationHandle;
-using ::transport_manager::DeviceHandle;
-using ::transport_manager::device_adapter::DeviceAdapterImpl;
-using ::transport_manager::device_adapter::DeviceType;
-using ::transport_manager::device_adapter::DeviceVector;
+#include "transport_manager/mock_device_adapter.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter : public DeviceAdapterImpl {
- public:
-  MockDeviceAdapter();
-  ~MockDeviceAdapter() {}
-  DeviceType getDeviceType() const { return "fake-adapter"; }
-  void addDevice(std::string name);
-  void clearDevices();
-  void addConnection(const DeviceHandle &device_id, const ApplicationHandle &app_id);
-  void clearConnection();
+MockConnection::MockConnection(const DeviceHandle& device_handle,
+                               const ApplicationHandle& app_handle,
+                               MockDeviceAdapter* adapter)
+    : adapter_(adapter),
+      device_handle_(device_handle),
+      app_handle_(app_handle) {}
 
-  DeviceVector devices_;
-  ::std::list< ::std::pair<DeviceHandle, ApplicationHandle> > connections_;
-};
+DeviceAdapter::Error MockConnection::sendData(RawMessageSptr message) {
+  return DeviceAdapter::OK;
+}
+
+DeviceAdapter::Error MockConnection::disconnect() {
+  ::std::pair<DeviceHandle, ApplicationHandle> connection =
+      ::std::make_pair(device_handle_, app_handle_);
+  if (::std::find(adapter_->connections_.begin(),
+                  adapter_->connections_.end(),
+                  connection) != adapter_->connections_.end()) {
+//    adapter_->connections_.erase(con);
+    adapter_->disconnectDone(device_handle_, app_handle_);
+//      if (::std::find_if(adapter_->connections_.begin(),
+//                         adapter_->connections_.end()))
+    adapter_->disconnectDevice(device_handle_);
+  } else {
+    // TODO: add disconnect failed
+  }
+  return DeviceAdapter::OK;
+}
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
-
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_ */

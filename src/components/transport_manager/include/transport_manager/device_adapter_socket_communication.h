@@ -37,6 +37,8 @@
 
 #include "transport_manager/device_adapter_impl.h"
 
+using ::transport_manager::device_adapter::Connection;
+
 namespace transport_manager {
 
 namespace device_adapter {
@@ -74,7 +76,7 @@ class ThreadedSocketConnection : public Connection {
  private:
   void thread();
   void transmit();
-  void finalise();
+  void finalize();
   DeviceAdapter::Error notify() const;
   bool receive();
   bool send();
@@ -111,8 +113,8 @@ class ThreadedSocketConnection : public Connection {
  };
  */
 
-}  // namespace
+}  // namespace device_adapter
 
-}  // namespace
+}  // namespace transport_manager
 
 #endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_SOCKET_COMMUNICATION

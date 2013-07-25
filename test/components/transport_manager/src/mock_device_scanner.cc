@@ -1,6 +1,6 @@
 /*
- * \file mock_device_adapter.h
- * \brief
+ * \file mock_device_scanner.cc
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,37 +33,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
+#include "transport_manager/mock_device_scanner.h"
+#include "transport_manager/mock_device_adapter.h"
 
-#include "transport_manager/device_adapter_impl.h"
-
-using ::transport_manager::ApplicationHandle;
-using ::transport_manager::DeviceHandle;
-using ::transport_manager::device_adapter::DeviceAdapterImpl;
-using ::transport_manager::device_adapter::DeviceType;
-using ::transport_manager::device_adapter::DeviceVector;
+using ::transport_manager::SearchDeviceError;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter : public DeviceAdapterImpl {
- public:
-  MockDeviceAdapter();
-  ~MockDeviceAdapter() {}
-  DeviceType getDeviceType() const { return "fake-adapter"; }
-  void addDevice(std::string name);
-  void clearDevices();
-  void addConnection(const DeviceHandle &device_id, const ApplicationHandle &app_id);
-  void clearConnection();
+MockDeviceScanner::MockDeviceScanner(MockDeviceAdapter *adapter)
+    : adapter_(adapter) {}
 
-  DeviceVector devices_;
-  ::std::list< ::std::pair<DeviceHandle, ApplicationHandle> > connections_;
-};
+DeviceAdapter::Error MockDeviceScanner::scan() {
+  if (!adapter_->devices_.empty()) {
+    adapter_->searchDeviceDone(adapter_->devices_);
+  } else {
+    adapter_->searchDeviceFailed(SearchDeviceError());
+  }
+  return DeviceAdapter::OK;
+}
 
-}  // namespace transport_manager
-}  // namespace components
-}  // namespace test
-
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_ */
+} // namespace transport_manager
+} // namespace components
+} // namespace test
