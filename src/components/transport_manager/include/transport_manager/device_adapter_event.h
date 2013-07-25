@@ -1,8 +1,6 @@
 /**
- * \file Device.hpp
- * \brief Device class.
- * Stores device information
- *
+ * \file device_adapter_event.h
+ * \brief DeviceAdapterEvent class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -34,81 +32,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
 
-#include <string>
-#include <map>
+namespace transport_manager {
 
-#include "utils/logger.h"
+namespace device_adapter {
+class DeviceAdapter;
+}
 
-/**
- * \namespace connection_handler
- * \brief SmartDeviceLink connection_handler namespace.
- */
-namespace connection_handler {
+using device_adapter::DeviceAdapter;
 
-/**
- * \brief Type for DeviceHandle
- */
-typedef std::string DeviceHandle;
-
-/**
- * \class Device
- * \brief Connection class
- */
-class Device {
+class DeviceAdapterEvent {
  public:
-  /**
-   * \brief Class constructor
-   */
-  Device(DeviceHandle device_handle, std::string user_friendly_name);
+  bool operator ==(const DeviceAdapterEvent &other);
+  DeviceAdapterEvent(int type,
+                     DeviceAdapter *device_adapter,
+                     const DeviceHandle &device_handle,
+                     const ApplicationHandle& application_id,
+                     RawMessageSptr data,
+                     BaseError *error);
+  ~DeviceAdapterEvent();
+  void set_event_type(int type);
+  void set_connection_uid(ConnectionUID id);
+  void set_device_adapter(device_adapter::DeviceAdapter *device_adapter);
+  void set_data(RawMessageSptr data);
+  void set_error(BaseError *error);
+  void set_device_handle(const DeviceHandle &device_handle);
 
-  /**
-   * \brief Destructor
-   */
-  ~Device();
-
-  /**
-   * \brief Returns device handle
-   * \return DeviceHandle
-   */
-  DeviceHandle device_handle() const;
-
-  /**
-   * \brief Returns user frendly device name
-   * \return UserFriendlyName
-   */
-  std::string user_friendly_name() const;
+  const DeviceHandle &device_handle() const;
+  int event_type(void) const;
+  ApplicationHandle application_id(void) const;
+  device_adapter::DeviceAdapter *device_adapter(void) const;
+  RawMessageSptr data(void) const;
+  BaseError *event_error(void) const;
 
  private:
-  /**
-   * \brief Uniq device handle.
-   */
   DeviceHandle device_handle_;
-
-  /**
-   * \brief User-friendly device name.
-   */
-  std::string user_friendly_name_;
-
-  /**
-   * \brief For logging.
-   */
-  static log4cxx::LoggerPtr logger_;
+  int event_type_;
+  ApplicationHandle application_id_;
+  device_adapter::DeviceAdapter *device_adapter_;
+  RawMessageSptr event_data_;
+  BaseError *event_error_;
 };
 
-/**
- * \brief Type for Devices map
- */
-typedef std::map<DeviceHandle, Device> DeviceList;
+}  // namespace
 
-/**
- * \brief Type for Devices map iterator
- * Key is DeviceHandle which is uniq
- */
-typedef std::map<DeviceHandle, Device>::iterator DeviceListIterator;
-
-}/* namespace connection_handler */
-
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT

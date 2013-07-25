@@ -36,10 +36,10 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPOR_MANAGER_DEVICE_HANDLE_GENERATOR
 
+#include "transport_manager/common.h"
+
 namespace transport_manager
 {
-
-typedef int DeviceHandle;
 
 /**
  * @brief Interface for device handle generator.

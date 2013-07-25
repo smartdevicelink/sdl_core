@@ -100,7 +100,7 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   unsigned int session_id,
   unsigned char service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -118,7 +118,7 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
 }
 
 void ProtocolHandlerImpl::SendStartSessionAck(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   unsigned char session_id,
   unsigned char protocol_version,
   unsigned int hash_code,
@@ -144,7 +144,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 }
 
 void ProtocolHandlerImpl::SendStartSessionNAck(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   unsigned char service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -163,7 +163,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
 }
 
 void ProtocolHandlerImpl::SendMessageToMobileApp(
-  const RawMessageSptr& message) {
+  const transport_manager::RawMessageSptr& message) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!message) {
     LOG4CXX_ERROR(logger_,
@@ -176,7 +176,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(
 }
 
 void ProtocolHandlerImpl::OnTMMessageReceived(
-  const RawMessageSptr& message) {
+  const transport_manager::RawMessageSptr& message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if (message) {
@@ -206,14 +206,14 @@ void ProtocolHandlerImpl::OnTMMessageSend() {
 
 void ProtocolHandlerImpl::OnTMMessageSendFailed(
   const transport_manager::DataSendError& error,
-  const RawMessageSptr& message)  {
+  const transport_manager::RawMessageSptr& message)  {
   // TODO(PV): implement
   LOG4CXX_ERROR(logger_, "Sending message " <<
                 message-> data() << " failed.");
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendFrame(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   const ProtocolPacket& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!packet.packet()) {
@@ -228,7 +228,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(
     "Packet to be sent: " << packet.packet()
     << " of size: " << packet.packet_size());
 
-  RawMessageSptr message_to_send(new RawMessage(
+  transport_manager::RawMessageSptr message_to_send(new RawMessage(
                                    original_message->connection_key(),
                                    original_message->connection_key(),
                                    packet.packet(),
@@ -247,7 +247,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   const unsigned char session_id, unsigned int protocol_version,
   const unsigned char service_type, const unsigned int data_size,
   const unsigned char* data, const bool compress) {
@@ -267,7 +267,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   const unsigned char session_id, unsigned int protocol_version,
   const unsigned char service_type, const unsigned int data_size,
   const unsigned char* data, const bool compress,
@@ -355,7 +355,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -415,7 +415,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -496,7 +496,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
-  const RawMessageSptr& original_message,
+  const transport_manager::RawMessageSptr& original_message,
   const ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 

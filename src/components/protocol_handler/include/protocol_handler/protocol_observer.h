@@ -36,16 +36,13 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
 
-#include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
-
+#include "transport_manager/common.h"
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
 
-typedef utils::SharedPtr<RawMessage> RawMessageSptr;
 
 /**
  * \class IProtocolObserver
@@ -59,7 +56,7 @@ class ProtocolObserver {
      * when new message is received from Mobile Application.
      * \param message Message with supporting params received
      */
-    virtual void OnMessageReceived(const RawMessageSptr& message) = 0;
+    virtual void OnMessageReceived(const transport_manager::RawMessageSptr& message) = 0;
 
   protected:
     /**

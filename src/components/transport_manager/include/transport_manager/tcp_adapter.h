@@ -1,6 +1,6 @@
 /**
- * \file bluetooth_adapter.h
- * \brief BluetoothAdapter class header file.
+ * \file tcp_adapter.h
+ * \brief TcpDeviceAdapter class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,15 +33,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER
 
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/hci_lib.h>
-#include <bluetooth/sdp.h>
-#include <bluetooth/sdp_lib.h>
-#include <bluetooth/rfcomm.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include "device_adapter_socket_communication.h"
 #include "device_adapter_impl.h"
@@ -50,43 +49,26 @@ namespace transport_manager {
 
 namespace device_adapter {
 
-class BluetoothDeviceScanner : public DeviceScanner {
+class TcpClientListener : public ClientConnectionListener {
  public:
-  BluetoothDeviceScanner(DeviceAdapterController* controller);
-  ~BluetoothDeviceScanner();
+  TcpClientListener(DeviceAdapterController* controller, const uint16_t port);
   void thread();
  protected:
+  virtual ~TcpClientListener();
   virtual DeviceAdapter::Error init();
   virtual void terminate();
-  virtual DeviceAdapter::Error scan();
   virtual bool isInitialised() const;
  private:
-
-  typedef std::vector<uint8_t> RfcommChannelVector;
-
-  bool waitForDeviceScanRequest();
-  RfcommChannelVector discoverSmartDeviceLinkRfcommChannels(
-      const bdaddr_t& device_address);
-  SearchDeviceError* doInquiry(DeviceVector* discovered_devices);
-
+  const uint16_t port_;
   DeviceAdapterController* controller_;
   pthread_t thread_;
+  int socket_;
   bool thread_started_;
   bool shutdown_requested_;
-  bool device_scan_requested_;
   bool ready_;
-  pthread_mutex_t device_scan_requested_mutex_;
-  pthread_cond_t device_scan_requested_cond_;
-
-  /**
-   * @brief UUID of SmartDeviceLink service.
-   **/
-  uuid_t smart_device_link_service_uuid_;
 };
 
-typedef std::vector<uint8_t> RfcommChannelVector;
-typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
-class BluetoothDevice : public Device {
+class TcpDevice : public Device {
  public:
   /**
    * @brief Constructor.
@@ -95,8 +77,9 @@ class BluetoothDevice : public Device {
    * @param name Human-readable device name.
    * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
    **/
-  BluetoothDevice(const bdaddr_t& address, const char* name,
-                  const RfcommChannelVector& rfcomm_channels);
+  TcpDevice(const in_addr& in_addr, const char* name);
+
+  virtual ~TcpDevice();
 
   /**
    * @brief Compare devices.
@@ -110,57 +93,34 @@ class BluetoothDevice : public Device {
    **/
   virtual bool isSameAs(const Device* other) const;
 
-  bool getRfcommChannel(const ApplicationHandle app_handle,
-                        uint8_t* channel_out);
-
   virtual ApplicationList getApplicationList() const;
 
-  const bdaddr_t& address() const {
-    return address_;
-  }
+  ApplicationHandle addApplication(const int socket);
+  void removeApplication(const ApplicationHandle app_handle);
+  int getApplicationSocket(const ApplicationHandle app_handle) const;
 
  private:
-  /**
-   * @brief Device bluetooth address.
-   **/
-  bdaddr_t address_;
-
-  /**
-   * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
-   **/
-  RfcommChannels rfcomm_channels_;
-
-  ApplicationHandle next_application_handle_;
+  std::set<int> applications_;
+  mutable pthread_mutex_t applications_mutex_;
+  const in_addr in_addr_;
+  const std::string name_;
 };
 
-class BluetoothSocketConnection : public ThreadedSocketConnection {
+class TcpSocketConnection : public ThreadedSocketConnection {
  public:
-  BluetoothSocketConnection(const DeviceHandle& device_handle,
-                            const ApplicationHandle& app_handle,
-                            DeviceAdapterController* controller);
-  virtual ~BluetoothSocketConnection();
+  TcpSocketConnection(const DeviceHandle& device_handle,
+                      const ApplicationHandle& app_handle,
+                      DeviceAdapterController* controller);
+  virtual ~TcpSocketConnection();
  protected:
   virtual bool establish(ConnectError** error);
 };
 
-class BluetoothConnectionFactory : public ServerConnectionFactory {
+class TcpDeviceAdapter : public DeviceAdapterImpl {
  public:
-  BluetoothConnectionFactory(DeviceAdapterController* controller);
- protected:
-  virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error createConnection(const DeviceHandle& device_handle,
-                                                const ApplicationHandle& app_handle);
-  virtual void terminate();
-  virtual bool isInitialised() const;
-  virtual ~BluetoothConnectionFactory();
- private:
-  DeviceAdapterController* controller_;
-};
-
-class BluetoothDeviceAdapter : public DeviceAdapterImpl {
- public:
-  BluetoothDeviceAdapter();
-  virtual ~BluetoothDeviceAdapter();
+  TcpDeviceAdapter();
+  virtual ~TcpDeviceAdapter();
+  static const uint16_t default_port = 1234;
  protected:
   virtual DeviceType getDeviceType() const;
 };
@@ -169,4 +129,4 @@ class BluetoothDeviceAdapter : public DeviceAdapterImpl {
 
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER

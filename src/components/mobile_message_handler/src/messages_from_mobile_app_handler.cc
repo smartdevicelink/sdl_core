@@ -56,7 +56,7 @@ void MessagesFromMobileAppHandler::threadMain() {
 
   while (1) {
     while (!handler->messages_from_mobile_app_.empty()) {
-      protocol_handler::RawMessageSptr message = handler
+      transport_manager::RawMessageSptr message = handler
           ->messages_from_mobile_app_.pop();
 
       application_manager::Message* outgoing_message =

@@ -46,6 +46,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/session_observer.h"
+#include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_impl.h"
 
@@ -101,7 +102,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \brief Method for sending message to Mobile Application.
      * \param message Message with params to be sent to Mobile App.
      */
-    void SendMessageToMobileApp(const RawMessageSptr& message);
+    void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message);
 
   protected:
     /**
@@ -112,7 +113,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendEndSessionNAck(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       unsigned int session_id,
       unsigned char service_type = SERVICE_TYPE_RPC);
 
@@ -129,7 +130,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendStartSessionAck(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       unsigned char session_id,
       unsigned char protocol_version,
       unsigned int hash_code = 0,
@@ -142,7 +143,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendStartSessionNAck(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       unsigned char service_type = SERVICE_TYPE_RPC);
 
   private:
@@ -152,7 +153,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * @param message Recieved message
      **/
     virtual void OnTMMessageReceived(
-      const RawMessageSptr& message);
+      const transport_manager::RawMessageSptr& message);
 
     /**
      * @brief Notifies about error on receiving message from TM.
@@ -177,7 +178,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      **/
     virtual void OnTMMessageSendFailed(
       const transport_manager::DataSendError& error,
-      const RawMessageSptr& message);
+      const transport_manager::RawMessageSptr& message);
 
     /**
      * \brief Sends message which size permits to send it in one frame.
@@ -192,7 +193,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendSingleFrameMessage(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       const unsigned char session_id,
       unsigned int protocol_version,
       const unsigned char service_type,
@@ -214,7 +215,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendMultiFrameMessage(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       const unsigned char session_id,
       unsigned int protocol_version,
       const unsigned char service_type,
@@ -231,7 +232,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendFrame(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       const ProtocolPacket& packet);
 
     /**
@@ -242,7 +243,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleMessage(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       ProtocolPacket* packet);
 
     /**
@@ -254,7 +255,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleMultiFrameMessage(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       ProtocolPacket* packet);
 
     /**
@@ -265,7 +266,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleControlMessage(
-      const RawMessageSptr& original_message,
+      const transport_manager::RawMessageSptr& original_message,
       const ProtocolPacket* packet);
 
     /**
@@ -293,12 +294,12 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
     /**
      *\brief Queue for message from Mobile side.
      */
-    MessageQueue<RawMessageSptr> messages_from_mobile_app_;
+    MessageQueue<transport_manager::RawMessageSptr> messages_from_mobile_app_;
 
     /**
      *\brief Queue for message to Mobile side.
      */
-    MessageQueue<RawMessageSptr> messages_to_mobile_app_;
+    MessageQueue<transport_manager::RawMessageSptr> messages_to_mobile_app_;
 
     /**
      *\brief Map of frames for messages received in multiple frames.

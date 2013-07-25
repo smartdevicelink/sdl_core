@@ -48,7 +48,7 @@ MessagesFromMobileAppHandler::~MessagesFromMobileAppHandler() {
 void MessagesFromMobileAppHandler::threadMain() {
   while (1) {
     while (!handler_->messages_from_mobile_app_.empty()) {
-      const RawMessageSptr& message = handler_
+      const transport_manager::RawMessageSptr& message = handler_
                                       ->messages_from_mobile_app_.pop();
       LOG4CXX_INFO_EXT(
         logger_,

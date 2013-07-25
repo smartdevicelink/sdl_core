@@ -50,108 +50,104 @@ namespace protocol_handler {
  * between components.
  */
 class RawMessage {
-  public:
-    /**
-     * \brief Constructor
-     * \param connectionKey Identifier of connection within which message
-     * is transferred
-     * \param protocolVersion Version of protocol of the message
-     * \param data Message string
-     * \param dataSize Message size
-     */
-    RawMessage(unsigned int connectionKey,
-               unsigned int protocolVersion,
-               unsigned char* data,
-               unsigned int dataSize);
+ public:
+  /**
+   * \brief Constructor
+   * \param connectionKey Identifier of connection within which message
+   * is transferred
+   * \param protocolVersion Version of protocol of the message
+   * \param data Message string
+   * \param dataSize Message size
+   */
+  RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
+             unsigned char* data, unsigned int dataSize);
 
-    RawMessage(unsigned int connectionKey,
-               unsigned int protocolVersion,
-               int serialNumber,
-               unsigned char* data,
-               unsigned int dataSize);
+  RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
+             unsigned int serialNumber, unsigned char* data,
+             unsigned int dataSize);
 
-    bool operator==(const RawMessage& other) const;
+  bool operator==(const RawMessage& other) const;
 
-    /**
-     * \brief Destructor
-     */
-    ~RawMessage();
+  /**
+   * \brief Destructor
+   */
+  ~RawMessage();
 
-    /**
-     * \brief Getter for connection identifier
-     */
-    unsigned int connection_key() const;
+  /**
+   * \brief Getter for connection identifier
+   */
+  unsigned int connection_key() const;
 
-    /**
-     * \brief Getter for message string
-     */
-    unsigned char* data() const;
+  /**
+   * \brief Getter for message string
+   */
+  unsigned char* data() const;
 
-    /**
-     * \brief Getter for message size
-     */
-    unsigned int data_size() const;
+  /**
+   * \brief Getter for message size
+   */
+  unsigned int data_size() const;
 
-    /**
-     * \brief Getter for protocol version
-     */
-    unsigned int protocol_version() const;
+  /**
+   * \brief Getter for protocol version
+   */
+  unsigned int protocol_version() const;
 
-    /**
-     * \brief Getter for serial number
-     */
-    unsigned int serial_number() const;
+  /**
+   * \brief Getter for serial number
+   */
+  unsigned int serial_number() const;
 
-    bool IsWaiting() const;
+  bool IsWaiting() const;
 
-    unsigned int connection_uid() const;
+  unsigned int connection_uid() const;
 
-    void set_connection_uid(unsigned int connection_id);
+  void set_connection_uid(unsigned int connection_id);
 
-    void set_waiting(bool v);
+  void set_waiting(bool v);
 
-  private:
-    /**
-     * \brief Connection Identifier
-     * Obtained from \saCconnection_handler
-     */
-    unsigned int connection_key_;
+ private:
+  /**
+   * \brief Connection Identifier
+   * Obtained from \saCconnection_handler
+   */
+  unsigned int connection_key_;
 
-    /**
-     * \brief Message string
-     */
-    unsigned char* data_;
+  /**
+   * \brief Message string
+   */
+  unsigned char* data_;
 
-    /**
-     * \brief Size of message
-     */
-    unsigned int data_size_;
+  /**
+   * \brief Size of message
+   */
+  unsigned int data_size_;
 
-    /**
-     * \brief Version of SmartDeviceLink protocol (currently 1,2)
-     * used for transferring message.
-     */
-    unsigned int protocol_version_;
-    /**
-     * \brief serial number of message that
-     *
-     */
-    unsigned int serial_number_;
+  /**
+   * \brief Version of SmartDeviceLink protocol (currently 1,2)
+   * used for transferring message.
+   */
+  unsigned int protocol_version_;
+  /**
+   * \brief serial number of message that
+   *
+   */
+  unsigned int serial_number_;
 
-    /**
-     * specifies current state of message in queue. if false message is "ready to be processed"
-     * otherwise it is "waiting for response"
-     *
-     */
-    bool waiting_;
+  /**
+   * specifies current state of message in queue. if false message is "ready to be processed"
+   * otherwise it is "waiting for response"
+   *
+   */
+  bool waiting_;
 
-    /**
-     * \brief Id of connection (for service messages like start/end session)
-     *
-     */
-    unsigned int connection_uid_;
+  /**
+   * \brief Id of connection (for service messages like start/end session)
+   *
+   */
+  unsigned int connection_uid_;
 
-    DISALLOW_COPY_AND_ASSIGN(RawMessage);
+  DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
 }  // namespace protocol_handler
 

@@ -1,6 +1,6 @@
-/**
- * \file transport_manager_listener.h
- * \brief interface for TransportManagerListener header file.
+/*
+ * \file timer.cc
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,10 +33,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_manager_listener_impl.h"
+#include <pthread.h>
+
+#include <transport_manager/timer.h>
 
 namespace transport_manager {
 
-TransportManagerListenerImpl::~TransportManagerListenerImpl() {
+Timer::Timer()
+    : thread_(0),
+      milliseconds(0),
+      routine(nullptr),
+      routineParam(nullptr),
+      need_to_process(false) {
 }
-}  //  namespace transport_manager
+
+Timer::Timer(unsigned long milliseconds, void (*routine)(void*), void *param)
+    : thread_(0),
+      milliseconds(milliseconds),
+      routine(routine),
+      routineParam(param),
+      need_to_process(true) {
+}
+
+void Timer::start() {
+  pthread_cond_init(&cond_, nullptr);
+  pthread_mutex_init(&mutex_, nullptr);
+  pthread_create(&thread_, nullptr, &threadRoutine, this);
+}
+
+void Timer::stop() {
+  need_to_process = false;
+  pthread_cond_signal(&cond_);
+  void *retval;
+  pthread_join(thread_, &retval);
+  pthread_mutex_destroy(&mutex_);
+  pthread_cond_destroy(&cond_);
+}
+
+void* Timer::threadRoutine(void* p) {
+  Timer *t = static_cast<Timer*>(p);
+  timespec time;
+  time.tv_nsec = t->milliseconds * 1000000;
+  pthread_mutex_lock(&t->mutex_);
+  pthread_cond_timedwait(&t->cond_, &t->mutex_, &time);
+  if (t->need_to_process) {
+    t->routine(t->routineParam);
+  }
+  return nullptr;
+}
+}

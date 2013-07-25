@@ -68,15 +68,8 @@ set(LIBRARIES
     HMI_API
     SmartObjects
     ApplicationManager
-<<<<<<< HEAD
     test_JSONHandler_v4_protocol_v2_0_revP
     test_JSONHandlerTest
-=======
-    MobileMessageHandler
-    ProtocolHandler
-    #test_JSONHandler_v4_protocol_v2_0_revP
-    #test_JSONHandlerTest
->>>>>>> origin/develop
     test_SmartObjectTest
     test_FormattersCommandsTest
     test_UtilsTest

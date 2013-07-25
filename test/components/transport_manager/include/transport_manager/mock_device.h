@@ -1,7 +1,6 @@
-/**
- * \file Device.hpp
- * \brief Device class.
- * Stores device information
+/*
+ * \file mock_device.h
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -34,81 +33,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#ifndef MOCK_DEVICE_H_
+#define MOCK_DEVICE_H_
 
-#include <string>
 #include <map>
 
-#include "utils/logger.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include <transport_manager/transport_manager.h>
+#include <transport_manager/device_adapter_impl.h>
+#include <transport_manager/transport_manager_impl.h>
+#include <transport_manager/mock_device_scanner.h>
 
-/**
- * \namespace connection_handler
- * \brief SmartDeviceLink connection_handler namespace.
- */
-namespace connection_handler {
+namespace test  {
+namespace components  {
+namespace transport_manager {
 
-/**
- * \brief Type for DeviceHandle
- */
-typedef std::string DeviceHandle;
-
-/**
- * \class Device
- * \brief Connection class
- */
-class Device {
- public:
-  /**
-   * \brief Class constructor
-   */
-  Device(DeviceHandle device_handle, std::string user_friendly_name);
-
-  /**
-   * \brief Destructor
-   */
-  ~Device();
-
-  /**
-   * \brief Returns device handle
-   * \return DeviceHandle
-   */
-  DeviceHandle device_handle() const;
-
-  /**
-   * \brief Returns user frendly device name
-   * \return UserFriendlyName
-   */
-  std::string user_friendly_name() const;
-
- private:
-  /**
-   * \brief Uniq device handle.
-   */
-  DeviceHandle device_handle_;
-
-  /**
-   * \brief User-friendly device name.
-   */
-  std::string user_friendly_name_;
-
-  /**
-   * \brief For logging.
-   */
-  static log4cxx::LoggerPtr logger_;
+struct listenerData_t {
+  pthread_mutex_t mutex;
+  pthread_barrier_t barrier;
+  int sockfd;
+  bool active;
 };
 
-/**
- * \brief Type for Devices map
- */
-typedef std::map<DeviceHandle, Device> DeviceList;
+class MockDevice : public ::transport_manager::device_adapter::Device {
+  pthread_t workerThread;
+  pthread_mutex_t device_started_mutex;
+  listenerData_t listener;
+  ApplicationList applications_;
+ public:
+  MockDevice(const std::string& name, const std::string& id) : Device(name, id), workerThread(0) {
+  }
+  void start();
+  void stop();
+  bool isSameAs(const Device* other) const;
+  ApplicationList getApplicationList() const;
+};
 
-/**
- * \brief Type for Devices map iterator
- * Key is DeviceHandle which is uniq
- */
-typedef std::map<DeviceHandle, Device>::iterator DeviceListIterator;
+} // namespace transport_manager
+} // namespace components
+} // namespace test
 
-}/* namespace connection_handler */
-
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#endif /* MOCK_DEVICE_H_ */

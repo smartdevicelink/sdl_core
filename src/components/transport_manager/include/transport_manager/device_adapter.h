@@ -41,71 +41,70 @@
 #include <list>
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
-#include "transport_manager/device_handle_generator.h"
-#include "protocol_handler/raw_message.h"
+#include "transport_manager/error.h"
 
 namespace transport_manager {
+
+namespace device_adapter {
 
 class Configuration;
 class DeviceAdapterListener;
 typedef std::string DeviceType;
 typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
-typedef std::vector<DeviceHandle> DeviceList;
-typedef std::list<DeviceAdapterListener*> DeviceAdapterListenerList;
+typedef std::vector<DeviceDesc> DeviceList;
+typedef std::list<DeviceAdapterListener *> DeviceAdapterListenerList;
 
 class DeviceAdapter {
-  public:
-    enum Error {
-      OK,
-      FAIL,
-      NOT_SUPPORTED,
-      ALREADY_EXIST,
-      BAD_STATE,
-      BAD_PARAM
-    };
+ public:
+  enum Error {
+    OK,
+    FAIL,
+    NOT_SUPPORTED,
+    ALREADY_EXIST,
+    BAD_STATE,
+    BAD_PARAM
+  };
 
-  public:
-    virtual ~DeviceAdapter() { }
+ public:
+  virtual ~DeviceAdapter() {
+  }
 
-    virtual DeviceType getDeviceType() const = 0;
+  virtual DeviceType getDeviceType() const = 0;
 
-    /* TODO
-     virtual Error LoadState(DeviceAdapterState* state) = 0;
-     virtual void SaveState(DeviceAdapterState* state) = 0;
-     */
+  /* TODO
+   virtual Error LoadState(DeviceAdapterState* state) = 0;
+   virtual void SaveState(DeviceAdapterState* state) = 0;
+   */
+  virtual bool isInitialised() const = 0;
 
-    virtual Error init(DeviceHandleGenerator* handle_generator,
-                       Configuration* configuration) = 0;
+  virtual Error init(Configuration* configuration) = 0;
 
-    virtual void addListener(DeviceAdapterListener* listener) = 0;
-    virtual bool isSearchDevicesSupported() const = 0;
-    virtual Error searchDevices() = 0;
+  virtual void addListener(DeviceAdapterListener* listener) = 0;
+  virtual bool isSearchDevicesSupported() const = 0;
+  virtual Error searchDevices() = 0;
 
-    virtual bool isServerOriginatedConnectSupported() const = 0;
-    virtual Error connect(const DeviceHandle device_handle,
-                          const ApplicationHandle app_handle,
-                          const int session_id) = 0;
+  virtual bool isServerOriginatedConnectSupported() const = 0;
+  virtual Error connect(const DeviceHandle& device_handle,
+                        const ApplicationHandle& app_handle) = 0;
 
-    virtual bool isClientOriginatedConnectSupported() const = 0;
+  virtual bool isClientOriginatedConnectSupported() const = 0;
 
-    virtual Error disconnect(const int session_id) = 0;
-    virtual Error disconnectDevice(const DeviceHandle device_handle) = 0;
+  virtual Error disconnect(const DeviceHandle& device_handle,
+                           const ApplicationHandle& app_handle) = 0;
+  virtual Error disconnectDevice(const DeviceHandle& device_handle) = 0;
 
-    virtual Error sendData(const int session_id, const RawMessageSptr data) = 0;
+  virtual Error sendData(const DeviceHandle& device_handle,
+                         const ApplicationHandle& app_handle,
+                         const RawMessageSptr data) = 0;
 
-    virtual DeviceList getDeviceList() const = 0;
-    virtual ApplicationList getApplicationList(
-      const DeviceHandle device_handle) const = 0;
+  virtual DeviceList getDeviceList() const = 0;
+  virtual ApplicationList getApplicationList(
+      const DeviceHandle& device_handle) const = 0;
 };
 
-/*
- class DataContainer
- {
- public:
- DataContainer(void* data, int data_size);
- };
- */
+}  // namespace device_adapter
+
 }  // namespace transport_manager
 
 #endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER

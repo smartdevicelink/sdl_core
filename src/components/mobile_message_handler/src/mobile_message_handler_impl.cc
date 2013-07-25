@@ -102,7 +102,7 @@ void MobileMessageHandlerImpl::setProtocolHandler(
 }
 
 void MobileMessageHandlerImpl::OnMessageReceived(
-  const protocol_handler::RawMessageSptr& message) {
+  const transport_manager::RawMessageSptr& message) {
   LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl onMessageReceived()");
   DCHECK(message);
 

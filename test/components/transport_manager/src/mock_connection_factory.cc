@@ -1,6 +1,6 @@
-/**
- * \file connection_handler.hpp
- * \brief Connection handler interface class.
+/*
+ * \file mock_connection_factory.cc
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,49 +33,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#include <transport_manager/mock_connection_factory.h>
 
-#include "transport_manager/transport_manager.h"
-#include "protocol_handler/session_observer.h"
-#include "connection_handler/connection_handler_observer.h"
-#include "connection_handler/device.h"
-#include "connection_handler/connection.h"
-#include "connection_handler/devices_discovery_starter.h"
-/**
- * \namespace connection_handler
- * \brief SmartDeviceLink connection_handler namespace.
- */
-namespace connection_handler {
-/**
- * \class ConnectionHandler
- * \brief SmartDeviceLink ConnectionHandler interface class
- */
-class ConnectionHandler {
-  public:
-    /**
-     * \brief Sets observer pointer for ConnectionHandler.
-     * \param observer Pointer to observer object.
-     **/
-    virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver* observer) = 0;
+namespace test {
+namespace components {
+namespace transport_manager {
 
-    /**
-     * \brief Sets pointer to TransportManager.
-     * \param transportManager Pointer to TransportManager object.
-     **/
-    virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_manager) = 0;
+MockConnectionFactory::MockConnectionFactory(DeviceAdapterController* controller)
+:controller_(controller){
+}
 
-    virtual void StartTransportManager() = 0;
+DeviceAdapter::Error MockConnectionFactory::init() {
+  return DeviceAdapter::OK;
+}
 
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ConnectionHandler() {
-    }
-};
-}/* namespace connection_handler */
+DeviceAdapter::Error MockConnectionFactory::createConnection(
+    const DeviceHandle& device_handle, const ApplicationHandle& app_handle) {
+  using ::transport_manager::device_adapter::Connection;
+  MockConnection *connection = new MockConnection(device_handle, app_handle, controller_);
+  return DeviceAdapter::OK;
+}
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+void MockConnectionFactory::terminate() {
+}
+
+bool MockConnectionFactory::isInitialised() const {
+  return true;
+}
+
+} // namespace transport_manager
+} // namespace components
+} // namespace test

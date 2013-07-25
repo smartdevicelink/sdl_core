@@ -1,7 +1,6 @@
-/**
- * \file Device.hpp
- * \brief Device class.
- * Stores device information
+/*
+ * \file raw_message_matcher.h
+ * \brief matcher RawMessagePtr
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -34,81 +33,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_
 
-#include <string>
-#include <map>
+#include <gmock/gmock.h>
 
-#include "utils/logger.h"
+#include "transport_manager/common.h"
+#include "protocol_handler/raw_message.h"
 
-/**
- * \namespace connection_handler
- * \brief SmartDeviceLink connection_handler namespace.
- */
-namespace connection_handler {
+using ::protocol_handler::RawMessage;
+using ::transport_manager::RawMessageSptr;
 
-/**
- * \brief Type for DeviceHandle
- */
-typedef std::string DeviceHandle;
+using ::testing::Matcher;
+using ::testing::MatcherInterface;
+using ::testing::MatchResultListener;
 
-/**
- * \class Device
- * \brief Connection class
- */
-class Device {
+namespace test {
+namespace components {
+namespace transport_manager {
+
+class RawMessageMatcher : public MatcherInterface<RawMessageSptr> {
  public:
-  /**
-   * \brief Class constructor
-   */
-  Device(DeviceHandle device_handle, std::string user_friendly_name);
+  explicit RawMessageMatcher(RawMessageSptr ptr);
 
-  /**
-   * \brief Destructor
-   */
-  ~Device();
-
-  /**
-   * \brief Returns device handle
-   * \return DeviceHandle
-   */
-  DeviceHandle device_handle() const;
-
-  /**
-   * \brief Returns user frendly device name
-   * \return UserFriendlyName
-   */
-  std::string user_friendly_name() const;
+  virtual bool MatchAndExplain(const RawMessageSptr ptr,
+                                   MatchResultListener* listener) const;
+  virtual void DescribeTo(::std::ostream* os) const;
+  virtual void DescribeNegationTo(::std::ostream* os) const;
 
  private:
-  /**
-   * \brief Uniq device handle.
-   */
-  DeviceHandle device_handle_;
-
-  /**
-   * \brief User-friendly device name.
-   */
-  std::string user_friendly_name_;
-
-  /**
-   * \brief For logging.
-   */
-  static log4cxx::LoggerPtr logger_;
+  const RawMessageSptr ptr_;
 };
 
-/**
- * \brief Type for Devices map
- */
-typedef std::map<DeviceHandle, Device> DeviceList;
+inline const Matcher<RawMessageSptr> RawMessageEq(RawMessageSptr msg) {
+  return MakeMatcher(new RawMessageMatcher(msg));
+}
 
-/**
- * \brief Type for Devices map iterator
- * Key is DeviceHandle which is uniq
- */
-typedef std::map<DeviceHandle, Device>::iterator DeviceListIterator;
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
-}/* namespace connection_handler */
-
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_ */

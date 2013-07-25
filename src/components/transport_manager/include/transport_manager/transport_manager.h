@@ -37,6 +37,7 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/device_adapter.h"
+#include "transport_manager/device_adapter_event.h"
 #include "transport_manager/device_adapter_listener.h"
 #include "transport_manager/transport_manager_listener.h"
 
@@ -58,7 +59,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_device_management
    **/
-  virtual void searchDevices(void) = 0;
+  virtual int searchDevices(void) = 0;
 
   /**
    * @brief Start scanning for new devices.
@@ -76,8 +77,7 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void connectDevice(const DeviceHandle &device_id,
-                             const ApplicationHandle &app_id,
-                             const SessionID &session_id) = 0;
+                             const ApplicationHandle &app_id) = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -86,8 +86,9 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void disconnectDevice(const SessionID &session_id) = 0;
+  virtual void disconnectDevice(const DeviceHandle &device_id) = 0;
 
+  virtual void disconnect(const ConnectionUID &connection) = 0;
   /**
    * @brief post new mesage into TM's queue
    *
@@ -95,7 +96,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void sendMessageToDevice(
+  virtual int sendMessageToDevice(
       const RawMessageSptr message) = 0;
 
   /**
@@ -105,8 +106,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void receiveEventFromDevice(
-      const DeviceAdapterListener::DeviceAdapterEvent &event) = 0;
+  virtual void receiveEventFromDevice(const DeviceAdapterEvent &event) = 0;
 
   /**
    * @brief add new device adapter
@@ -115,7 +115,7 @@ class TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void addDeviceAdapter(DeviceAdapter *device_adapter) = 0;
+  virtual void addDeviceAdapter(device_adapter::DeviceAdapter *device_adapter) = 0;
 
   /**
    * @brief register event listener that would be called when something happened in TM
@@ -127,15 +127,13 @@ class TransportManager {
   virtual void addEventListener(TransportManagerListener *listener) = 0;
 
   /**
-   * @brief register listener that would be used to catch adapter's events
+   * @brief unregister event listener
    *
    * @param event listener
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
-  virtual void addAdapterListener(DeviceAdapter *adapter,
-      transport_manager::DeviceAdapterListener *listener) = 0;
-
+  virtual void removeEventListener(TransportManagerListener *listener) = 0;
   /**
    * @brief remove device from internal storages
    *
@@ -144,28 +142,6 @@ class TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   virtual void removeDevice(const DeviceHandle &device) = 0;
-
-  /**
-   * @brief accept device originated connection
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void acceptConnect(const DeviceHandle &device_id,
-                             const ApplicationHandle &app_id,
-                             const SessionID &session_id) = 0;
-
-  /**
-   * @brief decline device originated connection
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  virtual void declineConnect(const DeviceHandle &device_id,
-                              const ApplicationHandle &app_id) = 0;
-
 };
 }
 

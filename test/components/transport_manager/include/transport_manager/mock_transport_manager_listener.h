@@ -37,45 +37,63 @@
 #define MOCK_TRANSPORT_MANAGER_LISTENER_H
 
 #include <gmock/gmock.h>
-#include <transport_manager/common.h>
-#include <transport_manager/device_adapter.h>
-#include <transport_manager/device_handle_generator.h>
-#include <transport_manager/transport_manager_listener_impl.h>
 
-using namespace transport_manager;
+#include "transport_manager/common.h"
+#include "transport_manager/device_adapter.h"
+#include "transport_manager/device_handle_generator.h"
+#include "transport_manager/transport_manager_listener.h"
 
-namespace test  {
-namespace components  {
+using ::transport_manager::ApplicationList;
+using ::transport_manager::ApplicationHandle;
+using ::transport_manager::device_adapter::DeviceAdapter;
+using ::transport_manager::DeviceHandle;
+using ::transport_manager::SearchDeviceError;
+using ::transport_manager::ConnectionUID;
+using ::transport_manager::DeviceDesc;
+using ::transport_manager::ConnectError;
+using ::transport_manager::DisconnectError;
+using ::transport_manager::DisconnectDeviceError;
+using ::transport_manager::DataSendError;
+using ::transport_manager::DataReceiveError;
+
+namespace test {
+namespace components {
 namespace transport_manager {
 
-class MockTransportManagerListener : public ::transport_manager::TransportManagerListenerImpl
-{
-  public:
-  MOCK_METHOD2(onSearchDeviceDone, void (const DeviceHandle device,
-                                         const ApplicationList app_list));
-  MOCK_METHOD2(onSearchDeviceFailed, void (const DeviceAdapter* device_adapter,
-      const SearchDeviceError& error));
-  MOCK_METHOD2(onConnectDone, void(const DeviceAdapter* device_adapter,
-                             const SessionID session_id));
-  MOCK_METHOD3(onDataReceiveDone, void(const DeviceAdapter* device_adapter,
-                                 const SessionID session_id,
-                                 const RawMessageSptr data_container));
-  MOCK_METHOD3(onDataSendDone, void(const DeviceAdapter* device_adapter,
-                              const SessionID session_id,
-                              const RawMessageSptr data_container));
-  MOCK_METHOD3(onDataSendFailed, void(const DeviceAdapter* device_adapter,
-                                const SessionID session_id,
-                                const DataSendError& error));
-  MOCK_METHOD3(onDataReceiveFailed, void (const DeviceAdapter* device_adapter,
-                                   const SessionID session_id,
-                                   const DataReceiveError& error));
-  MOCK_METHOD2(onCommunicationError, void (const DeviceAdapter* device_adapter,
-                                    const SessionID session_id));
-  ~MockTransportManagerListener() { }
+class MockTransportManagerListener :
+    public ::transport_manager::TransportManagerListener {
+ public:
 
+  MOCK_METHOD2(OnDeviceFound, void(const DeviceDesc &device,
+          const ApplicationList &app_list));
+  MOCK_METHOD0(OnScanDevicesFinished, void());
+  MOCK_METHOD1(OnScanDevicesFailed, void(const SearchDeviceError& error));
+
+  MOCK_METHOD3(OnConnectionEstablished, void(const DeviceDesc& device,
+                                       const ApplicationHandle &app_id,
+                                       ConnectionUID connection_id));
+  MOCK_METHOD3(OnConnectionFailed, void(const DeviceDesc& device,
+          const ApplicationHandle &app_id,
+          const ConnectError& error));
+
+  MOCK_METHOD1(OnConnectionClosed, void(const ConnectionUID connection_id));
+  MOCK_METHOD2(OnConnectionClosedFailure, void (ConnectionUID connection_id,
+                                           const DisconnectError& error));
+  MOCK_METHOD2(OnDeviceConnectionLost, void (const DeviceDesc& device,
+                                        const DisconnectDeviceError& error));
+  MOCK_METHOD2(OnDisconnectFailed, void (const DeviceDesc& device,
+                                    const DisconnectDeviceError& error));
+
+  MOCK_METHOD1(OnTMMessageReceived, void(const RawMessageSptr data_container));
+  MOCK_METHOD2(OnTMMessageReceiveFailed, void(ConnectionUID connection_id,
+          const DataReceiveError& error));
+  MOCK_METHOD0(OnTMMessageSend, void());
+  MOCK_METHOD2(OnTMMessageSendFailed, void(const DataSendError& error,
+          const RawMessageSptr& message));
 };
 
-}}}
-
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
 #endif /* MOCK_TRANSPORT_MANAGER_LISTENER_H */

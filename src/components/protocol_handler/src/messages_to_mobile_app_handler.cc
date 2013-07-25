@@ -49,7 +49,7 @@ MessagesToMobileAppHandler::~MessagesToMobileAppHandler() {
 void MessagesToMobileAppHandler::threadMain() {
   while (1) {
     while (!handler_->messages_to_mobile_app_.empty()) {
-      const RawMessageSptr& message = handler_->messages_to_mobile_app_
+      const transport_manager::RawMessageSptr& message = handler_->messages_to_mobile_app_
                                       .pop();
       LOG4CXX_INFO_EXT(
         logger_,

@@ -40,36 +40,46 @@
 
 namespace transport_manager {
 
-class TransportManagerListenerImpl: public TransportManagerListener {
-  public:
-    virtual ~TransportManagerListenerImpl();
+class TransportManagerListenerImpl : public TransportManagerListener {
+ public:
+  virtual ~TransportManagerListenerImpl();
 
-    virtual void OnDeviceListUpdated(
-      const Devices& device_list) {}
-    virtual void OnAccessRequested(const DeviceInfo& device) {}
-    virtual void OnScanDevicesFinished() {}
-    virtual void OnScanDevicesFailed(const SearchDeviceError& error) {}
-    virtual void OnConnectionEstablished(const DeviceInfo& device,
-                                         ConnectionUID connection_id) {}
-    virtual void OnConnectionFailed(const DeviceInfo& device,
-                                    ConnectionUID connection_id,
-                                    const ConnectError& error) {}
-    virtual void OnConnectionClosed(ConnectionUID connection_id) {}
-    virtual void OnConnectionClosedFailure(ConnectionUID connection_id,
-                                           const DisconnectError& error) {}
-    virtual void OnDeviceConnectionLost(const DeviceInfo& device,
-                                        const DisconnectDeviceError& error) {}
-    virtual void OnDisconnectFailed(const DeviceInfo& device,
-                                    const DisconnectDeviceError& error) {}
-    virtual void OnTMMessageReceived(
-      const RawMessageSptr& message) {}
-    virtual void OnTMMessageReceiveFailed(
-      const DataReceiveError& error) {}
+  virtual void OnDeviceListUpdated(const Devices& device_list) {
+  }
+  virtual void OnAccessRequested(const DeviceDesc& device) {
+  }
+  virtual void OnScanDevicesFinished() {
+  }
+  virtual void OnScanDevicesFailed(const SearchDeviceError& error) {
+  }
+  virtual void OnConnectionEstablished(const DeviceDesc& device,
+                                       ConnectionUID connection_id) {
+  }
+  virtual void OnConnectionFailed(const DeviceDesc& device,
+                                  ConnectionUID connection_id,
+                                  const ConnectError& error) {
+  }
+  virtual void OnConnectionClosed(ConnectionUID connection_id) {
+  }
+  virtual void OnConnectionClosedFailure(ConnectionUID connection_id,
+                                         const DisconnectError& error) {
+  }
+  virtual void OnDeviceConnectionLost(const DeviceDesc& device,
+                                      const DisconnectDeviceError& error) {
+  }
+  virtual void OnDisconnectFailed(const DeviceDesc& device,
+                                  const DisconnectDeviceError& error) {
+  }
+  virtual void OnTMMessageReceived(const RawMessageSptr& message) {
+  }
+  virtual void OnTMMessageReceiveFailed(const DataReceiveError& error) {
+  }
 
-    virtual void OnTMMessageSend() {}
-    virtual void OnTMMessageSendFailed(
-      const DataSendError& error,
-      const RawMessageSptr& message) {}
+  virtual void OnTMMessageSend() {
+  }
+  virtual void OnTMMessageSendFailed(const DataSendError& error,
+                                     const RawMessageSptr& message) {
+  }
 };
 }  // namespace transport_manager
 #endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL

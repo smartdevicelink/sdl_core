@@ -35,7 +35,8 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 
-#include "protocol_handler/protocol_observer.h"
+#include "transport_manager/transport_manager.h"
+
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
@@ -69,7 +70,7 @@ class ProtocolHandler {
      * \brief Method for sending message to Mobile Application.
      * \param message RawMessage with params to be sent to Mobile App.
      */
-    virtual void SendMessageToMobileApp(const RawMessageSptr& message) = 0;
+    virtual void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) = 0;
 
   protected:
     /**

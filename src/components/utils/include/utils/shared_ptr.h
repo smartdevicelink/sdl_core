@@ -180,6 +180,7 @@ class SharedPtr {
      * @brief Pointer to reference counter.
      **/
     unsigned int* mReferenceCounter;
+
 };
 
 template<typename ObjectType>

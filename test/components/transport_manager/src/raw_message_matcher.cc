@@ -1,6 +1,6 @@
-/**
- * \file connection_handler.hpp
- * \brief Connection handler interface class.
+/*
+ * \file matchers.cc
+ * \brief customers matchers for gmock
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,49 +33,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#include "transport_manager/raw_message_matcher.h"
 
-#include "transport_manager/transport_manager.h"
-#include "protocol_handler/session_observer.h"
-#include "connection_handler/connection_handler_observer.h"
-#include "connection_handler/device.h"
-#include "connection_handler/connection.h"
-#include "connection_handler/devices_discovery_starter.h"
-/**
- * \namespace connection_handler
- * \brief SmartDeviceLink connection_handler namespace.
- */
-namespace connection_handler {
-/**
- * \class ConnectionHandler
- * \brief SmartDeviceLink ConnectionHandler interface class
- */
-class ConnectionHandler {
-  public:
-    /**
-     * \brief Sets observer pointer for ConnectionHandler.
-     * \param observer Pointer to observer object.
-     **/
-    virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver* observer) = 0;
+using ::transport_manager::RawMessageSptr;
 
-    /**
-     * \brief Sets pointer to TransportManager.
-     * \param transportManager Pointer to TransportManager object.
-     **/
-    virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_manager) = 0;
+namespace test {
+namespace components {
+namespace transport_manager {
 
-    virtual void StartTransportManager() = 0;
+RawMessageMatcher::RawMessageMatcher(RawMessageSptr ptr)
+      : ptr_(ptr) {}
 
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ConnectionHandler() {
-    }
-};
-}/* namespace connection_handler */
+bool RawMessageMatcher::MatchAndExplain(const RawMessageSptr msg,
+                                             MatchResultListener* listener) const {
+  if (msg->data_size() != ptr_->data_size()) {
+    return ::std::equal(msg->data(), msg->data() + msg->data_size(), ptr_->data());
+  } else
+    return false;
+}
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+void RawMessageMatcher::DescribeTo(::std::ostream* os) const {
+  *os << "data_ is " ;
+  ::std::ostream_iterator<unsigned char> out(*os);
+  ::std::copy(ptr_->data(), ptr_->data() + ptr_->data_size(), out);
+}
+
+void RawMessageMatcher::DescribeNegationTo(::std::ostream* os) const {
+  *os << "data_ is not " ;
+  ::std::ostream_iterator<unsigned char> out(*os);
+  ::std::copy(ptr_->data(), ptr_->data() + ptr_->data_size(), out);
+}
+
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test

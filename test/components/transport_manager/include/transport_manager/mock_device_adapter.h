@@ -43,36 +43,31 @@
 #include <transport_manager/transport_manager.h>
 #include <transport_manager/device_adapter_impl.h>
 #include <transport_manager/transport_manager_impl.h>
+#include <transport_manager/mock_device_scanner.h>
+#include <transport_manager/mock_connection_factory.h>
+#include <transport_manager/mock_device_scanner.h>
 
 using namespace transport_manager;
+using ::transport_manager::device_adapter::DeviceAdapterController;
+using ::transport_manager::device_adapter::DeviceVector;
 
 namespace test  {
 namespace components  {
 namespace transport_manager {
 
-class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
+class MockDeviceAdapter : public ::transport_manager::device_adapter::DeviceAdapterImpl {
  public:
+  MockDeviceAdapter()
+   : DeviceAdapterImpl(new MockDeviceScanner(this), new MockConnectionFactory(this), nullptr) { }
   virtual ~MockDeviceAdapter();
 
-  struct listenerData_t {
-    pthread_mutex_t mutex;
-    pthread_barrier_t barrier;
-    int sockfd;
-    bool active;
-  };
+  MockDeviceScanner *device_scanner() const {
+    return static_cast<MockDeviceScanner*>(device_scanner_);
+  }
+
  protected:
 
-  class MockDevice : public Device {
-    pthread_t workerThread;
-    pthread_mutex_t device_started_mutex;
-    listenerData_t listener;
-   public:
-    MockDevice(const char *name) : Device(name), workerThread(0) { }
-    void start();
-    void stop();
-  };
-
-   virtual DeviceType getDeviceType() const;
+   virtual ::transport_manager::device_adapter::DeviceType getDeviceType() const;
 
    virtual bool isSearchDevicesSupported() const;
 
@@ -80,17 +75,17 @@ class MockDeviceAdapter : public ::transport_manager::DeviceAdapterImpl {
 
    virtual bool isClientOriginatedConnectSupported() const;
 
-   virtual void connectionThread(Connection* connection);
+   virtual void connectionThread(::transport_manager::device_adapter::Connection* connection);
 
    virtual ApplicationList getApplicationList(
        const DeviceHandle device_handle) const;
 
    virtual void mainThread();
-public:
-   void addDevice(const char *name);
 };
 
-}}}
+} // namespace transport_manager
+} // namespace components
+} // namespace test
 
 
 #endif /* MOCKDEVICEADAPTER_H_ */

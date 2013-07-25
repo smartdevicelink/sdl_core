@@ -35,8 +35,10 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
 
-#include <string>
 #include <set>
+#include <vector>
+#include <string>
+
 #include "protocol_handler/raw_message.h"
 #include "utils/shared_ptr.h"
 
@@ -46,40 +48,28 @@ namespace transport_manager {
  *
  * @see @ref components_transportmanager_client_connection_management
  **/
-typedef int SessionID;
-typedef unsigned int ConnectionUID;
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
+typedef std::string DeviceHandle;
+typedef unsigned int ConnectionUID;
+typedef int ApplicationHandle;
+typedef std::vector<ApplicationHandle> ApplicationList;
+typedef std::vector<DeviceHandle> DeviceList;
 
-struct DeviceInfo {
+struct DeviceDesc {
+  DeviceHandle handle;
   std::string name;
-  unsigned int handle;
-  std::string mac_address;
-};
-typedef std::set<DeviceInfo> Devices;
 
-class DeviceAdapterError {
+  DeviceDesc() {
+  }
+  DeviceDesc(const DeviceHandle &handle, const std::string& name)
+      : handle(handle),
+        name(name) {
+  }
+  bool operator==(const DeviceDesc& other) const{
+    return handle == other.handle && name == other.name;
+  };
 };
-
-class SearchDeviceError : public DeviceAdapterError {
-};
-
-class ConnectError : public DeviceAdapterError {
-};
-
-class DisconnectError : public DeviceAdapterError {
-};
-
-class DisconnectDeviceError : public DeviceAdapterError {
-};
-
-class DataReceiveError : public DeviceAdapterError {
-};
-
-class DataSendError : public DeviceAdapterError {
-};
-
-class CommunicationError : public DeviceAdapterError {
-};
+typedef std::set<DeviceDesc> Devices;
 
 }  //  namespace transport_manager
 

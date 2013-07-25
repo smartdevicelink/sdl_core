@@ -1,6 +1,6 @@
-/**
- * \file connection_handler.hpp
- * \brief Connection handler interface class.
+/*
+ * \file mock_device_scanner.cc
+ * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,49 +33,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#include <transport_manager/mock_device_adapter.h>
+#include <transport_manager/mock_device_scanner.h>
 
-#include "transport_manager/transport_manager.h"
-#include "protocol_handler/session_observer.h"
-#include "connection_handler/connection_handler_observer.h"
-#include "connection_handler/device.h"
-#include "connection_handler/connection.h"
-#include "connection_handler/devices_discovery_starter.h"
-/**
- * \namespace connection_handler
- * \brief SmartDeviceLink connection_handler namespace.
- */
-namespace connection_handler {
-/**
- * \class ConnectionHandler
- * \brief SmartDeviceLink ConnectionHandler interface class
- */
-class ConnectionHandler {
-  public:
-    /**
-     * \brief Sets observer pointer for ConnectionHandler.
-     * \param observer Pointer to observer object.
-     **/
-    virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver* observer) = 0;
+namespace test {
+namespace components {
+namespace transport_manager {
 
-    /**
-     * \brief Sets pointer to TransportManager.
-     * \param transportManager Pointer to TransportManager object.
-     **/
-    virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_manager) = 0;
+MockDeviceScanner::MockDeviceScanner(DeviceAdapterController* controller)
+    : is_initialized(false),
+      controller_(controller) {
+}
 
-    virtual void StartTransportManager() = 0;
+DeviceAdapter::Error MockDeviceScanner::init() {
+  is_initialized = true;
+  return DeviceAdapter::OK;
+}
 
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ConnectionHandler() {
-    }
-};
-}/* namespace connection_handler */
+DeviceAdapter::Error MockDeviceScanner::scan() {
+  if (devices_.empty()) {
+    controller_->searchDeviceFailed(SearchDeviceError());
+  } else {
+    controller_->searchDeviceDone(devices_);
+  }
+  return DeviceAdapter::OK;
+}
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+void MockDeviceScanner::terminate() {
+}
+
+bool MockDeviceScanner::isInitialised() const {
+  return is_initialized;
+}
+
+void MockDeviceScanner::addDevice(const std::string& name) {
+  static int devid = 100;
+  MockDevice* dev = new MockDevice(name, name);
+  dev->start();
+  devices_.push_back(dev);
+}
+
+} // namespace transport_manager
+} // namespace components
+} // namespace test

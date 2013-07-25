@@ -112,7 +112,7 @@ class SessionObserver {
     virtual int GetDataOnSessionKey(unsigned int key,
                                     unsigned int* app_id,
                                     std::list<int>* sessions_list,
-                                    unsigned int* device_id) = 0;
+                                    std::string* device_id) = 0;
 
     /**
      * \brief information about given Connection Key.
@@ -123,7 +123,7 @@ class SessionObserver {
      * \return int -1 in case of error or 0 in case of success
      */
     virtual int GetDataOnDeviceID(
-      unsigned int device_id,
+      std::string device_id,
       std::string* device_name,
       std::list<unsigned int>* applications_list) = 0;
 

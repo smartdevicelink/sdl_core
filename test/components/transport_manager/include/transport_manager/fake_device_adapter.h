@@ -1,7 +1,6 @@
-/**
- * \file Device.hpp
- * \brief Device class.
- * Stores device information
+/*
+ * \file fake_device_adapter.h
+ * \brief Fake device adapter for test without real devices
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -34,81 +33,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_
 
-#include <string>
-#include <map>
+#include "transport_manager/device_adapter_impl.h"
 
-#include "utils/logger.h"
+using ::transport_manager::ApplicationHandle;
+using ::transport_manager::DeviceHandle;
+using ::transport_manager::device_adapter::DeviceAdapterImpl;
+using ::transport_manager::device_adapter::DeviceType;
+using ::transport_manager::device_adapter::DeviceVector;
 
-/**
- * \namespace connection_handler
- * \brief SmartDeviceLink connection_handler namespace.
- */
-namespace connection_handler {
+namespace test {
+namespace components {
+namespace transport_manager {
 
-/**
- * \brief Type for DeviceHandle
- */
-typedef std::string DeviceHandle;
-
-/**
- * \class Device
- * \brief Connection class
- */
-class Device {
+class FakeDeviceAdapter : public DeviceAdapterImpl {
  public:
-  /**
-   * \brief Class constructor
-   */
-  Device(DeviceHandle device_handle, std::string user_friendly_name);
+  FakeDeviceAdapter();
+  ~FakeDeviceAdapter() {}
+  DeviceType getDeviceType() const { return "fake-adapter"; }
+  void addDevice(std::string name);
+  void clearDevices();
+  void addConnection(const DeviceHandle &device_id, const ApplicationHandle &app_id);
+  void clearConnection();
 
-  /**
-   * \brief Destructor
-   */
-  ~Device();
-
-  /**
-   * \brief Returns device handle
-   * \return DeviceHandle
-   */
-  DeviceHandle device_handle() const;
-
-  /**
-   * \brief Returns user frendly device name
-   * \return UserFriendlyName
-   */
-  std::string user_friendly_name() const;
-
- private:
-  /**
-   * \brief Uniq device handle.
-   */
-  DeviceHandle device_handle_;
-
-  /**
-   * \brief User-friendly device name.
-   */
-  std::string user_friendly_name_;
-
-  /**
-   * \brief For logging.
-   */
-  static log4cxx::LoggerPtr logger_;
+  DeviceVector devices_;
+  ::std::list< ::std::pair<DeviceHandle, ApplicationHandle> > connections_;
 };
 
-/**
- * \brief Type for Devices map
- */
-typedef std::map<DeviceHandle, Device> DeviceList;
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
-/**
- * \brief Type for Devices map iterator
- * Key is DeviceHandle which is uniq
- */
-typedef std::map<DeviceHandle, Device>::iterator DeviceListIterator;
-
-}/* namespace connection_handler */
-
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_FAKEDEVICEADAPTER_H_ */

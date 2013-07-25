@@ -1,7 +1,6 @@
 /**
- * \file connection_handler.hpp
- * \brief Connection handler interface class.
- *
+ * \file error.h
+ * \brief Transport manager error types definition.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,49 +32,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
 
-#include "transport_manager/transport_manager.h"
-#include "protocol_handler/session_observer.h"
-#include "connection_handler/connection_handler_observer.h"
-#include "connection_handler/device.h"
-#include "connection_handler/connection.h"
-#include "connection_handler/devices_discovery_starter.h"
-/**
- * \namespace connection_handler
- * \brief SmartDeviceLink connection_handler namespace.
- */
-namespace connection_handler {
-/**
- * \class ConnectionHandler
- * \brief SmartDeviceLink ConnectionHandler interface class
- */
-class ConnectionHandler {
-  public:
-    /**
-     * \brief Sets observer pointer for ConnectionHandler.
-     * \param observer Pointer to observer object.
-     **/
-    virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver* observer) = 0;
+namespace transport_manager {
 
-    /**
-     * \brief Sets pointer to TransportManager.
-     * \param transportManager Pointer to TransportManager object.
-     **/
-    virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_manager) = 0;
-
-    virtual void StartTransportManager() = 0;
-
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ConnectionHandler() {
-    }
+class BaseError {
 };
-}/* namespace connection_handler */
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+class SearchDeviceError : public BaseError {
+};
+
+class ConnectError : public BaseError {
+};
+
+class DisconnectError : public BaseError {
+};
+
+class DisconnectDeviceError : public BaseError {
+};
+
+class DataReceiveError : public BaseError {
+};
+
+class DataSendError : public BaseError {
+};
+
+class CommunicationError : public BaseError {
+};
+
+}  // namespace
+
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
