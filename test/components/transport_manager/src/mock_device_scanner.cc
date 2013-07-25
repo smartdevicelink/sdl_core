@@ -33,44 +33,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <transport_manager/mock_device_adapter.h>
-#include <transport_manager/mock_device_scanner.h>
+#include "transport_manager/mock_device_scanner.h"
+#include "transport_manager/mock_device_adapter.h"
+
+using ::transport_manager::SearchDeviceError;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-MockDeviceScanner::MockDeviceScanner(DeviceAdapterController* controller)
-    : is_initialized(false),
-      controller_(controller) {
-}
-
-DeviceAdapter::Error MockDeviceScanner::init() {
-  is_initialized = true;
-  return DeviceAdapter::OK;
-}
+MockDeviceScanner::MockDeviceScanner(MockDeviceAdapter *adapter)
+    : adapter_(adapter) {}
 
 DeviceAdapter::Error MockDeviceScanner::scan() {
-  if (devices_.empty()) {
-    controller_->searchDeviceFailed(SearchDeviceError());
+  if (!adapter_->devices_.empty()) {
+    adapter_->searchDeviceDone(adapter_->devices_);
   } else {
-    controller_->searchDeviceDone(devices_);
+    adapter_->searchDeviceFailed(SearchDeviceError());
   }
   return DeviceAdapter::OK;
-}
-
-void MockDeviceScanner::terminate() {
-}
-
-bool MockDeviceScanner::isInitialised() const {
-  return is_initialized;
-}
-
-void MockDeviceScanner::addDevice(const std::string& name) {
-  static int devid = 100;
-  MockDevice* dev = new MockDevice(name, name);
-  dev->start();
-  devices_.push_back(dev);
 }
 
 } // namespace transport_manager

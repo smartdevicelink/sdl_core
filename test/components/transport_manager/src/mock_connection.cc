@@ -1,6 +1,6 @@
 /*
  * \file mock_connection.cc
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -32,21 +32,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "transport_manager/common.h"
+
 #include "transport_manager/mock_connection.h"
 
-using namespace transport_manager;
-using namespace transport_manager::device_adapter;
+#include <algorithm>
+
+#include "transport_manager/mock_device_adapter.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-bool MockConnection::establish(ConnectError **error) {
-  return true;
+MockConnection::MockConnection(const DeviceHandle& device_handle,
+                               const ApplicationHandle& app_handle,
+                               MockDeviceAdapter* adapter)
+    : adapter_(adapter),
+      device_handle_(device_handle),
+      app_handle_(app_handle) {}
+
+DeviceAdapter::Error MockConnection::sendData(RawMessageSptr message) {
+  return DeviceAdapter::OK;
 }
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+DeviceAdapter::Error MockConnection::disconnect() {
+  ::std::pair<DeviceHandle, ApplicationHandle> connection =
+      ::std::make_pair(device_handle_, app_handle_);
+  if (::std::find(adapter_->connections_.begin(),
+                  adapter_->connections_.end(),
+                  connection) != adapter_->connections_.end()) {
+//    adapter_->connections_.erase(con);
+    adapter_->disconnectDone(device_handle_, app_handle_);
+//      if (::std::find_if(adapter_->connections_.begin(),
+//                         adapter_->connections_.end()))
+    adapter_->disconnectDevice(device_handle_);
+  } else {
+    // TODO: add disconnect failed
+  }
+  return DeviceAdapter::OK;
+}
 
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test

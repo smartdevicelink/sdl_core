@@ -33,45 +33,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCK_DEVICE_H_
-#define MOCK_DEVICE_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_
 
-#include <map>
+#include "transport_manager/common.h"
+#include "transport_manager/device_adapter_impl.h"
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include <transport_manager/transport_manager.h>
-#include <transport_manager/device_adapter_impl.h>
-#include <transport_manager/transport_manager_impl.h>
-#include <transport_manager/mock_device_scanner.h>
+using ::transport_manager::ApplicationList;
+using ::transport_manager::device_adapter::Device;
 
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace transport_manager {
 
-struct listenerData_t {
-  pthread_mutex_t mutex;
-  pthread_barrier_t barrier;
-  int sockfd;
-  bool active;
-};
-
-class MockDevice : public ::transport_manager::device_adapter::Device {
-  pthread_t workerThread;
-  pthread_mutex_t device_started_mutex;
-  listenerData_t listener;
-  ApplicationList applications_;
+class MockDevice : public Device {
  public:
-  MockDevice(const std::string& name, const std::string& id) : Device(name, id), workerThread(0) {
-  }
-  void start();
-  void stop();
-  bool isSameAs(const Device* other) const;
+  MockDevice(std::string name);
+  bool isSameAs(const Device *other) const;
   ApplicationList getApplicationList() const;
+  bool operator == (const MockDevice *other);
 };
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
-#endif /* MOCK_DEVICE_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_ */

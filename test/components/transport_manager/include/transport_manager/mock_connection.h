@@ -33,33 +33,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCK_CONNECTION_H_
-#define MOCK_CONNECTION_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTION_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTION_H_
 
 #include "transport_manager/common.h"
-#include "transport_manager/device_adapter.h"
 #include "transport_manager/device_adapter_impl.h"
-#include "transport_manager/device_adapter_socket_communication.h"
 
-using namespace transport_manager;
-using namespace transport_manager::device_adapter;
+using ::transport_manager::ApplicationHandle;
+using ::transport_manager::DeviceHandle;
+using ::transport_manager::device_adapter::Connection;
+using ::transport_manager::device_adapter::DeviceAdapter;
+using ::transport_manager::RawMessageSptr;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockConnection : public ThreadedSocketConnection {
+class MockDeviceAdapter;
+
+class MockConnection : public Connection {
  public:
   MockConnection(const DeviceHandle& device_handle,
                  const ApplicationHandle& app_handle,
-                 DeviceAdapterController* controller)
-      : ThreadedSocketConnection(device_handle, app_handle, controller) {
-  }
-  bool establish(ConnectError** error);
+                 MockDeviceAdapter *adapter);
+  DeviceAdapter::Error sendData(RawMessageSptr message);
+  DeviceAdapter::Error disconnect();
+
+ private:
+  MockDeviceAdapter *adapter_;
+  const DeviceHandle device_handle_;
+  const ApplicationHandle app_handle_;
 };
 
-} // namespace transport_manager
-} // namespace components
-} // namespace test
+}  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
-#endif /* MOCK_CONNECTION_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTION_H_ */

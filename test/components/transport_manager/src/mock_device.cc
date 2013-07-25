@@ -33,129 +33,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pthread.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <transport_manager/mock_device.h>
+#include "transport_manager/mock_device.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-namespace {
-
-struct workerData_t {
-  pthread_t tid;
-  pthread_mutex_t mutex;
-  pthread_cond_t cond;
-  int sockfd;
-  bool active;
-};
-
-workerData_t workerData[5];
-
-static void *mockDeviceWorker(void* p) {
-  workerData_t *data = static_cast<workerData_t*>(p);
-
-  unsigned char *buf = new unsigned char[4096];
-  pthread_mutex_lock(&data->mutex);
-  while (data->active) {
-    pthread_cond_wait(&data->cond, &data->mutex);
-    ssize_t len = recv(data->sockfd, buf, 4096, 0);
-    if (len > 0) {
-      send(data->sockfd, buf, len, 0);
-    }
-  }
-
-  pthread_mutex_unlock(&data->mutex);
-  delete[] buf;
-  return NULL;
-}
-
-void *mockDeviceListenerThreadRoutine(void *p) {
-  test::components::transport_manager::listenerData_t *data =
-      static_cast<test::components::transport_manager::listenerData_t*>(p);
-  data->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (data->sockfd == -1) {
-    return NULL;
-  }
-  unlink("./mockDevice");
-  sockaddr_un my_addr;
-  memset(&my_addr, 0, sizeof(my_addr));
-  strcpy(my_addr.sun_path, "./mockDevice");
-  my_addr.sun_family = AF_UNIX;
-  int res = bind(data->sockfd, reinterpret_cast<sockaddr*>(&my_addr),
-                 sizeof(my_addr));
-  if (res == -1) {
-    return NULL;
-  }
-
-  res = listen(data->sockfd, 5);
-
-  for (int i = 0; i < 5; ++i) {
-    workerData[i].active = true;
-    workerData[i].sockfd = 0;
-    pthread_mutex_init(&workerData[i].mutex, NULL);
-    pthread_create(&workerData[i].tid, NULL, mockDeviceWorker, &workerData[i]);
-  }
-
-  pthread_barrier_wait(&data->barrier);
-  while (data->active) {
-    socklen_t addr_size;
-    sockaddr peer_addr;
-
-    int peer_socket = accept(data->sockfd, &peer_addr, &addr_size);
-
-    if (peer_socket != 0) {
-      for (int i = 0; i < 5; ++i) {
-        if (workerData[i].sockfd == 0) {
-          workerData[i].sockfd = peer_socket;
-          pthread_cond_signal(&workerData[i].cond);
-          break;
-        }
-      }
-    }
-  }
-
-  return NULL;
-}
-}
-
-void MockDevice::start() {
-  listener.active = true;
-  pthread_mutex_init(&listener.mutex, NULL);
-  pthread_barrier_init(&listener.barrier, NULL, 2);
-  pthread_mutex_lock(&listener.mutex);
-  pthread_create(&workerThread, NULL, mockDeviceListenerThreadRoutine,
-                 &listener);
-  pthread_barrier_wait(&listener.barrier);
-}
-
-void MockDevice::stop() {
-  listener.active = false;
-  close(listener.sockfd);
-  for (int i = 0; i < 5; ++i) {
-    close(workerData[i].sockfd);
-    workerData[i].active = false;
-    pthread_cond_signal(&workerData[i].cond);
-  }
-  for (int i = 0; i < 5; ++i) {
-    pthread_join(workerData[i].tid, NULL);
-  }
-
-  unlink("./mockDevice");
-}
+MockDevice::MockDevice(std::string name) : Device(name, name) {}
 
 bool MockDevice::isSameAs(const Device* other) const {
   return unique_device_id() == other->unique_device_id();
 }
 
 ApplicationList MockDevice::getApplicationList() const {
-  return applications_;
+  return ApplicationList();
+}
+
+bool MockDevice::operator ==(const MockDevice* other) {
+  return isSameAs(other);
 }
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
-
