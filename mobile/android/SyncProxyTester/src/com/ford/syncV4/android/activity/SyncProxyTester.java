@@ -605,12 +605,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 */
 	private void resetAdapters() {
 		// set up storage for subscription records
-		// ignoring the last CUSTOM_NAME value
-		List<ButtonName> subscribableButtonNames = Arrays.asList(ButtonName.values()).
-				subList(0, ButtonName.values().length - 1);
-		isButtonSubscribed = new boolean[subscribableButtonNames.size()];
+		isButtonSubscribed = new boolean[ButtonName.values().length];
 		_buttonAdapter = new ArrayAdapter<ButtonName>(this,
-				android.R.layout.select_dialog_multichoice, subscribableButtonNames) {
+				android.R.layout.select_dialog_multichoice, ButtonName.values()) {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				CheckedTextView ret = (CheckedTextView) super.getView(position,
 						convertView, parent);
