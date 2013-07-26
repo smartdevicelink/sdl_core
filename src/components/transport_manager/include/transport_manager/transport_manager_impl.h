@@ -56,7 +56,6 @@ enum {
   E_CONNECTION_IS_TO_SHUTDOWN
 };
 
-const uint MAX_TM_THREADS = 2;
 
 //todo: add no_copy_constr where necessary
 //todo: add explicit where necessary

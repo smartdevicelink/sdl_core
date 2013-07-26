@@ -304,8 +304,8 @@ int main(int argc, char** argv) {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler)
 
-  //  transport_manager->addDataListener(protocol_handler);
-  //  transport_manager->addDeviceListener(connection_handler);
+  transport_manager->addEventListener(protocol_handler);
+  transport_manager->addEventListener(connection_handler);
 
   mmh->setProtocolHandler(protocol_handler);
   hmi_handler->setMessageObserver(app_manager);

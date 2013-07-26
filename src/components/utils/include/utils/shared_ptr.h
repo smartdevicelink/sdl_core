@@ -292,11 +292,7 @@ inline void SharedPtr<ObjectType>::dropReference(void) {
 
 template<typename ObjectType>
 ObjectType* SharedPtr<ObjectType>::get() {
-  delete mReferenceCounter;
-  mReferenceCounter = 0;
-  ObjectType* res = mObject;
-  mObject = NULL;
-  return res;
+  return mObject;
 }
 
 template<typename ObjectType>

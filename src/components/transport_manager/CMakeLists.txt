@@ -15,4 +15,4 @@ set (SOURCES
 )
 
 add_library("TransportManager" ${SOURCES})
-target_link_libraries ("TransportManager" log4cxx)
+target_link_libraries ("TransportManager" log4cxx bluetooth)

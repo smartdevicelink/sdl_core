@@ -46,6 +46,8 @@
 #include "transport_manager/transport_manager_listener_impl.h"
 #include "transport_manager/device_adapter_listener_impl.h"
 #include "transport_manager/timer.h"
+#include "transport_manager/bluetooth_adapter.h"
+#include "transport_manager/tcp_adapter.h"
 
 using transport_manager::device_adapter::DeviceAdapter;
 
@@ -76,11 +78,8 @@ TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr &config)
   pthread_mutex_init(&message_queue_mutex_, 0);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
-  // todo(YK): uncoment when adapter is ready
-  //  DeviceAdapter *d = new BluetoothAdapter();
-  //  d->init(device_adapter_listener_, NULL);
-  //  addDeviceAdapter(d);
-  //  addDeviceAdapter(new TCPAdapter());
+  addDeviceAdapter(new device_adapter::BluetoothDeviceAdapter());
+  addDeviceAdapter(new device_adapter::TcpDeviceAdapter());
   LOG4CXX_INFO(logger_, "TM object created.");
 }
 
@@ -299,7 +298,7 @@ int TransportManagerImpl::searchDevices(void) {
       it != adapter_handler_.device_adapters().end(); ++it) {
     LOG4CXX_INFO(logger_, "Iterating over device adapters");
     if (device_adapter::DeviceAdapter::OK != (*it)->searchDevices()) {
-      LOG4CXX_ERROR(logger_, "Device adapter search failed");
+      LOG4CXX_ERROR(logger_, "Device adapter search failed" << (*it));
       // todo(YK): notify error
     }
   }
@@ -330,6 +329,11 @@ void TransportManagerImpl::init(void) {
         logger_,
         "Event queue thread is not created exit with error code " << error_code);
     return;
+  }
+  for (AdapterHandler::AdapterList::const_iterator it = adapter_handler_
+      .device_adapters().begin();
+      it != adapter_handler_.device_adapters().end(); ++it) {
+    (*it)->init(NULL);
   }
   //todo: move initialized assign to each thread and mark TM initialized only after all threads have been started.
   is_initialized_ = true;
