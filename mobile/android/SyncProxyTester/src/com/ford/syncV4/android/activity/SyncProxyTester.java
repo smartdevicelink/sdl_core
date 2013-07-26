@@ -156,6 +156,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 */
 	private static final String AUDIOPASSTHRU_OUTPUT_FILE = "audiopassthru.wav";
 
+    /** String to join/split help, timeout, VR prompts, etc. */
+    private static final String JOIN_STRING = ",";
+
 	private static final int ALERT_MAXSOFTBUTTONS = 4;
 	private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
 	private static final int SHOW_MAXSOFTBUTTONS = 8;
@@ -1943,11 +1946,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									Vector<TTSChunk> ttsChunks = new Vector<TTSChunk>();
-									// string to join/split ttsChunks string
-									final String joinString = ",";
-									
 									String ttsChunksString = txtTtsChunks.getText().toString();
-									for (String ttsChunk : ttsChunksString.split(joinString)) {
+									for (String ttsChunk : ttsChunksString.split(JOIN_STRING)) {
 										TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
 										ttsChunks.add(chunk);
 									}
@@ -2087,7 +2087,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
                        final EditText editCmdID = (EditText) layout.findViewById(R.id.addcommand_commandID);
                        final EditText er = (EditText) layout.findViewById(R.id.addcommand_commandName);
-                       final EditText editVrSynonym = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
+                       final CheckBox chkUseVrSynonyms = (CheckBox) layout.findViewById(R.id.addcommand_useVRSynonyms);
+                       final EditText editVrSynonyms = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
                        final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
                        final Spinner s = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
                        s.setAdapter(_submenuAdapter);
@@ -2151,11 +2152,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                                }
                                msg.setMenuParams(menuParams);
 
-                               String vrSynonym = editVrSynonym.getText().toString();
-                               if (vrSynonym.length() > 0) {
-                                   Vector<String> vrCommands = new Vector<String>();
-                                   vrCommands.add(vrSynonym);
-                                   msg.setVrCommands(vrCommands);
+                               if (chkUseVrSynonyms.isChecked()) {
+                                   msg.setVrCommands(new Vector<String>(Arrays.asList(
+                                           editVrSynonyms.getText().toString().split(JOIN_STRING))));
                                }
 
                                if (v2Features && chkUseIcon.isChecked()) {
@@ -2403,8 +2402,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Choice one = new Choice();
 									one.setChoiceID(autoIncChoiceSetIdCmdId++);
 									one.setMenuName(command1.getText().toString());
-									one.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command1.getText().toString(),
-											vr1.getText().toString() })));
+									one.setVrCommands(new Vector<String>(Arrays.asList(
+											vr1.getText().toString().split(JOIN_STRING))));
 									if (v2Features && image1Check.isChecked()) {
 										Image image = new Image();
 										image.setImageType(imageTypeAdapter.getItem(image1Type.getSelectedItemPosition()));
@@ -2418,8 +2417,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Choice two = new Choice();
 									two.setChoiceID(autoIncChoiceSetIdCmdId++);
 									two.setMenuName(command2.getText().toString());
-									two.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command2.getText().toString(),
-											vr2.getText().toString() })));
+									two.setVrCommands(new Vector<String>(Arrays.asList(
+											vr2.getText().toString().split(JOIN_STRING))));
 									if (v2Features && image2Check.isChecked()) {
 										Image image = new Image();
 										image.setImageType(imageTypeAdapter.getItem(image2Type.getSelectedItemPosition()));
@@ -2433,8 +2432,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Choice three = new Choice();
 									three.setChoiceID(autoIncChoiceSetIdCmdId++);
 									three.setMenuName(command3.getText().toString());
-									three.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command3.getText().toString(),
-											vr3.getText().toString() })));
+									three.setVrCommands(new Vector<String>(Arrays.asList(
+											vr3.getText().toString().split(JOIN_STRING))));
 									if (v2Features && image3Check.isChecked()) {
 										Image image = new Image();
 										image.setImageType(imageTypeAdapter.getItem(image3Type.getSelectedItemPosition()));
@@ -2619,9 +2618,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									currentSoftButtons = null;
 									chkIncludeSoftButtons = null;
 									if (v2Features && customPresetsCheck.isChecked()) {
-										String splitter = ",";
 										String[] customPresetsList = customPresets.getText().
-												toString().split(splitter);
+												toString().split(JOIN_STRING);
 										msg.setCustomPresets(new Vector<String>(Arrays.
 												asList(customPresetsList)));
 									}
@@ -2712,9 +2710,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						
 						AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-							// string to join/split initial and help prompts, and VR helps
-							private String joinString = ",";
-
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								// fail if no interaction choice set selected
@@ -2749,27 +2744,38 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											msg.setTimeout(10000);
 										}
 									}
-									
-									if (vrHelpEnabled && vrHelpItemCheck.isChecked()) {
-										Vector<VrHelpItem> vrHelpItems = new Vector<VrHelpItem>();
-										VrHelpItem item = new VrHelpItem();
-										item.setText(vrHelpItemText.getText().toString());
-										
-										try {
-											item.setPosition(Integer.parseInt(vrHelpItemPos.getText().toString()));
-										} catch (NumberFormatException e) {
-											// set default position
-											item.setPosition(1);
-										}
-										
-										Image image = new Image();
-										image.setValue(vrHelpItemImage.getText().toString());
-										image.setImageType(ImageType.STATIC);
-										item.setImage(image);
-										
-										vrHelpItems.add(item);
-										msg.setVrHelp(vrHelpItems);
-									}
+
+                                    if (vrHelpEnabled && vrHelpItemCheck.isChecked()) {
+                                        Vector<VrHelpItem> vrHelpItems = new Vector<VrHelpItem>();
+
+                                        String[] itemTextArray = vrHelpItemText.getText().toString().split(JOIN_STRING);
+                                        String[] itemPosArray = vrHelpItemPos.getText().toString().split(JOIN_STRING);
+                                        String[] itemImageArray = vrHelpItemImage.getText().toString()
+                                                .split(JOIN_STRING);
+                                        int itemsCount = Math.min(itemTextArray.length,
+                                                Math.min(itemPosArray.length, itemImageArray.length));
+
+                                        for (int i = 0; i < itemsCount; ++i) {
+                                            VrHelpItem item = new VrHelpItem();
+                                            item.setText(itemTextArray[i]);
+
+                                            try {
+                                                item.setPosition(Integer.parseInt(itemPosArray[i]));
+                                            } catch (NumberFormatException e) {
+                                                // set default position
+                                                item.setPosition(1);
+                                            }
+
+                                            Image image = new Image();
+                                            image.setValue(itemImageArray[i]);
+                                            image.setImageType(ImageType.STATIC);
+                                            item.setImage(image);
+
+                                            vrHelpItems.add(item);
+                                        }
+
+                                        msg.setVrHelp(vrHelpItems);
+                                    }
 									
 									try {
 										_msgAdapter.logMessage(msg, true);
@@ -2787,7 +2793,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							 */
 							private Vector<TTSChunk> ttsChunksFromString(String string) {
 								Vector<TTSChunk> chunks = new Vector<TTSChunk>();
-								for (String stringChunk : string.split(joinString )) {
+								for (String stringChunk : string.split(JOIN_STRING)) {
 									TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, stringChunk);
 									chunks.add(chunk);
 								}
@@ -2848,13 +2854,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								String turnListString = txtTurnList.getText().toString();
 								String iconListString = txtIconList.getText().toString();
 								if ((turnListString.length() > 0) || (iconListString.length() > 0)) {
-									// string to split turnList/iconList strings
-									final String joinString = ",";
-									
 									Vector<Turn> tarray = new Vector<Turn>();
 									
-									String[] iconNames = iconListString.split(joinString);
-									String[] turnNames = turnListString.split(joinString);
+									String[] iconNames = iconListString.split(JOIN_STRING);
+									String[] turnNames = turnListString.split(JOIN_STRING);
 									int turnCount = Math.max(iconNames.length, turnNames.length);
 									
 									for (int i = 0; i < turnCount; ++i) {
@@ -2966,9 +2969,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
 						final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
 
-						// string to join/split footer strings
-						final String joinString = ",";
-
 						final CheckBox chkDynamicFooter = (CheckBox) layout.findViewById(R.id.slider_chkDynamicFooter);
 						chkDynamicFooter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 							@Override
@@ -2977,7 +2977,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									// set default static text
 									txtSliderFooter.setText(R.string.slider_footer);
 								} else {
-									updateDynamicFooter(txtNumTicks, txtSliderFooter, joinString);
+									updateDynamicFooter(txtNumTicks, txtSliderFooter, JOIN_STRING);
 								}
 							}
 						});
@@ -2986,7 +2986,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							@Override
 							public void onFocusChange(View v, boolean hasFocus) {
 								if ((!hasFocus) && chkDynamicFooter.isChecked()) {
-									updateDynamicFooter(txtNumTicks, txtSliderFooter, joinString);
+									updateDynamicFooter(txtNumTicks, txtSliderFooter, JOIN_STRING);
 								}
 							}
 						});
@@ -2996,7 +2996,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							public void onClick(DialogInterface dialog, int id) {
 								try {
 									if (chkDynamicFooter.isChecked()) {
-										updateDynamicFooter(txtNumTicks, txtSliderFooter, joinString);
+										updateDynamicFooter(txtNumTicks, txtSliderFooter, JOIN_STRING);
 									}
 									
 									Slider msg = new Slider();
@@ -3007,7 +3007,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Vector<String> footerelements = null;
 									String footer = txtSliderFooter.getText().toString();
 									if (chkDynamicFooter.isChecked()) {
-										footerelements = new Vector<String>(Arrays.asList(footer.split(joinString)));
+										footerelements = new Vector<String>(Arrays.asList(footer.split(JOIN_STRING)));
 									} else {
 										footerelements = new Vector<String>();
 										footerelements.add(footer);
@@ -3133,7 +3133,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
 						final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
 						final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
-						final EditText vrHelpItemPosition = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
+						final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
 						final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
 						final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
 						final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
@@ -3141,14 +3141,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						
 						final boolean vrHelpEnabled = getCurrentProtocolVersion() >= 2;
 						if (!vrHelpEnabled) {
-							// disable VR help title and VR help item
-							int visibility = android.view.View.GONE;
-							choiceVRHelpTitle.setVisibility(visibility);
-							vrHelpTitle.setVisibility(visibility);
-							layout.findViewById(R.id.setglobalproperties_vrHelpItemLayout).setVisibility(visibility);
-							vrHelpItemText.setVisibility(visibility);
-							vrHelpItemImage.setVisibility(visibility);
-						}
+                            // disable VR help title and VR help item
+                            View[] views = { choiceVRHelpTitle, vrHelpTitle, choiceVRHelpItem, vrHelpItemText,
+                                    vrHelpItemPos, vrHelpItemImage };
+                            for (View view : views) {
+                                view.setVisibility(View.GONE);
+                            }
+                        }
 
 						builder = new AlertDialog.Builder(mContext);
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -3156,13 +3155,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								SetGlobalProperties msg = new SetGlobalProperties();
 								int numberOfChoices = 0;
 								
-								// string to join/split help and timeout prompts
-								final String joinString = ",";
-								
 								if (choiceHelpPrompt.isChecked()) {
 									Vector<TTSChunk> help = new Vector<TTSChunk>();
 									String helpString = helpPrompt.getText().toString();
-									for (String ttsChunk : helpString.split(joinString)) {
+									for (String ttsChunk : helpString.split(JOIN_STRING)) {
 										TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
 										help.add(chunk);
 									}
@@ -3173,7 +3169,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								if (choiceTimeoutPrompt.isChecked()) {
 									Vector<TTSChunk> timeout = new Vector<TTSChunk>();
 									String timeoutString = timeoutPrompt.getText().toString();
-									for (String ttsChunk : timeoutString.split(joinString)) {
+									for (String ttsChunk : timeoutString.split(JOIN_STRING)) {
 										TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
 										timeout.add(chunk);
 									}
@@ -3187,24 +3183,36 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								}
 								
 								if (vrHelpEnabled && choiceVRHelpItem.isChecked()) {
-									Vector<VrHelpItem> vrHelp = new Vector<VrHelpItem>();
-									
-									VrHelpItem helpItem = new VrHelpItem();
-									helpItem.setText(vrHelpItemText.getText().toString());
-									try {
-										helpItem.setPosition(Integer.parseInt(vrHelpItemPosition.getText().toString()));
-									} catch (NumberFormatException e) {
-										// set something default
-										helpItem.setPosition(1);
-									}
-									Image image = new Image();
-									image.setValue(vrHelpItemImage.getText().toString());
-									image.setImageType(ImageType.STATIC);
-									helpItem.setImage(image);
-									vrHelp.add(helpItem);
-									
-									msg.setVrHelp(vrHelp);
-									++numberOfChoices;
+                                    Vector<VrHelpItem> vrHelpItems = new Vector<VrHelpItem>();
+
+                                    String[] itemTextArray = vrHelpItemText.getText().toString().split(JOIN_STRING);
+                                    String[] itemPosArray = vrHelpItemPos.getText().toString().split(JOIN_STRING);
+                                    String[] itemImageArray = vrHelpItemImage.getText().toString()
+                                            .split(JOIN_STRING);
+                                    int itemsCount = Math.min(itemTextArray.length,
+                                            Math.min(itemPosArray.length, itemImageArray.length));
+
+                                    for (int i = 0; i < itemsCount; ++i) {
+                                        VrHelpItem item = new VrHelpItem();
+                                        item.setText(itemTextArray[i]);
+
+                                        try {
+                                            item.setPosition(Integer.parseInt(itemPosArray[i]));
+                                        } catch (NumberFormatException e) {
+                                            // set default position
+                                            item.setPosition(1);
+                                        }
+
+                                        Image image = new Image();
+                                        image.setValue(itemImageArray[i]);
+                                        image.setImageType(ImageType.STATIC);
+                                        item.setImage(image);
+
+                                        vrHelpItems.add(item);
+                                    }
+
+                                    msg.setVrHelp(vrHelpItems);
+                                    ++numberOfChoices;
 								}
 
 								if (numberOfChoices > 0) {

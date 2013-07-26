@@ -28,8 +28,8 @@
     <string name="addcommand_commandIDDefault">42</string>
     <string name="addcommand_commandName">Command to add to menu</string>
     <string name="addcommand_commandNameDefault">Item To Add</string>
-    <string name="addcommand_vrSynonym">VR Synonym (optional)</string>
-    <string name="addcommand_vrSynonymDefault"/>
+    <string name="addcommand_vrSynonym">VR Synonyms (comma-separated)</string>
+    <string name="addcommand_vrSynonymDefault">synonym1,synonym2</string>
     <string name="addcommand_useParentID">Add this item to:</string>
     <string name="addcommand_useIcon">Use icon:</string>
     <string name="addcommand_menuPos">Menu Position</string>
@@ -44,10 +44,10 @@
     <string name="performinteraction_helpPromptDefault">help me,I\'m melting</string>
     <string name="performinteraction_timeoutPrompt">Timeout prompt (comma-separated)</string>
     <string name="performinteraction_timeoutPromptDefault">hurry it up</string>
-    <string name="performinteraction_vrHelp">VR Help Item #</string>
-    <string name="performinteraction_vrHelpItemPosDefault">1</string>
-    <string name="performinteraction_vrHelpItemDefault">VR help item</string>
-    <string name="performinteraction_vrHelpItemImageDefault">imageFilename</string>
+    <string name="performinteraction_vrHelp">VR Help Items (all comma-separated)</string>
+    <string name="performinteraction_vrHelpItemPosDefault">1,2,3</string>
+    <string name="performinteraction_vrHelpItemDefault">VR help item,Help Item 2,third item</string>
+    <string name="performinteraction_vrHelpItemImageDefault">imageFilename,action,action</string>
     <string name="performinteraction_timeout">Timeout</string>
     <string name="performinteraction_timeoutDefault">10000</string>
     <string name="show_mainField1">Main Field 1</string>
@@ -87,19 +87,19 @@
     <string name="selectprotocol_autoReconnect">Auto reconnect</string>
     <string name="selectprotocol_extraOptions">Extra Options</string>
     <string name="selectprotocol_autoSetAppIcon">Set app icon after registration</string>
-    <string name="createinteractionchoiceset_choiceVRSynonym">VR Synonym</string>
+    <string name="createinteractionchoiceset_choiceVRSynonym">VR Synonyms (comma-separated)</string>
     <string name="createinteractionchoiceset_choiceUseImage">Use image:</string>
     <string name="createinteractionchoiceset_choice1">Choice 1</string>
     <string name="createinteractionchoiceset_choice1Default">1st item</string>
-    <string name="createinteractionchoiceset_choice1VRDefault">Command one</string>
+    <string name="createinteractionchoiceset_choice1VRDefault">Command one,1st command</string>
     <string name="createinteractionchoiceset_choice1ImageValue">turn_left.png</string>
     <string name="createinteractionchoiceset_choice2">Choice 2</string>
     <string name="createinteractionchoiceset_choice2Default">2nd item</string>
-    <string name="createinteractionchoiceset_choice2VRDefault">Command two</string>
+    <string name="createinteractionchoiceset_choice2VRDefault">Command two,2nd command</string>
     <string name="createinteractionchoiceset_choice2ImageValue">turn_right.png</string>
     <string name="createinteractionchoiceset_choice3">Choice 3</string>
     <string name="createinteractionchoiceset_choice3Default">3rd item</string>
-    <string name="createinteractionchoiceset_choice3VRDefault">Command three</string>
+    <string name="createinteractionchoiceset_choice3VRDefault">Command three,third command</string>
     <string name="createinteractionchoiceset_choice3ImageValue">turn_forward.png</string>
     <string name="showconstanttbt_navText1">Navigation Text 1</string>
     <string name="showconstanttbt_navText1Default">Navigation Text 1</string>
@@ -124,5 +124,15 @@
     <string name="addsubmenu_menuIDDefault">42</string>
     <string name="addsubmenu_menuPos">Submenu Position</string>
     <string name="addsubmenu_menuPosDefault">1000</string>
+    <string name="setglobalproperties_helpPrompt">Help prompt (comma-separated)</string>
+    <string name="setglobalproperties_helpPromptDefault">Help prompt 1,Second help prompt</string>
+    <string name="setglobalproperties_timeoutPrompt">Timeout prompt (comma-separated)</string>
+    <string name="setglobalproperties_timeoutPromptDefault">First timeout prompt,Another timeout prompt</string>
+    <string name="setglobalproperties_vrHelpTitle">VR help title</string>
+    <string name="setglobalproperties_vrHelpTitleDefault">This is the VR help title</string>
+    <string name="setglobalproperties_vrHelp">VR Help Items (all comma-separated)</string>
+    <string name="setglobalproperties_vrHelpItemPosDefault">1,2,3</string>
+    <string name="setglobalproperties_vrHelpItemDefault">VR help item,Help Item 2,third item</string>
+    <string name="setglobalproperties_vrHelpItemImageDefault">imageFilename,action,action</string>
 
 </resources>
