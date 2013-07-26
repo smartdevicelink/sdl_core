@@ -1,8 +1,9 @@
 set(LIBRARIES
   ApplicationManager
   HMI_API
+  MOBILE_API
   SmartObjects
-  JSONHandler
+  formatters
   ProtocolHandler
   connectionHandler
   TransportManager
@@ -26,7 +27,7 @@ include_directories (
   ../thirdPartyLibs/jsoncpp/include/
   ../components/mobile_message_handler/include
   ../components/application_manager/include
-  ../components/JSONHandler/include
+  ../components/formatters/include
   ../components/AppMgr/include
   ../components/transport_manager/include
   ../components/config_profile/include
@@ -34,7 +35,7 @@ include_directories (
   ../components/connection_handler/include/
   ../components/hmi_message_handler/include
   ../components/request_watchdog/include
-  ../components/SmartObjects/include/
+  ../components/smart_objects/include/
   ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
@@ -57,6 +58,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CUR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
 

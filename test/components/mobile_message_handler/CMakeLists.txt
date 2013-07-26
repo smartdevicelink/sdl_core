@@ -4,7 +4,7 @@ include_directories (
   ../../../src/components/application_manager/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/mobile_message_handler/include/
-  ../../../src/components/TransportManager/include/
+  ../../../src/components/transport_manager/include/
   ../../../src/components/utils/include/
   ../../../test/components/mobile_message_handler/include
 )

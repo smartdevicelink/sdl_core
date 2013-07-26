@@ -39,32 +39,52 @@
 
 namespace application_manager {
 
+class Application;
+
 namespace commands {
 
 /**
  * @brief PerformInteractionRequest command class
  **/
 class PerformInteractionRequest : public CommandRequestImpl {
- public:
-  /**
-   * @brief PerformInteractionRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit PerformInteractionRequest(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief PerformInteractionRequest class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit PerformInteractionRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief PerformInteractionRequest class destructor
-   **/
-  virtual ~PerformInteractionRequest();
+    /**
+     * @brief PerformInteractionRequest class destructor
+     **/
+    virtual ~PerformInteractionRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
+  private:
+    /*
+     * @brief Sends VR AddCommand request to HMI
+     *
+     * @param app_id Application ID
+     *
+     * @return TRUE on success, otherwise FALSE
+     */
+    bool SendVRAddCommandRequest(Application* const app);
+
+    /*
+     * @brief Sends UI PerformInteraction request to HMI
+     *
+     * @param app_id Application ID
+     *
+     * * @return TRUE on success, otherwise FALSE
+     */
+    bool SendUIPerformInteractionRequest(Application* const app);
+
+    DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 
 }  // namespace commands

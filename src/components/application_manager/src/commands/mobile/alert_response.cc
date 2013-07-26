@@ -34,8 +34,8 @@
 #include "application_manager/commands/mobile/alert_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,34 +51,23 @@ AlertResponse::~AlertResponse() {
 void AlertResponse::Run() {
   LOG4CXX_INFO(logger_, "AlertResponse::Run");
 
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
-
-    const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
-
-    if (code) {
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      SendResponse(true);
     } else {
-      (*message_)[strings::msg_params][strings::success] = false;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::IGNORED;
+      SendResponse(true, mobile_apis::Result::IGNORED);
     }
-    SendResponse();
   }
 }
 

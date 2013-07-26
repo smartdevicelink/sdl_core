@@ -64,8 +64,8 @@ SDL.sdlView = Em.ContainerView.create( {
     innerMenu: SDL.MenuList.extend( {
 
         refreshItems: function() {
-            if( SDL.SDLAppController.model.appId == SDL.SDLMediaController.currentAppId ){
-                this.addItems( SDL.SDLAppController.model.softButtons, SDL.SDLAppController.model.appId );
+            if( SDL.SDLAppController.model.appID == SDL.SDLMediaController.currentAppId ){
+                this.addItems( SDL.SDLAppController.model.softButtons, SDL.SDLAppController.model.appID );
             }
         }.observes( 'SDL.SDLAppController.model.softButtons.@each' ),
 

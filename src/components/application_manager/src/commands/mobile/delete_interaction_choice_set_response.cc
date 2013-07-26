@@ -34,8 +34,8 @@
 #include "application_manager/commands/mobile/delete_interaction_choice_set_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,26 +51,23 @@ DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {
 void DeleteInteractionChoiceSetResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetResponse::Run");
 
-  // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse();
-    return;
+   // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
-
   const int code =
-    (*message_)[strings::msg_params][hmi_response::code].asInt();
+      (*message_)[strings::msg_params][strings::result_code].asInt();
 
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(correlation_id)) {
-          (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-
-    SendResponse();
+  if (hmi_apis::Common_Result::SUCCESS == code) {
+    SendResponse(true);
+  } else {
+    // TODO(DK): Some logic
+    SendResponse(false);
   }
 }
 

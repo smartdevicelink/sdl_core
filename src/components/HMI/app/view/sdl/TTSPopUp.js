@@ -71,7 +71,7 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         contentBinding: 'parentView.content'
     } ),
 
-    ActivateTTS: function( msg, delay ) {
+    ActivateTTS: function( msg ) {
         var self = this;
 
         // play audio alert
@@ -80,20 +80,10 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         this.set( 'content', msg );
         this.set( 'active', true );
 
-        FFW.UI.OnSystemContext( 'NOT_AUDIBLE' );
-
         clearTimeout( this.timer );
         this.timer = setTimeout( function() {
             self.set( 'active', false );
-            self.onStateChange();
-        }, delay ? delay : 10000 );
-    },
-
-    // send context notification
-    onStateChange: function() {
-        if( !SDL.AlertPopUp.active ){
-            FFW.UI.OnSystemContext( 'AUDIBLE' );
-        }
+        }, 2000 );
     },
     
     /**

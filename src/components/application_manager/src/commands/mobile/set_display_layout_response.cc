@@ -47,7 +47,7 @@ SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {
 void SetDisplayLayoutResponse::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutResponse::Run");
 
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands

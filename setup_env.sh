@@ -7,6 +7,7 @@ GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
 LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
+PULSEAUDIO_DEV="libpulse-dev"
 
 function apt-install() {
     if [ -z "$1" ]
@@ -31,12 +32,16 @@ echo "Installng BlueZ Bluetooth protocol stack implementation"
 apt-install ${BLUEZ_PROTOCOL_STACK}
 echo $OK
 
-echo "log4cxx library"
+echo "Installing log4cxx library"
 apt-install ${LOG4CXX_LIBRARY}
 echo $OK
 
-echo "Chromium browser"
+echo "Installing Chromium browser"
 apt-install ${CHROMIUM_BROWSER}
+echo $OK
+
+echo "Installing pulseaudio development files"
+apt-install ${PULSEAUDIO_DEV}
 echo $OK
 
 

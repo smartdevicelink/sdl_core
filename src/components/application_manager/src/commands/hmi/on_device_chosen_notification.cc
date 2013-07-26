@@ -39,7 +39,7 @@ namespace application_manager {
 namespace commands {
 
 OnDeviceChosenNotification::OnDeviceChosenNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
 OnDeviceChosenNotification::~OnDeviceChosenNotification() {
@@ -48,8 +48,11 @@ OnDeviceChosenNotification::~OnDeviceChosenNotification() {
 void OnDeviceChosenNotification::Run() {
   LOG4CXX_INFO(logger_, "OnDeviceChosenNotification::Run");
 
-  ApplicationManagerImpl::instance()->ConnectToDevice(
-  (*message_)[strings::msg_params][strings::device_info][strings::id].asInt());
+  if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
+    ApplicationManagerImpl::instance()->ConnectToDevice(
+      (*message_)[strings::msg_params][strings::device_info]
+      [strings::id]);
+  }
 }
 
 }  // namespace commands

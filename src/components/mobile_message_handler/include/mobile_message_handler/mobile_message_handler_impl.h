@@ -44,6 +44,7 @@
 #include "protocol_handler/raw_message.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_observer.h"
+#include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 
 #include "mobile_message_handler/mobile_message_handler.h"
@@ -76,18 +77,18 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
 
     //! ----------------------------------------------------------------
 
-    protocol_handler::RawMessage* HandleOutgoingMessageProtocolV1(
-      const application_manager::Message* message);
+  protocol_handler::RawMessage* HandleOutgoingMessageProtocolV1(
+      const MobileMessage& message);
 
-    protocol_handler::RawMessage* HandleOutgoingMessageProtocolV2(
-      const application_manager::Message* message);
+  protocol_handler::RawMessage* HandleOutgoingMessageProtocolV2(
+      const MobileMessage& message);
 
     //! ----------------------------------------------------------------
 
     protocol_handler::ProtocolHandler* protocol_handler_;
 
-    MessageQueue<transport_manager::RawMessageSptr> messages_from_mobile_app_;
-    MessageQueue<application_manager::Message*> messages_to_mobile_app_;
+  MessageQueue<transport_manager::RawMessageSptr> messages_from_mobile_app_;
+  MessageQueue<MobileMessage> messages_to_mobile_app_;
 
     std::vector<MobileMessageObserver*> mobile_message_listeners_;
 

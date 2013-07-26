@@ -49,16 +49,15 @@ void ResetGlobalPropertiesResponse::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesResponse::Run");
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  (*message_)[strings::msg_params][strings::success] = true;
-  (*message_)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::SUCCESS;
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands

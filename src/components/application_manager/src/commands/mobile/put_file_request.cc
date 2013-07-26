@@ -50,9 +50,9 @@ PutFileRequest::~PutFileRequest() {
 void PutFileRequest::Run() {
   LOG4CXX_INFO(logger_, "PutFileRequest::Run");
 
-  ApplicationImpl* application =
-    static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-        application((*message_)[strings::params][strings::connection_key]));
+  Application* application =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -72,7 +72,15 @@ void PutFileRequest::Run() {
       (*message_)[strings::msg_params][strings::persistent_file];
   }
 
-  const std::vector<unsigned char> file_data = message_->asBinary();
+  if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "Binary data empty");
+    return;
+  }
+
+  const std::vector<unsigned char> file_data =
+    (*message_)[strings::params][strings::binary_data].asBinary();
+  LOG4CXX_ERROR(logger_, "######## size " << file_data.size());
 
   if (free_space > file_data.size()) {
     std::string relative_file_path =

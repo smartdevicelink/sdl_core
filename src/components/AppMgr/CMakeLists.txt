@@ -9,7 +9,7 @@ include_directories (
     ../../thirdPartyLibs/jsoncpp/include/
     ../../thirdPartyLibs/logger/include/
     ../../thirdPartyLibs/encryption/include/
-  ../../../src/components/SmartObjects/include
+  ../../../src/components/smart_objects/include
 )
 
 set (SOURCES

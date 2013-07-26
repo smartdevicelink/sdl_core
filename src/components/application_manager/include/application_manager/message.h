@@ -46,7 +46,9 @@ enum MessageType {
   kUnknownType = -1,
   kRequest = 0,
   kResponse = 1,
-  kNotification = 2
+  kNotification = 2,
+  kErrorResponse = 3
+
 };
 
 enum ProtocolVersion {

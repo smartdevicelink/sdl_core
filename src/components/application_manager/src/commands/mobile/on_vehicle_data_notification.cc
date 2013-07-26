@@ -51,7 +51,8 @@ void OnVehicleDataNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVehicleDataNotification::Run");
 
   if ((*message_)[strings::msg_params].keyExists(hmi_notification::prndl)) {
-    const unsigned int prndl = static_cast<unsigned int>(
+    const unsigned int prndl =
+      static_cast<unsigned int>(
         (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
 
     // TODO(DK) : need to create enum for vehicleData
@@ -60,7 +61,7 @@ void OnVehicleDataNotification::Run() {
 
     std::vector<Application*>::const_iterator it = applications.begin();
     for (; applications.end() != it; ++it) {
-      ApplicationImpl* app = static_cast<ApplicationImpl*>(*it);
+      Application* app = *it;
       if (!app) {
         LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
         continue;
@@ -73,14 +74,14 @@ void OnVehicleDataNotification::Run() {
   }
 }
 
-void OnVehicleDataNotification::SendVehicleData(const ApplicationImpl* app) {
+void OnVehicleDataNotification::SendVehicleData(const Application* app) {
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "SendVehicleData NULL pointer");
     return;
   }
 
-  smart_objects::CSmartObject* on_vehicle_data =
-    new smart_objects::CSmartObject();
+  smart_objects::SmartObject* on_vehicle_data =
+    new smart_objects::SmartObject();
 
   if (!on_vehicle_data) {
     LOG4CXX_ERROR_EXT(logger_, "SendVehicleData NULL pointer");

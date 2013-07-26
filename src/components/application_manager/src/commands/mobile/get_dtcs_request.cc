@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 GetDTCsRequest::GetDTCsRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 GetDTCsRequest::~GetDTCsRequest() {
@@ -50,9 +50,9 @@ GetDTCsRequest::~GetDTCsRequest() {
 void GetDTCsRequest::Run() {
   LOG4CXX_INFO(logger_, "GetDTCsRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -66,43 +66,17 @@ void GetDTCsRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject* vi_request  =
-          new smart_objects::CSmartObject();
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  if (NULL == vi_request) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
+  msg_params[strings::ecu_name] =
+    (*message_)[strings::msg_params][strings::ecu_name];
+  msg_params[strings::dtc_mask] =
+    (*message_)[strings::msg_params][strings::dtc_mask];
+  msg_params[strings::app_id] = app->app_id();
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-  const int hmi_request_id = hmi_apis::FunctionID::VehicleInfo_GetDTCs;
-
-  (*vi_request)[strings::params][strings::correlation_id] =
-      correlation_id;
-
-  (*vi_request)[strings::params][strings::function_id] =
-      hmi_request_id;
-
-  (*vi_request)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-  (*vi_request)[strings::msg_params][strings::ecu_name] =
-      (*message_)[strings::msg_params][strings::ecu_name];
-
-  (*vi_request)[strings::msg_params][strings::dtc_mask] =
-      (*message_)[strings::msg_params][strings::dtc_mask];
-
-  (*vi_request)[strings::msg_params][strings::app_id] =
-      app->app_id();
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*vi_request));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetDTCs,
+                   msg_params, true);
 }
 
 }  // namespace commands

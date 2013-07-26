@@ -50,14 +50,13 @@ CommandSharedPtr CreateCommand(const MessageSharedPtr& message) {
     return command;
   }
 
-  smart_objects::CSmartObject& message_data = *message;
+  smart_objects::SmartObject& message_data = *message;
   int function_id = message_data[strings::params][strings::function_id];
 
   int app_id = message_data[strings::params][strings::connection_key];
 
-  ApplicationImpl* application =
-    static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-                                  application(app_id));
+  Application* application = ApplicationManagerImpl::instance()->
+                             application(app_id);
 
   if (!application) {
     return command;

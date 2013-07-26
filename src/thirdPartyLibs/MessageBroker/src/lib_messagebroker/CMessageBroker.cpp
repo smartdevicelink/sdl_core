@@ -667,10 +667,13 @@ namespace NsMessageBroker
             DBG_MSG(("Unknown method!\n"));
             Json::Value error;
             Json::Value err;
+            Json::Value error_data;
             error["id"] = root["id"];
             error["jsonrpc"] = "2.0";
-            err["code"] = METHOD_NOT_FOUND;
+            err["code"] = UNSUPPORTED_RESOURCE;
             err["message"] = "Destination controller not found!";
+            error_data["method"] = root["method"];
+            err["data"] = error_data;
             error["error"] = err;
             processError(new CMessage(pMessage->getSenderFd(), error));
          }

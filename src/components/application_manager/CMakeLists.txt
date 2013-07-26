@@ -3,7 +3,7 @@ include_directories (
   ../utils/include/
   ../formatters/include/
   ../protocol_handler/include/
-  ../SmartObjects/include/
+  ../smart_objects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
   ../connection_handler/include/
@@ -21,7 +21,6 @@ set (SOURCES
 ./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc
-./src/application_command_factory.cc
 ./src/audio_pass_thru_thread_impl.cc
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
@@ -31,6 +30,11 @@ set (SOURCES
 ./src/to_mobile_thread_impl.cc
 ./src/from_hmh_thread_impl.cc
 ./src/to_hmh_thread_impl.cc
+./src/application_data_impl.cc
+)
+
+set (POLICIES_MANAGER
+./src/policies_manager/policies_manager.cc
 )
 
 set (MOBILE_COMMANDS_SOURCES
@@ -268,5 +272,5 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_vi_vehicle_data_notification.cc
 )
 
-add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES})
+add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER})
 target_link_libraries ("ApplicationManager" log4cxx)

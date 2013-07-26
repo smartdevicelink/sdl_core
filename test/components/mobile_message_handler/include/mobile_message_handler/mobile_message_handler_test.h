@@ -40,8 +40,10 @@
 #include "gmock/gmock.h"
 
 #include "mobile_message_handler/mobile_message_handler_impl.h"
-#include "protocol_handler/protocol_handler_impl.h"
+#include "protocol_handler/protocol_handler.h"
 #include "utils/logger.h"
+#include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/session_observer.h"
 
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -71,6 +73,21 @@ class MobileMessageHandlerTester :
     public mobile_message_handler::MobileMessageObserver,
     public protocol_handler::ProtocolHandler {
  public:
+  virtual void set_protocol_observer(protocol_handler::ProtocolObserver* observer) {}
+
+  /**
+   * \brief Sets pointer for Connection Handler layer for managing sessions
+   * \param observer Pointer to object of the class implementing
+   * ISessionObserver
+   */
+  virtual void set_session_observer(protocol_handler::SessionObserver* observer) {}
+
+  /**
+   * \brief Method for sending message to Mobile Application.
+   * \param message RawMessage with params to be sent to Mobile App.
+   */
+  void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) {}
+
   MobileMessageHandlerTester()
       : mmh_(NULL) {
   }
@@ -90,8 +107,8 @@ class MobileMessageHandlerTester :
     synchronisation.signal();
   }
 
-  void sendMessageToMobileApp(const protocol_handler::RawMessage* message) {
-    mmh_->onMessageReceived(message);
+  void sendMessageToMobileApp(const transport_manager::RawMessageSptr message) {
+    mmh_->OnMessageReceived(message);
   }
 
  private:

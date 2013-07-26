@@ -76,34 +76,34 @@ SDL.VRPopUp = Em.ContainerView.create( {
         classNames: 'popUp'
     } ),
 
-    AddActivateApp: function( appId, appName ) {
+    AddActivateApp: function( appID, appName ) {
 
         this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
             action: 'onActivateSDLApp',
             target: 'SDL.SDLController',
             text: appName,
             appName: appName,
-            appId: appId,
+            appID: appID,
             classNames: 'list-item',
             templateName: 'text'
         } ) );
 
     },
 
-    DeleteActivateApp: function( appId ) {
+    DeleteActivateApp: function( appID ) {
 
-        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'activeAppId', appId ) );
+        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'activeAppId', appID ) );
 
     },
 
-    AddCommand: function( commandId, vrCommands, appId ) {
+    AddCommand: function( commandID, vrCommands, appID ) {
 
         for( var j = 0; j < vrCommands.length; j++ ){
             this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
                 action: 'onVRCommand',
                 target: 'SDL.SDLAppController',
-                appId: appId,
-                commandId: commandId,
+                appID: appID,
+                commandID: commandID,
                 text: vrCommands[j],
                 classNames: 'list-item',
                 templateName: 'text'
@@ -112,9 +112,9 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     },
 
-    DeleteCommand: function( commandId ) {
+    DeleteCommand: function( commandID ) {
 
-        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'commandId', commandId ) );
+        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'commandID', commandID ) );
 
     },
 
@@ -129,7 +129,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
                 this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
                     action: 'onChoiceInteraction',
                     target: 'SDL.SDLAppController',
-                    choiceId: params[i].choiceID,
+                    choiceID: params[i].choiceID,
                     btnType: 'interactionChoice',
                     text: params[i].vrCommands[j],
                     performInteractionRequestId: performInteractionRequestId,

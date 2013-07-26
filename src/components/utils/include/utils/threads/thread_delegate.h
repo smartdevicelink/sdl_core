@@ -36,6 +36,8 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_
 
+#include <pthread.h>
+
 namespace threads {
 
 /**
@@ -54,6 +56,13 @@ class ThreadDelegate {
    * Thread procedure.
    */
   virtual void threadMain() = 0;
+
+  /**
+   * Should be called to free all resources allocated in threadMain
+   * and exiting threadMain
+   */
+  virtual void exitThreadMain() {
+  }
 };
 
 }  // namespace threads

@@ -58,7 +58,7 @@ void OnTBTClientStateNotification::Run() {
 
   std::vector<Application*>::const_iterator it = applications.begin();
   for (; applications.end() != it; ++it) {
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(*it);
+    Application* app = *it;
     if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = app->app_id();
       SendNotification();

@@ -54,13 +54,6 @@ class DevicesDiscoveryStarter {
    */
   virtual void StartDevicesDiscovery()=0;
 
-  /**
-   * \brief Connects to all services of device
-   * \param deviceHandle Handle of device to connect to
-   */
-  virtual void ConnectToDevice(
-      connection_handler::DeviceHandle device_handle) = 0;
-
   virtual void StartTransportManager() = 0;
 
  protected:

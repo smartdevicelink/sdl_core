@@ -69,6 +69,13 @@ class ConnectionHandler {
 
     virtual void StartTransportManager() = 0;
 
+    /**
+     * \brief Connects to all services of device
+     * \param deviceHandle Handle of device to connect to
+     */
+    virtual void ConnectToDevice(
+        connection_handler::DeviceHandle device_handle) = 0;
+
   protected:
     /**
      * \brief Destructor

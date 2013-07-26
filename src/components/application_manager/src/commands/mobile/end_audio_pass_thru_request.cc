@@ -33,15 +33,11 @@
 
 #include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
-#include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
-
-namespace str = strings;
 
 EndAudioPassThruRequest::EndAudioPassThruRequest(
   const MessageSharedPtr& message): CommandRequestImpl(message) {
@@ -55,35 +51,8 @@ void EndAudioPassThruRequest::Run() {
 
   ApplicationManagerImpl::instance()->StopAudioPassThruThread();
 
-  // crate HMI UI request
-  smart_objects::CSmartObject* ui_audio = new smart_objects::CSmartObject();
-
-  if (NULL == ui_audio) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  const int audio_cmd_id = hmi_apis::FunctionID::UI_EndAudioPassThru;
-  (*ui_audio)[str::params][str::function_id] = audio_cmd_id;
-  (*ui_audio)[str::params][str::message_type] = MessageType::kRequest;
-  // app_id
-  (*ui_audio)[strings::msg_params][strings::app_id] =
-    (*message_)[strings::params][strings::connection_key];
-
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-
-  (*ui_audio)[str::params][str::correlation_id] = correlation_id;
-  (*ui_audio)[str::params][str::connection_key] = connection_key;
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-      connection_key, correlation_id, audio_cmd_id);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(ui_audio);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
+                   smart_objects::SmartObject(), true, 1);
 }
 
 }  // namespace commands

@@ -54,7 +54,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create( {
     /**
      * Identifier of current request
      */
-    performInteractionRequestId: null,
+    performInteractionRequestID: null,
 
     /**
      * Deactivate window
@@ -65,7 +65,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create( {
         this.set( 'active', false );
 
         if( ABORTED ){
-            SDL.SDLController.interactionChoiseCloseResponse( 'ABORTED', this.performInteractionRequestId );
+            SDL.SDLController.interactionChoiseCloseResponse( SDL.SDLModel.resultCode["ABORTED"], this.performInteractionRequestID );
         }
     },
 
@@ -83,14 +83,14 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create( {
      * 
      * @param data: Array
      */
-    preformChoices: function( data, performInteractionRequestId, timeout ) {
+    preformChoices: function( data, performInteractionRequestID, timeout ) {
 
         if( !data ){
-            Em.Logger.error( 'No choices to preform' )
+            Em.Logger.error( 'No choices to preform' );
             return;
         }
 
-        this.set( 'performInteractionRequestId', performInteractionRequestId );
+        this.set( 'performInteractionRequestID', performInteractionRequestID );
 
         var i = 0, length = data.length, self = this;
 
@@ -100,13 +100,13 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create( {
                 type: SDL.Button,
                 params: {
                     text: data[i].menuName,
-                    choiceId: data[i].choiceID,
+                    choiceID: data[i].choiceID,
                     action: 'onChoiceInteraction',
                     onDown: false,
                     target: 'SDL.SDLAppController',
-                    performInteractionRequestId: performInteractionRequestId,
+                    performInteractionRequestID: performInteractionRequestID,
                     templateName: 'text',
-                    icon: data[i].image ? data[i].image : null
+                    icon: data[i].image ? data[i].image.value : null
                 }
             } );
         }

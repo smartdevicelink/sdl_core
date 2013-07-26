@@ -74,6 +74,11 @@ class Profile {
   const std::string& server_address() const;
 
   /**
+   * @brief Returns policies file name
+   */
+  const std::string& policies_file_name() const;
+
+  /**
    * @brief Returns server port
    */
   const uint16_t& server_port() const;
@@ -140,6 +145,7 @@ class Profile {
   // Members section
   std::string  config_file_name_;
   std::string  server_address_;
+  std::string  policies_file_name_;
   uint16_t     server_port_;
   uint64_t     min_tread_stack_size_;
   bool         is_mixing_audio_supported_;

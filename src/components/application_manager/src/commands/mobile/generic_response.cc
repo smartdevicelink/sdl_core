@@ -32,18 +32,18 @@
  */
 
 #include "application_manager/commands/mobile/generic_response.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_conversion.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/message_conversion.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 void GenericResponse::Run() {
-  NsSmartDeviceLink::NsSmartObjects::CSmartObject response;
+  /*NsSmartDeviceLink::NsSmartObjects::SmartObject response;
 
-  response[strings::params][strings::message_type] = MessageType::kResponse;
   response[strings::params][strings::correlation_id] =
       (*message_)[strings::params][strings::correlation_id];
   response[strings::params][strings::protocol_version] =
@@ -52,10 +52,16 @@ void GenericResponse::Run() {
       (*message_)[strings::params][strings::connection_key];
 
   response[strings::msg_params][strings::success] = false;
-  response[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::INVALID_DATA;
+  */
 
-  SendResponse();
+  (*message_)[strings::params][strings::function_id] =
+    mobile_apis::FunctionID::GenericResponseID;
+  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
+  (*message_)[strings::msg_params][strings::success] = false;
+  (*message_)[strings::msg_params][strings::result_code] =
+    mobile_apis::Result::UNSUPPORTED_REQUEST;
+
+  SendResponse(false);
 }
 
 }  // namespace commands

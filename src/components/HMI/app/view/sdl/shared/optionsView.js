@@ -76,7 +76,7 @@ SDL.OptionsView = SDL.SDLAbstractView.create( {
 
             for( i = 0; i < len; i++ ){
                 
-                if( commands[i].menuId ){
+                if( commands[i].menuID ){
                     template = 'arrow';
                 }else{
                     template = commands[i].icon ? 'rightText' : 'text';
@@ -87,8 +87,8 @@ SDL.OptionsView = SDL.SDLAbstractView.create( {
                     params: {
                         templateName: template,
                         text: commands[i].name,
-                        commandId: commands[i].commandId,
-                        menuId: commands[i].menuId,
+                        commandID: commands[i].commandID,
+                        menuID: commands[i].menuID,
                         icon: commands[i].icon,
                         target: 'SDL.SDLAppController',
                         action: 'onCommand',

@@ -32,15 +32,16 @@
 #include "application_manager/commands/hmi/ui_scrollable_message_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
 UIScrollableMessageResponse::UIScrollableMessageResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UIScrollableMessageResponse::~UIScrollableMessageResponse() {
@@ -49,8 +50,8 @@ UIScrollableMessageResponse::~UIScrollableMessageResponse() {
 void UIScrollableMessageResponse::Run() {
   LOG4CXX_INFO(logger_, "UIScrollableMessageResponse::Run");
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -63,16 +64,15 @@ void UIScrollableMessageResponse::Run() {
   /* store received response code for to check it
    * in corresponding Mobile response
    */
-  const mobile_apis::Result::eType code =
-    static_cast<mobile_apis::Result::eType>(
-      (*message_)[strings::msg_params][hmi_response::code].asInt());
+  const hmi_apis::Common_Result::eType code =
+    static_cast<hmi_apis::Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
 
   msg_chain->set_ui_response_result(code);
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

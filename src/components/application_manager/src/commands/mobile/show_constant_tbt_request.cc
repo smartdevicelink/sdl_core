@@ -32,16 +32,18 @@
  */
 
 #include "application_manager/commands/mobile/show_constant_tbt_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
 ShowConstantTBTRequest::ShowConstantTBTRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 ShowConstantTBTRequest::~ShowConstantTBTRequest() {
@@ -50,9 +52,9 @@ ShowConstantTBTRequest::~ShowConstantTBTRequest() {
 void ShowConstantTBTRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -62,17 +64,35 @@ void ShowConstantTBTRequest::Run() {
 
   app->set_tbt_show_command((*message_)[strings::msg_params]);
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params = (*message_)[strings::msg_params];
 
-  const int hmi_request_id = hmi_apis::FunctionID::Navigation_ShowConstantTBT;
+  msg_params[strings::app_id] = app->app_id();
 
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
+  msg_params[hmi_request::navi_texts] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  if (msg_params.keyExists(strings::navigation_text_1)) {
+    // erase useless parametr
+    msg_params.erase(strings::navigation_text_1);
+    msg_params[hmi_request::navi_texts][0][hmi_request::field_name] =
+      TextFieldName::NAVI_TEXT1;
+    msg_params[hmi_request::navi_texts][0][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::navigation_text_1];
+  }
+
+  if (msg_params.keyExists(strings::navigation_text_2)) {
+    // erase useless param
+    msg_params.erase(strings::navigation_text_2);
+    msg_params[hmi_request::navi_texts][1][hmi_request::field_name] =
+      TextFieldName::NAVI_TEXT2;
+    msg_params[hmi_request::navi_texts][1][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::navigation_text_2];
+  }
+
+  CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,
+                   msg_params, true, 1);
 }
 
 }  // namespace commands

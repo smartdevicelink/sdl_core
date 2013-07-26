@@ -35,7 +35,6 @@
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -56,9 +55,8 @@ void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -72,36 +70,15 @@ void GetVehicleDataRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject* get_vehicle_data  =
-    new smart_objects::CSmartObject();
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  if (NULL == get_vehicle_data) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
+  // copy entirely msg
+  msg_params = (*message_)[strings::msg_params];
+  msg_params[strings::app_id] = app->app_id();
 
-  // copy entirely smart object
-  (*get_vehicle_data) = (*message_);
-
-  const int correlation_id =
-    (*get_vehicle_data)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*get_vehicle_data)[strings::params][strings::connection_key];
-
-  const int vr_cmd_id = hmi_apis::FunctionID::VehicleInfo_GetVehicleData;
-  (*get_vehicle_data)[strings::params][strings::function_id] = vr_cmd_id;
-
-  (*get_vehicle_data)[strings::msg_params][strings::app_id] =
-    app->app_id();
-
-  (*get_vehicle_data)[strings::params][strings::message_type] =
-    MessageType::kRequest;
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-          connection_key, correlation_id, vr_cmd_id, get_vehicle_data);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(get_vehicle_data);
+  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+                   msg_params, true);
 }
 
 }  // namespace commands

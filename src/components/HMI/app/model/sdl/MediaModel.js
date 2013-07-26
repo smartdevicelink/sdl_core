@@ -101,8 +101,8 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
      * 
      * @param {Number}
      */
-    onDeleteApplication: function(appId) {
-        SDL.SDLMediaController.onDeleteApplication(appId);
+    onDeleteApplication: function(appID) {
+        SDL.SDLMediaController.onDeleteApplication(appID);
     },
 
     /**
@@ -224,48 +224,52 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
     onSDLUIShow: function(params) {
         clearInterval(this.timer);
         
-        for (var i = 0; i < params.alertStrings.length; i++) {
-            switch (params.alertStrings[key]) {
+        for (var i = 0; i < params.showStrings.length; i++) {
+            switch (params.showStrings[i].fieldName) {
                 case 'mainField1': {
-                    this.appInfo.set('field1', params.alertStrings[key].fieldText);
+                    this.appInfo.set('field1', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mainField2': {
-                    this.appInfo.set('field2', params.alertStrings[key].fieldText);
+                    this.appInfo.set('field2', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mainField3': {
-                    this.appInfo.set('field3', params.alertStrings[key].fieldText);
+                    this.appInfo.set('field3', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mainField4': {
-                    this.appInfo.set('field4', params.alertStrings[key].fieldText);
+                    this.appInfo.set('field4', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'statusBar': {
-                    this.appInfo.set('statusText', params.alertStrings[key].fieldText);
+                    this.appInfo.set('statusText', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mediaClock': {
-                    this.appInfo.set('mediaClock', params.alertStrings[key].fieldText);
+                    this.appInfo.set('mediaClock', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mediaTrack': {
-                    this.appInfo.set('mediaTrack', params.alertStrings[key].fieldText);
+                    this.appInfo.set('mediaTrack', params.showStrings[i].fieldText);
                     break;
                 }
             }
         }
 
-        this.appInfo.set('alignment', params.alignment);
+        if (params.alignment) {
+            this.appInfo.set('alignment', params.alignment);
+        }
 
         if(params.graphic){
-            this.appInfo.set('trackIcon', params.graphic);
+            this.appInfo.set('trackIcon', params.graphic.value);
         }else{
             this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
         }
 
-        this.updateSoftButtons(params.softButtons);
+        if (params.softButtons) {
+            this.updateSoftButtons(params.softButtons);
+        }
 
         if(params.customPresets){
             var i = 0;

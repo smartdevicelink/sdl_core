@@ -35,6 +35,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,9 +53,7 @@ void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -88,33 +88,31 @@ void ResetGlobalPropertiesRequest::Run() {
       }
       default: {
         LOG4CXX_ERROR(logger_, "Unknown global property 0x%02X value" <<
-            (*message_)[strings::msg_params][strings::properties][i].asInt());
+                      (*message_)[strings::msg_params]
+                      [strings::properties][i].asInt());
         break;
       }
     }
   }
-
-  // there is no request to HMI
-  /*
-      SetGlobalProperties
-  */
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
-void ResetGlobalPropertiesRequest::ResetHelpPromt(ApplicationImpl* const app,
+void ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app,
     bool is_timeout_promp) {
   if (NULL == app) {
     return;
   }
 
   CommandsMap cmdMap = app->commands_map();
-  smart_objects::CSmartObject helpPrompt;
+  smart_objects::SmartObject helpPrompt;
 
   int index = 0;
   CommandsMap::const_iterator command_it = cmdMap.begin();
   for (; cmdMap.end() != command_it; ++command_it) {
     if (false == (*command_it->second).keyExists(strings::vr_commands)) {
       LOG4CXX_ERROR(logger_, "VR synonyms are empty");
-      break;
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
     }
     // use only first
     helpPrompt[index++] = (*command_it->second)[strings::vr_commands][0];
@@ -128,22 +126,24 @@ void ResetGlobalPropertiesRequest::ResetHelpPromt(ApplicationImpl* const app,
 }
 
 void ResetGlobalPropertiesRequest::ResetTimeoutPromt(
-  ApplicationImpl* const app) {
+  Application* const app) {
   ResetHelpPromt(app, true);
 }
 
 void ResetGlobalPropertiesRequest::ResetVrHelpTitle(
-  ApplicationImpl* const app) {
+  Application* const app) {
   if (NULL == app) {
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  smart_objects::CSmartObject help_title(app->name());
+  smart_objects::SmartObject help_title(app->name());
   app->set_vr_help_title(help_title);
 }
 
 void ResetGlobalPropertiesRequest::ResetVrHelpItems(
-  ApplicationImpl* const app) {
+  Application* const app) {
 }
 
 }  // namespace commands

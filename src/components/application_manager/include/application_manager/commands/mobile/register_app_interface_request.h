@@ -39,7 +39,7 @@
 
 namespace application_manager {
 
-class ApplicationImpl;
+class Application;
 
 namespace commands {
 
@@ -47,37 +47,37 @@ namespace commands {
  * @brief Register app interface request  command class
  **/
 class RegisterAppInterfaceRequest : public CommandRequestImpl {
- public:
-  /**
-   * \brief RegisterAppInterfaceRequest class constructor
-   **/
-  explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message)
+  public:
+    /**
+     * \brief RegisterAppInterfaceRequest class constructor
+     **/
+    explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message)
       : CommandRequestImpl(message) {
-  }
+    }
 
-  /**
-   * \brief RegisterAppInterfaceRequest class destructor
-   **/
-  virtual ~RegisterAppInterfaceRequest() {
-  }
+    /**
+     * \brief RegisterAppInterfaceRequest class destructor
+     **/
+    virtual ~RegisterAppInterfaceRequest() {
+    }
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-  // virtual void cleanUp() = 0;
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
+    // virtual void cleanUp() = 0;
 
-  /**
-    * @brief Sends RegisterAppInterface response to mobile
-    *
-    *@param application_impl application
-    *
-    **/
-  void SendRegisterAppInterfaceResponseToMobile(
-      const ApplicationImpl& application_impl);
+    /**
+      * @brief Sends RegisterAppInterface response to mobile
+      *
+      *@param application_impl application
+      *
+      **/
+    void SendRegisterAppInterfaceResponseToMobile(
+      const Application& application_impl);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };
 
 }  // namespace commands

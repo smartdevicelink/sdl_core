@@ -39,8 +39,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "TransportManager/SDeviceInfo.hpp"
-#include "TransportManager/ITransportManager.hpp"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 
@@ -48,25 +46,25 @@ namespace test  {
 namespace components  {
 namespace protocol_handler_test {
 
-	using namespace NsSmartDeviceLink::NsTransportManager;
+	using namespace ::transport_manager;
 	using namespace protocol_handler;
 
-class MockTransportManager : public ITransportManager {
+class MockTransportManager : public TransportManager {
 public:
-	MOCK_METHOD4(sendFrame, void(tConnectionHandle ConnectionHandle, 
-		const uint8_t * Data, size_t DataSize, const int UserData));
-
-	void run(void) {}
-    void scanForNewDevices(void) {}
-    void connectDevice(const tDeviceHandle DeviceHandle) {}
-    void disconnectDevice(const tDeviceHandle DeviceHandle) {}
-    void addDataListener(ITransportManagerDataListener * Listener) {}
-    void removeDataListener(ITransportManagerDataListener * Listener) {}
-    void addDeviceListener(ITransportManagerDeviceListener * Listener) {}
-    void removeDeviceListener(ITransportManagerDeviceListener * Listener) {}
+//	MOCK_METHOD4(sendFrame, void(tConnectionHandle ConnectionHandle,
+//		const uint8_t * Data, size_t DataSize, const int UserData));
+//
+//	void run(void) {}
+//    void scanForNewDevices(void) {}
+//    void connectDevice(const tDeviceHandle DeviceHandle) {}
+//    void disconnectDevice(const tDeviceHandle DeviceHandle) {}
+//    void addDataListener(ITransportManagerDataListener * Listener) {}
+//    void removeDataListener(ITransportManagerDataListener * Listener) {}
+//    void addDeviceListener(ITransportManagerDeviceListener * Listener) {}
+//    void removeDeviceListener(ITransportManagerDeviceListener * Listener) {}
 };
 
-	TEST(interface_test, test_result_success){
+//	TEST(interface_test, test_result_success){
 		//Segfault
 		/*MockTransportManager tm;
 		ProtocolHandlerImpl * handler = new ProtocolHandlerImpl(&tm);
@@ -89,7 +87,7 @@ public:
 		EXPECT_CALL(tm, sendFrame(1, 0, 0, 0))
             .Times(1);*/
 
-	}
+//	}
 }
 }
 }

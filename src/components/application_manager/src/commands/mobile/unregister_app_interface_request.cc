@@ -58,7 +58,7 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject message;
+  smart_objects::SmartObject message;
 
   message[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;

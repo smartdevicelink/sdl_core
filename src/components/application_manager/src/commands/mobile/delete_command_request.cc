@@ -34,16 +34,15 @@
 #include "application_manager/commands/mobile/delete_command_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
 DeleteCommandRequest::DeleteCommandRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 DeleteCommandRequest::~DeleteCommandRequest() {
@@ -52,95 +51,52 @@ DeleteCommandRequest::~DeleteCommandRequest() {
 void DeleteCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteCommandRequest::Run");
 
-  ApplicationImpl* application =
-        static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-            application((*message_)[strings::params][strings::connection_key]));
+  Application* application =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
-  smart_objects::CSmartObject* command = application->
+
+  smart_objects::SmartObject* command = application->
         FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!command) {
-      SendResponse(false, mobile_apis::Result::INVALID_ID);
-      LOG4CXX_ERROR(logger_, "Invalid ID");
-      return;
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
+    LOG4CXX_ERROR(logger_, "Invalid ID");
+    return;
   }
 
-  const int correlation_id =
-        (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-        (*message_)[strings::params][strings::connection_key];
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+  msg_params[strings::app_id] = application->app_id();
 
 
-  MessageChaining * chain = NULL;
+  // we should specify amount of required responses in the 1st request
+  unsigned int chaining_counter = 0;
+  if ((*command).keyExists(strings::menu_params)) {
+    ++chaining_counter;
+  }
 
-  if ((*command)[strings::msg_params].keyExists(strings::menu_params)) {
-      smart_objects::CSmartObject* p_smrt_ui  =
-          new smart_objects::CSmartObject();
+  if ((*command).keyExists(strings::vr_commands)) {
+    ++chaining_counter;
+  }
 
-      if (NULL == p_smrt_ui) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-        return;
-      }
-
-      const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
-      (*p_smrt_ui)[strings::params][strings::function_id] = ui_cmd_id;
-
-      (*p_smrt_ui)[strings::msg_params][strings::correlation_id] =
-          correlation_id;
-
-      (*p_smrt_ui)[strings::params][strings::message_type] =
-          MessageType::kRequest;
-
-      (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-          (*message_)[strings::msg_params][strings::cmd_id];
-
-      (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-          application->app_id();
-
-     chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, ui_cmd_id, p_smrt_ui);
-
-      ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
-    }
-
-    // check vr params
-    if ((*command)[strings::msg_params].keyExists(strings::vr_commands)) {
-      smart_objects::CSmartObject* p_smrt_vr  =
-          new smart_objects::CSmartObject();
-
-      if (NULL == p_smrt_vr) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-        return;
-      }
-
-      const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
-
-      (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
-
-      (*p_smrt_vr)[strings::msg_params][strings::correlation_id] =
-          correlation_id;
-
-      (*p_smrt_vr)[strings::params][strings::message_type] =
-          MessageType::kRequest;
-
-      (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
-          (*message_)[strings::msg_params][strings::cmd_id];
-
-      (*p_smrt_vr)[strings::msg_params][strings::app_id] =
-               application->app_id();
-
-      ApplicationManagerImpl::instance()->AddMessageChain(chain,
-          connection_key, correlation_id, vr_cmd_id, p_smrt_vr);
-
-      ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
-    }
+  if ((*command).keyExists(strings::menu_params)) {
+    CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand,
+                     msg_params, true, chaining_counter);
+  }
+  // check vr params
+  if ((*command).keyExists(strings::vr_commands)) {
+    CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params, true
+      , chaining_counter);
+  }
 }
 
 }  // namespace commands

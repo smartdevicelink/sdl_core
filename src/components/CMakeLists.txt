@@ -15,7 +15,7 @@ add_subdirectory(./connection_handler)
 add_subdirectory(./utils)
 
 # --- SmartObjects
-add_subdirectory(./SmartObjects)
+add_subdirectory(./smart_objects)
 
 # --- Mobile message handler
 add_subdirectory(./mobile_message_handler)
@@ -31,3 +31,6 @@ add_subdirectory(./hmi_message_handler)
 
 # --- Config
 add_subdirectory(./config_profile)
+
+# --- AudioManager
+add_subdirectory(./audio_manager)

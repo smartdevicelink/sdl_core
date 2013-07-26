@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/create_interaction_choice_set_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -51,23 +50,16 @@ CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {
 void CreateInteractionChoiceSetResponse::Run() {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
-    SendResponse();
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int hmi_correlation_id = (*message_)[strings::params]
-                                 [strings::correlation_id];
-
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(hmi_correlation_id)) {
-
-    (*message_)[strings::params][strings::success] = true;
-    (*message_)[strings::params][strings::result_code] =
-      mobile_apis::Result::SUCCESS;
-    SendResponse();
-  }
+  SendResponse(true);
 }
 
 }  // namespace commands

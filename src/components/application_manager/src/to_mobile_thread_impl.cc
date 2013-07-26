@@ -50,8 +50,7 @@ void ToMobileThreadImpl::threadMain() {
   while (1) {
     while (!handler_->messages_to_mobile_.empty()) {
       LOG4CXX_INFO(logger_, "Received message to mobile");
-      utils::SharedPtr<Message> message =
-        handler_->messages_to_mobile_.pop();
+      utils::SharedPtr<Message> message =  handler_->messages_to_mobile_.pop();
 
       if (!handler_->mobile_handler_) {
         LOG4CXX_ERROR(logger_,

@@ -129,7 +129,7 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
             'monoAudioOutputMuted': false,
             'signalLevelStatus': "NOT_PROVIDED",
             'primaryAudioSource': "NO_SOURCE_SELECTED",
-            'eCallEventActive': false,
+            'eCallEventActive': false
         },
         'driverBraking': "NOT_SUPPORTED",
         'wiperStatus': "NO_DATA_EXISTS",
@@ -184,7 +184,7 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      */
     onPRNDLSelected: function() {
         if( this.prndlSelectState ) {
-            this.set( 'vehicleData.VEHICLEDATA_PRNDLSTATUS.data', this.prndlSelectState );
+            this.set( 'vehicleData.prndl', this.prndlSelectState );
         }
     }.observes( 'this.prndlSelectState' ),
 
@@ -237,10 +237,12 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
 
         for( var i = 0; i < params.didLocation.length; i++ ){
             if( i < 10 ){
+            	didResult[i] = {};
                 didResult[i].resultCode = 'SUCCESS';
                 didResult[i].didLocation = params.didLocation[i];
                 didResult[i].data = '0';
             }else{
+            	didResult[i] = {};
                 didResult[i].resultCode = "VEHICLE_DATA_NOT_AVAILABLE";
                 didResult[i].didLocation = params.didLocation[i];
                 didResult[i].data = '0';
@@ -273,9 +275,9 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
 
         var jsonData = {};
         for( var i in this.vehicleData ){
-            jsonData[this.vehicleData[i].type] = this.vehicleData[i].data;
+            jsonData[i] = this.vehicleData[i];
         }
         FFW.VehicleInfo.OnVehicleData( jsonData );
 
-    }.observes( 'this.vehicleData.VEHICLEDATA_PRNDLSTATUS.data' )
+    }.observes( 'this.vehicleData.prndl' )
 } );

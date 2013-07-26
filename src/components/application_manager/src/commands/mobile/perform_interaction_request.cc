@@ -31,17 +31,21 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/perform_interaction_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
 PerformInteractionRequest::PerformInteractionRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -50,50 +54,199 @@ PerformInteractionRequest::~PerformInteractionRequest() {
 void PerformInteractionRequest::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  const int choise_set_id = (*message_)[strings::msg_params]
-      [strings::interaction_choice_set_id].asInt();
+  smart_objects::SmartObject& choice_list =
+    (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  if (!app->FindChoiceSet(choise_set_id)) {
-    SendResponse(false, mobile_apis::Result::INVALID_ID);
-    LOG4CXX_ERROR(logger_, "Invalid ID");
-    return;
+  for (size_t i = 0; i < choice_list.length(); ++i) {
+    if (!app->FindChoiceSet(choice_list[i].asInt())) {
+      LOG4CXX_ERROR(logger_, "Invalid ID");
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
+      return;
+    }
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-
-  // create HMI request
-  smart_objects::CSmartObject* hmi_request =
-      new smart_objects::CSmartObject(*message_);
-
-  if (NULL == hmi_request) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
+  if (!SendVRAddCommandRequest(app)) {
+    LOG4CXX_ERROR(logger_, "Failed to send VR Addcommand");
   }
 
-  const int hmi_request_id = hmi_apis::FunctionID::UI_PerformInteraction;
-  (*hmi_request)[strings::params][strings::function_id] = hmi_request_id;
-  (*hmi_request)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-  (*hmi_request)[strings::msg_params][strings::app_id] = app->app_id();
+  if (SendUIPerformInteractionRequest(app)) {
+     app->set_perform_interaction_active(true);
+  }
+}
 
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
+bool PerformInteractionRequest::SendVRAddCommandRequest(
+    Application* const app) {
+  smart_objects::SmartObject& choice_list =
+    (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(hmi_request);
+  for (size_t i = 0; i < choice_list.length(); ++i) {
+    // choice_set contains SmartObject msg_params
+    smart_objects::SmartObject* i_choice_set =
+      app->FindChoiceSet(choice_list[i].asInt());
+
+    for (size_t j = 0; j < choice_list.length(); ++j) {
+      smart_objects::SmartObject* j_choice_set =
+        app->FindChoiceSet(choice_list[j].asInt());
+
+      if (i == j) {
+        // skip check the same element
+        continue;
+      }
+
+      if ((!i_choice_set) || (!j_choice_set)) {
+        LOG4CXX_ERROR(logger_, "Invalid ID");
+        SendResponse(false, mobile_apis::Result::INVALID_ID);
+        return false;
+      }
+
+      size_t ii = 0;
+      size_t jj = 0;
+      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
+        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
+          // choice_set pointer contains SmartObject msg_params
+          smart_objects::SmartObject& ii_vr_commands =
+            (*i_choice_set)[strings::choice_set][ii][strings::vr_commands];
+
+          smart_objects::SmartObject& jj_vr_commands =
+            (*j_choice_set)[strings::choice_set][jj][strings::vr_commands];
+
+          for (size_t iii = 0; iii < ii_vr_commands.length(); ++iii) {
+            for (size_t jjj = 0; jjj < jj_vr_commands.length(); ++jjj) {
+              if (ii_vr_commands[iii].asString() ==
+                  jj_vr_commands[jjj].asString()) {
+                LOG4CXX_ERROR(logger_, "Choice set has duplicated VR synonym");
+                SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+                return false;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (size_t i = 0; i < choice_list.length(); ++i) {
+    smart_objects::SmartObject* choice_set =
+      app->FindChoiceSet(choice_list[i].asInt());
+
+    if (!choice_set) {
+      LOG4CXX_ERROR(logger_, "Invalid ID");
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
+      return false;
+    }
+
+    // save choice set for sent VR commands
+    app->AddChoiceSetVRCommands(choice_list[i].asInt(),
+                                *choice_set);
+
+    for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+      smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      msg_params[strings::app_id] = app->app_id();
+      msg_params[strings::cmd_id] =
+        (*choice_set)[strings::choice_set][j][strings::choice_id];
+      msg_params[strings::vr_commands] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+      msg_params[strings::vr_commands] =
+        (*choice_set)[strings::choice_set][j][strings::vr_commands];
+
+      CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, false);
+    }
+  }
+
+  return true;
+}
+
+bool PerformInteractionRequest::SendUIPerformInteractionRequest(
+  Application* const app) {
+  smart_objects::SmartObject& choice_list =
+    (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+  for (size_t i = 0; i < choice_list.length(); ++i) {
+    // choice_set contains SmartObject msg_params
+    smart_objects::SmartObject* i_choice_set =
+      app->FindChoiceSet(choice_list[i].asInt());
+
+    for (size_t j = 0; j < choice_list.length(); ++j) {
+      smart_objects::SmartObject* j_choice_set =
+        app->FindChoiceSet(choice_list[j].asInt());
+
+      if (i == j) {
+        // skip check the same element
+        continue;
+      }
+
+      if (!i_choice_set || !j_choice_set) {
+        LOG4CXX_ERROR(logger_, "Invalid ID");
+        SendResponse(false, mobile_apis::Result::INVALID_ID);
+        return false;
+      }
+
+      size_t ii = 0;
+      size_t jj = 0;
+      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
+        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
+          std::string ii_menu_name = (*i_choice_set)[strings::choice_set][ii]
+              [strings::menu_name].asString();
+          std::string jj_menu_name = (*j_choice_set)[strings::choice_set][jj]
+              [strings::menu_name].asString();
+
+          if (ii_menu_name == jj_menu_name) {
+            LOG4CXX_ERROR(logger_,
+                          "Incoming choiceset has duplicated menu name");
+            SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[hmi_request::initial_text][hmi_request::field_name] =
+    TextFieldName::INITIAL_INTERACTION_TEXT;
+  msg_params[hmi_request::initial_text][hmi_request::field_text] =
+    (*message_)[strings::msg_params][hmi_request::initial_text];
+  msg_params[strings::timeout] =
+      (*message_)[strings::msg_params][strings::timeout];
+  msg_params[strings::app_id] = app->app_id();
+
+  msg_params[strings::choice_set] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (size_t i = 0; i < choice_list.length(); ++i) {
+    smart_objects::SmartObject* choice_set =
+      app->FindChoiceSet(choice_list[i].asInt());
+    if (choice_set) {
+      for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+        int index = msg_params[strings::choice_set].length();
+        msg_params[strings::choice_set][index] =
+            (*choice_set)[strings::choice_set][j];
+        std::string file_path = file_system::FullPath(app->name());
+        file_path += "/";
+        file_path += msg_params[strings::choice_set][index]
+            [strings::image][strings::value].asString();
+        msg_params[strings::choice_set][index][strings::image][strings::value] =
+            file_path;
+      }
+    }
+  }
+
+  CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
+                   msg_params, true, 1);
+  return true;
 }
 
 }  // namespace commands

@@ -22,4 +22,3 @@ set (LIBRARIES
 create_test("test_RequestWatchdog" "${SOURCES}" "${LIBRARIES}")
 
 add_library("test_RequestWatchdogTest" "${SOURCES}")
-l

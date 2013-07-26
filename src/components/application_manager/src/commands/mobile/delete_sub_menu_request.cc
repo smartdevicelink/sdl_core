@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 DeleteSubMenuRequest::DeleteSubMenuRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {
@@ -50,34 +50,31 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 void DeleteSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
 
-  ApplicationImpl* application =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
-  if (!application) {
+  if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  if (!application->FindSubMenu(
-      (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
+  if (!app->FindSubMenu(
+        (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
   }
 
-  const int correlation_id =
-        (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-        (*message_)[strings::params][strings::connection_key];
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  const int hmi_request_id = hmi_apis::FunctionID::UI_DeleteSubMenu;
+  msg_params[strings::menu_id] =
+    (*message_)[strings::msg_params][strings::menu_id];
+  msg_params[strings::app_id] = app->app_id();
 
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, msg_params, true, 1);
 }
 
 }  // namespace commands

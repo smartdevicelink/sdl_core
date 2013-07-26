@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -42,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
@@ -51,9 +52,9 @@ CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
 void CreateInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -62,7 +63,8 @@ void CreateInteractionChoiceSetRequest::Run() {
   }
 
   const int choise_set_id =
-  (*message_)[strings::msg_params][strings::interaction_choice_set_id].asInt();
+    (*message_)[strings::msg_params]
+    [strings::interaction_choice_set_id].asInt();
 
   if (app->FindChoiceSet(choise_set_id)) {
     LOG4CXX_ERROR(logger_, "Invalid ID");
@@ -70,18 +72,69 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+  if ((false == CheckChoiceSetMenuNames()) ||
+      (false == CheckChoiceSetVRSynonyms())) {
+    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+    return;
+  }
 
-  const int hmi_request_id =
-      hmi_apis::FunctionID::UI_CreateInteractionChoiceSet;
+  const int choice_set_id = (*message_)[strings::msg_params]
+      [strings::interaction_choice_set_id].asInt();
 
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
+  app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
+}
+
+bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
+  smart_objects::SmartObject& choice_set =
+    (*message_)[strings::msg_params][strings::choice_set];
+
+  for (size_t i = 0; i < choice_set.length(); ++i) {
+    for (size_t j = 0; j < choice_set.length(); ++j) {
+      if (i == j) {
+        // skip check the same element
+        continue;
+      }
+      if (choice_set[i][strings::menu_name].asString() ==
+           choice_set[j][strings::menu_name].asString()) {
+        LOG4CXX_ERROR(logger_, "Incoming choiceset has duplicated menu name " <<
+                      choice_set[i][strings::menu_name].asString() << " " <<
+                      choice_set[j][strings::menu_name].asString());
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
+  smart_objects::SmartObject& choice_set =
+    (*message_)[strings::msg_params][strings::choice_set];
+
+  for (size_t i = 0; i < choice_set.length(); ++i) {
+    for (size_t j = 0; j < choice_set.length(); ++j) {
+      for (size_t ii = 0; ii < choice_set[i][strings::vr_commands].length();
+           ++ii) {
+        for (size_t jj = 0; jj < choice_set[j][strings::vr_commands].length();
+            ++jj) {
+          if ((i == j) && (ii == jj)) {
+            // skip check the same element
+            continue;
+          }
+          if (choice_set[i][strings::vr_commands][ii].asString() ==
+              choice_set[j][strings::vr_commands][jj].asString()) {
+            LOG4CXX_ERROR(logger_, "Choice set has duplicated VR synonym " <<
+                          choice_set[i][strings::vr_commands][ii].asString() <<
+                          " " <<
+                          choice_set[j][strings::vr_commands][jj].asString());
+            return false;
+          }
+        }
+      }
+    }
+  }
+  return true;
 }
 
 }  // namespace commands

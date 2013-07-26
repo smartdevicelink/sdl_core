@@ -35,7 +35,7 @@
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-class CSmartObject;
+class SmartObject;
 }
 }
 
@@ -67,7 +67,7 @@ struct HMICapabilities {
      *
      * @return Currently supported UI languages
      */
-    inline const smart_objects::CSmartObject*
+    inline const smart_objects::SmartObject*
     ui_supported_languages() const {
       return ui_supported_languages_;
     }
@@ -78,14 +78,14 @@ struct HMICapabilities {
      * @param supported_languages Supported UI languages
      */
     void set_ui_supported_languages(
-      const smart_objects::CSmartObject& supported_languages);
+      const smart_objects::SmartObject& supported_languages);
 
     /*
      * @brief Retrieves TTS  supported languages
      *
      * @return Currently supported TTS languages
      */
-    inline const smart_objects::CSmartObject*
+    inline const smart_objects::SmartObject*
     tts_supported_languages() const {
       return tts_supported_languages_;
     }
@@ -96,14 +96,14 @@ struct HMICapabilities {
      * @param supported_languages Supported TTS languages
      */
     void set_tts_supported_languages(
-      const smart_objects::CSmartObject& supported_languages);
+      const smart_objects::SmartObject& supported_languages);
 
     /*
      * @brief Retrieves VR supported languages
      *
      * @return Currently supported VR languages
      */
-    inline const smart_objects::CSmartObject*
+    inline const smart_objects::SmartObject*
     vr_supported_languages() const {
       return vr_supported_languages_;
     }
@@ -114,14 +114,14 @@ struct HMICapabilities {
      * @param supported_languages Supported VR languages
      */
     void set_vr_supported_languages(
-      const smart_objects::CSmartObject& supported_languages);
+      const smart_objects::SmartObject& supported_languages);
 
     /*
      * @brief Retrieves information about the display capabilities
      *
      * @return Currently supported display capabilities
      */
-    inline const smart_objects::CSmartObject*
+    inline const smart_objects::SmartObject*
     display_capabilities() const {
       return display_capabilities_;
     }
@@ -132,14 +132,14 @@ struct HMICapabilities {
      * @param display_capabilities supported display capabilities
      */
     void set_display_capabilities(
-      const smart_objects::CSmartObject& display_capabilities);
+      const smart_objects::SmartObject& display_capabilities);
 
     /*
      * @brief Retrieves information about the HMI zone capabilities
      *
      * @return Currently supported HMI zone capabilities
      */
-    inline const smart_objects::CSmartObject*
+    inline const smart_objects::SmartObject*
     hmi_zone_capabilities() const {
       return hmi_zone_capabilities_;
     }
@@ -150,14 +150,14 @@ struct HMICapabilities {
      * @param hmi_zone_capabilities supported HMI zone capabilities
      */
     void set_hmi_zone_capabilities(
-      const smart_objects::CSmartObject& hmi_zone_capabilities);
+      const smart_objects::SmartObject& hmi_zone_capabilities);
 
     /*
      * @brief Retrieves information about the SoftButton's capabilities
      *
      * @return Currently supported SoftButton's capabilities
      */
-    inline const smart_objects::CSmartObject*
+    inline const smart_objects::SmartObject*
     soft_button_capabilities() const {
       return soft_buttons_capabilities_;
     }
@@ -168,14 +168,14 @@ struct HMICapabilities {
      * @param soft_button_capabilities supported SoftButton's capabilities
      */
     void set_soft_button_capabilities(
-      const smart_objects::CSmartObject& soft_button_capabilities);
+      const smart_objects::SmartObject& soft_button_capabilities);
 
     /*
      * @brief Retrieves information about the Button's capabilities
      *
      * @return Currently supported Button's capabilities
      */
-    inline const smart_objects::CSmartObject* button_capabilities() const {
+    inline const smart_objects::SmartObject* button_capabilities() const {
       return soft_buttons_capabilities_;
     }
 
@@ -185,14 +185,14 @@ struct HMICapabilities {
      * @param speech_capabilities supported speech capabilities
      */
     void set_speech_capabilities(
-      const smart_objects::CSmartObject& speech_capabilities);
+      const smart_objects::SmartObject& speech_capabilities);
 
     /*
      * @brief Retrieves information about the speech capabilities
      *
      * @return Currently supported speech capabilities
      */
-    inline const smart_objects::CSmartObject* speech_capabilities() const {
+    inline const smart_objects::SmartObject* speech_capabilities() const {
       return speech_capabilities_;
     }
 
@@ -202,14 +202,14 @@ struct HMICapabilities {
      * @param vr_capabilities supported VR capabilities
      */
     void set_vr_capabilities(
-      const smart_objects::CSmartObject& vr_capabilities);
+      const smart_objects::SmartObject& vr_capabilities);
 
     /*
      * @brief Retrieves information about the VR capabilities
      *
      * @return Currently supported VR capabilities
      */
-    inline const smart_objects::CSmartObject* vr_capabilities() const {
+    inline const smart_objects::SmartObject* vr_capabilities() const {
       return vr_capabilities_;
     }
 
@@ -219,14 +219,14 @@ struct HMICapabilities {
      * @param vr_capabilities supported audio_pass_thru capabilities
      */
     void set_audio_pass_thru_capabilities(
-      const smart_objects::CSmartObject& audio_pass_thru_capabilities);
+      const smart_objects::SmartObject& audio_pass_thru_capabilities);
 
     /*
      * @brief Retrieves information about the audio_pass_thru capabilities
      *
      * @return Currently supported audio_pass_thru capabilities
      */
-    inline const smart_objects::CSmartObject*
+    inline const smart_objects::SmartObject*
         audio_pass_thru_capabilities() const {
       return audio_pass_thru_capabilities_;
     }
@@ -237,14 +237,14 @@ struct HMICapabilities {
      * @param soft_button_capabilities supported Button's capabilities
      */
     void set_button_capabilities(
-        const smart_objects::CSmartObject& button_capabilities);
+        const smart_objects::SmartObject& button_capabilities);
 
     /*
      * @brief Retrieves information about the preset bank capabilities
      *
      * @return Currently supported preset bank capabilities
      */
-    inline const smart_objects::CSmartObject* preset_bank_capabilities() const {
+    inline const smart_objects::SmartObject* preset_bank_capabilities() const {
       return preset_bank_capabilities_;
     }
 
@@ -254,21 +254,21 @@ struct HMICapabilities {
      * @param soft_button_capabilities supported preset bank capabilities
      */
     void set_preset_bank_capabilities(
-        const smart_objects::CSmartObject& preset_bank_capabilities);
+        const smart_objects::SmartObject& preset_bank_capabilities);
 
   protected:
     bool attenuated_supported_;
-    smart_objects::CSmartObject* ui_supported_languages_;
-    smart_objects::CSmartObject* tts_supported_languages_;
-    smart_objects::CSmartObject* vr_supported_languages_;
-    smart_objects::CSmartObject* display_capabilities_;
-    smart_objects::CSmartObject* hmi_zone_capabilities_;
-    smart_objects::CSmartObject* soft_buttons_capabilities_;
-    smart_objects::CSmartObject* button_capabilities_;
-    smart_objects::CSmartObject* preset_bank_capabilities_;
-    smart_objects::CSmartObject* vr_capabilities_;
-    smart_objects::CSmartObject* speech_capabilities_;
-    smart_objects::CSmartObject* audio_pass_thru_capabilities_;
+    smart_objects::SmartObject* ui_supported_languages_;
+    smart_objects::SmartObject* tts_supported_languages_;
+    smart_objects::SmartObject* vr_supported_languages_;
+    smart_objects::SmartObject* display_capabilities_;
+    smart_objects::SmartObject* hmi_zone_capabilities_;
+    smart_objects::SmartObject* soft_buttons_capabilities_;
+    smart_objects::SmartObject* button_capabilities_;
+    smart_objects::SmartObject* preset_bank_capabilities_;
+    smart_objects::SmartObject* vr_capabilities_;
+    smart_objects::SmartObject* speech_capabilities_;
+    smart_objects::SmartObject* audio_pass_thru_capabilities_;
 };
 }  //  namespace application_manager
 

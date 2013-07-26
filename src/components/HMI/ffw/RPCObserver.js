@@ -29,19 +29,19 @@
  * 
  */
 
-FFW.RPCObserver = Em.Object.extend( {
+FFW.RPCObserver = Em.Object.extend({
 
     onRPCRegistered: function() {
         // request necessary parameters from Backend
-        Em.Logger.log( "FFW.RPCObserver.Registered" );
+        Em.Logger.log("FFW.RPCObserver.Registered");
     },
 
-    onRPCUnregistred: function() {
-        Em.Logger.log( "FFW.RPCObserver.onUnregistered" );
+    onRPCUnregistered: function() {
+        Em.Logger.log("FFW.RPCObserver.onUnregistered");
     },
 
     onRPCDisconnected: function() {
-        Em.Logger.log( "FFW.RPCObserver.onRPCDisconnected" );
+        Em.Logger.log("FFW.RPCObserver.onRPCDisconnected");
     },
 
     /*
@@ -50,27 +50,47 @@ FFW.RPCObserver = Em.Object.extend( {
      * previously store reuqestID to determine to which request repsonse belongs
      * to
      */
-    onRPCResult: function( result ) {
-
+    onRPCResult: function(result) {
         // parse JSON string and set necessary properties
     },
 
     /*
      */
-    onRPCError: function( error ) {
-
+    onRPCError: function(error) {
         // parse JSON string and set necessary properties
     },
 
     /*
      */
-    onRPCNotification: function( notification ) {
-
+    onRPCNotification: function(notification) {
         // parse JSON string and set necessary properties
     },
 
-    onRPCRequest: function( request ) {
-
-        // parse JSON string and send back necessary data
+    onRPCRequest: function(request) {
+        //parse JSON string and send back necessary data
+    },
+    
+    validationCheck: function(request) {
+    	if (request && request.method && request.params) {
+        	var parsedMethod = request.method.split(/[.]/),
+                validateFunc,
+                result;
+            
+        	if (SDL.ValidateMessage[parsedMethod[0]][parsedMethod[1]]){
+	        	validateFunc = SDL.ValidateMessage[parsedMethod[0]][parsedMethod[1]];
+	            result = validateFunc(request.params);
+	
+	            if (result.resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
+	                this.sendError(result.resultCode, request.id, request.method, result.resultMessage);
+	                return false;
+	            } else {
+	            	return true;
+	            }
+        	} else {
+        		this.sendError(SDL.SDLModel.resultCode["UNSUPPORTED_REQUEST"], request.id, request.method, 'Unsupported incoming request! ' + parsedMethod[0] + '.' + parsedMethod[1]);
+        		Em.Logger.error( 'No method "' + parsedMethod[0] + '.' + parsedMethod[1] + '"' );
+        		return false;
+        	}
+        }
     }
-} )
+});

@@ -33,10 +33,10 @@
 
 #include "application_manager/commands/mobile/alert_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -54,138 +54,83 @@ AlertRequest::~AlertRequest() {
 void AlertRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  unsigned int app_id =
+    (*message_)[strings::params][strings::connection_key].asInt();
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  SendAlertRequest();
-  SendPlayToneRequest();
-  SendSpeekRequest();
+  SendAlertRequest(app->app_id());
+  SendPlayToneRequest(app->app_id());
+  SendSpeakRequest(app->app_id());
 }
 
-void AlertRequest::SendAlertRequest() {
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
+void AlertRequest::SendAlertRequest(int app_id) {
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // create HMI alert request
-  smart_objects::CSmartObject* ui_alert  = new smart_objects::CSmartObject();
-
-  if (NULL == ui_alert) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  const int ui_cmd_id = hmi_apis::FunctionID::UI_Alert;
-
-  (*ui_alert)[strings::params][strings::function_id] =
-    ui_cmd_id;
-
-  (*ui_alert)[strings::params][strings::message_type] =
-    MessageType::kRequest;
-
-  // create Common.TextFieldStruct type
   // alert1
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][0] =
-    smart_objects::CSmartObject();
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][0]
+  msg_params[hmi_request::alert_strings] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+  msg_params[hmi_request::alert_strings][0]
   [hmi_request::field_name] = TextFieldName::ALERT_TEXT1;
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][0]
+  msg_params[hmi_request::alert_strings][0]
   [hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::alert_text1];
 
   // alert2
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][1] =
-    smart_objects::CSmartObject();
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][1]
-  [hmi_request::field_name] = TextFieldName::ALERT_TEXT2;
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][1]
-  [hmi_request::field_text] =
+  msg_params[hmi_request::alert_strings][1][hmi_request::field_name] =
+    TextFieldName::ALERT_TEXT2;
+  msg_params[hmi_request::alert_strings][1][hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::alert_text2];
+
   // alert3
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][2] =
-    smart_objects::CSmartObject();
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][2]
-  [hmi_request::field_name] = TextFieldName::ALERT_TEXT3;
-  (*ui_alert)[strings::msg_params][hmi_request::alert_strings][2]
-  [hmi_request::field_text] =
+  msg_params[hmi_request::alert_strings][2][hmi_request::field_name] =
+    TextFieldName::ALERT_TEXT3;
+  msg_params[hmi_request::alert_strings][2][hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::alert_text3];
+
   // duration
-  (*ui_alert)[strings::msg_params][hmi_request::duration] =
+  msg_params[hmi_request::duration] =
     (*message_)[strings::msg_params][strings::duration];
   // softButtons
-  (*ui_alert)[strings::msg_params][hmi_request::soft_buttons] =
+  msg_params[hmi_request::soft_buttons] =
     (*message_)[strings::msg_params][strings::soft_buttons];
   // app_id
-  (*ui_alert)[strings::msg_params][strings::app_id] =
-    (*message_)[strings::params][strings::connection_key];
+  msg_params[strings::app_id] = app_id;
 
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-      connection_key, correlation_id, ui_cmd_id);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(ui_alert);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_Alert, msg_params, true);
 }
 
-void AlertRequest::SendSpeekRequest() {
+void AlertRequest::SendSpeakRequest(int app_id) {
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       // crate HMI basic communication playtone request
-      smart_objects::CSmartObject* tts_speak =
-        new smart_objects::CSmartObject();
+      smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-      if (NULL == tts_speak) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-        return;
-      }
-
-      const int tts_cmd_id = hmi_apis::FunctionID::TTS_Speak;
-
-      (*tts_speak)[strings::params][strings::function_id] =
-        tts_cmd_id;
-
-      (*tts_speak)[strings::params][strings::message_type] =
-        MessageType::kRequest;
-      (*tts_speak)[strings::msg_params][hmi_request::tts_chunks] =
+      msg_params[hmi_request::tts_chunks] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+      msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
-      ApplicationManagerImpl::instance()->ManageHMICommand(tts_speak);
+      msg_params[strings::app_id] = app_id;
+      CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
     }
   }
 }
 
-void AlertRequest::SendPlayToneRequest() {
+void AlertRequest::SendPlayToneRequest(int app_id) {
   // check playtone parameter
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
-      smart_objects::CSmartObject* bc_play =
-        new smart_objects::CSmartObject();
-
-      if (NULL == bc_play) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-        return;
-      }
-
-      const int bc_cmd_id = hmi_apis::FunctionID::BasicCommunication_PlayTone;
-
-      (*bc_play)[strings::params][strings::function_id] =
-        bc_cmd_id;
-
-      (*bc_play)[strings::params][strings::message_type] =
-        MessageType::kNotification;
-      ApplicationManagerImpl::instance()->ManageHMICommand(bc_play);
+      CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_PlayTone,
+                            smart_objects::SmartObject());
     }
   }
 }

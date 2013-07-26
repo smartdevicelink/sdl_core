@@ -34,13 +34,14 @@
 #ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__
 #define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__
 
-#include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
+
+#include "smart_objects/smart_object.h"
+#include "smart_objects/enum_schema_item.h"
 
 #include "CFormatterJsonBase.hpp"
 
 #include "formatters/CSmartFactory.hpp"
-#include "SmartObjects/TEnumSchemaItem.hpp"
 #include "formatters/meta_formatter.h"
 
 namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
@@ -70,7 +71,7 @@ private:
    * @brief Extracts a message type from the SmartObject
    */
   static const std::string getMessageType(
-      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
   /**
    * @brief Extracts a message type from the root JSON object.
@@ -130,7 +131,7 @@ public:
    * @return true if success, false otherwise
    */
   static bool toString(
-      const NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
       std::string& outStr);
 
   /**
@@ -142,7 +143,7 @@ public:
    */
   template<typename FunctionId, typename MessageType>
   static int fromString(const std::string &str,
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject &out);
+      NsSmartDeviceLink::NsSmartObjects::SmartObject &out);
 
   /**
     * @brief Converts to string the smart object against the given schema
@@ -153,7 +154,7 @@ public:
     * @return formatting error code
     */
   static tMetaFormatterErrorCode MetaFormatToString(
-            const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+            const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
             const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
             std::string& outStr);
 
@@ -163,7 +164,7 @@ public:
 
 template<typename FunctionId, typename MessageType>
 int Formatters::CFormatterJsonSDLRPCv1::fromString(const std::string& str,
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& out) {
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& out) {
   Json::Value root;
   Json::Reader reader;
   std::string type;

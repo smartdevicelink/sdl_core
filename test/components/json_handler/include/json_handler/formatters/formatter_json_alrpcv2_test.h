@@ -52,8 +52,8 @@ namespace test { namespace components { namespace json_handler { namespace forma
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
 
         std::string str;
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject dstObj;
 
         fillTestObject(srcObj);
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -93,7 +93,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
             \"vrSynonyms\": [\"Synonym 1\", \"Synonym 2\"]\
         }";
 
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
         bool result;
 
         result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::

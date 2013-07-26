@@ -35,8 +35,9 @@
 #ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
 #define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
 
-#include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
+
+#include "smart_objects/smart_object.h"
 
 #include "CFormatterJsonBase.hpp"
 #include "formatters/CSmartFactory.hpp"
@@ -79,7 +80,7 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
          * @param outStr resulting JSON string
          * @return true if success, false otherwise
          */
-        static bool toString(const NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
+        static bool toString(const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
                 std::string& outStr);
 
 
@@ -94,7 +95,7 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
          */
         template<typename FunctionId, typename MessageType>
         static bool fromString(const std::string &str,
-                NsSmartDeviceLink::NsSmartObjects::CSmartObject &out,
+                NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
                 FunctionId functionId,
                 MessageType messageType);
 
@@ -113,7 +114,7 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
          */
         template<typename FunctionId, typename MessageType>
         static bool fromString(const std::string &str,
-                NsSmartDeviceLink::NsSmartObjects::CSmartObject &out,
+                NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
                 FunctionId functionId,
                 MessageType messageType,
                 int correlationId);
@@ -127,7 +128,7 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
         * @return formatting error code
         */
       static tMetaFormatterErrorCode MetaFormatToString(
-                const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+                const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
                 const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
                 std::string& outStr);
     };
@@ -135,7 +136,7 @@ namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
 template<typename FunctionId, typename MessageType>
 inline bool CFormatterJsonSDLRPCv2::fromString(
         const std::string& str,
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& out,
+        NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
         FunctionId functionId,
         MessageType messageType) {
 
@@ -162,7 +163,7 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
 template<typename FunctionId, typename MessageType>
 inline bool CFormatterJsonSDLRPCv2::fromString(
         const std::string& str,
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& out,
+        NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
         FunctionId functionId,
         MessageType messageType,
         int correlationId) {

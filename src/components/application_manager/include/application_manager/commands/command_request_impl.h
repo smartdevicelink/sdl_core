@@ -35,14 +35,17 @@
 
 #include "application_manager/commands/command_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-class CSmartObject;
+class SmartObject;
 }
 }
 
 namespace application_manager {
+
+class MessageChaining;
 
 namespace commands {
 
@@ -55,10 +58,47 @@ class CommandRequestImpl : public CommandImpl {
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
+
+  /*
+   * @brief Creates Mobile response
+   *
+   * @param success true if successful; false, if failed
+   * @param result_code Result code (SUCCESS, INVALID_DATA, e.t.c)
+   * @param info Provides additional human readable info regarding the result
+   * @param response_params Additional params in response
+   */
   void SendResponse(const bool success,
                     const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
-                    const NsSmart::CSmartObject* response_params = NULL);
+                    const NsSmart::SmartObject* response_params = NULL) const;
+
+  /*
+   * @brief Creates HMI request
+   *
+   * @param function_id HMI request ID
+   * @param msg_params HMI request msg params
+   * @param require_chaining Indicate if response from HMI is required
+   * before sending response to Mobile
+   * @param chaining counter Indicate amount of HMI responses should arrived
+   * before sending response to Mobile
+   *
+   */
+  void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                   const NsSmart::SmartObject& msg_params,
+                   bool require_chaining = false,
+                   unsigned int chaining_counter = 0);
+
+  /*
+   * @brief Creates HMI request
+   *
+   * @param function_id HMI request ID
+   * @param msg_params HMI request msg params
+   */
+  void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
+                   const NsSmart::SmartObject& msg_params) const;
+
+ protected:
+  MessageChaining*  msg_chaining_;
 };
 
 }  // namespace commands
