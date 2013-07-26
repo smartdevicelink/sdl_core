@@ -63,8 +63,7 @@ void UnsubscribeButtonRequest::Run() {
   }
 
   const unsigned int btn_id =
-    static_cast<unsigned int>
-    ((*message_)[str::msg_params][str::button_name].asInt());
+      ((*message_)[str::msg_params][str::button_name]asUInt());
 
   if (!app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);

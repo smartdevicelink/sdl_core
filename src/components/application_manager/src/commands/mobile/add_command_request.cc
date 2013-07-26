@@ -83,8 +83,8 @@ void AddCommandRequest::Run() {
     ++chaining_counter;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands) &&
-      (*message_)[strings::msg_params][strings::vr_commands].length() > 0) {
+  if (((*message_)[strings::msg_params].keyExists(strings::vr_commands)) &&
+      ((*message_)[strings::msg_params][strings::vr_commands].length() > 0)) {
     ++chaining_counter;
   }
 
@@ -104,10 +104,10 @@ void AddCommandRequest::Run() {
 
     msg_params[strings::app_id] = app->app_id();
 
-    if ((*message_)[strings::msg_params]
-                   [strings::cmd_icon].keyExists(strings::value) &&
-         0 < (*message_)[strings::msg_params][strings::cmd_icon]
-                                             [strings::value].length()) {
+    if (((*message_)[strings::msg_params]
+                   [strings::cmd_icon].keyExists(strings::value)) &&
+         (0 < (*message_)[strings::msg_params][strings::cmd_icon]
+                                             [strings::value].length())) {
       msg_params[strings::cmd_icon] =
          (*message_)[strings::msg_params][strings::cmd_icon];
 
