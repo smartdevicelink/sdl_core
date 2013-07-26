@@ -293,4 +293,5 @@ public class Names {
 	public static final String maneuverComplete = "maneuverComplete";
 	public static final String turnList = "turnList";
     public static final String muteAudio = "muteAudio";
+    public static final String dtcMask = "dtcMask";
 }

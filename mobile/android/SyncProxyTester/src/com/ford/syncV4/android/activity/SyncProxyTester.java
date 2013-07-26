@@ -1794,44 +1794,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == Names.GetDTCs) { 
-							//GetDTCs
-							AlertDialog.Builder builder;
-							AlertDialog dlg;
-							
-							final Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.getdtcs, null);
-							
-							final EditText txtECUNameDTC = (EditText) layout.findViewById(R.id.txtECUNameDTC);
-							final CheckBox chkEncryptedDTC = (CheckBox) layout.findViewById(R.id.chkEncryptedDTC);
-							
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									try {
-										GetDTCs msg = new GetDTCs();
-										msg.setEcuName(Integer.parseInt(txtECUNameDTC.getText().toString()));
-										msg.setEncrypted(chkEncryptedDTC.isChecked());
-										msg.setCorrelationID(autoIncCorrId++);
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (NumberFormatException e) {
-										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							dlg = builder.create();
-							dlg.show();
+						} else if (adapter.getItem(which) == Names.GetDTCs) {
+                            sendGetDTCs();
 						} else if (adapter.getItem(which) == Names.ShowConstantTBT) {
 							sendShowConstantTBT();
 						} else if (adapter.getItem(which) == Names.AlertManeuver) {
@@ -1930,6 +1894,44 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 						messageSelectCount.put(function, curCount + 1);
 					}
+
+                   /**
+                    * Opens the dialog for GetDTCs message and sends it.
+                    */
+                   private void sendGetDTCs() {
+                       final Context mContext = adapter.getContext();
+                       LayoutInflater inflater = (LayoutInflater) mContext
+                               .getSystemService(LAYOUT_INFLATER_SERVICE);
+                       View layout = inflater.inflate(R.layout.getdtcs, null);
+
+                       final EditText txtECUNameDTC = (EditText) layout.findViewById(R.id.getdtcs_txtECUNameDTC);
+                       final EditText txtdtcMask = (EditText) layout.findViewById(R.id.getdtcs_dtcMask);
+
+                       AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                       builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               try {
+                                   GetDTCs msg = new GetDTCs();
+                                   msg.setEcuName(Integer.parseInt(txtECUNameDTC.getText().toString()));
+                                   msg.setDTCMask(Integer.parseInt(txtdtcMask.getText().toString()));
+                                   msg.setCorrelationID(autoIncCorrId++);
+                                   _msgAdapter.logMessage(msg, true);
+                                   ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                               } catch (NumberFormatException e) {
+                                   Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
+                               } catch (SyncException e) {
+                                   _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                               }
+                           }
+                       });
+                       builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               dialog.cancel();
+                           }
+                       });
+                       builder.setView(layout);
+                       builder.show();
+                   }
 
                    /**
                     * Opens the dialog for PerformAudioPassThru message and sends it.

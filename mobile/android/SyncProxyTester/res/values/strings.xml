@@ -146,5 +146,9 @@
     <string name="performaudiopassthru_bitsPerSample">Bits Per Sample</string>
     <string name="performaudiopassthru_audioType">Audio Type</string>
     <string name="performaudiopassthru_muteAudio">Mute Audio</string>
+    <string name="getdtcs_ecuName">ECU Name</string>
+    <string name="getdtcs_ecuNameDefault">2000</string>
+    <string name="getdtcs_dtcMask">DTC Mask</string>
+    <string name="getdtcs_dtcMaskDefault">42</string>
 
 </resources>
