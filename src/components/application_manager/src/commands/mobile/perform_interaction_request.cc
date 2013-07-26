@@ -219,8 +219,15 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
     TextFieldName::INITIAL_INTERACTION_TEXT;
   msg_params[hmi_request::initial_text][hmi_request::field_text] =
     (*message_)[strings::msg_params][hmi_request::initial_text];
-  msg_params[strings::timeout] =
-      (*message_)[strings::msg_params][strings::timeout];
+
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    msg_params[strings::timeout] =
+        (*message_)[strings::msg_params][strings::timeout];
+  }
+  else {
+    msg_params[strings::timeout] = 10000;
+  }
+
   msg_params[strings::app_id] = app->app_id();
 
   msg_params[strings::choice_set] =
