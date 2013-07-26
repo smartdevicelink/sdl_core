@@ -292,4 +292,5 @@ public class Names {
 	public static final String distanceToManeuverScale = "distanceToManeuverScale";
 	public static final String maneuverComplete = "maneuverComplete";
 	public static final String turnList = "turnList";
+    public static final String muteAudio = "muteAudio";
 }

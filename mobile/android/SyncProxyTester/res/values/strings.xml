@@ -134,5 +134,17 @@
     <string name="setglobalproperties_vrHelpItemPosDefault">1,2,3</string>
     <string name="setglobalproperties_vrHelpItemDefault">VR help item,Help Item 2,third item</string>
     <string name="setglobalproperties_vrHelpItemImageDefault">imageFilename,action,action</string>
+    <string name="performaudiopassthru_initPrompt">Initial Prompt</string>
+    <string name="performaudiopassthru_initPromptDefault">Initial Prompt</string>
+    <string name="performaudiopassthru_text1">AudioPassThru Display Text 1</string>
+    <string name="performaudiopassthru_text1Default">AudioPassThru Display Text 1</string>
+    <string name="performaudiopassthru_text2">AudioPassThru Display Text 2</string>
+    <string name="performaudiopassthru_text2Default">AudioPassThru Display Text 2</string>
+    <string name="performaudiopassthru_sampleRate">Sampling Rate</string>
+    <string name="performaudiopassthru_maxDuration">Max Duration</string>
+    <string name="performaudiopassthru_maxDurationDefault">10000</string>
+    <string name="performaudiopassthru_bitsPerSample">Bits Per Sample</string>
+    <string name="performaudiopassthru_audioType">Audio Type</string>
+    <string name="performaudiopassthru_muteAudio">Mute Audio</string>
 
 </resources>

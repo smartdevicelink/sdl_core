@@ -1719,74 +1719,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.PerformAudioPassThru) {
-							//PerformAudioPassThru
-							AlertDialog.Builder builder;
-							AlertDialog dlg;
-
-							final Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.performaudiopassthru, null);
-
-							final EditText txtInitialPrompt = (EditText) layout.findViewById(R.id.txtInitialPrompt);
-
-							final EditText txtAudioPassThruDisplayText1 = (EditText) layout.findViewById(R.id.txtAudioPassThruDisplayText1);
-
-							final EditText txtAudioPassThruDisplayText2 = (EditText) layout.findViewById(R.id.txtAudioPassThruDisplayText2);
-							
-							final Spinner spnSamplingRate = (Spinner) layout.findViewById(R.id.spnSamplingRate);
-							ArrayAdapter<SamplingRate> spinnerAdapterSamplingRate = new ArrayAdapter<SamplingRate>(adapter.getContext(),
-									android.R.layout.simple_spinner_item, SamplingRate.values());
-							spinnerAdapterSamplingRate.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-							spnSamplingRate.setAdapter(spinnerAdapterSamplingRate);
-
-							final EditText txtMaxDuration = (EditText) layout.findViewById(R.id.txtMaxDuration);
-							
-							final Spinner spnBitsPerSample = (Spinner) layout.findViewById(R.id.spnBitsPerSample);
-							ArrayAdapter<BitsPerSample> spinnerAdapterBitsPerSample = new ArrayAdapter<BitsPerSample>(adapter.getContext(),
-									android.R.layout.simple_spinner_item, BitsPerSample.values());
-							spinnerAdapterBitsPerSample.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-							spnBitsPerSample.setAdapter(spinnerAdapterBitsPerSample);
-
-							final Spinner spnAudioType = (Spinner) layout.findViewById(R.id.spnAudioType);
-							ArrayAdapter<AudioType> spinnerAdapterAudioType = new ArrayAdapter<AudioType>(adapter.getContext(),
-									android.R.layout.simple_spinner_item, AudioType.values());
-							spinnerAdapterAudioType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-							spnAudioType.setAdapter(spinnerAdapterAudioType);
-							
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									Vector<TTSChunk> initChunks = TTSChunkFactory
-											.createSimpleTTSChunks(txtInitialPrompt.getText().toString());
-									try {
-										PerformAudioPassThru msg = new PerformAudioPassThru();
-										msg.setInitialPrompt(initChunks);
-										msg.setAudioPassThruDisplayText1(txtAudioPassThruDisplayText1.getText().toString());
-										msg.setAudioPassThruDisplayText2(txtAudioPassThruDisplayText2.getText().toString());
-										msg.setSamplingRate((SamplingRate) spnSamplingRate.getSelectedItem());
-										msg.setMaxDuration(Integer.parseInt(txtMaxDuration.getText().toString()));
-										msg.setBitsPerSample((BitsPerSample) spnBitsPerSample.getSelectedItem());
-										msg.setAudioType((AudioType) spnAudioType.getSelectedItem());
-										msg.setCorrelationID(autoIncCorrId++);
-										latestPerformAudioPassThruMsg = msg;
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (NumberFormatException e) {
-										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							dlg = builder.create();
-							dlg.show();
+                            sendPerformAudioPassThru();
 						} else if (adapter.getItem(which) == Names.EndAudioPassThru) {
 							//EndAudioPassThru
 							try {
@@ -1997,6 +1930,87 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 						messageSelectCount.put(function, curCount + 1);
 					}
+
+                   /**
+                    * Opens the dialog for PerformAudioPassThru message and sends it.
+                    */
+                   private void sendPerformAudioPassThru() {
+                       final Context mContext = adapter.getContext();
+                       LayoutInflater inflater = (LayoutInflater) mContext
+                               .getSystemService(LAYOUT_INFLATER_SERVICE);
+                       View layout = inflater.inflate(R.layout.performaudiopassthru, null);
+
+                       final EditText txtInitialPrompt = (EditText) layout
+                               .findViewById(R.id.performaudiopassthru_txtInitialPrompt);
+                       final EditText txtAudioPassThruDisplayText1 = (EditText) layout
+                               .findViewById(R.id.performaudiopassthru_txtAudioPassThruDisplayText1);
+                       final EditText txtAudioPassThruDisplayText2 = (EditText) layout
+                               .findViewById(R.id.performaudiopassthru_txtAudioPassThruDisplayText2);
+                       final Spinner spnSamplingRate = (Spinner) layout
+                               .findViewById(R.id.performaudiopassthru_spnSamplingRate);
+                       final EditText txtMaxDuration = (EditText) layout
+                               .findViewById(R.id.performaudiopassthru_txtMaxDuration);
+                       final Spinner spnBitsPerSample = (Spinner) layout
+                               .findViewById(R.id.performaudiopassthru_spnBitsPerSample);
+                       final Spinner spnAudioType = (Spinner) layout
+                               .findViewById(R.id.performaudiopassthru_spnAudioType);
+                       final CheckBox chkMuteAudio = (CheckBox) layout
+                               .findViewById(R.id.performaudiopassthru_muteAudio);
+
+                       ArrayAdapter<SamplingRate> spinnerAdapterSamplingRate = new ArrayAdapter<SamplingRate>(
+                               adapter.getContext(),
+                               android.R.layout.simple_spinner_item, SamplingRate.values());
+                       spinnerAdapterSamplingRate
+                               .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                       spnSamplingRate.setAdapter(spinnerAdapterSamplingRate);
+
+                       ArrayAdapter<BitsPerSample> spinnerAdapterBitsPerSample = new ArrayAdapter<BitsPerSample>(
+                               adapter.getContext(),
+                               android.R.layout.simple_spinner_item, BitsPerSample.values());
+                       spinnerAdapterBitsPerSample
+                               .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                       spnBitsPerSample.setAdapter(spinnerAdapterBitsPerSample);
+
+                       ArrayAdapter<AudioType> spinnerAdapterAudioType = new ArrayAdapter<AudioType>(
+                               adapter.getContext(),
+                               android.R.layout.simple_spinner_item, AudioType.values());
+                       spinnerAdapterAudioType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                       spnAudioType.setAdapter(spinnerAdapterAudioType);
+
+                       AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                       builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               Vector<TTSChunk> initChunks = TTSChunkFactory
+                                       .createSimpleTTSChunks(txtInitialPrompt.getText().toString());
+                               try {
+                                   PerformAudioPassThru msg = new PerformAudioPassThru();
+                                   msg.setInitialPrompt(initChunks);
+                                   msg.setAudioPassThruDisplayText1(txtAudioPassThruDisplayText1.getText().toString());
+                                   msg.setAudioPassThruDisplayText2(txtAudioPassThruDisplayText2.getText().toString());
+                                   msg.setSamplingRate((SamplingRate) spnSamplingRate.getSelectedItem());
+                                   msg.setMaxDuration(Integer.parseInt(txtMaxDuration.getText().toString()));
+                                   msg.setBitsPerSample((BitsPerSample) spnBitsPerSample.getSelectedItem());
+                                   msg.setAudioType((AudioType) spnAudioType.getSelectedItem());
+                                   msg.setMuteAudio(chkMuteAudio.isChecked());
+                                   msg.setCorrelationID(autoIncCorrId++);
+                                   latestPerformAudioPassThruMsg = msg;
+                                   _msgAdapter.logMessage(msg, true);
+                                   ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                               } catch (NumberFormatException e) {
+                                   Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
+                               } catch (SyncException e) {
+                                   _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                               }
+                           }
+                       });
+                       builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               dialog.cancel();
+                           }
+                       });
+                       builder.setView(layout);
+                       builder.show();
+                   }
 
                    /**
                     * Opens the dialog for AddSubMenu message and sends it.
