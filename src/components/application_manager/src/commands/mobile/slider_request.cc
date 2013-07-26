@@ -66,6 +66,10 @@ void SliderRequest::Run() {
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application_impl->app_id();
 
+  if (!(*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    msg_params[strings::timeout] = 10000;
+  }
+
   CreateHMIRequest(hmi_apis::FunctionID::UI_Slider, msg_params, true);
 }
 

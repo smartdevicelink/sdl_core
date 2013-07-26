@@ -84,6 +84,13 @@ class PerformInteractionRequest : public CommandRequestImpl {
      */
     bool SendUIPerformInteractionRequest(Application* const app);
 
+    /*
+     * @brief Sends TTS Speak request to HMI
+     *
+     * @param app_id Application ID
+     */
+    void SendTTSSpeakRequest(Application* const app);
+
     DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 

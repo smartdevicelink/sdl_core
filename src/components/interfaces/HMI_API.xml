@@ -1389,7 +1389,7 @@
         <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
           <description>Array of lines of alert text fields. See TextFieldStruct. Uses alertText1, alertText2, alertText3.</description>
         </param>
-        <param name="duration" type="Integer" mandatory="false" minvalue="3000" maxvalue="10000" defvalue="5000">
+        <param name="duration" type="Integer" mandatory="true" minvalue="3000" maxvalue="10000" defvalue="5000">
           <description>Timeout in milliseconds. Typical timeouts are 3-5 seconds. If omitted, timeout is set to 5s.</description>
         </param>
         <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
@@ -1681,7 +1681,7 @@
       <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
         <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
       </param>
-      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="false">
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="true">
         <description>App defined timeout.</description>
       </param>
       <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">

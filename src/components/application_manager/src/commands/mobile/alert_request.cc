@@ -94,14 +94,19 @@ void AlertRequest::SendAlertRequest(int app_id) {
   msg_params[hmi_request::alert_strings][2][hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::alert_text3];
 
-  // duration
-  msg_params[hmi_request::duration] =
-    (*message_)[strings::msg_params][strings::duration];
   // softButtons
   msg_params[hmi_request::soft_buttons] =
     (*message_)[strings::msg_params][strings::soft_buttons];
   // app_id
   msg_params[strings::app_id] = app_id;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
+    msg_params[strings::duration] =
+        (*message_)[strings::msg_params][strings::duration];
+  }
+  else {
+    msg_params[strings::duration] = 5000;
+  }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_Alert, msg_params, true);
 }
