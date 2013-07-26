@@ -82,6 +82,10 @@ void PerformInteractionRequest::Run() {
   if (SendUIPerformInteractionRequest(app)) {
      app->set_perform_interaction_active(true);
   }
+
+  SendTTSSpeakRequest(app);
+
+  // TODO (DK): need to implement timeout TTS speak request.
 }
 
 bool PerformInteractionRequest::SendVRAddCommandRequest(
@@ -256,6 +260,16 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
   return true;
 }
 
+void PerformInteractionRequest::SendTTSSpeakRequest(Application* const app) {
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::tts_chunks] =
+      (*message_)[strings::msg_params][strings::initial_prompt];
+  msg_params[strings::app_id] = app->app_id();
+
+  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, false);
+}
 }  // namespace commands
 
 }  // namespace application_manager
