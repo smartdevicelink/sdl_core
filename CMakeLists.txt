@@ -11,8 +11,6 @@ set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized
 set(CMAKE_CXX_FLAGS_RELEASE "-s") #It will be appended to CMAKE_CXX_FLAGS in release
 
 option( BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
-option( BUILD_ONLY_TM "Build only new TM" ON)
-set(BUILD_ONLY_TM ON)
 set(BUILD_TESTS ON)
 
 add_definitions(-DOS_POSIX)

@@ -1,12 +1,10 @@
-if(BUILD_ONLY_TM)
-add_definitions(-DBUILD_ONLY_TM)
 set(LIBRARIES
   ApplicationManager
   HMI_API
   SmartObjects
-  #JSONHandler
-  #ProtocolHandler
-  #connectionHandler
+  JSONHandler
+  ProtocolHandler
+  connectionHandler
   TransportManager
   HMIMessageHandler
   MessageBroker
@@ -42,50 +40,6 @@ include_directories (
   ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/components/
 )
-else()
-set(LIBRARIES
-  ApplicationManager
-  HMI_API
-  SmartObjects
-  JSONHandler
-  ProtocolHandler
-  connectionHandler
-  TransportManager
-  HMIMessageHandler
-  MessageBroker
-  MessageBrokerClient
-  MessageBrokerServer
-  Utils
-  encryption
-  jsoncpp
-  bluetooth
-  pthread
-  rt
-  ConfigProfile
-  MobileMessageHandler
-  RequestWatchdog
-)
-include_directories (
-  ./
-  ../components/protocol_handler/include/
-  ../thirdPartyLibs/jsoncpp/include/
-  ../components/mobile_message_handler/include
-  ../components/application_manager/include
-  ../components/JSONHandler/include
-  ../components/AppMgr/include
-  ../components/TransportManager/include
-  ../components/config_profile/include
-  ../components/utils/include/
-  ../components/connection_handler/include/
-  ../components/hmi_message_handler/include
-  ../components/request_watchdog/include
-  ../components/SmartObjects/include/
-  ../utils/include/
-  ../thirdPartyLibs/MessageBroker/include
-  ../thirdPartyLibs/encryption/include
-  ${CMAKE_BINARY_DIR}/src/components/
-)
-endif()
 
 
 set (SOURCES

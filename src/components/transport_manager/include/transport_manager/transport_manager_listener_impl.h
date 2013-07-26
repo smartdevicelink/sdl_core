@@ -42,38 +42,33 @@ namespace transport_manager {
 
 class TransportManagerListenerImpl : public TransportManagerListener {
  public:
-  virtual ~TransportManagerListenerImpl();
+  virtual ~TransportManagerListenerImpl(){};
 
-  virtual void OnDeviceListUpdated(const Devices& device_list) {
-  }
+  virtual void OnDeviceFound(const DeviceHandle& device, const ApplicationList &app_list) {}
   virtual void OnAccessRequested(const DeviceDesc& device) {
   }
   virtual void OnScanDevicesFinished() {
   }
   virtual void OnScanDevicesFailed(const SearchDeviceError& error) {
   }
-  virtual void OnConnectionEstablished(const DeviceDesc& device,
-                                       ConnectionUID connection_id) {
-  }
-  virtual void OnConnectionFailed(const DeviceDesc& device,
-                                  ConnectionUID connection_id,
-                                  const ConnectError& error) {
-  }
+  virtual void OnConnectionEstablished(const DeviceHandle& device,
+                                       const ApplicationHandle &app_id,
+                                       ConnectionUID connection_id) {}
+  virtual void OnConnectionFailed(const DeviceHandle& device,
+                                  const ApplicationHandle &app_id,
+                                  const ConnectError& error) {}
   virtual void OnConnectionClosed(ConnectionUID connection_id) {
   }
   virtual void OnConnectionClosedFailure(ConnectionUID connection_id,
                                          const DisconnectError& error) {
   }
-  virtual void OnDeviceConnectionLost(const DeviceDesc& device,
-                                      const DisconnectDeviceError& error) {
-  }
-  virtual void OnDisconnectFailed(const DeviceDesc& device,
-                                  const DisconnectDeviceError& error) {
-  }
-  virtual void OnTMMessageReceived(const RawMessageSptr& message) {
-  }
-  virtual void OnTMMessageReceiveFailed(const DataReceiveError& error) {
-  }
+  virtual void OnDeviceConnectionLost(const DeviceHandle& device,
+                                      const DisconnectDeviceError& error){}
+  virtual void OnDisconnectFailed(const DeviceHandle& device,
+                                  const DisconnectDeviceError& error) {}
+  virtual void OnTMMessageReceived(const RawMessageSptr message) {}
+  virtual void OnTMMessageReceiveFailed(ConnectionUID connection_id,
+                                        const DataReceiveError& error){}
 
   virtual void OnTMMessageSend() {
   }

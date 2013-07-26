@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock.h"
-#ifndef BUILD_ONLY_TM
 #include "utils/file_system_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "request_watchdog/request_watchdog_test.h"
@@ -11,7 +10,6 @@
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
-#endif
 
 //#include "SmartObjectConvertionTimeTest.h"
 //#include "jsoncpp/json_reader_test.h"
@@ -21,13 +19,11 @@
 //#include "json_handler/formatters/formatter_json_alrpcv2_test.h"
 //#include "json_handler/formatters/formatter_json_rpcv2_test.h"
 
-#ifndef BUILD_ONLY_TM
 using namespace test::components::request_watchdog_test;
 using namespace test::components::utils;
 using namespace test::components::protocol_handler_test;
 using namespace test::components::SmartObjects;
 using namespace utils;
-#endif
 //using namespace test::third_party_libs::json_reader_test;
 //using namespace test::components::json_handler::smart_schema_draft_test;
 //using namespace test::components::json_handler::formatters;

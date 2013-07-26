@@ -8,7 +8,6 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/test/components/transport_manager/include/
 )
 
-if(BUILD_ONLY_TM)
 set (LIBRARIES
     gtest
     gtest_main
@@ -34,4 +33,3 @@ set (SOURCES
 create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")
 create_test("test_TcpDeviceAdapter" "src/test_tcp_device_adapter.cc" "${LIBRARIES}")
 target_link_libraries("test_TransportManagerTest" TransportManager)
-endif()

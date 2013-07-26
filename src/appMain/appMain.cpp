@@ -39,7 +39,6 @@
 
 #include "appMain.h"
 
-#ifndef BUILD_ONLY_TM
 #include "protocol_handler/protocol_handler_impl.h"
 
 #include "connection_handler/connection_handler_impl.h"
@@ -75,9 +74,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
-#include "TransportManager/ITransportManager.hpp"
-#include "TransportManager/ITransportManagerDeviceListener.hpp"
-#endif
+#include "transport_manager/transport_manager.h"
+#include "transport_manager/transport_manager_impl.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
 /*class CTransportManagerListener : public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener
@@ -113,7 +111,6 @@
  */
 
 int main(int argc, char** argv) {
-#ifndef BUILD_ONLY_TM
   // --------------------------------------------------------------------------
   // Logger initialization
 
@@ -127,8 +124,8 @@ int main(int argc, char** argv) {
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
-  NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager =
-  NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
+  ::transport_manager::TransportManager* transport_manager =
+      ::transport_manager::TransportManagerImpl::instance();
   DCHECK(transport_manager);
 
   protocol_handler::ProtocolHandlerImpl* protocol_handler =
@@ -151,8 +148,8 @@ int main(int argc, char** argv) {
   hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler)
 
-  transport_manager->addDataListener(protocol_handler);
-  transport_manager->addDeviceListener(connection_handler);
+//  transport_manager->addDataListener(protocol_handler);
+//  transport_manager->addDeviceListener(connection_handler);
 
   mmh->setProtocolHandler(protocol_handler);
   hmi_handler->setMessageObserver(app_manager);
@@ -171,18 +168,17 @@ int main(int argc, char** argv) {
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
 
-  if (!InitMessageBroker()) {
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
+//  if (!InitMessageBroker()) {
+//    exit(EXIT_FAILURE);
+//  }
+//  LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
-  if (!InitHmi()) {
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitHmi successful");
+//  if (!InitHmi()) {
+//    exit(EXIT_FAILURE);
+//  }
+//  LOG4CXX_INFO(logger, "InitHmi successful");
 
   // --------------------------------------------------------------------------
-#endif
 
   while (true) {
     sleep(100500);
