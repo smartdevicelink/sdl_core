@@ -110,6 +110,7 @@ public class SoftButtonEditActivity extends Activity {
 		imageTypeAdapter
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinnerImageType.setAdapter(imageTypeAdapter);
+        spinnerImageType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
 
 		systemActionAdapter = new ArrayAdapter<SystemAction>(this,
 				android.R.layout.simple_spinner_item, SystemAction.values());

@@ -2110,6 +2110,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                        }
 
                        spnIconType.setAdapter(imageTypeAdapter);
+                       spnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
 
                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -2266,7 +2267,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						
 						if (v2Features) {
 							spnTurnIconType.setAdapter(imageTypeAdapter);
-						} else {
+                            spnTurnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
+                        } else {
 							int visibility = android.view.View.GONE;
 							View[] views = { chkUseTurnIcon, spnTurnIconType, txtTurnIconValue };
 							for (View view : views) {
@@ -2380,10 +2382,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final EditText image3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image3Value);
 						
 						if (v2Features) {
-							image1Type.setAdapter(imageTypeAdapter);
-							image2Type.setAdapter(imageTypeAdapter);
-							image3Type.setAdapter(imageTypeAdapter);
-						} else {
+                            Spinner[] spinners = { image1Type, image2Type, image3Type };
+                            for (Spinner spinner : spinners) {
+                                spinner.setAdapter(imageTypeAdapter);
+                                spinner.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
+                            }
+                        } else {
 							int visibility = android.view.View.GONE;
 							View[] views = { image1Check, image2Check, image3Check,
 									image1Type, image2Type, image3Type,
@@ -2532,8 +2536,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                             }
 						} else {
                             graphicType.setAdapter(imageTypeAdapter);
+                            graphicType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
 
-							SoftButton sb1 = new SoftButton();
+                            SoftButton sb1 = new SoftButton();
 							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb1.setText("KeepContext");
 							sb1.setType(SoftButtonType.SBT_TEXT);
@@ -2768,7 +2773,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
                                             Image image = new Image();
                                             image.setValue(itemImageArray[i]);
-                                            image.setImageType(ImageType.STATIC);
+                                            image.setImageType(ImageType.DYNAMIC);
                                             item.setImage(image);
 
                                             vrHelpItems.add(item);
@@ -2865,7 +2870,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
 										Image ti = new Image();
 										ti.setValue((i < iconNames.length) ? iconNames[i] : "");
-										ti.setImageType(ImageType.STATIC);
+										ti.setImageType(ImageType.DYNAMIC);
 										t.setTurnIcon(ti);
 										tarray.add(t);
 									}
@@ -3205,7 +3210,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
                                         Image image = new Image();
                                         image.setValue(itemImageArray[i]);
-                                        image.setImageType(ImageType.STATIC);
+                                        image.setImageType(ImageType.DYNAMIC);
                                         item.setImage(image);
 
                                         vrHelpItems.add(item);

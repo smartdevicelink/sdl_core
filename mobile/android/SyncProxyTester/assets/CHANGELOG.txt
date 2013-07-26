@@ -1,4 +1,5 @@
 [CW30]
+* ImageType value is DYNAMIC by default.
 * SetGlobalProperties, AddCommand, CreateInteractionChoiceSet, PerformInteraction dialogs: allow to set multiple VR commands/synonyms parameters as comma-separated strings.
 * Update VehicleData and Language values.
 * ButtonSubscriptions dialog: add ButtonName.CUSTOM_NAME value.
