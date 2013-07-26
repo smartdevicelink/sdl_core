@@ -1,3 +1,0 @@
-include ':SyncProxyTester'
-include ':FileExplorer'
-include ':SyncProxyAndroid'
