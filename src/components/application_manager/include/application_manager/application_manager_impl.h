@@ -37,7 +37,6 @@
 #include <vector>
 #include <map>
 #include <set>
-#include <string>
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_chaining.h"
@@ -126,7 +125,7 @@ class ApplicationManagerImpl : public ApplicationManager
     bool RemoveAppDataFromHMI(Application* application);
     bool LoadAppDataToHMI(Application* application);
     bool ActivateApplication(Application* application);
-    void ConnectToDevice(std::string id);
+    void ConnectToDevice(unsigned int id);
     void OnHMIStartedCooperation();
 
     /*

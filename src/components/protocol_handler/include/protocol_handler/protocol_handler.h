@@ -35,50 +35,35 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 
-#include "transport_manager/transport_manager.h"
-
+#include "protocol_handler/raw_message.h"
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
-class ProtocolObserver;
-class SessionObserver;
-
 /**
  * \class ProtocolHandler
- * \brief Interface for component parsing protocol header
+ * \brief Interface for component parsing protocol header 
  * on the messages between SDL and mobile application.
  */
-class ProtocolHandler {
-  public:
-    /**
-     * \brief Sets pointer for higher layer handler for message exchange
-     * \param observer Pointer to object of the class implementing
-     * IProtocolObserver
-     */
-    virtual void set_protocol_observer(ProtocolObserver* observer) = 0;
+class ProtocolHandler
+{
+public:
 
-    /**
-     * \brief Sets pointer for Connection Handler layer for managing sessions
-     * \param observer Pointer to object of the class implementing
-     * ISessionObserver
-     */
-    virtual void set_session_observer(SessionObserver* observer) = 0;
+  /**
+   * \brief Method for sending message to Mobile Application.
+   * \param message RawMessage with params to be sent to Mobile App.
+   */
+  virtual void sendMessageToMobileApp(const RawMessage* message) = 0;
 
-    /**
-     * \brief Method for sending message to Mobile Application.
-     * \param message RawMessage with params to be sent to Mobile App.
-     */
-    virtual void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) = 0;
-
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ProtocolHandler() {
-    }
+protected:
+	/**
+   * \brief Destructor
+   */
+	virtual ~ProtocolHandler(){
+	}
 };
-}  //  namespace protocol_handler
+}
 
-#endif  //  SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
+
+#endif // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER

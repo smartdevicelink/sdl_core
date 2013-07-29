@@ -82,7 +82,7 @@ void JSONReaderTest::SetUp()
   tabString_ = "{\"field\" : \"va\tlue\" }";
   bellString_ = "{\"field\" : \"va\alue\" }";
   quoteString_ = "{\"field\" : \"va\"lue\" }";
-  slashString_ = "{\"field\" : \"va/lue\" }";
+  slashString_ = "{\"field\" : \"va\/lue\" }";
   backslashString_ = "{\"field\" : \"va\\lue\" }";
   singlequoteString_ = "{\"field\" : \"va\'lue\" }";
   openingbraceString_ = "{\"field\" : \"va{lue\" }";

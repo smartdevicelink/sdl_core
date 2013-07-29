@@ -37,41 +37,12 @@
 
 namespace protocol_handler {
 
-RawMessage::RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
-                       const unsigned char* data, unsigned int data_size)
+RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
+                       unsigned char* data, unsigned int dataSize)
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),
-      serial_number_(0),
-      waiting_(false),
-      data_size_(data_size),
-      connection_uid_(0) {
-  if (data_size > 0) {
-    data_ = new unsigned char[data_size];
-    for (int i = 0; i < data_size; ++i) {
-      data_[i] = data[i];
-    }
-  } else {
-    data_ = 0;
-  }
-}
-
-RawMessage::RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
-                       unsigned int serialNumber, const unsigned char* data,
-                       unsigned int data_size)
-    : connection_key_(connectionKey),
-      protocol_version_(protocolVersion),
-      serial_number_(serialNumber),
-      waiting_(false),
-      data_size_(data_size),
-      connection_uid_(0) {
-  if (data_size > 0) {
-    data_ = new unsigned char[data_size];
-    for (int i = 0; i < data_size; ++i) {
-      data_[i] = data[i];
-    }
-  } else {
-    data_ = 0;
-  }
+      data_(data),
+      data_size_(dataSize) {
 }
 
 RawMessage::~RawMessage() {
@@ -81,7 +52,7 @@ RawMessage::~RawMessage() {
   }
 }
 
-unsigned int RawMessage::connection_key() const {
+int RawMessage::connection_key() const {
   return connection_key_;
 }
 
@@ -96,29 +67,4 @@ unsigned int RawMessage::data_size() const {
 unsigned int RawMessage::protocol_version() const {
   return protocol_version_;
 }
-
-unsigned int RawMessage::serial_number() const {
-  return serial_number_;
-}
-
-bool RawMessage::operator==(const RawMessage& other) const {
-  return (serial_number_ == other.serial_number_);
-}
-
-bool RawMessage::IsWaiting() const {
-  return waiting_;
-}
-
-unsigned int RawMessage::connection_uid() const {
-  return connection_uid_;
-}
-
-void RawMessage::set_connection_uid(unsigned int connection_id) {
-  connection_uid_ = connection_id;
-}
-
-void RawMessage::set_waiting(bool v) {
-  waiting_ = v;
-}
-
 }  // namespace protocol_handler

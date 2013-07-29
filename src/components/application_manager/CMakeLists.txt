@@ -9,7 +9,7 @@ include_directories (
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
-  ../transport_manager/include/
+  ../TransportManager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
   ${CMAKE_BINARY_DIR}/src/components/

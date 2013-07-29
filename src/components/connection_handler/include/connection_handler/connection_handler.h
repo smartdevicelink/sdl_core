@@ -36,12 +36,14 @@
 #ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
 #define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
 
-#include "transport_manager/transport_manager.h"
+#include "TransportManager/ITransportManagerDeviceListener.hpp"
+#include "TransportManager/SDeviceInfo.hpp"
 #include "protocol_handler/session_observer.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
+
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.
@@ -65,16 +67,12 @@ class ConnectionHandler {
      * \param transportManager Pointer to TransportManager object.
      **/
     virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_manager) = 0;
+      NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager) = 0;
 
     virtual void StartTransportManager() = 0;
 
-    /**
-     * \brief Connects to all services of device
-     * \param deviceHandle Handle of device to connect to
-     */
     virtual void ConnectToDevice(
-        connection_handler::DeviceHandle device_handle) = 0;
+      connection_handler::DeviceHandle device_handle) = 0;
 
   protected:
     /**

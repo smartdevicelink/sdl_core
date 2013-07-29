@@ -51,7 +51,7 @@ void OnDeviceChosenNotification::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
     ApplicationManagerImpl::instance()->ConnectToDevice(
       (*message_)[strings::msg_params][strings::device_info]
-      [strings::id]);
+      [strings::id].asInt());
   }
 }
 

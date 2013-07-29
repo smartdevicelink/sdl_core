@@ -39,6 +39,7 @@
 
 #include <map>
 #include <vector>
+
 #include "utils/logger.h"
 #include "connection_handler/device.h"
 
@@ -51,7 +52,7 @@ namespace connection_handler {
 /**
  * \brief Type for ConnectionHandle
  */
-typedef unsigned int ConnectionHandle;
+typedef int ConnectionHandle;
 
 /**
  * \brief Type for Sessions vector
@@ -68,93 +69,93 @@ typedef std::vector<unsigned char>::iterator SessionListIterator;
  * \brief Connection class
  */
 class Connection {
-  public:
-    /**
-     * \brief Class constructor
-     */
-    Connection(ConnectionHandle connection_handle,
-               DeviceHandle connection_device_handle);
+ public:
+  /**
+   * \brief Class constructor
+   */
+  Connection(ConnectionHandle connection_handle,
+              DeviceHandle connection_device_handle);
 
-    /**
-     * \brief Destructor
-     */
-    ~Connection();
+  /**
+   * \brief Destructor
+   */
+  ~Connection();
 
-    /**
-     * \brief Returns device handle
-     * \return DeviceHandle
-     */
-    ConnectionHandle connection_handle();
+  /**
+   * \brief Returns device handle
+   * \return DeviceHandle
+   */
+  ConnectionHandle connection_handle();
 
-    /**
-     * \brief Returns connection device handle
-     * \return ConnectionDeviceHandle
-     */
-    DeviceHandle connection_device_handle();
+  /**
+   * \brief Returns connection device handle
+   * \return ConnectionDeviceHandle
+   */
+  DeviceHandle connection_device_handle();
 
-    /**
-     * \brief Adds session to connection
-     * \return sessionID or 0 in case of issues
-     */
-    unsigned int AddNewSession();
+  /**
+   * \brief Adds session to connection
+   * \return sessionID or -1 in case of issues
+   */
+  int AddNewSession();
 
-    /**
-     * \brief Removes session from connection
-     * \param aSession session ID
-     * \return sessionID or 0 in case of issues
-     */
-    unsigned int RemoveSession(unsigned char session);
+  /**
+   * \brief Removes session from connection
+   * \param aSession session ID
+   * \return sessionID or -1 in case of issues
+   */
+  int RemoveSession(unsigned char session);
 
-    /**
-     * \brief Returns ID of first session from connection
-     * \return first sessionID or -1 in case of issues
-     */
-    unsigned int GetFirstSessionID();
+  /**
+   * \brief Returns ID of first session from connection
+   * \return first sessionID or -1 in case of issues
+   */
+  int GetFirstSessionID();
 
-    /**
-     * \brief Returns list of sessions which have been opened in
-     *  current connection.
-     * \param session_list list of sessions
-     */
-    void GetSessionList(SessionList* session_list);
+  /**
+   * \brief Returns list of sessions which have been opened in
+   *  current connection.
+   * \param session_list list of sessions
+   */
+  void GetSessionList(SessionList & session_list);
 
-  private:
-    /**
-     * \brief Current connection handle.
-     */
-    ConnectionHandle connection_handle_;
+ private:
+  /**
+   * \brief Current connection handle.
+   */
+  ConnectionHandle connection_handle_;
 
-    /**
-     * \brief DeviceHandle of this connection.
-     */
-    DeviceHandle connection_device_handle_;
+  /**
+   * \brief DeviceHandle of this connection.
+   */
+  DeviceHandle connection_device_handle_;
 
-    /**
-     * \brief Counter to generate session id's.
-     */
-    unsigned char session_id_counter_;
+  /**
+   * \brief Counter to generate session id's.
+   */
+  unsigned char session_id_counter_;
 
-    /**
-     * \brief Counter to generate session id's.
-     */
-    SessionList session_list_;
+  /**
+   * \brief Counter to generate session id's.
+   */
+  SessionList session_list_;
 
-    /**
-     * \brief For logging.
-     */
-    static log4cxx::LoggerPtr logger_;
+  /**
+   * \brief For logging.
+   */
+  static log4cxx::LoggerPtr logger_;
 };
 
 /**
  * \brief Type for Connections map
  * Key is ConnectionHandle which is uniq
  */
-typedef std::map<unsigned int, Connection> ConnectionList;
+typedef std::map<int, Connection> ConnectionList;
 
 /**
  * \brief Type for Connections map iterator
  */
-typedef std::map<unsigned int, Connection>::iterator ConnectionListIterator;
+typedef std::map<int, Connection>::iterator ConnectionListIterator;
 
 }/* namespace connection_handler */
 

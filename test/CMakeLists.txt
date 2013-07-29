@@ -5,6 +5,7 @@
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
 
+
 include_directories (
   ../src/thirdPartyLibs/gmock-1.6.0/include
   ../src/components/formatters/include
@@ -14,7 +15,7 @@ include_directories (
   ../src/components/request_watchdog/include
   ../src/components/audio_manager/include
   ../src/components/protocol_handler/include
-  ../src/components/transport_manager/include
+  ../src/components/TransportManager/include
   ../src/components/connection_handler/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
@@ -46,6 +47,8 @@ set(LIBRARIES
     HMI_API
     SmartObjects
     ApplicationManager
+    MobileMessageHandler
+    ProtocolHandler
     #test_JSONHandler_v4_protocol_v2_0_revP
     #test_JSONHandlerTest
     test_SmartObjectTest
@@ -55,7 +58,6 @@ set(LIBRARIES
     test_ProtocolHandlerTest
     test_JSONCPPTest
     test_MobileMessageHandlerTest
-    #test_TransportManagerTest
     MOBILE_API
     jsoncpp
     Utils
@@ -64,5 +66,4 @@ set(LIBRARIES
 
 add_executable("test_suit" "./test_suit.cc")
 target_link_libraries("test_suit" ${LIBRARIES})
-
 

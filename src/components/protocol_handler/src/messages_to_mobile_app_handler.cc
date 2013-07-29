@@ -33,13 +33,15 @@
 #include "protocol_handler/messages_to_mobile_app_handler.h"
 #include "protocol_handler/session_observer.h"
 
+using NsSmartDeviceLink::NsTransportManager::tConnectionHandle;
+
 namespace protocol_handler {
 log4cxx::LoggerPtr MessagesToMobileAppHandler::logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ProtocolHandler"));
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ProtocolHandler"));
 
 MessagesToMobileAppHandler::MessagesToMobileAppHandler(
-  ProtocolHandlerImpl* handler)
-  : handler_(handler) {
+    ProtocolHandlerImpl* handler)
+    : handler_(handler) {
   CHECK(handler_);
 }
 
@@ -47,15 +49,16 @@ MessagesToMobileAppHandler::~MessagesToMobileAppHandler() {
 }
 
 void MessagesToMobileAppHandler::threadMain() {
+  // TODO(PV): check if continue running condition.
   while (1) {
     while (!handler_->messages_to_mobile_app_.empty()) {
-      const transport_manager::RawMessageSptr& message = handler_->messages_to_mobile_app_
-                                      .pop();
+      const RawMessage* message = handler_->messages_to_mobile_app_
+          .pop();
       LOG4CXX_INFO_EXT(
-        logger_,
-        "Message to mobile app: connection " << message->connection_key()
-        << "; dataSize: " << message->data_size()
-        << " ; protocolVersion " << message->protocol_version());
+          logger_,
+          "Message to mobile app: connection " << message->connection_key()
+            << "; dataSize: " << message->data_size()
+            << " ; protocolVersion " << message->protocol_version());
 
       unsigned int maxDataSize = 0;
       if (PROTOCOL_VERSION_1 == message->protocol_version()) {
@@ -66,40 +69,40 @@ void MessagesToMobileAppHandler::threadMain() {
 
       if (!handler_->session_observer_) {
         LOG4CXX_ERROR(
-          logger_,
-          "Cannot handle message to mobile app:"
-          << " ISessionObserver doesn't exist.");
-        return;
+            logger_,
+            "Cannot handle message to mobile app:"
+              << " ISessionObserver doesn't exist.");
+        return;  // pthread_exit(0);
       }
-      unsigned int connectionHandle = 0;
+      tConnectionHandle connectionHandle = 0;
       unsigned char sessionID = 0;
-      handler_->session_observer_->PairFromKey(message->connection_key(),
-          &connectionHandle, &sessionID);
+      handler_->session_observer_->pairFromKey(message->connection_key(),
+                                              connectionHandle, sessionID);
 
       if (message->data_size() <= maxDataSize) {
-        RESULT_CODE result = handler_->SendSingleFrameMessage(
-                               message, sessionID, message->protocol_version(),
-                               SERVICE_TYPE_RPC,
-                               message->data_size(), message->data(),
-                               false);
+        RESULT_CODE result = handler_->sendSingleFrameMessage(
+            connectionHandle, sessionID, message->protocol_version(),
+            SERVICE_TYPE_RPC, message->data_size(), message->data(),
+            false);
         if (result != RESULT_OK) {
           LOG4CXX_ERROR(
-            logger_, "ProtocolHandler failed to send single frame message.");
+              logger_, "ProtocolHandler failed to send single frame message.");
         }
       } else {
         LOG4CXX_INFO_EXT(
-          logger_,
-          "Message will be sent in multiple frames; max size is "
-          << maxDataSize);
+            logger_,
+            "Message will be sent in multiple frames; max size is "
+              << maxDataSize);
 
-        RESULT_CODE result = handler_->SendMultiFrameMessage(
-                               message, sessionID, message->protocol_version(),
-                               SERVICE_TYPE_RPC,
-                               message->data_size(), message->data(), false,
-                               maxDataSize);
+        // TODO(PV) : check if this is correct assumption; and remove this
+        // hot fix because it is not supposed to be so.
+        RESULT_CODE result = handler_->sendMultiFrameMessage(
+            connectionHandle, sessionID, message->protocol_version(),
+            SERVICE_TYPE_RPC, message->data_size(), message->data(), false,
+            maxDataSize);
         if (result != RESULT_OK) {
           LOG4CXX_ERROR(
-            logger_, "ProtocolHandler failed to send multiframe messages.");
+              logger_, "ProtocolHandler failed to send multiframe messages.");
         }
       }
     }

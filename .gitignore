@@ -1,5 +1,5 @@
 *.a
-*.cmake
+#*.cmake
 bin
 build
 CMakeFiles
@@ -13,10 +13,7 @@ install_manifest.txt
 .libs
 *.la
 *.kdev4
-.project
-.cproject
-*~
-*.log
+*.*~
 
 # ctags-generated
 tags

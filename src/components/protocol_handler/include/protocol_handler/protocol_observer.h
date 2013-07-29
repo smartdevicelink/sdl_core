@@ -36,13 +36,12 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
 
-#include "transport_manager/common.h"
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
-
+class RawMessage;
 
 /**
  * \class IProtocolObserver
@@ -50,20 +49,20 @@ namespace protocol_handler {
  * ProtocolHandler and JSONHandler components.
  */
 class ProtocolObserver {
-  public:
-    /**
-     * \brief Callback function which is used by ProtocolHandler
-     * when new message is received from Mobile Application.
-     * \param message Message with supporting params received
-     */
-    virtual void OnMessageReceived(const transport_manager::RawMessageSptr& message) = 0;
+ public:
+  /**
+   * \brief Callback function which is used by ProtocolHandler
+   * when new message is received from Mobile Application.
+   * \param message Message with supporting params received
+   */
+  virtual void onMessageReceived(const RawMessage* message) = 0;
 
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ProtocolObserver() {
-    }
+ protected:
+  /**
+   * \brief Destructor
+   */
+  virtual ~ProtocolObserver() {
+  }
 };
 }  // namespace protocol_handler
 

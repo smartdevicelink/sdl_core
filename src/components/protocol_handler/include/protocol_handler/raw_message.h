@@ -36,8 +36,6 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
 
-#include "utils/macro.h"
-
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
@@ -46,27 +44,21 @@
 namespace protocol_handler {
 /**
  * \class SmartDeviceLinkRawMessage
- * \brief Class-wrapper for information about message for interchanging
+ * \brief Class-wraper for information about message for interchanging
  * between components.
  */
 class RawMessage {
  public:
   /**
    * \brief Constructor
-   * \param connectionKey Identifier of connection within which message
+   * \param connectionKey Identifier of connection within wich message
    * is transferred
    * \param protocolVersion Version of protocol of the message
    * \param data Message string
    * \param dataSize Message size
    */
-  RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
-             const unsigned char* data, unsigned int dataSize);
-
-  RawMessage(unsigned int connectionKey, unsigned int protocolVersion,
-             unsigned int serialNumber, const unsigned char* data,
-             unsigned int dataSize);
-
-  bool operator==(const RawMessage& other) const;
+  RawMessage(int connectionKey, unsigned int protocolVersion,
+                            unsigned char* data, unsigned int dataSize);
 
   /**
    * \brief Destructor
@@ -76,7 +68,7 @@ class RawMessage {
   /**
    * \brief Getter for connection identifier
    */
-  unsigned int connection_key() const;
+  int connection_key() const;
 
   /**
    * \brief Getter for message string
@@ -93,25 +85,12 @@ class RawMessage {
    */
   unsigned int protocol_version() const;
 
-  /**
-   * \brief Getter for serial number
-   */
-  unsigned int serial_number() const;
-
-  bool IsWaiting() const;
-
-  unsigned int connection_uid() const;
-
-  void set_connection_uid(unsigned int connection_id);
-
-  void set_waiting(bool v);
-
  private:
   /**
    * \brief Connection Identifier
    * Obtained from \saCconnection_handler
    */
-  unsigned int connection_key_;
+  int connection_key_;
 
   /**
    * \brief Message string
@@ -125,29 +104,9 @@ class RawMessage {
 
   /**
    * \brief Version of SmartDeviceLink protocol (currently 1,2)
-   * used for transferring message.
+   * used for tranferring message.
    */
   unsigned int protocol_version_;
-  /**
-   * \brief serial number of message that
-   *
-   */
-  unsigned int serial_number_;
-
-  /**
-   * specifies current state of message in queue. if false message is "ready to be processed"
-   * otherwise it is "waiting for response"
-   *
-   */
-  bool waiting_;
-
-  /**
-   * \brief Id of connection (for service messages like start/end session)
-   *
-   */
-  unsigned int connection_uid_;
-
-  DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
 }  // namespace protocol_handler
 

@@ -1,7 +1,7 @@
 include_directories (
   ./include
   ../utils/include/
-  ../transport_manager/include/
+  ../TransportManager/include/
 )
 
 set (SOURCES

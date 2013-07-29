@@ -21,6 +21,7 @@ set(LIBRARIES
   MobileMessageHandler
   RequestWatchdog
 )
+
 include_directories (
   ./
   ../components/protocol_handler/include/
@@ -29,7 +30,7 @@ include_directories (
   ../components/application_manager/include
   ../components/formatters/include
   ../components/AppMgr/include
-  ../components/transport_manager/include
+  ../components/TransportManager/include
   ../components/config_profile/include
   ../components/utils/include/
   ../components/connection_handler/include/
@@ -41,7 +42,6 @@ include_directories (
   ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/components/
 )
-
 
 set (SOURCES
   appMain.cpp

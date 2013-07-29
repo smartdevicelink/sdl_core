@@ -34,7 +34,7 @@
  */
 
 #include <algorithm>
-#include "utils/macro.h"
+
 #include "connection_handler/connection.h"
 
 /**
@@ -56,7 +56,7 @@ Connection::Connection(ConnectionHandle connection_handle,
 Connection::~Connection() {
 }
 
-unsigned int Connection::AddNewSession() {
+int Connection::AddNewSession() {
   int result = -1;
   if (255 > session_id_counter_) {
     session_list_.push_back(session_id_counter_);
@@ -65,7 +65,7 @@ unsigned int Connection::AddNewSession() {
   return result;
 }
 
-unsigned int Connection::RemoveSession(unsigned char session) {
+int Connection::RemoveSession(unsigned char session) {
   int result = -1;
   SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
                                      session);
@@ -78,7 +78,7 @@ unsigned int Connection::RemoveSession(unsigned char session) {
   return result;
 }
 
-unsigned int Connection::GetFirstSessionID() {
+int Connection::GetFirstSessionID() {
   int result = -1;
   SessionListIterator it = session_list_.begin();
   if (session_list_.end() != it) {
@@ -95,8 +95,7 @@ DeviceHandle Connection::connection_device_handle() {
   return connection_device_handle_;
 }
 
-void Connection::GetSessionList(SessionList* session_list) {
-  DCHECK(session_list);
-  *session_list = session_list_;
+void Connection::GetSessionList(SessionList& session_list) {
+  session_list = session_list_;
 }
 }/* namespace connection_handler */

@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
@@ -114,8 +114,6 @@ class SharedPtr {
      **/
     SharedPtr<ObjectType>& operator =(const SharedPtr<ObjectType>& Other);
 
-    bool operator ==(const SharedPtr<ObjectType>& Other) const;
-
     /**
      * @brief Assignment operator.
      *
@@ -150,7 +148,6 @@ class SharedPtr {
     explicit operator bool() const;
     void reset();
     void reset(ObjectType* other);
-    ObjectType* get();
 
     /**
      * @return true if mObject not NULL
@@ -180,7 +177,6 @@ class SharedPtr {
      * @brief Pointer to reference counter.
      **/
     unsigned int* mReferenceCounter;
-
 };
 
 template<typename ObjectType>
@@ -226,12 +222,6 @@ utils::SharedPtr<ObjectType>::operator=(const SharedPtr<ObjectType>& Other) {
 }
 
 template<typename ObjectType>
-inline bool utils::SharedPtr<ObjectType>::operator ==(
-  const SharedPtr<ObjectType>& Other) const {
-  return (mObject == Other.mObject);
-}
-
-template<typename ObjectType>
 template<typename OtherObjectType>
 inline utils::SharedPtr<ObjectType>&
 utils::SharedPtr<ObjectType>::operator=(
@@ -265,12 +255,13 @@ utils::SharedPtr<ObjectType>::operator bool() const {
   return 0 != mObject;
 }
 
-template<typename ObjectType> void utils::SharedPtr<ObjectType>::reset() {
+template<typename ObjectType> void
+utils::SharedPtr<ObjectType>::reset() {
   reset(0);
 }
 
-template<typename ObjectType> void utils::SharedPtr<ObjectType>::reset(
-  ObjectType* other) {
+template<typename ObjectType> void
+utils::SharedPtr<ObjectType>::reset(ObjectType* other) {
   DCHECK(other);
   dropReference();
   mObject = other;
@@ -288,11 +279,6 @@ inline void SharedPtr<ObjectType>::dropReference(void) {
       mReferenceCounter = 0;
     }
   }
-}
-
-template<typename ObjectType>
-ObjectType* SharedPtr<ObjectType>::get() {
-  return mObject;
 }
 
 template<typename ObjectType>

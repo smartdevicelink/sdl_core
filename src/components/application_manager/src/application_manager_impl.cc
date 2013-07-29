@@ -333,7 +333,7 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
   return true;
 }
 
-void ApplicationManagerImpl::ConnectToDevice(std::string id) {
+void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
   // TODO(VS): Call function from ConnectionHandler
   if (!connection_handler_) {
     LOG4CXX_WARN(logger_, "Connection handler is not set.");

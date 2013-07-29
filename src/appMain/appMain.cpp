@@ -37,29 +37,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "appMain.h"
-
-#include "protocol_handler/protocol_handler_impl.h"
-
-#include "connection_handler/connection_handler_impl.h"
-#include "mobile_message_handler/mobile_message_handler_impl.h"
-#include "utils/macro.h"
-
-/*#include "AppMgr/AppMgr.h"
- #include "AppMgr/AppMgrCore.h"*/
-#include "application_manager/application_manager_impl.h"
-#include "hmi_message_handler/hmi_message_handler_impl.h"
-#include "hmi_message_handler/messagebroker_adapter.h"
-
-#include "CMessageBroker.hpp"
-
-#include "mb_tcpserver.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 #include <string>
 #include <iostream>  // cpplint: Streams are highly discouraged.
 #include <fstream>   // cpplint: Streams are highly discouraged.
+
 // ----------------------------------------------------------------------------
 
 #include "./appMain.h"
@@ -74,8 +58,9 @@
 #include "application_manager/application_manager_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_manager_impl.h"
+#include "TransportManager/ITransportManager.hpp"
+#include "TransportManager/ITransportManagerDeviceListener.hpp"
+
 // ----------------------------------------------------------------------------
 // Third-Party includes
 
@@ -259,13 +244,13 @@ bool InitHmi() {
   }
 }
 }
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
  * \param argv array of arguments
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-
 int main(int argc, char** argv) {
   // --------------------------------------------------------------------------
   // Logger initialization
@@ -280,8 +265,8 @@ int main(int argc, char** argv) {
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
-  ::transport_manager::TransportManager* transport_manager =
-    ::transport_manager::TransportManagerImpl::instance();
+  NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager =
+    NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
   DCHECK(transport_manager);
 
   protocol_handler::ProtocolHandlerImpl* protocol_handler =
@@ -304,8 +289,8 @@ int main(int argc, char** argv) {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler)
 
-  transport_manager->addEventListener(protocol_handler);
-  transport_manager->addEventListener(connection_handler);
+  transport_manager->addDataListener(protocol_handler);
+  transport_manager->addDeviceListener(connection_handler);
 
   mmh->setProtocolHandler(protocol_handler);
   hmi_handler->setMessageObserver(app_manager);

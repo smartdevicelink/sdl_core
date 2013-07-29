@@ -51,7 +51,7 @@ namespace connection_handler {
 /**
  * \brief Type for DeviceHandle
  */
-typedef std::string DeviceHandle;
+typedef int DeviceHandle;
 
 /**
  * \class Device
@@ -101,13 +101,13 @@ class Device {
 /**
  * \brief Type for Devices map
  */
-typedef std::map<DeviceHandle, Device> DeviceList;
+typedef std::map<int, Device> DeviceList;
 
 /**
  * \brief Type for Devices map iterator
  * Key is DeviceHandle which is uniq
  */
-typedef std::map<DeviceHandle, Device>::iterator DeviceListIterator;
+typedef std::map<int, Device>::iterator DeviceListIterator;
 
 }/* namespace connection_handler */
 

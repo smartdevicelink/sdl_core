@@ -2,7 +2,7 @@
 add_subdirectory(./request_watchdog)
 
 # --- TransportManager
-add_subdirectory(./transport_manager)
+# add_subdirectory(./TransportManager)
 
 # --- JSONHandler
 # add_subdirectory(./formatters)

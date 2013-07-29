@@ -2,13 +2,18 @@
 add_subdirectory(./interfaces)
 
 # --- TransportManager
-add_subdirectory(./transport_manager)
+add_subdirectory(./TransportManager)
 
-add_subdirectory(./protocol_handler)
+# --- AppMgr
+#add_subdirectory(./AppMgr)
 
 # --- formatters
 add_subdirectory(./formatters)
 
+# --- ProtocolHandler
+add_subdirectory(./protocol_handler)
+
+# --- ConnectionHandler
 add_subdirectory(./connection_handler)
 
 # --- Utils
