@@ -136,7 +136,13 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         if(this.countUp){
             number = this.duration + this.currTime;
         }else{
-            number = this.duration - this.currTime;
+            if (this.duration <= this.currTime) {
+            	clearInterval(this.timer);
+            	this.currTime = 0;
+            	this.appInfo.set('mediaClock', '00:00:00');
+                return;
+            }
+        	number = this.duration - this.currTime;
         }
 
         hrs = parseInt(number / 3600), // hours
@@ -157,7 +163,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
 
     changeDuration: function() {
         clearInterval(this.timer);
-        this.currTime = 0;
+        this.currTime = -1;
         this.startTimer();
     }.observes('this.duration'),
 
@@ -184,7 +190,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         }else{
             if(params.startTime){
                 this.set('countUp', params.updateMode == "COUNTUP" ? true : false);
-                this.set('duration', 0);
+                this.set('duration', null);
                 this.set('duration', params.startTime.hours * 3600 + params.startTime.minutes * 60 + params.startTime.seconds);
             }
             this.set('pause', false);
