@@ -974,7 +974,7 @@ SDL.ValidateMessage = Em.Object.create({
                 
                 return this.resultStruct;
             }
-            if (!params.timeout) {
+            if (params.timeout == null ) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -983,7 +983,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (typeof params.timeout != 'number') {
+            if (typeof params.timeout != 'number' || params.timeout < 0) {
                 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
