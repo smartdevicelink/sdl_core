@@ -446,7 +446,7 @@ FFW.UI = FFW.RPCObserver.create({
 
         Em.Logger.log("FFW." + method + "Response");
 
-        if(resultCode != 0){
+        if(resultCode !== 0){
 
             // send repsonse
             var JSONMessage = {

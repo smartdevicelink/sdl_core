@@ -83,7 +83,7 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         clearTimeout( this.timer );
         this.timer = setTimeout( function() {
             self.set( 'active', false );
-        }, 2000 );
+        }, 2000 ); // 2 second timeout for TTS popUp
     },
     
     /**
