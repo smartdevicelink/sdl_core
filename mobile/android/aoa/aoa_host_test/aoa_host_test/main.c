@@ -24,7 +24,6 @@
 
 
 #include <stdio.h>
-//#include <usb.h>
 #include <libusb.h>
 #include <string.h>
 #include <unistd.h>
@@ -154,11 +153,12 @@ static int connectToAccessory() {
     fprintf(stdout, "Waiting for accessory\n");
     int tries = 10;
 	for(;;){//attempt to connect to new PID, if that doesn't work try ACCESSORY_PID_ALT
-		tries--;
         fprintf(stdout, "%d ", tries);
+	fflush(stdout);
+		tries--;
 		if((handle = libusb_open_device_with_vid_pid(NULL, ACCESSORY_VID, ACCESSORY_PID)) == NULL){
 			if(tries < 0){
-                fprintf(stdout, "Problem acquiring handle for accessory\n");
+                fprintf(stdout, "\nProblem acquiring handle for accessory\n");
 				return -1;
 			}
 		}else{
@@ -167,7 +167,7 @@ static int connectToAccessory() {
 		sleep(1);
 	}
 	libusb_claim_interface(handle, 0);
-	fprintf(stdout, "Interface claimed, ready to transfer data\n");
+	fprintf(stdout, "\nInterface claimed, ready to transfer data\n");
     return 0;
 }
 
