@@ -8,15 +8,14 @@ buildscript {
 }
 apply plugin: 'android'
 
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     compile 'com.android.support:support-v4:13.0.+'
+    compile project(':SyncProxyAndroid')
 }
 
 android {
+
     compileSdkVersion 17
     buildToolsVersion "17.0.0"
 

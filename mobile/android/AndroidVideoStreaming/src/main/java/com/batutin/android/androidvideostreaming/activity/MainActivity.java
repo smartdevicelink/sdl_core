@@ -1,8 +1,10 @@
-package com.batutin.android.androidvideostreaming;
+package com.batutin.android.androidvideostreaming.reader;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+
+import com.batutin.android.androidvideostreaming.R;
 
 public class MainActivity extends Activity {
 

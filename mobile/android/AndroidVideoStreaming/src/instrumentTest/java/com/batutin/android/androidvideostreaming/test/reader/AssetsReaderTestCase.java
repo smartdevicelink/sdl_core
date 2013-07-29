@@ -1,10 +1,12 @@
-package videostreaming;
+package com.batutin.android.androidvideostreaming.test;
 
 import android.test.AndroidTestCase;
 
 import junit.framework.Assert;
 
 import java.io.InputStream;
+
+import com.batutin.android.androidvideostreaming.reader.AssetsReader;
 
 /**
  * Created by admin on 7/19/13.

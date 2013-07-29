@@ -1,4 +1,4 @@
-package videostreaming;
+package com.batutin.android.androidvideostreaming.reader;
 
 /**
  * Created by Andrew Batutin on 7/24/13.

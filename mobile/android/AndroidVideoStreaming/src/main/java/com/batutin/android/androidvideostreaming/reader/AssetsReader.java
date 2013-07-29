@@ -1,4 +1,4 @@
-package videostreaming;
+package com.batutin.android.androidvideostreaming.reader;
 
 import android.content.Context;
 
