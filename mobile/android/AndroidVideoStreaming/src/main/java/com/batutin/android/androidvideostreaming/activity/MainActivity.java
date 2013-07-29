@@ -1,4 +1,4 @@
-package com.batutin.android.androidvideostreaming.reader;
+package com.batutin.android.androidvideostreaming.activity;
 
 import android.os.Bundle;
 import android.app.Activity;

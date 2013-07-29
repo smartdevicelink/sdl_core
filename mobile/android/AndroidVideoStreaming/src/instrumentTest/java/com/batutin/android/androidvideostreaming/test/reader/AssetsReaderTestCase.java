@@ -1,4 +1,4 @@
-package com.batutin.android.androidvideostreaming.test;
+package com.batutin.android.androidvideostreaming.test.reader;
 
 import android.test.AndroidTestCase;
 

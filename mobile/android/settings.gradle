@@ -1,1 +1,4 @@
-include ':SyncProxyAndroid', ':SyncProxyTester' ,':FileExplorer', ':AndroidVideoStreaming'
+include ':SyncProxyTester'
+include ':FileExplorer'
+include ':SyncProxyAndroid'
+include ':AndroidVideoStreaming'
