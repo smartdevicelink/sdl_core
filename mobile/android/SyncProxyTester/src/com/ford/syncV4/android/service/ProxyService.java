@@ -1280,8 +1280,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		else Log.i(TAG, "" + notification);
 		
 		EncodedSyncPDataHeader encodedSyncPDataHeader;
-		encodedSyncPDataHeader = EncodedSyncPDataHeader.parseEncodedSyncPDataHeader(
-				Base64.decode(notification.getData().get(0)));
+        try {
+            encodedSyncPDataHeader = EncodedSyncPDataHeader.parseEncodedSyncPDataHeader(
+                    Base64.decode(notification.getData().get(0)));
+        } catch (IOException e) {
+            Log.e(TAG, "Can't decode base64 string", e);
+            return;
+        }
 
 		if (encodedSyncPDataHeader.getServiceType() == 3 && encodedSyncPDataHeader.getCommandType() == 1) {
 			writeToFile(encodedSyncPDataHeader.getPayload());

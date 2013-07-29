@@ -1,3 +1,6 @@
+[CW31]
+* Fix a crash with EncodedSyncPData message (replaced the Base64 codec).
+
 [CW30]
 * GetDTCs dialog and message: add dtcMask and remove encrypted parameter.
 + PerformAudioPassThru dialog and message: add muteAudio parameter.

@@ -2230,7 +2230,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                                String filename = txtLocalFileName.getText().toString();
                                byte[] data = contentsOfFile(filename);
                                if (data != null) {
-                                   String base64Data = Base64.encode(data);
+                                   String base64Data = Base64.encodeBytes(data);
                                    EncodedSyncPData msg = new EncodedSyncPData();
                                    Vector<String> syncPData = new Vector<String>();
                                    syncPData.add(base64Data);
