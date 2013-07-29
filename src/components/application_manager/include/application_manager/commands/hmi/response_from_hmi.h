@@ -34,10 +34,19 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RESPONSE_FROM_HMI_H_
 
 #include "application_manager/commands/command_impl.h"
+#include "interfaces/HMI_API.h"
+
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class SmartObject;
+}
+}
 
 namespace application_manager {
 
 namespace commands {
+
+namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
 class ResponseFromHMI : public CommandImpl {
   public:
@@ -47,6 +56,15 @@ class ResponseFromHMI : public CommandImpl {
     virtual bool CleanUp();
     virtual void Run();
     void SendResponseToMobile(const MessageSharedPtr& message);
+
+    /*
+     * @brief Creates HMI request
+     *
+     * @param function_id HMI request ID
+     * @param msg_params HMI request msg params
+     */
+    void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                          const NsSmart::SmartObject& msg_params) const;
 };
 
 }  // namespace commands

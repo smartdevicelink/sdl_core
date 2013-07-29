@@ -79,8 +79,29 @@ void UIPerformInteractionResponse::Run() {
     return;
   }
 
-  app->DeleteChoiceSetVRCommands();
-  app->set_perform_interaction_active(false);
+  if (app->is_perform_interaction_active()) {
+    const ChoiceSetVRCmdMap& choice_set_map = app->GetChoiceSetVRCommands();
+
+    ChoiceSetVRCmdMap::const_iterator it = choice_set_map.begin();
+    for (; choice_set_map.end() != it; ++it) {
+
+      const smart_objects::SmartObject& choice_set =
+        (*it->second).getElement(strings::choice_set);
+
+      for (size_t j = 0; j < choice_set.length(); ++j) {
+
+        smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+        msg_params[strings::app_id] = app->app_id();
+        msg_params[strings::cmd_id] =
+            choice_set.getElement(j).getElement(strings::choice_id);
+
+        CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+      }
+    }
+    app->DeleteChoiceSetVRCommands();
+    app->set_perform_interaction_active(false);
+  }
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
