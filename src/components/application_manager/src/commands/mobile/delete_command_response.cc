@@ -99,8 +99,7 @@ void DeleteCommandResponse::Run() {
       if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
           ((hmi_apis::Common_Result::SUCCESS == result_vr) ||
            (hmi_apis::Common_Result::INVALID_ENUM == result_vr))) {
-        app->RemoveCommand(
-          data[strings::msg_params][strings::cmd_id].asInt());
+        app->RemoveCommand(data[strings::msg_params][strings::cmd_id].asInt());
 
         SendResponse(true);
       } else {
