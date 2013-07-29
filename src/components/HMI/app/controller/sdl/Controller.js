@@ -172,7 +172,7 @@ SDL.SDLController = Em.Object.create({
 
         if (SDL.AudioPassThruPopUp.active) {
         	SDL.AudioPassThruPopUp.deactivate();
-            SDL.SDLController.performAudioPassThruResponse( "SUCCESS" );
+            SDL.SDLController.performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
         }
 
         if(SDL.InteractionChoicesView.active){
@@ -260,14 +260,25 @@ SDL.SDLController = Em.Object.create({
     },
 
     /**
-     * Method close PerformAudioPassThruPopUp and call response from UIRPC back
+     * Method close PerformAudioPassThruPopUp and call response from UI RPC back
      * to SDLCore
      * 
      * @param {String} result Result code
      */
     performAudioPassThruResponse: function(result) {
         SDL.SDLModel.set('AudioPassThruState', false);
-        FFW.UI.sendUIResult(SDL.SDLModel.resultCode[result], FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru");
+        FFW.UI.sendUIResult(result, FFW.UI.performAudioPassThruRequestID, "UI.PerformAudioPassThru");
+    },
+
+    /**
+     * Method close PerformAudioPassThruPopUp and call error response from UI RPC back
+     * to SDLCore
+     * 
+     * @param {String} result Result code
+     */
+    callPerformAudioPassThruPopUpErrorResponse: function(element) {
+        SDL.SDLModel.set('AudioPassThruState', false);
+        FFW.UI.sendError(element.responseResult, FFW.UI.performAudioPassThruRequestID, "UI.PerformAudioPassThru", "PerformAudioPassThru was not completed successfuly!");
     },
 
     /**

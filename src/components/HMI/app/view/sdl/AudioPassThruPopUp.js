@@ -112,9 +112,9 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
         elementId: 'AudioPassThruPopUpButtonRetry',
         classNames: 'buttonRetry softButton',
         text: 'Retry',
-        responseResult: 'RETRY',
+        responseResult: SDL.SDLModel.resultCode['RETRY'],
         actionUp: function() {
-            SDL.SDLController.callPerformAudioPassThruPopUpResponse( this );
+            SDL.SDLController.callPerformAudioPassThruPopUpErrorResponse( this );
         }
     } ),
 
@@ -122,7 +122,7 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
         elementId: 'AudioPassThruPopUpButtonDone',
         classNames: 'buttonDone softButton',
         text: 'Done',
-        responseResult: 'SUCCESS',
+        responseResult: SDL.SDLModel.resultCode['SUCCESS'],
         actionUp: function() {
             SDL.SDLController.callPerformAudioPassThruPopUpResponse( this );
         }
@@ -132,9 +132,9 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
         elementId: 'AudioPassThruPopUpButtonCancel',
         classNames: 'buttonCancel softButton',
         text: 'Cancel',
-        responseResult: 'ABORTED',
+        responseResult: SDL.SDLModel.resultCode['ABORTED'],
         actionUp: function() {
-            SDL.SDLController.callPerformAudioPassThruPopUpResponse( this );
+            SDL.SDLController.callPerformAudioPassThruPopUpErrorResponse( this );
         }
     } ),
 
@@ -168,7 +168,7 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
 
             clearTimeout( this.timer );
             this.timer = setTimeout( function() {
-                SDL.SDLController.performAudioPassThruResponse( "SUCCESS" );
+                SDL.SDLController.performAudioPassThruResponse( SDL.SDLModel.resultCode["SUCCESS"] );
             }, data.maxDuration );
         }else{
             if( this.timer ){
