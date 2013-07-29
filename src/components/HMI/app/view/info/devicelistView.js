@@ -91,7 +91,9 @@ SDL.DeviceListView = Em.ContainerView.create( {
      */
     ShowDeviceList: function( params ) {
 
-        var i, len = params.deviceList.length;
+        this.clearDeviceList();
+	
+		var i, len = params.deviceList.length;
         for( i = 0; i < len; i++ ){
             this.get( 'listOfDevices.list.childViews' ).pushObject( SDL.Button.create( {
                 deviceName: params.deviceList[i].name,
