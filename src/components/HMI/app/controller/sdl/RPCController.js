@@ -45,6 +45,20 @@ SDL.ValidateMessage = Em.Object.create({
         resultStruct: {},
         
         /**
+         * Validate method for request IsReady
+         * 
+         * @param {Object} params
+         */
+        IsReady: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
          * Validate method for request Navigation.ShowConstantTBT
          * 
          * @param {Object} params
@@ -1136,8 +1150,22 @@ SDL.ValidateMessage = Em.Object.create({
             };
 
             return this.resultStruct;
-        }
-    }),
+        },
+    
+	    /**
+	     * Validate method for request EndAudioPassThru
+	     * 
+	     * @param {Object} params
+	     */
+	    EndAudioPassThru: function(params) {
+
+	        this.resultStruct = {
+	            "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+	        };
+	
+	        return this.resultStruct;
+	    }
+	}),
     
     /**
      * Object that contains check methods that
@@ -1147,6 +1175,20 @@ SDL.ValidateMessage = Em.Object.create({
     VehicleInfo: Em.Object.create({
 
         resultStruct: {},
+        
+        /**
+         * Validate method for request IsReady
+         * 
+         * @param {Object} params
+         */
+        IsReady: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
         
         /**
          * Validate method for request ReadDID
@@ -1337,6 +1379,20 @@ SDL.ValidateMessage = Em.Object.create({
     VR: Em.Object.create({
 
         resultStruct: {},
+        
+        /**
+         * Validate method for request IsReady
+         * 
+         * @param {Object} params
+         */
+        IsReady: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
         
         /**
          * Validate method for request AddCommand

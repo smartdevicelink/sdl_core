@@ -71,7 +71,7 @@ FFW.RPCObserver = Em.Object.extend({
     },
     
     validationCheck: function(request) {
-    	if (request && request.method && request.params) {
+    	if (request && request.method) {
         	var parsedMethod = request.method.split(/[.]/),
                 validateFunc,
                 result;

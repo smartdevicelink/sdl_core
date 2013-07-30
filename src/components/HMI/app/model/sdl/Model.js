@@ -510,10 +510,10 @@ SDL.SDLModel = Em.Object.create( {
      */
     UIEndAudioPassThru: function() {
         if( this.AudioPassThruState ){
-            FFW.UI.sendUIResult( this.resultCode["SUCCESS"], FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
+            FFW.UI.sendUIResult( this.resultCode["SUCCESS"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru" );
             SDL.SDLController.performAudioPassThruResponse( this.resultCode["SUCCESS"] );
         }else{
-            FFW.UI.sendUIResult( this.resultCode["GENERIC_ERROR"], FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
+            FFW.UI.sendUIResult( this.resultCode["GENERIC_ERROR"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru" );
         }
     },
 

@@ -118,36 +118,6 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     },
 
-    CreateInteractionChoise: function( params, performInteractionRequestId ) {
-
-        if( !params ){
-            return;
-        }
-
-        for( var i = 0; i < params.length; i++ ){
-            for( var j = 0; j < params[i].vrCommands.length; j++ ){
-                this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
-                    action: 'onChoiceInteraction',
-                    target: 'SDL.SDLAppController',
-                    choiceID: params[i].choiceID,
-                    btnType: 'interactionChoice',
-                    text: params[i].vrCommands[j],
-                    performInteractionRequestId: performInteractionRequestId,
-                    classNames: 'list-item',
-                    templateName: 'text'
-                } ) );
-            }
-        }
-    },
-
-    DeleteInteractionChoise: function() {
-
-        if( !SDL.InteractionChoicesView.active ){
-            this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'btnType', 'interactionChoice' ) );
-        }
-
-    }.observes( 'SDL.InteractionChoicesView.active' ),
-
     activateVRPopUp: function() {
         var self = this;
 
