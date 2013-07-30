@@ -13,17 +13,6 @@
 	left: 790px;
 }
 
-#protocolVersion.protocolVersion {
-	width: 302px;
-	height: 20px;
-	top: 450px;
-	left: 810px;
-}
-
-#protocolVersion .protocolVersionLabel{
-	left: 20px;
-}
-
 #driverDistractionControl.driverDistractionControl {
 	width: 302px;
 	height: 20px;

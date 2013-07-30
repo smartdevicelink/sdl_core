@@ -41,7 +41,6 @@ SDL.ControlButtons = Em.ContainerView.create( {
             'VRButton',
             'buttonControls',
             'driverDistractionControl',
-            'protocolVersion',
             'infoTable',
             'sendData',
             'sendDataCheckBox',
@@ -325,37 +324,6 @@ SDL.ControlButtons = Em.ContainerView.create( {
             classNames: 'driverDistractionControlCheckBox',
 
             checkedBinding: 'SDL.SDLModel.driverDistractionState'
-
-        } )
-    } ),
-
-    protocolVersion: Em.ContainerView.extend( {
-        elementId: 'protocolVersion',
-
-        classNames: 'protocolVersion',
-
-        childViews:
-            [
-                'protocolVersionLabel',
-                'protocolVersionCheckBox'
-            ],
-
-        protocolVersionLabel: SDL.Label.extend( {
-
-            elementId: 'protocolVersionLabel',
-
-            classNames: 'protocolVersionLabel',
-
-            content: 'Protocol version V2'
-        } ),
-
-        protocolVersionCheckBox: Em.Checkbox.extend( {
-
-            elementId: 'protocolVersionCheckBox',
-
-            classNames: 'protocolVersionCheckBox',
-
-            checkedBinding: 'SDL.SDLModel.protocolVersion2State'
 
         } )
     } ),

@@ -62,6 +62,14 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
     },
 
     /**
+     * Parameter for presets for Media App
+     * to show presets on media screen 
+     *
+     * @type bool
+     */
+    mediaPreset: false,
+
+    /**
      * Flag for media playing state
      * 
      * @param {Boolean}
@@ -218,7 +226,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         for(i = 0; i < 6; i++){
             this.appInfo.set('customPresets.' + i, '');
         }
-        SDL.SDLModel.set('protocolVersion2State', false);
+        this.set('mediaPreset', false);
 
     },
 
@@ -286,9 +294,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                     this.appInfo.set('customPresets.' + i, '');
                 }
             }
-            SDL.SDLModel.set('protocolVersion2State', true);
+            this.set('mediaPreset', true);
         }else{
-            SDL.SDLModel.set('protocolVersion2State', false);
+            this.set('mediaPreset', false);
         }
     }
 });

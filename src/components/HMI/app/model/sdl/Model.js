@@ -56,13 +56,6 @@ SDL.SDLModel = Em.Object.create( {
     sendDataExtend: false,
 
     /**
-     * Protocol Version 2 State
-     *
-     * @type bool
-     */
-    protocolVersion2State: false,
-
-    /**
      * Flag to be set true when phone call is initialised
      *
      * @param {Boolean}
