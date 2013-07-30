@@ -53,26 +53,23 @@ ScrollabelMessageRequest::~ScrollabelMessageRequest(){
 void ScrollabelMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::Run");
 
-  Application* app =
-    application_manager::ApplicationManagerImpl::instance()->
+  Application* app = application_manager::ApplicationManagerImpl::instance()->
     application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  msg_params[hmi_request::initial_text][hmi_request::field_name] =
+  msg_params[hmi_request::message_text][hmi_request::field_name] =
     TextFieldName::SCROLLABLE_MSG_BODY;
-  msg_params[hmi_request::initial_text][hmi_request::field_text] =
+  msg_params[hmi_request::message_text][hmi_request::field_text] =
     (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();
-  msg_params[strings::soft_buttons] =
-    (*message_)[strings::msg_params][strings::soft_buttons];
 
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
     msg_params[strings::timeout] =
@@ -80,6 +77,11 @@ void ScrollabelMessageRequest::Run() {
   }
   else {
     msg_params[strings::timeout] = 30000;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    msg_params[strings::soft_buttons] =
+        (*message_)[strings::msg_params][strings::soft_buttons];
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage,
