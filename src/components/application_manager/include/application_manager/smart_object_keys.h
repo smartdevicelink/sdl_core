@@ -180,6 +180,8 @@ const char my_key[] = "myKey";
 const char help_prompt[] = "helpPrompt";
 const char timeout_prompt[] = "timeoutPrompt";
 const char scroll_message_body[] = "scrollableMessageBody";
+const char data_result[] = "dataResult";
+const char dtc_list[] = "dtcList";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -220,7 +222,10 @@ const char button_capabilities[] = "buttonCapabilities";
 const char preset_bank_capabilities[] = "presetBankCapabilities";
 const char allowed[] = "allowed";
 const char vehicle_type[] = "vehicleType";
-
+const char did_result[] = "didResult";
+const char result_code[] = "resultCode";
+const char dtc[] = "dtc";
+const char ecu_header[] = "ecuHeader";
 }  // namespace hmi_response
 
 namespace hmi_notification {

@@ -58,6 +58,18 @@ void ReadDIDResponse::Run() {
     }
   }
 
+  if ((*message_)[strings::msg_params].keyExists(hmi_response::did_result)) {
+    (*message_)[strings::msg_params][strings::data_result] =
+        (*message_)[strings::msg_params][hmi_response::did_result]
+                                         [hmi_response::result_code];
+
+    (*message_)[strings::msg_params][strings::data] =
+        (*message_)[strings::msg_params][hmi_response::did_result]
+                                         [strings::data];
+
+    (*message_)[strings::msg_params].erase(hmi_response::did_result);
+  }
+
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
