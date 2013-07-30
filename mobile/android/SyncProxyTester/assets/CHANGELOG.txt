@@ -1,4 +1,5 @@
 [CW31]
+* SyncProxyAndroid SDK: fix a bug when negative function ID corrupted the binary RPC header.
 * Fix a crash with EncodedSyncPData message (replaced the Base64 codec).
 
 [CW30]
