@@ -271,16 +271,19 @@ SDL.SDLAppModel = Em.Object.extend( {
      */
     onSlider: function( message ) {
 
-        SDL.SliderView.loadData( message );
-
-        SDL.SliderView.activate( this.appName );
-
         if (message.params.timeout !== 0){
+
+        	SDL.SliderView.loadData( message );
+
+            SDL.SliderView.activate( this.appName );
+
 	        setTimeout( function() {
 	            if( SDL.SliderView.active ){
 	                SDL.SliderView.deactivate();
 	            }
 	        }, message.params.timeout );
+        } else {
+            FFW.UI.sendSliderResult(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.params.position);
         }
     }
 } );
