@@ -264,6 +264,36 @@ public class Names {
 	public static final String genericbinary = "genericbinary";
 	public static final String GPSData = "GPSData";
 	public static final String gps = "gps";
+    public static final String fuelLevel_State = "fuelLevel_State";
+    public static final String instantFuelConsumption = "instantFuelConsumption";
+    public static final String beltStatus = "beltStatus";
+    public static final String bodyInformation = "bodyInformation";
+    public static final String deviceStatus = "deviceStatus";
+    public static final String driverBraking = "driverBraking";
+    public static final String wiperStatus = "wiperStatus";
+    public static final String fuelEconomy = "fuelEconomy";
+    public static final String engineOilLife = "engineOilLife";
+    public static final String headLampStatus = "headLampStatus";
+    public static final String brakeTorque = "brakeTorque";
+    public static final String turboBoost = "turboBoost";
+    public static final String coolantTemp = "coolantTemp";
+    public static final String airFuelRatio = "airFuelRatio";
+    public static final String coolingHeadTemp = "coolingHeadTemp";
+    public static final String oilTemp = "oilTemp";
+    public static final String intakeAirTemp = "intakeAirTemp";
+    public static final String gearShiftAdvice = "gearShiftAdvice";
+    public static final String acceleration = "acceleration";
+    public static final String accPedalPosition = "accPedalPosition";
+    public static final String clutchPedalPosition = "clutchPedalPosition";
+    public static final String reverseGearStatus = "reverseGearStatus";
+    public static final String accTorque = "accTorque";
+    public static final String evInfo = "evInfo";
+    public static final String ambientLightStatus = "ambientLightStatus";
+    public static final String eCallInfo = "eCallInfo";
+    public static final String airbagStatus = "airbagStatus";
+    public static final String emergencyEvent = "emergencyEvent";
+    public static final String clusterModeStatus = "clusterModeStatus";
+    public static final String myKey = "myKey";
 	public static final String dataType = "dataType";
 	public static final String identifier = "identifier";
 	public static final String statusByte = "statusByte";
@@ -292,6 +322,80 @@ public class Names {
 	public static final String distanceToManeuverScale = "distanceToManeuverScale";
 	public static final String maneuverComplete = "maneuverComplete";
 	public static final String turnList = "turnList";
+
+    public static final String driverBeltDeployed = "driverBeltDeployed";
+    public static final String passengerBeltDeployed = "passengerBeltDeployed";
+    public static final String passengerBuckleBelted = "passengerBuckleBelted";
+    public static final String driverBuckleBelted = "driverBuckleBelted";
+    public static final String leftRow2BuckleBelted = "leftRow2BuckleBelted";
+    public static final String passengerChildDetected = "passengerChildDetected";
+    public static final String rightRow2BuckleBelted = "rightRow2BuckleBelted";
+    public static final String middleRow2BuckleBelted = "middleRow2BuckleBelted";
+    public static final String middleRow3BuckleBelted = "middleRow3BuckleBelted";
+    public static final String leftRow3BuckleBelted = "leftRow3BuckleBelted";
+    public static final String rightRow3BuckleBelted = "rightRow3BuckleBelted";
+    public static final String rearInflatableBelted = "rearInflatableBelted";
+    public static final String leftRearInflatableBelted = "leftRearInflatableBelted";
+    public static final String rightRearInflatableBelted = "rightRearInflatableBelted";
+    public static final String middleRow1BeltDeployed = "middleRow1BeltDeployed";
+    public static final String middleRow1BuckleBelted = "middleRow1BuckleBelted";
+
+    public static final String eCallNotificationStatus = "eCallNotificationStatus";
+    public static final String auxECallNotificationStatus = "auxECallNotificationStatus";
+    public static final String eCallConfirmationStatus = "eCallConfirmationStatus";
+
+    public static final String driverAirbagDeployed = "driverAirbagDeployed";
+    public static final String driverSideAirbagDeployed = "driverSideAirbagDeployed";
+    public static final String driverCurtainAirbagDeployed = "driverCurtainAirbagDeployed";
+    public static final String passengerAirbagDeployed = "passengerAirbagDeployed";
+    public static final String passengerCurtainAirbagDeployed = "passengerCurtainAirbagDeployed";
+    public static final String driverKneeAirbagDeployed = "driverKneeAirbagDeployed";
+    public static final String passengerSideAirbagDeployed = "passengerSideAirbagDeployed";
+    public static final String passengerKneeAirbagDeployed = "passengerKneeAirbagDeployed";
+
+    public static final String emergencyEventType = "emergencyEventType";
+    public static final String fuelCutoffStatus = "fuelCutoffStatus";
+    public static final String rolloverEvent = "rolloverEvent";
+    public static final String maximumChangeVelocity = "maximumChangeVelocity";
+    public static final String multipleEvents = "multipleEvents";
+
+    public static final String powerModeActive = "powerModeActive";
+    public static final String powerModeQualificationStatus = "powerModeQualificationStatus";
+    public static final String carModeStatus = "carModeStatus";
+    public static final String powerModeStatus = "powerModeStatus";
+
     public static final String muteAudio = "muteAudio";
+
+    public static final String parkBrakeActive = "parkBrakeActive";
+    public static final String ignitionStableStatus = "ignitionStableStatus";
+    public static final String ignitionStatus = "ignitionStatus";
+
+    public static final String e911Override = "e911Override";
+
     public static final String dtcMask = "dtcMask";
+
+    public static final String voiceRecOn = "voiceRecOn";
+    public static final String btIconOn = "btIconOn";
+    public static final String callActive = "callActive";
+    public static final String phoneRoaming = "phoneRoaming";
+    public static final String textMsgAvailable = "textMsgAvailable";
+    public static final String battLevelStatus = "battLevelStatus";
+    public static final String stereoAudioOutputMuted = "stereoAudioOutputMuted";
+    public static final String monoAudioOutputMuted = "monoAudioOutputMuted";
+    public static final String signalLevelStatus = "signalLevelStatus";
+    public static final String primaryAudioSource = "primaryAudioSource";
+    public static final String eCallEventActive = "eCallEventActive";
+
+    public static final String fuelEconomySinceLastReset = "fuelEconomySinceLastReset";
+    public static final String currentTripFuelEconomy = "currentTripFuelEconomy";
+    public static final String averageTripFuelEconomy = "averageTripFuelEconomy";
+    public static final String currentCycleFuelEconomy = "currentCycleFuelEconomy";
+
+    public static final String lightSwitchStatus = "lightSwitchStatus";
+    public static final String highBeamsOn = "highBeamsOn";
+
+    public static final String electricFuelConsumption = "electricFuelConsumption";
+    public static final String stateOfCharge = "stateOfCharge";
+    public static final String fuelMaintenanceMode = "fuelMaintenanceMode";
+    public static final String distanceToEmpty = "distanceToEmpty";
 }
