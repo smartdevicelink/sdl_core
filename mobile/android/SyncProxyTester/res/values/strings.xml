@@ -71,8 +71,6 @@
     <string name="show_softButtons">Soft Buttons</string>
     <string name="show_customPresets">Custom Presets (comma-separated)</string>
     <string name="show_customPresetsDefault">GEN0,GEN1,GEN2,GEN3,GEN4,GEN5</string>
-    <string name="selectprotocol_protocolV1">Protocol v1</string>
-    <string name="selectprotocol_protocolV2">Protocol v2</string>
     <string name="selectprotocol_media">Media</string>
     <string name="selectprotocol_appName">App name:</string>
     <string name="selectprotocol_appNameDefault">SyncProxyTester</string>

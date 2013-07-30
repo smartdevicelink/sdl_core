@@ -8,7 +8,6 @@ public class Const {
 	public static final String PREFS_NAME = "SyncProxyTesterPrefs";
 
 	// Protocol properties
-	public static final String PREFS_KEY_PROTOCOLVERSION = "VersionNumber";
 	public static final String PREFS_KEY_ISMEDIAAPP = "isMediaApp";
 	public static final String PREFS_KEY_APPNAME = "appName";
 	public static final String PREFS_KEY_LANG = "desiredLang";
@@ -17,13 +16,16 @@ public class Const {
 	public static final String PREFS_KEY_DISABLE_LOCK_WHEN_TESTING = "disableLockWhenTesting";
 
 	// Default values
-	public static final int PREFS_DEFAULT_PROTOCOLVERSION = 1;
 	public static final boolean PREFS_DEFAULT_ISMEDIAAPP = true;
 	public static final String PREFS_DEFAULT_APPNAME = "SyncProxyTester";
 	public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
 	public static final boolean PREFS_DEFAULT_AUTOSETAPPICON = true;
 	public static final boolean PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING = false;
+
+    // Protocol version constants
+    public static final int PROTOCOL_VERSION_1 = 1;
+    public static final int PROTOCOL_VERSION_2 = 2;
 
 	// Transport properties
 	public static final class Transport {
