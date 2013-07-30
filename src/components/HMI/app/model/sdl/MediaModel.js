@@ -257,7 +257,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                     break;
                 }
                 case 'statusBar': {
-                    this.appInfo.set('statusText', params.showStrings[i].fieldText);
+                    this.set('statusText', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mediaClock': {
