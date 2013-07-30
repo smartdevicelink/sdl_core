@@ -4,7 +4,6 @@
 *.ipr
 .idea/
 .gradle/
-local.properties
 
 */build/
 
