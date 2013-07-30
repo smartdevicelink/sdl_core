@@ -83,7 +83,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
             target: 'SDL.SDLController',
             text: appName,
             appName: appName,
-            appID: appID,
+            activeAppId: appID,
             classNames: 'list-item',
             templateName: 'text'
         } ) );

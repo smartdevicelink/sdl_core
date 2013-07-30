@@ -403,7 +403,7 @@ SDL.SDLController = Em.Object.create({
      */
     onActivateSDLApp: function(element) {
     	//FFW.BasicCommunication.ActivateApp(element.appID);
-    	SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
+    	SDL.SDLController.getApplicationModel(element.activeAppId).turnOnSDL();
     },
 
     /**
