@@ -63,6 +63,7 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   const std::string tKey;
 
   static GMainLoop *loop;
+  threads::Thread* sleepThread_;
 
   std::string outputFileName_, durationString_;
 
@@ -75,7 +76,17 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
 
   void psleep(void *timeout);
 
-  void stop(void *pipe);
+  class SleepThreadDelegate : public threads::ThreadDelegate {
+   public:
+    SleepThreadDelegate(GstTimeout* timeout);
+
+    void threadMain();
+
+   private:
+    GstTimeout* timeout_;
+
+    DISALLOW_COPY_AND_ASSIGN(SleepThreadDelegate);
+  };
 
   DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
 };

@@ -107,7 +107,7 @@ void FromMicToFileRecorderThread::threadMain() {
       {NULL}
   };
 
-  pthread_t kill, wait;
+  pthread_t wait;
   int retcode;
 
   if (!g_thread_supported())
@@ -172,47 +172,44 @@ void FromMicToFileRecorderThread::threadMain() {
 
   // Start up a timer for the pipeline
   if (duration > 0) {
-      GstTimeout* timeout = static_cast<GstTimeout*>(malloc(sizeof(timeout)));
-      timeout->pipeline = pipeline;
-      timeout->duration = duration;
-      retcode = pthread_create(&wait, NULL, reinterpret_cast
-              <void* (*)(void* timeout)>(&FromMicToFileRecorderThread::psleep),
-              reinterpret_cast<void*>(timeout));
-      if (retcode)
-        LOG4CXX_ERROR(logger_, "return code from pthread_create() is "
-                      << retcode);
-  }
+    GstTimeout* timeout = static_cast<GstTimeout*>(malloc(sizeof(timeout)));
+    timeout->pipeline = pipeline;
+    timeout->duration = duration;
 
-  // Wait for user input to quit
-  retcode = pthread_create(&kill, NULL,
-    reinterpret_cast<void* (*)(void* pipe)>(&FromMicToFileRecorderThread::stop),
-    reinterpret_cast<void*>(pipeline));
+    sleepThread_ = new threads::Thread("SleepThread"
+              , new SleepThreadDelegate(timeout));
 
-  if (retcode) {
-    LOG4CXX_ERROR(logger_, "return code from pthread_create() is " << retcode);
+    if(NULL != sleepThread_) {
+      sleepThread_->start();
+    }
   }
 
   g_main_loop_run(loop);
 }
 
-void FromMicToFileRecorderThread::psleep(void* timeout) {
-  LOG4CXX_TRACE_ENTER(logger_);
-  GstTimeout *t = reinterpret_cast<GstTimeout*>(timeout);
-  LOG4CXX_DEBUG(logger_, "sleeping for " << t->duration << " seconds");
-  sleep(t->duration);
-  gst_element_send_event(t->pipeline, gst_event_new_eos());
-  pthread_exit(NULL);
+FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(GstTimeout* timeout)
+  : threads::ThreadDelegate(),
+    timeout_(timeout) {
 }
 
-void FromMicToFileRecorderThread::stop(void* pipe) {
-  LOG4CXX_TRACE_ENTER(logger_);
-  pthread_exit(NULL);
-}
+void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
+  LOG4CXX_TRACE(logger_, "Sleep for " << timeout_->duration << " seconds");
 
+  sleep(timeout_->duration);
+
+  LOG4CXX_TRACE(logger_, "Woke up. Call gst_element_send_event()");
+  gst_element_send_event(timeout_->pipeline, gst_event_new_eos());
+}
 
 void FromMicToFileRecorderThread::exitThreadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
+
   g_main_loop_quit(loop);
+
+  if(NULL != sleepThread_) {
+    sleepThread_->stop();
+    delete sleepThread_;
+  }
 }
 
 }  // namespace audio_manager

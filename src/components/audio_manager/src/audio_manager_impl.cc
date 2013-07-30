@@ -60,19 +60,66 @@ AudioManagerImpl::~AudioManagerImpl() {
 }
 
 void AudioManagerImpl::addA2DPSource(const std::string& device) {
-  // TODO(PK) Implement
+  if (sources_.find(device) == sources_.end()) {
+    sources_.insert(std::pair<std::string, threads::Thread*>(
+        device, NULL));
+  }
 }
 
 void AudioManagerImpl::removeA2DPSource(const std::string& device) {
-  // TODO(PK) Implement
+  std::map<std::string, threads::Thread*>::iterator it =
+      sources_.find(device);
+
+  if (it != sources_.end()) {
+    // Source exists
+    LOG4CXX_DEBUG(logger_, "Source exists");
+    if (NULL != (*it).second) {
+      // Sources thread was allocated
+      LOG4CXX_DEBUG(logger_, "Sources thread was allocated");
+      if ((*it).second->is_running()) {
+        // Sources thread was started - stop it
+        LOG4CXX_DEBUG(logger_, "Sources thread was started - stop it");
+        (*it).second->stop();
+      }
+      // Delete allocated thread
+      LOG4CXX_DEBUG(logger_, "Delete allocated thread");
+      delete (*it).second;
+    }
+
+    sources_.erase(it);
+  }
 }
 
 void AudioManagerImpl::playA2DPSource(const std::string& device) {
-  // TODO(PK) Implement
+  std::map<std::string, threads::Thread*>::iterator it =
+      sources_.find(device);
+
+  if (it != sources_.end()) {
+    // Source exists - allocate thread for the source
+    (*it).second = new threads::Thread((*it).first.c_str(),
+        new A2DPSourcePlayerThread((*it).first));
+
+    if (NULL != (*it).second) {
+      // Thread was successfully allocated - start thread
+      (*it).second->start();
+    }
+  }
 }
 
 void AudioManagerImpl::stopA2DPSource(const std::string& device) {
-  // TODO(PK) Implement
+  std::map<std::string, threads::Thread*>::iterator it =
+      sources_.find(device);
+
+  if (it != sources_.end()) {
+    // Source exists
+    if (NULL != (*it).second) {
+      // Sources thread was allocated
+      if ((*it).second->is_running()) {
+        // Sources thread was started - stop it
+        (*it).second->stop();
+      }
+    }
+  }
 }
 
 std::string AudioManagerImpl::sockAddr2SourceAddr(const sockaddr& device) {
@@ -99,80 +146,25 @@ std::string AudioManagerImpl::sockAddr2SourceAddr(const sockaddr& device) {
 void AudioManagerImpl::addA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  std::string source = sockAddr2SourceAddr(device);
-
-  if (sources_.find(source) == sources_.end()) {
-    sources_.insert(std::pair<std::string, threads::Thread*>(
-        source, NULL));
-  }
+  addA2DPSource(sockAddr2SourceAddr(device));
 }
 
 void AudioManagerImpl::removeA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  std::string source = sockAddr2SourceAddr(device);
-
-  std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(source);
-
-  if (it != sources_.end()) {
-    // Source exists
-    LOG4CXX_DEBUG(logger_, "Source exists");
-    if (NULL != (*it).second) {
-      // Sources thread was allocated
-      LOG4CXX_DEBUG(logger_, "Sources thread was allocated");
-      if ((*it).second->is_running()) {
-        // Sources thread was started - stop it
-        LOG4CXX_DEBUG(logger_, "Sources thread was started - stop it");
-        (*it).second->stop();
-      }
-      // Delete allocated thread
-      LOG4CXX_DEBUG(logger_, "Delete allocated thread");
-      delete (*it).second;
-    }
-
-    sources_.erase(it);
-  }
+  removeA2DPSource(sockAddr2SourceAddr(device));
 }
 
 void AudioManagerImpl::playA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  std::string source = sockAddr2SourceAddr(device);
-
-  std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(source);
-
-  if (it != sources_.end()) {
-    // Source exists - allocate thread for the source
-    (*it).second = new threads::Thread((*it).first.c_str(),
-        new A2DPSourcePlayerThread((*it).first));
-
-    if (NULL != (*it).second) {
-      // Thread was successfully allocated - start thread
-      (*it).second->start();
-    }
-  }
+  playA2DPSource(sockAddr2SourceAddr(device));
 }
 
 void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  std::string source = sockAddr2SourceAddr(device);
-
-  std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(source);
-
-  if (it != sources_.end()) {
-    // Source exists
-    if (NULL != (*it).second) {
-      // Sources thread was allocated
-      if ((*it).second->is_running()) {
-        // Sources thread was started - stop it
-        (*it).second->stop();
-      }
-    }
-  }
+  stopA2DPSource(sockAddr2SourceAddr(device));
 }
 
 void AudioManagerImpl::startMicrophoneRecording(
@@ -182,21 +174,27 @@ void AudioManagerImpl::startMicrophoneRecording(
   FromMicToFileRecorderThread* recordThreadDelegate =
       new FromMicToFileRecorderThread();
 
-  recordThreadDelegate->setOutputFileName(outputFileName);
-  recordThreadDelegate->setRecordDuration(duration);
+  if(NULL != recordThreadDelegate)
+  {
+    recordThreadDelegate->setOutputFileName(outputFileName);
+    recordThreadDelegate->setRecordDuration(duration);
 
-  recorderThread_ = new threads::Thread("MicrophoneRecorder"
+    recorderThread_ = new threads::Thread("MicrophoneRecorder"
         , recordThreadDelegate);
 
-  recorderThread_->start();
+    if(NULL != recorderThread_) {
+      recorderThread_->start();
+    }
+  }
 }
 
 void AudioManagerImpl::stopMicrophoneRecording() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  recorderThread_->stop();
-
-  delete recorderThread_;
+  if(NULL != recorderThread_) {
+    recorderThread_->stop();
+    delete recorderThread_;
+  }
 }
 
 }  // namespace audio_manager
