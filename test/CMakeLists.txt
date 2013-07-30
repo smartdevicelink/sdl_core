@@ -1,10 +1,12 @@
+find_package(Gstreamer-1.0 REQUIRED)
+find_package(Glib-2.0 REQUIRED)
+
 # --- GoogleTest example
 #add_subdirectory(./gtest-example)
 
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
-
 
 include_directories (
   ../src/thirdPartyLibs/gmock-1.6.0/include
@@ -34,9 +36,14 @@ include_directories (
   ../test/components/application_manager
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_BINARY_DIR}
+  /usr/lib/i386-linux-gnu/glib-2.0/include
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
 set(LIBRARIES
+    ${GSTREAMER_LIBRARIES}
+    ${GLIB2_LIBRARIES}
     gtest
     gtest_main
     gmock
@@ -62,6 +69,11 @@ set(LIBRARIES
     jsoncpp
     Utils
     rt
+    gstreamer-1.0
+    gobject-2.0
+    gmodule-2.0
+    gthread-2.0
+    glib-2.0
 )
 
 add_executable("test_suit" "./test_suit.cc")

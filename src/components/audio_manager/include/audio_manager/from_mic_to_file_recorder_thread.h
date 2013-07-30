@@ -30,33 +30,56 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
+#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
+#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
+
+#include <net/if.h>
+#include <gst/gst.h>
+#include <string>
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/synchronisation_primitives.h"
 
 namespace audio_manager {
 
-class string;
-
-class AudioManager {
+class FromMicToFileRecorderThread : public threads::ThreadDelegate {
  public:
+  FromMicToFileRecorderThread();
 
-  virtual void addA2DPSource(const sockaddr& device) = 0;
-  virtual void removeA2DPSource(const sockaddr& device) = 0;
-  virtual void playA2DPSource(const sockaddr& device) = 0;
-  virtual void stopA2DPSource(const sockaddr& device) = 0;
+  void threadMain();
 
-  virtual void addA2DPSource(const std::string& device) = 0;
-  virtual void removeA2DPSource(const std::string& device) = 0;
-  virtual void playA2DPSource(const std::string& device) = 0;
-  virtual void stopA2DPSource(const std::string& device) = 0;
+  void exitThreadMain();
 
-  virtual void startMicrophoneRecording(const std::string& outputFileName, int duration) = 0;
-  virtual void stopMicrophoneRecording() = 0;
+  void setOutputFileName(const std::string& outputFileName);
+  void setRecordDuration(int duration);
 
-  virtual ~AudioManager() {
-  }
+ private:
+  static log4cxx::LoggerPtr logger_;
+
+  int argc_;
+  gchar** argv_;
+
+  const std::string oKey;
+  const std::string tKey;
+
+  static GMainLoop *loop;
+
+  std::string outputFileName_, durationString_;
+
+  typedef struct {
+    GstElement *pipeline;
+    gint duration;
+  } GstTimeout;
+
+  void initArgs();
+
+  void psleep(void *timeout);
+
+  void stop(void *pipe);
+
+  DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
 };
 
-}  //  namespace audio_manager
+}  // namespace audio_manager
 
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
+#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_

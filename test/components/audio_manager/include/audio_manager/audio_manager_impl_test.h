@@ -36,7 +36,6 @@
 
 #include <pulse/simple.h>
 #include <pulse/error.h>
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "audio_manager/audio_manager_impl.h"
 #include "utils/threads/thread.h"
@@ -60,54 +59,75 @@ void AudioManagerTest::SetUp() {
 void AudioManagerTest::TearDown() {
 }
 
-TEST_F(AudioManagerTest, AddAndPlayStream) {
+TEST_F(AudioManagerTest, RecordMicrophoneStream) {
   audio_manager::AudioManager* audioManager =
       audio_manager::AudioManagerImpl::getAudioManager();
 
-  sockaddr device;
+  audioManager->startMicrophoneRecording(std::string("record.wav"), 20);
 
-  //device.sa_data[0] = 0xf8;
-  //device.sa_data[1] = 0xd0;
-  //device.sa_data[2] = 0xbd;
-  //device.sa_data[3] = 0xac;
-  //device.sa_data[4] = 0xb4;
-  //device.sa_data[5] = 0x5d;
+  // Sleep for 15 sec
+  usleep(15000000);
 
-  device.sa_data[0] = 0x38;
-  device.sa_data[1] = 0xe7;
-  device.sa_data[2] = 0xd8;
-  device.sa_data[3] = 0x45;
-  device.sa_data[4] = 0x48;
-  device.sa_data[5] = 0x27;
-
-  audioManager->addA2DPSource(device);
-  audioManager->playA2DPSource(device);
-
-  usleep(10000000);
-
-  audioManager->removeA2DPSource(device);
-
-  usleep(10000000);
-
-  audioManager->addA2DPSource(device);
-  audioManager->playA2DPSource(device);
-
-  usleep(10000000);
-
-  audioManager->stopA2DPSource(device);
-
-  usleep(10000000);
-
-  audioManager->playA2DPSource(device);
-
-  usleep(10000000);
-
-  audioManager->stopA2DPSource(device);
-
-  usleep(10000000);
-
-  audioManager->removeA2DPSource(device);
+  audioManager->stopMicrophoneRecording();
 }
+
+//TEST_F(AudioManagerTest, AddAndPlayStream) {
+//  audio_manager::AudioManager* audioManager =
+//      audio_manager::AudioManagerImpl::getAudioManager();
+//
+//  sockaddr device, device_one, device_two;
+//
+//  device_one.sa_data[0] = 0xf8;
+//  device_one.sa_data[1] = 0xd0;
+//  device_one.sa_data[2] = 0xbd;
+//  device_one.sa_data[3] = 0xac;
+//  device_one.sa_data[4] = 0xb4;
+//  device_one.sa_data[5] = 0x5d;
+//
+//  device_two.sa_data[0] = 0x38;
+//  device_two.sa_data[1] = 0xe7;
+//  device_two.sa_data[2] = 0xd8;
+//  device_two.sa_data[3] = 0x45;
+//  device_two.sa_data[4] = 0x48;
+//  device_two.sa_data[5] = 0x27;
+//
+//  device = device_one;
+//
+//  audioManager->addA2DPSource(device);
+//  audioManager->playA2DPSource(device);
+//
+//  LOG4CXX_TRACE(logger, ".Playing stream");
+//  while (true) {
+//    usleep(10000000);
+//    LOG4CXX_TRACE(logger, ".");
+//  }
+//
+//
+//  usleep(10000000);
+//
+//  audioManager->removeA2DPSource(device);
+//
+//  usleep(10000000);
+//
+//  audioManager->addA2DPSource(device);
+//  audioManager->playA2DPSource(device);
+//
+//  usleep(10000000);
+//
+//  audioManager->stopA2DPSource(device);
+//
+//  usleep(10000000);
+//
+//  audioManager->playA2DPSource(device);
+//
+//  usleep(10000000);
+//
+//  audioManager->stopA2DPSource(device);
+//
+//  usleep(10000000);
+//
+//  audioManager->removeA2DPSource(device);
+//}
 
 }  //  namespace audio_manager_test
 }  //  namespace components

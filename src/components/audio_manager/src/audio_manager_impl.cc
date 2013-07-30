@@ -30,9 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pulse/simple.h>
-#include <pulse/error.h>
-#include <string.h>
 #include <algorithm>
 #include <iterator>
 #include "audio_manager/audio_manager_impl.h"
@@ -46,12 +43,6 @@ AudioManagerImpl* AudioManagerImpl::sInstance_ = 0;
 
 const std::string AudioManagerImpl::sA2DPSourcePrefix_ = "bluez_source.";
 
-const pa_sample_spec AudioManagerImpl::A2DPSourcePlayerThread::
-      sSampleFormat_ = {
-      /*format*/    PA_SAMPLE_S16LE,
-      /*rate*/      44100,
-      /*channels*/  2 };
-
 AudioManager* AudioManagerImpl::getAudioManager() {
   if (0 == sInstance_) {
     sInstance_ = new AudioManagerImpl;
@@ -62,26 +53,26 @@ AudioManager* AudioManagerImpl::getAudioManager() {
 
 AudioManagerImpl::AudioManagerImpl()
 // Six hex-pairs + five underscores + '\n'
- : MAC_ADDRESS_LENGTH_(12 + 5 + 1)  {
+  : MAC_ADDRESS_LENGTH_(12 + 5 + 1) {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
 }
 
-void AudioManagerImpl::addA2DPSource(const string& device) {
-  // TODO (PK) Implement
+void AudioManagerImpl::addA2DPSource(const std::string& device) {
+  // TODO(PK) Implement
 }
 
-void AudioManagerImpl::removeA2DPSource(const string& device) {
-  // TODO (PK) Implement
+void AudioManagerImpl::removeA2DPSource(const std::string& device) {
+  // TODO(PK) Implement
 }
 
-void AudioManagerImpl::playA2DPSource(const string& device) {
-  // TODO (PK) Implement
+void AudioManagerImpl::playA2DPSource(const std::string& device) {
+  // TODO(PK) Implement
 }
 
-void AudioManagerImpl::stopA2DPSource(const string& device) {
-  // TODO (PK) Implement
+void AudioManagerImpl::stopA2DPSource(const std::string& device) {
+  // TODO(PK) Implement
 }
 
 std::string AudioManagerImpl::sockAddr2SourceAddr(const sockaddr& device) {
@@ -89,13 +80,10 @@ std::string AudioManagerImpl::sockAddr2SourceAddr(const sockaddr& device) {
 
   char mac[MAC_ADDRESS_LENGTH_];
 
-  sprintf(mac, "%02x_%02x_%02x_%02x_%02x_%02x",
-          (unsigned char)device.sa_data[0],
-          (unsigned char)device.sa_data[1],
-          (unsigned char)device.sa_data[2],
-          (unsigned char)device.sa_data[3],
-          (unsigned char)device.sa_data[4],
-          (unsigned char)device.sa_data[5]);
+  snprintf(mac, MAC_ADDRESS_LENGTH_, "%02x_%02x_%02x_%02x_%02x_%02x",
+           (unsigned char)device.sa_data[0], (unsigned char)device.sa_data[1],
+           (unsigned char)device.sa_data[2], (unsigned char)device.sa_data[3],
+           (unsigned char)device.sa_data[4], (unsigned char)device.sa_data[5]);
 
   std::string ret = std::string(mac);
 
@@ -187,112 +175,28 @@ void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
   }
 }
 
-AudioManagerImpl::A2DPSourcePlayerThread::A2DPSourcePlayerThread(
-    const std::string& device)
-    : threads::ThreadDelegate(),
-      device_(device),
-      BUFSIZE_(32) {
-  stopFlagMutex_.init();
-}
-
-void AudioManagerImpl::A2DPSourcePlayerThread::freeStreams() {
-  LOG4CXX_TRACE_ENTER(logger_);
-  if (s_in) {
-    pa_simple_free(s_in);
-  }
-
-  if (s_out) {
-    pa_simple_free(s_out);
-  }
-}
-
-void AudioManagerImpl::A2DPSourcePlayerThread::exitThreadMain() {
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = true;
-  stopFlagMutex_.unlock();
-}
-
-void AudioManagerImpl::A2DPSourcePlayerThread::threadMain() {
+void AudioManagerImpl::startMicrophoneRecording(
+    const std::string& outputFileName, int duration) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = false;
-  stopFlagMutex_.unlock();
+  FromMicToFileRecorderThread* recordThreadDelegate =
+      new FromMicToFileRecorderThread();
 
-  int error;
+  recordThreadDelegate->setOutputFileName(outputFileName);
+  recordThreadDelegate->setRecordDuration(duration);
 
-  const char * a2dpSource = device_.c_str();
+  recorderThread_ = new threads::Thread("MicrophoneRecorder"
+        , recordThreadDelegate);
 
-  LOG4CXX_DEBUG(logger_, device_);
+  recorderThread_->start();
+}
 
-  LOG4CXX_DEBUG(logger_, "Creating streams");
+void AudioManagerImpl::stopMicrophoneRecording() {
+  LOG4CXX_TRACE_ENTER(logger_);
 
-  /* Create a new playback stream */
-  if (!(s_out = pa_simple_new(NULL, "AudioManager", PA_STREAM_PLAYBACK, NULL,
-                          "playback", &sSampleFormat_, NULL, NULL, &error))) {
-    LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
-    freeStreams();
-    return;
-  }
+  recorderThread_->stop();
 
-  if (!(s_in = pa_simple_new(NULL, "AudioManager", PA_STREAM_RECORD, a2dpSource,
-                             "record", &sSampleFormat_, NULL, NULL, &error))) {
-    LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
-    freeStreams();
-    return;
-  }
-
-  LOG4CXX_DEBUG(logger_, "Entering main loop");
-
-  for (;;) {
-    uint8_t buf[BUFSIZE_];
-    ssize_t r;
-
-    pa_usec_t latency;
-
-    if ((latency = pa_simple_get_latency(s_in, &error)) == (pa_usec_t) -1) {
-      LOG4CXX_ERROR(logger_, "pa_simple_get_latency() failed: "
-                   << pa_strerror(error));
-      break;
-    }
-
-    //LOG4CXX_INFO(logger_, "In: " << static_cast<float>(latency));
-
-    if ((latency = pa_simple_get_latency(s_out, &error)) == (pa_usec_t) -1) {
-      LOG4CXX_ERROR(logger_, "pa_simple_get_latency() failed: "
-                    << pa_strerror(error));
-      break;
-    }
-
-    //LOG4CXX_INFO(logger_, "Out: " << static_cast<float>(latency));
-
-    if (pa_simple_read(s_in, buf, sizeof(buf), &error) < 0) {
-      LOG4CXX_ERROR(logger_, "read() failed: " << strerror(error));
-      break;
-    }
-
-    /* ... and play it */
-    if (pa_simple_write(s_out, buf, sizeof(buf), &error) < 0) {
-      LOG4CXX_ERROR(logger_, "pa_simple_write() failed: "
-                    << pa_strerror(error));
-      break;
-    }
-
-    stopFlagMutex_.lock();
-    if(shouldBeStoped_) {
-      break;
-    }
-    stopFlagMutex_.unlock();
-  }
-
-  /* Make sure that every single sample was played */
-  if (pa_simple_drain(s_out, &error) < 0) {
-    LOG4CXX_ERROR(logger_, "pa_simple_drain() failed: " << pa_strerror(error));
-    freeStreams();
-    return;
-  }
-
-  freeStreams();
+  delete recorderThread_;
 }
 
 }  // namespace audio_manager

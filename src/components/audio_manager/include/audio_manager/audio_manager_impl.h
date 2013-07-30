@@ -39,9 +39,8 @@
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "audio_manager/audio_manager.h"
-#include "utils/threads/thread.h"
-#include "utils/threads/thread_delegate.h"
-#include "utils/synchronisation_primitives.h"
+#include "audio_manager/from_mic_to_file_recorder_thread.h"
+#include "audio_manager/a2dp_source_player_thread.h"
 
 namespace audio_manager {
 
@@ -58,42 +57,23 @@ class AudioManagerImpl : AudioManager {
   virtual void playA2DPSource(const sockaddr& device);
   virtual void stopA2DPSource(const sockaddr& device);
 
-  virtual void addA2DPSource(const string& device);
-  virtual void removeA2DPSource(const string& device);
-  virtual void playA2DPSource(const string& device);
-  virtual void stopA2DPSource(const string& device);
+  virtual void addA2DPSource(const std::string& device);
+  virtual void removeA2DPSource(const std::string& device);
+  virtual void playA2DPSource(const std::string& device);
+  virtual void stopA2DPSource(const std::string& device);
+
+  virtual void startMicrophoneRecording(const std::string& outputFileName,
+                                        int duration);
+  virtual void stopMicrophoneRecording();
 
   virtual ~AudioManagerImpl();
 
  protected:
   AudioManagerImpl();
 
-  class A2DPSourcePlayerThread : public threads::ThreadDelegate {
-   public:
-    explicit A2DPSourcePlayerThread(const std::string& device);
-
-    void threadMain();
-
-    void exitThreadMain();
-
-   private:
-     // The Sample format to use
-     static const pa_sample_spec sSampleFormat_;
-
-     const int BUFSIZE_;
-     pa_simple *s_in, *s_out;
-     std::string device_;
-     bool shouldBeStoped_;
-     sync_primitives::SynchronisationPrimitives stopFlagMutex_;
-
-     void freeStreams();
-
-     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
-    };
-
-
  private:
   std::map<std::string, threads::Thread*> sources_;
+  threads::Thread* recorderThread_;
 
   const int MAC_ADDRESS_LENGTH_;
   static AudioManagerImpl* sInstance_;
