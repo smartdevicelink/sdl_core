@@ -147,6 +147,8 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
    */
   const AudioType& audio_type() const;
 
+  void exitThreadMain();
+
  private:
   /*
    * @brief Sends AudioPassThru request

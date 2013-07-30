@@ -515,6 +515,10 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
 }
 
 void ApplicationManagerImpl::StopAudioPassThruThread() {
+  if (!perform_audio_thread_) {
+    return;
+  }
+
   perform_audio_thread_->stop();
   delete perform_audio_thread_;
   perform_audio_thread_ = NULL;

@@ -284,6 +284,10 @@ void AudioPassThruThreadImpl::threadMain() {
 #endif
 }
 
+void AudioPassThruThreadImpl::exitThreadMain() {
+  LOG4CXX_INFO(logger_, "AudioPassThruThreadImpl::exitThreadMain");
+}
+
 unsigned int AudioPassThruThreadImpl::session_key() const {
   return session_key_;
 }

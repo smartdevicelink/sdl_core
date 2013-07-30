@@ -112,6 +112,7 @@ void PerformAudioPassThruRequest::Run() {
   CreateHMIRequest(hmi_apis::FunctionID::UI_PerformAudioPassThru,
                    msg_params, true, 1);
 
+  ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(true);
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(
     (*message_)[str::params][str::connection_key].asInt(),
     (*message_)[str::params][str::correlation_id].asInt(),
