@@ -284,6 +284,7 @@ public class Names {
     public static final String gearShiftAdvice = "gearShiftAdvice";
     public static final String acceleration = "acceleration";
     public static final String accPedalPosition = "accPedalPosition";
+    public static final String steeringWheelAngle = "steeringWheelAngle";
     public static final String clutchPedalPosition = "clutchPedalPosition";
     public static final String reverseGearStatus = "reverseGearStatus";
     public static final String accTorque = "accTorque";

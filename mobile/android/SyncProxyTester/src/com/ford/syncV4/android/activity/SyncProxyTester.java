@@ -12,9 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -1733,24 +1736,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						} else if (adapter.getItem(which) == VehicleDataSubscriptions) {
 							sendVehicleDataSubscriptions();
 						} else if (adapter.getItem(which) == Names.GetVehicleData) {
-							//GetVehicleData
-							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-							builder.setAdapter(_vehicleDataType, new DialogInterface.OnClickListener() {
-
-								public void onClick(DialogInterface dialog, int which) {
-									try {
-										GetVehicleData msg = new GetVehicleData();
-										msg.setDataType(VehicleDataType.values()[which]);
-										msg.setCorrelationID(autoIncCorrId++);
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-								}
-							});
-							AlertDialog dlg = builder.create();
-							dlg.show();
+                            sendGetVehicleData();
 						} else if (adapter.getItem(which) == Names.ReadDID) {
 							//ReadDID
 							AlertDialog.Builder builder;
@@ -1894,6 +1880,54 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 						messageSelectCount.put(function, curCount + 1);
 					}
+
+                   /**
+                    * Opens the dialog for GetVehicleData message and sends it.
+                    */
+                   private void sendGetVehicleData() {
+                       AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
+                       builder.setAdapter(_vehicleDataType, new DialogInterface.OnClickListener() {
+
+                           public void onClick(DialogInterface dialog, int which) {
+                               try {
+                                   GetVehicleData msg = new GetVehicleData();
+
+                                   final String[] methodNames = { "Gps", "Speed", "Rpm", "FuelLevel",
+                                           "FuelLevel_State", "InstantFuelConsumption", "ExternalTemperature",
+                                           "Prndl", "TirePressure", "Odometer", "BeltStatus", "BodyInformation",
+                                           "DeviceStatus", "DriverBraking", "WiperStatus", "HeadLampStatus",
+                                           "EngineTorque", "AccPedalPosition", "SteeringWheelAngle",
+                                           "ECallInfo", "AirbagStatus", "EmergencyEvent", "ClusterModeStatus",
+                                           "MyKey" };
+                                   final String setterName = "set" + methodNames[which];
+                                   setVehicleDataParam(msg, GetVehicleData.class, setterName);
+
+                                   msg.setCorrelationID(autoIncCorrId++);
+                                   _msgAdapter.logMessage(msg, true);
+                                   ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                               } catch (SyncException e) {
+                                   _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                               }
+                           }
+                       });
+                       builder.show();
+                   }
+
+                   /**
+                    * Calls the setter with setterName on the msg.
+                    */
+                   private void setVehicleDataParam(RPCRequest msg, Class msgClass, String setterName) {
+                       try {
+                           Method setter = msgClass.getMethod(setterName, Boolean.class);
+                           setter.invoke(msg, true);
+                       } catch (NoSuchMethodException e) {
+                           Log.e(logTag, "Can't set vehicle data", e);
+                       } catch (IllegalAccessException e) {
+                           Log.e(logTag, "Can't set vehicle data", e);
+                       } catch (InvocationTargetException e) {
+                           Log.e(logTag, "Can't set vehicle data", e);
+                       }
+                   }
 
                    /**
                     * Opens the dialog for GetDTCs message and sends it.
@@ -3089,11 +3123,43 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										unsubscribeVehicleData.add(dataTypes[i]);
 									}
 								}
-								
-								if (!subscribeVehicleData.isEmpty()) {
+
+                                final Map<VehicleDataType, String> methodNamesMap =
+                                        new HashMap<VehicleDataType, String>() {{
+                                            put(VehicleDataType.VEHICLEDATA_GPS, "Gps");
+                                            put(VehicleDataType.VEHICLEDATA_SPEED, "Speed");
+                                            put(VehicleDataType.VEHICLEDATA_RPM, "Rpm");
+                                            put(VehicleDataType.VEHICLEDATA_FUELLEVEL, "FuelLevel");
+                                            put(VehicleDataType.VEHICLEDATA_FUELLEVEL_STATE, "FuelLevel_State");
+                                            put(VehicleDataType.VEHICLEDATA_INSTANTFUELCONSUMPTION,
+                                                    "InstantFuelConsumption");
+                                            put(VehicleDataType.VEHICLEDATA_EXTERNTEMP, "ExternalTemperature");
+                                            put(VehicleDataType.VEHICLEDATA_PRNDLSTATUS, "Prndl");
+                                            put(VehicleDataType.VEHICLEDATA_TIREPRESSURE, "TirePressure");
+                                            put(VehicleDataType.VEHICLEDATA_ODOMETER, "Odometer");
+                                            put(VehicleDataType.VEHICLEDATA_BELTSTATUS, "BeltStatus");
+                                            put(VehicleDataType.VEHICLEDATA_BODYINFORMATION, "BodyInformation");
+                                            put(VehicleDataType.VEHICLEDATA_DEVICESTATUS, "DeviceStatus");
+                                            put(VehicleDataType.VEHICLEDATA_DRIVERBRAKING, "DriverBraking");
+                                            put(VehicleDataType.VEHICLEDATA_WIPERSTATUS, "WiperStatus");
+                                            put(VehicleDataType.VEHICLEDATA_HEADLAMPSTATUS, "HeadLampStatus");
+                                            put(VehicleDataType.VEHICLEDATA_ENGINETORQUE, "EngineTorque");
+                                            put(VehicleDataType.VEHICLEDATA_ACCPEDALPOSITION, "AccPedalPosition");
+                                            put(VehicleDataType.VEHICLEDATA_STEERINGWHEELANGLE, "SteeringWheelAngle");
+                                            put(VehicleDataType.VEHICLEDATA_ECALLINFO, "ECallInfo");
+                                            put(VehicleDataType.VEHICLEDATA_AIRBAGSTATUS, "AirbagStatus");
+                                            put(VehicleDataType.VEHICLEDATA_EMERGENCYEVENT, "EmergencyEvent");
+                                            put(VehicleDataType.VEHICLEDATA_CLUSTERMODESTATUS, "ClusterModeStatus");
+                                            put(VehicleDataType.VEHICLEDATA_MYKEY, "MyKey");
+                                        }};
+
+                                if (!subscribeVehicleData.isEmpty()) {
 									try {
 										SubscribeVehicleData msg = new SubscribeVehicleData();
-										msg.setDataType(subscribeVehicleData);
+										for (VehicleDataType vdt : subscribeVehicleData) {
+                                            setVehicleDataParam(msg, SubscribeVehicleData.class,
+                                                    "set" + methodNamesMap.get(vdt));
+                                        }
 										msg.setCorrelationID(autoIncCorrId++);
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
@@ -3105,7 +3171,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								if (!unsubscribeVehicleData.isEmpty()) {
 									try {
 										UnsubscribeVehicleData msg = new UnsubscribeVehicleData();
-										msg.setDataType(unsubscribeVehicleData);
+                                        for (VehicleDataType vdt : unsubscribeVehicleData) {
+                                            setVehicleDataParam(msg, UnsubscribeVehicleData.class,
+                                                    "set" + methodNamesMap.get(vdt));
+                                        }
 										msg.setCorrelationID(autoIncCorrId++);
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
