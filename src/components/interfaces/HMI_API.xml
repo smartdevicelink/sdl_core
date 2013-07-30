@@ -1133,6 +1133,13 @@
     <function name="GetDeviceList" messagetype="response">
         <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
     </function>
+	<function name="AllowDeviceToConnect" messagetype="request">
+        <description>Request from SmartDeviceLink to HMI to get the permissions of new device connection.</description>
+        <param name="device" type="Common.DeviceInfo" mandatory="true"/>
+    </function>
+    <function name="AllowDeviceToConnect" messagetype="response">
+		<param name="allow" type="Boolean" mandatory="true"/>
+	</function>
     <function name="StartDeviceDiscovery" messagetype="request">
       <description>Initiated by HMI user. In response optional list of found devices - if not provided, not were found.</description>
     </function>
