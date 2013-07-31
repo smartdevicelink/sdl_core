@@ -104,6 +104,7 @@ import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayout;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.Show;
@@ -961,6 +962,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, Names.ShowConstantTBT);
 			addToFunctionsAdapter(adapter, Names.AlertManeuver);
 			addToFunctionsAdapter(adapter, Names.UpdateTurnList);
+            addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
 			addToFunctionsAdapter(adapter, GenericRequest);
 			
 			adapter.sort(new Comparator<String>() {
@@ -1737,6 +1739,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.UpdateTurnList) {
 							sendUpdateTurnList();
+						} else if (adapter.getItem(which) == Names.SetDisplayLayout) {
+							sendSetDisplayLayout();
 						} else if (adapter.getItem(which) == GenericRequest) {
 							sendGenericRequest();
 						}
@@ -3161,7 +3165,43 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder.setView(layout);
 						builder.create().show();
 					}
-					
+
+
+                   /**
+                    * Opens the dialog for SetDisplayLayout message and sends it.
+                    */
+                   private void sendSetDisplayLayout() {
+                       Context mContext = adapter.getContext();
+                       LayoutInflater inflater = (LayoutInflater) mContext
+                               .getSystemService(LAYOUT_INFLATER_SERVICE);
+                       View layout = inflater.inflate(R.layout.setdisplaylayout,
+                               (ViewGroup) findViewById(R.id.setdisplaylayout_itemRoot));
+
+                       final EditText editDisplayLayout = (EditText) layout.findViewById(R.id.setdisplaylayout_displayLayout);
+
+                       AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                       builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               SetDisplayLayout msg = new SetDisplayLayout();
+                               msg.setCorrelationID(autoIncCorrId++);
+                               msg.setDisplayLayout(editDisplayLayout.getText().toString());
+                               _msgAdapter.logMessage(msg, true);
+                               try {
+                                   ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                               } catch (SyncException e) {
+                                   _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                               }
+                           }
+                       });
+                       builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               dialog.cancel();
+                           }
+                       });
+                       builder.setView(layout);
+                       builder.show();
+                   }
+
 					/**
 					 * Sends a GenericRequest message.
 					 */

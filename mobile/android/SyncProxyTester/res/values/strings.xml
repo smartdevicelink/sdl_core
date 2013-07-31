@@ -147,5 +147,7 @@
     <string name="getdtcs_ecuNameDefault">2000</string>
     <string name="getdtcs_dtcMask">DTC Mask</string>
     <string name="getdtcs_dtcMaskDefault">42</string>
+    <string name="setdisplaylayout_displayLayout">Display Layout</string>
+    <string name="setdisplaylayout_displayLayoutDefault">ONSCREEN_PRESETS</string>
 
 </resources>
