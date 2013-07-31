@@ -42,8 +42,6 @@ include_directories (
 )
 
 set(LIBRARIES
-    ${GSTREAMER_LIBRARIES}
-    ${GLIB2_LIBRARIES}
     gtest
     gtest_main
     gmock
@@ -69,11 +67,7 @@ set(LIBRARIES
     jsoncpp
     Utils
     rt
-    gstreamer-1.0
-    gobject-2.0
-    gmodule-2.0
-    gthread-2.0
-    glib-2.0
+    ${GSTREAMER_gstreamer_LIBRARY}
 )
 
 add_executable("test_suit" "./test_suit.cc")

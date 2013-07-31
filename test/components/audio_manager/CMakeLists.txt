@@ -20,11 +20,7 @@ set (LIBRARIES
     gmock
     gmock_main
     AudioManager
-    gstreamer-1.0
-    gobject-2.0
-    gmodule-2.0
-    gthread-2.0
-    glib-2.0
+    ${GSTREAMER_gstreamer_LIBRARY}
 )
 
 create_test("test_AudioManager" "${SOURCES}" "${LIBRARIES}")

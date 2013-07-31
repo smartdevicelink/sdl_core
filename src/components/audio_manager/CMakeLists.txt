@@ -12,8 +12,7 @@ include_directories (
 )
 
 set(LIBRARIES
-    ${GSTREAMER_LIBRARIES}
-    ${GLIB2_LIBRARIES}
+  ${GSTREAMER_gstreamer_LIBRARY}
 )
 
 set (SOURCES
