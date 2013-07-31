@@ -2,7 +2,6 @@ package com.batutin.android.androidvideostreaming.screenshot;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
 import android.graphics.ImageFormat;
 import android.graphics.YuvImage;
 
@@ -23,32 +22,10 @@ public class ColorSpaceUtils {
     private static final int CVG = -27439;
     private static final int CVB = -5329;
 
-    // from http://d.hatena.ne.jp/Superdry/20110130/1296405341
-    private int[] convertRGB2YUV(int color) {
-        ColorMatrix cm = new ColorMatrix();
-        cm.setRGB2YUV();
-        final float[] yuvArray = cm.getArray();
-
-        int r = Color.red(color);
-        int g = Color.green(color);
-        int b = Color.blue(color);
-        int[] result = new int[3];
-
-        // Adding a 127 U and V.
-        result[0] = floatToByte(yuvArray[0] * r + yuvArray[1] * g + yuvArray[2] * b);
-        result[1] = floatToByte(yuvArray[5] * r + yuvArray[6] * g + yuvArray[7] * b) + 127;
-        result[2] = floatToByte(yuvArray[10] * r + yuvArray[11] * g + yuvArray[12] * b) + 127;
-        return result;
-    }
-
-    private int floatToByte(float x) {
-        int n = java.lang.Math.round(x);
-        return n;
-    }
 
     // Generate YuvImage based on the content in bitmap. If paddings > 0, the
     // strides of YuvImage are calculated by adding paddings to bitmap.getWidth().
-    private YuvImage generateYuvImage(int format, Bitmap bitmap, int paddings) {
+    public YuvImage generateYuvImage(int format, Bitmap bitmap, int paddings) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
 
@@ -117,4 +94,5 @@ public class ColorSpaceUtils {
         yuv[1] = (byte) (((CUR * r + CUG * g + CUB * b) >> CSHIFT) + 128);
         yuv[2] = (byte) (((CVR * r + CVG * g + CVB * b) >> CSHIFT) + 128);
     }
+
 }
