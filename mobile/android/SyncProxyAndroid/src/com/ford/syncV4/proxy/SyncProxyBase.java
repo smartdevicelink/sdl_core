@@ -64,7 +64,6 @@ import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
-import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.DisplayCapabilities;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
@@ -2105,20 +2104,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					});
 				} else {
 					_proxyListener.onUpdateTurnListResponse((UpdateTurnListResponse)msg);	
-				}
-			} else if (functionName.equals(Names.DialNumber)) {
-				// DialNumber
-				final DialNumberResponse msg = new DialNumberResponse(hash);
-				if (_callbackToUIThread) {
-					// Run in UI thread
-					_mainUIHandler.post(new Runnable() {
-						@Override
-						public void run() {
-							_proxyListener.onDialNumberResponse((DialNumberResponse)msg);
-						}
-					});
-				} else {
-					_proxyListener.onDialNumberResponse((DialNumberResponse)msg);	
 				}
 			} else {
 				if (_syncMsgVersion != null) {

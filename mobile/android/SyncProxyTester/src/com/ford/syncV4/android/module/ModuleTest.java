@@ -49,7 +49,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
-import com.ford.syncV4.proxy.rpc.DialNumber;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
@@ -504,8 +503,6 @@ public class ModuleTest {
 									rpc = new SetMediaClockTimer();
 								} else if (name.equalsIgnoreCase(Names.EncodedSyncPData)) {
 									rpc = new EncodedSyncPData();
-								} else if (name.equalsIgnoreCase(Names.DialNumber)) {
-									rpc = new DialNumber();
 								} else if (name.equalsIgnoreCase(Names.PerformAudioPassThru)) {
 									rpc = new PerformAudioPassThru();
 								} else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {

@@ -10,7 +10,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
-import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
@@ -290,6 +289,4 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	public void onShowConstantTBTResponse(ShowConstantTBTResponse response);
 	
 	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
-	
-	public void onDialNumberResponse(DialNumberResponse response);
 }

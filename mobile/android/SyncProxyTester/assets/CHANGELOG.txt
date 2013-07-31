@@ -1,4 +1,5 @@
 [CW31]
+- SyncProxyAndroid SDK: remove DialNumber function.
 * SyncProxyAndroid SDK: update FunctionID values. NB: The SDLCore must use the same values to be compatible!
 * SyncProxyTester always uses protocol version 2.
 * SyncProxyAndroid SDK: VehicleData parameters are sent as booleans (based on Ford's changes).

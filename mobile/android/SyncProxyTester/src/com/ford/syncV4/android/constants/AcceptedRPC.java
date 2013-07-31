@@ -24,7 +24,6 @@ public class AcceptedRPC {
 		acceptedRPC.add(Names.Speak);
 		acceptedRPC.add(Names.SetMediaClockTimer);
 		acceptedRPC.add(Names.EncodedSyncPData);
-	    acceptedRPC.add(Names.DialNumber);
 	    acceptedRPC.add(Names.PerformAudioPassThru);
 	    acceptedRPC.add(Names.EndAudioPassThru);
 		acceptedRPC.add(Names.SubscribeButton);

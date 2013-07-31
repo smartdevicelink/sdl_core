@@ -47,7 +47,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
-import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
@@ -1381,18 +1380,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		}
 	}
 
-	@Override
-	public void onDialNumberResponse(DialNumberResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (isModuleTesting()) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
-	
 	@Override
 	public IBinder onBind(Intent intent) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();

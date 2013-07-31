@@ -20,7 +20,6 @@ public class Names {
 	public static final String CreateInteractionChoiceSet = "CreateInteractionChoiceSet";
 	public static final String DeleteInteractionChoiceSet = "DeleteInteractionChoiceSet";
 	public static final String PerformInteraction = "PerformInteraction";
-	public static final String DialNumber = "DialNumber";
 	public static final String EncodedSyncPData = "EncodedSyncPData";
 	public static final String SubscribeButton = "SubscribeButton";
 	public static final String UnsubscribeButton = "UnsubscribeButton";
@@ -212,7 +211,6 @@ public class Names {
 	public static final String altitude = "altitude";
 	public static final String heading = "heading";
 	public static final String speed = "speed";
-	public static final String number = "number";
 	public static final String syncFileName = "syncFileName";
 	public static final String localFileName = "localFileName";
 	public static final String maxDuration = "maxDuration";

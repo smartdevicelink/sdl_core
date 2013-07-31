@@ -18,7 +18,6 @@ public enum FunctionID {
 	Speak,
 	SetMediaClockTimer,
 	EncodedSyncPData,
-	DialNumber,
 	PerformAudioPassThru,
 	EndAudioPassThru,
 	SubscribeButton,
