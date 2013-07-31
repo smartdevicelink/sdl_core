@@ -7,6 +7,7 @@ include_directories (
   ../../thirdPartyLibs/logger/include/
   ../../thirdPartyLibs/MessageBroker/include/
   /usr/lib/i386-linux-gnu/glib-2.0/include
+  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
 )
