@@ -23,5 +23,5 @@ set (LIBRARIES
     ${GSTREAMER_gstreamer_LIBRARY}
 )
 
-create_test("test_AudioManager" "${SOURCES}" "${LIBRARIES}")
+#create_test("test_AudioManager" "${SOURCES}" "${LIBRARIES}")
 add_library("test_AudioManagerTest" "${SOURCES}")

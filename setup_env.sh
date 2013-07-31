@@ -56,11 +56,13 @@ sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
 if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
 	echo "Adding gstreamer to /etc/apt/sources.list"
+	# TODO use $FULL_GSTREAMER_REPO_LINK in sed
 	sudo sed -i '$a\deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu precise main' /etc/apt/sources.list
 fi
 
 if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 	echo "Adding gstreamer sources to /etc/apt/sources.list"
+	# TODO use $FULL_GSTREAMER_SRC_REPO_LINK in sed
 	sudo sed -i '$a\deb-src http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu precise main' /etc/apt/sources.list
 fi
 
