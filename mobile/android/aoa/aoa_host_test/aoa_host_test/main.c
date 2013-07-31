@@ -28,8 +28,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#define IN 0x85
-#define OUT 0x07
+#define IN 0x81
+#define OUT 0x02
 
 #define VID_NEXUSS 0x18D1
 #define PID_NEXUSS 0x4E22
@@ -40,8 +40,11 @@
 #define VID_MOTOROLA_RAZR 0x22b8
 #define PID_MOTOROLA_RAZR 0x4362
 
-#define VID VID_NEXUS7
-#define PID PID_NEXUS7
+#define VID_HUAWEI 0x12d1
+#define PID_HUAWEI 0x1052
+
+#define VID VID_HUAWEI
+#define PID PID_HUAWEI
 
 #define ACCESSORY_VID 0x18d1
 #define ACCESSORY_PID 0x2D01
@@ -120,16 +123,31 @@ int main (int argc, char *argv[]){
 	return 0;
 }
 
+static void printCharArray(unsigned char *buf, unsigned int len) {
+    // http://stackoverflow.com/questions/5189071/print-part-of-char-array/5191818#5191818
+    fprintf(stdout, "%.*s\n", len, buf);
+}
+
 static int mainPhase(){
 	unsigned char buffer[500000];
 	int response = 0;
-	static int transferred;
+	int transferred;
     
+    // reading data length
 	response = libusb_bulk_transfer(handle,IN,buffer,16384, &transferred,0);
+    fprintf(stdout, "1: Transferred %d bytes\n", transferred);
 	if(response < 0){error(response);return -1;}
+    if (transferred > 1) {
+        printCharArray(buffer, transferred);
+    } else {
+        fprintf(stdout, "Length: %u\n", buffer[0]);
+    }
     
+    // reading data
 	response = libusb_bulk_transfer(handle,IN,buffer,500000, &transferred,0);
+    fprintf(stdout, "2: Transferred %d bytes\n", transferred);
 	if(response < 0){error(response);return -1;}
+    printCharArray(buffer, transferred);
     
     return 0;
 }
@@ -231,8 +249,10 @@ static int setupAccessory(
     
 	fprintf(stdout,"Attempted to put device into accessory mode %d\n", devVersion);
     
-	if(handle != NULL)
+	if(handle != NULL) {
 		libusb_release_interface (handle, 0);
+        libusb_close(handle);
+    }
     
     return connectToAccessory();
 }
