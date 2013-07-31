@@ -56,6 +56,13 @@ SDL.SDLModel = Em.Object.create( {
     sendDataExtend: false,
 
     /**
+     * VR active status
+     *
+     * @param {Boolean}
+     */
+    VRActive: false,
+
+    /**
      * Flag to be set true when phone call is initialised
      *
      * @param {Boolean}
@@ -531,6 +538,20 @@ SDL.SDLModel = Em.Object.create( {
             }
             SDL.TTSPopUp.ActivateTTS( message );
         }
+    },
+    
+    /**
+     * Play audio file on PlayTone notification
+     */
+    onPlayTone: function() {
+    	SDL.Audio.play('audio/initial.wav');
+    },
+
+    /**
+     * Prompt deactivation
+     */
+    TTSStopSpeaking: function() {
+        SDL.TTSPopUp.DeactivateTTS();
     },
 
     /**

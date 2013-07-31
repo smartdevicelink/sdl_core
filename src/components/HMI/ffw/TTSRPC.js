@@ -161,6 +161,8 @@ FFW.TTS = FFW.RPCObserver.create( {
             case "TTS.StopSpeaking": {
                 
             	Em.Logger.log("FFW." + request.method + "Response");
+            	
+            	SDL.SDLModel.TTSStopSpeaking();
 
                 // send repsonse
                 var JSONMessage = {

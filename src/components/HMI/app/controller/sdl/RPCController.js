@@ -35,7 +35,235 @@
 SDL.ValidateMessage = Em.Object.create({
 
     
-    /**
+	/**
+     * Object that contains check methods that
+     * returns true if mandatory fields is successful
+     * and returns false if not
+     */
+    TTS: Em.Object.create({
+
+        resultStruct: {},
+        
+        /**
+         * Validate method for request IsReady
+         * 
+         * @param {Object} params
+         */
+        IsReady: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request GetLanguage
+         * 
+         * @param {Object} params
+         */
+        GetLanguage: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request SetGlobalProperties
+         * 
+         * @param {Object} params
+         */
+        SetGlobalProperties: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.appID) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appID' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appID != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appID'!"
+                };
+                
+                return this.resultStruct;
+            }
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request GetSupportedLanguages
+         * 
+         * @param {Object} params
+         */
+        GetSupportedLanguages: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request StopSpeaking
+         * 
+         * @param {Object} params
+         */
+        StopSpeaking: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request Speak
+         * 
+         * @param {Object} params
+         */
+        Speak: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.ttsChunks) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'ttsChunks' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (params.ttsChunks.length < 1) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'ttsChunks'!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.appID) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appID' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appID != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appID'!"
+                };
+                
+                return this.resultStruct;
+            }
+            
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+            
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request ChangeRegistration
+         * 
+         * @param {Object} params
+         */
+        ChangeRegistration: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.language) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'language' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.language != 'string') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'language'!"
+                };
+                
+                return this.resultStruct;
+            }
+            if (!params.appID) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appID' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appID != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appID'!"
+                };
+                
+                return this.resultStruct;
+            }
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        }
+    }),
+	
+	/**
      * Object that contains check methods that
      * returns true if mandatory fields is successful
      * and returns false if not

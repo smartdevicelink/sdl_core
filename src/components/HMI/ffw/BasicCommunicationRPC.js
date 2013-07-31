@@ -181,7 +181,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         }
 
         if(notification.method == this.onPlayToneNotification){
-            // to do play tone
+        	SDL.SDLModel.onPlayTone();
         }
     },
 

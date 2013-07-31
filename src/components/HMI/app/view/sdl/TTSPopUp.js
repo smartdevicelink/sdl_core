@@ -74,9 +74,6 @@ SDL.TTSPopUp = Em.ContainerView.create( {
     ActivateTTS: function( msg ) {
         var self = this;
 
-        // play audio alert
-        // SDL.Audio.play('audio/initial.wav');
-
         this.set( 'content', msg );
         this.set( 'active', true );
 
@@ -84,6 +81,11 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         this.timer = setTimeout( function() {
             self.set( 'active', false );
         }, 2000 ); // 2 second timeout for TTS popUp
+    },
+    
+    DeactivateTTS: function() {
+        clearTimeout( this.timer );
+        this.set( 'active', false );
     },
     
     /**

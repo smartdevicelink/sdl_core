@@ -40,7 +40,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     classNameBindings:
         [
-            'VRActive:active'
+            'SDL.SDLModel.VRActive:active'
         ],
 
     childViews:
@@ -67,7 +67,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
         content: 'Speak the command'
     } ),
 
-    VRActive: false,
+    VRActiveBinding: 'SDL.SDLModel.VRActive',
 
     popUp: Em.View.extend( {
 
@@ -118,21 +118,6 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     },
 
-    activateVRPopUp: function() {
-        var self = this;
-
-        if( this.VRActive ){
-            this.set( 'VRActive', false );
-        }else{
-            // play audio alert
-            SDL.Audio.play( 'audio/say.wav' );
-
-            this.set( 'VRActive', true );
-        }
-
-        SDL.SDLController.onSystemContextChange();
-    },
-
     /**
      * List for option on SDLOptionsView screen
      */
@@ -148,10 +133,22 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     // deactivate VR on change application state
     onStateChange: function() {
-        if( this.VRActive ){
-            this.set( 'VRActive', false );
-        }
-    }.observes( 'SDL.TransitionIterator.ready' ),
+        if (this.VRActive) {
+    		FFW.VR.Started();
+    		this.set( 'VRActive', false );
+    	} else {
+    		FFW.VR.Stopped();
+    	}
+    }.observes('SDL.TransitionIterator.ready'),
+
+    onActivate: function() {
+    	SDL.SDLController.onSystemContextChange();
+    	if (this.VRActive) {
+    		FFW.VR.Started();
+    	} else {
+    		FFW.VR.Stopped();
+    	}
+    }.observes('this.VRActive'),
     
     /**
      * This event triggered when component is placed to

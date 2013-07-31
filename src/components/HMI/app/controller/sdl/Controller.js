@@ -98,11 +98,11 @@ SDL.SDLController = Em.Object.create({
                 break;
             }
             case "NonMediaView": {
-                SDL.SDLController.getApplicationModel(element.appID).clearAppOverLay();
+                this.getApplicationModel(element.appID).clearAppOverLay();
                 break;
             }
             case "MediaView": {
-                SDL.SDLController.getApplicationModel(element.appID).clearAppOverLay();
+                this.getApplicationModel(element.appID).clearAppOverLay();
                 break;
             }
 
@@ -113,7 +113,7 @@ SDL.SDLController = Em.Object.create({
      * Action to show Voice Recognition PopUp
      */
     activateVRPopUp: function() {
-        SDL.VRPopUp.activateVRPopUp();
+    	SDL.SDLModel.toggleProperty('VRActive');
     },
 
     /**
@@ -127,12 +127,12 @@ SDL.SDLController = Em.Object.create({
 
             case "AlertPopUp": {
                 SDL.AlertPopUp.deactivate();
-                SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
+                this.getApplicationModel(element.appID).turnOnSDL();
                 break;
             }
             case "ScrollableMessage": {
                 SDL.ScrollableMessage.deactivate();
-                SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
+                this.getApplicationModel(element.appID).turnOnSDL();
                 break;
             }
 
@@ -172,7 +172,7 @@ SDL.SDLController = Em.Object.create({
 
         if (SDL.AudioPassThruPopUp.active) {
         	SDL.AudioPassThruPopUp.deactivate();
-            SDL.SDLController.performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
+            this.performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
         }
 
         if(SDL.InteractionChoicesView.active){
@@ -306,7 +306,7 @@ SDL.SDLController = Em.Object.create({
      */
     registerApplication: function(params, applicationType) {
 
-        SDL.SDLModel.get('registeredApps').pushObject(SDL.SDLController.applicationModels[applicationType].create({
+        SDL.SDLModel.get('registeredApps').pushObject(this.applicationModels[applicationType].create({
             appID: params.appID,
             appName: params.appName,
             deviceName: params.deviceName
@@ -403,7 +403,7 @@ SDL.SDLController = Em.Object.create({
      */
     onActivateSDLApp: function(element) {
     	//FFW.BasicCommunication.ActivateApp(element.appID);
-    	SDL.SDLController.getApplicationModel(element.activeAppId).turnOnSDL();
+    	this.getApplicationModel(element.activeAppId).turnOnSDL();
     },
 
     /**
