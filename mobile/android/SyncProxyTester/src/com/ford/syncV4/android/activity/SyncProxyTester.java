@@ -115,6 +115,7 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
@@ -946,6 +947,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, Names.DeleteInteractionChoiceSet);
 			addToFunctionsAdapter(adapter, Names.PerformInteraction);
 			addToFunctionsAdapter(adapter, Names.EncodedSyncPData);
+			addToFunctionsAdapter(adapter, Names.SyncPData);
 			addToFunctionsAdapter(adapter, Names.Slider);
 			addToFunctionsAdapter(adapter, Names.ScrollableMessage);
 			addToFunctionsAdapter(adapter, Names.ChangeRegistration);
@@ -1324,7 +1326,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						} else if (adapter.getItem(which) == Names.PerformInteraction) {
 							sendPerformInteraction();
 						} else if (adapter.getItem(which) == Names.EncodedSyncPData) {
-							sendEncodedSyncPData();
+							sendSyncPData(true);
+						} else if (adapter.getItem(which) == Names.SyncPData) {
+							sendSyncPData(false);
 						} else if (adapter.getItem(which) == Names.Slider) {
 							sendSlider();
 						} else if (adapter.getItem(which) == Names.ScrollableMessage) {
@@ -1418,7 +1422,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final Spinner spnLanguage = (Spinner) layout.findViewById(R.id.spnLanguage);
 							ArrayAdapter<Language> spinnerAdapterLanguage = new ArrayAdapter<Language>(adapter.getContext(),
 									android.R.layout.simple_spinner_item, Language.values());
-							spinnerAdapterLanguage.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+							spinnerAdapterLanguage.setDropDownViewResource(
+                                    android.R.layout.simple_spinner_dropdown_item);
 							spnLanguage.setAdapter(spinnerAdapterLanguage);
 							
 							final Spinner spnHmiDisplayLanguage = (Spinner) layout.findViewById(R.id.spnHmiDisplayLanguage);
@@ -2099,9 +2104,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                    }
 
                    /**
-                    * Opens the dialog for EncodedSyncPData message and sends it.
+                    * Opens the dialog for SyncPData or EncodedSyncPData message and sends it.
+                    * @param sendEncoded true to send EncodedSyncPData message; SyncPData otherwise
                     */
-                   private void sendEncodedSyncPData() {
+                   private void sendSyncPData(final Boolean sendEncoded) {
                        final Context mContext = adapter.getContext();
                        LayoutInflater inflater = (LayoutInflater) mContext
                                .getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -2128,17 +2134,26 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                                String filename = txtLocalFileName.getText().toString();
                                byte[] data = contentsOfFile(filename);
                                if (data != null) {
-                                   String base64Data = Base64.encodeBytes(data);
-                                   EncodedSyncPData msg = new EncodedSyncPData();
-                                   Vector<String> syncPData = new Vector<String>();
-                                   syncPData.add(base64Data);
-                                   msg.setData(syncPData);
-                                   msg.setCorrelationID(autoIncCorrId++);
+                                   RPCRequest request = null;
+                                   if (sendEncoded) {
+                                       String base64Data = Base64.encodeBytes(data);
+                                       EncodedSyncPData msg = new EncodedSyncPData();
+                                       Vector<String> syncPData = new Vector<String>();
+                                       syncPData.add(base64Data);
+                                       msg.setData(syncPData);
+                                       msg.setCorrelationID(autoIncCorrId++);
+                                       request = msg;
+                                   } else {
+                                       SyncPData msg = new SyncPData();
+                                       msg.setCorrelationID(autoIncCorrId++);
+                                       msg.setBulkData(data);
+                                       request = msg;
+                                   }
 
-                                   _msgAdapter.logMessage(msg, true);
+                                   _msgAdapter.logMessage(request, true);
 
                                    try {
-                                       ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                                       ProxyService.getInstance().getProxyInstance().sendRPCRequest(request);
                                    } catch (SyncException e) {
                                        _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                    }

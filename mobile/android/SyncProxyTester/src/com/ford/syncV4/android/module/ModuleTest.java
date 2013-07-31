@@ -72,6 +72,7 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
@@ -503,6 +504,8 @@ public class ModuleTest {
 									rpc = new SetMediaClockTimer();
 								} else if (name.equalsIgnoreCase(Names.EncodedSyncPData)) {
 									rpc = new EncodedSyncPData();
+								} else if (name.equalsIgnoreCase(Names.SyncPData)) {
+									rpc = new SyncPData();
 								} else if (name.equalsIgnoreCase(Names.PerformAudioPassThru)) {
 									rpc = new PerformAudioPassThru();
 								} else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {

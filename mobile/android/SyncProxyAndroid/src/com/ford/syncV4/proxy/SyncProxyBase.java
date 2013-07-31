@@ -82,6 +82,7 @@ import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
@@ -112,6 +113,8 @@ import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.SyncPData;
+import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
@@ -144,6 +147,7 @@ import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.DebugTool;
 
 public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> {
@@ -870,64 +874,82 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		// Trace that ctor has fired
 		SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
 	}
-	
-	public String sendEncodedSyncPDataToUrl(String urlString, String encodedSyncPData){
-		try{
-			final int CONNECTION_TIMEOUT = 30000; // in ms
-			
-			Vector<String> encodedSyncPDataReceived = new Vector<String>();
-		
+
+	public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
+		try {
+			final int CONNECTION_TIMEOUT = timeout*1000; // in ms
+			Log.i("sendEncodedSyncPDataToUrl", "sendEncodedSyncPDataToUrl() go! ");
+			//Log.i("sendEncodedSyncPDataToUrl", "CONNECTION_TIMEOUT: " + CONNECTION_TIMEOUT);
+			//Log.i("sendEncodedSyncPDataToUrl", "urlString: " + urlString);
+			//Log.i("sendEncodedSyncPDataToUrl", "timeout: " + timeout);
+			//Log.i("sendEncodedSyncPDataToUrl", "encodedSyncPData.firstElement(): " + encodedSyncPData.firstElement());
+
 			// Form the JSON message to send to the cloud
-			byte[] bytesToSend = encodedSyncPData.getBytes("UTF-8");
-			
+			JSONArray jsonArrayOfSyncPPackets = new JSONArray(encodedSyncPData);
+			JSONObject jsonObjectToSendToServer = new JSONObject();
+			jsonObjectToSendToServer.put("data", jsonArrayOfSyncPPackets);
+			String valid_json = jsonObjectToSendToServer.toString().replace("\\", "");					
+			byte[] bytesToSend = valid_json.getBytes("UTF-8");
+
 			// Send the Bytes to the Cloud and get the Response
 			HttpParams httpParams = new BasicHttpParams();
+			
+			// Set the timeout in milliseconds until a connection is established.
+			// The default value is zero, that means the timeout is not used. 
 			HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT);
+			
+			// Set the default socket timeout (SO_TIMEOUT) 
+			// in milliseconds which is the timeout for waiting for data.
 			HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIMEOUT);
+
 			HttpClient client = new DefaultHttpClient(httpParams);
 			HttpPost request = new HttpPost(urlString);
-			request.setHeader("Content-type", "application/json");
+			request.setHeader("Content-type", "application/json");			
 			request.setEntity(new ByteArrayEntity(bytesToSend));
 			HttpResponse response = client.execute(request);
+			Log.i("sendEncodedSyncPDataToUrl", "sent and received");
 			
 			// If response is null, then return
-			if(response == null){
+			if (response == null) {
 				DebugTool.logError("Response from server returned null: ");
-				return null;
+				Log.i("sendEncodedSyncPDataToUrl","Response from server returned null: ");
+				return;
 			}
-			
-			String returnVal = new String();
+
+			Vector<String> encodedSyncPDataReceived = new Vector<String>();			
 			if (response.getStatusLine().getStatusCode() == 200) {
-				Log.e("TestApp", "Status 200");
+				
 				// Convert the response to JSON
-				returnVal = EntityUtils.toString(response.getEntity(), "UTF-8");
-				JSONObject jsonResponse = new JSONObject(returnVal);
-							
-				// Create and send the encodedSyncPData message back to SYNC
-				if(jsonResponse.get("data") instanceof JSONArray){
+				JSONObject jsonResponse = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+				
+				if (jsonResponse.get("data") instanceof JSONArray) {
 					JSONArray jsonArray = jsonResponse.getJSONArray("data");
-					for(int i=0; i<jsonArray.length(); i++){
-						if(jsonArray.get(i) instanceof String){
+					for (int i=0; i<jsonArray.length(); i++) {
+						if (jsonArray.get(i) instanceof String) {
 							encodedSyncPDataReceived.add(jsonArray.getString(i));
 						}
 					}
-				} else if(jsonResponse.get("data") instanceof String){
+				} else if (jsonResponse.get("data") instanceof String) {
 					encodedSyncPDataReceived.add(jsonResponse.getString("data"));
 				} else {
 					DebugTool.logError("sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
-					// Exit method
-					return null;
+					//Log.i("sendEncodedSyncPDataToUrl", "sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
+					return;
 				}
-			} else if (response.getStatusLine().getStatusCode() == 500) returnVal = "Error 500";
-			else returnVal = "Unknown Error";
-			
-			// Send new encodedSyncPDataRequest to SYNC
-			EncodedSyncPData encodedSyncPDataRequest = RPCRequestFactory.buildEncodedSyncPData(encodedSyncPDataReceived, getPoliciesReservedCorrelationID());
-			if(getIsConnected()){
-				sendRPCRequestPrivate(encodedSyncPDataRequest);
+				
+				// Send new encodedSyncPDataRequest to SYNC
+				EncodedSyncPData encodedSyncPDataRequest = RPCRequestFactory.buildEncodedSyncPData(encodedSyncPDataReceived, getPoliciesReservedCorrelationID());
+			   
+			    if (getIsConnected()) {
+					sendRPCRequestPrivate(encodedSyncPDataRequest);
+					Log.i("sendEncodedSyncPDataToUrl", "sent to sync");
+				}
+			} else if (response.getStatusLine().getStatusCode() == 500) {
+				Log.i("sendEncodedSyncPDataToUrl", "Status 500");
+				//returnVal = "Status 500";
 			}
-			return returnVal;
-		} catch (SyncException e){
+			
+		} catch (SyncException e) {
 			DebugTool.logError("sendEncodedSyncPDataToUrl: Could not get data from JSONObject received.", e);
 		} catch (JSONException e) {
 			DebugTool.logError("sendEncodedSyncPDataToUrl: JSONException: ", e);
@@ -942,62 +964,90 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		} catch (Exception e) {
 			DebugTool.logError("sendEncodedSyncPDataToUrl: Unexpected Exception: ", e);
 		}
-		return null;
 	}
-	
-	private void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData) {
+
+	public void sendSyncPDataToUrl(String urlString, byte[] bs, Integer timeout) {
 		try {
-			final int CONNECTION_TIMEOUT = 30000; // in ms
-			
-			Vector<String> encodedSyncPDataReceived = new Vector<String>();
-		
+			final int CONNECTION_TIMEOUT = timeout*1000; // in ms
+			Log.i("sendEncodedSyncPDataToUrl", "sendEncodedSyncPDataToUrl() go! ");
+			//Log.i("sendEncodedSyncPDataToUrl", "CONNECTION_TIMEOUT: " + CONNECTION_TIMEOUT);
+			//Log.i("sendEncodedSyncPDataToUrl", "urlString: " + urlString);
+			//Log.i("sendEncodedSyncPDataToUrl", "timeout: " + timeout);
+			//Log.i("sendEncodedSyncPDataToUrl", "encodedSyncPData.firstElement(): " + encodedSyncPData.firstElement());
+
+			//base64 encode the binary syncp packet before sending to cloud
+			String base64SyncP = Base64.encodeBytes(bs);
+			//Log.i("text", "base64 encoded syncP: " + base64SyncP);
+
 			// Form the JSON message to send to the cloud
-			JSONArray jsonArrayOfSyncPPackets = new JSONArray(encodedSyncPData);
+			JSONArray jsonArrayOfSyncPPackets = new JSONArray(base64SyncP);	
 			JSONObject jsonObjectToSendToServer = new JSONObject();
 			jsonObjectToSendToServer.put("data", jsonArrayOfSyncPPackets);
-			byte[] bytesToSend = jsonObjectToSendToServer.toString().getBytes("UTF-8");
+			String valid_json = jsonObjectToSendToServer.toString().replace("\\", "");					
+			byte[] bytesToSend = valid_json.getBytes("UTF-8");
 			
 			// Send the Bytes to the Cloud and get the Response
 			HttpParams httpParams = new BasicHttpParams();
+			
+			// Set the timeout in milliseconds until a connection is established.
+			// The default value is zero, that means the timeout is not used. 
 			HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT);
+			
+			// Set the default socket timeout (SO_TIMEOUT) 
+			// in milliseconds which is the timeout for waiting for data.
 			HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIMEOUT);
 			HttpClient client = new DefaultHttpClient(httpParams);
 			HttpPost request = new HttpPost(urlString);
+			request.setHeader("Content-type", "application/json");			
 			request.setEntity(new ByteArrayEntity(bytesToSend));
 			HttpResponse response = client.execute(request);
-			
+
+			Log.i("sendEncodedSyncPDataToUrl", "sent and received");
+
 			// If response is null, then return
 			if (response == null) {
 				DebugTool.logError("Response from server returned null: ");
-			
+				Log.i("sendEncodedSyncPDataToUrl","Response from server returned null: ");
 				return;
 			}
-			
-			// Convert the response to JSON
-			JSONObject jsonResponse = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-						
-			// Create and send the encodedSyncPData message back to SYNC
-			if (jsonResponse.get("data") instanceof JSONArray) {
-				JSONArray jsonArray = jsonResponse.getJSONArray("data");
-				for (int i=0; i<jsonArray.length(); i++) {
-					if (jsonArray.get(i) instanceof String) {
-						encodedSyncPDataReceived.add(jsonArray.getString(i));
-					}
-				}
-			} else if (jsonResponse.get("data") instanceof String) {
-				encodedSyncPDataReceived.add(jsonResponse.getString("data"));
-			} else {
-				DebugTool.logError("sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
+
+			Vector<String> encodedSyncPDataReceived = new Vector<String>();			
+			if (response.getStatusLine().getStatusCode() == 200) {
+				// Convert the response to JSON
+				JSONObject jsonResponse = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
 				
-				// Exit method
-				return;
+				if (jsonResponse.get("data") instanceof JSONArray) {
+					JSONArray jsonArray = jsonResponse.getJSONArray("data");
+					for (int i=0; i<jsonArray.length(); i++) {
+						if (jsonArray.get(i) instanceof String) {
+							encodedSyncPDataReceived.add(jsonArray.getString(i));
+							//Log.i("sendEncodedSyncPDataToUrl", "jsonArray.getString(i): " + jsonArray.getString(i));
+						}
+					}
+				} else if (jsonResponse.get("data") instanceof String) {
+					encodedSyncPDataReceived.add(jsonResponse.getString("data"));
+					//Log.i("sendEncodedSyncPDataToUrl", "jsonResponse.getString(data): " + jsonResponse.getString("data"));
+				} else {
+					DebugTool.logError("sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
+					//Log.i("sendEncodedSyncPDataToUrl", "sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
+					return;
+				}
+				
+				//convert encodedsyncp packet to binary
+				byte[] syncppacket = encodedSyncPDataReceived.firstElement().getBytes();
+				
+				// Send new binary syncp data to SYNC
+				SyncPData syncPDataRequest = RPCRequestFactory.buildSyncPData(syncppacket, getPoliciesReservedCorrelationID());
+			   
+			    if (getIsConnected()) {
+					sendRPCRequestPrivate(syncPDataRequest);
+					Log.i("sendEncodedSyncPDataToUrl", "sent to sync");
+				}
+			} else if (response.getStatusLine().getStatusCode() == 500) {
+				Log.i("sendEncodedSyncPDataToUrl", "Status 500");
+				//returnVal = "Status 500";
 			}
 			
-			// Send new encodedSyncPDataRequest to SYNC
-			EncodedSyncPData encodedSyncPDataRequest = RPCRequestFactory.buildEncodedSyncPData(encodedSyncPDataReceived, getPoliciesReservedCorrelationID());
-			if (getIsConnected()) {
-				sendRPCRequestPrivate(encodedSyncPDataRequest);
-			}
 		} catch (SyncException e) {
 			DebugTool.logError("sendEncodedSyncPDataToUrl: Could not get data from JSONObject received.", e);
 		} catch (JSONException e) {
@@ -1501,7 +1551,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						Thread handleOffboardSyncTransmissionTread = new Thread() {
 							@Override
 							public void run() {
-								sendEncodedSyncPDataToUrl(msg.getUrl(), msg.getData());
+								sendEncodedSyncPDataToUrl(msg.getUrl(), msg.getData(), msg.getTimeout());
 							}
 						};
 						
@@ -1726,6 +1776,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					});
 				} else {
 					_proxyListener.onEncodedSyncPDataResponse(msg); 		
+				}
+			} else if (functionName.equals(Names.SyncPData)) {
+				// SyncPData
+				
+				final SyncPDataResponse msg = new SyncPDataResponse(hash);
+				if (_callbackToUIThread) {
+					// Run in UI thread
+					_mainUIHandler.post(new Runnable() {
+						@Override
+						public void run() {
+							_proxyListener.onSyncPDataResponse(msg); 
+						}
+					});
+				} else {
+					_proxyListener.onSyncPDataResponse(msg); 		
 				}
 			} else if (functionName.equals(Names.CreateInteractionChoiceSet)) {
 				// CreateInteractionChoiceSet
@@ -2217,7 +2282,38 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					Thread handleOffboardSyncTransmissionTread = new Thread() {
 						@Override
 						public void run() {
-							sendEncodedSyncPDataToUrl(msg.getUrl(), msg.getData());
+							sendEncodedSyncPDataToUrl(msg.getUrl(), msg.getData(), msg.getTimeout());
+						}
+					};
+
+					handleOffboardSyncTransmissionTread.start();
+				}
+			} else if (functionName.equals(Names.OnSyncPData)) {
+				// OnSyncPData
+				Log.i("pt", "functionName.equals(Names.OnEncodedSyncPData)");
+				final OnSyncPData msg = new OnSyncPData(hash);
+
+				// If url is null, then send notification to the app, otherwise, send to URL
+				if (msg.getUrl() == null) {		
+					Log.i("pt", "send syncp to app");
+					if (_callbackToUIThread) {
+						// Run in UI thread
+						_mainUIHandler.post(new Runnable() {
+							@Override
+							public void run() {
+								_proxyListener.onOnSyncPData(msg);
+							}
+						});
+					} else {
+						_proxyListener.onOnSyncPData(msg);
+					}
+				} else { //url not null, send to url
+					Log.i("pt", "send syncp to url");
+					// URL has data, attempt to post request to external server
+					Thread handleOffboardSyncTransmissionTread = new Thread() {
+						@Override
+						public void run() {
+							sendSyncPDataToUrl(msg.getUrl(), msg.getSyncPData(), msg.getTimeout());
 						}
 					};
 					
@@ -2652,8 +2748,23 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	public void encodedSyncPData(Vector<String> data, Integer correlationID) 
 			throws SyncException {
 		
+		Log.i("pt", "encodedSyncPData() giving to sync");
 		EncodedSyncPData msg = RPCRequestFactory.buildEncodedSyncPData(data, correlationID);
-
+		sendRPCRequest(msg);
+	}
+	
+	/**
+	 * Sends a Data RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
+	 * 
+	 * @param data
+	 * @param correlationID
+	 * @throws SyncException
+	 */
+	public void syncPData(byte[] data, Integer correlationID) 
+			throws SyncException {
+		
+		Log.i("pt", "syncPData() giving to sync");
+		SyncPData msg = RPCRequestFactory.buildSyncPData(data, correlationID);
 		sendRPCRequest(msg);
 	}
 	

@@ -43,8 +43,11 @@ public class OnEncodedSyncPData extends RPCNotification {
 			parameters.remove(Names.URL);
         }
     }
-    public Integer getTimeout() {
-        return (Integer) parameters.get(Names.timeout);
+    public Integer getTimeout(){
+    	if (parameters.get(Names.Timeout) instanceof Integer) {
+    		return (Integer)parameters.get(Names.Timeout);
+    	}
+    	return null;
     }
     public void setTimeout(Integer timeout) {
         if (timeout != null) {

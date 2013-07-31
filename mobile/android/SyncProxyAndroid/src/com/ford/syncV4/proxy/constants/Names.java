@@ -21,6 +21,7 @@ public class Names {
 	public static final String DeleteInteractionChoiceSet = "DeleteInteractionChoiceSet";
 	public static final String PerformInteraction = "PerformInteraction";
 	public static final String EncodedSyncPData = "EncodedSyncPData";
+	public static final String SyncPData = "SyncPData";
 	public static final String SubscribeButton = "SubscribeButton";
 	public static final String UnsubscribeButton = "UnsubscribeButton";
 	public static final String SubscribeVehicleData = "SubscribeVehicleData";
@@ -86,6 +87,7 @@ public class Names {
 	public static final String OnHMIStatus = "OnHMIStatus";
 	public static final String OnTBTClientState = "OnTBTClientState";
 	public static final String OnEncodedSyncPData = "OnEncodedSyncPData";
+	public static final String OnSyncPData = "OnSyncPData";
 	public static final String OnDriverDistraction = "OnDriverDistraction";
 	public static final String OnAppInterfaceUnregistered = "OnAppInterfaceUnregistered";
 	public static final String OnProxyClosed = "OnProxyClosed";
@@ -238,6 +240,7 @@ public class Names {
 	public static final String syncChoice = "syncChoice";
 	public static final String syncCommand = "syncCommand";
 	public static final String URL = "URL";
+	public static final String Timeout = "Timeout";
 	public static final String PermissionGroupName = "PermissionGroupName";
 	public static final String PermissionGroupStatus = "PermissionGroupStatus";
 	public static final String PermissionGroupItems = "PermissionGroupItems";

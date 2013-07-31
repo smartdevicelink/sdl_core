@@ -98,12 +98,14 @@ public class FunctionID {
                 Range = 0x 0001 0000 - 0x 0001 7FFF
              */
             put(Names.EncodedSyncPData, 65536);
+            put(Names.SyncPData, 65537);
 
             /*
                 Ford Specific Notifications
                 Range = 0x 0001 8000 - 0x 0001 FFFF
              */
             put(Names.OnEncodedSyncPData, 98304);
+            put(Names.OnSyncPData, 98305);
         }};
     }
 }
