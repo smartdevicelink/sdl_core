@@ -16,7 +16,7 @@ public class ScreenShotUtils {
         return result;
     }
 
-    public static Bitmap getBitmapFromView(View view) {
+    private static Bitmap getBitmapFromView(View view) {
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(returnedBitmap);
         Drawable bgDrawable =view.getBackground();
@@ -27,5 +27,7 @@ public class ScreenShotUtils {
         view.draw(canvas);
         return returnedBitmap;
     }
+
+
     
 }
