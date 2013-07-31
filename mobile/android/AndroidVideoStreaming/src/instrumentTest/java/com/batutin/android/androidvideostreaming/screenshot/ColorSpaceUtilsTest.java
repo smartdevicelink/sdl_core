@@ -73,96 +73,24 @@ public class ColorSpaceUtilsTest extends AndroidTestCase{
         ByteBuffer[] decoderOutputBuffers = null;
 
         int numCodecs = MediaCodecList.getCodecCount();
-        MediaCodecInfo codecInfo = null;
-        for (int i = 0; i < numCodecs && codecInfo == null; i++) {
-            MediaCodecInfo info = MediaCodecList.getCodecInfoAt(i);
-            if (!info.isEncoder()) {
-                continue;
-            }
-            String[] types = info.getSupportedTypes();
-            boolean found = false;
-            for (int j = 0; j < types.length && !found; j++) {
-                if (types[j].equals(mimeType))
-                    found = true;
-            }
-            if (!found)
-                continue;
-            codecInfo = info;
-        }
+        MediaCodecInfo codecInfo = getMediaCodecInfo(mimeType, numCodecs);
         Log.d(TAG, "Found " + codecInfo.getName() + " supporting " + mimeType);
-
-        int colorFormat = 0;
         MediaCodecInfo.CodecCapabilities capabilities = codecInfo.getCapabilitiesForType(mimeType);
-        for (int i = 0; i < capabilities.colorFormats.length && colorFormat == 0; i++) {
-            int format = capabilities.colorFormats[i];
-            switch (format) {
-                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar:
-                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar:
-                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar:
-                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar:
-                case MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar:
-                    colorFormat = format;
-                    break;
-                default:
-                    Log.d(TAG, "Skipping unsupported color format " + format);
-                    break;
-            }
-        }
+        int colorFormat = getCapabilities(capabilities);
         assertTrue("no supported color format", colorFormat != 0);
         Log.d(TAG, "Using color format " + colorFormat);
 
-        if (codecInfo.getName().equals("OMX.TI.DUCATI1.VIDEO.H264E")) {
-            // This codec doesn't support a width not a multiple of 16,
-            // so round down.
-            width &= ~15;
-        }
-        int stride = width;
-        int sliceHeight = height;
-        if (codecInfo.getName().startsWith("OMX.Nvidia.")) {
-            stride = (stride + 15)/16*16;
-            sliceHeight = (sliceHeight + 15)/16*16;
-        }
-        encoder = MediaCodec.createByCodecName(codecInfo.getName());
-        MediaFormat inputFormat = MediaFormat.createVideoFormat(mimeType, width, height);
-        inputFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
-        inputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, frameRate);
-        inputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
-        inputFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 75);
-        inputFormat.setInteger("stride", stride);
-        inputFormat.setInteger("slice-height", sliceHeight);
-        Log.d(TAG, "Configuring encoder with input format " + inputFormat);
-        encoder.configure(inputFormat, null /* surface */, null /* crypto */, MediaCodec.CONFIGURE_FLAG_ENCODE);
-        encoder.start();
+        width = calcWidth(codecInfo, width);
+        int stride = calcStrideForWidth(width, codecInfo);
+        int sliceHeight = calcSliceHeightForHeight(height, codecInfo);
+        MediaFormat inputFormat = getMediaFormat(width, height, bitRate, frameRate, mimeType, colorFormat, stride, sliceHeight);
+        encoder = startMediaCodec(codecInfo, inputFormat);
         encoderInputBuffers = encoder.getInputBuffers();
         encoderOutputBuffers = encoder.getOutputBuffers();
 
-        int chromaStride = stride/2;
-        int frameSize = stride*sliceHeight + 2*chromaStride*sliceHeight/2;
-        byte[] inputFrame = new byte[frameSize];
-        if (colorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar ||
-                colorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar) {
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int Y = (x + y) & 255;
-                    int Cb = 255*x/width;
-                    int Cr = 255*y/height;
-                    inputFrame[y*stride + x] = (byte) Y;
-                    inputFrame[stride*sliceHeight + (y/2)*chromaStride + (x/2)] = (byte) Cb;
-                    inputFrame[stride*sliceHeight + chromaStride*(sliceHeight/2) + (y/2)*chromaStride + (x/2)] = (byte) Cr;
-                }
-            }
-        } else {
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int Y = (x + y) & 255;
-                    int Cb = 255*x/width;
-                    int Cr = 255*y/height;
-                    inputFrame[y*stride + x] = (byte) Y;
-                    inputFrame[stride*sliceHeight + 2*(y/2)*chromaStride + 2*(x/2)] = (byte) Cb;
-                    inputFrame[stride*sliceHeight + 2*(y/2)*chromaStride + 2*(x/2) + 1] = (byte) Cr;
-                }
-            }
-        }
+        int chromaStride = calcChromaStride(stride);
+        int frameSize = calcFrameStride(stride, sliceHeight, chromaStride);
+        byte[] inputFrame = createInputFrame(width, height, colorFormat, stride, sliceHeight, chromaStride, frameSize);
 
         // start encoding + decoding
         final long kTimeOutUs = 5000;
@@ -279,6 +207,127 @@ public class ColorSpaceUtilsTest extends AndroidTestCase{
 
         assertTrue("no frame decoded", errors >= 0);
         assertTrue("decoding error too big: " + errors + "/" + maxerror, errors <= maxerror);
+    }
+
+    private MediaCodec startMediaCodec(MediaCodecInfo codecInfo, MediaFormat inputFormat) {
+        MediaCodec encoder = MediaCodec.createByCodecName(codecInfo.getName());
+        Log.d(TAG, "Configuring encoder with input format " + inputFormat);
+        encoder.configure(inputFormat, null /* surface */, null /* crypto */, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        encoder.start();
+        return encoder;
+    }
+
+    private byte[] createInputFrame(int width, int height, int colorFormat, int stride, int sliceHeight, int chromaStride, int frameSize) {
+        byte[] inputFrame = new byte[frameSize];
+        if (colorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar ||
+                colorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar) {
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int Y = (x + y) & 255;
+                    int Cb = 255*x/width;
+                    int Cr = 255*y/height;
+                    inputFrame[y*stride + x] = (byte) Y;
+                    inputFrame[stride*sliceHeight + (y/2)*chromaStride + (x/2)] = (byte) Cb;
+                    inputFrame[stride*sliceHeight + chromaStride*(sliceHeight/2) + (y/2)*chromaStride + (x/2)] = (byte) Cr;
+                }
+            }
+        } else {
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int Y = (x + y) & 255;
+                    int Cb = 255*x/width;
+                    int Cr = 255*y/height;
+                    inputFrame[y*stride + x] = (byte) Y;
+                    inputFrame[stride*sliceHeight + 2*(y/2)*chromaStride + 2*(x/2)] = (byte) Cb;
+                    inputFrame[stride*sliceHeight + 2*(y/2)*chromaStride + 2*(x/2) + 1] = (byte) Cr;
+                }
+            }
+        }
+        return inputFrame;
+    }
+
+    private int calcFrameStride(int stride, int sliceHeight, int chromaStride) {
+        return stride*sliceHeight + 2*chromaStride*sliceHeight/2;
+    }
+
+    private int calcChromaStride(int stride) {
+        return stride/2;
+    }
+
+    private MediaFormat getMediaFormat(int width, int height, int bitRate, int frameRate, String mimeType, int colorFormat, int stride, int sliceHeight) {
+        MediaFormat inputFormat = MediaFormat.createVideoFormat(mimeType, width, height);
+        inputFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
+        inputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, frameRate);
+        inputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
+        inputFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 75);
+        inputFormat.setInteger("stride", stride);
+        inputFormat.setInteger("slice-height", sliceHeight);
+        return inputFormat;
+    }
+
+    private int calcSliceHeightForHeight(int height, MediaCodecInfo codecInfo) {
+        int sliceHeight = height;
+        if (codecInfo.getName().startsWith("OMX.Nvidia.")) {
+            sliceHeight = (sliceHeight + 15)/16*16;
+        }
+        return sliceHeight;
+    }
+
+    private int calcStrideForWidth(int width, MediaCodecInfo codecInfo) {
+        int stride = width;
+        if (codecInfo.getName().startsWith("OMX.Nvidia.")) {
+            stride = (stride + 15)/16*16;
+        }
+        return stride;
+    }
+
+    private int calcWidth(MediaCodecInfo codecInfo, int width) {
+        if (codecInfo.getName().equals("OMX.TI.DUCATI1.VIDEO.H264E")) {
+            // This codec doesn't support a width not a multiple of 16,
+            // so round down.
+            width &= ~15;
+        }
+        return width;
+    }
+
+    private int getCapabilities(MediaCodecInfo.CodecCapabilities capabilities) {
+        int colorFormat = 0;
+        for (int i = 0; i < capabilities.colorFormats.length && colorFormat == 0; i++) {
+            int format = capabilities.colorFormats[i];
+            switch (format) {
+                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar:
+                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar:
+                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar:
+                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar:
+                case MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar:
+                    colorFormat = format;
+                    break;
+                default:
+                    Log.d(TAG, "Skipping unsupported color format " + format);
+                    break;
+            }
+        }
+        return colorFormat;
+    }
+
+    private MediaCodecInfo getMediaCodecInfo(String mimeType, int numCodecs) {
+        MediaCodecInfo codecInfo = null;
+        for (int i = 0; i < numCodecs && codecInfo == null; i++) {
+            MediaCodecInfo info = MediaCodecList.getCodecInfoAt(i);
+            if (!info.isEncoder()) {
+                continue;
+            }
+            String[] types = info.getSupportedTypes();
+            boolean found = false;
+            for (int j = 0; j < types.length && !found; j++) {
+                if (types[j].equals(mimeType))
+                    found = true;
+            }
+            if (!found)
+                continue;
+            codecInfo = info;
+        }
+        return codecInfo;
     }
 
 }
