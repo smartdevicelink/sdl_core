@@ -13,15 +13,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class UsbTest extends Activity {
 	private UsbAccessory mAccessory = null;
 	private Button mBtSend = null;
 	private FileOutputStream mFout = null;
+    private FileInputStream mFin = null;
 	private PendingIntent mPermissionIntent = null;
 	
     /** Called when the activity is first created. */
@@ -50,6 +54,7 @@ public class UsbTest extends Activity {
         		finish();
         	}
         	mFout = new FileOutputStream(fd);
+            mFin = new FileInputStream(fd);
         }else{
         	UsbAccessory[] accessories = ((UsbManager) getSystemService(Context.USB_SERVICE)).getAccessoryList();
 			if (accessories != null) {
@@ -96,11 +101,43 @@ public class UsbTest extends Activity {
 					Log.d("USB", "Writing data: "+data);
 					mFout.write(data.getBytes());
 					Log.d("USB","Done writing");
+
+                    queueRead();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}).start();
+    }
+
+    public void queueRead() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Log.d("USB", "Reading");
+
+                    byte[] lenBuffer = new byte[500];
+                    int bytesRead = mFin.read(lenBuffer);
+                    Log.d("USB", "1: Bytes read: " + bytesRead);
+
+                    byte[] buffer = new byte[100000];
+                    bytesRead = mFin.read(buffer);
+                    byte[] outBuffer = Arrays.copyOf(buffer, bytesRead);
+                    final String out = new String(outBuffer);
+                    Log.d("USB", "2: Bytes read: " + bytesRead + "\n" + out);
+
+                    UsbTest.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), out, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
     
 	private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
@@ -123,6 +160,7 @@ public class UsbTest extends Activity {
 			        		finish();
 			        	}
 			        	mFout = new FileOutputStream(fd);
+                        mFin = new FileInputStream(fd);
 			        	mBtSend.setEnabled(true);
 					} else {
 						Log.d("USB", "permission denied for accessory "
@@ -131,12 +169,20 @@ public class UsbTest extends Activity {
 			} else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
 				UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 				if (accessory != null && accessory.equals(mAccessory)) {
-					if(mFout != null)
+					if(mFout != null) {
 						try {
 							mFout.close();
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
+                    }
+                    if (mFin != null) {
+                        try {
+                            mFin.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
 					mAccessory = null;
 					mBtSend.setEnabled(false);
 				}
@@ -157,6 +203,7 @@ public class UsbTest extends Activity {
 		                		finish();
 		                	}
 		                	mFout = new FileOutputStream(fd);
+                            mFin = new FileInputStream(fd);
 		        			l("added accessory");
 		        			break;
 		        		}

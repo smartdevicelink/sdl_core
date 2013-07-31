@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-    <TextView android:text="@string/str_desc" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/textView1"></TextView>
-    <EditText android:id="@+id/editText1" android:layout_width="match_parent" android:text="" android:layout_height="wrap_content" android:inputType="numberDecimal"></EditText>
-    <Button android:layout_height="wrap_content" android:id="@+id/btSebd" android:layout_width="match_parent" android:text="@string/str_send"></Button>
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+
+    <TextView
+            android:text="@string/str_desc"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/textView1"/>
+
+    <EditText
+            android:id="@+id/editText1"
+            android:layout_width="match_parent"
+            android:text="@string/str_number"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+
+    <Button
+            android:layout_height="wrap_content"
+            android:id="@+id/btSebd"
+            android:layout_width="match_parent"
+            android:text="@string/str_send"/>
 </LinearLayout>

@@ -27,6 +27,7 @@
 #include <libusb.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #define IN 0x81
 #define OUT 0x02
@@ -61,6 +62,8 @@
  
  Tested for Nexus S with Gingerbread 2.3.4
  */
+
+typedef unsigned char byte;
 
 static int mainPhase();
 static int init(void);
@@ -128,6 +131,16 @@ static void printCharArray(unsigned char *buf, unsigned int len) {
     fprintf(stdout, "%.*s\n", len, buf);
 }
 
+static void intToByteArray(int i, byte **outArray, int *outLen) {
+    *outLen = 4;
+    byte *buf = (byte *)malloc(*outLen);
+    buf[0] = (i >> 24) & 0xFF;
+    buf[1] = (i >> 16) & 0xFF;
+    buf[2] = (i >> 8) & 0xFF;
+    buf[3] = i & 0xFF;
+    *outArray = buf;
+}
+
 static int mainPhase(){
 	unsigned char buffer[500000];
 	int response = 0;
@@ -144,10 +157,33 @@ static int mainPhase(){
     }
     
     // reading data
-	response = libusb_bulk_transfer(handle,IN,buffer,500000, &transferred,0);
+	response = libusb_bulk_transfer(handle,IN,buffer,sizeof(buffer), &transferred,0);
     fprintf(stdout, "2: Transferred %d bytes\n", transferred);
 	if(response < 0){error(response);return -1;}
     printCharArray(buffer, transferred);
+    int dataLength = transferred;
+    
+    // writing data length
+    byte *lenBuf = 0;
+    int lenBufLen = 0;
+    intToByteArray(transferred, &lenBuf, &lenBufLen);
+    printCharArray(lenBuf, lenBufLen);
+    
+    response = libusb_bulk_transfer(handle, OUT, lenBuf, lenBufLen, &transferred, 0);
+    free(lenBuf), lenBuf = 0;
+    if (response < 0) {
+        error(response);
+        return -1;
+    }
+    printf("Sent %d bytes\n", transferred);
+    
+    // writing data
+    response = libusb_bulk_transfer(handle, OUT, buffer, dataLength, &transferred, 0);
+    if (response < 0) {
+        error(response);
+        return -1;
+    }
+    printf("Sent %d bytes\n", transferred);
     
     return 0;
 }
