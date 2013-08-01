@@ -77,7 +77,6 @@ std::map<std::string, FunctionID::eType> kFunctionIDs {
   { "UpdateTurnList", FunctionID::UpdateTurnListID },
   { "ChangeRegistration", FunctionID::ChangeRegistrationID },
   { "GenericResponse", FunctionID::GenericResponseID },
-  { "DialNumber", FunctionID::DialNumberID },
   { "PutFile", FunctionID::PutFileID },
   { "DeleteFile", FunctionID::DeleteFileID },
   { "ListFilesID", FunctionID::ListFilesID },
@@ -112,7 +111,7 @@ namespace policies_manager {
 //! ---------------------------------------------------------------------------
 
 log4cxx::LoggerPtr PoliciesManager::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("PoliciesManager"));
+      log4cxx::Logger::getLogger("PoliciesManager"));
 
 //! ---------------------------------------------------------------------------
 
@@ -125,7 +124,7 @@ PoliciesManager::~PoliciesManager() {
 bool PoliciesManager::init() {
   std::string json_string;
   std::string policies_file_name = profile::Profile::instance()
-      ->policies_file_name();
+                                   ->policies_file_name();
   if (!file_system::FileExists(policies_file_name)) {
     return false;
   }
@@ -140,8 +139,8 @@ bool PoliciesManager::init() {
     bool parsedSuccess = reader_.parse(json_string, json_, false);
     if (!parsedSuccess) {
       LOG4CXX_ERROR(
-          logger_,
-          "Failed to parse JSON: " << reader_.getFormatedErrorMessages());
+        logger_,
+        "Failed to parse JSON: " << reader_.getFormatedErrorMessages());
       return false;
     }
 
@@ -166,7 +165,7 @@ bool PoliciesManager::init() {
 
       items_.insert(PoliciesItem(kFunctionIDs[item.asString()], hmi_levels));
     }
-  } catch(...) {
+  } catch (...) {
     return false;
   }
 
@@ -174,15 +173,16 @@ bool PoliciesManager::init() {
 }
 
 bool PoliciesManager::is_valid_hmi_status(
-    FunctionID::eType function,
-    mobile_apis::HMILevel::eType status) {
+  FunctionID::eType function,
+  mobile_apis::HMILevel::eType status) {
   if (items_.find(function) == items_.end()) {
     return false;
   }
 
   HmiLevels levels = items_[function];
-  if (std::find(levels.begin(), levels.end(), status) != levels.end())
+  if (std::find(levels.begin(), levels.end(), status) != levels.end()) {
     return true;
+  }
 
   return false;
 }

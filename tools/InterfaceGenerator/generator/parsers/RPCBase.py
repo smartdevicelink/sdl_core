@@ -202,13 +202,17 @@ class Parser(object):
             self._parse_base_item(element, prefix)
 
         internal_scope = None
+        scope = None
         for attribute in attributes:
             if attribute == "internal_scope":
                 internal_scope = attributes[attribute]
+            elif attribute == "scope":
+                scope = attributes[attribute]
             else:
                 raise ParseError("Unexpected attribute '" + attribute +
                                  "' in enum '" + params["name"] + "'")
         params["internal_scope"] = internal_scope
+        params["scope"] = scope
 
         elements = collections.OrderedDict()
         for subelement in subelements:
@@ -231,9 +235,14 @@ class Parser(object):
         """
         params, subelements, attrib = self._parse_base_item(element, prefix)
 
-        if len(attrib) != 0:
-            raise ParseError("Unexpected attributes for struct '" +
-                             params["name"] + "'")
+        scope = None
+        for attribute in attrib:
+            if attribute == "scope":
+                scope = attrib[attribute]
+            else:
+                raise ParseError("Unexpected attribute '" + attribute +
+                                 "' in struct '" + params["name"] + "'")
+        params["scope"] = scope
 
         members = collections.OrderedDict()
         for subelement in subelements:
@@ -261,12 +270,17 @@ class Parser(object):
             params["name"],
             attributes)
 
-        if len(attributes) != 0:
-            raise ParseError("Unexpected attributes in function '" +
-                             params["name"] + "'")
+        scope = None
+        for attribute in attributes:
+            if attribute == "scope":
+                scope = attributes[attribute]
+            else:
+                raise ParseError("Unexpected attribute '" + attribute +
+                                 "' in function '" + params["name"] + "'")
 
         params["function_id"] = function_id
         params["message_type"] = message_type
+        params["scope"] = scope
 
         function_params = collections.OrderedDict()
         for subelement in subelements:
@@ -426,6 +440,8 @@ class Parser(object):
         if len(subelements) != 0:
             raise ParseError("Unexpected subelements in enum element")
 
+        self._ignore_attribute(attributes, "hexvalue")
+
         internal_name = None
         value = None
         for attribute in attributes:
@@ -457,8 +473,8 @@ class Parser(object):
             self._parse_param_base_item(element, prefix)
 
         if len(attrib) != 0:
-            raise ParseError("Unknown attributes in param '" +
-                             params["name"] + "'")
+            raise ParseError("""Unknown attribute(s) {0} in param {1}
+                """.format(attrib, params["name"]))
 
         if len(subelements) != 0:
             raise ParseError("Unknown subelements in param '" +
@@ -538,6 +554,11 @@ class Parser(object):
 
         params["is_mandatory"] = self._extract_optional_bool_attrib(
             attrib, "mandatory", True)
+
+        scope = self._extract_attrib(attrib, "scope")
+        if scope is not None:
+            params["scope"] = scope
+        self._ignore_attribute(attrib, "defvalue")
 
         param_type = None
         type_name = self._extract_attrib(attrib, "type")
@@ -702,3 +723,16 @@ class Parser(object):
                              bool_string + "'")
 
         return value
+
+    def _ignore_attribute(self, attrib, name):
+        """To be called when attribute is meaningless in terms
+        of code generation but it's presence is not issue.
+
+        Removes this attribute from attribute list.
+
+        """
+        if name in attrib:
+            del attrib[name]
+            print ("Ignoring attribute '" +
+                   name + "'")
+        return True

@@ -106,11 +106,12 @@ class InterfaceItemBase(object):
     issues -- list of issues
     todos -- list of string todo elements
     platform -- optional platform (string or None)
+    scope -- optional scope: internal, partner or none (none by defaul, means public)
 
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None, platform=None):
+                 issues=None, todos=None, platform=None, scope=None):
         self.name = name
         self.description = description if description is not None else []
         self.design_description = \
@@ -118,6 +119,7 @@ class InterfaceItemBase(object):
         self.issues = issues if issues is not None else []
         self.todos = todos if todos is not None else []
         self.platform = platform
+        self.scope = scope
 
 
 class EnumElement(InterfaceItemBase):
@@ -164,11 +166,11 @@ class Enum(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, platform=None, internal_scope=None,
-                 elements=None):
+                 elements=None, scope=None):
         super(Enum, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform)
+            platform=platform, scope=scope)
 
         self.internal_scope = internal_scope
         self.elements = \
@@ -212,11 +214,11 @@ class Param(InterfaceItemBase):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True):
+                 platform=None, is_mandatory=True, scope=None):
         super(Param, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform)
+            platform=platform, scope=scope)
 
         self.is_mandatory = is_mandatory
         self.param_type = param_type
@@ -233,11 +235,11 @@ class FunctionParam(Param):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True, default_value=None):
+                 platform=None, is_mandatory=True, default_value=None, scope=None):
         super(FunctionParam, self).__init__(
             name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, is_mandatory=is_mandatory)
+            platform=platform, is_mandatory=is_mandatory, scope=scope)
 
         self.default_value = default_value
 
@@ -252,11 +254,11 @@ class Struct(InterfaceItemBase):
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None, platform=None, members=None):
+                 issues=None, todos=None, platform=None, members=None, scope=None):
         super(Struct, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform)
+            platform=platform, scope=scope)
 
         self.members = \
             members if members is not None else collections.OrderedDict()
@@ -275,11 +277,11 @@ class Function(InterfaceItemBase):
 
     def __init__(self, name, function_id, message_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, params=None):
+                 platform=None, params=None, scope=None):
         super(Function, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform)
+            platform=platform, scope=scope)
 
         self.function_id = function_id
         self.message_type = message_type
