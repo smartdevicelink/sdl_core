@@ -222,8 +222,9 @@ void AudioPassThruThreadImpl::threadMain() {
   std::vector<unsigned char>::iterator from = binaryData.begin();
   std::vector<unsigned char>::iterator to = from + step;
 
+
   // Minimal timeout is 1 second now.
-  for (int i = 0; i != seconds; i += kAudioPassThruTimeout) {
+  for (int i = 1; i <= seconds; i += kAudioPassThruTimeout) {
 #if defined(OS_POSIX) && defined(OS_LINUX)
 
     LOG4CXX_INFO(logger_, "Before timer; kAudioPassThruTimeout "
@@ -270,6 +271,11 @@ void AudioPassThruThreadImpl::threadMain() {
 
     from = to;
     to = to + step;
+
+    if (i == seconds - 1) {
+      // set iterator to the end
+      to = binaryData.end();
+    }
   }
 
 #if defined(OS_POSIX) && defined(OS_LINUX)

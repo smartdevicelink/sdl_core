@@ -740,7 +740,7 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
                                                         frameSendStatus = SendStatusInternalError;
                                                     }
 
-                                                    delete frame;
+
                                                 }
                                                 else
                                                 {
@@ -748,8 +748,8 @@ void NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::handleCommunication(
 
                                                     frameSendStatus = SendStatusInternalError;
                                                 }
-
                                                 mListener.onFrameSendCompleted(this, ConnectionHandle, frame->mUserData, frameSendStatus);
+                                                delete frame;
                                             }
                                         }
                                     }

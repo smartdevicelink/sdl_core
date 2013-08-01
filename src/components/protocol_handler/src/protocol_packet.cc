@@ -42,7 +42,8 @@ namespace protocol_handler {
 ProtocolPacket::ProtocolPacket()
     : packet_(0),
       total_packet_size_(0),
-      data_offset_(0) {
+      data_offset_(0),
+      packet_id_(0) {
 }
 
 ProtocolPacket::ProtocolPacket(unsigned char version, bool compress,
@@ -50,10 +51,12 @@ ProtocolPacket::ProtocolPacket(unsigned char version, bool compress,
                                unsigned char serviceType,
                                unsigned char frameData, unsigned char sessionID,
                                unsigned int dataSize, unsigned int messageID,
-                               const unsigned char* data)
+                               const unsigned char* data,
+                               unsigned int packet_id)
     : packet_(0),
       total_packet_size_(0),
-      data_offset_(0) {
+      data_offset_(0),
+      packet_id_(packet_id) {
   serializePacket(version, compress, frameType, serviceType, frameData,
                   sessionID, dataSize, messageID, data);
 }
@@ -62,6 +65,7 @@ ProtocolPacket::~ProtocolPacket() {
   // TODO(PV): where to clean?
   packet_ = 0;
   total_packet_size_ = 0;
+  packet_id_ = 0;
 }
 
 // Serialization
@@ -129,6 +133,10 @@ unsigned char * ProtocolPacket::packet() const {
 
 unsigned int ProtocolPacket::packet_size() const {
   return total_packet_size_;
+}
+
+unsigned int ProtocolPacket::packet_id() const {
+  return packet_id_;
 }
 
 RESULT_CODE ProtocolPacket::appendData(unsigned char* chunkData,

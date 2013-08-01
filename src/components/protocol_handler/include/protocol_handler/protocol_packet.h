@@ -278,7 +278,8 @@ class ProtocolPacket {
   ProtocolPacket(unsigned char version, bool compress, unsigned char frameType,
                  unsigned char serviceType, unsigned char frameData,
                  unsigned char sessionId, unsigned int dataSize,
-                 unsigned int messageID, const unsigned char* data = 0);
+                 unsigned int messageID, const unsigned char* data = 0,
+                 unsigned int packet_id = 0);
   /**
    * \brief Destructor
    */
@@ -322,10 +323,17 @@ class ProtocolPacket {
   unsigned char* packet() const;
 
   /**
-   * \brief Getter of message size including protocol header
+   * \brief Getter of message ID
    * \return unsigned int size of message string
    */
   unsigned int packet_size() const;
+
+  /**
+   * \brief Getter of message size including protocol header
+   * \return unsigned int size of message string
+   */
+  unsigned int packet_id() const;
+
   /*End of Serialization*/
 
   /*Deserialization*/
@@ -421,6 +429,11 @@ class ProtocolPacket {
    *\brief Offset for multiframe messages
    */
   unsigned int data_offset_;
+
+  /**
+   *\brief ID for multiframe messages
+   */
+  unsigned int packet_id_;
 };
 }  // namespace protocol_handler
 

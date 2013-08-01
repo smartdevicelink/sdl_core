@@ -203,7 +203,11 @@ void ProtocolHandlerImpl::onFrameSendCompleted(
     NsSmartDeviceLink::NsTransportManager::ESendStatus sendStatus) {
   if (NsSmartDeviceLink::NsTransportManager::SendStatusOK != sendStatus) {
     LOG4CXX_ERROR(logger_, "Failed to send frame with number " << userData);
+  } else {
+    LOG4CXX_INFO_EXT(logger_, "Frame with number " << userData <<
+                  " successfully sent");
   }
+
 }
 
 RESULT_CODE ProtocolHandlerImpl::sendFrame(
@@ -219,13 +223,12 @@ RESULT_CODE ProtocolHandlerImpl::sendFrame(
 
   LOG4CXX_INFO_EXT(
       logger_,
-      "Packet to be sent: " << packet.packet()
-        << " of size: " << packet.packet_size());
+      "Packet to be sent of size: "  << packet.packet_size() << " packet id "<< packet.packet_id());
 
   if (transport_manager_) {
     transport_manager_->sendFrame(connectionHandle, packet.packet(),
                                   packet.packet_size(),
-                                  static_cast<int>(packet.frame_data()));
+                                  packet.packet_id());
   } else {
     LOG4CXX_WARN(logger_, "No Transport Manager found.");
     LOG4CXX_TRACE_EXIT(logger_);
@@ -319,7 +322,7 @@ RESULT_CODE ProtocolHandlerImpl::sendMultiFrameMessage(
       ProtocolPacket packet(versionF, compress, FRAME_TYPE_CONSECUTIVE,
                             servType, ((i % FRAME_DATA_MAX_VALUE) + 1),
                             sessionID, maxDataSize,
-                            message_counters_[sessionID], outDataFrame);
+                            message_counters_[sessionID], outDataFrame, i);
 
       retVal = sendFrame(connectionHandle, packet);
       if (RESULT_FAIL == retVal) {
@@ -330,7 +333,7 @@ RESULT_CODE ProtocolHandlerImpl::sendMultiFrameMessage(
 
       ProtocolPacket packet(versionF, compress, FRAME_TYPE_CONSECUTIVE,
                             servType, 0x0, sessionID, lastDataSize,
-                            message_counters_[sessionID], outDataFrame);
+                            message_counters_[sessionID], outDataFrame, i);
 
       retVal = sendFrame(connectionHandle, packet);
     }
