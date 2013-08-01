@@ -125,7 +125,7 @@ SDL.SDLAppModel = Em.Object.extend( {
      * 
      * @type {Number}
      */
-    currentSubMenuId: 0,
+    currentSubMenuId: -1,
 
     /**
      * Return current submenu name
@@ -168,7 +168,7 @@ SDL.SDLAppModel = Em.Object.extend( {
             this.get( 'commandsList' ).pushObject( {
                 commandID: params.cmdID,
                 name: params.menuParams.menuName ? params.menuParams.menuName : "",
-                parent: params.menuParams.parentID ? params.menuParams.parentID : 0,
+                parent: params.menuParams.parentID != null ? params.menuParams.parentID : -1,
                 position: params.menuParams.position ? params.menuParams.position : 0,
                 icon: params.cmdIcon ? params.cmdIcon.value : null
             } );
@@ -176,7 +176,7 @@ SDL.SDLAppModel = Em.Object.extend( {
             this.get( 'commandsList' ).pushObject( {
                 commandID: params.cmdID,
                 name: '',
-                parent: 0,
+                parent: -1,
                 position: 0,
                 icon: params.cmdIcon ? params.cmdIcon.value : null
             } );
@@ -203,7 +203,7 @@ SDL.SDLAppModel = Em.Object.extend( {
         this.get( 'commandsList' ).pushObject( {
             menuID: params.menuID,
             name: params.menuParams.menuName ? params.menuParams.menuName : '',
-            parent: 0,
+            parent: -1,
             position: params.menuParams.position ? params.menuParams.position : 0
         } );
     },

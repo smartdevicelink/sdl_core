@@ -470,7 +470,9 @@ SDL.SDLController = Em.Object.create({
     onSoftButtonOkActionUp: function(name) {
         FFW.Buttons.buttonEvent(name, "BUTTONUP");
         FFW.Buttons.buttonPressed(name, "SHORT");
-        SDL.SDLAppController.model.set('isPlaying', !SDL.SDLAppController.model.isPlaying);
+        if (SDL.SDLAppController.model) {
+        	SDL.SDLAppController.model.set('isPlaying', !SDL.SDLAppController.model.isPlaying);
+        }
     },
 
     /**

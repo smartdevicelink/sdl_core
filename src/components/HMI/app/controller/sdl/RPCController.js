@@ -705,7 +705,7 @@ SDL.ValidateMessage = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (!params.menuID) {
+            if (params.menuID == null) {
 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],

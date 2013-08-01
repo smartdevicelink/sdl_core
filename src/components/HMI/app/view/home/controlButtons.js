@@ -395,11 +395,19 @@ SDL.ControlButtons = Em.ContainerView.create( {
             } ),
 
             /** Ok button */
-            OkBtn: SDL.Button.create( SDL.PresetEvents, {
+            OkBtn: SDL.Button.create({
                 elementId: 'OK',
                 classNames: 'OkBtn',
                 time: 0,
-                presetName: 'OK'
+                presetName: 'OK',
+                actionDown: function() {
+                    this._super();
+                    SDL.SDLController.onSoftButtonOkActionDown( this.presetName );
+                },
+                actionUp: function() {
+                    this._super();
+                    SDL.SDLController.onSoftButtonOkActionUp( this.presetName );
+                }
             } )
         } ),
 
