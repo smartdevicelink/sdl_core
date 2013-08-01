@@ -60,12 +60,7 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  app->set_help_prompt((*message_)[strings::msg_params][strings::help_promt]);
-  app->set_timeout_prompt(
-    (*message_)[strings::msg_params][strings::timeout_promt]);
-  app->set_vr_help_title(
-    (*message_)[strings::msg_params][strings::vr_help_title]);
-  app->set_vr_help((*message_)[strings::msg_params][strings::vr_help]);
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run" << (*message_)[strings::msg_params][strings::vr_help_title].asString());
 
   unsigned int chaining_counter = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
@@ -81,11 +76,17 @@ void SetGlobalPropertiesRequest::Run() {
   // check TTS params
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
+
+    app->set_help_prompt(
+        (*message_)[strings::msg_params].getElement(strings::help_promt));
+    app->set_timeout_prompt(
+      (*message_)[strings::msg_params].getElement(strings::timeout_promt));
+
     smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::help_prompt] = app->vr_help_title();
-    msg_params[strings::timeout_prompt] = app->vr_help();
+    msg_params[strings::help_prompt] = (*app->help_promt());
+    msg_params[strings::timeout_prompt] = (*app->timeout_promt());
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
@@ -94,11 +95,17 @@ void SetGlobalPropertiesRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
       (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+
+    app->set_vr_help_title(
+        (*message_)[strings::msg_params].getElement(strings::vr_help_title));
+    app->set_vr_help(
+        (*message_)[strings::msg_params].getElement(strings::vr_help));
+
     smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::vr_help_title] = app->vr_help_title();
-    msg_params[strings::vr_help] = app->vr_help();
+    msg_params[strings::vr_help_title] = (*app->vr_help_title());
+    msg_params[strings::vr_help] = (*app->vr_help());
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
