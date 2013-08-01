@@ -1284,6 +1284,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	}
 	
 	private void setWiProVersion(byte version) {
+        Log.i(TAG, "Setting WiPro version from " + (int)this._wiproVersion + " to " + (int)version);
+        Log.i(TAG, "setter called from: " + Log.getStackTraceString(new Exception()));
 		this._wiproVersion = version;
 	}
 
@@ -1392,7 +1394,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
 	
 			byte[] msgBytes = _jsonRPCMarshaller.marshall(request, _wiproVersion);
-	
+            Log.d(TAG, "Version: " + _wiproVersion + " | msg: " + new String(msgBytes));
+
 			ProtocolMessage pm = new ProtocolMessage();
 			pm.setData(msgBytes);
 			pm.setSessionID(_rpcSessionID);
