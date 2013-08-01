@@ -102,7 +102,7 @@ void ChangeRegistrationResponse::Run() {
 
     if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
         (hmi_apis::Common_Result::SUCCESS == result_vr)) {
-      SendResponse(true);
+      SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
       SendResponse(false);
       // TODO(VS): check ui and vr response code

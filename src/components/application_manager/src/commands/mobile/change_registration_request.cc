@@ -72,9 +72,12 @@ void ChangeRegistrationRequest::Run() {
       false == IsLanguageSupportedByVR(language)     ||
       false == IsLanguageSupportedByTTS(language)) {
     LOG4CXX_ERROR(logger_, "Language is not supported by any of modules");
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
+  // we should specify amount of required responses in the 1st request
+  const unsigned int chaining_counter = 2;
   bool has_actually_changed = false;
   if (app->ui_language() !=
       (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
@@ -86,7 +89,7 @@ void ChangeRegistrationRequest::Run() {
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
-                     msg_params, true);
+                     msg_params, true, has_actually_changed);
 
     has_actually_changed = true;
   }
@@ -105,8 +108,11 @@ void ChangeRegistrationRequest::Run() {
     has_actually_changed = true;
   }
 
-  if (!has_actually_changed) {
-    SendResponse(true, mobile_apis::Result::SUCCESS);
+  if (false == has_actually_changed) {
+    LOG4CXX_ERROR(logger_, "Current language is the same");
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Current language is the same");
+    return;
   }
 }
 
@@ -114,6 +120,11 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
   const int& hmi_display_lang) {
   const smart_objects::SmartObject* ui_languages =
     ApplicationManagerImpl::instance()->ui_supported_languages();
+
+  if (!ui_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
 
   bool is_language_supported = false;
   for (size_t i = 0; i < ui_languages->length(); ++i) {
@@ -135,6 +146,11 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
   const smart_objects::SmartObject* vr_languages =
     ApplicationManagerImpl::instance()->vr_supported_languages();
 
+  if (!vr_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
+
   bool is_language_supported = false;
   for (size_t i = 0; i < vr_languages->length(); ++i) {
     if (hmi_display_lang == vr_languages->getElement(i).asInt()) {
@@ -154,6 +170,11 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
   const int& hmi_display_lang) {
   const smart_objects::SmartObject* tts_languages =
     ApplicationManagerImpl::instance()->tts_supported_languages();
+
+  if (!tts_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
 
   bool is_language_supported = false;
   for (size_t i = 0; i < tts_languages->length(); ++i) {
