@@ -1245,10 +1245,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					if (_wiproVersion == 2) {
 						Hashtable hashTemp = new Hashtable();
 						hashTemp.put(Names.correlationID, message.getCorrID());
+
 						if (message.getJsonSize() > 0) {
 							final Hashtable<String, Object> mhash = _jsonRPCMarshaller.unmarshall(message.getData());
-							//hashTemp.put(Names.parameters, mhash.get(Names.parameters));
-							hashTemp.put(Names.parameters, mhash);
+                            if (mhash != null) {
+							    hashTemp.put(Names.parameters, mhash);
+                            } else {
+                                String err = "Can't parse JSON: " + new String(message.getData());
+                                DebugTool.logError(err);
+                                Log.e(TAG, err);
+                            }
 						}
 						FunctionID functionID = new FunctionID();
 						hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID()));
