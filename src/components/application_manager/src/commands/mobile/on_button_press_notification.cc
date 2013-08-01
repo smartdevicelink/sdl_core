@@ -40,6 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace mobile {
+
 OnButtonPressNotification::OnButtonPressNotification(
   const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
@@ -106,13 +108,12 @@ void OnButtonPressNotification::SendButtonPress(const Application* app,
     return;
   }
 
-  (*on_btn_press)[strings::params][strings::message_type] =
-    MessageType::kNotification;
-
   (*on_btn_press)[strings::params][strings::connection_key] =
       app->app_id();
+
   (*on_btn_press)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::OnButtonPressID;
+     mobile_apis::FunctionID::eType::OnButtonPressID;
+
   (*on_btn_press)[strings::msg_params][strings::button_name] =
     (*message_)[strings::msg_params][hmi_response::button_name];
   (*on_btn_press)[strings::msg_params][strings::button_press_mode] =
@@ -128,6 +129,8 @@ void OnButtonPressNotification::SendButtonPress(const Application* app,
   message_.reset(on_btn_press);
   SendNotification();
 }
+
+} // namespace mobile
 
 }  // namespace commands
 

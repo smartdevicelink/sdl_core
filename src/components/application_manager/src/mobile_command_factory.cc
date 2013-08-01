@@ -456,11 +456,11 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::OnButtonEventID: {
-      command.reset(new commands::OnButtonEventNotification(message));
+      command.reset(new commands::mobile::OnButtonEventNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnButtonPressID: {
-      command.reset(new commands::OnButtonPressNotification(message));
+      command.reset(new commands::mobile::OnButtonPressNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnAudioPassThruID: {

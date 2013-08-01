@@ -43,6 +43,8 @@ class Application;
 
 namespace commands {
 
+namespace mobile {
+
 /**
  * @brief OnButtonPressNotification class is used to send notification
  * to mobile device that some button was pressed on HMI.
@@ -79,6 +81,7 @@ class OnButtonPressNotification : public CommandNotificationImpl {
     DISALLOW_COPY_AND_ASSIGN(OnButtonPressNotification);
 };
 
+}  // namespace mobile
 }  // namespace commands
 }  // namespace application_manager
 

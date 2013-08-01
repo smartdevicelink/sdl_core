@@ -40,6 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace mobile {
+
 OnButtonEventNotification::OnButtonEventNotification(
   const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
@@ -106,23 +108,11 @@ void OnButtonEventNotification::SendButtonEvent(const Application* app,
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
+  (*on_btn_event)[strings::params][strings::connection_key] = app->app_id();
 
-  (*on_btn_event)[strings::params][strings::message_type] =
-    MessageType::kNotification;
-  (*on_btn_event)[strings::params][strings::correlation_id] =
-    correlation_id;
-
-  (*on_btn_event)[strings::params][strings::app_id] =
-    app->app_id();
-
-  (*on_btn_event)[strings::params][strings::connection_key] =
-    connection_key;
   (*on_btn_event)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::eType::OnButtonEventID;
+
   (*on_btn_event)[strings::msg_params][strings::button_name] =
     (*message_)[strings::msg_params][hmi_response::button_name];
   (*on_btn_event)[strings::msg_params][strings::button_event_mode] =
@@ -135,13 +125,11 @@ void OnButtonEventNotification::SendButtonEvent(const Application* app,
     (*on_btn_event)[strings::msg_params][strings::custom_button_id] = 0;
   }
 
-  (*on_btn_event)[strings::msg_params][strings::success] = true;
-  (*on_btn_event)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::SUCCESS;
-
   message_.reset(on_btn_event);
   SendNotification();
 }
+
+} // namespace mobile
 
 }  // namespace commands
 

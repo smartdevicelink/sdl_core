@@ -684,11 +684,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::Buttons_OnButtonEvent: {
-      command.reset(new commands::OnButtonEventNotification(message));
+      command.reset(new commands::hmi::OnButtonEventNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::Buttons_OnButtonPress: {
-      command.reset(new commands::OnButtonPressNotification(message));
+      command.reset(new commands::hmi::OnButtonPressNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::VehicleInfo_OnVehicleData: {
