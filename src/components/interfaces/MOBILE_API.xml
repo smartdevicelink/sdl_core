@@ -3335,7 +3335,7 @@
 		<description> true, if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" array="true" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3378,7 +3378,7 @@
 		<description> true, if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" array="true" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
