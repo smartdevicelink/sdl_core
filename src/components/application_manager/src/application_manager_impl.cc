@@ -872,7 +872,13 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
                             message.getElement(
                               jhs::S_PARAMS).getElement(
                               jhs::S_MESSAGE_TYPE).asInt()));
-  output.set_json_message(output_string);
+
+  // Currently formatter creates JSON = 3 bytes for empty SmartObject.
+  // workaround for notification. JSON must be empty
+  if (mobile_apis::FunctionID::OnAudioPassThruID != message.getElement(
+      jhs::S_PARAMS).getElement(strings::function_id).asInt()) {
+    output.set_json_message(output_string);
+  }
 
   if (message.getElement(jhs::S_PARAMS).keyExists(strings::binary_data)) {
     application_manager::BinaryData* binaryData =
