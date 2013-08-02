@@ -759,13 +759,11 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
   switch (message.protocol_version()) {
     case ProtocolVersion::kV2: {
       if (!formatters::CFormatterJsonSDLRPCv2::fromString(
-            message.json_message(),
-            output,
-            message.function_id(),
-            message.type(),
-            message.correlation_id()) ||
+          message.json_message(), output, message.function_id(),
+            message.type(), message.correlation_id()) ||
           !mobile_so_factory().attachSchema(output) ||
-          output.validate() != smart_objects::Errors::OK) {
+          ((output.validate() != smart_objects::Errors::OK) &&
+          (output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
         LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
         utils::SharedPtr<smart_objects::SmartObject> response(
           MessageHelper::CreateNegativeResponse(
