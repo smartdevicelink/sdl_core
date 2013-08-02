@@ -21,5 +21,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/btSebd"
             android:layout_width="match_parent"
-            android:text="@string/str_send"/>
+            android:text="@string/str_send"
+            android:enabled="false"/>
 </LinearLayout>
