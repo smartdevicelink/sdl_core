@@ -1,4 +1,5 @@
 [CW31]
+* SyncProxyAndroid SDK: fix a crash on sending GenericRequest message.
 * SyncProxyAndroid SDK: cherry-pick Ford's changes: add SyncPData function.
 + Add the SetDisplayLayout dialog.
 - SyncProxyAndroid SDK: remove DialNumber function.

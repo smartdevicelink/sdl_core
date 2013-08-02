@@ -30,7 +30,8 @@ public class FunctionID {
             initFunctionIds();
         }
 
-        return functionIDMap.get(functionName);
+        final Integer functionID = functionIDMap.get(functionName);
+        return (functionID != null) ? functionID : -1;
     }
 
     static public void initFunctionIds() {
