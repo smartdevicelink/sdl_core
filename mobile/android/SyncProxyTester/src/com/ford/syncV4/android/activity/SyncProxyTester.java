@@ -88,7 +88,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
-import com.ford.syncV4.proxy.rpc.DialNumber;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
@@ -105,6 +104,7 @@ import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayout;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.Show;
@@ -115,6 +115,7 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
@@ -946,6 +947,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, Names.DeleteInteractionChoiceSet);
 			addToFunctionsAdapter(adapter, Names.PerformInteraction);
 			addToFunctionsAdapter(adapter, Names.EncodedSyncPData);
+			addToFunctionsAdapter(adapter, Names.SyncPData);
 			addToFunctionsAdapter(adapter, Names.Slider);
 			addToFunctionsAdapter(adapter, Names.ScrollableMessage);
 			addToFunctionsAdapter(adapter, Names.ChangeRegistration);
@@ -962,7 +964,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, Names.ShowConstantTBT);
 			addToFunctionsAdapter(adapter, Names.AlertManeuver);
 			addToFunctionsAdapter(adapter, Names.UpdateTurnList);
-			addToFunctionsAdapter(adapter, Names.DialNumber);
+            addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
 			addToFunctionsAdapter(adapter, GenericRequest);
 			
 			adapter.sort(new Comparator<String>() {
@@ -1324,7 +1326,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						} else if (adapter.getItem(which) == Names.PerformInteraction) {
 							sendPerformInteraction();
 						} else if (adapter.getItem(which) == Names.EncodedSyncPData) {
-							sendEncodedSyncPData();
+							sendSyncPData(true);
+						} else if (adapter.getItem(which) == Names.SyncPData) {
+							sendSyncPData(false);
 						} else if (adapter.getItem(which) == Names.Slider) {
 							sendSlider();
 						} else if (adapter.getItem(which) == Names.ScrollableMessage) {
@@ -1418,7 +1422,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final Spinner spnLanguage = (Spinner) layout.findViewById(R.id.spnLanguage);
 							ArrayAdapter<Language> spinnerAdapterLanguage = new ArrayAdapter<Language>(adapter.getContext(),
 									android.R.layout.simple_spinner_item, Language.values());
-							spinnerAdapterLanguage.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+							spinnerAdapterLanguage.setDropDownViewResource(
+                                    android.R.layout.simple_spinner_dropdown_item);
 							spnLanguage.setAdapter(spinnerAdapterLanguage);
 							
 							final Spinner spnHmiDisplayLanguage = (Spinner) layout.findViewById(R.id.spnHmiDisplayLanguage);
@@ -1739,8 +1744,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.UpdateTurnList) {
 							sendUpdateTurnList();
-						} else if (adapter.getItem(which) == Names.DialNumber) {
-							sendDialNumber();
+						} else if (adapter.getItem(which) == Names.SetDisplayLayout) {
+							sendSetDisplayLayout();
 						} else if (adapter.getItem(which) == GenericRequest) {
 							sendGenericRequest();
 						}
@@ -2099,9 +2104,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                    }
 
                    /**
-                    * Opens the dialog for EncodedSyncPData message and sends it.
+                    * Opens the dialog for SyncPData or EncodedSyncPData message and sends it.
+                    * @param sendEncoded true to send EncodedSyncPData message; SyncPData otherwise
                     */
-                   private void sendEncodedSyncPData() {
+                   private void sendSyncPData(final Boolean sendEncoded) {
                        final Context mContext = adapter.getContext();
                        LayoutInflater inflater = (LayoutInflater) mContext
                                .getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -2128,17 +2134,26 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                                String filename = txtLocalFileName.getText().toString();
                                byte[] data = contentsOfFile(filename);
                                if (data != null) {
-                                   String base64Data = Base64.encodeBytes(data);
-                                   EncodedSyncPData msg = new EncodedSyncPData();
-                                   Vector<String> syncPData = new Vector<String>();
-                                   syncPData.add(base64Data);
-                                   msg.setData(syncPData);
-                                   msg.setCorrelationID(autoIncCorrId++);
+                                   RPCRequest request = null;
+                                   if (sendEncoded) {
+                                       String base64Data = Base64.encodeBytes(data);
+                                       EncodedSyncPData msg = new EncodedSyncPData();
+                                       Vector<String> syncPData = new Vector<String>();
+                                       syncPData.add(base64Data);
+                                       msg.setData(syncPData);
+                                       msg.setCorrelationID(autoIncCorrId++);
+                                       request = msg;
+                                   } else {
+                                       SyncPData msg = new SyncPData();
+                                       msg.setCorrelationID(autoIncCorrId++);
+                                       msg.setBulkData(data);
+                                       request = msg;
+                                   }
 
-                                   _msgAdapter.logMessage(msg, true);
+                                   _msgAdapter.logMessage(request, true);
 
                                    try {
-                                       ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                                       ProxyService.getInstance().getProxyInstance().sendRPCRequest(request);
                                    } catch (SyncException e) {
                                        _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                    }
@@ -2781,40 +2796,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder.show();
 					}
 
-					private void sendDialNumber() {
-						AlertDialog.Builder builder;
-
-						Context mContext = adapter.getContext();
-						LayoutInflater inflater = (LayoutInflater) mContext
-								.getSystemService(LAYOUT_INFLATER_SERVICE);
-						View layout = inflater.inflate(R.layout.dialnumber, null);
-						final EditText txtPhoneNumber = (EditText) layout.findViewById(R.id.dialNumber_editPhoneNumber);
-						
-						builder = new AlertDialog.Builder(mContext);
-						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								DialNumber msg = new DialNumber();
-								msg.setNumber(txtPhoneNumber.getText().toString());
-								msg.setCorrelationID(autoIncCorrId++);
-								
-								_msgAdapter.logMessage(msg, true);
-								
-								try {
-									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-								} catch (SyncException e) {
-									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-								}
-							}
-						});
-						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
-						builder.setView(layout);
-						builder.show();
-					}
-					
 					private void updateDynamicFooter(EditText txtNumTicks,
 							EditText txtSliderFooter, String joinString) {
 						// set numTicks comma-separated strings
@@ -3199,7 +3180,43 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder.setView(layout);
 						builder.create().show();
 					}
-					
+
+
+                   /**
+                    * Opens the dialog for SetDisplayLayout message and sends it.
+                    */
+                   private void sendSetDisplayLayout() {
+                       Context mContext = adapter.getContext();
+                       LayoutInflater inflater = (LayoutInflater) mContext
+                               .getSystemService(LAYOUT_INFLATER_SERVICE);
+                       View layout = inflater.inflate(R.layout.setdisplaylayout,
+                               (ViewGroup) findViewById(R.id.setdisplaylayout_itemRoot));
+
+                       final EditText editDisplayLayout = (EditText) layout.findViewById(R.id.setdisplaylayout_displayLayout);
+
+                       AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                       builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               SetDisplayLayout msg = new SetDisplayLayout();
+                               msg.setCorrelationID(autoIncCorrId++);
+                               msg.setDisplayLayout(editDisplayLayout.getText().toString());
+                               _msgAdapter.logMessage(msg, true);
+                               try {
+                                   ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                               } catch (SyncException e) {
+                                   _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                               }
+                           }
+                       });
+                       builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               dialog.cancel();
+                           }
+                       });
+                       builder.setView(layout);
+                       builder.show();
+                   }
+
 					/**
 					 * Sends a GenericRequest message.
 					 */

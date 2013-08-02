@@ -1,4 +1,9 @@
 [CW31]
+* SyncProxyAndroid SDK: fix a crash on sending GenericRequest message.
+* SyncProxyAndroid SDK: cherry-pick Ford's changes: add SyncPData function.
++ Add the SetDisplayLayout dialog.
+- SyncProxyAndroid SDK: remove DialNumber function.
+* SyncProxyAndroid SDK: update FunctionID values. NB: The SDLCore must use the same values to be compatible!
 * SyncProxyAndroid SDK: add incoming JSON message check.
 * SyncProxyAndroid SDK: log when protocol version is set, and each marshalled request.
 * SyncProxyTester always uses protocol version 2.

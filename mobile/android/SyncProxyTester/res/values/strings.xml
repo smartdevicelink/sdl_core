@@ -16,7 +16,6 @@
     <string name="title_activity_soft_button_edit">Edit SoftButton</string>
     <string name="delete_icon_desc">Delete icon</string>
     <string name="softbutton_id">Id:</string>
-    <string name="dialNumber_phoneNumber">Phone Number:</string>
     <string name="updateturnlist_turnList">Turn List (comma-separated)</string>
     <string name="updateturnlist_defaultTurnList">Turn Left,Turn Right,Go Forward</string>
     <string name="includeSoftButtons">Include</string>
@@ -148,5 +147,7 @@
     <string name="getdtcs_ecuNameDefault">2000</string>
     <string name="getdtcs_dtcMask">DTC Mask</string>
     <string name="getdtcs_dtcMaskDefault">42</string>
+    <string name="setdisplaylayout_displayLayout">Display Layout</string>
+    <string name="setdisplaylayout_displayLayoutDefault">ONSCREEN_PRESETS</string>
 
 </resources>

@@ -17,7 +17,9 @@ import com.ford.syncV4.proxy.interfaces.ISyncDeleteInteractionChoiceSetResponseL
 import com.ford.syncV4.proxy.interfaces.ISyncDeleteSubMenuResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncDriverDistractionListener;
 import com.ford.syncV4.proxy.interfaces.ISyncEncodedSyncPDataListener;
+import com.ford.syncV4.proxy.interfaces.ISyncSyncPDataListener;
 import com.ford.syncV4.proxy.interfaces.ISyncEncodedSyncPDataResponseListener;
+import com.ford.syncV4.proxy.interfaces.ISyncSyncPDataResponseListener;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.interfaces.ISyncChoiceListener;
 import com.ford.syncV4.proxy.interfaces.ISyncPerformInteractionResponseListener;
@@ -41,8 +43,8 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
-import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
@@ -54,6 +56,7 @@ import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
+import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
@@ -77,6 +80,7 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
@@ -318,12 +322,14 @@ public class SyncProxyALMManager {
 	private ISyncALMLifeCycleListener _lifecycleListener = null;
 	private Vector<ISyncDriverDistractionListener> _driverDistractionListeners = new Vector<ISyncDriverDistractionListener>();
 	private Vector<ISyncEncodedSyncPDataListener> _encodedSyncPDataListeners = new Vector<ISyncEncodedSyncPDataListener>();
+	private Vector<ISyncSyncPDataListener> _syncPDataListeners = new Vector<ISyncSyncPDataListener>();
 	private Vector<ISyncTBTClientStateListener> _tbtClientStateListeners = new Vector<ISyncTBTClientStateListener>();
 	private Hashtable<ButtonName, ISyncButtonListener> _buttonListeners = new Hashtable<ButtonName, ISyncButtonListener>();
 	private Hashtable<Integer, ISyncButtonListener> _buttonResponseListeners = new Hashtable<Integer, ISyncButtonListener>();
 	private Hashtable<Integer, ISyncCommandListener> _commandListeners = new Hashtable<Integer, ISyncCommandListener>();
 	private Hashtable<Integer, ISyncCommandListener> _commandResponseListeners = new Hashtable<Integer, ISyncCommandListener>();
 	private Hashtable<Integer, ISyncEncodedSyncPDataResponseListener> _encodedSyncPDataResponseListeners = new Hashtable<Integer, ISyncEncodedSyncPDataResponseListener>();
+	private Hashtable<Integer, ISyncSyncPDataResponseListener> _syncPDataResponseListeners = new Hashtable<Integer, ISyncSyncPDataResponseListener>();
 	private Hashtable<Integer, ISyncAddSubMenuResponseListener> _addSubMenuResponseListeners = new Hashtable<Integer,ISyncAddSubMenuResponseListener>();
 	private Hashtable<Integer, ISyncAlertResponseListener> _alertResponseListeners = new Hashtable<Integer, ISyncAlertResponseListener>();
 	private Hashtable<Integer, ISyncCreateInteractionChoiceSetResponseListener> _createInteractionChoiceSetResponseListeners = new Hashtable<Integer, ISyncCreateInteractionChoiceSetResponseListener>();
@@ -575,6 +581,16 @@ public class SyncProxyALMManager {
 		_encodedSyncPDataListeners.remove(removeListener);
 	}
 	
+	// SyncPData Listeners
+	private void addIProxySyncPDataListener(ISyncSyncPDataListener newListener) {
+		// Add a listener for new Sync PData
+		_syncPDataListeners.add(newListener);
+	}
+	private void removeIProxySyncPDataListener(ISyncSyncPDataListener removeListener) {
+		// Add a listener for new Sync PData
+		_syncPDataListeners.remove(removeListener);
+	}
+	
 	// TBTClientState Listeners
 	private void addIProxyTBTClientStateListener(ISyncTBTClientStateListener newListener) {
 		_tbtClientStateListeners.add(newListener);
@@ -633,6 +649,15 @@ public class SyncProxyALMManager {
 	}
 	private void removeIProxyEncodedSyncPDataResponseListener(Integer correlationID) {
 		_encodedSyncPDataResponseListeners.remove(correlationID);
+	}
+	
+	// SyncPDataResponse Listeners
+	private void addIProxySyncPDataResponseListener(ISyncSyncPDataResponseListener newListener, Integer correlationID) {
+		// Add a listener for the response
+		_syncPDataResponseListeners.put(correlationID, newListener);
+	}
+	private void removeIProxySyncPDataResponseListener(Integer correlationID) {
+		_syncPDataResponseListeners.remove(correlationID);
 	}
 	
 	// AddSubMenuResponse Listeners
@@ -1890,6 +1915,36 @@ public class SyncProxyALMManager {
 	}
 	
 	/**
+	 * Subscribes to notifications concerning SyncPData
+	 * 
+	 * @param listener
+	 * @throws SyncException
+	 */
+	public void subscribeToSyncPData(ISyncSyncPDataListener listener) throws SyncException{
+		
+		if (listener == null) {
+			throw new SyncException("ISyncSyncPDataListener cannot be null.", SyncExceptionCause.INVALID_ARGUMENT);
+		}
+		
+		addIProxySyncPDataListener(listener);
+	}
+	
+	/**
+	 * Unsubscribes from notifications concerning SyncPData
+	 * 
+	 * @param listener
+	 * @throws SyncException
+	 */
+	public void unsubscribeFromSyncPData(ISyncSyncPDataListener listener) throws SyncException{
+		
+		if (listener == null) {
+			throw new SyncException("ISyncSyncPDataListener cannot be null.", SyncExceptionCause.INVALID_ARGUMENT);
+		}
+		
+		removeIProxySyncPDataListener(listener);
+	}
+	
+	/**
 	 * Creates a choice to be added to a choiceset. Choice has both a voice and a visual menu component.
 	 * 
 	 * @param choiceMenuName -Text name displayed for this choice.
@@ -2089,6 +2144,15 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
+		public void onOnSyncPData(OnSyncPData notification) {
+			for (Iterator<ISyncSyncPDataListener> i = _syncPDataListeners.iterator(); i.hasNext();) {
+				final ISyncSyncPDataListener listener = i.next();
+				
+				listener.onOnSyncPData(notification);
+			}
+		}
+	
+		@Override
 		public void onEncodedSyncPDataResponse(EncodedSyncPDataResponse response) {
 			final ISyncEncodedSyncPDataResponseListener listener = _encodedSyncPDataResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
@@ -2106,6 +2170,26 @@ public class SyncProxyALMManager {
 			listener.onEncodedSyncPDataResponse(response, tagToReturn);
 			
 			removeIProxyEncodedSyncPDataResponseListener(response.getCorrelationID());
+		}
+	
+		@Override
+		public void onSyncPDataResponse(SyncPDataResponse response) {
+			final ISyncSyncPDataResponseListener listener = _syncPDataResponseListeners.get(response.getCorrelationID());
+			Object tagToReturn = null;
+			
+			// Return if listener is null
+			if (listener == null) {
+				return;
+			}
+			
+			// Set tag, null if none exists
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			// Remove any tag tied to this correlationID
+			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			
+			listener.onSyncPDataResponse(response, tagToReturn);
+			
+			removeIProxySyncPDataResponseListener(response.getCorrelationID());
 		}
 	
 		@Override
@@ -2500,11 +2584,6 @@ public class SyncProxyALMManager {
 		@Override
 		public void onUpdateTurnListResponse(UpdateTurnListResponse response) {
 			_lifecycleListener.onUpdateTurnListResponse(response);
-		}
-
-		@Override
-		public void onDialNumberResponse(DialNumberResponse response) {
-			_lifecycleListener.onDialNumberResponse(response);
 		}
 	}
 }

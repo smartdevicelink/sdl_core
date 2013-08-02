@@ -47,7 +47,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
-import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
@@ -64,6 +63,7 @@ import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
@@ -87,6 +87,7 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
@@ -813,7 +814,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 	@Override
 	public void onEncodedSyncPDataResponse(EncodedSyncPDataResponse response) {
-		Log.i("syncp", response.getInfo() + response.getResultCode() + response.getSuccess());
+		Log.i("syncp", "onEncodedSyncPDataResponse: "+response.getInfo() + response.getResultCode() + response.getSuccess());
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
@@ -1382,18 +1383,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 
 	@Override
-	public void onDialNumberResponse(DialNumberResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (isModuleTesting()) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
-	
-	@Override
 	public IBinder onBind(Intent intent) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("Service on Bind");
@@ -1425,5 +1414,25 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
+	}
+
+	@Override
+	public void onSyncPDataResponse(SyncPDataResponse response) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+        else Log.i(TAG, "" + response);
+
+        if (isModuleTesting()) {
+            ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+        }
+		
+	}
+
+	@Override
+	public void onOnSyncPData(OnSyncPData notification) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+        else Log.i(TAG, "" + notification);
 	}
 }
