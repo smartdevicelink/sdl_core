@@ -265,17 +265,17 @@ static int setupAccessory(
 	
 	usleep(1000);//sometimes hangs on the next transfer :(
     
-	response = libusb_control_transfer(handle,0x40,52,0,0,(char*)manufacturer,strlen(manufacturer),0);
+	response = libusb_control_transfer(handle,0x40,52,0,0,(byte*)manufacturer,strlen(manufacturer),0);
 	if(response < 0){error(response);return -1;}
-	response = libusb_control_transfer(handle,0x40,52,0,1,(char*)modelName,strlen(modelName)+1,0);
+	response = libusb_control_transfer(handle,0x40,52,0,1,(byte*)modelName,strlen(modelName)+1,0);
 	if(response < 0){error(response);return -1;}
-	response = libusb_control_transfer(handle,0x40,52,0,2,(char*)description,strlen(description)+1,0);
+	response = libusb_control_transfer(handle,0x40,52,0,2,(byte*)description,strlen(description)+1,0);
 	if(response < 0){error(response);return -1;}
-	response = libusb_control_transfer(handle,0x40,52,0,3,(char*)version,strlen(version)+1,0);
+	response = libusb_control_transfer(handle,0x40,52,0,3,(byte*)version,strlen(version)+1,0);
 	if(response < 0){error(response);return -1;}
-	response = libusb_control_transfer(handle,0x40,52,0,4,(char*)uri,strlen(uri)+1,0);
+	response = libusb_control_transfer(handle,0x40,52,0,4,(byte*)uri,strlen(uri)+1,0);
 	if(response < 0){error(response);return -1;}
-	response = libusb_control_transfer(handle,0x40,52,0,5,(char*)serialNumber,strlen(serialNumber)+1,0);
+	response = libusb_control_transfer(handle,0x40,52,0,5,(byte*)serialNumber,strlen(serialNumber)+1,0);
 	if(response < 0){error(response);return -1;}
     
 	fprintf(stdout,"Accessory Identification %d sent\n", devVersion);
