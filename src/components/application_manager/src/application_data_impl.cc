@@ -439,4 +439,9 @@ void DynamicApplicationDataImpl::set_perform_interaction_active(bool active) {
   is_perform_interaction_active_ = active;
 }
 
+void DynamicApplicationDataImpl::set_reset_global_properties_active(
+    bool active) {
+  is_reset_global_properties_active_ = active;
+}
+
 }  //

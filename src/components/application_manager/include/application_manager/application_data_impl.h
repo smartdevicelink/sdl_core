@@ -204,6 +204,20 @@ class DynamicApplicationDataImpl : public virtual Application {
      */
     inline bool is_perform_interaction_active() const;
 
+    /*
+     * @brief Sets reset global properties state
+     *
+     * @param active Current state of the reset global properties
+     */
+    void set_reset_global_properties_active(bool active);
+
+    /*
+     * @brief Retrieves reset global properties state
+     *
+     * @return TRUE if perform interaction active, otherwise FALSE
+     */
+    inline bool is_reset_global_properties_active() const;
+
   protected:
     smart_objects::SmartObject* help_promt_;
     smart_objects::SmartObject* timeout_promt_;
@@ -218,6 +232,7 @@ class DynamicApplicationDataImpl : public virtual Application {
     ChoiceSetMap                 choice_set_map_;
     ChoiceSetVRCmdMap            choice_set_vr_commands_map_;
     bool                         is_perform_interaction_active_;
+    bool                         is_reset_global_properties_active_;
 };
 
 const CommandsMap& DynamicApplicationDataImpl::commands_map() const {
@@ -226,6 +241,10 @@ const CommandsMap& DynamicApplicationDataImpl::commands_map() const {
 
 bool DynamicApplicationDataImpl::is_perform_interaction_active() const {
   return is_perform_interaction_active_;
+}
+
+bool DynamicApplicationDataImpl::is_reset_global_properties_active() const {
+  return is_reset_global_properties_active_;
 }
 
 const ChoiceSetVRCmdMap& DynamicApplicationDataImpl::GetChoiceSetVRCommands() {

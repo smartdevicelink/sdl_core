@@ -249,6 +249,20 @@ class DynamicApplicationData {
      * @return TRUE if perform interaction active, otherwise FALSE
      */
     virtual bool is_perform_interaction_active() const = 0;
+
+    /*
+     * @brief Sets reset global properties state
+     *
+     * @param active Current state of the reset global properties
+     */
+    virtual void set_reset_global_properties_active(bool active) = 0;
+
+    /*
+     * @brief Retrieves reset global properties state
+     *
+     * @return TRUE if perform interaction active, otherwise FALSE
+     */
+    virtual bool is_reset_global_properties_active() const = 0;
 };
 
 class Application : public virtual InitialApplicationData,

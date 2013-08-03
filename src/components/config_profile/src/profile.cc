@@ -45,6 +45,8 @@ Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
   , policies_file_name_("policy_table.json")
   , server_address_("127.0.0.1")
+  , help_promt_()
+  , time_out_promt_()
   , server_port_(8087)
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
   , is_mixing_audio_supported_(false) {
@@ -78,6 +80,15 @@ const std::string& Profile::policies_file_name() const {
 const std::string& Profile::server_address() const {
   return server_address_;
 }
+
+const std::vector<std::string>& Profile::help_promt() const {
+  return help_promt_;
+}
+
+const std::vector<std::string>& Profile::time_out_promt() const {
+  return time_out_promt_;
+}
+
 
 const uint16_t& Profile::server_port() const {
   return server_port_;
@@ -138,6 +149,34 @@ void Profile::UpdateValues() {
       is_mixing_audio_supported_ = true;
     }
     LOG4CXX_INFO(logger_, "Set MixingAudioSupported to " << value);
+  }
+
+  help_promt_.clear();
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "GLOBAL PROPERTIES", "HelpPromt", value))
+      && ('\0' != *value)) {
+      char* str = NULL;
+      str = strtok (value,",");
+      while (str != NULL) {
+        LOG4CXX_INFO (logger_, "Add HelpPromt string" << str);
+        help_promt_.push_back(std::string(str));
+        str = strtok (NULL, ",");
+      }
+  }
+
+  time_out_promt_.clear();
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "GLOBAL PROPERTIES", "TimeOutPromt", value))
+      && ('\0' != *value)) {
+      char* str = NULL;
+      str = strtok (value,",");
+      while (str != NULL) {
+        LOG4CXX_INFO (logger_, "Add TimeOutPromt string" << str);
+        time_out_promt_.push_back(std::string(str));
+        str = strtok (NULL, ",");
+      }
   }
 }
 

@@ -60,9 +60,9 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run" << (*message_)[strings::msg_params][strings::vr_help_title].asString());
-
-  unsigned int chaining_counter = 0;
+  // by default counter is 1 for TTS request. If only one param specified
+  // for TTS REJECT response will be sent
+  unsigned int chaining_counter = 1;
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
     ++chaining_counter;
@@ -70,7 +70,63 @@ void SetGlobalPropertiesRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
       (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-    ++chaining_counter;
+
+    // check vrhelpitem position index
+    if (!CheckVrHelpItemsOrder()) {
+      LOG4CXX_ERROR(logger_, "Request rejected");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
+    }
+
+    app->set_vr_help_title(
+        (*message_)[strings::msg_params].getElement(strings::vr_help_title));
+    app->set_vr_help(
+        (*message_)[strings::msg_params].getElement(strings::vr_help));
+
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    msg_params[strings::vr_help_title] = (*app->vr_help_title());
+    msg_params[strings::vr_help] = (*app->vr_help());
+    msg_params[strings::app_id] = app->app_id();
+
+    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                     msg_params, true, chaining_counter);
+  } else if (
+      !(*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
+      !(*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+
+      const CommandsMap& cmdMap = app->commands_map();
+      CommandsMap::const_iterator command_it = cmdMap.begin();
+
+      int index = 0;
+      smart_objects::SmartObject vr_help_items;
+      for (; cmdMap.end() != command_it; ++command_it) {
+        if (false == (*command_it->second).keyExists(strings::vr_commands)) {
+          LOG4CXX_ERROR(logger_, "VR synonyms are empty");
+          SendResponse(false, mobile_apis::Result::INVALID_DATA);
+          return;
+        }
+        // use only first
+        vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
+      }
+
+      app->set_vr_help_title(smart_objects::SmartObject(app->name()));
+      app->set_vr_help(vr_help_items);
+
+      smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+      msg_params[strings::vr_help_title] = (*app->vr_help_title());
+      msg_params[strings::vr_help] = (*app->vr_help());
+      msg_params[strings::app_id] = app->app_id();
+
+      CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                       msg_params, true, chaining_counter);
+  } else {
+      LOG4CXX_ERROR(logger_, "Request rejected");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
   }
 
   // check TTS params
@@ -90,27 +146,27 @@ void SetGlobalPropertiesRequest::Run() {
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
-                     msg_params, true, chaining_counter);
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
-      (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-
-    app->set_vr_help_title(
-        (*message_)[strings::msg_params].getElement(strings::vr_help_title));
-    app->set_vr_help(
-        (*message_)[strings::msg_params].getElement(strings::vr_help));
-
-    smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-    msg_params[strings::vr_help_title] = (*app->vr_help_title());
-    msg_params[strings::vr_help] = (*app->vr_help());
-    msg_params[strings::app_id] = app->app_id();
-
-    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
                      msg_params, true);
   }
+}
+
+bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
+  const smart_objects::SmartObject vr_help =
+      (*message_)[strings::msg_params].getElement(strings::vr_help);
+
+  for (size_t i = 0; i < vr_help.length(); ++i) {
+    for (size_t j = i + 1; j < vr_help.length(); ++j) {
+
+      if (vr_help.getElement(i).getElement(strings::position).asInt() >
+          vr_help.getElement(j).getElement(strings::position).asInt()) {
+        LOG4CXX_ERROR(logger_, "VR help items order is wrong");
+        return false;
+      }
+
+    }
+  }
+
+  return true;
 }
 
 }  // namespace commands
