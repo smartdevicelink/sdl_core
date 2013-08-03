@@ -66,16 +66,18 @@ void CommandResponseImpl::SendResponse(
   (*message_)[strings::msg_params][strings::success] = success;
 
   if (!(*message_)[strings::msg_params].keyExists(strings::result_code)) {
-    if (success) {
+    if (mobile_apis::Result::INVALID_ENUM != result_code) {
+      (*message_)[strings::msg_params][strings::result_code] = result_code;
+    } else if ((*message_)[strings::params].keyExists(hmi_response::code)) {
       (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-    } else {
-      if (mobile_apis::Result::INVALID_ENUM != result_code) {
-        (*message_)[strings::msg_params][strings::result_code] = result_code;
-      } else if ((*message_)[strings::params][strings::message_type] ==
-                 MessageType::kErrorResponse) {
-        (*message_)[strings::msg_params][strings::result_code] =
           (*message_)[strings::params][hmi_response::code];
+    } else {
+      if (success) {
+        (*message_)[strings::msg_params][strings::result_code] =
+            mobile_apis::Result::SUCCESS;
+      } else {
+        (*message_)[strings::msg_params][strings::result_code] =
+            mobile_apis::Result::INVALID_ENUM;
       }
     }
   }

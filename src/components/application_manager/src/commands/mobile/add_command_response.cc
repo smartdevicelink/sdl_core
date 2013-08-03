@@ -100,9 +100,13 @@ void AddCommandResponse::Run() {
                         data[strings::msg_params]);
       }
 
-      if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
-          ((hmi_apis::Common_Result::SUCCESS == result_vr) ||
-          (hmi_apis::Common_Result::INVALID_ENUM == result_vr))) {
+
+      if (((hmi_apis::Common_Result::SUCCESS == result_ui)
+          && (hmi_apis::Common_Result::SUCCESS == result_vr))      ||
+          ((hmi_apis::Common_Result::SUCCESS == result_ui)
+          && (hmi_apis::Common_Result::INVALID_ENUM == result_vr)) ||
+          ((hmi_apis::Common_Result::INVALID_ENUM == result_ui)
+          && (hmi_apis::Common_Result::SUCCESS == result_vr))) {
         SendResponse(true);
       } else {
         // TODO: Check Response result code
