@@ -87,6 +87,8 @@ void UpdateTurnListRequest::Run() {
     smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
+  msg_params[strings::app_id] = app->app_id();
+
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList,
                    msg_params, true);
 }
