@@ -40,6 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace mobile {
+
 OnDriverDistractionNotification::OnDriverDistractionNotification(
   const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
@@ -65,6 +67,8 @@ void OnDriverDistractionNotification::Run() {
     }
   }
 }
+
+}  // namespace mobile
 
 }  // namespace commands
 

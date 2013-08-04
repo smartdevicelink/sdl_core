@@ -485,7 +485,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::OnDriverDistractionID: {
-      command.reset(new commands::OnDriverDistractionNotification(message));
+      command.reset(new commands::mobile::OnDriverDistractionNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnLanguageChangeID: {

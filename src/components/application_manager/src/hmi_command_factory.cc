@@ -636,7 +636,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_OnDriverDistraction: {
-      command.reset(new commands::OnDriverDistractionNotification(message));
+      command.reset(new commands::hmi::OnDriverDistractionNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated: {

@@ -41,6 +41,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
+
 OnDriverDistractionNotification::OnDriverDistractionNotification(
   const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
@@ -86,20 +88,16 @@ void OnDriverDistractionNotification::NotifyMobileApp(
   (*on_driver_distraction)[strings::params][strings::function_id] =
       mobile_api::FunctionID::OnDriverDistractionID;
 
-  (*on_driver_distraction)[strings::params][strings::correlation_id] =
-      (*message_)[strings::params][strings::correlation_id];
-
   (*on_driver_distraction)[strings::params][strings::message_type] =
       MessageType::kNotification;
 
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
-      ApplicationManagerImpl::instance()->driver_distraction();
-
-  (*on_driver_distraction)[strings::msg_params][strings::app_id] =
-      app->app_id();
+      (*message_)[strings::msg_params][hmi_notification::state];
 
   SendNotificationToMobile(on_driver_distraction);
 }
+
+}  // namespace hmi
 
 }  // namespace commands
 

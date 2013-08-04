@@ -41,6 +41,8 @@ class Application;
 
 namespace commands {
 
+namespace hmi {
+
 /**
  * @brief OnDriverDistractionNotification command class
  **/
@@ -73,6 +75,8 @@ class OnDriverDistractionNotification : public NotificationFromHMI {
 
     DISALLOW_COPY_AND_ASSIGN(OnDriverDistractionNotification);
 };
+
+}  // namespace hmi
 
 }  // namespace commands
 
