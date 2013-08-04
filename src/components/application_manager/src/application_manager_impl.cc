@@ -236,27 +236,112 @@ ApplicationManagerImpl::device_list() {
   return devices;
 }
 
-bool ApplicationManagerImpl::RegisterApplication(Application* application) {
-  DCHECK(application);
-  if (NULL == application) {
-    return false;
-  }
+Application* ApplicationManagerImpl::RegisterApplication(
+  const utils::SharedPtr<smart_objects::SmartObject>&
+  request_for_registration) {
+  DCHECK(request_for_registration);
+  smart_objects::SmartObject& message = *request_for_registration;
+  unsigned int connection_key =
+    message[strings::params][strings::connection_key];
 
   if (false == is_all_apps_allowed_) {
     LOG4CXX_INFO(logger_,
                  "RegisterApplication: access to app's disabled by user");
-    return false;
+    utils::SharedPtr<smart_objects::SmartObject> response(
+      MessageHelper::CreateNegativeResponse(
+        connection_key,
+        mobile_apis::FunctionID::RegisterAppInterfaceID,
+        message[strings::params][strings::correlation_id],
+        mobile_apis::Result::DISALLOWED));
+    ManageMobileCommand(response);
+    return NULL;
   }
 
-  std::map<int, Application*>::iterator it = applications_.find(
-        application->app_id());
-  if (applications_.end() != it) {
-    return false;
+  int app_id = 0;
+  std::list<int> sessions_list;
+  int device_id = 0;
+
+  if (connection_handler_) {
+    connection_handler::ConnectionHandlerImpl* con_handler_impl =
+      static_cast<connection_handler::ConnectionHandlerImpl*>(
+        connection_handler_);
+    if (con_handler_impl->GetDataOnSessionKey(connection_key, app_id,
+        sessions_list, device_id) == -1) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to create application: no connection info.");
+      utils::SharedPtr<smart_objects::SmartObject> response(
+        MessageHelper::CreateNegativeResponse(
+          connection_key,
+          mobile_apis::FunctionID::RegisterAppInterfaceID,
+          message[strings::params][strings::correlation_id],
+          mobile_apis::Result::GENERIC_ERROR));
+      ManageMobileCommand(response);
+      return NULL;
+    }
   }
+
+  const std::string& name =
+    message[strings::msg_params][strings::app_name].asString();
+
+  for (std::set<Application*>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    if ((*it)->app_id() == app_id) {
+      LOG4CXX_ERROR(logger_, "Application has been registered already.");
+      utils::SharedPtr<smart_objects::SmartObject> response(
+        MessageHelper::CreateNegativeResponse(
+          connection_key,
+          mobile_apis::FunctionID::RegisterAppInterfaceID,
+          message[strings::params][strings::correlation_id],
+          mobile_apis::Result::APPLICATION_REGISTERED_ALREADY));
+      ManageMobileCommand(response);
+      return NULL;
+    }
+    if ((*it)->name().compare(name) == 0) {
+      LOG4CXX_ERROR(logger_, "Application with this name already registered.");
+      utils::SharedPtr<smart_objects::SmartObject> response(
+        MessageHelper::CreateNegativeResponse(
+          connection_key,
+          mobile_apis::FunctionID::RegisterAppInterfaceID,
+          message[strings::params][strings::correlation_id],
+          mobile_apis::Result::DUPLICATE_NAME));
+      ManageMobileCommand(response);
+      return NULL;
+    }
+  }
+
+  Application* application = new ApplicationImpl(app_id);
+  if (!application) {
+    utils::SharedPtr<smart_objects::SmartObject> response(
+      MessageHelper::CreateNegativeResponse(
+        connection_key,
+        mobile_apis::FunctionID::RegisterAppInterfaceID,
+        message[strings::params][strings::correlation_id],
+        mobile_apis::Result::OUT_OF_MEMORY));
+    ManageMobileCommand(response);
+    return NULL;
+  }
+
+  application->set_name(name);
+  application->set_device(device_id);
+  application->set_language(
+    MessageHelper::ConvertEnumAPINoCheck < hmi_apis::Common_Language::eType,
+    mobile_apis::Language::eType > (
+      vr_language_));
+  application->set_ui_language(
+    MessageHelper::ConvertEnumAPINoCheck < hmi_apis::Common_Language::eType,
+    mobile_apis::Language::eType > (
+      ui_language_));
+
   applications_.insert(std::pair<int, Application*>(
-                         application->app_id(), application));
+                         app_id, application));
   application_list_.insert(application);
-  return true;
+
+  // TODO(PV): add asking user to allow application
+  // BasicCommunication_AllowApp
+  // application->set_app_allowed(result);
+
+  return application;
 }
 
 bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
@@ -524,6 +609,26 @@ void ApplicationManagerImpl::StopAudioPassThruThread() {
   perform_audio_thread_ = NULL;
 }
 
+std::string ApplicationManagerImpl::GetDeviceName(
+  connection_handler::DeviceHandle handle) {
+  DCHECK(connection_handler_);
+
+  std::string device_name = "";
+  std::list<int> applications_list;
+  connection_handler::ConnectionHandlerImpl* con_handler_impl =
+    static_cast<connection_handler::ConnectionHandlerImpl*>(
+      connection_handler_);
+  if (con_handler_impl->GetDataOnDeviceID(handle,
+                                          device_name,
+                                          applications_list) == -1) {
+    LOG4CXX_ERROR(logger_, "Failed to extract device name for id " << handle);
+  } else {
+    LOG4CXX_INFO(logger_, "\t\t\t\t\tDevice name is " << device_name);
+  }
+
+  return device_name;
+}
+
 void ApplicationManagerImpl::OnMobileMessageReceived(
   const MobileMessage& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageReceived");
@@ -759,11 +864,11 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
   switch (message.protocol_version()) {
     case ProtocolVersion::kV2: {
       if (!formatters::CFormatterJsonSDLRPCv2::fromString(
-          message.json_message(), output, message.function_id(),
+            message.json_message(), output, message.function_id(),
             message.type(), message.correlation_id()) ||
           !mobile_so_factory().attachSchema(output) ||
           ((output.validate() != smart_objects::Errors::OK) &&
-          (output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
+           (output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
         LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
         utils::SharedPtr<smart_objects::SmartObject> response(
           MessageHelper::CreateNegativeResponse(
@@ -874,7 +979,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   // Currently formatter creates JSON = 3 bytes for empty SmartObject.
   // workaround for notification. JSON must be empty
   if (mobile_apis::FunctionID::OnAudioPassThruID != message.getElement(
-      jhs::S_PARAMS).getElement(strings::function_id).asInt()) {
+        jhs::S_PARAMS).getElement(strings::function_id).asInt()) {
     output.set_json_message(output_string);
   }
 
@@ -882,7 +987,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
     application_manager::BinaryData* binaryData =
       new application_manager::BinaryData(
       message.getElement(jhs::S_PARAMS).getElement(
-          strings::binary_data).asBinary());
+        strings::binary_data).asBinary());
 
     if (NULL == binaryData) {
       LOG4CXX_ERROR(logger_, "Null pointer");

@@ -42,27 +42,20 @@ namespace application_manager {
 namespace commands {
 
 void RegisterAppInterfaceRequest::Run() {
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run");
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run"
                << (*message_)[strings::params]
                [strings::connection_key].asInt());
-  if (ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key])) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
-    LOG4CXX_ERROR_EXT(logger_,
-                      "Application "
-                      << (*message_)[strings::msg_params]
-                      [strings::app_name].asString()
-                      << " is already registered!");
+
+  Application* application_impl =
+    ApplicationManagerImpl::instance()->
+    RegisterApplication(message_);
+
+  if (!application_impl) {
+    LOG4CXX_ERROR_EXT(
+      logger_,
+      "Application " << ((*message_)[strings::msg_params][strings::app_name].asString()) <<
+      "  hasn't been registered!");
   } else {
-    Application* application_impl = new ApplicationImpl(
-      (*message_)[strings::params][strings::connection_key]);
-
-    if (!application_impl) {
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      LOG4CXX_ERROR_EXT(logger_, "NULL pointer!");
-    }
-
     Version version;
     version.min_supported_api_version =
       static_cast<APIVersion>((*message_)[strings::msg_params]
@@ -73,9 +66,6 @@ void RegisterAppInterfaceRequest::Run() {
                               [strings::sync_msg_version]
                               [strings::major_version].asInt());
     application_impl->set_version(version);
-
-    application_impl->set_name(
-      (*message_)[strings::msg_params][strings::app_name]);
 
     application_impl->set_mobile_app_id(
       (*message_)[strings::msg_params][strings::app_id]);
@@ -94,14 +84,6 @@ void RegisterAppInterfaceRequest::Run() {
         (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
     }
 
-    application_impl->set_language(
-      static_cast<mobile_api::Language::eType>(
-        (*message_)[strings::msg_params][strings::language_desired].asInt()));
-    application_impl->set_ui_language(
-      static_cast<mobile_api::Language::eType>(
-        (*message_)[strings::msg_params]
-        [strings::hmi_display_language_desired].asInt()));
-
     if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
       application_impl->set_tts_name(
         (*message_)[strings::msg_params][strings::tts_name]);
@@ -112,21 +94,9 @@ void RegisterAppInterfaceRequest::Run() {
         (*message_)[strings::msg_params][strings::app_type]);
     }
 
-    bool register_application_result =
-      ApplicationManagerImpl::instance()->
-      RegisterApplication(application_impl);
-
-    if (!register_application_result) {
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-      LOG4CXX_ERROR_EXT(
-        logger_,
-        "Application " << application_impl->name() <<
-        "  hasn't been registered!");
-    } else {
-      SendRegisterAppInterfaceResponseToMobile(*application_impl);
-      MessageHelper::SendOnAppRegisteredNotificationToHMI(*application_impl);
-      MessageHelper::SendHMIStatusNotification(*application_impl);
-    }
+    SendRegisterAppInterfaceResponseToMobile(*application_impl);
+    MessageHelper::SendOnAppRegisteredNotificationToHMI(*application_impl);
+    MessageHelper::SendHMIStatusNotification(*application_impl);
   }
 }
 
@@ -154,9 +124,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     LOG4CXX_WARN_EXT(logger_, "Wrong language on registering application "
                      << application_impl.name());
     LOG4CXX_ERROR_EXT(
-           logger_,"vr " << (*message_)[strings::msg_params][strings::language_desired].asInt() << " - " <<
-           app_manager->active_vr_language() << "ui " << (*message_)[strings::msg_params][strings::hmi_display_language_desired].asInt()
-           << " - " << app_manager->active_ui_language());
+      logger_, "vr " << (*message_)[strings::msg_params][strings::language_desired].asInt() << " - " <<
+      app_manager->active_vr_language() << "ui " << (*message_)[strings::msg_params][strings::hmi_display_language_desired].asInt()
+      << " - " << app_manager->active_ui_language());
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 

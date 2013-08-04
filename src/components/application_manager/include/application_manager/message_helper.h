@@ -178,12 +178,16 @@ class MessageHelper {
     static void SendAppDataToHMI(const Application* app);
     static void RemoveAppDataFromHMI(const Application* app);
 
-    // TODO(PV): Implement
     static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key,
       int function_id,
       unsigned int correlation_id,
       int result_code);
+
+    template<typename From, typename To>
+    static To ConvertEnumAPINoCheck(const From& input) {
+      return static_cast<To>(input);
+    }
 
   private:
     MessageHelper();

@@ -36,16 +36,17 @@
 
 namespace application_manager {
 
-ApplicationImpl::ApplicationImpl(int app_id)
+ApplicationImpl::ApplicationImpl(unsigned int app_id)
   : app_id_(app_id),
     active_message_(NULL),
     is_media_(false),
     allowed_support_navigation_(false),
     hmi_level_(mobile_api::HMILevel::HMI_NONE),
-    system_context_(mobile_api::SystemContext::SYSCTXT_MAIN),  // TODO(AK): Is it correct?
+    system_context_(mobile_api::SystemContext::SYSCTXT_MAIN),
     audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
     is_app_allowed_(true),
-    has_been_activated_(false) {
+    has_been_activated_(false),
+    device_(NULL) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -108,10 +109,6 @@ const Version& ApplicationImpl::version() const {
   return version_;
 }
 
-int ApplicationImpl::app_id() const {
-  return app_id_;
-}
-
 const std::string& ApplicationImpl::name() const {
   return app_name_;
 }
@@ -131,6 +128,10 @@ ApplicationImpl::system_context() const {
 
 const std::string& ApplicationImpl::app_icon_path() const {
   return app_icon_path_;
+}
+
+connection_handler::DeviceHandle ApplicationImpl::device() const {
+  return device_;
 }
 
 void ApplicationImpl::set_version(const Version& version) {
@@ -173,6 +174,10 @@ bool ApplicationImpl::set_app_icon_path(const std::string& file_name) {
 
 void ApplicationImpl::set_app_allowed(const bool& allowed) {
   is_app_allowed_ = allowed;
+}
+
+void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
+  device_ = device;
 }
 
 bool ApplicationImpl::HasBeenActivated() const {

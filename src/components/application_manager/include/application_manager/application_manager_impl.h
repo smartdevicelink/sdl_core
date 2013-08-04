@@ -105,7 +105,9 @@ class ApplicationManagerImpl : public ApplicationManager
 
     /////////////////////////////////////////////////////
 
-    bool RegisterApplication(Application* application);
+    Application* RegisterApplication(
+      const utils::SharedPtr<smart_objects::SmartObject>&
+      request_for_registration);
     /*
      * @brief Closes application by id
      *
@@ -159,10 +161,10 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return TRUE on success, otherwise FALSE
      */
     MessageChaining* AddMessageChain(const unsigned int& connection_key,
-      const unsigned int& correlation_id,
-      const unsigned int& hmi_correlation_id,
-      MessageChaining* msg_chaining,
-      const smart_objects::SmartObject* data = NULL);
+                                     const unsigned int& correlation_id,
+                                     const unsigned int& hmi_correlation_id,
+                                     MessageChaining* msg_chaining,
+                                     const smart_objects::SmartObject* data = NULL);
 
     /*
      * @brief Decrease chain after response from hmi was received
@@ -185,7 +187,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return MessageChaining on success, otherwise NULL
      */
     MessageChaining* GetMessageChain(
-        const unsigned int& hmi_correlation_id) const;
+      const unsigned int& hmi_correlation_id) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request
@@ -315,6 +317,8 @@ class ApplicationManagerImpl : public ApplicationManager
      * @brief Terminates audio pass thru thread
      */
     void StopAudioPassThruThread();
+
+    std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
     /////////////////////////////////////////////////////
 

@@ -155,10 +155,11 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   [strings::application]
   [strings::icon] = application_impl.app_icon_path();
 
-  // TODO(VS): get device name from application_impl
+  std::string dev_name = ApplicationManagerImpl::instance()->GetDeviceName(
+                           application_impl.device());
   message[strings::msg_params]
   [strings::application]
-  [strings::device_name] = "";
+  [strings::device_name] = dev_name;
 
   message[strings::msg_params]
   [strings::application][strings::app_id] = application_impl.app_id();
@@ -263,7 +264,7 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
     so_to_send[strings::params][strings::protocol_version] = 2;
     so_to_send[strings::params][strings::protocol_type] = 1;
     so_to_send[strings::params][strings::correlation_id] =
-      4444;
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
     so_to_send[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
     smart_objects::SmartObject* msg_params = MessageHelper::CreateSetAppIcon(

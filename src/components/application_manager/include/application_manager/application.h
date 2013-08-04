@@ -36,6 +36,7 @@
 #include <string>
 #include <map>
 #include "interfaces/MOBILE_API.h"
+#include "connection_handler/device.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -288,7 +289,7 @@ class Application : public virtual InitialApplicationData,
     virtual bool HasBeenActivated() const = 0;
 
     virtual const Version& version() const = 0;
-    virtual int app_id() const = 0;
+    virtual unsigned int app_id() const = 0;
     virtual const std::string& name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
@@ -296,6 +297,7 @@ class Application : public virtual InitialApplicationData,
     virtual const mobile_api::AudioStreamingState::eType&
     audio_streaming_state() const = 0;
     virtual const std::string& app_icon_path() const = 0;
+    virtual connection_handler::DeviceHandle device() const = 0;
 
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
@@ -308,6 +310,7 @@ class Application : public virtual InitialApplicationData,
       const mobile_api::AudioStreamingState::eType& state) = 0;
     virtual bool set_app_icon_path(const std::string& file_name) = 0;
     virtual void set_app_allowed(const bool& allowed) = 0;
+    virtual void set_device(connection_handler::DeviceHandle device) = 0;
 
     virtual bool AddFile(const std::string& file_name, bool is_persistent) = 0;
     virtual bool DeleteFile(const std::string& file_name) = 0;

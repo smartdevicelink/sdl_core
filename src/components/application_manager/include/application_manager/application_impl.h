@@ -36,43 +36,13 @@
 #include <map>
 #include <set>
 #include <vector>
-/*#include <string>
-#include "smart_objects/smart_object.h"
-#include "application_manager/application.h"
-#include "interfaces/MOBILE_API.h"*/
-
 #include "application_manager/application_data_impl.h"
+#include "connection_handler/device.h"
 
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
 
-/*struct InitialAppDataContainer {
-  smart_objects::SmartObject* app_types_;
-  smart_objects::SmartObject* vr_synonyms_;
-  smart_objects::SmartObject* mobile_app_id_;
-  smart_objects::SmartObject* tts_name_;
-  smart_objects::SmartObject* ngn_media_screen_name_;
-  mobile_api::Language::eType  language_;
-  mobile_api::Language::eType  ui_language_;
-};
-
-struct DynamicAppDataContainer {
-  smart_objects::SmartObject* help_promt_;
-  smart_objects::SmartObject* timeout_promt_;
-  smart_objects::SmartObject* vr_help_title_;
-  smart_objects::SmartObject* vr_help_;
-  mobile_api::TBTState::eType  tbt_state_;
-  smart_objects::SmartObject* show_command_;
-  smart_objects::SmartObject* tbt_show_command_;
-
-  CommandsMap                  commands_;
-  SubMenuMap                   sub_menu_;
-  ChoiceSetMap                 choice_set_map_;
-  ChoiceSetVRCmdMap            choice_set_vr_commands_map_;
-  bool                         is_perform_interaction_active_;
-};
-*/
 struct AppFile {
   AppFile(const std::string& name, bool persistent)
     : is_persistent(persistent),
@@ -84,7 +54,7 @@ struct AppFile {
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
   public virtual DynamicApplicationDataImpl {
   public:
-    explicit ApplicationImpl(int app_id);
+    explicit ApplicationImpl(unsigned int app_id);
     ~ApplicationImpl();
 
     /**
@@ -104,7 +74,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
     bool HasBeenActivated() const;
 
     const Version& version() const;
-    int app_id() const;
+    inline unsigned int app_id() const;
     const std::string& name() const;
     bool is_media_application() const;
     const mobile_api::HMILevel::eType& hmi_level() const;
@@ -112,6 +82,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
     inline const mobile_api::AudioStreamingState::eType&
     audio_streaming_state() const;
     const std::string& app_icon_path() const;
+    connection_handler::DeviceHandle device() const;
 
     void set_version(const Version& version);
     void set_name(const std::string& name);
@@ -123,6 +94,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
       const mobile_api::AudioStreamingState::eType& state);
     bool set_app_icon_path(const std::string& file_name);
     void set_app_allowed(const bool& allowed);
+    void set_device(connection_handler::DeviceHandle device);
 
     bool AddFile(const std::string& file_name, bool is_persistent);
     bool DeleteFile(const std::string& file_name);
@@ -142,7 +114,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
     smart_objects::SmartObject*           active_message_;
 
     Version                                version_;
-    int                                    app_id_;
+    unsigned int                                    app_id_;
     std::string                            app_name_;
     bool                                   is_media_;
     bool                                   allowed_support_navigation_;
@@ -153,11 +125,16 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
     mobile_api::SystemContext::eType       system_context_;
     mobile_api::AudioStreamingState::eType audio_streaming_state_;
     std::string                            app_icon_path_;
+    connection_handler::DeviceHandle device_;
 
     std::vector<AppFile>                   app_files_;
     std::set<unsigned int>                 subscribed_buttons_;
     std::set<unsigned int>                 subscribed_vehicle_info_;
 };
+
+unsigned int ApplicationImpl::app_id() const {
+  return app_id_;
+}
 
 const mobile_api::AudioStreamingState::eType&
 ApplicationImpl::audio_streaming_state() const {
