@@ -33,15 +33,16 @@
 #include "application_manager/commands/hmi/on_button_press_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_helper.h"
 #include "utils/logger.h"
 
 namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
+
 OnButtonPressNotification::OnButtonPressNotification(
-    const MessageSharedPtr& message): NotificationFromHMI(message) {
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
 OnButtonPressNotification::~OnButtonPressNotification() {
@@ -50,41 +51,13 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 void OnButtonPressNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
 
-  if((*message_)[strings::msg_params].keyExists(
-      hmi_response::custom_button_id)) {
+  (*message_)[strings::params][strings::function_id] =
+    mobile_apis::FunctionID::eType::OnButtonPressID;
 
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->active_application());
-
-    if (NULL == app) {
-      LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-      return;
-    }
-
-    NotifyMobileApp(app);
-    return;
-  }
-
-  const unsigned int btn_id = static_cast<unsigned int>(
-      (*message_)[strings::msg_params]
-      [hmi_response::button_name].asInt());
-
-  const std::vector<Application*>& subscribedApps =
-      ApplicationManagerImpl::instance()->applications_by_button(btn_id);
-
-  std::vector<Application*>::const_iterator it = subscribedApps.begin();
-  for (; subscribedApps.end() != it; ++it) {
-    ApplicationImpl* subscribed_app = static_cast<ApplicationImpl*>(*it);
-
-    if (subscribed_app) {
-      NotifyMobileApp(subscribed_app);
-    }
-  }
+  SendNotificationToMobile(message_);
 }
 
-void OnButtonPressNotification::NotifyMobileApp(ApplicationImpl* const app) {
-  MessageHelper::SendHMIStatusNotification(*app);
-}
+} // hmi
 
 }  // namespace commands
 

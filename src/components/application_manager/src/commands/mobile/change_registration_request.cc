@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/change_registration_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -44,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 ChangeRegistrationRequest::ChangeRegistrationRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 ChangeRegistrationRequest::~ChangeRegistrationRequest() {
@@ -53,9 +52,9 @@ ChangeRegistrationRequest::~ChangeRegistrationRequest() {
 void ChangeRegistrationRequest::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -64,101 +63,68 @@ void ChangeRegistrationRequest::Run() {
   }
 
   const int hmi_language =
-      (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
+    (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
 
   const int language =
-      (*message_)[strings::msg_params][strings::language].asInt();
+    (*message_)[strings::msg_params][strings::language].asInt();
 
   if (false == IsLanguageSupportedByUI(hmi_language) ||
       false == IsLanguageSupportedByVR(language)     ||
       false == IsLanguageSupportedByTTS(language)) {
-
     LOG4CXX_ERROR(logger_, "Language is not supported by any of modules");
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-
-  MessageChaining* chain = NULL;
-
+  // we should specify amount of required responses in the 1st request
+  const unsigned int chaining_counter = 2;
   bool has_actually_changed = false;
   if (app->ui_language() !=
-     (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
-    smart_objects::CSmartObject* ui_request  =
-        new smart_objects::CSmartObject();
+      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    if (NULL == ui_request) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
-    }
+    msg_params[strings::language] =
+      (*message_)[strings::msg_params][strings::hmi_display_language];
+    msg_params[strings::app_id] = app->app_id();
 
-    const int ui_hmi_request_id = hmi_apis::FunctionID::UI_ChangeRegistration;
-    (*ui_request)[strings::params][strings::function_id] =
-        ui_hmi_request_id;
-
-    (*ui_request)[strings::params][strings::message_type] =
-        MessageType::kRequest;
-
-    (*ui_request)[strings::msg_params][strings::language] =
-        (*message_)[strings::msg_params][strings::hmi_display_language];
-
-    (*ui_request)[strings::msg_params][strings::app_id] =
-        app->app_id();
-
-    chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, ui_hmi_request_id, &(*message_));
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(ui_request);
+    CreateHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
+                     msg_params, true, has_actually_changed);
 
     has_actually_changed = true;
   }
 
   if (app->language() !=
-     (*message_)[strings::msg_params][strings::language].asInt()) {
-    smart_objects::CSmartObject* vr_request  =
-        new smart_objects::CSmartObject();
+      (*message_)[strings::msg_params][strings::language].asInt()) {
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::language] =
+      (*message_)[strings::msg_params][strings::language];
+    msg_params[strings::app_id] = app->app_id();
 
-    if (NULL == vr_request) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
-    }
-
-    const int vr_hmi_request_id = hmi_apis::FunctionID::VR_ChangeRegistration;
-    (*vr_request)[strings::params][strings::function_id] =
-        vr_hmi_request_id;
-
-    (*vr_request)[strings::params][strings::message_type] =
-        MessageType::kRequest;
-
-    (*vr_request)[strings::msg_params][strings::language] =
-        (*message_)[strings::msg_params][strings::language];
-
-    (*vr_request)[strings::msg_params][strings::app_id] =
-        app->app_id();
-
-    ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, vr_hmi_request_id, &(*message_));
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(vr_request);
+    CreateHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
+                     msg_params, true);
 
     has_actually_changed = true;
   }
 
-  if (!has_actually_changed) {
-    SendResponse(true, mobile_apis::Result::SUCCESS);
+  if (false == has_actually_changed) {
+    LOG4CXX_ERROR(logger_, "Current language is the same");
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Current language is the same");
+    return;
   }
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
-    const int& hmi_display_lang) {
+  const int& hmi_display_lang) {
+  const smart_objects::SmartObject* ui_languages =
+    ApplicationManagerImpl::instance()->ui_supported_languages();
 
-  const smart_objects::CSmartObject* ui_languages =
-      ApplicationManagerImpl::instance()->ui_supported_languages();
+  if (!ui_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
 
   bool is_language_supported = false;
   for (size_t i = 0; i < ui_languages->length(); ++i) {
@@ -176,10 +142,14 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
-    const int& hmi_display_lang) {
+  const int& hmi_display_lang) {
+  const smart_objects::SmartObject* vr_languages =
+    ApplicationManagerImpl::instance()->vr_supported_languages();
 
-  const smart_objects::CSmartObject* vr_languages =
-      ApplicationManagerImpl::instance()->vr_supported_languages();
+  if (!vr_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
 
   bool is_language_supported = false;
   for (size_t i = 0; i < vr_languages->length(); ++i) {
@@ -197,10 +167,14 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
-    const int& hmi_display_lang) {
+  const int& hmi_display_lang) {
+  const smart_objects::SmartObject* tts_languages =
+    ApplicationManagerImpl::instance()->tts_supported_languages();
 
-  const smart_objects::CSmartObject* tts_languages =
-      ApplicationManagerImpl::instance()->tts_supported_languages();
+  if (!tts_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
 
   bool is_language_supported = false;
   for (size_t i = 0; i < tts_languages->length(); ++i) {

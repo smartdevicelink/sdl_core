@@ -77,6 +77,7 @@
     <element name="PRESET_4"/>
     <element name="PRESET_5"/>
     <element name="PRESET_6"/>
+    <element name="PRESET_7"/>
     <element name="PRESET_8"/>
     <element name="PRESET_9"/>
     <element name="CUSTOM_BUTTON"/>
@@ -738,7 +739,7 @@
     <param name="deviceName" type="String" mandatory="true">
       <description>Name of device on which provided application is running.</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
+    <param name="appID" type="Integer" mandatory="true">
       <description>Unique(during ignition cycle) id of application. To be used in all commands sent by application for identification.</description>
     </param>
     <param name="hmiDisplayLanguageDesired" type="Common.Language" mandatory="true">
@@ -1133,6 +1134,13 @@
     <function name="GetDeviceList" messagetype="response">
         <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
     </function>
+	<function name="AllowDeviceToConnect" messagetype="request">
+        <description>Request from SmartDeviceLink to HMI to get the permissions of new device connection.</description>
+        <param name="device" type="Common.DeviceInfo" mandatory="true"/>
+    </function>
+    <function name="AllowDeviceToConnect" messagetype="response">
+		<param name="allow" type="Boolean" mandatory="true"/>
+	</function>
     <function name="StartDeviceDiscovery" messagetype="request">
       <description>Initiated by HMI user. In response optional list of found devices - if not provided, not were found.</description>
     </function>
@@ -1141,7 +1149,7 @@
     </function>
     <function name="OnDeviceListUpdated" messagetype="notification">
         <description>Notification from SmartDeviceLink to HMI about changes in device list.</description>
-        <param name="deviceList" type="String" mandatory="false" array="true" minsize="1" maxsize="100"/>
+        <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
     </function>
     <function name="GetAppList" messagetype="request">
         <description>This methos is usually invoked by HMI to get list of registered apps.</description>
@@ -1151,16 +1159,16 @@
     </function>
     <function name="ActivateApp" messagetype="request">
       <description>Invoked by UI component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action. Application is shown on recieving successful response.</description>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of selected application.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of selected application.</description>
       </param>
     </function>
     <function name="ActivateApp" messagetype="response">
     </function>
     <function name="OnAppDeactivated" messagetype="notification">
       <description>Invoked by UI component when user switches to any functionality which is not other mobile application.</description>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of deactivated application.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of deactivated application.</description>
       </param>
       <param name="reason" type="Common.DeactivateReason" mandatory="true">
         <description>Specifies the functionality user switched to.</description>
@@ -1172,12 +1180,12 @@
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
-      <param name="appId" type="Integer" mandatory="true"/>
+      <param name="appID" type="Integer" mandatory="true"/>
     </function>
     <function name="ExitApplication" messagetype="request">
       <description>Used by HMI when User chooses to exit application. Sent from HMI to SDL.</description>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="ExitApplication" messagetype="response">
@@ -1236,25 +1244,25 @@
   </function>
   <function name="AddCommand" messagetype="request">
     <description>Adds command(string with associated id) to VR.</description>
-    <param name="cmdId" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
-      <description>Id of command to used in OnCommand notification.</description>
+    <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
+      <description>ID of command to used in OnCommand notification.</description>
     </param>
     <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="100" array="true">
       <description>List of strings to be used as VR commands.</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="AddCommand" messagetype="response">
   </function>
   <function name="DeleteCommand" messagetype="request">
     <description>Delete commands from VR</description>
-    <param name="cmdId" type="Integer" mandatory="true">
-      <description>Id of list of commands sent by AddCommand.</description>
+    <param name="cmdID" type="Integer" mandatory="true">
+      <description>ID of list of commands sent by AddCommand.</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="DeleteCommand" messagetype="response">
@@ -1262,10 +1270,10 @@
   <function name="OnCommand" messagetype="notification">
     <description>Notifies SDL about command trigerred via VR</description>
     <param name="cmdID" type="Integer" mandatory="true">
-      <description>Id of list of commands which trigerred command belongs to.</description>
+      <description>ID of list of commands which trigerred command belongs to.</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="ChangeRegistration" messagetype="request">
@@ -1273,8 +1281,8 @@
     <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="ChangeRegistration" messagetype="response">
@@ -1316,8 +1324,8 @@
     <param name="ttsChunks" type="Common.TTSChunk" mandatory="true" array="true" minsize="1" maxsize="100">
       <description>List of strings to be recorded.</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="Speak" messagetype="response">
@@ -1333,8 +1341,8 @@
     <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="ChangeRegistration" messagetype="response">
@@ -1375,8 +1383,8 @@
           The array must have at least one item.
         </description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application requested this RPC.</description>
       </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">
@@ -1389,14 +1397,14 @@
         <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
           <description>Array of lines of alert text fields. See TextFieldStruct. Uses alertText1, alertText2, alertText3.</description>
         </param>
-        <param name="duration" type="Integer" mandatory="false" minvalue="3000" maxvalue="10000" defvalue="5000">
+        <param name="duration" type="Integer" mandatory="true" minvalue="3000" maxvalue="10000" defvalue="5000">
           <description>Timeout in milliseconds. Typical timeouts are 3-5 seconds. If omitted, timeout is set to 5s.</description>
         </param>
         <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
           <description>App defined SoftButtons</description>
         </param>
-        <param name="appId" type="Integer" mandatory="true">
-          <description>Id of application requested this RPC.</description>
+        <param name="appID" type="Integer" mandatory="true">
+          <description>ID of application requested this RPC.</description>
         </param>
     </function>
     <function name="Alert" messagetype="response">
@@ -1454,19 +1462,19 @@
          <description>Image struct determining whether static or dynamic icon.</description>
          <description>If omitted on supported displays, no (or the default if applicable) icon shall be displayed.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="AddCommand" messagetype="response">
     </function>
     <function name="DeleteCommand" messagetype="request">
       <description>Deletes command from the in-application menu with the specified command id.</description>
-      <param name="cmdId" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
-        <description>cmdId sent via AddCommand request - id of command to be deleted.</description>
+      <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
+        <description>cmdID sent via AddCommand request - id of command to be deleted.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="DeleteCommand" messagetype="response">
@@ -1479,8 +1487,8 @@
       <param name="menuParams" type="Common.MenuParams" mandatory="true">
         <description>Position and name of the added menu.'parent' field is ommited for this API. </description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="AddSubMenu" messagetype="response">
@@ -1490,8 +1498,8 @@
       <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000">
         <description>The "menuID" of the submenu to delete. (See addSubMenu.menuID)</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="DeleteSubMenu" messagetype="response">
@@ -1502,8 +1510,8 @@
         <description>Unique ID used for this interaction choice set.</description>
       </param>
       <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" />
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="CreateInteractionChoiceSet" messagetype="response">
@@ -1514,8 +1522,8 @@
       <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
         <description>ID of the interaction choice set to delete.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="DeleteInteractionChoiceSet" messagetype="response">
@@ -1525,15 +1533,15 @@
       <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
         <description>Uses initialInteractionText. See TextFieldStruct.</description>
       </param>
-      <param name="interactionChoiceSetIDList" type="Integer" minsize="1" maxsize="100" minvalue="0" maxvalue="2000000000" array="true" mandatory="true">
+      <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
         <description>List of interaction choice set IDs to use with an interaction.</description>
       </param>
-      <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="false">
+      <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
         <description>Timeout in milliseconds.</description>
         <description>If omitted a standard value of 10000 milliseconds is used.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="PerformInteraction" messagetype="response">
@@ -1551,8 +1559,8 @@
         <description>Enumeration to control the media clock.</description>
         <description>In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="SetMediaClockTimer" messagetype="response">
@@ -1567,8 +1575,8 @@
         <description>If omitted on supported displays, the default SYNC generated help items shall be used.</description>
         <description>If the list of VR Help Items contains nonsequential positions (e.g. [1,2,4]), the RPC shall be rejected.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="SetGlobalProperties" messagetype="response">
@@ -1578,8 +1586,8 @@
       <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
         <description>Command ID, which is related to a specific menu entry.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="OnSystemContext" messagetype="notification">
@@ -1601,8 +1609,8 @@
       <param name="language" type="Common.Language" mandatory="true">
         <description>The language application wants to switch to.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="ChangeRegistration" messagetype="response">
@@ -1634,8 +1642,8 @@
     <function name="SetAppIcon" messagetype="request">
       <description>Used to set existing local file on SYNC as the app's icon.</description>
       <param name="syncFileName" type="Common.Image" mandatory="true"/>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="SetAppIcon" messagetype="response">
@@ -1666,8 +1674,8 @@
         <description>App defined timeout.</description>
         <description>If omitted, the value is set to 10000.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="Slider" messagetype="response">
@@ -1681,15 +1689,15 @@
       <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
         <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
       </param>
-      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="false">
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="true">
         <description>App defined timeout.</description>
       </param>
       <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
         <description>App defined SoftButtons.</description>
         <description>If omitted on supported displays, only the system defined "Close" SoftButton will be displayed.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="ScrollableMessage" messagetype="response">
@@ -1763,8 +1771,8 @@
         <description>Three dynamic SoftButtons available (second SoftButton is fixed to "Turns").</description>
         <description>If omitted on supported displays, the currently displayed SoftButton values will not change.</description>
       </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="ShowConstantTBT" messagetype="response">
@@ -1783,6 +1791,9 @@
       </param>
       <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="1" array="true" mandatory="false">
         <description>If omitted on supported displays, app-defined SoftButton will be left blank.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="UpdateTurnList" messagetype="response">
@@ -1818,8 +1829,8 @@
     <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="0" maxsize="1000" array="true" mandatory="true">
       <description>Get raw data from vehicle data DID location(s).</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="ReadDID" messagetype="response">
@@ -1835,8 +1846,8 @@
     <param name="dtcMask" type="Integer" minvalue="0" maxvalue="255" mandatory="false">
       <description>DTC Mask Byte to be sent in diagnostic request to module .</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application that requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="GetDTCs" messagetype="response">
@@ -1915,8 +1926,8 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-    <param name="appId" type="Integer" mandatory="true">
-      <description>Id of application requested this RPC.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
     </param>
   </function>
 

@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 
 #include "utils/shared_ptr.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 
 namespace application_manager {
@@ -44,7 +44,7 @@ namespace application_manager {
  **/
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-typedef utils::SharedPtr<smart_objects::CSmartObject> MessageSharedPtr;
+typedef utils::SharedPtr<smart_objects::SmartObject> MessageSharedPtr;
 
 namespace commands {
 

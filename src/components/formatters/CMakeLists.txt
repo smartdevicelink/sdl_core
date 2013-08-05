@@ -6,7 +6,7 @@ include_directories (
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
   ../../thirdPartyLibs/logger/include
-  ../../../src/components/SmartObjects/include
+  ../../../src/components/smart_objects/include
 )
 
 set (SOURCES
@@ -21,6 +21,6 @@ set (FORMATTER_SOURCES
     ./src/meta_formatter.cc
 )
 
-add_library("JSONHandler" ${SOURCES}
+add_library("formatters" ${SOURCES}
         ${FORMATTER_SOURCES}
 )

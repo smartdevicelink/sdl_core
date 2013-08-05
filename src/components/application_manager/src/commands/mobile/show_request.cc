@@ -34,8 +34,10 @@
 #include "application_manager/commands/mobile/show_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -51,36 +53,104 @@ ShowRequest::~ShowRequest() {
 void ShowRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowRequest::Run");
 
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::connection_key]));
+  Application* app = application_manager::ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key].asInt());
 
-  if (!application_impl) {
-    LOG4CXX_ERROR_EXT(logger_, "An application "
-                          << application_impl->name() << " is not registered.");
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
+                      " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  const int correlationId =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connectionKey =
-    (*message_)[strings::params][strings::connection_key];
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  (*message_)[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::UI_Show;
 
-  ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connectionKey, correlationId),
-      connectionKey, correlationId);
+  msg_params[hmi_request::show_strings] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+  msg_params[strings::app_id] = app->app_id();
 
-  MessageSharedPtr persistentData;
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
+    msg_params[hmi_request::show_strings][0][hmi_request::field_name] =
+      TextFieldName::MAIN_FILED1;
+    msg_params[hmi_request::show_strings][0][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::main_field_1];
+  }
 
-  (*persistentData)[strings::msg_params] = (*message_)[strings::msg_params];
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
+    msg_params[hmi_request::show_strings][1][hmi_request::field_name] =
+      TextFieldName::MAIN_FILED2;
+    msg_params[hmi_request::show_strings][1][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::main_field_2];
+  }
 
-  application_impl->set_show_command(*persistentData);
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
+    msg_params[hmi_request::show_strings][2][hmi_request::field_name] =
+      TextFieldName::MAIN_FILED3;
+    msg_params[hmi_request::show_strings][2][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::main_field_3];
+  }
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(&(*message_));
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
+    msg_params[hmi_request::show_strings][3][hmi_request::field_name] =
+      TextFieldName::MAIN_FILED4;
+    msg_params[hmi_request::show_strings][3][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::main_field_4];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
+    msg_params[hmi_request::show_strings][4][hmi_request::field_name] =
+      TextFieldName::MEDIA_CLOCK;
+    msg_params[hmi_request::show_strings][4][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::media_clock];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
+    msg_params[hmi_request::show_strings][5][hmi_request::field_name] =
+      TextFieldName::MEDIA_TRACK;
+    msg_params[hmi_request::show_strings][5][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::media_track];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
+    msg_params[hmi_request::show_strings][6][hmi_request::field_name] =
+      TextFieldName::STATUS_BAR;
+    msg_params[hmi_request::show_strings][6][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::status_bar];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::alignment)) {
+    msg_params[strings::alignment] =
+      (*message_)[strings::msg_params][strings::alignment];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
+    msg_params[strings::graphic] =
+      (*message_)[strings::msg_params][strings::graphic];
+    std::string file_path = file_system::FullPath(app->name());
+    file_path += "/";
+    file_path += (*message_)[strings::msg_params][strings::graphic]
+                         [strings::value].asString();
+
+    msg_params[strings::graphic][strings::value] = file_path;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    msg_params[strings::soft_buttons] =
+      (*message_)[strings::msg_params][strings::soft_buttons];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
+    msg_params[strings::custom_presets] =
+      (*message_)[strings::msg_params][strings::custom_presets];
+  }
+
+  CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true, 1);
+
+  MessageSharedPtr persistentData =
+    new smart_objects::SmartObject((*message_)[strings::msg_params]);
+  app->set_show_command(*persistentData);
 }
 
 }  // namespace commands

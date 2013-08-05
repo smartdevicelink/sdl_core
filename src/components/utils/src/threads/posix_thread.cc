@@ -56,7 +56,8 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
       delegate_(delegate),
       thread_handle_(0),
       thread_id_(0),
-      thread_options_() {
+      thread_options_(),
+      isThreadRunning_(false){
   if (name) {
     name_ = name;
   }
@@ -96,6 +97,8 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
   success = !pthread_create(&thread_handle_, &attributes, threadFunc,
                             delegate_);
 
+  isThreadRunning_ = success;
+
   pthread_attr_destroy(&attributes);
   return success;
 }
@@ -105,14 +108,16 @@ void Thread::stop() {
     return;
   }
 
-  pthread_cancel(thread_handle_);
+  delegate_->exitThreadMain();
 
   // Wait for the thread to exit.  It should already have terminated but make
   // sure this assumption is valid.
+
   join();
 }
 
 void Thread::join() {
   pthread_join(thread_handle_, NULL);
+  isThreadRunning_ = false;
 }
 }  // namespace threads

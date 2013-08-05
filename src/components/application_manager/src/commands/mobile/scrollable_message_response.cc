@@ -32,9 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/scrollable_message_response.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_conversion.h"
-#include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -48,7 +47,14 @@ ScrollableMessageResponse::ScrollableMessageResponse(
 void ScrollableMessageResponse::Run() {
   LOG4CXX_INFO(logger_, "ScrollableMessageResponse::Run");
 
-  SendResponse();
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+        SendResponse(true);
+    } else {
+         SendResponse(false);
+    }
+  }
 }
 
 }  // namespace commands

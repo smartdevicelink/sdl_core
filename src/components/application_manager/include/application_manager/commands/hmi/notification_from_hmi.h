@@ -34,12 +34,19 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NOTIFICATION_FROM_HMI_H_
 
 #include "application_manager/commands/command_impl.h"
+#include "interfaces/HMI_API.h"
 
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class CSmartObject;
+}
+}
 
 namespace application_manager {
 
 namespace commands {
 
+namespace NsSmartObj = NsSmartDeviceLink::NsSmartObjects;
 
 class NotificationFromHMI : public CommandImpl {
   public:
@@ -49,6 +56,8 @@ class NotificationFromHMI : public CommandImpl {
     virtual bool CleanUp();
     virtual void Run();
     void SendNotificationToMobile(const MessageSharedPtr& message);
+    void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                          const NsSmartObj::SmartObject& msg_params) const;
 };
 
 }  // namespace commands

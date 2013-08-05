@@ -64,11 +64,11 @@ void CMetaFormatterTestHelper::TearDown() {
 //-----------------------------------------------------------
 
 void CMetaFormatterTestHelper::AnyObjectToJsonString(
-    const smart_objects_ns::CSmartObject& obj, std::string& result_string) {  
+    const smart_objects_ns::SmartObject& obj, std::string& result_string) {  
   
     Json::Value params(Json::objectValue);
 
-    smart_objects_ns::CSmartObject formattedObj(obj);
+    smart_objects_ns::SmartObject formattedObj(obj);
 
     formatter_ns::CFormatterJsonBase::objToJsonValue(formattedObj, params);
 
@@ -78,7 +78,7 @@ void CMetaFormatterTestHelper::AnyObjectToJsonString(
 //-----------------------------------------------------------
 
 void CMetaFormatterTestHelper::FillObjectIdenticalToSchema(
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
   
   obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] =
       generated_ns::messageType::request;
@@ -110,7 +110,7 @@ void CMetaFormatterTestHelper::FillObjectIdenticalToSchema(
 //-----------------------------------------------------------
 
 void CMetaFormatterTestHelper::FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
+        NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
   obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] =
       generated_ns::messageType::request;
   obj[strings_ns::S_PARAMS][strings_ns::S_FUNCTION_ID] =
@@ -139,7 +139,7 @@ void CMetaFormatterTestHelper::FillObjectIdenticalToSchemaWithoutNoMandatoriesPa
 }
 
 void CMetaFormatterTestHelper::FillObjectWithoutSomeMandatoryFields(
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
 obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] =
       generated_ns::messageType::request;
   obj[strings_ns::S_PARAMS][strings_ns::S_FUNCTION_ID] =
@@ -170,8 +170,8 @@ obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] =
 //-----------------------------------------------------------
 
 void CMetaFormatterTestHelper::CompareObjects(
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second) {
+        const NsSmartDeviceLink::NsSmartObjects::SmartObject& first,
+        const NsSmartDeviceLink::NsSmartObjects::SmartObject& second) {
   
   if (smart_objects_ns::SmartType_Array == first.getType()) {
     ASSERT_EQ(smart_objects_ns::SmartType_Array, second.getType());
@@ -213,7 +213,7 @@ void CMetaFormatterTestHelper::CompareObjects(
 //-----------------------------------------------------------
 
 void CMetaFormatterTestHelper::FillObjectWithDefaultValues(
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
 
   obj[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE] = -1;      
   obj[strings_ns::S_PARAMS][strings_ns::S_FUNCTION_ID] = -1;

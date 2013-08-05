@@ -41,7 +41,7 @@
 
 #include "test/components/JSONHandler/formatters/test_JSONHandler_alrpcv2.hpp"
 
-#include "SmartObjects/CSmartObject.hpp"
+#include "SmartObjects/SmartObject.hpp"
 #include "test/components/JSONHandler/formatters/test_JSONHandler_alrpcv2.h"
 
 namespace generated_ns = Gen::test::components::JSONHandler2;
@@ -119,27 +119,27 @@ class CMetaFormatterTestHelper :public ::testing::Test {
   virtual void TearDown();
 
   void AnyObjectToJsonString(
-      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
       std::string& result_string);
 
   // for message_type::request, function_id::RegisterAppInterfaceID
   void FillObjectIdenticalToSchema(
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
   // for message_type::request, function_id::RegisterAppInterfaceID
   void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
   void CompareObjects(
-      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& first,
-      const NsSmartDeviceLink::NsSmartObjects::CSmartObject& second);
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& first,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& second);
 
   // for message_type::request, function_id::RegisterAppInterfaceID
   void FillObjectWithDefaultValues(
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
   void FillObjectWithoutSomeMandatoryFields(
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj);
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
   // members
   generated_ns::test_JSONHandler_alrpcv2 factory_;

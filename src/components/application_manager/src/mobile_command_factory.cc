@@ -33,6 +33,8 @@
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/commands/mobile/add_command_response.h"
+#include "application_manager/commands/mobile/delete_command_request.h"
+#include "application_manager/commands/mobile/delete_command_response.h"
 #include "application_manager/commands/mobile/add_sub_menu_request.h"
 #include "application_manager/commands/mobile/add_sub_menu_response.h"
 #include "application_manager/commands/mobile/alert_request.h"
@@ -122,17 +124,17 @@
 namespace application_manager {
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
-  CommandSharedPtr command(NULL);
+  const MessageSharedPtr& message) {
+  CommandSharedPtr command;
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
+  switch ((*message)[strings::params][strings::function_id].asInt()) {
     case mobile_apis::FunctionID::RegisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kRequest) {
         command.reset(new commands::RegisterAppInterfaceRequest(message));
       } else {
         command.reset(
-            new commands::RegisterAppInterfaceResponse(message));
+          new commands::RegisterAppInterfaceResponse(message));
       }
       break;
     }
@@ -142,7 +144,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::UnregisterAppInterfaceRequest(message));
       } else {
         command.reset(
-            new commands::UnregisterAppInterfaceResponse(message));
+          new commands::UnregisterAppInterfaceResponse(message));
       }
       break;
     }
@@ -150,7 +152,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::SetGlobalPropertiesResponse(message));
+          new commands::SetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::SetGlobalPropertiesRequest(message));
       }
@@ -160,7 +162,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::ResetGlobalPropertiesResponse(message));
+          new commands::ResetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::ResetGlobalPropertiesRequest(message));
       }
@@ -172,6 +174,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::AddCommandResponse(message));
       } else {
         command.reset(new commands::AddCommandRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::DeleteCommandID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::DeleteCommandResponse(message));
+      } else {
+        command.reset(new commands::DeleteCommandRequest(message));
       }
       break;
     }
@@ -197,7 +208,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::DeleteInteractionChoiceSetResponse(message));
+          new commands::DeleteInteractionChoiceSetResponse(message));
       } else {
         command.reset(new commands::DeleteInteractionChoiceSetRequest(message));
       }
@@ -212,14 +223,32 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SpeakID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SpeakResponse(message));
+      } else {
+        command.reset(new commands::SpeakRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SliderID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SliderResponse(message));
+      } else {
+        command.reset(new commands::SliderRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::PerformAudioPassThruID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::PerformAudioPassThruResponse(message));
+          new commands::PerformAudioPassThruResponse(message));
       } else {
         command.reset(
-            new commands::PerformAudioPassThruRequest(message));
+          new commands::PerformAudioPassThruRequest(message));
       }
       break;
     }
@@ -227,7 +256,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::CreateInteractionChoiceSetResponse(message));
+          new commands::CreateInteractionChoiceSetResponse(message));
       } else {
         command.reset(new commands::CreateInteractionChoiceSetRequest(message));
       }
@@ -305,14 +334,23 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::ShowID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::ShowResponse(message));
+      } else {
+        command.reset(new commands::ShowRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::SubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::SubscribeVehicleDataResponse(message));
+          new commands::SubscribeVehicleDataResponse(message));
       } else {
         command.reset(
-            new commands::SubscribeVehicleDataRequest(message));
+          new commands::SubscribeVehicleDataRequest(message));
       }
       break;
     }
@@ -320,10 +358,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
         command.reset(
-            new commands::UnsubscribeVehicleDataResponse(message));
+          new commands::UnsubscribeVehicleDataResponse(message));
       } else {
         command.reset(
-            new commands::UnsubscribeVehicleDataRequest(message));
+          new commands::UnsubscribeVehicleDataRequest(message));
       }
       break;
     }
@@ -342,6 +380,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::GetVehicleDataResponse(message));
       } else {
         command.reset(new commands::GetVehicleDataRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::ScrollableMessageID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::ScrollableMessageResponse(message));
+      } else {
+        command.reset(new commands::ScrollabelMessageRequest(message));
       }
       break;
     }
@@ -399,12 +446,21 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SetMediaClockTimerID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SetMediaClockTimerResponse(message));
+      } else {
+        command.reset(new commands::SetMediaClockRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::OnButtonEventID: {
-      command.reset(new commands::OnButtonEventNotification(message));
+      command.reset(new commands::mobile::OnButtonEventNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnButtonPressID: {
-      command.reset(new commands::OnButtonPressNotification(message));
+      command.reset(new commands::mobile::OnButtonPressNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnAudioPassThruID: {
@@ -417,7 +473,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::OnAppInterfaceUnregisteredID: {
       command.reset(
-          new commands::OnAppInterfaceUnregisteredNotification(message));
+        new commands::OnAppInterfaceUnregisteredNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnCommandID: {
@@ -429,7 +485,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::OnDriverDistractionID: {
-      command.reset(new commands::OnDriverDistractionNotification(message));
+      command.reset(new commands::mobile::OnDriverDistractionNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnLanguageChangeID: {

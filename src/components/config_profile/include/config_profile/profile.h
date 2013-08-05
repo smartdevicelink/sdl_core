@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
 
 #include <string>
+#include <vector>
 #include "utils/macro.h"
 
 namespace profile {
@@ -72,6 +73,21 @@ class Profile {
    * @brief Returns server address
    */
   const std::string& server_address() const;
+
+  /**
+   * @brief Returns policies file name
+   */
+  const std::string& policies_file_name() const;
+
+  /**
+   * @brief Returns help promt vector
+   */
+  const std::vector<std::string>& help_promt() const;
+
+  /**
+   * @brief Returns help promt vector
+   */
+  const std::vector<std::string>& time_out_promt() const;
 
   /**
    * @brief Returns server port
@@ -138,11 +154,14 @@ class Profile {
                  const char* const pKey) const;
 
   // Members section
-  std::string  config_file_name_;
-  std::string  server_address_;
-  uint16_t     server_port_;
-  uint64_t     min_tread_stack_size_;
-  bool         is_mixing_audio_supported_;
+  std::string                     config_file_name_;
+  std::string                     server_address_;
+  std::string                     policies_file_name_;
+  std::vector<std::string>        help_promt_;
+  std::vector<std::string>        time_out_promt_;
+  uint16_t                        server_port_;
+  uint64_t                        min_tread_stack_size_;
+  bool                            is_mixing_audio_supported_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

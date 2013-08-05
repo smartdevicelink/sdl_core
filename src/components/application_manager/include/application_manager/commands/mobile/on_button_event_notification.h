@@ -39,45 +39,49 @@
 
 namespace application_manager {
 
-class ApplicationImpl;
+class Application;
 
 namespace commands {
+
+namespace mobile {
 
 /**
  * @brief OnButtonEventNotification class is used to send notification
  * to mobile device that some button was pressed on HMI.
  **/
 class OnButtonEventNotification : public CommandNotificationImpl {
- public:
-  /**
-   * @brief OnButtonEventNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnButtonEventNotification(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief OnButtonEventNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnButtonEventNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnButtonEventNotification class destructor
-   **/
-  virtual ~OnButtonEventNotification();
+    /**
+     * @brief OnButtonEventNotification class destructor
+     **/
+    virtual ~OnButtonEventNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  /*
-   * @brief Sends button event notification to mobile device
-   *
-   * @param app Application to receive notification
-   * @param is_custom_btn_id Indicates if received notification
-   *  with custom button param
-   */
-  void SendButtonEvent(const ApplicationImpl* app, bool is_custom_btn_id);
+  private:
+    /*
+     * @brief Sends button event notification to mobile device
+     *
+     * @param app Application to receive notification
+     * @param is_custom_btn_id Indicates if received notification
+     *  with custom button param
+     */
+    void SendButtonEvent(const Application* app, bool is_custom_btn_id);
 
-  DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
+    DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
 };
+
+}  // namespace mobile
 
 }  // namespace commands
 }  // namespace application_manager

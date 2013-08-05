@@ -34,7 +34,8 @@
 #include "application_manager/commands/mobile/set_global_properties_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,8 +52,7 @@ void SetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -60,85 +60,113 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  app->set_help_prompt(
-    (*message_)[strings::msg_params][strings::help_promt]);
-  app->set_timeout_prompt(
-    (*message_)[strings::msg_params][strings::timeout_promt]);
-  app->set_vr_help_title(
-    (*message_)[strings::msg_params][strings::vr_help_title]);
-  app->set_vr_help(
-    (*message_)[strings::msg_params][strings::vr_help]);
+  // by default counter is 1 for TTS request. If only one param specified
+  // for TTS REJECT response will be sent
+  unsigned int chaining_counter = 1;
+  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
+      (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
+    ++chaining_counter;
+  }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
+      (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
 
-  smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
+    // check vrhelpitem position index
+    if (!CheckVrHelpItemsOrder()) {
+      LOG4CXX_ERROR(logger_, "Request rejected");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
+    }
 
-  if (NULL == p_smrt_ui) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
+    app->set_vr_help_title(
+        (*message_)[strings::msg_params].getElement(strings::vr_help_title));
+    app->set_vr_help(
+        (*message_)[strings::msg_params].getElement(strings::vr_help));
+
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    msg_params[strings::vr_help_title] = (*app->vr_help_title());
+    msg_params[strings::vr_help] = (*app->vr_help());
+    msg_params[strings::app_id] = app->app_id();
+
+    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                     msg_params, true, chaining_counter);
+  } else if (
+      !(*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
+      !(*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+
+      const CommandsMap& cmdMap = app->commands_map();
+      CommandsMap::const_iterator command_it = cmdMap.begin();
+
+      int index = 0;
+      smart_objects::SmartObject vr_help_items;
+      for (; cmdMap.end() != command_it; ++command_it) {
+        if (false == (*command_it->second).keyExists(strings::vr_commands)) {
+          LOG4CXX_ERROR(logger_, "VR synonyms are empty");
+          SendResponse(false, mobile_apis::Result::INVALID_DATA);
+          return;
+        }
+        // use only first
+        vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
+      }
+
+      app->set_vr_help_title(smart_objects::SmartObject(app->name()));
+      app->set_vr_help(vr_help_items);
+
+      smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+      msg_params[strings::vr_help_title] = (*app->vr_help_title());
+      msg_params[strings::vr_help] = (*app->vr_help());
+      msg_params[strings::app_id] = app->app_id();
+
+      CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                       msg_params, true, chaining_counter);
+  } else {
+      LOG4CXX_ERROR(logger_, "Request rejected");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
   }
 
   // check TTS params
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
 
-    const int tts_cmd_id = hmi_apis::FunctionID::TTS_SetGlobalProperties;
+    app->set_help_prompt(
+        (*message_)[strings::msg_params].getElement(strings::help_promt));
+    app->set_timeout_prompt(
+      (*message_)[strings::msg_params].getElement(strings::timeout_promt));
 
-    (*p_smrt_ui)[strings::params][strings::function_id] =
-      tts_cmd_id;
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    (*p_smrt_ui)[strings::params][strings::message_type] =
-      MessageType::kRequest;
+    msg_params[strings::help_prompt] = (*app->help_promt());
+    msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    msg_params[strings::app_id] = app->app_id();
 
-    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
+    CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
+                     msg_params, true);
+  }
+}
 
-    (*p_smrt_ui)[strings::msg_params][strings::help_prompt] =
-      app->vr_help_title();
+bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
+  const smart_objects::SmartObject vr_help =
+      (*message_)[strings::msg_params].getElement(strings::vr_help);
 
-    (*p_smrt_ui)[strings::msg_params][strings::timeout_prompt] =
-      app->vr_help();
+  for (size_t i = 0; i < vr_help.length(); ++i) {
+    for (size_t j = i + 1; j < vr_help.length(); ++j) {
 
-    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-      app->app_id();
-    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
+      if (vr_help.getElement(i).getElement(strings::position).asInt() >
+          vr_help.getElement(j).getElement(strings::position).asInt()) {
+        LOG4CXX_ERROR(logger_, "VR help items order is wrong");
+        return false;
+      }
 
-    ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, correlation_id),
-      connection_key, correlation_id, tts_cmd_id);
+    }
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_help_title) &&
-      (*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-
-    const int ui_cmd_id = hmi_apis::FunctionID::UI_SetGlobalProperties;
-    (*p_smrt_ui)[strings::params][strings::function_id] =
-      ui_cmd_id;
-
-    (*p_smrt_ui)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
-
-    (*p_smrt_ui)[strings::msg_params][strings::vr_help_title] =
-      app->vr_help_title();
-
-    (*p_smrt_ui)[strings::msg_params][strings::vr_help] =
-      app->vr_help();
-
-    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-      app->app_id();
-    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_ui);
-
-    ApplicationManagerImpl::instance()->AddMessageChain(
-      new MessageChaining(connection_key, correlation_id),
-      connection_key, correlation_id, ui_cmd_id);
-  }
+  return true;
 }
 
 }  // namespace commands

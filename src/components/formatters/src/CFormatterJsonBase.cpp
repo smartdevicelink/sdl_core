@@ -38,9 +38,9 @@
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValueToObj(
     const Json::Value& value,
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& obj) {
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
   if (value.type() == Json::objectValue) {
-    obj = NsSmartDeviceLink::NsSmartObjects::CSmartObject(
+    obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
         NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
 
     Json::Value::Members members = value.getMemberNames();
@@ -49,7 +49,7 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValue
       jsonValueToObj(value[members[i]], obj[members[i]]);
     }
   } else if (value.type() == Json::arrayValue) {
-    obj = NsSmartDeviceLink::NsSmartObjects::CSmartObject(
+    obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
         NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
 
     for (int i = 0; i < value.size(); i++) {
@@ -70,7 +70,7 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValue
 // ----------------------------------------------------------------------------
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue(
-    const NsSmartDeviceLink::NsSmartObjects::CSmartObject &obj,
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
     Json::Value &item) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == obj.getType()) {
     item = Json::arrayValue;

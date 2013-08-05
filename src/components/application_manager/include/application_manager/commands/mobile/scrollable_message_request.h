@@ -44,18 +44,17 @@ namespace commands {
 /**
  * @brief scrollable message request command class
  **/
-class ScrollabeMessageRequest : public CommandRequestImpl {
+class ScrollabelMessageRequest : public CommandRequestImpl {
  public:
   /**
    * \brief ScrollabeMessageRequest class constructor
    **/
-  explicit ScrollabeMessageRequest(const MessageSharedPtr& message);
+  explicit ScrollabelMessageRequest(const MessageSharedPtr& message);
 
   /**
    * \brief SliderCommand class destructor
    **/
-  virtual ~ScrollabeMessageRequest() {
-  }
+  virtual ~ScrollabelMessageRequest();
 
   /**
    * @brief Execute command
@@ -63,7 +62,7 @@ class ScrollabeMessageRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ScrollabeMessageRequest);
+  DISALLOW_COPY_AND_ASSIGN(ScrollabelMessageRequest);
 };
 
 }  // namespace commands

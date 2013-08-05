@@ -47,7 +47,7 @@ void MessagesToMobileAppHandler::threadMain() {
 
   while (1) {
     while (!handler->messages_to_mobile_app_.empty()) {
-      application_manager::Message* message = handler->messages_to_mobile_app_
+      MobileMessage message = handler->messages_to_mobile_app_
           .pop();
 
       protocol_handler::RawMessage* rawMessage = 0;

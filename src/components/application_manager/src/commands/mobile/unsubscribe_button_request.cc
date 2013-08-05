@@ -52,9 +52,9 @@ UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
 void UnsubscribeButtonRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeButtonRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(
-          (*message_)[str::params][str::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->application(
+      (*message_)[str::params][str::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -62,8 +62,8 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
-  const unsigned int btn_id = static_cast<unsigned int>
-      ((*message_)[str::params][str::button_name].asInt());
+  const unsigned int btn_id =
+      (*message_)[str::msg_params][str::button_name].asUInt();
 
   if (!app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);

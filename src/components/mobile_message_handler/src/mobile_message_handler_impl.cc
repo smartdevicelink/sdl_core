@@ -118,7 +118,7 @@ void MobileMessageHandlerImpl::SendMessageToMobileApp(
   LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl SendMessageToMobileApp()");
   DCHECK(message.valid());
 
-  messages_to_mobile_app_.push(&(*message));
+  messages_to_mobile_app_.push(message);
 }
 
 application_manager::Message*
@@ -239,7 +239,7 @@ MobileMessageHandlerImpl::HandleIncomingMessageProtocolV2(
 
 protocol_handler::RawMessage*
 MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV1(
-    const application_manager::Message* message) {
+    const MobileMessage& message) {
   LOG4CXX_INFO(logger_,
                  "MobileMessageHandlerImpl HandleOutgoingMessageProtocolV1()");
   std::string messageString = message->json_message();
@@ -258,7 +258,7 @@ MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV1(
 
 protocol_handler::RawMessage*
 MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
-    const application_manager::Message* message) {
+    const MobileMessage& message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandlerImpl HandleOutgoingMessageProtocolV2()");
 //  if (json.isNull()) {

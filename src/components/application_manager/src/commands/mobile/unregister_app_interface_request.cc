@@ -52,13 +52,15 @@ void UnregisterAppInterfaceRequest::Run() {
   }
 
   if (!app_manager->UnregisterApplication(
-      (*message_)[strings::msg_params][strings::app_id])) {
+      (*message_)[strings::params][strings::connection_key])) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     LOG4CXX_ERROR(logger_, "Generic error");
     return;
   }
 
-  smart_objects::CSmartObject message;
+  SendResponse(true, mobile_apis::Result::SUCCESS);
+
+  smart_objects::SmartObject message;
 
   message[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
@@ -69,8 +71,6 @@ void UnregisterAppInterfaceRequest::Run() {
       (*message_)[strings::params][strings::connection_key];
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
-
-  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands

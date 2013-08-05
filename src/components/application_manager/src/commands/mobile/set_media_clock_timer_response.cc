@@ -32,10 +32,11 @@
  */
 
 #include "application_manager/commands/mobile/set_media_clock_timer_response.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_conversion.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_conversion.h"
+#include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -52,22 +53,25 @@ SetMediaClockTimerResponse::~SetMediaClockTimerResponse() {
 void SetMediaClockTimerResponse::Run() {
   LOG4CXX_INFO(logger_, "SetMediaClockTimerResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
-      SendResponse();
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
       LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
       return;
     }
+  }
 
-    const int hmi_correlation_id = (*message_)[strings::params]
-                                     [strings::correlation_id];
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
-    if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        hmi_correlation_id)) {
-      (*message_)[strings::params][strings::success] = true;
-      (*message_)[strings::params][strings::result_code] =
-              mobile_apis::Result::SUCCESS;
-      SendResponse();
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      SendResponse(true);
+    } else {
+      // TODO(VS): Some logic
+      SendResponse(false);
     }
+  }
 }
 
 }  // namespace commands

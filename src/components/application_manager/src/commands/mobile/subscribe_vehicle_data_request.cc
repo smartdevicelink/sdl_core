@@ -36,7 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
@@ -54,9 +54,8 @@ SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {
 void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(
-          (*message_)[str::params][str::connection_key]));
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[str::params][str::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -71,7 +70,7 @@ void SubscribeVehicleDataRequest::Run() {
 
   // response params
   namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
-  NsSmart::CSmartObject response_params;
+  NsSmart::SmartObject response_params;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
@@ -93,9 +92,12 @@ void SubscribeVehicleDataRequest::Run() {
     }
   }
 
-  if (subscribed_items == items_to_subscribe) {
-    SendResponse(false, mobile_apis::Result::SUCCESS,
-                 "Subscribed on all VehicleData", &response_params);
+  if (0 == items_to_subscribe) {
+    SendResponse(false, mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE,
+                 "Provided VehicleData is empty", &response_params);
+  } else if (subscribed_items == items_to_subscribe) {
+    SendResponse(true, mobile_apis::Result::SUCCESS,
+                 "Subscribed on provided VehicleData", &response_params);
   } else if (0 == subscribed_items) {
     SendResponse(false, mobile_apis::Result::REJECTED,
                  "Already subscribed on all VehicleData", &response_params);

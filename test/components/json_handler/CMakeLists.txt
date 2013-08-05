@@ -9,7 +9,7 @@ include_directories (
   ../../../src/components/utils/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
-  ../../../src/components/SmartObjects/include
+  ../../../src/components/smart_objects/include
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src//thirdPartyLibs/jsoncpp/include/
   ../../../src/components/JSONHandler/include/

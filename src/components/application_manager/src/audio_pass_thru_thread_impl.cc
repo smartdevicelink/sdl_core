@@ -39,7 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/timer.h"
@@ -75,7 +75,7 @@ void AudioPassThruThreadImpl::Init() {
 }
 
 void AudioPassThruThreadImpl::FactoryCreateCommand(
-  smart_objects::CSmartObject* cmd) {
+  smart_objects::SmartObject* cmd) {
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(&(*cmd));
   command->Init();
   command->Run();
@@ -85,10 +85,10 @@ void AudioPassThruThreadImpl::FactoryCreateCommand(
 bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
   LOG4CXX_INFO(logger_, "sendEndAudioPassThruToHMI");
 
-  smart_objects::CSmartObject* end_audio = new smart_objects::CSmartObject();
+  smart_objects::SmartObject* end_audio = new smart_objects::SmartObject();
   if (NULL == end_audio) {
-    smart_objects::CSmartObject* error_response =
-      new smart_objects::CSmartObject();
+    smart_objects::SmartObject* error_response =
+      new smart_objects::SmartObject();
     if (NULL != error_response) {
       (*error_response)[strings::params][strings::message_type] =
         MessageType::kResponse;
@@ -102,14 +102,14 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
 
       (*error_response)[strings::msg_params][strings::success] = false;
       (*error_response)[strings::msg_params][strings::result_code] =
-          mobile_apis::Result::OUT_OF_MEMORY;
+        mobile_apis::Result::OUT_OF_MEMORY;
       FactoryCreateCommand(error_response);
     }
     return false;
   }
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(session_key_));
+  Application* app = ApplicationManagerImpl::instance()->application(
+                       session_key_);
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -222,8 +222,9 @@ void AudioPassThruThreadImpl::threadMain() {
   std::vector<unsigned char>::iterator from = binaryData.begin();
   std::vector<unsigned char>::iterator to = from + step;
 
+
   // Minimal timeout is 1 second now.
-  for (int i = 0; i != seconds; i += kAudioPassThruTimeout) {
+  for (int i = 1; i <= seconds; i += kAudioPassThruTimeout) {
 #if defined(OS_POSIX) && defined(OS_LINUX)
 
     LOG4CXX_INFO(logger_, "Before timer; kAudioPassThruTimeout "
@@ -233,8 +234,8 @@ void AudioPassThruThreadImpl::threadMain() {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif
 
-    smart_objects::CSmartObject* on_audio_pass =
-      new smart_objects::CSmartObject();
+    smart_objects::SmartObject* on_audio_pass =
+      new smart_objects::SmartObject();
     if (!on_audio_pass) {
       LOG4CXX_ERROR_EXT(logger_, "OnAudioPassThru NULL pointer");
       if (false == SendEndAudioPassThru()) {
@@ -259,20 +260,22 @@ void AudioPassThruThreadImpl::threadMain() {
     (*on_audio_pass)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnAudioPassThruID;
 
-    (*on_audio_pass)[strings::msg_params][strings::success] = true;
-    (*on_audio_pass)[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::SUCCESS;
-
     // binary data
-    (*on_audio_pass)[strings::binary_data] =
-      smart_objects::CSmartObject(std::vector<unsigned char>(from, to));
+    (*on_audio_pass)[strings::params][strings::binary_data] =
+      smart_objects::SmartObject(std::vector<unsigned char>(from, to));
 
+    FactoryCreateCommand(on_audio_pass);
 #if defined(OS_POSIX) && defined(OS_LINUX)
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 #endif
 
     from = to;
     to = to + step;
+
+    if (i == seconds - 1) {
+      // set iterator to the end
+      to = binaryData.end();
+    }
   }
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
@@ -285,6 +288,10 @@ void AudioPassThruThreadImpl::threadMain() {
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
   pthread_exit(NULL);
 #endif
+}
+
+void AudioPassThruThreadImpl::exitThreadMain() {
+  LOG4CXX_INFO(logger_, "AudioPassThruThreadImpl::exitThreadMain");
 }
 
 unsigned int AudioPassThruThreadImpl::session_key() const {

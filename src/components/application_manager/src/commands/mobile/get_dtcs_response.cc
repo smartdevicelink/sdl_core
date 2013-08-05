@@ -33,8 +33,7 @@
 
 #include "application_manager/commands/mobile/get_dtcs_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
-#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -50,26 +49,30 @@ GetDTCsResponse::~GetDTCsResponse() {
 void GetDTCsResponse::Run() {
   LOG4CXX_INFO(logger_, "GetDTCsResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
-    SendResponse();
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+  if ((*message_)[strings::msg_params].keyExists(hmi_response::dtc)) {
+    (*message_)[strings::msg_params][strings::dtc_list] =
+        (*message_)[strings::msg_params][hmi_response::dtc];
 
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(correlation_id)) {
-    if (mobile_apis::Result::SUCCESS ==
-        (*message_)[strings::msg_params][hmi_response::code].asInt()) {
+    (*message_)[strings::msg_params].erase(hmi_response::dtc);
+  }
 
-        (*message_)[strings::params][strings::success] = true;
-        (*message_)[strings::params][strings::result_code] =
-            mobile_apis::Result::SUCCESS;
-        SendResponse();
+  (*message_)[strings::msg_params].erase(hmi_response::ecu_header);
+
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+        SendResponse(true);
     } else {
-      // TODO(VS): Some logic
+      SendResponse(false);
     }
   }
 }

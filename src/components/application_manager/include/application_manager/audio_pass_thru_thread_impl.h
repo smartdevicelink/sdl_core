@@ -41,7 +41,7 @@
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-class CSmartObject;
+class SmartObject;
 }
 }
 
@@ -147,6 +147,8 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
    */
   const AudioType& audio_type() const;
 
+  void exitThreadMain();
+
  private:
   /*
    * @brief Sends AudioPassThru request
@@ -159,7 +161,7 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
    * @param cmd Smart object representing command
    */
   void FactoryCreateCommand(
-      NsSmartDeviceLink::NsSmartObjects::CSmartObject* cmd);
+      NsSmartDeviceLink::NsSmartObjects::SmartObject* cmd);
 
   sync_primitives::SynchronisationPrimitives synchronisation_;
   sync_primitives::Timer*     timer_;

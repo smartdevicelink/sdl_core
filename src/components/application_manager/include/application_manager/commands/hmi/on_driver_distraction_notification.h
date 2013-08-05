@@ -37,42 +37,46 @@
 
 namespace application_manager {
 
-class ApplicationImpl;
+class Application;
 
 namespace commands {
+
+namespace hmi {
 
 /**
  * @brief OnDriverDistractionNotification command class
  **/
 class OnDriverDistractionNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnDriverDistractionNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnDriverDistractionNotification(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief OnDriverDistractionNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnDriverDistractionNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnDriverDistractionNotification class destructor
-   **/
-  virtual ~OnDriverDistractionNotification();
+    /**
+     * @brief OnDriverDistractionNotification class destructor
+     **/
+    virtual ~OnDriverDistractionNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  /*
-   * @brief Sends OnDriverDistraction notification to mobile app
-   *
-   * @param app Mobile app to be notified about changes
-   */
-  void NotifyMobileApp(const ApplicationImpl* app);
+  private:
+    /*
+     * @brief Sends OnDriverDistraction notification to mobile app
+     *
+     * @param app Mobile app to be notified about changes
+     */
+    void NotifyMobileApp(const Application* app);
 
-  DISALLOW_COPY_AND_ASSIGN(OnDriverDistractionNotification);
+    DISALLOW_COPY_AND_ASSIGN(OnDriverDistractionNotification);
 };
+
+}  // namespace hmi
 
 }  // namespace commands
 

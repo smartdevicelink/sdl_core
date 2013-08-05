@@ -34,15 +34,12 @@
 #include "application_manager/commands/mobile/read_did_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
-
-namespace str = strings;
 
 ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message)
   : CommandRequestImpl(message) {
@@ -54,13 +51,12 @@ ReadDIDRequest::~ReadDIDRequest() {
 void ReadDIDRequest::Run() {
   LOG4CXX_INFO(logger_, "ReadDIDRequest::Run");
 
-  ApplicationImpl* app =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-          application((*message_)[str::params][str::connection_key]));
+  unsigned int app_id =
+    (*message_)[strings::params][strings::connection_key].asUInt();
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "An application "
-                      << app->name() << " is not registered.");
+    LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -71,37 +67,16 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  smart_objects::CSmartObject* p_vi_read_did  =
-    new smart_objects::CSmartObject();
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = app->app_id();
+  msg_params[strings::ecu_name] =
+    (*message_)[strings::msg_params][strings::ecu_name];
+  msg_params[strings::did_location] =
+    (*message_)[strings::msg_params][strings::did_location];
 
-  if (!p_vi_read_did) {
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    LOG4CXX_ERROR(logger_, "Null pointer");
-    return;
-  }
-
-  const int correlation_id =
-    (*p_vi_read_did)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*p_vi_read_did)[strings::params][strings::connection_key];
-
-  const int vi_read_did = hmi_apis::FunctionID::VehicleInfo_ReadDID;
-  (*p_vi_read_did)[strings::params][strings::function_id] = vi_read_did;
-
-  (*p_vi_read_did)[strings::params][strings::message_type] =
-    MessageType::kRequest;
-
-  (*p_vi_read_did)[strings::msg_params][strings::app_id] =
-    app->app_id();
-  (*p_vi_read_did)[strings::msg_params][strings::ecu_name] =
-    (*message_)[str::msg_params][str::ecu_name];
-  (*p_vi_read_did)[strings::msg_params][strings::did_location] =
-    (*message_)[str::msg_params][str::did_location];
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-          connection_key, correlation_id, vi_read_did, p_vi_read_did);
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(p_vi_read_did);
+  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_ReadDID,
+                   msg_params, true, 1);
 }
 
 }  // namespace commands

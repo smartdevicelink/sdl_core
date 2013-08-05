@@ -34,10 +34,11 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_RESPONSE_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-class CSmartObject;
+class SmartObject;
 }
 }
 
@@ -52,7 +53,9 @@ class CommandResponseImpl : public CommandImpl {
     virtual bool Init();
     virtual bool CleanUp();
     virtual void Run();
-    void SendResponse();
+    void SendResponse(bool successe, const mobile_apis::Result::eType& result_code =
+    				  mobile_apis::Result::INVALID_ENUM);
+    bool IsPendingResponseExist();
 };
 
 }  // namespace commands

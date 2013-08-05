@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message.h"
 
 namespace application_manager {
 
@@ -55,8 +56,61 @@ bool CommandResponseImpl::CleanUp() {
 void CommandResponseImpl::Run() {
 }
 
-void CommandResponseImpl::SendResponse() {
+void CommandResponseImpl::SendResponse(
+  bool success,
+  const mobile_apis::Result::eType& result_code) {
+  LOG4CXX_INFO(logger_, "Trying to send response");
+
+  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+  (*message_)[strings::msg_params][strings::success] = success;
+
+  if (!(*message_)[strings::msg_params].keyExists(strings::result_code)) {
+    if (mobile_apis::Result::INVALID_ENUM != result_code) {
+      (*message_)[strings::msg_params][strings::result_code] = result_code;
+    } else if ((*message_)[strings::params].keyExists(hmi_response::code)) {
+      (*message_)[strings::msg_params][strings::result_code] =
+          (*message_)[strings::params][hmi_response::code];
+    } else {
+      if (success) {
+        (*message_)[strings::msg_params][strings::result_code] =
+            mobile_apis::Result::SUCCESS;
+      } else {
+        (*message_)[strings::msg_params][strings::result_code] =
+            mobile_apis::Result::INVALID_ENUM;
+      }
+    }
+  }
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+}
+
+bool CommandResponseImpl::IsPendingResponseExist() {
+  bool result = true;
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
+
+  unsigned int mobile_correlation_id = 0;
+
+  MessageChaining* msg_chain =
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+
+  int connection_key = 0;
+  if (msg_chain) {
+    connection_key = msg_chain->connection_key();
+  }
+
+  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+        correlation_id, mobile_correlation_id)) {
+    result = false;
+    // change correlation id to mobile
+    (*message_)[strings::params][strings::correlation_id] =
+      mobile_correlation_id;
+
+    (*message_)[strings::params][strings::connection_key] =
+      connection_key;
+  }
+
+  return result;
 }
 
 }  // namespace commands

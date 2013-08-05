@@ -32,9 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/set_icon_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -42,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 SetIconRequest::SetIconRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 SetIconRequest::~SetIconRequest() {
@@ -51,9 +52,9 @@ SetIconRequest::~SetIconRequest() {
 void SetIconRequest::Run() {
   LOG4CXX_INFO(logger_, "SetIconRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -62,7 +63,7 @@ void SetIconRequest::Run() {
   }
 
   const std::string& sync_file_name =
-      (*message_)[strings::msg_params][strings::sync_file_name];
+    (*message_)[strings::msg_params][strings::sync_file_name];
 
   std::string relative_file_path = app->name();
   relative_file_path += "/";
@@ -76,40 +77,13 @@ void SetIconRequest::Run() {
     return;
   }
 
-  const int hmi_request_id = hmi_apis::FunctionID::UI_SetAppIcon;
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  smart_objects::CSmartObject* set_app_icon_hmi_request  =
-      new smart_objects::CSmartObject();
+  msg_params[strings::app_id] = app->app_id();
+  msg_params[strings::sync_file_name] = full_file_path;
 
-  if (NULL == set_app_icon_hmi_request) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  (*set_app_icon_hmi_request)[strings::params][strings::function_id] =
-      hmi_request_id;
-
-  (*set_app_icon_hmi_request)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-  (*set_app_icon_hmi_request)[strings::msg_params][strings::app_id] =
-      (*message_)[strings::msg_params][strings::connection_key];
-
-  (*set_app_icon_hmi_request)[strings::params][strings::sync_file_name] =
-      full_file_path;
-
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
-
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id,
-        hmi_request_id, &(*set_app_icon_hmi_request));
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(
-        set_app_icon_hmi_request);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, msg_params, true, 1);
 }
 
 }  // namespace commands

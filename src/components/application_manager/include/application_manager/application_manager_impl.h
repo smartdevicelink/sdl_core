@@ -33,11 +33,13 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 
+#include <cstdint>
 #include <vector>
 #include <map>
 #include <set>
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
+#include "application_manager/message_chaining.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
 #include "connection_handler/connection_handler_observer.h"
@@ -46,6 +48,9 @@
 #include "connection_handler/device.h"
 #include "request_watchdog/watchdog_subscriber.h"
 #include "interfaces/HMI_API.h"
+#include "formatters/CSmartFactory.hpp"
+#include "interfaces/HMI_API_schema.h"
+#include "interfaces/MOBILE_API_schema.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -54,7 +59,7 @@
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-class CSmartObject;
+class SmartObject;
 }
 }
 
@@ -124,45 +129,63 @@ class ApplicationManagerImpl : public ApplicationManager
     void OnHMIStartedCooperation();
 
     /*
-     * @brief Add to the chain amount of requests sent to hmi
-     * from mobile request, to ensure that response to mobile
-     * will be sent only after all hmi response were received.
+     * @brief Returns unique correlation ID for HMI request
      *
-     * @param chain Pointer to MessageChaining class.
-     * If parameter is empty new instance is created,
-     * otherwise counter of MessageChaining for
-     * corresponding correlation ID is increased
-     *
-     * @param connection_key of connection for Mobile side
-     * @param correlation_id Correlation id for response for Mobile side
-     * @param function_id Id of HMI request/response
-     * @return pointer to MessageChaining
+     * @return Unique correlation ID
      */
-    MessageChaining* AddMessageChain(
-      MessageChaining* chain,
-      unsigned int connection_key,
-      unsigned int correlation_id,
-      unsigned int function_id = 0,  // TODO(VS): delete this param
-      const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
+    unsigned int GetNextHMICorrelationID();
 
     /*
-     * @brief Decrease chain for correlation ID
-     * after response from hmi was received.
+     * @brief Add to the chain amount of requests sent to hmi
+     * from mobile request, to ensure that all response were received
+     * before sending response to mobile.
      *
-     * @param correlation_id Correlation id for response for Mobile side
+     * @param connection_key Connection key of application stored in
+     * MessageChaining object
+     *
+     * @param correlation_id Correlation of Mobile request stored in
+     * MessageChaining object
+     *
+     *
+     * @param hmi_correlation_id Param is map index and it is equeal to hmi
+     * correlation id. Returned from GetNextHMICorrelationID.
+     *
+     * If param is grate then 0, stored  MessageChaining counter incremented,
+     * otherwise new Message chain created.
+     *
+     * @param data Temporary SmartObject from mobile request.
+     * Sometimes request data is needed in mobile response.
+     *
+     * @return TRUE on success, otherwise FALSE
+     */
+    MessageChaining* AddMessageChain(const unsigned int& connection_key,
+      const unsigned int& correlation_id,
+      const unsigned int& hmi_correlation_id,
+      MessageChaining* msg_chaining,
+      const smart_objects::SmartObject* data = NULL);
+
+    /*
+     * @brief Decrease chain after response from hmi was received
+     *
+     * @param hmi_correlation_id Unique HMI correlation id from response
+     * @param mobile_correlation_id Unique correlation id for Mobile response
+     * returned in this parameter
      *
      * @return true if there is no other pending responses
      */
-    bool DecreaseMessageChain(unsigned int correlation_id);
+    bool DecreaseMessageChain(const unsigned int& hmi_correlation_id,
+                              unsigned int& mobile_correlation_id);
 
     /*
-     * @brief Retriev MessageChaining object from chain
+     * @brief Retrieve MessageChaining object from chain for corresponding
+     * HMI correlation ID
      *
-     * @param correlation_id Correlation id for response for Mobile side
+     * @param hmi_correlation_id HMI correlation id from HMI response
      *
      * @return MessageChaining on success, otherwise NULL
      */
-    MessageChaining* GetMessageChain(unsigned int correlation_id) const;
+    MessageChaining* GetMessageChain(
+        const unsigned int& hmi_correlation_id) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request
@@ -256,9 +279,9 @@ class ApplicationManagerImpl : public ApplicationManager
       const hmi_apis::Common_Language::eType& language);
 
     void set_vehicle_type(
-      const smart_objects::CSmartObject& vehicle_type);
+      const smart_objects::SmartObject& vehicle_type);
 
-    const smart_objects::CSmartObject* vehicle_type() const;
+    const smart_objects::SmartObject* vehicle_type() const;
 
     /*
      * @brief Retrieves SDL access to all mobile apps
@@ -307,13 +330,13 @@ class ApplicationManagerImpl : public ApplicationManager
 
     void StartDevicesDiscovery();
     void SendMessageToMobile(
-      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message);
     bool ManageMobileCommand(
-      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message);
     void SendMessageToHMI(
-      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message);
     bool ManageHMICommand(
-      const utils::SharedPtr<smart_objects::CSmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message);
 
     /////////////////////////////////////////////////////////
     /*
@@ -345,6 +368,8 @@ class ApplicationManagerImpl : public ApplicationManager
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
+    hmi_apis::HMI_API& hmi_so_factory();
+    mobile_apis::MOBILE_API& mobile_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
     void CreatePoliciesManager(PoliciesManager* managaer);
@@ -357,7 +382,7 @@ class ApplicationManagerImpl : public ApplicationManager
        * \param application Application that recieved message to be checked by policies
        * \return bool Indicates whether message is allowed for application
        */
-    bool CheckPolicies(smart_objects::CSmartObject* message,
+    bool CheckPolicies(smart_objects::SmartObject* message,
                        Application* application);
 
     /**
@@ -368,12 +393,12 @@ class ApplicationManagerImpl : public ApplicationManager
        * \param message Message received for application
        * \return bool Indicates whether message is allowed for application
        */
-    bool CheckHMIMatrix(smart_objects::CSmartObject* message);
+    bool CheckHMIMatrix(smart_objects::SmartObject* message);
 
     bool ConvertMessageToSO(const Message& message,
-                            smart_objects::CSmartObject& output);
+                            smart_objects::SmartObject& output);
     bool ConvertSOtoMessage(
-      const smart_objects::CSmartObject& message, Message& output);
+      const smart_objects::SmartObject& message, Message& output);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
@@ -396,28 +421,33 @@ class ApplicationManagerImpl : public ApplicationManager
     hmi_apis::Common_Language::eType              ui_language_;
     hmi_apis::Common_Language::eType              vr_language_;
     hmi_apis::Common_Language::eType              tts_language_;
-    smart_objects::CSmartObject* vehicle_type_;
+    smart_objects::SmartObject*                   vehicle_type_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler*        connection_handler_;
     request_watchdog::Watchdog*                   watchdog_;
 
-    MessageQueue<utils::SharedPtr<Message>> messages_from_mobile_;
-    MessageQueue<utils::SharedPtr<Message>> messages_to_mobile_;
-    MessageQueue<utils::SharedPtr<Message>> messages_from_hmh_;
-    MessageQueue<utils::SharedPtr<Message>> messages_to_hmh_;
+    MessageQueue<utils::SharedPtr<Message>>       messages_from_mobile_;
+    MessageQueue<utils::SharedPtr<Message>>       messages_to_mobile_;
+    MessageQueue<utils::SharedPtr<Message>>       messages_from_hmh_;
+    MessageQueue<utils::SharedPtr<Message>>       messages_to_hmh_;
 
-    threads::Thread* from_mobile_thread_;
+    threads::Thread*                              from_mobile_thread_;
     friend class FromMobileThreadImpl;
-    threads::Thread* to_mobile_thread_;
+    threads::Thread*                              to_mobile_thread_;
     friend class ToMobileThreadImpl;
-    threads::Thread* from_hmh_thread_;
+    threads::Thread*                              from_hmh_thread_;
     friend class FromHMHThreadImpl;
-    threads::Thread* to_hmh_thread_;
+    threads::Thread*                              to_hmh_thread_;
     friend class ToHMHThreadImpl;
 
+    hmi_apis::HMI_API*                            hmi_so_factory_;
+    mobile_apis::MOBILE_API*                      mobile_so_factory_;
+
     static log4cxx::LoggerPtr                     logger_;
+    static unsigned int                           message_chain_current_id_;
+    static const unsigned int                     message_chain_max_id_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };

@@ -41,7 +41,6 @@ SDL.ControlButtons = Em.ContainerView.create( {
             'VRButton',
             'buttonControls',
             'driverDistractionControl',
-            'protocolVersion',
             'infoTable',
             'sendData',
             'sendDataCheckBox',
@@ -329,37 +328,6 @@ SDL.ControlButtons = Em.ContainerView.create( {
         } )
     } ),
 
-    protocolVersion: Em.ContainerView.extend( {
-        elementId: 'protocolVersion',
-
-        classNames: 'protocolVersion',
-
-        childViews:
-            [
-                'protocolVersionLabel',
-                'protocolVersionCheckBox'
-            ],
-
-        protocolVersionLabel: SDL.Label.extend( {
-
-            elementId: 'protocolVersionLabel',
-
-            classNames: 'protocolVersionLabel',
-
-            content: 'Protocol version V2'
-        } ),
-
-        protocolVersionCheckBox: Em.Checkbox.extend( {
-
-            elementId: 'protocolVersionCheckBox',
-
-            classNames: 'protocolVersionCheckBox',
-
-            checkedBinding: 'SDL.SDLModel.protocolVersion2State'
-
-        } )
-    } ),
-
     buttonControls: Em.ContainerView.extend( {
         elementId: 'buttonControls',
 
@@ -427,11 +395,19 @@ SDL.ControlButtons = Em.ContainerView.create( {
             } ),
 
             /** Ok button */
-            OkBtn: SDL.Button.create( SDL.PresetEvents, {
+            OkBtn: SDL.Button.create({
                 elementId: 'OK',
                 classNames: 'OkBtn',
                 time: 0,
-                presetName: 'OK'
+                presetName: 'OK',
+                actionDown: function() {
+                    this._super();
+                    SDL.SDLController.onSoftButtonOkActionDown( this.presetName );
+                },
+                actionUp: function() {
+                    this._super();
+                    SDL.SDLController.onSoftButtonOkActionUp( this.presetName );
+                }
             } )
         } ),
 

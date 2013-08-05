@@ -36,7 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
@@ -55,9 +55,9 @@ void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -71,7 +71,7 @@ void UnsubscribeVehicleDataRequest::Run() {
   int unsubscribed_items = 0;
   // response params
   namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
-  NsSmart::CSmartObject response_params;
+  NsSmart::SmartObject response_params;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();

@@ -136,6 +136,9 @@ namespace file_system {
     */
   bool ReadBinaryFile(const std::string& name,
                         std::vector<unsigned char>& result);
+
+  bool ReadFile(const std::string& name, std::string& result);
+
 }  // namespace file_system
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_

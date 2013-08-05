@@ -62,6 +62,14 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
     },
 
     /**
+     * Parameter for presets for Media App
+     * to show presets on media screen 
+     *
+     * @type bool
+     */
+    mediaPreset: false,
+
+    /**
      * Flag for media playing state
      * 
      * @param {Boolean}
@@ -101,8 +109,8 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
      * 
      * @param {Number}
      */
-    onDeleteApplication: function(appId) {
-        SDL.SDLMediaController.onDeleteApplication(appId);
+    onDeleteApplication: function(appID) {
+        SDL.SDLMediaController.onDeleteApplication(appID);
     },
 
     /**
@@ -136,7 +144,13 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         if(this.countUp){
             number = this.duration + this.currTime;
         }else{
-            number = this.duration - this.currTime;
+            if (this.duration <= this.currTime) {
+            	clearInterval(this.timer);
+            	this.currTime = 0;
+            	this.appInfo.set('mediaClock', '00:00:00');
+                return;
+            }
+        	number = this.duration - this.currTime;
         }
 
         hrs = parseInt(number / 3600), // hours
@@ -157,7 +171,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
 
     changeDuration: function() {
         clearInterval(this.timer);
-        this.currTime = 0;
+        this.currTime = -1;
         this.startTimer();
     }.observes('this.duration'),
 
@@ -184,7 +198,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         }else{
             if(params.startTime){
                 this.set('countUp', params.updateMode == "COUNTUP" ? true : false);
-                this.set('duration', 0);
+                this.set('duration', null);
                 this.set('duration', params.startTime.hours * 3600 + params.startTime.minutes * 60 + params.startTime.seconds);
             }
             this.set('pause', false);
@@ -212,7 +226,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         for(i = 0; i < 6; i++){
             this.appInfo.set('customPresets.' + i, '');
         }
-        SDL.SDLModel.set('protocolVersion2State', false);
+        this.set('mediaPreset', false);
 
     },
 
@@ -224,48 +238,52 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
     onSDLUIShow: function(params) {
         clearInterval(this.timer);
         
-        for (var i = 0; i < params.alertStrings.length; i++) {
-            switch (params.alertStrings[key]) {
+        for (var i = 0; i < params.showStrings.length; i++) {
+            switch (params.showStrings[i].fieldName) {
                 case 'mainField1': {
-                    this.appInfo.set('field1', params.alertStrings[key].fieldText);
+                    this.appInfo.set('field1', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mainField2': {
-                    this.appInfo.set('field2', params.alertStrings[key].fieldText);
+                    this.appInfo.set('field2', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mainField3': {
-                    this.appInfo.set('field3', params.alertStrings[key].fieldText);
+                    this.appInfo.set('field3', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mainField4': {
-                    this.appInfo.set('field4', params.alertStrings[key].fieldText);
+                    this.appInfo.set('field4', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'statusBar': {
-                    this.appInfo.set('statusText', params.alertStrings[key].fieldText);
+                    this.set('statusText', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mediaClock': {
-                    this.appInfo.set('mediaClock', params.alertStrings[key].fieldText);
+                    this.appInfo.set('mediaClock', params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mediaTrack': {
-                    this.appInfo.set('mediaTrack', params.alertStrings[key].fieldText);
+                    this.appInfo.set('mediaTrack', params.showStrings[i].fieldText);
                     break;
                 }
             }
         }
 
-        this.appInfo.set('alignment', params.alignment);
+        if (params.alignment) {
+            this.appInfo.set('alignment', params.alignment);
+        }
 
         if(params.graphic){
-            this.appInfo.set('trackIcon', params.graphic);
+            this.appInfo.set('trackIcon', params.graphic.value);
         }else{
             this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
         }
 
-        this.updateSoftButtons(params.softButtons);
+        if (params.softButtons) {
+            this.updateSoftButtons(params.softButtons);
+        }
 
         if(params.customPresets){
             var i = 0;
@@ -276,9 +294,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                     this.appInfo.set('customPresets.' + i, '');
                 }
             }
-            SDL.SDLModel.set('protocolVersion2State', true);
+            this.set('mediaPreset', true);
         }else{
-            SDL.SDLModel.set('protocolVersion2State', false);
+            this.set('mediaPreset', false);
         }
     }
 });

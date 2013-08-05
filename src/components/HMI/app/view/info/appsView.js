@@ -71,7 +71,7 @@ SDL.InfoAppsView = Em.ContainerView.create( {
                 target: 'SDL.SDLController',
                 text: apps[i].appName + " - " + apps[i].deviceName,
                 appName: apps[i].appName,
-                appId: apps[i].appId,
+                activeAppId: apps[i].appID,
                 classNames: 'list-item button',
                 iconBinding: 'SDL.SDLModel.registeredApps.' + appIndex + '.appIcon'
             } ) );

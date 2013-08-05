@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class Application;
+
 namespace commands {
 
 /**
@@ -64,6 +66,24 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+  /*
+   * @brief Deletes VR commands from SDL for corresponding submenu ID
+   *
+   * @param app_id Application ID
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  void DeleteSubMenuVRCommands(Application* const app);
+
+  /*
+    * @brief Deletes UI commands from SDL for corresponding submenu ID
+    *
+    * @param app_id Application ID
+    *
+    * @return TRUE on success, otherwise FALSE
+    */
+   void DeleteSubMenuUICommands(Application* const app);
+
   DISALLOW_COPY_AND_ASSIGN(DeleteSubMenuRequest);
 };
 

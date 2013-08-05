@@ -34,14 +34,14 @@
 #include "application_manager/commands/mobile/delete_sub_menu_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
 DeleteSubMenuRequest::DeleteSubMenuRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {
@@ -50,34 +50,78 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 void DeleteSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
 
-  ApplicationImpl* application =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
-  if (!application) {
+  if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  if (!application->FindSubMenu(
-      (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
+  if (!app->FindSubMenu(
+        (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
   }
 
-  const int correlation_id =
-        (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-        (*message_)[strings::params][strings::connection_key];
+  // delete sub menu items from SDL and HMI
+  DeleteSubMenuVRCommands(app);
+  DeleteSubMenuUICommands(app);
 
-  const int hmi_request_id = hmi_apis::FunctionID::UI_DeleteSubMenu;
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  ApplicationManagerImpl::instance()->AddMessageChain(NULL,
-        connection_key, correlation_id, hmi_request_id, &(*message_));
+  msg_params[strings::menu_id] =
+    (*message_)[strings::msg_params][strings::menu_id];
+  msg_params[strings::app_id] = app->app_id();
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, msg_params, true, 1);
+}
+
+void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
+  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::DeleteSubMenuVRCommands");
+
+  const CommandsMap& commands = app->commands_map();
+  CommandsMap::const_iterator it = commands.begin();
+
+  for (; commands.end() != it; ++it) {
+    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
+        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
+      for (size_t i = 0; i < (*it->second)[strings::vr_commands].length();
+                                                                    ++i) {
+        smart_objects::SmartObject msg_params =
+            smart_objects::SmartObject(smart_objects::SmartType_Map);
+        msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
+        msg_params[strings::app_id] = app->app_id();
+
+        CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+      }
+    }
+  }
+}
+
+void DeleteSubMenuRequest::DeleteSubMenuUICommands(Application* const app) {
+  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::DeleteSubMenuUICommands");
+
+  const CommandsMap& commands = app->commands_map();
+  CommandsMap::const_iterator it = commands.begin();
+
+  for (; commands.end() != it; ++it) {
+    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
+        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
+
+        smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+        msg_params[strings::app_id] = app->app_id();
+        msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
+
+        app->RemoveCommand((*it->second)[strings::cmd_id].asInt());
+        CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, msg_params);
+    }
+  }
 }
 
 }  // namespace commands

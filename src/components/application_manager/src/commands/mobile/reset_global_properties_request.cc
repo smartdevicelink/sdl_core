@@ -35,6 +35,9 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,9 +54,7 @@ void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app =
-      static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-      application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -68,22 +69,28 @@ void ResetGlobalPropertiesRequest::Run() {
 
   size_t obj_length =
     (*message_)[strings::msg_params][strings::properties].length();
+
+  bool helpt_promt = false;
+  bool timeout_promt = false;
+  bool vr_help_title = false;
+  bool vr_help_items = false;
+
   for (size_t i = 0; i < obj_length; ++i) {
     switch ((*message_)[strings::msg_params][strings::properties][i].asInt()) {
       case GlobalProperty::HELPPROMT: {
-        ResetHelpPromt(app);
+        helpt_promt = ResetHelpPromt(app);
         break;
       }
       case GlobalProperty::TIMEOUTPROMT: {
-        ResetTimeoutPromt(app);
+        timeout_promt = ResetTimeoutPromt(app);
         break;
       }
       case GlobalProperty::VRHELPTITLE: {
-        ResetVrHelpTitle(app);
+        vr_help_title = ResetVrHelpTitle(app);
         break;
       }
       case GlobalProperty::VRHELPITEMS: {
-        ResetVrHelpItems(app);
+        vr_help_items = ResetVrHelpItems(app);
         break;
       }
       default: {
@@ -94,56 +101,133 @@ void ResetGlobalPropertiesRequest::Run() {
     }
   }
 
-  // there is no request to HMI
-  /*
-      SetGlobalProperties
-  */
-}
+  app->set_reset_global_properties_active(true);
 
-void ResetGlobalPropertiesRequest::ResetHelpPromt(ApplicationImpl* const app,
-    bool is_timeout_promp) {
-  if (NULL == app) {
-    return;
+  unsigned int chaining_counter = 0;
+  if (vr_help_title || vr_help_items) {
+    ++chaining_counter;
   }
 
-  CommandsMap cmdMap = app->commands_map();
-  smart_objects::CSmartObject helpPrompt;
+  if (timeout_promt || helpt_promt) {
+    ++chaining_counter;
+  }
+
+  if (vr_help_title || vr_help_items ) {
+
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    msg_params[strings::vr_help_title] = (*app->vr_help_title());
+    msg_params[strings::vr_help] = (*app->vr_help());
+    msg_params[strings::app_id] = app->app_id();
+
+    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                     msg_params, true, chaining_counter);
+  }
+
+  if (timeout_promt || helpt_promt) {
+    // create ui request
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    msg_params[strings::help_prompt] = (*app->help_promt());
+    msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    msg_params[strings::app_id] = app->app_id();
+
+    // check if only tts request should be sent
+    if (1 == chaining_counter) {
+      CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
+                           msg_params, true, chaining_counter);
+    } else {
+      CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
+                     msg_params, true);
+    }
+  }
+}
+
+bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
+  if (NULL == app) {
+    LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return false;
+  }
+
+  const std::vector<std::string>& help_promt =
+      profile::Profile::instance()->help_promt();
+
+  smart_objects::SmartObject so_help_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (unsigned int i = 0; i < help_promt.size(); ++i) {
+    so_help_promt[i] = help_promt[i];
+  }
+
+  app->set_help_prompt(so_help_promt);
+
+  return true;
+}
+
+bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
+  if (NULL == app) {
+    LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return false;
+  }
+
+  const std::vector<std::string>& time_out_promt =
+      profile::Profile::instance()->time_out_promt();
+
+  smart_objects::SmartObject so_time_out_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (unsigned int i = 0; i < time_out_promt.size(); ++i) {
+    so_time_out_promt[i] = time_out_promt[i];
+  }
+
+  app->set_timeout_prompt(so_time_out_promt);
+
+  return true;
+}
+
+bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(Application* const app) {
+  if (NULL == app) {
+    LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return false;
+  }
+
+  smart_objects::SmartObject help_title(app->name());
+  app->set_vr_help_title(help_title);
+
+  return true;
+}
+
+bool ResetGlobalPropertiesRequest::ResetVrHelpItems(Application* const app) {
+  if (NULL == app) {
+    LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return false;
+  }
+
+  const CommandsMap& cmdMap = app->commands_map();
+  smart_objects::SmartObject vr_help_items;
 
   int index = 0;
   CommandsMap::const_iterator command_it = cmdMap.begin();
+
   for (; cmdMap.end() != command_it; ++command_it) {
     if (false == (*command_it->second).keyExists(strings::vr_commands)) {
       LOG4CXX_ERROR(logger_, "VR synonyms are empty");
-      break;
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return false;
     }
     // use only first
-    helpPrompt[index++] = (*command_it->second)[strings::vr_commands][0];
+    vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
   }
 
-  if (true == is_timeout_promp) {
-    app->set_timeout_prompt(helpPrompt);
-  } else {
-    app->set_help_prompt(helpPrompt);
-  }
-}
+  app->set_vr_help(vr_help_items);
 
-void ResetGlobalPropertiesRequest::ResetTimeoutPromt(
-  ApplicationImpl* const app) {
-  ResetHelpPromt(app, true);
-}
-
-void ResetGlobalPropertiesRequest::ResetVrHelpTitle(
-  ApplicationImpl* const app) {
-  if (NULL == app) {
-    return;
-  }
-
-  smart_objects::CSmartObject help_title(app->name());
-  app->set_vr_help_title(help_title);
-}
-
-void ResetGlobalPropertiesRequest::ResetVrHelpItems(
-  ApplicationImpl* const app) {
+  return true;
 }
 
 }  // namespace commands

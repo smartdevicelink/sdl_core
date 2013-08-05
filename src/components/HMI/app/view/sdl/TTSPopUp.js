@@ -71,29 +71,21 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         contentBinding: 'parentView.content'
     } ),
 
-    ActivateTTS: function( msg, delay ) {
+    ActivateTTS: function( msg ) {
         var self = this;
-
-        // play audio alert
-        // SDL.Audio.play('audio/initial.wav');
 
         this.set( 'content', msg );
         this.set( 'active', true );
 
-        FFW.UI.OnSystemContext( 'NOT_AUDIBLE' );
-
         clearTimeout( this.timer );
         this.timer = setTimeout( function() {
             self.set( 'active', false );
-            self.onStateChange();
-        }, delay ? delay : 10000 );
+        }, 2000 ); // 2 second timeout for TTS popUp
     },
-
-    // send context notification
-    onStateChange: function() {
-        if( !SDL.AlertPopUp.active ){
-            FFW.UI.OnSystemContext( 'AUDIBLE' );
-        }
+    
+    DeactivateTTS: function() {
+        clearTimeout( this.timer );
+        this.set( 'active', false );
     },
     
     /**

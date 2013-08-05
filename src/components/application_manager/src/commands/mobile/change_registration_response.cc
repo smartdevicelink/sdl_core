@@ -34,8 +34,8 @@
 #include "application_manager/commands/mobile/change_registration_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,14 +51,17 @@ ChangeRegistrationResponse::~ChangeRegistrationResponse() {
 void ChangeRegistrationResponse::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationResponse::Run");
 
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse();
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -69,38 +72,39 @@ void ChangeRegistrationResponse::Run() {
   }
 
   // we need to retrieve stored response code before message chain decrease
-  const mobile_api::Result::eType result_ui = msg_chain->ui_response_result();
-  const mobile_api::Result::eType result_vr = msg_chain->vr_response_result();
+  const hmi_apis::Common_Result::eType result_ui =
+    msg_chain->ui_response_result();
+  const hmi_apis::Common_Result::eType result_vr =
+    msg_chain->vr_response_result();
 
   // get stored SmartObject
-  smart_objects::CSmartObject data = msg_chain->data();
+  smart_objects::SmartObject data = msg_chain->data();
+  const int connection_key =  msg_chain->connection_key();
 
-  // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
-    ApplicationImpl* application = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->
-        application(data[strings::params][strings::connection_key]));
+  if (!IsPendingResponseExist()) {
+    Application* application = ApplicationManagerImpl::instance()->
+      application(connection_key);
 
-    if (mobile_api::Result::SUCCESS == result_ui) {
-      application->set_language(
-        static_cast<mobile_api::Language::eType>(
+    if (NULL == application) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+
+    if (hmi_apis::Common_Result::SUCCESS == result_ui) {
+      application->set_language(static_cast<mobile_api::Language::eType>(
           data[strings::msg_params][strings::language].asInt()));
     }
 
-    if (mobile_api::Result::SUCCESS == result_vr) {
-      application->set_ui_language(
-        static_cast<mobile_api::Language::eType>(
+    if (hmi_apis::Common_Result::SUCCESS == result_vr) {
+      application->set_ui_language(static_cast<mobile_api::Language::eType>(
           data[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
-    if ((mobile_api::Result::SUCCESS == result_ui) &&
-        (mobile_api::Result::SUCCESS == result_vr)) {
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-      SendResponse();
+    if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
+        (hmi_apis::Common_Result::SUCCESS == result_vr)) {
+      SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
+      SendResponse(false);
       // TODO(VS): check ui and vr response code
     }
   }

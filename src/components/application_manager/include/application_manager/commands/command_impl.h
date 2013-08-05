@@ -77,6 +77,10 @@ class CommandImpl : public Command {
 
   protected:
     MessageSharedPtr message_;
+
+    static const int hmi_protocol_type_;
+    static const int mobile_protocol_type_;
+    static const int protocol_version_;
 };
 
 }  // namespace commands

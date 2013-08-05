@@ -44,9 +44,9 @@ namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 //---------------------------------------------------------------
 
 bool formatter_ns::CMetaFormatter::CreateObjectByPattern(
-    const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
     const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object) {
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) {
 
   if (smart_objects_ns::SmartType_Invalid == result_object.getType()) {
     return false;

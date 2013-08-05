@@ -52,7 +52,7 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create( {
 
     active: false,
 
-    appId: null,
+    appID: null,
 
     timer: null,
 
@@ -90,7 +90,7 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create( {
 
             this.set( 'messageRequestId', messageRequestId );
             this.set( 'captionText.content', appName );
-            this.softButtons.addItems( params.softButtons, params.appId );
+            this.softButtons.addItems( params.softButtons, params.appID );
             this.set( 'active', true );
             clearTimeout( this.timer );
             this.timer = setTimeout( function() {

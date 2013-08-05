@@ -64,6 +64,14 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+
+  /*
+   * @brief Chec if HelpItems order is correct
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckVrHelpItemsOrder();
+
   DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
 };
 

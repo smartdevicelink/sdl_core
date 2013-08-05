@@ -175,19 +175,28 @@ log4cxx::LoggerPtr HMICommandFactory::logger_   =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
-  const MessageSharedPtr& message) {
+    const MessageSharedPtr& message) {
   LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand function_id: " <<
                (*message)[strings::params][strings::function_id].asInt());
 
   CommandSharedPtr command(new application_manager::commands::CommandImpl(message));
 
-  LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand function_id: " <<
-               (*message)[strings::params][strings::function_id].asInt());
+  bool is_response = false;
+  if ((*message)[strings::params][strings::message_type] ==
+      MessageType::kResponse) {
+    is_response = true;
+    LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand response");
+  } else if ((*message)[strings::params][strings::message_type] ==
+      MessageType::kErrorResponse) {
+    is_response = true;
+    LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand error response");
+  } else {
+    LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand request");
+  }
 
-  switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
+  switch ((*message)[strings::params][strings::function_id].asInt()) {
     case  hmi_apis::FunctionID::BasicCommunication_StartDeviceDiscovery: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::StartDeviceDiscoveryResponse(message));
       } else {
         command.reset(new commands::StartDeviceDiscoveryRequest(message));
@@ -195,8 +204,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_GetDeviceList: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::GetDeviceListResponse(message));
       } else {
         command.reset(new commands::GetDeviceListRequest(message));
@@ -204,8 +212,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_AllowAllApps: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::AllowAllAppsResponse(message));
       } else {
         command.reset(new commands::AllowAllAppsRequest(message));
@@ -213,8 +220,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_AllowApp: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::AllowAppResponse(message));
       } else {
         command.reset(new commands::AllowAppRequest(message));
@@ -222,8 +228,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::MixingAudioSupportedResponse(message));
       } else {
         command.reset(new commands::MixingAudioSupportedRequest(message));
@@ -231,8 +236,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_ExitAllApplications: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::ExitAllApplicationsResponse(message));
       } else {
         command.reset(new commands::ExitAllApplicationsRequest(message));
@@ -240,8 +244,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_AddCommand: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIAddCommandResponse(message));
       } else {
         command.reset(new commands::UIAddCommandRequest(message));
@@ -249,8 +252,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_DeleteCommand: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIDeleteCommandResponse(message));
       } else {
         command.reset(new commands::UIDeleteCommandRequest(message));
@@ -258,8 +260,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_AddSubMenu: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIAddSubmenuResponse(message));
       } else {
         command.reset(new commands::UIAddSubmenuRequest(message));
@@ -267,8 +268,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_DeleteSubMenu: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIDeleteSubmenuResponse(message));
       } else {
         command.reset(new commands::UIDeleteSubmenuRequest(message));
@@ -276,8 +276,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_SetMediaClockTimer: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UISetMediaClockTimerResponse(message));
       } else {
         command.reset(new commands::UISetMediaClockTimerRequest(message));
@@ -285,8 +284,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_CreateInteractionChoiceSet: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UICreateInteractionChoiceSetResponse(message));
       } else {
         command.reset(new commands::UICreateInteractionChoiceSetRequest(message));
@@ -294,8 +292,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIDeleteInteractionChoiceSetResponse(message));
       } else {
         command.reset(new commands::UIDeleteInteractionChoiceSetRequest(message));
@@ -303,8 +300,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_PerformInteraction: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIPerformInteractionResponse(message));
       } else {
         command.reset(new commands::UIPerformInteractionRequest(message));
@@ -312,8 +308,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_SetGlobalProperties: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UISetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::UISetGlobalPropertiesRequest(message));
@@ -321,8 +316,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_ScrollableMessage: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIScrollableMessageResponse(message));
       } else {
         command.reset(new commands::UIScrollableMessageRequest(message));
@@ -330,8 +324,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_SetAppIcon: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UISetIconResponse(message));
       } else {
         command.reset(new commands::UISetIconRequest(message));
@@ -339,8 +332,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_GetSupportedLanguages: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIGetSupportedLanguagesResponse(message));
       } else {
         command.reset(new commands::UIGetSupportedLanguagesRequest(message));
@@ -348,8 +340,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_GetLanguage: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIGetLanguageResponse(message));
       } else {
         command.reset(new commands::UIGetLanguageRequest(message));
@@ -357,8 +348,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_GetCapabilities: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIGetCapabilitiesResponse(message));
       } else {
         command.reset(new commands::UIGetCapabilitiesRequest(message));
@@ -366,8 +356,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_ChangeRegistration: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIChangeRegistratioResponse(message));
       } else {
         command.reset(new commands::UIChangeRegistrationRequest(message));
@@ -375,8 +364,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_PerformAudioPassThru: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIPerformAudioPassThruResponse(message));
       } else {
         command.reset(new commands::UIPerformAudioPassThruRequest(message));
@@ -384,8 +372,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_EndAudioPassThru: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIEndAudioPassThruResponse(message));
       } else {
         command.reset(new commands::UIEndAudioPassThruRequest(message));
@@ -393,8 +380,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_Alert: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIAlertResponse(message));
       } else {
         command.reset(new commands::UIAlertRequest(message));
@@ -402,8 +388,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VR_IsReady: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VRIsReadyResponse(message));
       } else {
         command.reset(new commands::VRIsReadyRequest(message));
@@ -411,8 +396,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VR_AddCommand: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VRAddCommandResponse(message));
       } else {
         command.reset(new commands::VRAddCommandRequest(message));
@@ -420,8 +404,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VR_DeleteCommand: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VRDeleteCommandResponse(message));
       } else {
         command.reset(new commands::VRDeleteCommandRequest(message));
@@ -429,8 +412,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VR_ChangeRegistration: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VRChangeRegistrationResponse(message));
       } else {
         command.reset(new commands::VRChangeRegistrationRequest(message));
@@ -438,8 +420,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VR_GetSupportedLanguages: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VRGetSupportedLanguagesResponse(message));
       } else {
         command.reset(new commands::VRGetSupportedLanguagesRequest(message));
@@ -447,8 +428,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VR_GetLanguage: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VRGetLanguageResponse(message));
       } else {
         command.reset(new commands::VRGetLanguageRequest(message));
@@ -456,8 +436,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::TTS_IsReady: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::TTSIsReadyResponse(message));
       } else {
         command.reset(new commands::TTSIsReadyRequest(message));
@@ -465,8 +444,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::TTS_ChangeRegistration: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::TTSChangeRegistratioResponse(message));
       } else {
         command.reset(new commands::TTSChangeRegistrationRequest(message));
@@ -474,8 +452,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::TTS_GetSupportedLanguages: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::TTSGetSupportedLanguagesResponse(message));
       } else {
         command.reset(new commands::TTSGetSupportedLanguagesRequest(message));
@@ -483,8 +460,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::TTS_StopSpeaking: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::TTSStopSpeakingResponse(message));
       } else {
         command.reset(new commands::TTSStopSpeakingRequest(message));
@@ -492,8 +468,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::TTS_GetLanguage: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::TTSGetLanguageResponse(message));
       } else {
         command.reset(new commands::TTSGetLanguageRequest(message));
@@ -501,8 +476,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::TTS_Speak: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::TTSSpeakResponse(message));
       } else {
         command.reset(new commands::TTSSpeakRequest(message));
@@ -510,8 +484,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::TTS_SetGlobalProperties: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::TTSSetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::TTSSetGlobalPropertiesRequest(message));
@@ -519,8 +492,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_ActivateApp: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::ActivateAppResponse(message));
       } else {
         command.reset(new commands::ActivateAppRequest(message));
@@ -528,8 +500,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_ExitApplication: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::ExitApplicationResponse(message));
       } else {
         command.reset(new commands::ExitApplicationRequest(message));
@@ -537,8 +508,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_Show: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIShowResponse(message));
       } else {
         command.reset(new commands::UIShowRequest(message));
@@ -546,8 +516,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_Slider: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UISliderResponse(message));
       } else {
         command.reset(new commands::UISliderRequest(message));
@@ -555,8 +524,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_ClosePopUp: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::ClosePopupResponse(message));
       } else {
         command.reset(new commands::ClosePopupRequest(message));
@@ -564,8 +532,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_IsReady: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::UIIsReadyResponse(message));
       } else {
         command.reset(new commands::UIIsReadyRequest(message));
@@ -573,8 +540,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VehicleInfo_IsReady: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VIIsReadyResponse(message));
       } else {
         command.reset(new commands::VIIsReadyRequest(message));
@@ -582,8 +548,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VehicleInfo_ReadDID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VIReadDIDResponse(message));
       } else {
         command.reset(new commands::VIReadDIDRequest(message));
@@ -591,17 +556,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
-        command.reset(new commands::VIReadDIDResponse(message));
+      if (is_response) {
+        command.reset(new commands::VIGetVehicleDataResponse(message));
       } else {
-        command.reset(new commands::VIReadDIDRequest(message));
+        command.reset(new commands::VIGetVehicleDataRequest(message));
       }
       break;
     }
     case  hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VIGetDTCsResponse(message));
       } else {
         command.reset(new commands::VIGetDTCsRequest(message));
@@ -609,8 +572,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::VehicleInfo_GetVehicleType: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::VIGetVehicleTypeResponse(message));
       } else {
         command.reset(new commands::VIGetVehicleTypeRequest(message));
@@ -618,8 +580,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::Navigation_IsReady: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::NaviIsReadyResponse(message));
       } else {
         command.reset(new commands::NaviIsReadyRequest(message));
@@ -627,8 +588,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::Navigation_AlertManeuver: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::NaviAlertManeuverResponse(message));
       } else {
         command.reset(new commands::NaviAlertManeuverRequest(message));
@@ -636,8 +596,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::Navigation_UpdateTurnList: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::NaviUpdateTurnListResponse(message));
       } else {
         command.reset(new commands::NaviUpdateTurnListRequest(message));
@@ -645,8 +604,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::NaviShowConstantTBTResponse(message));
       } else {
         command.reset(new commands::NaviShowConstantTBTRequest(message));
@@ -654,8 +612,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::Buttons_GetCapabilities: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kResponse) {
+      if (is_response) {
         command.reset(new commands::ButtonGetCapabilitiesResponse(message));
       } else {
         command.reset(new commands::ButtonGetCapabilitiesRequest(message));
@@ -679,7 +636,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_OnDriverDistraction: {
-      command.reset(new commands::OnDriverDistractionNotification(message));
+      command.reset(new commands::hmi::OnDriverDistractionNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated: {
@@ -727,11 +684,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::Buttons_OnButtonEvent: {
-      command.reset(new commands::OnButtonEventNotification(message));
+      command.reset(new commands::hmi::OnButtonEventNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::Buttons_OnButtonPress: {
-      command.reset(new commands::OnButtonPressNotification(message));
+      command.reset(new commands::hmi::OnButtonPressNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::VehicleInfo_OnVehicleData: {

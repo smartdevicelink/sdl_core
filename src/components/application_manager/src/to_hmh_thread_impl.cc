@@ -49,9 +49,8 @@ ToHMHThreadImpl::~ToHMHThreadImpl() {
 void ToHMHThreadImpl::threadMain() {
   while (1) {
     while (!handler_->messages_to_hmh_.empty()) {
-      LOG4CXX_INFO(logger_, "Received message from hmi");
-      utils::SharedPtr<Message> message =
-        handler_->messages_to_hmh_.pop();
+      LOG4CXX_INFO(logger_, "Received message to hmi");
+      utils::SharedPtr<Message> message = handler_->messages_to_hmh_.pop();
 
       if (!handler_->hmi_handler_) {
         LOG4CXX_ERROR(logger_, "Observer is not set for HMIMessageHandler");

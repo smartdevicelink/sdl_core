@@ -36,8 +36,8 @@
 #ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
 #define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
 
-#include "SmartObjects/CSmartObject.hpp"
-#include "SmartObjects/CSmartSchema.hpp"
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {
@@ -48,7 +48,7 @@ namespace Formatters {
   *
   * Sample usage:
   *    CSmartFactory factory;
-  *    CSmartObject object;
+  *    SmartObject object;
   *    CSmartSchmema schema;
   *
   */
@@ -66,12 +66,12 @@ class CMetaFormatter {
     * @return true if successful, false - otherwise
     */
   static bool CreateObjectByPattern(
-          const NsSmartDeviceLink::NsSmartObjects::CSmartObject& object,
+          const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
           const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-          NsSmartDeviceLink::NsSmartObjects::CSmartObject& result_object);
+          NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 };
 
-}// namespace NsSmartDeviceLink  
+}// namespace NsSmartDeviceLink
 }// namespace NsSmartDeviceLink::NsJSONHandler
 }// namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 

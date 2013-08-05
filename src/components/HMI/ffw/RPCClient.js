@@ -42,7 +42,7 @@ FFW.RPCClient = Em.Object.extend( {
     /*
      * url for message broker
      */
-    url: "ws://172.16.42.128:8087",
+    url: "ws://192.168.118.128:8087",
 
     /*
      * Component name in RPC system It is unique.

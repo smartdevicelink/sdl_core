@@ -43,12 +43,12 @@ namespace application_manager {
 namespace commands {
 
 const std::string EncodedSyncPDataRequest::TEMPORARY_HARDCODED_FILENAME
-                = "policy_sync_data.dat";
+  = "policy_sync_data.dat";
 const std::string EncodedSyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME
-                = "/config/policies";
+  = "/config/policies";
 
 EncodedSyncPDataRequest::EncodedSyncPDataRequest(
-    const MessageSharedPtr& message)
+  const MessageSharedPtr& message)
   : CommandRequestImpl(message) {
 }
 
@@ -58,41 +58,41 @@ EncodedSyncPDataRequest::~EncodedSyncPDataRequest() {
 void EncodedSyncPDataRequest::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
 
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
-        (application_manager::ApplicationManagerImpl::instance()->
-        application((*message_)[strings::msg_params][strings::app_id]));
+  Application* application_impl =
+    application_manager::ApplicationManagerImpl::instance()->
+    application((*message_)[strings::msg_params][strings::app_id]);
 
-    if (NULL == application_impl) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-      return;
-    }
+  if (NULL == application_impl) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
 
-    uint64_t free_space = file_system::AvailableSpace();
+    unsigned int free_space = file_system::AvailableSpace();
 
-    const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
+  const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
 
-    const std::string string_pdata = base64_decode(((*message_)[strings::params]
-                                              [strings::data]).asString());
+  const std::string string_pdata = base64_decode(((*message_)[strings::params]
+                                   [strings::data]).asString());
 
-    const std::vector<unsigned char> char_vector_pdata(string_pdata.begin(),
-                                                       string_pdata.end());
+  const std::vector<unsigned char> char_vector_pdata(string_pdata.begin(),
+      string_pdata.end());
 
-    if (free_space > string_pdata.size()) {
-      std::string relative_file_path =
-          file_system::CreateDirectory(TEMPORARY_HARDCODED_FOLDERNAME);
-      relative_file_path += "/";
-      relative_file_path += sync_file_name;
+  if (free_space > string_pdata.size()) {
+    std::string relative_file_path =
+      file_system::CreateDirectory(TEMPORARY_HARDCODED_FOLDERNAME);
+    relative_file_path += "/";
+    relative_file_path += sync_file_name;
 
-      if (file_system::Write(file_system::FullPath(relative_file_path),
-                             char_vector_pdata)) {
-        SendResponse(true, mobile_apis::Result::SUCCESS);
-      } else {
-        SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-      }
+    if (file_system::Write(file_system::FullPath(relative_file_path),
+                           char_vector_pdata)) {
+      SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
+  } else {
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+  }
 }
 
 }  // namespace commands

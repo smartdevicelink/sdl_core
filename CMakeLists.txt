@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
@@ -48,8 +50,9 @@ macro (GenerateInterface arg_xml_name arg_namespace parser_type)
                        )
 
     include_directories (
-        ../../../src/components/SmartObjects/include
+        ../../../src/components/smart_objects/include
         ../../../src/components/formatters/include/
+        ${CMAKE_SOURCE_DIR}/src/components/formatters/include/
         ${CMAKE_BINARY_DIR}
     )
 
@@ -85,7 +88,6 @@ if(BUILD_TESTS)
     add_subdirectory(./src/thirdPartyLibs/gmock-1.6.0)
     add_subdirectory(./test)
 endif()
-
 
 # Building documentation
 

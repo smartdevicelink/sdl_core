@@ -35,7 +35,9 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,21 +53,41 @@ PerformInteractionResponse::~PerformInteractionResponse() {
 void PerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
-     SendResponse();
-     LOG4CXX_ERROR(logger_, "Success = false");
-     return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int hmi_request_id = (*message_)[strings::params]
-                                [strings::correlation_id];
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  if (ApplicationManagerImpl::instance()->
-       DecreaseMessageChain(hmi_request_id)) {
-     (*message_)[strings::params][strings::success] = true;
-     (*message_)[strings::params][strings::result_code] =
-       mobile_apis::Result::SUCCESS;
-     SendResponse();
+  MessageChaining* msg_chain =
+    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+
+  if (NULL == msg_chain) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
+  smart_objects::SmartObject data =
+    msg_chain->data();
+
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
+
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      SendResponse(true);
+    } else if (hmi_apis::Common_Result::ABORTED == code) {
+      SendResponse(true);
+    }
+    else {
+      // TODO(DK): Some logic
+      SendResponse(false);
+    }
   }
 }
 

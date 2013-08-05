@@ -32,9 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/set_global_properties_response.h"
-#include "interfaces/MOBILE_API.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_chaining.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,14 +52,16 @@ void SetGlobalPropertiesResponse::Run() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesResponse::Run");
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -68,22 +71,20 @@ void SetGlobalPropertiesResponse::Run() {
     return;
   }
 
-    // we need to retrieve stored response code before message chain decrase
-  const bool result_ui = msg_chain->ui_response_result();
-  const bool result_tts = msg_chain->tts_response_result();
+  // we need to retrieve stored response code before message chain decrase
+  const hmi_apis::Common_Result::eType result_ui =
+    msg_chain->ui_response_result();
+  const hmi_apis::Common_Result::eType result_tts =
+    msg_chain->tts_response_result();
 
-  // sending response
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id)) {
+  if (!IsPendingResponseExist()) {
 
-    if ((mobile_apis::Result::SUCCESS == result_ui) &&
-            (mobile_apis::Result::SUCCESS == result_tts)) {
-      (*message_)[strings::msg_params][strings::success] = true;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
-      SendResponse();
+    if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
+        (hmi_apis::Common_Result::SUCCESS == result_tts)) {
+      SendResponse(true);
     } else {
       // TODO: check ui and tts response code
+      SendResponse(false);
     }
   }
 }

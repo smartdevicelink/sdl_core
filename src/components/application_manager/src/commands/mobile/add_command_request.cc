@@ -31,19 +31,20 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AddCommandRequest::AddCommandRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
 }
 
 AddCommandRequest::~AddCommandRequest() {
@@ -52,93 +53,86 @@ AddCommandRequest::~AddCommandRequest() {
 void AddCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "AddCommandRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
-    SendResponse(false,
-                 mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id)))
+  {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
   if (app->
-      FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt())) {
+      FindCommand((*message_)[strings::msg_params][strings::cmd_id].asUInt())) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-
-  MessageChaining* chain = NULL;
-  // check menu params
+  // we should specify amount of required responses in the 1st request
+  unsigned int chaining_counter = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
-    smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
-
-    if (NULL == p_smrt_ui) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
-    }
-
-    const int ui_cmd_id = hmi_apis::FunctionID::UI_AddCommand;
-
-    (*p_smrt_ui)[strings::params][strings::function_id] =
-      ui_cmd_id;
-
-    (*p_smrt_ui)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-    (*p_smrt_ui)[strings::msg_params][strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
-
-    (*p_smrt_ui)[strings::msg_params][strings::menu_params] =
-      (*message_)[strings::msg_params][strings::menu_params];
-
-    (*p_smrt_ui)[strings::msg_params][strings::app_id] =
-      app->app_id();
-
-    chain = ApplicationManagerImpl::instance()->AddMessageChain(chain,
-            connection_key, correlation_id, ui_cmd_id, &(*message_));
-
-    ApplicationManagerImpl::instance()->SendMessageToHMI(p_smrt_ui);
+    ++chaining_counter;
   }
 
-  // check vr params
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
-    smart_objects::CSmartObject* p_smrt_vr  = new smart_objects::CSmartObject();
+  if (((*message_)[strings::msg_params].keyExists(strings::vr_commands)) &&
+      ((*message_)[strings::msg_params][strings::vr_commands].length() > 0)) {
+    ++chaining_counter;
+  }
 
-    if (NULL == p_smrt_vr) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
+  if (!chaining_counter) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+    msg_params[strings::menu_params] =
+      (*message_)[strings::msg_params][strings::menu_params];
+
+    msg_params[strings::app_id] = app->app_id();
+
+    if (((*message_)[strings::msg_params]
+                   [strings::cmd_icon].keyExists(strings::value)) &&
+         (0 < (*message_)[strings::msg_params][strings::cmd_icon]
+                                             [strings::value].length())) {
+      msg_params[strings::cmd_icon] =
+         (*message_)[strings::msg_params][strings::cmd_icon];
+
+       std::string file_path = file_system::FullPath(app->name());
+       file_path += "/";
+       file_path += (*message_)[strings::msg_params][strings::cmd_icon]
+           [strings::value].asString();
+
+       msg_params[strings::cmd_icon][strings::value] = file_path;
     }
 
-    const int vr_cmd_id = hmi_apis::FunctionID::VR_AddCommand;
-    (*p_smrt_vr)[strings::params][strings::function_id] =
-      vr_cmd_id;
+    CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true,
+                     chaining_counter);
+  }
 
-    (*p_smrt_vr)[strings::params][strings::message_type] =
-      MessageType::kRequest;
-
-    (*p_smrt_vr)[strings::msg_params][strings::cmd_id] =
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
+    smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
-
-    (*p_smrt_vr)[strings::msg_params][strings::vr_commands] =
+    msg_params[strings::vr_commands] =
       (*message_)[strings::msg_params][strings::vr_commands];
+    msg_params[strings::app_id] = app->app_id();
 
-    (*p_smrt_vr)[strings::msg_params][strings::app_id] =
-      app->app_id();
-
-    ApplicationManagerImpl::instance()->AddMessageChain(chain,
-        connection_key, correlation_id, vr_cmd_id, &(*message_));
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(p_smrt_vr);
+    CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, true);
   }
 }
 

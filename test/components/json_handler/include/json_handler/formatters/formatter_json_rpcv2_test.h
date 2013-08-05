@@ -50,8 +50,8 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         Json::Reader reader;    // the same thing
 
         std::string str;
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject dstObj;
 
         // TODO: Implement test on valid RPC2 test data
 
@@ -71,7 +71,7 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         srcObj["msg_params"]["ttsName"][0]["type"] = "TEXT";
         srcObj["msg_params"]["vrSynonyms"][0] = "Synonym1";
         srcObj["msg_params"]["vrSynonyms"][1] = "Synonym2";
-        srcObj["msg_params"]["null"] = NsSmartDeviceLink::NsSmartObjects::CSmartObject();
+        srcObj["msg_params"]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
         srcObj["msg_params"]["double"] = -0.1234;
 
         // SmartObjects --> JSON

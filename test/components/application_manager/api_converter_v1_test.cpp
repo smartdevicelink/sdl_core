@@ -111,7 +111,7 @@ TEST(CAPIVersionConverterV1Test, convertJSON) {
             }\
         }";
 
-  CSmartObject obj;
+  SmartObject obj;
   bool result;
   result = CFormatterJsonSDLRPCv1::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj);
 

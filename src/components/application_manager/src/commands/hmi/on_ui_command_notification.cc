@@ -50,7 +50,7 @@ void OnUICommandNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::eType::OnCommandID;
 
-  (*message_)[strings::params][strings::trigger_source] =
+  (*message_)[strings::msg_params][strings::trigger_source] =
     mobile_apis::TriggerSource::TS_MENU;
   SendNotificationToMobile(message_);
 }

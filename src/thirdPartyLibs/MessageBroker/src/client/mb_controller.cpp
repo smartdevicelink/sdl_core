@@ -327,7 +327,7 @@ namespace NsMessageBroker
                error["error"] = err;
                return false;
             }
-         } else if (!root.isMember("result"))
+         } else if (!root.isMember("result") && !root.isMember("error"))
          {
             return false;
          }

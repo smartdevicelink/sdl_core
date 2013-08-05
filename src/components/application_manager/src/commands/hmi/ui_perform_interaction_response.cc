@@ -32,15 +32,16 @@
 #include "application_manager/commands/hmi/ui_perform_interaction_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
 UIPerformInteractionResponse::UIPerformInteractionResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UIPerformInteractionResponse::~UIPerformInteractionResponse() {
@@ -49,8 +50,8 @@ UIPerformInteractionResponse::~UIPerformInteractionResponse() {
 void UIPerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "UIPerformInteractionResponse::Run");
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asInt();
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -63,20 +64,43 @@ void UIPerformInteractionResponse::Run() {
   /* store received response code for to check it
    * in corresponding Mobile response
    */
-  const mobile_apis::Result::eType code =
-    static_cast<mobile_apis::Result::eType>(
-      (*message_)[strings::msg_params][hmi_response::code].asInt());
+  const hmi_apis::Common_Result::eType code =
+    static_cast<hmi_apis::Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
 
   msg_chain->set_ui_response_result(code);
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  const int connection_key =  msg_chain->connection_key();
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(connection_key);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
+  }
+
+  if (app->is_perform_interaction_active()) {
+    const ChoiceSetVRCmdMap& choice_set_map = app->GetChoiceSetVRCommands();
+
+    ChoiceSetVRCmdMap::const_iterator it = choice_set_map.begin();
+    for (; choice_set_map.end() != it; ++it) {
+
+      const smart_objects::SmartObject& choice_set =
+        (*it->second).getElement(strings::choice_set);
+
+      for (size_t j = 0; j < choice_set.length(); ++j) {
+
+        smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+        msg_params[strings::app_id] = app->app_id();
+        msg_params[strings::cmd_id] =
+            choice_set.getElement(j).getElement(strings::choice_id);
+
+        CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+      }
+    }
+    app->DeleteChoiceSetVRCommands();
+    app->set_perform_interaction_active(false);
   }
 
   // prepare SmartObject for mobile factory

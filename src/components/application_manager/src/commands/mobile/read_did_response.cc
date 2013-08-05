@@ -33,7 +33,7 @@
 
 #include "application_manager/commands/mobile/read_did_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -49,31 +49,36 @@ ReadDIDResponse::~ReadDIDResponse() {
 void ReadDIDResponse::Run() {
   LOG4CXX_INFO(logger_, "ReadDIDResponse::Run");
 
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
+  if ((*message_)[strings::msg_params].keyExists(hmi_response::did_result)) {
+    (*message_)[strings::msg_params][strings::data_result] =
+        (*message_)[strings::msg_params][hmi_response::did_result]
+                                         [hmi_response::result_code];
 
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id)) {
+    (*message_)[strings::msg_params][strings::data] =
+        (*message_)[strings::msg_params][hmi_response::did_result]
+                                         [strings::data];
 
-    const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
-    if (true == code) {
-      (*message_)[strings::params][strings::success] = true;
-      (*message_)[strings::params][strings::result_code] =
-        mobile_apis::Result::SUCCESS;
+    (*message_)[strings::msg_params].erase(hmi_response::did_result);
+  }
+
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
+
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      SendResponse(true);
     } else {
       // TODO(DK): Some logic
+      SendResponse(false);
     }
-    SendResponse();
   }
 }
 

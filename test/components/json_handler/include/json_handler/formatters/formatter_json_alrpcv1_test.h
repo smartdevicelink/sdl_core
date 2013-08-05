@@ -124,8 +124,8 @@ namespace test { namespace components { namespace json_handler { namespace forma
         Json::Reader reader;    // the same thing
 
         std::string str;
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject srcObj;
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject dstObj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject dstObj;
 
         fillTestObject(srcObj);
         srcObj[S_PARAMS][S_FUNCTION_ID] = "UnregisterAppInterface"; // a hack, it shouldn't be a string in the SmartObject
@@ -167,7 +167,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
             }\
         }";
 
-        NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+        NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
         int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str, obj);
 
         ASSERT_EQ(FormatterV1::kSuccess, result) << "Error parsing JSON string";
@@ -196,7 +196,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
     int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str, obj);
 
     ASSERT_TRUE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -218,7 +218,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj1;
     int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
 
     ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -235,7 +235,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj2;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj2;
     result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj2);
 
     ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -257,7 +257,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj1;
     int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
 
     ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -279,7 +279,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj2;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj2;
     result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str2, obj2);
 
     ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -304,7 +304,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj1;
     int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
 
     ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -329,7 +329,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj1;
     int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
 
     ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -354,7 +354,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj1;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj1;
     int result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str1, obj1);
 
     ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -375,7 +375,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         }\
     }";
 
-    NsSmartDeviceLink::NsSmartObjects::CSmartObject obj2;
+    NsSmartDeviceLink::NsSmartObjects::SmartObject obj2;
     result = FormatterV1::fromString<FunctionID::eType, messageType::eType>(str2, obj2);
 
     ASSERT_FALSE(FormatterV1::kParsingError & result) << "Wrong error code";
@@ -390,15 +390,15 @@ namespace test { namespace components { namespace json_handler { namespace forma
   TEST_F(CFormatterTestHelper, test_SDLRPCv1_EmptyMapArrayTest) {
     using namespace NsSmartDeviceLink::NsSmartObjects;
 
-    CSmartObject srcObj, dstObj;
+    SmartObject srcObj, dstObj;
     std::string str;
 
     fillTestObject(srcObj);
     srcObj[S_PARAMS][S_FUNCTION_ID] = "UnregisterAppInterface"; // a hack, it shouldn't be a string in the SmartObject
     srcObj[S_PARAMS][S_MESSAGE_TYPE] = "request";               // the same thing
     srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
-    srcObj[S_MSG_PARAMS]["EmptyArray"] = CSmartObject(SmartType_Array);
-    srcObj[S_MSG_PARAMS]["EmptyMap"] = CSmartObject(SmartType_Map);
+    srcObj[S_MSG_PARAMS]["EmptyArray"] = SmartObject(SmartType_Array);
+    srcObj[S_MSG_PARAMS]["EmptyMap"] = SmartObject(SmartType_Map);
     srcObj[S_MSG_PARAMS]["AnotherEmptyArray"] = srcObj[S_MSG_PARAMS]["EmptyArray"];
     srcObj[S_MSG_PARAMS]["AnotherEmptyMap"]  =  srcObj[S_MSG_PARAMS]["EmptyMap"];
 
@@ -426,7 +426,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     std::string result;
     FormatterV1::tMetaFormatterErrorCode error_code;
 
-    so::CSmartObject empty_object;
+    so::SmartObject empty_object;
     so::CSmartSchema empty_schema;
 
     error_code = FormatterV1::MetaFormatToString(empty_object,
@@ -457,7 +457,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
         "This creation shold not fail because of valid empty schema";
 
-    so::CSmartObject object(so::SmartType_Map);
+    so::SmartObject object(so::SmartType_Map);
 
     object["1"] = 1;
     object["2"] = "two";
@@ -482,7 +482,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
         "This creation shold not fail because of valid empty schema";
 
-    so::CSmartObject function_object(so::SmartType_Map);
+    so::SmartObject function_object(so::SmartType_Map);
 
     function_object[S_PARAMS][S_FUNCTION_ID] =
         FunctionID::UnregisterAppInterface;
@@ -553,7 +553,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     std::string result;
     FormatterV1::tMetaFormatterErrorCode error_code;
     
-    so::CSmartObject empty_object;
+    so::SmartObject empty_object;
 
     std::set<FunctionID::eType> function_id_items;
     function_id_items.insert(FunctionID::RegisterAppInterface);
@@ -797,7 +797,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
         "This creation shold not fail because of valid schema";
 
-    so::CSmartObject function_object(so::SmartType_Map);
+    so::SmartObject function_object(so::SmartType_Map);
 
     function_object[S_PARAMS][S_MESSAGE_TYPE] = messageType::response;
     function_object[S_PARAMS][S_FUNCTION_ID] =

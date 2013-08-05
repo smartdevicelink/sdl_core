@@ -73,12 +73,12 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create( {
      * 
      * @type {Number}
      */
-    updateList: function( appId ) {
+    updateList: function( appID ) {
         this.get( 'tbtTurnListList.list' ).removeAllChildren();
 
         this.tbtTurnListList.list.refresh();
 
-        var i = 0, turnListArray = SDL.SDLController.getApplicationModel( appId ).turnList;
+        var i = 0, turnListArray = SDL.SDLController.getApplicationModel( appID ).turnList;
         length = turnListArray.length;
         for( i = 0; i < length; i++ ){
             this.get( 'tbtTurnListList.list.childViews' ).pushObject( SDL.Label.create( {

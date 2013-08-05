@@ -35,6 +35,12 @@
 
 #include "application_manager/commands/command_impl.h"
 
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class SmartObject;
+}
+}
+
 namespace application_manager {
 
 namespace commands {

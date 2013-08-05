@@ -35,7 +35,7 @@
 
 #include <map>
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 
@@ -115,58 +115,81 @@ typedef std::map<const char*, VehicleDataType> VehicleData;
  * @brief MessageHelper class
  **/
 class MessageHelper {
- public:
-  /**
-   * @brief Sends HMI status notification to mobile
-   *
-   *@param application_impl application with changed HMI status
-   *
-   **/
-  static void SendHMIStatusNotification(
-      const ApplicationImpl& application_impl);
+  public:
+    /**
+     * @brief Sends HMI status notification to mobile
+     *
+     *@param application_impl application with changed HMI status
+     *
+     **/
+    static void SendHMIStatusNotification(
+      const Application& application_impl);
 
-  /**
-   * @brief Sends OnDeviceListUpdated notification to HMI
-   *
-   *@param device_list Device list
-   *
-   **/
-  static void SendDeviceListUpdatedNotificationToHMI(
+    /**
+     * @brief Sends OnDeviceListUpdated notification to HMI
+     *
+     *@param device_list Device list
+     *
+     **/
+    static void SendDeviceListUpdatedNotificationToHMI(
       const std::set<connection_handler::Device>& devices);
 
-  /**
-   * @brief Sends OnAppRegistered notification to HMI
-   *
-   *@param application_impl application with changed HMI status
-   *
-   **/
-  static void SendOnAppRegisteredNotificationToHMI(
-      const ApplicationImpl& application_impl);
+    /**
+     * @brief Sends OnAppRegistered notification to HMI
+     *
+     *@param application_impl application with changed HMI status
+     *
+     **/
+    static void SendOnAppRegisteredNotificationToHMI(
+      const Application& application_impl);
 
-  /**
-   * @brief Sends OnAppInterfaceUnregistered notification to mobile
-   *
-   *@param connection_key Connection key
-   *@param reason Reason
-   *
-   **/
-  static void SendOnAppInterfaceUnregisteredNotificationToMobile(
+    /**
+     * @brief Sends OnAppInterfaceUnregistered notification to mobile
+     *
+     *@param connection_key Connection key
+     *@param reason Reason
+     *
+     **/
+    static void SendOnAppInterfaceUnregisteredNotificationToMobile(
       int connection_key,
       mobile_apis::AppInterfaceUnregisteredReason::eType reason);
 
-  /*
-   * @brief Retrieve vehicle data map for param name in mobile request
-   * to VehicleDataType
-   *
-   * @return VehicleData reference
-   */
-  static const VehicleData& vehicle_data();
+    /*
+     * @brief Retrieve vehicle data map for param name in mobile request
+     * to VehicleDataType
+     *
+     * @return VehicleData reference
+     */
+    static const VehicleData& vehicle_data();
 
- private:
-   MessageHelper();
+    /*
+     * @brief Prepare GetDeviceListResponse
+     *
+     *
+     * @param devices Devices list
+     *
+     */
+    static smart_objects::SmartObject* CreateDeviceListSO(
+      const connection_handler::DeviceList& devices);
 
-   static const VehicleData      vehicle_data_;
-   DISALLOW_COPY_AND_ASSIGN(MessageHelper);
+    static smart_objects::SmartObject* CreateSetAppIcon(
+      const std::string& path_to_icon, unsigned int app_id);
+
+    static void SendAppDataToHMI(const Application* app);
+    static void RemoveAppDataFromHMI(const Application* app);
+
+    // TODO(PV): Implement
+    static smart_objects::SmartObject* CreateNegativeResponse(
+      unsigned int connection_key,
+      int function_id,
+      unsigned int correlation_id,
+      int result_code);
+
+  private:
+    MessageHelper();
+
+    static const VehicleData      vehicle_data_;
+    DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 };
 
 }  // namespace application_manager

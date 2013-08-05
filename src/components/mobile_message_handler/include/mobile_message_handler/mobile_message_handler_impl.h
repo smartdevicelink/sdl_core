@@ -76,17 +76,17 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
   //! -------------------------------------------------------------------------
 
   protocol_handler::RawMessage* HandleOutgoingMessageProtocolV1(
-      const application_manager::Message* message);
+      const MobileMessage& message);
 
   protocol_handler::RawMessage* HandleOutgoingMessageProtocolV2(
-      const application_manager::Message* message);
+      const MobileMessage& message);
 
   //! -------------------------------------------------------------------------
 
   protocol_handler::ProtocolHandler* protocol_handler_;
 
   MessageQueue<const protocol_handler::RawMessage*> messages_from_mobile_app_;
-  MessageQueue<application_manager::Message*> messages_to_mobile_app_;
+  MessageQueue<MobileMessage> messages_to_mobile_app_;
 
   std::vector<MobileMessageObserver*> mobile_message_listeners_;
 

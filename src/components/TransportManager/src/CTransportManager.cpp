@@ -840,8 +840,8 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
                         TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. DataSize: " << callbackIterator->mDataSize);
                         break;
                     case CTransportManager::DataListenerCallbackType_FrameSendCompleted:
+                        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Callback onFrameSendCompleted on listener #" << dataListenerIndex << " was called. UserData: " << callbackIterator->mUserData<< " Data " << callbackIterator->mDataSize << " SendStatus: "<<callbackIterator->mSendStatus);
                         (*dataListenersIterator)->onFrameSendCompleted(callbackIterator->mConnectionHandle, callbackIterator->mUserData, callbackIterator->mSendStatus);
-                        TM_CH_LOG4CXX_INFO(logger_, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. UserData: " << callbackIterator->mUserData<<", SendStatus: "<<callbackIterator->mSendStatus);
                         break;
                     default:
                         TM_CH_LOG4CXX_ERROR(logger_, ConnectionHandle, "Unknown callback type: " << (*callbackIterator).mCallbackType);

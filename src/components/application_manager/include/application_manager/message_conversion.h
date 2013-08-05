@@ -35,14 +35,14 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CONVERSION_H_
 
 #include "application_manager/message.h"
-#include "SmartObjects/CSmartObject.hpp"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
 Message SmartObjectToMessage
-(NsSmartDeviceLink::NsSmartObjects::CSmartObject* smart_object);
+(NsSmartDeviceLink::NsSmartObjects::SmartObject* smart_object);
 
-NsSmartDeviceLink::NsSmartObjects::CSmartObject MessageToSmartObject
+NsSmartDeviceLink::NsSmartObjects::SmartObject MessageToSmartObject
 (const Message& message);
 
 }  // namespace application_manager

@@ -98,11 +98,11 @@ SDL.SDLController = Em.Object.create({
                 break;
             }
             case "NonMediaView": {
-                SDL.SDLController.getApplicationModel(element.appId).clearAppOverLay();
+                this.getApplicationModel(element.appID).clearAppOverLay();
                 break;
             }
             case "MediaView": {
-                SDL.SDLController.getApplicationModel(element.appId).clearAppOverLay();
+                this.getApplicationModel(element.appID).clearAppOverLay();
                 break;
             }
 
@@ -113,7 +113,7 @@ SDL.SDLController = Em.Object.create({
      * Action to show Voice Recognition PopUp
      */
     activateVRPopUp: function() {
-        SDL.VRPopUp.activateVRPopUp();
+    	SDL.SDLModel.toggleProperty('VRActive');
     },
 
     /**
@@ -127,12 +127,12 @@ SDL.SDLController = Em.Object.create({
 
             case "AlertPopUp": {
                 SDL.AlertPopUp.deactivate();
-                SDL.SDLController.getApplicationModel(element.appId).turnOnSDL();
+                this.getApplicationModel(element.appID).turnOnSDL();
                 break;
             }
             case "ScrollableMessage": {
                 SDL.ScrollableMessage.deactivate();
-                SDL.SDLController.getApplicationModel(element.appId).turnOnSDL();
+                this.getApplicationModel(element.appID).turnOnSDL();
                 break;
             }
 
@@ -161,6 +161,34 @@ SDL.SDLController = Em.Object.create({
     },
 
     /**
+     * Action for ClosePopUp request
+     * that triggers deactivate function from opened popUp
+     */
+    closePopUp: function() {
+
+        if(SDL.AlertPopUp.active){
+        	SDL.AlertPopUp.deactivate(true);
+        }
+
+        if (SDL.AudioPassThruPopUp.active) {
+        	SDL.AudioPassThruPopUp.deactivate();
+            this.performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
+        }
+
+        if(SDL.InteractionChoicesView.active){
+        	SDL.InteractionChoicesView.deactivate(true);
+        }
+
+        if(SDL.ScrollableMessage.active){
+        	SDL.ScrollableMessage.deactivate(true);
+        }
+
+        if(SDL.SliderView.active){
+        	SDL.SliderView.deactivate(true);
+        }
+    },
+
+    /**
      * Method to close AlertMeneuverPopUp view
      */
     closeAlertMeneuverPopUp: function() {
@@ -170,10 +198,10 @@ SDL.SDLController = Em.Object.create({
     /**
      * Method to open Turn List view from TBT
      * 
-     * @param {Number} appId AppId of activated sdl application
+     * @param {Number} appID AppID of activated sdl application
      */
-    tbtTurnList: function(appId) {
-        SDL.TBTTurnList.activate(appId);
+    tbtTurnList: function(appID) {
+        SDL.TBTTurnList.activate(appID);
     },
 
     /**
@@ -182,24 +210,24 @@ SDL.SDLController = Em.Object.create({
      * @param {String}
      */
     tbtClientStateSeleced: function(state) {
-        FFW.UI.onTBTClientState(state, SDL.SDLAppController.model.appId);
+        FFW.Navigation.onTBTClientState(state, SDL.SDLAppController.model.appID);
     },
 
     /**
      * Method to sent notification ABORTED for PerformInteractionChoise
      */
-    interactionChoiseCloseResponse: function(result, performInteractionRequestId) {
-        FFW.UI.interactionResponse(result, performInteractionRequestId);
+    interactionChoiseCloseResponse: function(result, performInteractionRequestID) {
+        FFW.UI.interactionResponse(result, performInteractionRequestID);
     },
 
     /**
      * Method to sent notification for Alert
      * 
      * @param {String} result
-     * @param {Number} alertRequestId
+     * @param {Number} alertRequestID
      */
-    alertResponse: function(result, alertRequestId) {
-        FFW.UI.alertResponse(result, alertRequestId);
+    alertResponse: function(result, alertRequestID) {
+        FFW.UI.alertResponse(result, alertRequestID);
     },
 
     /**
@@ -232,14 +260,25 @@ SDL.SDLController = Em.Object.create({
     },
 
     /**
-     * Method close PerformAudioPassThruPopUp and call response from UIRPC back
+     * Method close PerformAudioPassThruPopUp and call response from UI RPC back
      * to SDLCore
      * 
      * @param {String} result Result code
      */
     performAudioPassThruResponse: function(result) {
         SDL.SDLModel.set('AudioPassThruState', false);
-        FFW.UI.sendUIResult(result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru");
+        FFW.UI.sendUIResult(result, FFW.UI.performAudioPassThruRequestID, "UI.PerformAudioPassThru");
+    },
+
+    /**
+     * Method close PerformAudioPassThruPopUp and call error response from UI RPC back
+     * to SDLCore
+     * 
+     * @param {String} result Result code
+     */
+    callPerformAudioPassThruPopUpErrorResponse: function(element) {
+        SDL.SDLModel.set('AudioPassThruState', false);
+        FFW.UI.sendError(element.responseResult, FFW.UI.performAudioPassThruRequestID, "UI.PerformAudioPassThru", "PerformAudioPassThru was not completed successfuly!");
     },
 
     /**
@@ -267,8 +306,8 @@ SDL.SDLController = Em.Object.create({
      */
     registerApplication: function(params, applicationType) {
 
-        SDL.SDLModel.get('registeredApps').pushObject(SDL.SDLController.applicationModels[applicationType].create({
-            appId: params.appId,
+        SDL.SDLModel.get('registeredApps').pushObject(this.applicationModels[applicationType].create({
+            appID: params.appID,
             appName: params.appName,
             deviceName: params.deviceName
         }));
@@ -278,15 +317,15 @@ SDL.SDLController = Em.Object.create({
     /**
      * Unregister application
      * 
-     * @param {Number} appId
+     * @param {Number} appID
      */
-    unregisterApplication: function(appId) {
+    unregisterApplication: function(appID) {
 
-        this.getApplicationModel(appId).onDeleteApplication(appId);
+        this.getApplicationModel(appID).onDeleteApplication(appID);
 
-        this.getApplicationModel(appId).set('active', false);
+        this.getApplicationModel(appID).set('active', false);
 
-        var index = SDL.SDLModel.registeredApps.indexOf(SDL.SDLModel.registeredApps.filterProperty('appId', appId)[0]);
+        var index = SDL.SDLModel.registeredApps.indexOf(SDL.SDLModel.registeredApps.filterProperty('appID', appID)[0]);
 
         SDL.SDLModel.registeredApps.replace(index, 1);
 
@@ -306,23 +345,12 @@ SDL.SDLController = Em.Object.create({
     }.observes('SDL.SDLModel.driverDistractionState'),
 
     /**
-     * SDL Protocol Version 2 ON/OFF switcher
-     */
-    selectProtocolVersion: function() {
-        if(SDL.SDLModel.protocolVersion2State){
-            FFW.BasicCommunication.OnVersionChanged(2);
-        }else{
-            FFW.BasicCommunication.OnVersionChanged(1);
-        }
-    }.observes('SDL.SDLModel.protocolVersion2State'),
-
-    /**
      * Get application model
      * 
      * @param {Number}
      */
     getApplicationModel: function(applicationId) {
-        return SDL.SDLModel.registeredApps.filterProperty('appId', applicationId)[0];
+        return SDL.SDLModel.registeredApps.filterProperty('appID', applicationId)[0];
     },
 
     /**
@@ -337,7 +365,8 @@ SDL.SDLController = Em.Object.create({
      */
     onGetDeviceList: function() {
         SDL.States.goToStates('info.devicelist');
-        FFW.BasicCommunication.getDeviceList();
+        //FFW.BasicCommunication.getDeviceList();
+        FFW.BasicCommunication.StartDeviceDiscovery();
     },
 
     /**
@@ -346,7 +375,7 @@ SDL.SDLController = Em.Object.create({
      * @param element: SDL.Button
      */
     onDeviceChoosed: function(element) {
-        FFW.UI.OnDeviceChosen(element.deviceName, element.appId);
+        FFW.UI.OnDeviceChosen(element.deviceName, element.id);
         this.turnChangeDeviceViewBack();
     },
 
@@ -373,7 +402,8 @@ SDL.SDLController = Em.Object.create({
      * @param {Object}
      */
     onActivateSDLApp: function(element) {
-        this.getApplicationModel(element.appId).turnOnSDL();
+    	//FFW.BasicCommunication.ActivateApp(element.appID);
+    	this.getApplicationModel(element.activeAppId).turnOnSDL();
     },
 
     /**
@@ -440,7 +470,9 @@ SDL.SDLController = Em.Object.create({
     onSoftButtonOkActionUp: function(name) {
         FFW.Buttons.buttonEvent(name, "BUTTONUP");
         FFW.Buttons.buttonPressed(name, "SHORT");
-        SDL.SDLAppController.model.set('isPlaying', !SDL.SDLAppController.model.isPlaying);
+        if (SDL.SDLAppController.model) {
+        	SDL.SDLAppController.model.set('isPlaying', !SDL.SDLAppController.model.isPlaying);
+        }
     },
 
     /**

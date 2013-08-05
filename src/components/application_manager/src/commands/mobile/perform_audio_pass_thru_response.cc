@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/perform_audio_pass_thru_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -54,24 +53,19 @@ void PerformAudioPassThruResponse::Run() {
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse();
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asInt();
-
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-         correlation_id)) {
+  if (!IsPendingResponseExist()) {
     ApplicationManagerImpl::instance()->StopAudioPassThruThread();
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
 
-    (*message_)[strings::msg_params][strings::success] = true;
-    (*message_)[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::SUCCESS;
-    SendResponse();
+    SendResponse(true);
   }
 }
 

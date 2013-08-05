@@ -33,6 +33,7 @@
 
 
 #include "application_manager/commands/mobile/register_app_interface_response.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager  {
 
@@ -41,7 +42,7 @@ namespace commands  {
 void RegisterAppInterfaceResponse::Run()  {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceResponse::Run");
 
-  SendResponse();
+  SendResponse(true);
 }
 
 }  // namespace commands
