@@ -82,7 +82,7 @@ void PerformInteractionResponse::Run() {
     if (hmi_apis::Common_Result::SUCCESS == code) {
       SendResponse(true);
     } else if (hmi_apis::Common_Result::ABORTED == code) {
-      SendResponse(true);
+      SendResponse(true, mobile_apis::Result::SUCCESS);
     }
     else {
       // TODO(DK): Some logic
