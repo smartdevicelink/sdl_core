@@ -11,17 +11,18 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
-import android.test.AndroidTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
 import com.batutin.android.androidvideostreaming.R;
+import com.batutin.android.androidvideostreaming.activity.DecodeActivity;
 
 import java.nio.ByteBuffer;
 
 /**
  * Created by Andrew Batutin on 7/31/13.
  */
-public class ColorSpaceUtilsTest extends AndroidTestCase{
+public class ColorSpaceUtilsTest extends ActivityInstrumentationTestCase2<DecodeActivity> {
 
     private static final String TAG = "ColorSpaceUtilsTest";
     ColorSpaceUtils sut;
@@ -30,6 +31,7 @@ public class ColorSpaceUtilsTest extends AndroidTestCase{
     private Bitmap mTestBitmaps;
 
     public ColorSpaceUtilsTest() {
+        super(DecodeActivity.class);
     }
 
     @Override
@@ -42,7 +44,7 @@ public class ColorSpaceUtilsTest extends AndroidTestCase{
     private Bitmap generateTestBitmaps(int width, int height) {
         Bitmap dst = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(dst);
-        Resources res = this.getContext().getResources();
+        Resources res = this.getActivity().getResources();
         Bitmap src = BitmapFactory.decodeResource(res, R.drawable.ic_launcher);
         c.drawBitmap(src, null, new Rect(0, 0, WIDTH, HEIGHT), null);
         return dst;

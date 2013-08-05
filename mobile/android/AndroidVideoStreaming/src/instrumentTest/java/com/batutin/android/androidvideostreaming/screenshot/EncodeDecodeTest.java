@@ -16,6 +16,7 @@ package com.batutin.android.androidvideostreaming.screenshot;
  * limitations under the License.
  */
 
+import android.media.CamcorderProfile;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
@@ -35,11 +36,11 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Generates a series of video frames, encodes them, decodes them, and tests for significant
  * divergence from the original.
- * <p>
+ * <p/>
  * We copy the data from the encoder's output buffers to the decoder's input buffers, running
  * them in parallel.  The first buffer output for video/avc contains codec configuration data,
  * which we must carefully forward to the decoder.
- * <p>
+ * <p/>
  * An alternative approach would be to save the output of the decoder as an mpeg4 video
  * file, and read it back in from disk.  The data we're generating is just an elementary
  * stream, so we'd need to perform additional steps to make that happen.
@@ -47,17 +48,14 @@ import javax.microedition.khronos.opengles.GL10;
 public class EncodeDecodeTest extends AndroidTestCase {
     private static final String TAG = "EncodeDecodeTest";
     private static final boolean VERBOSE = false;           // lots of logging
-    private static final boolean DEBUG_SAVE_FILE = false;   // save copy of encoded movie
+    private static final boolean DEBUG_SAVE_FILE = true;   // save copy of encoded movie
     private static final String DEBUG_FILE_NAME_BASE = "/sdcard/test.";
-
     // parameters for the encoder
     private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
     private static final int FRAME_RATE = 15;               // 15fps
     private static final int IFRAME_INTERVAL = 10;          // 10 seconds between I-frames
-
     // movie length, in frames
     private static final int NUM_FRAMES = 30;               // two seconds of video
-
     private static final int TEST_Y = 120;                  // YUV values for colored rect
     private static final int TEST_U = 160;
     private static final int TEST_V = 200;
@@ -67,292 +65,13 @@ public class EncodeDecodeTest extends AndroidTestCase {
     private static final int TEST_R1 = 236;                 // RGB equivalent of {120,160,200}
     private static final int TEST_G1 = 50;
     private static final int TEST_B1 = 186;
-
     // size of a frame, in pixels
     private int mWidth = -1;
     private int mHeight = -1;
     // bit rate, in bits per second
     private int mBitRate = -1;
-
     // largest color component delta seen (i.e. actual vs. expected)
     private int mLargestColorDelta;
-
-
-    /**
-     * Tests streaming of AVC video through the encoder and decoder.  Data is encoded from
-     * a series of byte[] buffers and decoded into ByteBuffers.  The output is checked for
-     * validity.
-     */
-    public void testEncodeDecodeVideoFromBufferToBufferQCIF() throws Exception {
-        setParameters(176, 144, 1000000);
-        encodeDecodeVideoFromBuffer(false);
-    }
-    public void testEncodeDecodeVideoFromBufferToBufferQVGA() throws Exception {
-        setParameters(320, 240, 2000000);
-        encodeDecodeVideoFromBuffer(false);
-    }
-    public void testEncodeDecodeVideoFromBufferToBuffer720p() throws Exception {
-        setParameters(1280, 720, 6000000);
-        encodeDecodeVideoFromBuffer(false);
-    }
-
-    /**
-     * Tests streaming of AVC video through the encoder and decoder.  Data is encoded from
-     * a series of byte[] buffers and decoded into Surfaces.  The output is checked for
-     * validity.
-     * <p>
-     * Because of the way SurfaceTexture.OnFrameAvailableListener works, we need to run this
-     * test on a thread that doesn't have a Looper configured.  If we don't, the test will
-     * pass, but we won't actually test the output because we'll never receive the "frame
-     * available" notifications".  The CTS test framework seems to be configuring a Looper on
-     * the test thread, so we have to hand control off to a new thread for the duration of
-     * the test.
-     */
-    public void testEncodeDecodeVideoFromBufferToSurfaceQCIF() throws Throwable {
-        setParameters(176, 144, 1000000);
-        BufferToSurfaceWrapper.runTest(this);
-    }
-    public void testEncodeDecodeVideoFromBufferToSurfaceQVGA() throws Throwable {
-        setParameters(320, 240, 2000000);
-        BufferToSurfaceWrapper.runTest(this);
-    }
-    public void testEncodeDecodeVideoFromBufferToSurface720p() throws Throwable {
-        setParameters(1280, 720, 6000000);
-        BufferToSurfaceWrapper.runTest(this);
-    }
-
-    /** Wraps testEncodeDecodeVideoFromBuffer(true) */
-    private static class BufferToSurfaceWrapper implements Runnable {
-        private Throwable mThrowable;
-        private EncodeDecodeTest mTest;
-
-        private BufferToSurfaceWrapper(EncodeDecodeTest test) {
-            mTest = test;
-        }
-
-        @Override
-        public void run() {
-            try {
-                mTest.encodeDecodeVideoFromBuffer(true);
-            } catch (Throwable th) {
-                mThrowable = th;
-            }
-        }
-
-        /**
-         * Entry point.
-         */
-        public static void runTest(EncodeDecodeTest obj) throws Throwable {
-            BufferToSurfaceWrapper wrapper = new BufferToSurfaceWrapper(obj);
-            Thread th = new Thread(wrapper, "codec test");
-            th.start();
-            th.join();
-            if (wrapper.mThrowable != null) {
-                throw wrapper.mThrowable;
-            }
-        }
-    }
-
-    /**
-     * Tests streaming of AVC video through the encoder and decoder.  Data is provided through
-     * a Surface and decoded onto a Surface.  The output is checked for validity.
-     */
-    public void testEncodeDecodeVideoFromSurfaceToSurfaceQCIF() throws Throwable {
-        setParameters(176, 144, 1000000);
-        SurfaceToSurfaceWrapper.runTest(this);
-    }
-    public void testEncodeDecodeVideoFromSurfaceToSurfaceQVGA() throws Throwable {
-        setParameters(320, 240, 2000000);
-        SurfaceToSurfaceWrapper.runTest(this);
-    }
-    public void testEncodeDecodeVideoFromSurfaceToSurface720p() throws Throwable {
-        setParameters(1280, 720, 6000000);
-        SurfaceToSurfaceWrapper.runTest(this);
-    }
-
-    /** Wraps testEncodeDecodeVideoFromSurfaceToSurface() */
-    private static class SurfaceToSurfaceWrapper implements Runnable {
-        private Throwable mThrowable;
-        private EncodeDecodeTest mTest;
-
-        private SurfaceToSurfaceWrapper(EncodeDecodeTest test) {
-            mTest = test;
-        }
-
-        @Override
-        public void run() {
-            try {
-                mTest.encodeDecodeVideoFromSurfaceToSurface();
-            } catch (Throwable th) {
-                mThrowable = th;
-            }
-        }
-
-        /**
-         * Entry point.
-         */
-        public static void runTest(EncodeDecodeTest obj) throws Throwable {
-            SurfaceToSurfaceWrapper wrapper = new SurfaceToSurfaceWrapper(obj);
-            Thread th = new Thread(wrapper, "codec test");
-            th.start();
-            th.join();
-            if (wrapper.mThrowable != null) {
-                throw wrapper.mThrowable;
-            }
-        }
-    }
-
-    /**
-     * Sets the desired frame size and bit rate.
-     */
-    private void setParameters(int width, int height, int bitRate) {
-        if ((width % 16) != 0 || (height % 16) != 0) {
-            Log.w(TAG, "WARNING: width or height not multiple of 16");
-        }
-        mWidth = width;
-        mHeight = height;
-        mBitRate = bitRate;
-    }
-
-    /**
-     * Tests encoding and subsequently decoding video from frames generated into a buffer.
-     * <p>
-     * We encode several frames of a video test pattern using MediaCodec, then decode the
-     * output with MediaCodec and do some simple checks.
-     * <p>
-     * See http://b.android.com/37769 for a discussion of input format pitfalls.
-     */
-    private void encodeDecodeVideoFromBuffer(boolean toSurface) throws Exception {
-        MediaCodec encoder = null;
-        MediaCodec decoder = null;
-
-        mLargestColorDelta = -1;
-
-        try {
-            MediaCodecInfo codecInfo = selectCodec(MIME_TYPE);
-            if (codecInfo == null) {
-                // Don't fail CTS if they don't have an AVC codec (not here, anyway).
-                Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
-                return;
-            }
-            if (VERBOSE) Log.d(TAG, "found codec: " + codecInfo.getName());
-
-            int colorFormat = selectColorFormat(codecInfo, MIME_TYPE);
-            if (VERBOSE) Log.d(TAG, "found colorFormat: " + colorFormat);
-
-            // We avoid the device-specific limitations on width and height by using values that
-            // are multiples of 16, which all tested devices seem to be able to handle.
-            MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
-
-            // Set some properties.  Failing to specify some of these can cause the MediaCodec
-            // configure() call to throw an unhelpful exception.
-            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
-            format.setInteger(MediaFormat.KEY_BIT_RATE, mBitRate);
-            format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
-            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
-            if (VERBOSE) Log.d(TAG, "format: " + format);
-
-            // Create a MediaCodec for the desired codec, then configure it as an encoder with
-            // our desired properties.
-            encoder = MediaCodec.createByCodecName(codecInfo.getName());
-            encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-            encoder.start();
-
-            // Create a MediaCodec for the decoder, just based on the MIME type.  The various
-            // format details will be passed through the csd-0 meta-data later on.
-            decoder = MediaCodec.createDecoderByType(MIME_TYPE);
-
-            doEncodeDecodeVideoFromBuffer(encoder, colorFormat, decoder, toSurface);
-        } finally {
-            if (VERBOSE) Log.d(TAG, "releasing codecs");
-            if (encoder != null) {
-                encoder.stop();
-                encoder.release();
-            }
-            if (decoder != null) {
-                decoder.stop();
-                decoder.release();
-            }
-
-            Log.i(TAG, "Largest color delta: " + mLargestColorDelta);
-        }
-    }
-
-    /**
-     * Tests encoding and subsequently decoding video from frames generated into a buffer.
-     * <p>
-     * We encode several frames of a video test pattern using MediaCodec, then decode the
-     * output with MediaCodec and do some simple checks.
-     */
-    private void encodeDecodeVideoFromSurfaceToSurface() throws Exception {
-        MediaCodec encoder = null;
-        MediaCodec decoder = null;
-        InputSurface inputSurface = null;
-        OutputSurface outputSurface = null;
-
-        mLargestColorDelta = -1;
-
-        try {
-            MediaCodecInfo codecInfo = selectCodec(MIME_TYPE);
-            if (codecInfo == null) {
-                // Don't fail CTS if they don't have an AVC codec (not here, anyway).
-                Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
-                return;
-            }
-            if (VERBOSE) Log.d(TAG, "found codec: " + codecInfo.getName());
-
-            int colorFormat = MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface;
-
-            // We avoid the device-specific limitations on width and height by using values that
-            // are multiples of 16, which all tested devices seem to be able to handle.
-            MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
-
-            // Set some properties.  Failing to specify some of these can cause the MediaCodec
-            // configure() call to throw an unhelpful exception.
-            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
-            format.setInteger(MediaFormat.KEY_BIT_RATE, mBitRate);
-            format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
-            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
-            if (VERBOSE) Log.d(TAG, "format: " + format);
-
-            // Create the output surface.
-            outputSurface = new OutputSurface(mWidth, mHeight);
-
-            // Create a MediaCodec for the decoder, just based on the MIME type.  The various
-            // format details will be passed through the csd-0 meta-data later on.
-            decoder = MediaCodec.createDecoderByType(MIME_TYPE);
-            MediaFormat decoderFormat = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
-            decoder.configure(format, outputSurface.getSurface(), null, 0);
-            decoder.start();
-
-            // Create a MediaCodec for the desired codec, then configure it as an encoder with
-            // our desired properties.  Request a Surface to use for input.
-            encoder = MediaCodec.createByCodecName(codecInfo.getName());
-            encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-            inputSurface = new InputSurface(encoder.createInputSurface());
-            encoder.start();
-
-            doEncodeDecodeVideoFromSurfaceToSurface(encoder, inputSurface, colorFormat, decoder, outputSurface);
-        } finally {
-            if (VERBOSE) Log.d(TAG, "releasing codecs");
-            if (inputSurface != null) {
-                inputSurface.release();
-            }
-            if (outputSurface != null) {
-                outputSurface.release();
-            }
-            if (encoder != null) {
-                encoder.stop();
-                encoder.release();
-            }
-            if (decoder != null) {
-                decoder.stop();
-                decoder.release();
-            }
-
-            Log.i(TAG, "Largest color delta: " + mLargestColorDelta);
-        }
-    }
 
     /**
      * Returns the first codec capable of encoding the specified MIME type, or null if no
@@ -427,6 +146,250 @@ public class EncodeDecodeTest extends AndroidTestCase {
                 return true;
             default:
                 throw new RuntimeException("unknown format " + colorFormat);
+        }
+    }
+
+    /**
+     * Generates the presentation time for frame N, in microseconds.
+     */
+    private static long computePresentationTime(int frameIndex) {
+        return 132 + frameIndex * 1000000 / FRAME_RATE;
+    }
+
+    /**
+     * Tests streaming of AVC video through the encoder and decoder.  Data is encoded from
+     * a series of byte[] buffers and decoded into ByteBuffers.  The output is checked for
+     * validity.
+     */
+    public void testEncodeDecodeVideoFromBufferToBufferQCIF() throws Exception {
+        boolean hasProf = CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_CIF);
+        if (hasProf == true) {
+            CamcorderProfile cp = CamcorderProfile.get(CamcorderProfile.QUALITY_CIF);
+            setParameters(cp.videoFrameWidth, cp.videoFrameHeight, cp.videoBitRate);
+            encodeDecodeVideoFromBuffer(false);
+        }
+    }
+
+    public void testEncodeDecodeVideoFromBufferToBufferQVGA() throws Exception {
+        //boolean hasProf = CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_QVGA);
+        //if (hasProf == true) {
+
+            int width = 320, height = 240;
+            int bitRate = 128000;
+            int frameRate = 15;
+            //CamcorderProfile cp = CamcorderProfile.get(CamcorderProfile.QUALITY_QVGA);
+            setParameters(width, height, bitRate);
+            encodeDecodeVideoFromBuffer(false);
+        //}
+
+    }
+
+    public void testEncodeDecodeVideoFromBufferToBuffer720p() throws Exception {
+        boolean hasProf = CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_720P);
+        if (hasProf == true) {
+            CamcorderProfile cp = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+            setParameters(cp.videoFrameWidth, cp.videoFrameHeight, cp.videoBitRate);
+            encodeDecodeVideoFromBuffer(false);
+        }
+    }
+
+    /**
+     * Tests streaming of AVC video through the encoder and decoder.  Data is encoded from
+     * a series of byte[] buffers and decoded into Surfaces.  The output is checked for
+     * validity.
+     * <p/>
+     * Because of the way SurfaceTexture.OnFrameAvailableListener works, we need to run this
+     * test on a thread that doesn't have a Looper configured.  If we don't, the test will
+     * pass, but we won't actually test the output because we'll never receive the "frame
+     * available" notifications".  The CTS test framework seems to be configuring a Looper on
+     * the test thread, so we have to hand control off to a new thread for the duration of
+     * the test.
+     */
+    public void testEncodeDecodeVideoFromBufferToSurfaceQCIF() throws Throwable {
+        setParameters(176, 144, 1000000);
+        BufferToSurfaceWrapper.runTest(this);
+    }
+
+    public void testEncodeDecodeVideoFromBufferToSurfaceQVGA() throws Throwable {
+        setParameters(320, 240, 2000000);
+        BufferToSurfaceWrapper.runTest(this);
+    }
+
+    public void testEncodeDecodeVideoFromBufferToSurface720p() throws Throwable {
+        setParameters(1280, 720, 6000000);
+        BufferToSurfaceWrapper.runTest(this);
+    }
+
+    /**
+     * Tests streaming of AVC video through the encoder and decoder.  Data is provided through
+     * a Surface and decoded onto a Surface.  The output is checked for validity.
+     */
+    public void testEncodeDecodeVideoFromSurfaceToSurfaceQCIF() throws Throwable {
+        setParameters(176, 144, 1000000);
+        SurfaceToSurfaceWrapper.runTest(this);
+    }
+
+    public void testEncodeDecodeVideoFromSurfaceToSurfaceQVGA() throws Throwable {
+        setParameters(320, 240, 2000000);
+        SurfaceToSurfaceWrapper.runTest(this);
+    }
+
+    public void testEncodeDecodeVideoFromSurfaceToSurface720p() throws Throwable {
+        setParameters(1280, 720, 6000000);
+        SurfaceToSurfaceWrapper.runTest(this);
+    }
+
+    /**
+     * Sets the desired frame size and bit rate.
+     */
+    private void setParameters(int width, int height, int bitRate) {
+        if ((width % 16) != 0 || (height % 16) != 0) {
+            Log.w(TAG, "WARNING: width or height not multiple of 16");
+        }
+        mWidth = width;
+        mHeight = height;
+        mBitRate = bitRate;
+    }
+
+    /**
+     * Tests encoding and subsequently decoding video from frames generated into a buffer.
+     * <p/>
+     * We encode several frames of a video test pattern using MediaCodec, then decode the
+     * output with MediaCodec and do some simple checks.
+     * <p/>
+     * See http://b.android.com/37769 for a discussion of input format pitfalls.
+     */
+    private void encodeDecodeVideoFromBuffer(boolean toSurface) throws Exception {
+        MediaCodec encoder = null;
+        MediaCodec decoder = null;
+
+        mLargestColorDelta = -1;
+
+        try {
+            MediaCodecInfo codecInfo = selectCodec(MIME_TYPE);
+            if (codecInfo == null) {
+                // Don't fail CTS if they don't have an AVC codec (not here, anyway).
+                Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
+                return;
+            }
+            if (VERBOSE) Log.d(TAG, "found codec: " + codecInfo.getName());
+
+            int colorFormat = selectColorFormat(codecInfo, MIME_TYPE);
+            if (VERBOSE) Log.d(TAG, "found colorFormat: " + colorFormat);
+
+            // We avoid the device-specific limitations on width and height by using values that
+            // are multiples of 16, which all tested devices seem to be able to handle.
+            MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
+
+            // Set some properties.  Failing to specify some of these can cause the MediaCodec
+            // configure() call to throw an unhelpful exception.
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
+            format.setInteger(MediaFormat.KEY_BIT_RATE, mBitRate);
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
+            if (VERBOSE) Log.d(TAG, "format: " + format);
+
+            // Create a MediaCodec for the desired codec, then configure it as an encoder with
+            // our desired properties.
+            encoder = MediaCodec.createByCodecName(codecInfo.getName());
+            encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            encoder.start();
+
+            // Create a MediaCodec for the decoder, just based on the MIME type.  The various
+            // format details will be passed through the csd-0 meta-data later on.
+            decoder = MediaCodec.createDecoderByType(MIME_TYPE);
+
+            doEncodeDecodeVideoFromBuffer(encoder, colorFormat, decoder, toSurface);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (VERBOSE) Log.d(TAG, "releasing codecs");
+            if (encoder != null) {
+                encoder.stop();
+                encoder.release();
+            }
+            if (decoder != null) {
+                decoder.stop();
+                decoder.release();
+            }
+
+            Log.i(TAG, "Largest color delta: " + mLargestColorDelta);
+        }
+    }
+
+    /**
+     * Tests encoding and subsequently decoding video from frames generated into a buffer.
+     * <p/>
+     * We encode several frames of a video test pattern using MediaCodec, then decode the
+     * output with MediaCodec and do some simple checks.
+     */
+    private void encodeDecodeVideoFromSurfaceToSurface() throws Exception {
+        MediaCodec encoder = null;
+        MediaCodec decoder = null;
+        InputSurface inputSurface = null;
+        OutputSurface outputSurface = null;
+
+        mLargestColorDelta = -1;
+
+        try {
+            MediaCodecInfo codecInfo = selectCodec(MIME_TYPE);
+            if (codecInfo == null) {
+                // Don't fail CTS if they don't have an AVC codec (not here, anyway).
+                Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
+                return;
+            }
+            if (VERBOSE) Log.d(TAG, "found codec: " + codecInfo.getName());
+
+            int colorFormat = MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface;
+
+            // We avoid the device-specific limitations on width and height by using values that
+            // are multiples of 16, which all tested devices seem to be able to handle.
+            MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
+
+            // Set some properties.  Failing to specify some of these can cause the MediaCodec
+            // configure() call to throw an unhelpful exception.
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
+            format.setInteger(MediaFormat.KEY_BIT_RATE, mBitRate);
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
+            if (VERBOSE) Log.d(TAG, "format: " + format);
+
+            // Create the output surface.
+            outputSurface = new OutputSurface(mWidth, mHeight);
+
+            // Create a MediaCodec for the decoder, just based on the MIME type.  The various
+            // format details will be passed through the csd-0 meta-data later on.
+            decoder = MediaCodec.createDecoderByType(MIME_TYPE);
+            MediaFormat decoderFormat = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
+            decoder.configure(format, outputSurface.getSurface(), null, 0);
+            decoder.start();
+
+            // Create a MediaCodec for the desired codec, then configure it as an encoder with
+            // our desired properties.  Request a Surface to use for input.
+            encoder = MediaCodec.createByCodecName(codecInfo.getName());
+            encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            inputSurface = new InputSurface(encoder.createInputSurface());
+            encoder.start();
+
+            doEncodeDecodeVideoFromSurfaceToSurface(encoder, inputSurface, colorFormat, decoder, outputSurface);
+        } finally {
+            if (VERBOSE) Log.d(TAG, "releasing codecs");
+            if (inputSurface != null) {
+                inputSurface.release();
+            }
+            if (outputSurface != null) {
+                outputSurface.release();
+            }
+            if (encoder != null) {
+                encoder.stop();
+                encoder.release();
+            }
+            if (decoder != null) {
+                decoder.stop();
+                decoder.release();
+            }
+
+            Log.i(TAG, "Largest color delta: " + mLargestColorDelta);
         }
     }
 
@@ -893,7 +856,6 @@ public class EncodeDecodeTest extends AndroidTestCase {
         }
     }
 
-
     /**
      * Generates data for frame N into the supplied buffer.  We have an 8-frame animation
      * sequence that wraps around.  It looks like this:
@@ -922,8 +884,8 @@ public class EncodeDecodeTest extends AndroidTestCase {
             startY = mHeight / 2;
         }
 
-        for (int y = startY + (mHeight/2) - 1; y >= startY; --y) {
-            for (int x = startX + (mWidth/4) - 1; x >= startX; --x) {
+        for (int y = startY + (mHeight / 2) - 1; y >= startY; --y) {
+            for (int x = startX + (mWidth / 4) - 1; x >= startX; --x) {
                 if (semiPlanar) {
                     // full-size Y, followed by UV pairs at half resolution
                     // e.g. Nexus 4 OMX.qcom.video.encoder.avc COLOR_FormatYUV420SemiPlanar
@@ -931,8 +893,8 @@ public class EncodeDecodeTest extends AndroidTestCase {
                     //        OMX_TI_COLOR_FormatYUV420PackedSemiPlanar
                     frameData[y * mWidth + x] = (byte) TEST_Y;
                     if ((x & 0x01) == 0 && (y & 0x01) == 0) {
-                        frameData[mWidth*mHeight + y * HALF_WIDTH + x] = (byte) TEST_U;
-                        frameData[mWidth*mHeight + y * HALF_WIDTH + x + 1] = (byte) TEST_V;
+                        frameData[mWidth * mHeight + y * HALF_WIDTH + x] = (byte) TEST_U;
+                        frameData[mWidth * mHeight + y * HALF_WIDTH + x + 1] = (byte) TEST_V;
                     }
                 } else {
                     // full-size Y, followed by quarter-size U and quarter-size V
@@ -940,9 +902,9 @@ public class EncodeDecodeTest extends AndroidTestCase {
                     // e.g. Nexus 7 OMX.Nvidia.h264.encoder COLOR_FormatYUV420Planar
                     frameData[y * mWidth + x] = (byte) TEST_Y;
                     if ((x & 0x01) == 0 && (y & 0x01) == 0) {
-                        frameData[mWidth*mHeight + (y/2) * HALF_WIDTH + (x/2)] = (byte) TEST_U;
-                        frameData[mWidth*mHeight + HALF_WIDTH * (mHeight / 2) +
-                                (y/2) * HALF_WIDTH + (x/2)] = (byte) TEST_V;
+                        frameData[mWidth * mHeight + (y / 2) * HALF_WIDTH + (x / 2)] = (byte) TEST_U;
+                        frameData[mWidth * mHeight + HALF_WIDTH * (mHeight / 2) +
+                                (y / 2) * HALF_WIDTH + (x / 2)] = (byte) TEST_V;
                     }
                 }
             }
@@ -951,7 +913,7 @@ public class EncodeDecodeTest extends AndroidTestCase {
 
     /**
      * Performs a simple check to see if the frame is more or less right.
-     * <p>
+     * <p/>
      * See {@link #generateFrame} for a description of the layout.  The idea is to sample
      * one pixel from the middle of the 8 regions, and verify that the correct one has
      * the non-background color.  We can't know exactly what the video encoder has done
@@ -1002,14 +964,14 @@ public class EncodeDecodeTest extends AndroidTestCase {
             if (semiPlanar) {
                 // Galaxy Nexus uses OMX_TI_COLOR_FormatYUV420PackedSemiPlanar
                 testY = frameData.get(y * width + x) & 0xff;
-                testU = frameData.get(width*height + 2*(y/2) * halfWidth + 2*(x/2)) & 0xff;
-                testV = frameData.get(width*height + 2*(y/2) * halfWidth + 2*(x/2) + 1) & 0xff;
+                testU = frameData.get(width * height + 2 * (y / 2) * halfWidth + 2 * (x / 2)) & 0xff;
+                testV = frameData.get(width * height + 2 * (y / 2) * halfWidth + 2 * (x / 2) + 1) & 0xff;
             } else {
                 // Nexus 10, Nexus 7 use COLOR_FormatYUV420Planar
                 testY = frameData.get(y * width + x) & 0xff;
-                testU = frameData.get(width*height + (y/2) * halfWidth + (x/2)) & 0xff;
-                testV = frameData.get(width*height + halfWidth * (height / 2) +
-                        (y/2) * halfWidth + (x/2)) & 0xff;
+                testU = frameData.get(width * height + (y / 2) * halfWidth + (x / 2)) & 0xff;
+                testV = frameData.get(width * height + halfWidth * (height / 2) +
+                        (y / 2) * halfWidth + (x / 2)) & 0xff;
             }
 
             int expY, expU, expV;
@@ -1126,10 +1088,71 @@ public class EncodeDecodeTest extends AndroidTestCase {
     }
 
     /**
-     * Generates the presentation time for frame N, in microseconds.
+     * Wraps testEncodeDecodeVideoFromBuffer(true)
      */
-    private static long computePresentationTime(int frameIndex) {
-        return 132 + frameIndex * 1000000 / FRAME_RATE;
+    private static class BufferToSurfaceWrapper implements Runnable {
+        private Throwable mThrowable;
+        private EncodeDecodeTest mTest;
+
+        private BufferToSurfaceWrapper(EncodeDecodeTest test) {
+            mTest = test;
+        }
+
+        /**
+         * Entry point.
+         */
+        public static void runTest(EncodeDecodeTest obj) throws Throwable {
+            BufferToSurfaceWrapper wrapper = new BufferToSurfaceWrapper(obj);
+            Thread th = new Thread(wrapper, "codec test");
+            th.start();
+            th.join();
+            if (wrapper.mThrowable != null) {
+                throw wrapper.mThrowable;
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                mTest.encodeDecodeVideoFromBuffer(true);
+            } catch (Throwable th) {
+                mThrowable = th;
+            }
+        }
+    }
+
+    /**
+     * Wraps testEncodeDecodeVideoFromSurfaceToSurface()
+     */
+    private static class SurfaceToSurfaceWrapper implements Runnable {
+        private Throwable mThrowable;
+        private EncodeDecodeTest mTest;
+
+        private SurfaceToSurfaceWrapper(EncodeDecodeTest test) {
+            mTest = test;
+        }
+
+        /**
+         * Entry point.
+         */
+        public static void runTest(EncodeDecodeTest obj) throws Throwable {
+            SurfaceToSurfaceWrapper wrapper = new SurfaceToSurfaceWrapper(obj);
+            Thread th = new Thread(wrapper, "codec test");
+            th.start();
+            th.join();
+            if (wrapper.mThrowable != null) {
+                throw wrapper.mThrowable;
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                mTest.encodeDecodeVideoFromSurfaceToSurface();
+            } catch (Throwable th) {
+                mThrowable = th;
+            }
+        }
     }
 }
 

@@ -4,8 +4,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.media.MediaFormat;
 import android.view.View;
 
 /**
@@ -132,5 +134,23 @@ public class ScreenShotUtils {
     public int calcChromaStride(int stride) {
         return stride/2;
     }
-    
+
+    public MediaFormat getMediaFormat(int width, int height, int bitRate, int frameRate, String mimeType, int colorFormat, int stride, int sliceHeight) {
+        MediaFormat inputFormat = MediaFormat.createVideoFormat(mimeType, width, height);
+        inputFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
+        inputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, frameRate);
+        inputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
+        inputFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 75);
+        inputFormat.setInteger("stride", stride);
+        inputFormat.setInteger("slice-height", sliceHeight);
+        return inputFormat;
+    }
+
+    public MediaCodec startMediaCodec(MediaCodecInfo codecInfo, MediaFormat inputFormat) {
+        MediaCodec encoder = MediaCodec.createByCodecName(codecInfo.getName());
+
+        encoder.configure(inputFormat, null /* surface */, null /* crypto */, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        encoder.start();
+        return encoder;
+    }
 }
