@@ -32,21 +32,6 @@
 #define IN 0x81
 #define OUT 0x02
 
-#define VID_NEXUSS 0x18D1
-#define PID_NEXUSS 0x4E22
-
-#define VID_NEXUS7 0x18d1
-#define PID_NEXUS7 0x4e42
-
-#define VID_MOTOROLA_RAZR 0x22b8
-#define PID_MOTOROLA_RAZR 0x4362
-
-#define VID_HUAWEI 0x12d1
-#define PID_HUAWEI 0x1052
-
-#define VID VID_HUAWEI
-#define PID PID_HUAWEI
-
 #define ACCESSORY_VID 0x18d1
 #define ACCESSORY_PID 0x2D01
 #define ACCESSORY_PID_ALT 0x2D00
@@ -66,7 +51,7 @@
 typedef unsigned char byte;
 
 static int mainPhase();
-static int init(void);
+static int init(const uint16_t vid, const uint16_t pid);
 static int deInit(void);
 static void error(int code);
 static void status(int code);
@@ -85,7 +70,16 @@ static struct libusb_device_handle* handle;
 //static char success = 0;
 
 int main (int argc, char *argv[]){
-	int ret = init();
+    if (argc < 3) {
+        printf("%s takes two parameters: USB VID and PID of the device to "
+               "connect to, eg:\n%s 0x1234 0xFEDC", argv[0], argv[0]);
+        return -1;
+    }
+    
+    long vid = strtol(argv[1], NULL, 0);
+    long pid = strtol(argv[2], NULL, 0);
+    
+	int ret = init(vid, pid);
     switch (ret) {
         case ERR_DEVICE_NOT_OPEN: {
             if (connectToAccessory() < 0) {
@@ -189,13 +183,14 @@ static int mainPhase(){
 }
 
 
-static int init(){
+static int init(const uint16_t vid, const uint16_t pid){
 	int response = libusb_init(NULL);
     if (response != 0) {
         error(response);
         return -1;
     }
-	if((handle = libusb_open_device_with_vid_pid(NULL, VID, PID)) == NULL){
+    printf("Using VID %u and PID %u\n", vid, pid);
+	if((handle = libusb_open_device_with_vid_pid(NULL, vid, pid)) == NULL){
 		fprintf(stdout, "Problem acquiring handle for device\n");
 		return ERR_DEVICE_NOT_OPEN;
 	}
