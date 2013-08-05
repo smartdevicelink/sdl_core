@@ -25,16 +25,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @name SDL.ValidateMessage
+ * @name SDL.RPCController
  * @desc RPC Controller
  * @category Controller
  * @filesource app/controller/sdl/RPCController.js
  * @version 1.0
  */
 
-SDL.ValidateMessage = Em.Object.create({
+SDL.RPCController = Em.Object.create({
+	
+	/**
+     * Start register RPC components on controller init
+     */
+	init: function(){
+	    FFW.Buttons.connect();
+	    FFW.TTS.connect();
+	    FFW.VR.connect();
+	    FFW.BasicCommunication.connect();
+	    FFW.UI.connect();
+	    FFW.VehicleInfo.connect();
+	    FFW.Navigation.connect();
+	},
 
-    
 	/**
      * Object that contains check methods that
      * returns true if mandatory fields is successful

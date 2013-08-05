@@ -49,7 +49,8 @@ SDL.SDLController = Em.Object.create({
             return 'ALERT';
         }
 
-        if(SDL.TBTClientStateView.active || SDL.VehicleInfo.active || SDL.DriverDistraction.active || SDL.ExitApp.active){
+        if(SDL.TBTClientStateView.active || SDL.VehicleInfo.active || SDL.DriverDistraction.active || SDL.ExitApp.active || SDL.SliderView.active
+        		|| SDL.InteractionChoicesView.active || SDL.ScrollableMessage.active){
             return 'HMI_OBSCURED';
         }
 
@@ -64,7 +65,8 @@ SDL.SDLController = Em.Object.create({
         }
 
     }.property('SDL.DriverDistraction.active', 'SDL.OptionsView.active', 'SDL.VRPopUp.VRActive', 'SDL.AlertPopUp.active', 'SDL.TBTClientStateView.active',
-                    'SDL.VehicleInfo.active', 'SDL.States.info.nonMedia.active', 'SDL.States.media.sdlmedia.active', 'SDL.ExitApp.active'),
+                    'SDL.VehicleInfo.active', 'SDL.States.info.nonMedia.active', 'SDL.States.media.sdlmedia.active', 'SDL.ExitApp.active',
+                    'SDL.ScrollableMessage.active', 'SDL.InteractionChoicesView.active', ''),
 
     /**
      * List of SDL application models
@@ -75,6 +77,35 @@ SDL.SDLController = Em.Object.create({
         0: SDL.SDLMediaModel,
         1: SDL.SDLNonMediaModel
     },
+    
+    /**
+     * Registered components handler
+     * 
+     * @type object
+     */
+    registeredComponentStatus: function(component) {
+    	for (var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
+    		if (SDL.SDLModel.registeredComponents[i].type == component) {
+    			SDL.SDLModel.set('registeredComponents.' + i + '.state', true);
+    			return;
+    		}
+    	}
+    	
+    },
+    
+    /**
+     * Notify SDLCore that HMI is ready 
+     * and all components are registered
+     * @type {String}
+     */
+    componentsReadiness: function(component) {
+    	for (var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
+    		if (!SDL.SDLModel.registeredComponents[i].state) {
+    			return;
+    		}
+    	}
+    	FFW.BasicCommunication.onReady();
+    }.observes('SDL.SDLModel.registeredComponents.@each.state'),
 
     /**
      * Default action for SoftButtons: closes window, popUp or clears

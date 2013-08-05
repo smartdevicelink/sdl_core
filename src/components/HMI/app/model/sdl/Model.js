@@ -200,6 +200,21 @@ SDL.SDLModel = Em.Object.create( {
     registeredApps: [],
 
     /**
+     * List of registered components
+     *
+     * @type object
+     */
+    registeredComponents: [
+        {type: "UI", state: false},
+        {type: "TTS", state: false},
+        {type: "VR", state: false},
+        {type: "BasicCommunicationClient", state: false},
+        {type: "VehicleInfo", state: false},
+        {type: "Buttons", state: false},
+        {type: "Navigation", state: false}
+    ],
+
+    /**
      * List of icons
      *
      * @type {Object}
@@ -358,7 +373,7 @@ SDL.SDLModel = Em.Object.create( {
     onAppUnregistered: function( params ) {
         if( SDL.SDLController.getApplicationModel( params.appID ) ){
 
-            SDL.VRPopUp.DeleteActivateApp( params.appID );
+            SDL.VRPopUp.UnregisterApp( params.appID );
 
             SDL.SDLController.unregisterApplication( params.appID );
         }

@@ -92,11 +92,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         this.onAppUnregisteredSubscribeRequestID = this.client.subscribeToNotification(this.onAppUnregisteredNotification);
         this.onDeviceListUpdatedNotificationID = this.client.subscribeToNotification(this.onDeviceListUpdatedNotification);
         this.onPlayToneNotificationID = this.client.subscribeToNotification(this.onPlayToneNotification);
-        
-        
-        // notify other components that UI is ready
-        // main purpose is to nitofy SDLCore
-        this.onReady();
+
     },
 
     /**

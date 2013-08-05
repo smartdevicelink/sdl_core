@@ -33,7 +33,7 @@ FFW.RPCObserver = Em.Object.extend({
 
     onRPCRegistered: function() {
         // request necessary parameters from Backend
-        Em.Logger.log("FFW.RPCObserver.Registered");
+		SDL.SDLController.registeredComponentStatus(this.client.componentName);
     },
 
     onRPCUnregistered: function() {
@@ -76,8 +76,8 @@ FFW.RPCObserver = Em.Object.extend({
                 validateFunc,
                 result;
             
-        	if (SDL.ValidateMessage[parsedMethod[0]][parsedMethod[1]]){
-	        	validateFunc = SDL.ValidateMessage[parsedMethod[0]][parsedMethod[1]];
+        	if (SDL.RPCController[parsedMethod[0]][parsedMethod[1]]){
+	        	validateFunc = SDL.RPCController[parsedMethod[0]][parsedMethod[1]];
 	            result = validateFunc(request.params);
 	
 	            if (result.resultCode != SDL.SDLModel.resultCode["SUCCESS"]){

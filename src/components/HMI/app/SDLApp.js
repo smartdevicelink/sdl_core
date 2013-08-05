@@ -63,14 +63,6 @@ SDL = Em.Application.create( {
     init: function() {
         Em.Logger.log( 'SDL: Application init!' );
 
-        FFW.Buttons.connect();
-        FFW.TTS.connect();
-        FFW.VR.connect();
-        FFW.BasicCommunication.connect();
-        FFW.UI.connect();
-        FFW.VehicleInfo.connect();
-        FFW.Navigation.connect();
-
         this._super();
     },
 

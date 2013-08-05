@@ -84,15 +84,16 @@ SDL.VRPopUp = Em.ContainerView.create( {
             text: appName,
             appName: appName,
             activeAppId: appID,
+            appID: appID,
             classNames: 'list-item',
             templateName: 'text'
         } ) );
 
     },
 
-    DeleteActivateApp: function( appID ) {
+    UnregisterApp: function( appID ) {
 
-        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'activeAppId', appID ) );
+        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'appID', appID ) );
 
     },
 
