@@ -56,8 +56,7 @@ void SpeakRequest::Run() {
       (*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
-                      " is not registered.");
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -68,7 +67,7 @@ void SpeakRequest::Run() {
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, true, 1);
 }
 
 }  // namespace commands

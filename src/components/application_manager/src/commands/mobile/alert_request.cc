@@ -108,7 +108,7 @@ void AlertRequest::SendAlertRequest(int app_id) {
     msg_params[strings::duration] = 5000;
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_Alert, msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_Alert, msg_params, true, 1);
 }
 
 void AlertRequest::SendSpeakRequest(int app_id) {
