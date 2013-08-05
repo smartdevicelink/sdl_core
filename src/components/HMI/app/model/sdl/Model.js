@@ -137,6 +137,24 @@ SDL.SDLModel = Em.Object.create( {
     ],
 
     /**
+     * List of states for ExitApplication notification
+     */
+    exitAppState:[
+        {
+            name: "IGNITION_OFF",
+            id: 0
+        },
+        {
+            name: "MASTER_RESET",
+            id: 1
+        },
+        {
+            name: "FACTORY_DEFAULTS",
+            id: 2
+        }
+    ],
+
+    /**
      * Enum with result codes for RPC
      */
     resultCode:{

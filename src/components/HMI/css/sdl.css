@@ -440,11 +440,20 @@
 #tbtClientStateButton.tbtClientStateButton{
 	width: 158px;
 	height: 48px;
-	left: 1018px;
+	left: 865px;
 	top: 418px;
 	text-align: center;
 	line-height: 48px;
 }
+#exitApp.exitApp{
+	width: 135px;
+	height: 48px;
+	left: 1043px;
+	top: 418px;
+	text-align: center;
+	line-height: 48px;
+}
+#exitAppView,
 #tbtClientStateView,
 #VehicleInfo{
 	opacity: 0;
@@ -459,6 +468,7 @@
 	display: none;
 	border: 1px solid white;
 }
+#exitAppView .exitAppViewLabel,
 #tbtClientStateView .tbtClientStateLabel,
 #VehicleInfo .vehicleInfoLabel{
 	top: 10px;
@@ -468,11 +478,13 @@
 	padding: 15px;
 	background: #393939;
 }
+#exitAppView.active,
 #tbtClientStateView.active,
 #VehicleInfo.active{
 	opacity: 1;
 	display: block;
 }
+#exitAppView .exitAppViewTitle,
 #tbtClientStateView .tbtClientState, 
 #VehicleInfo .prndl{
 	top: 70px;
@@ -482,6 +494,7 @@
 	padding: 10px;
 	background: #535353;
 }
+#exitAppView .exitAppViewSelect, 
 #tbtClientStateView .tbtClientStateSelect,
 #VehicleInfo .prndlSelect{
 	top: 125px;
@@ -492,6 +505,7 @@
 	color: white;
 	background: #393939;
 }
+#exitAppView .exitAppViewSelect option,
 #tbtClientStateView .tbtClientStateSelect option,
 #VehicleInfo .prndlSelect option{
 	background: #393939;

@@ -25,18 +25,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @name SDL.TBTClientStateView
- * @desc TBTClientStateView module visual representation
+ * @name SDL.ExitApp
+ * @desc Exit All Applications reason select visual representation
  * @category View
- * @filesource app/view/sdl/TBTClientStateView.js
+ * @filesource app/view/sdl/ExitAppView.js
  * @version 1.0
  */
 
-SDL.TBTClientStateView = Em.ContainerView.create( {
+SDL.ExitApp = Em.ContainerView.create( {
 
-    elementId: 'tbtClientStateView',
+	elementId: 'exitAppView',
 
-    classNames: 'tbtClientStateView',
+    classNames: 'exitAppView',
 
     classNameBindings:
         [
@@ -45,21 +45,21 @@ SDL.TBTClientStateView = Em.ContainerView.create( {
 
     childViews:
         [
-            'tbtClientStateLabel',
-            'tbtClientState',
-            'tbtClientStateSelect'
+            'exitAppViewLabel',
+            'exitAppViewTitle',
+            'exitAppViewSelect'
         ],
 
     /**
      * Title of VehicleInfo PopUp view
      */
-    tbtClientStateLabel: SDL.Label.extend( {
+    exitAppViewLabel: SDL.Label.extend( {
 
-        elementId: 'tbtClientStateLabel',
+        elementId: 'exitAppViewLabel',
 
-        classNames: 'tbtClientStateLabel',
+        classNames: 'exitAppViewLabel',
 
-        content: 'TBT Client State'
+        content: 'Exit Application'
     } ),
 
     /**
@@ -70,25 +70,25 @@ SDL.TBTClientStateView = Em.ContainerView.create( {
     /**
      * Title of tbtClientState group of parameters
      */
-    tbtClientState: SDL.Label.extend( {
+    exitAppViewTitle: SDL.Label.extend( {
 
-        elementId: 'tbtClientState',
+        elementId: 'exitAppViewTitle',
 
-        classNames: 'tbtClientState',
+        classNames: 'exitAppViewTitle',
 
-        content: 'Client State'
+        content: 'Exit Application reason'
     } ),
 
     /**
      * HMI element Select with parameters of TBTClientStates
      */
-    tbtClientStateSelect: Em.Select.extend( {
+    exitAppViewSelect: Em.Select.extend( {
 
-        elementId: 'tbtClientStateSelect',
+        elementId: 'exitAppViewSelect',
 
-        classNames: 'tbtClientStateSelect',
+        classNames: 'exitAppViewSelect',
 
-        contentBinding: 'SDL.SDLModel.tbtClientStates',
+        contentBinding: 'SDL.SDLModel.exitAppState',
 
         optionValuePath: 'content.id',
 
@@ -99,7 +99,7 @@ SDL.TBTClientStateView = Em.ContainerView.create( {
          */
         click: function() {
 
-            SDL.SDLController.tbtClientStateSelected( this.selection.name );
+            SDL.SDLController.exitAppViewSelected( this.selection.name );
 
         }
     } ),

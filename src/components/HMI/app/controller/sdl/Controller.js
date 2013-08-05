@@ -49,7 +49,7 @@ SDL.SDLController = Em.Object.create({
             return 'ALERT';
         }
 
-        if(SDL.TBTClientStateView.active || SDL.VehicleInfo.active || SDL.DriverDistraction.active){
+        if(SDL.TBTClientStateView.active || SDL.VehicleInfo.active || SDL.DriverDistraction.active || SDL.ExitApp.active){
             return 'HMI_OBSCURED';
         }
 
@@ -64,7 +64,7 @@ SDL.SDLController = Em.Object.create({
         }
 
     }.property('SDL.DriverDistraction.active', 'SDL.OptionsView.active', 'SDL.VRPopUp.VRActive', 'SDL.AlertPopUp.active', 'SDL.TBTClientStateView.active',
-                    'SDL.VehicleInfo.active', 'SDL.States.info.nonMedia.active', 'SDL.States.media.sdlmedia.active'),
+                    'SDL.VehicleInfo.active', 'SDL.States.info.nonMedia.active', 'SDL.States.media.sdlmedia.active', 'SDL.ExitApp.active'),
 
     /**
      * List of SDL application models
@@ -209,8 +209,17 @@ SDL.SDLController = Em.Object.create({
      * 
      * @param {String}
      */
-    tbtClientStateSeleced: function(state) {
+    tbtClientStateSelected: function(state) {
         FFW.Navigation.onTBTClientState(state, SDL.SDLAppController.model.appID);
+    },
+
+    /**
+     * Method to sent notification with selected reason of Exit Application
+     * 
+     * @param {String}
+     */
+    exitAppViewSelected: function(state) {
+        FFW.BasicCommunication.ExitAllApplications(state);
     },
 
     /**

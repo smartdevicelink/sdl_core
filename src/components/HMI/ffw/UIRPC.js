@@ -243,7 +243,11 @@ FFW.UI = FFW.RPCObserver.create({
 	            case "UI.SetMediaClockTimer": {
 	
 	                var resultCode = SDL.SDLController.getApplicationModel(request.params.appID).sdlSetMediaClockTimer(request.params);
-	                this.sendUIResult(resultCode, request.id, request.method);
+	                if (resultCode === 0) {
+	                	this.sendUIResult(resultCode, request.id, request.method);
+	                } else {
+	                	this.sendError(resultCode, request.id, request.method, 'Request is ignored, because the intended result is already in effect.');
+	                }
 	
 	                break;
 	            }

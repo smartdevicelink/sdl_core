@@ -183,12 +183,12 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
     sdlSetMediaClockTimer: function(params) {
 
         if((params.updateMode == "PAUSE" && this.pause) || (params.updateMode == "RESUME" && !this.pause)){
-            return 'IGNORED';
+            return SDL.SDLModel.resultCode['IGNORED'];
         }
 
         if(params.updateMode == "CLEAR"){
             this.stopTimer();
-            return 'SUCCESS';
+            return SDL.SDLModel.resultCode['SUCCESS'];
         }
 
         if(params.updateMode == "PAUSE"){

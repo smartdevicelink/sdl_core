@@ -356,7 +356,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         // send request
 
         var JSONMessage = {
-            "id": this.client.idStart,
+            "id": this.getAppListRequestID,
             "jsonrpc": "2.0",
             "method": "BasicCommunication.ExitAllApplications",
             "params": {

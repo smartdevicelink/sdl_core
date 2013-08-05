@@ -47,6 +47,7 @@ SDL.ControlButtons = Em.ContainerView.create( {
             'sendDataLabel',
             'vehicleInfo',
             'tbtClientState',
+            'ExitApp',
             'UILanguages',
             'TTSVRLanguages',
             'UILanguagesLabel',
@@ -224,6 +225,21 @@ SDL.ControlButtons = Em.ContainerView.create( {
     } ),
 
     /**
+     * Exit Application button
+     * opens Exit Application reasons popup 
+     */
+    ExitApp: SDL.Button.create( {
+        elementId: 'exitApp',
+        classNames: 'exitApp btn',
+        text: 'Exit Application',
+        action: function() {
+            // this._super();
+    		SDL.ExitApp.toggleActivity();
+        },
+        templateName: 'text'
+    } ),
+
+    /**
      * Voice Recognition button
      */
     VRButton: SDL.Button.create( {
@@ -314,7 +330,7 @@ SDL.ControlButtons = Em.ContainerView.create( {
 
             classNames: 'driverDistractionControlLabel',
 
-            content: 'Driver Distraction'
+            content: 'DD'
         } ),
 
         driverDistractionCheckBox: Em.Checkbox.extend( {
