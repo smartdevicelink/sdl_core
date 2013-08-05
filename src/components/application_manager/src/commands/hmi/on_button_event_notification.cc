@@ -49,10 +49,10 @@ OnButtonEventNotification::~OnButtonEventNotification() {
 }
 
 void OnButtonEventNotification::Run() {
-  LOG4CXX_INFO(logger_, " OnButtonEventNotification::Run");
+  LOG4CXX_INFO(logger_, "OnButtonEventNotification::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::OnButtonEventID;
+    mobile_apis::FunctionID::OnButtonEventID;
 
   SendNotificationToMobile(message_);
 }

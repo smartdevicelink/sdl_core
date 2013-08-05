@@ -85,6 +85,7 @@ const char cmd_id[] = "cmdID";
 const char menu_params[] = "menuParams";
 const char vr_commands[] = "vrCommands";
 const char position[] = "position";
+const char num_ticks[] = "numTicks";
 const char menu_id[] = "menuID";
 const char menu_name[] = "menuName";
 const char interaction_choice_set_id[] = "interactionChoiceSetID";

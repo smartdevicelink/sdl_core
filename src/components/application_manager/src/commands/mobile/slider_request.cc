@@ -61,6 +61,13 @@ void SliderRequest::Run() {
     return;
   }
 
+  if ((*message_)[strings::msg_params][strings::num_ticks].asInt() <
+      (*message_)[strings::msg_params][strings::position].asInt()) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    return;
+  }
+
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
