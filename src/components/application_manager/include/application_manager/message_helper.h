@@ -172,6 +172,9 @@ class MessageHelper {
     static smart_objects::SmartObject* CreateDeviceListSO(
       const connection_handler::DeviceList& devices);
 
+    static smart_objects::SmartObject* CreateModuleInfoSO(
+      unsigned int function_id);
+
     static smart_objects::SmartObject* CreateSetAppIcon(
       const std::string& path_to_icon, unsigned int app_id);
 

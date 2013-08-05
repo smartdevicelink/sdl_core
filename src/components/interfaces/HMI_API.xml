@@ -1808,11 +1808,11 @@
 
 <interface name="VehicleInfo" version="1.0" date="2013-04-21">
   <function name="IsReady" messagetype="request">
-    <description>Method should be invoked at system startup. Response provides information about presence of UI module and its readiness to cooperate with SDL.</description>
+    <description>Method should be invoked at system startup. Response provides information about presence of VehicleInfo module and its readiness to cooperate with SDL.</description>
   </function>
   <function name="IsReady" messagetype="response">
     <param name="available" type="Boolean" mandatory="true">
-      <description>If true then UI is present and ready to communicate with SDL.</description>
+      <description>If true then VehicleInfo is present and ready to communicate with SDL.</description>
     </param>
   </function>
   <function name="GetVehicleType" messagetype="request">

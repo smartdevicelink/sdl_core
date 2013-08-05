@@ -47,7 +47,7 @@ HMICapabilities::HMICapabilities()
     preset_bank_capabilities_(NULL),
     vr_capabilities_(NULL),
     speech_capabilities_(NULL),
-    audio_pass_thru_capabilities_(NULL){}
+    audio_pass_thru_capabilities_(NULL) {}
 
 HMICapabilities::~HMICapabilities() {
   delete ui_supported_languages_;
@@ -61,6 +61,46 @@ HMICapabilities::~HMICapabilities() {
   delete vr_capabilities_;
   delete speech_capabilities_;
   delete audio_pass_thru_capabilities_;
+}
+
+bool HMICapabilities::is_vr_cooperating() const {
+  return is_vr_cooperating_;
+}
+
+void HMICapabilities::set_is_vr_cooperating(bool value) {
+  is_vr_cooperating_ = value;
+}
+
+bool HMICapabilities::is_tts_cooperating() const {
+  return is_tts_cooperating_;
+}
+
+void HMICapabilities::set_is_tts_cooperating(bool value) {
+  is_tts_cooperating_ = value;
+}
+
+bool HMICapabilities::is_ui_cooperating() const {
+  return is_ui_cooperating_;
+}
+
+void HMICapabilities::set_is_ui_cooperating(bool value) {
+  is_ui_cooperating_ = value;
+}
+
+bool HMICapabilities::is_navi_cooperating() const {
+  return is_navi_cooperating_;
+}
+
+void HMICapabilities::set_is_navi_cooperating(bool value) {
+  is_navi_cooperating_ = value;
+}
+
+bool HMICapabilities::is_ivi_cooperating() const {
+  return is_ivi_cooperating_;
+}
+
+void HMICapabilities::set_is_ivi_cooperating(bool value) {
+  is_ivi_cooperating_ = value;
 }
 
 bool HMICapabilities::attenuated_supported() const {
@@ -126,48 +166,48 @@ void HMICapabilities::set_soft_button_capabilities(
 }
 
 void HMICapabilities::set_button_capabilities(
-    const smart_objects::SmartObject& button_capabilities) {
+  const smart_objects::SmartObject& button_capabilities) {
   if (button_capabilities_) {
-     delete button_capabilities_;
-   }
+    delete button_capabilities_;
+  }
   button_capabilities_ =
-     new smart_objects::SmartObject(button_capabilities);
+    new smart_objects::SmartObject(button_capabilities);
 }
 
 void HMICapabilities::set_vr_capabilities(
-    const smart_objects::SmartObject& vr_capabilities) {
+  const smart_objects::SmartObject& vr_capabilities) {
   if (vr_capabilities_) {
-     delete vr_capabilities_;
+    delete vr_capabilities_;
   }
   vr_capabilities_ =
-     new smart_objects::SmartObject(vr_capabilities);
+    new smart_objects::SmartObject(vr_capabilities);
 }
 
 void HMICapabilities::set_speech_capabilities(
-    const smart_objects::SmartObject& speech_capabilities) {
+  const smart_objects::SmartObject& speech_capabilities) {
   if (speech_capabilities_) {
-     delete speech_capabilities_;
+    delete speech_capabilities_;
   }
   speech_capabilities_ =
-     new smart_objects::SmartObject(speech_capabilities);
+    new smart_objects::SmartObject(speech_capabilities);
 }
 
 void HMICapabilities::set_audio_pass_thru_capabilities(
-    const smart_objects::SmartObject& audio_pass_thru_capabilities) {
+  const smart_objects::SmartObject& audio_pass_thru_capabilities) {
   if (audio_pass_thru_capabilities_) {
-     delete audio_pass_thru_capabilities_;
+    delete audio_pass_thru_capabilities_;
   }
   audio_pass_thru_capabilities_ =
-     new smart_objects::SmartObject(audio_pass_thru_capabilities);
+    new smart_objects::SmartObject(audio_pass_thru_capabilities);
 }
 
 void HMICapabilities::set_preset_bank_capabilities(
-    const smart_objects::SmartObject& preset_bank_capabilities) {
+  const smart_objects::SmartObject& preset_bank_capabilities) {
   if (preset_bank_capabilities_) {
-     delete preset_bank_capabilities_;
-   }
+    delete preset_bank_capabilities_;
+  }
   preset_bank_capabilities_ =
-     new smart_objects::SmartObject(preset_bank_capabilities);
+    new smart_objects::SmartObject(preset_bank_capabilities);
 }
 
 

@@ -437,19 +437,25 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
     connection_handler_->StartTransportManager();
   }
 
-  smart_objects::SmartObject* is_vr_ready = new smart_objects::SmartObject;
-  smart_objects::SmartObject& so_to_send = *is_vr_ready;
-  so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
-    hmi_apis::FunctionID::VR_IsReady;
-  so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
-    hmi_apis::messageType::request;
-  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
-  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
-  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4444;
-  so_to_send[jhs::S_MSG_PARAMS] =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
-
+  utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
+    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady));
   ManageHMICommand(is_vr_ready);
+
+  utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
+    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_IsReady));
+  ManageHMICommand(is_tts_ready);
+
+  utils::SharedPtr<smart_objects::SmartObject> is_ui_ready(
+    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_IsReady));
+  ManageHMICommand(is_ui_ready);
+
+  utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
+    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::Navigation_IsReady));
+  ManageHMICommand(is_navi_ready);
+
+  utils::SharedPtr<smart_objects::SmartObject> is_ivi_ready(
+    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_IsReady));
+  ManageHMICommand(is_ivi_ready);
 }
 
 unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
@@ -627,6 +633,59 @@ std::string ApplicationManagerImpl::GetDeviceName(
   }
 
   return device_name;
+}
+
+void ApplicationManagerImpl::set_is_vr_cooperating(bool value) {
+  is_vr_cooperating_ = value;
+  if (is_vr_cooperating_) {
+    utils::SharedPtr<smart_objects::SmartObject> get_language(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage));
+    ManageHMICommand(get_language);
+    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages));
+    ManageHMICommand(get_all_languages);
+  }
+}
+
+void ApplicationManagerImpl::set_is_tts_cooperating(bool value) {
+  is_tts_cooperating_ = value;
+  if (is_tts_cooperating_) {
+    utils::SharedPtr<smart_objects::SmartObject> get_language(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetLanguage));
+    ManageHMICommand(get_language);
+    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetSupportedLanguages));
+    ManageHMICommand(get_all_languages);
+  }
+}
+
+void ApplicationManagerImpl::set_is_ui_cooperating(bool value) {
+  is_ui_cooperating_ = value;
+  if (is_ui_cooperating_) {
+    utils::SharedPtr<smart_objects::SmartObject> get_language(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage));
+    ManageHMICommand(get_language);
+    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetSupportedLanguages));
+    ManageHMICommand(get_all_languages);
+    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetCapabilities));
+    ManageHMICommand(get_capabilities);
+  }
+}
+
+void ApplicationManagerImpl::set_is_navi_cooperating(bool value) {
+  is_navi_cooperating_ = value;
+}
+
+void ApplicationManagerImpl::set_is_ivi_cooperating(bool value) {
+  is_ivi_cooperating_ = value;
+  if (is_ivi_cooperating_) {
+    utils::SharedPtr<smart_objects::SmartObject> get_type(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleType));
+    ManageHMICommand(get_type);
+  }
 }
 
 void ApplicationManagerImpl::OnMobileMessageReceived(
@@ -868,7 +927,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
             message.type(), message.correlation_id()) ||
           !mobile_so_factory().attachSchema(output) ||
           ((output.validate() != smart_objects::Errors::OK) &&
-          (output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
+           (output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
         LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
         utils::SharedPtr<smart_objects::SmartObject> response(
           MessageHelper::CreateNegativeResponse(

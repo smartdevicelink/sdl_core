@@ -320,6 +320,11 @@ class ApplicationManagerImpl : public ApplicationManager
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
+    virtual void set_is_vr_cooperating(bool value);
+    virtual void set_is_tts_cooperating(bool value);
+    virtual void set_is_ui_cooperating(bool value);
+    virtual void set_is_navi_cooperating(bool value);
+    virtual void set_is_ivi_cooperating(bool value);
     /////////////////////////////////////////////////////
 
     void set_hmi_message_handler(

@@ -233,6 +233,23 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
   return device_list_so;
 }
 
+smart_objects::SmartObject* MessageHelper::CreateModuleInfoSO(
+  unsigned int function_id) {
+  smart_objects::SmartObject* module_info =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+  if (NULL == module_info) {
+    return NULL;
+  }
+  smart_objects::SmartObject& object = *module_info;
+  object[strings::params][strings::message_type] = MessageType::kRequest;
+  object[strings::params][strings::function_id] = function_id;
+  object[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  object[strings::msg_params] = smart_objects::SmartObject(
+                                  smart_objects::SmartType_Map);
+  return module_info;
+}
+
 smart_objects::SmartObject* MessageHelper::CreateSetAppIcon(
   const std::string& path_to_icon, unsigned int app_id) {
   smart_objects::SmartObject* set_icon = new smart_objects::SmartObject(
