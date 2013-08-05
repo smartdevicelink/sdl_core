@@ -116,6 +116,8 @@ namespace NsSmartDeviceLink
              **/
             static SmartType getSmartType(void);
 
+            bool isNumberType(SmartType type);
+
             /**
              * @brief Copy constructor.
              *
@@ -187,11 +189,20 @@ utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType
 }
 
 template <typename NumberType>
+bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::isNumberType(SmartType type) {
+  if (SmartType_Integer == type || SmartType_Double == type) {
+    return true;
+  }
+
+  return false;
+}
+
+template <typename NumberType>
 NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
 {
     NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
 
-    if (getSmartType() == Object.getType())
+    if (isNumberType(Object.getType()))
     {
         result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
         NumberType value = Object;

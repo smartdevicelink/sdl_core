@@ -868,7 +868,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
             message.type(), message.correlation_id()) ||
           !mobile_so_factory().attachSchema(output) ||
           ((output.validate() != smart_objects::Errors::OK) &&
-           (output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
+          (output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
         LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
         utils::SharedPtr<smart_objects::SmartObject> response(
           MessageHelper::CreateNegativeResponse(
