@@ -1,14 +1,22 @@
 package com.ford.syncV4.transport.usb;
 
+import android.util.Log;
+
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TransportType;
 
+import java.util.Arrays;
+
 /**
  * Class that implements USB transport.
  */
 public class USBTransport extends SyncTransport {
+    /**
+     * String tag for logging.
+     */
+    private static final String TAG = USBTransport.class.getSimpleName();
     /**
      * USB config object.
      */
@@ -37,6 +45,8 @@ public class USBTransport extends SyncTransport {
     @Override
     protected boolean sendBytesOverTransport(byte[] msgBytes, int offset,
                                              int length) {
+        logD("sendBytesOverTransport() " + Arrays.toString(msgBytes) +
+                ", offset " + offset + ", length " + length);
         return false;
     }
 
@@ -47,7 +57,7 @@ public class USBTransport extends SyncTransport {
      */
     @Override
     public void openConnection() throws SyncException {
-
+        logD("openConnection()");
     }
 
     /**
@@ -55,7 +65,7 @@ public class USBTransport extends SyncTransport {
      */
     @Override
     public void disconnect() {
-
+        logD("disconnect()");
     }
 
     /**
@@ -67,5 +77,14 @@ public class USBTransport extends SyncTransport {
     @Override
     public TransportType getTransportType() {
         return TransportType.USB;
+    }
+
+    /**
+     * Logs the string with DEBUG level.
+     *
+     * @param s string to log
+     */
+    private void logD(String s) {
+        Log.d(TAG, s);
     }
 }

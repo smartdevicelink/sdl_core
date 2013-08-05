@@ -500,80 +500,95 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		appNameEditText.setText(appName);
 		langSpinner.setSelection(langAdapter.getPosition(lang));
 		hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
-		transportGroup
-				.check(transportType == Const.Transport.KEY_TCP ? R.id.selectprotocol_radioWiFi
-						: R.id.selectprotocol_radioBT);
 		ipAddressEditText.setText(ipAddress);
 		tcpPortEditText.setText(String.valueOf(tcpPort));
 		autoReconnectCheckBox.setChecked(autoReconnect);
 		autoSetAppIconCheckBox.setChecked(autoSetAppIcon);
 
+        int groupCheck = R.id.selectprotocol_radioUSB;
+        switch (transportType) {
+            case Const.Transport.KEY_TCP:
+                groupCheck = R.id.selectprotocol_radioWiFi;
+                break;
+
+            case Const.Transport.KEY_BLUETOOTH:
+                groupCheck = R.id.selectprotocol_radioBT;
+                break;
+        }
+        transportGroup.check(groupCheck);
+
 		new AlertDialog.Builder(context)
 				.setTitle("Please select protocol properties")
 				.setCancelable(false)
 				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						int protocolVersion = 1;
-						switch (protocolVersionGroup.getCheckedRadioButtonId()) {
-						case R.id.selectprotocol_radioV2:
-							protocolVersion = 2;
-							break;
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int protocolVersion = 1;
+                        switch (protocolVersionGroup
+                                .getCheckedRadioButtonId()) {
+                            case R.id.selectprotocol_radioV2:
+                                protocolVersion = 2;
+                                break;
 
-						case R.id.selectprotocol_radioV1:
-							// 1 by default
-						default:
-							break;
-						}
+                            case R.id.selectprotocol_radioV1:
+                                // 1 by default
+                            default:
+                                break;
+                        }
 
-						boolean isMedia = mediaCheckBox.isChecked();
-						String appName = appNameEditText.getText().toString();
-						String lang = ((Language) langSpinner.getSelectedItem())
-								.name();
-						String hmiLang = ((Language) hmiLangSpinner
-								.getSelectedItem()).name();
-						int transportType = transportGroup
-								.getCheckedRadioButtonId() == R.id.selectprotocol_radioWiFi ? Const.Transport.KEY_TCP
-								: Const.Transport.KEY_BLUETOOTH;
-						String ipAddress = ipAddressEditText.getText()
-								.toString();
-						int tcpPort = Integer.parseInt(tcpPortEditText
-								.getText().toString());
-						boolean autoReconnect = autoReconnectCheckBox
-								.isChecked();
-						boolean autoSetAppIcon = autoSetAppIconCheckBox
-								.isChecked();
+                        boolean isMedia = mediaCheckBox.isChecked();
+                        String appName = appNameEditText.getText().toString();
+                        String lang = ((Language) langSpinner.getSelectedItem())
+                                .name();
+                        String hmiLang =
+                                ((Language) hmiLangSpinner.getSelectedItem())
+                                        .name();
+                        int transportType = Const.Transport.KEY_USB;
+                        switch (transportGroup.getCheckedRadioButtonId()) {
+                            case R.id.selectprotocol_radioWiFi:
+                                transportType = Const.Transport.KEY_TCP;
+                                break;
 
-						// save the configs
-						boolean success = prefs
-								.edit()
-								.putInt(Const.PREFS_KEY_PROTOCOLVERSION,
-										protocolVersion)
-								.putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
-								.putString(Const.PREFS_KEY_APPNAME, appName)
-								.putString(Const.PREFS_KEY_LANG, lang)
-								.putString(Const.PREFS_KEY_HMILANG, hmiLang)
-								.putInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
-										transportType)
-								.putString(
-										Const.Transport.PREFS_KEY_TRANSPORT_IP,
-										ipAddress)
-								.putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT,
-										tcpPort)
-								.putBoolean(
-										Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
-										autoReconnect)
-								.putBoolean(Const.PREFS_KEY_AUTOSETAPPICON,
-										autoSetAppIcon).commit();
-						if (!success) {
-							Log.w(logTag,
-									"Can't save selected protocol properties");
-						}
+                            case R.id.selectprotocol_radioBT:
+                                transportType = Const.Transport.KEY_BLUETOOTH;
+                                break;
+                        }
+                        String ipAddress =
+                                ipAddressEditText.getText().toString();
+                        int tcpPort = Integer.parseInt(
+                                tcpPortEditText.getText().toString());
+                        boolean autoReconnect =
+                                autoReconnectCheckBox.isChecked();
+                        boolean autoSetAppIcon =
+                                autoSetAppIconCheckBox.isChecked();
 
-						showProtocolPropertiesInTitle();
-						startSyncProxy();
-					}
-				}).setView(view).show();
+                        // save the configs
+                        boolean success = prefs.edit()
+                                .putInt(Const.PREFS_KEY_PROTOCOLVERSION,
+                                        protocolVersion)
+                                .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
+                                .putString(Const.PREFS_KEY_APPNAME, appName)
+                                .putString(Const.PREFS_KEY_LANG, lang)
+                                .putString(Const.PREFS_KEY_HMILANG, hmiLang)
+                                .putInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+                                        transportType).putString(
+                                        Const.Transport.PREFS_KEY_TRANSPORT_IP,
+                                        ipAddress)
+                                .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT,
+                                        tcpPort).putBoolean(
+                                        Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
+                                        autoReconnect)
+                                .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON,
+                                        autoSetAppIcon).commit();
+                        if (!success) {
+                            Log.w(logTag,
+                                    "Can't save selected protocol properties");
+                        }
+
+                        showProtocolPropertiesInTitle();
+                        startSyncProxy();
+                    }
+                }).setView(view).show();
 	}
 
 	/** Starts the sync proxy at startup after selecting protocol features. */
@@ -649,10 +664,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Const.PREFS_DEFAULT_PROTOCOLVERSION);
 		boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
 				Const.PREFS_DEFAULT_ISMEDIAAPP);
-		String transportType = prefs.getInt(
-				Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
-				Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE) == Const.Transport.KEY_TCP ? "WiFi"
-				: "BT";
+        String transportType = null;
+        switch (prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+                Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE)) {
+            case Const.Transport.KEY_TCP:
+                transportType = "WiFi";
+                break;
+
+            case Const.Transport.KEY_BLUETOOTH:
+                transportType = "BT";
+                break;
+
+            case Const.Transport.KEY_USB:
+                transportType = "USB";
+                break;
+        }
 		setTitle(getResources().getString(R.string.tester_app_name) + " (v"
 				+ protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
 				+ transportType + ")");

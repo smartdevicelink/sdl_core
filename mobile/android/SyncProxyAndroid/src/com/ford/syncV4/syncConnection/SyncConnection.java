@@ -8,6 +8,10 @@ import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.transport.*;
 import com.ford.syncV4.transport.TCPTransport;
+import com.ford.syncV4.transport.usb.USBTransport;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
+
+import static com.ford.syncV4.transport.TransportType.*;
 
 public class SyncConnection implements IProtocolListener, ITransportListener {
 
@@ -37,16 +41,23 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 				}
 				_transport = null;
 			}
-			
-			if (transportConfig.getTransportType() == TransportType.BLUETOOTH)
-			{
-				_transport = new BTTransport(this);	
-			}
-			else if (transportConfig.getTransportType() == TransportType.TCP)
-			{
-                _transport = new TCPTransport((TCPTransportConfig) transportConfig, this);
+
+            switch (transportConfig.getTransportType()) {
+                case BLUETOOTH:
+                    _transport = new BTTransport(this);
+                    break;
+
+                case TCP:
+                    _transport = new TCPTransport(
+                            (TCPTransportConfig) transportConfig, this);
+                    break;
+
+                case USB:
+                    _transport = new USBTransport(
+                            (USBTransportConfig) transportConfig, this);
+                    break;
             }
-		}
+        }
 		
 		// Initialize the protocol
 		synchronized(PROTOCOL_REFERENCE_LOCK) {
