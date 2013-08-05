@@ -1392,6 +1392,20 @@ SDL.ValidateMessage = Em.Object.create({
 	        };
 	
 	        return this.resultStruct;
+	    },
+    
+	    /**
+	     * Validate method for request EndAudioPassThru
+	     * 
+	     * @param {Object} params
+	     */
+	    ClosePopUp: function(params) {
+
+	        this.resultStruct = {
+	            "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+	        };
+	
+	        return this.resultStruct;
 	    }
 	}),
     
