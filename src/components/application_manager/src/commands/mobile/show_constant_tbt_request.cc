@@ -62,8 +62,6 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  app->set_tbt_show_command((*message_)[strings::msg_params]);
-
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
@@ -91,6 +89,7 @@ void ShowConstantTBTRequest::Run() {
       (*message_)[strings::msg_params][strings::navigation_text_2];
   }
 
+  app->set_tbt_show_command(msg_params);
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,
                    msg_params, true, 1);
 }

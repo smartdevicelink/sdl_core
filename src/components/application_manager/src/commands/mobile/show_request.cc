@@ -69,7 +69,6 @@ void ShowRequest::Run() {
 
   msg_params[hmi_request::show_strings] =
     smart_objects::SmartObject(smart_objects::SmartType_Array);
-  msg_params[strings::app_id] = app->app_id();
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
     msg_params[hmi_request::show_strings][0][hmi_request::field_name] =
@@ -149,7 +148,7 @@ void ShowRequest::Run() {
   CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true, 1);
 
   MessageSharedPtr persistentData =
-    new smart_objects::SmartObject((*message_)[strings::msg_params]);
+    new smart_objects::SmartObject(msg_params);
   app->set_show_command(*persistentData);
 }
 

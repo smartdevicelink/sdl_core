@@ -135,6 +135,11 @@ class DynamicApplicationDataImpl : public virtual Application {
     inline const CommandsMap& commands_map() const;
 
     /*
+     * @brief Retrieve application sub menus
+     */
+    inline const SubMenuMap& sub_menu_map() const;
+
+    /*
      * @brief Adds a interaction choice set to the application
      *
      * @param choice_set_id Unique ID used for this interaction choice set
@@ -237,6 +242,10 @@ class DynamicApplicationDataImpl : public virtual Application {
 
 const CommandsMap& DynamicApplicationDataImpl::commands_map() const {
   return commands_;
+}
+
+const SubMenuMap& DynamicApplicationDataImpl::sub_menu_map() const {
+  return sub_menu_;
 }
 
 bool DynamicApplicationDataImpl::is_perform_interaction_active() const {

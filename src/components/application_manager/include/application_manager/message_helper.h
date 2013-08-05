@@ -176,6 +176,11 @@ class MessageHelper {
       const std::string& path_to_icon, unsigned int app_id);
 
     static void SendAppDataToHMI(const Application* app);
+    static void SendGlobalPropertiesToHMI(const Application* app);
+    static void SendShowRequestToHMI(const Application* app);
+    static void SendShowConstantTBTRequestToHMI(const Application* app);
+    static void SendAddCommandRequestToHMI(const Application* app);
+    static void SendAddSubMenuRequestToHMI(const Application* app);
     static void RemoveAppDataFromHMI(const Application* app);
 
     static smart_objects::SmartObject* CreateNegativeResponse(

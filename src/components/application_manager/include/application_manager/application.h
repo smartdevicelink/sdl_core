@@ -180,6 +180,11 @@ class DynamicApplicationData {
     virtual const CommandsMap& commands_map() const = 0;
 
     /*
+     * @brief Retrieve application sub menus
+     */
+    virtual const SubMenuMap& sub_menu_map() const = 0;
+
+    /*
      * @brief Adds a interaction choice set to the application
      *
      * @param choice_set_id Unique ID used for this interaction choice set
