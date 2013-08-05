@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/encoded_sync_pdata_request.h"
+#include "application_manager/commands/mobile/sync_pdata_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -42,21 +42,21 @@ namespace application_manager {
 
 namespace commands {
 
-const std::string EncodedSyncPDataRequest::TEMPORARY_HARDCODED_FILENAME
+const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FILENAME
   = "policy_sync_data.dat";
-const std::string EncodedSyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME
+const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME
   = "/config/policies";
 
-EncodedSyncPDataRequest::EncodedSyncPDataRequest(
+SyncPDataRequest::SyncPDataRequest(
   const MessageSharedPtr& message)
   : CommandRequestImpl(message) {
 }
 
-EncodedSyncPDataRequest::~EncodedSyncPDataRequest() {
+SyncPDataRequest::~SyncPDataRequest() {
 }
 
-void EncodedSyncPDataRequest::Run() {
-  LOG4CXX_INFO(logger_, "EncodedSyncPDataRequest::Run");
+void SyncPDataRequest::Run() {
+  LOG4CXX_INFO(logger_, "SyncPDataRequest::Run");
 
   Application* application_impl =
     application_manager::ApplicationManagerImpl::instance()->
@@ -72,8 +72,8 @@ void EncodedSyncPDataRequest::Run() {
 
   const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
 
-  const std::string string_pdata = base64_decode(((*message_)[strings::params]
-                                   [strings::data]).asString());
+  const std::string string_pdata = ((*message_)[strings::params]
+                                   [strings::data]).asString();
 
   const std::vector<unsigned char> char_vector_pdata(string_pdata.begin(),
       string_pdata.end());

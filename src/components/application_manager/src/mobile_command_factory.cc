@@ -119,6 +119,9 @@
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_response.h"
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "application_manager/commands/mobile/update_turn_list_response.h"
+#include "application_manager/commands/mobile/sync_pdata_request.h"
+#include "application_manager/commands/mobile/sync_pdata_response.h"
+#include "application_manager/commands/mobile/on_sync_pdata_notification.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -354,6 +357,17 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SyncPDataID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(
+          new commands::SyncPDataResponse(message));
+      } else {
+        command.reset(
+          new commands::SyncPDataRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
@@ -498,6 +512,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::OnHMIStatusID: {
       command.reset(new commands::OnHMIStatusNotification(message));
+      break;
+    }
+    case mobile_apis::FunctionID::OnSyncPDataID: {
+      command.reset(new commands::OnSyncPDataNotification(message));
       break;
     }
     default: {

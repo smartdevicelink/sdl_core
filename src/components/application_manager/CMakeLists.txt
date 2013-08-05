@@ -128,6 +128,9 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/unsubscribe_vehicle_data_response.cc
 ./src/commands/mobile/update_turn_list_request.cc
 ./src/commands/mobile/update_turn_list_response.cc
+./src/commands/mobile/sync_pdata_request.cc
+./src/commands/mobile/sync_pdata_response.cc
+./src/commands/mobile/on_sync_pdata_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES

@@ -31,7 +31,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/encoded_sync_pdata_request.h"
+#include <string>
+#include <vector>
+#include "application_manager/commands/mobile/on_sync_pdata_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -42,59 +44,42 @@ namespace application_manager {
 
 namespace commands {
 
-const std::string EncodedSyncPDataRequest::TEMPORARY_HARDCODED_FILENAME
-  = "policy_sync_data.dat";
-const std::string EncodedSyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME
-  = "/config/policies";
-
-EncodedSyncPDataRequest::EncodedSyncPDataRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+OnSyncPDataNotification::OnSyncPDataNotification(
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
-EncodedSyncPDataRequest::~EncodedSyncPDataRequest() {
+OnSyncPDataNotification::~OnSyncPDataNotification() {
 }
 
-void EncodedSyncPDataRequest::Run() {
-  LOG4CXX_INFO(logger_, "EncodedSyncPDataRequest::Run");
+void OnSyncPDataNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnSyncPDataNotification::Run");
 
-  Application* application_impl =
-    application_manager::ApplicationManagerImpl::instance()->
-    application((*message_)[strings::msg_params][strings::app_id]);
+  const std::string fileName =
+    (*message_)[strings::params][hmi_notification::file_name].asString();
 
-  if (NULL == application_impl) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+  if (!file_system::FileExists(fileName)) {
+    (*message_)[strings::msg_params][strings::success] = false;
+    (*message_)[strings::msg_params][strings::result_code] =
+      mobile_apis::Result::FILE_NOT_FOUND;
+
+    SendResponse(false);
+    LOG4CXX_ERROR(logger_, "File not found");
     return;
   }
 
-    unsigned int free_space = file_system::AvailableSpace();
+  std::vector<unsigned char> pData;
 
-  const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
+  file_system::ReadBinaryFile(fileName, pData);
 
-  const std::string string_pdata = base64_decode(((*message_)[strings::params]
-                                   [strings::data]).asString());
+  const std::string string_pdata = std::string(pData.begin(),
+                                   pData.end());
 
-  const std::vector<unsigned char> char_vector_pdata(string_pdata.begin(),
-      string_pdata.end());
+  (*message_)[strings::params][strings::data] = string_pdata;
 
-  if (free_space > string_pdata.size()) {
-    std::string relative_file_path =
-      file_system::CreateDirectory(TEMPORARY_HARDCODED_FOLDERNAME);
-    relative_file_path += "/";
-    relative_file_path += sync_file_name;
-
-    if (file_system::Write(file_system::FullPath(relative_file_path),
-                           char_vector_pdata)) {
-      SendResponse(true, mobile_apis::Result::SUCCESS);
-    } else {
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-    }
-  } else {
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-  }
+  SendResponse(true);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+
