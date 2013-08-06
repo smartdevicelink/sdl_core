@@ -44,12 +44,15 @@ public class USBAccessoryAttachmentActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        String action = getIntent().getAction();
+        final Intent intent = getIntent();
+        String action = intent.getAction();
         Log.d(TAG, "Resumed with action: " + action);
 
         if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)) {
             Intent usbAccessoryAttachedIntent =
                     new Intent(USBTransport.ACTION_USB_ACCESSORY_ATTACHED);
+            usbAccessoryAttachedIntent.putExtra(UsbManager.EXTRA_ACCESSORY,
+                    intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY));
             sendBroadcast(usbAccessoryAttachedIntent);
         }
 
