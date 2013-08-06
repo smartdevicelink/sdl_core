@@ -175,16 +175,6 @@ class DynamicApplicationData {
     virtual bool IsSubMenuNameAlreadyExist(const std::string& name) = 0;
 
     /*
-     * @brief Retrieve application commands
-     */
-    virtual const CommandsMap& commands_map() const = 0;
-
-    /*
-     * @brief Retrieve application sub menus
-     */
-    virtual const SubMenuMap& sub_menu_map() const = 0;
-
-    /*
      * @brief Adds a interaction choice set to the application
      *
      * @param choice_set_id Unique ID used for this interaction choice set
@@ -241,6 +231,21 @@ class DynamicApplicationData {
      */
     virtual smart_objects::SmartObject*  FindChoiceSetVRCommands(
       unsigned int choice_set_id) const = 0;
+
+    /*
+     * @brief Retrieve application commands
+     */
+    virtual const CommandsMap& commands_map() const = 0;
+
+    /*
+     * @brief Retrieve application sub menus
+     */
+    virtual const SubMenuMap& sub_menu_map() const = 0;
+
+    /*
+     * @brief Retrieve application choice set map
+     */
+    virtual const ChoiceSetMap& choice_set_map() const = 0;
 
     /*
      * @brief Sets perform interaction state

@@ -66,7 +66,8 @@ void CreateInteractionChoiceSetRequest::Run() {
     (*message_)[strings::msg_params]
     [strings::interaction_choice_set_id].asInt();
 
-  if (app->FindChoiceSet(choise_set_id)) {
+  if (app->FindChoiceSet(choise_set_id) ||
+      false == CheckChoiceID(app)) {
     LOG4CXX_ERROR(logger_, "Invalid ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
@@ -91,11 +92,8 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
     (*message_)[strings::msg_params][strings::choice_set];
 
   for (size_t i = 0; i < choice_set.length(); ++i) {
-    for (size_t j = 0; j < choice_set.length(); ++j) {
-      if (i == j) {
-        // skip check the same element
-        continue;
-      }
+    for (size_t j = i + 1; j < choice_set.length(); ++j) {
+
       if (choice_set[i][strings::menu_name].asString() ==
            choice_set[j][strings::menu_name].asString()) {
         LOG4CXX_ERROR(logger_, "Incoming choiceset has duplicated menu name " <<
@@ -134,6 +132,46 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
       }
     }
   }
+  return true;
+}
+
+bool CreateInteractionChoiceSetRequest::CheckChoiceID(const Application* app) {
+  smart_objects::SmartObject& choice_set =
+    (*message_)[strings::msg_params][strings::choice_set];
+
+  // check inside incoming request
+  for (size_t i = 0; i < choice_set.length(); ++i) {
+    for (size_t j = i + 1; j < choice_set.length(); ++j) {
+
+      if (choice_set[i][strings::choice_id].asInt() ==
+          choice_set[j][strings::choice_id].asInt()) {
+        LOG4CXX_ERROR(logger_, "Incoming choice set has duplicated choice ID");
+        return false;
+      }
+    }
+  }
+
+  // check inside SDL application
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
+
+  const ChoiceSetMap& choice_set_map = app->choice_set_map();
+  ChoiceSetMap::const_iterator it = choice_set_map.begin();
+
+  for (; choice_set_map.end() != it; ++it) {
+    for (size_t i = 0; i < (*it->second)[strings::choice_set].length(); ++i) {
+      for (size_t j = 0; j < choice_set.length(); ++i) {
+        if ((*it->second)[strings::choice_set][i][strings::choice_id].asInt() ==
+             choice_set[j][strings::choice_id].asInt()) {
+          LOG4CXX_ERROR(logger_, "Incoming choice ID already exist");
+          return false;
+        }
+      }
+    }
+  }
+
   return true;
 }
 

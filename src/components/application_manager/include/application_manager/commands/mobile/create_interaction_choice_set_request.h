@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class Application;
+
 namespace commands {
 
 /**
@@ -80,6 +82,17 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * otherwise FALSE
    */
   bool CheckChoiceSetVRSynonyms();
+
+  /*
+   * @brief Checks if incoming choiceSet doesn't have duplicated choice ID's
+   * and Choice ID doesn't exist in application choiceSet map
+   *
+   *@param app Registred mobile application
+   *
+   * return Return TRUE if there are no similar choice ID in choice set,
+   * otherwise FALSE
+   */
+  bool CheckChoiceID(const Application* app);
 
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };
