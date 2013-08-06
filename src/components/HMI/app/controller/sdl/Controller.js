@@ -124,10 +124,6 @@ SDL.SDLController = Em.Object.create({
                 SDL.ScrollableMessage.deactivate();
                 break;
             }
-            case "TurnByTurnView": {
-                SDL.TurnByTurnView.deactivate();
-                break;
-            }
             case "NonMediaView": {
                 this.getApplicationModel(element.appID).clearAppOverLay();
                 break;

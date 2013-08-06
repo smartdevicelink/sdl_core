@@ -70,7 +70,7 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
         if( params ){
             
             for (var i = 0; i < params.navigationTexts.length; i++) {
-                switch (params.alertStrings[i]) {
+                switch (params.navigationTexts[i]) {
                     case 'navigationText1': {
                         this.set( 'captionText.content', params.navigationTexts[i].fieldText );
                         break;

@@ -478,7 +478,7 @@ SDL.RPCController = Em.Object.create({
     UI: Em.Object.create({
 
         resultStruct: {},
-        
+
         /**
          * Validate method for request IsReady
          * 
@@ -492,7 +492,49 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
+        /**
+         * Validate method for request GetCapabilities
+         * 
+         * @param {Object} params
+         */
+        GetCapabilities: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request GetLanguage
+         * 
+         * @param {Object} params
+         */
+        GetLanguage: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request GetSupportedLanguages
+         * 
+         * @param {Object} params
+         */
+        GetSupportedLanguages: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
         /**
          * Validate method for request UI.Alert
          * 
@@ -552,7 +594,7 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
         /**
          * Validate method for request Show
          * 
@@ -594,7 +636,7 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
         /**
          * Validate method for request AddCommand
          * 
@@ -654,7 +696,7 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
         /**
          * Validate method for request DeleteCommand
          * 
@@ -714,7 +756,7 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
         /**
          * Validate method for request AddSubMenu
          * 
@@ -783,7 +825,7 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
         /**
          * Validate method for request DeleteSubMenu
          * 
@@ -853,7 +895,7 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
         /**
          * Validate method for request PerformInteraction
          * 
@@ -1668,6 +1710,34 @@ SDL.RPCController = Em.Object.create({
          * @param {Object} params
          */
         IsReady: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request GetLanguage
+         * 
+         * @param {Object} params
+         */
+        GetLanguage: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request GetSupportedLanguages
+         * 
+         * @param {Object} params
+         */
+        GetSupportedLanguages: function(params) {
 
             this.resultStruct = {
                 "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
