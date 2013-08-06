@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class Application;
+
 namespace commands {
 
 /**
@@ -64,6 +66,26 @@ class AddCommandRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+
+  /*
+   * @brief Check if coomand name doesn't exist in application
+   * Please see SDLAQ-CRS-407 for more information
+   *
+   * @param app Mobile application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckCommandName(const Application* app);
+
+  /*
+   * @brief Check if coomand vr synonyms doesn't exist in application commands
+   * Please see SDLAQ-CRS-407 for more information
+   *
+   * @param app Mobile application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckCommandVRSynonym(const Application* app);
 
   DISALLOW_COPY_AND_ASSIGN(AddCommandRequest);
 };

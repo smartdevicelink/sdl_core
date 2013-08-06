@@ -80,11 +80,19 @@ void AddCommandRequest::Run() {
   // we should specify amount of required responses in the 1st request
   unsigned int chaining_counter = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
+    if (!CheckCommandName(app)) {
+      SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+      return;
+    }
     ++chaining_counter;
   }
 
   if (((*message_)[strings::msg_params].keyExists(strings::vr_commands)) &&
       ((*message_)[strings::msg_params][strings::vr_commands].length() > 0)) {
+    if (!CheckCommandVRSynonym(app)) {
+      SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+      return;
+    }
     ++chaining_counter;
   }
 
@@ -134,6 +142,51 @@ void AddCommandRequest::Run() {
 
     CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, true);
   }
+}
+
+bool AddCommandRequest::CheckCommandName(const Application* app) {
+  if (NULL == app) {
+    return false;
+  }
+
+  const CommandsMap& commands = app->commands_map();
+  CommandsMap::const_iterator i = commands.begin();
+
+  for (; commands.end() != i; ++i) {
+    if ((*i->second)[strings::menu_params][strings::menu_name].asString() ==
+        (*message_)[strings::msg_params][strings::menu_params]
+                                         [strings::menu_name].asString()) {
+      LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandName received"
+                   " command name already exist");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool AddCommandRequest::CheckCommandVRSynonym(const Application* app) {
+  if (NULL == app) {
+    return false;
+  }
+
+  const CommandsMap& commands = app->commands_map();
+  CommandsMap::const_iterator it = commands.begin();
+
+  for (; commands.end() != it; ++it) {
+    for (size_t i = 0; i < (*it->second)[strings::vr_commands].length(); ++i) {
+      for (size_t j = 0; j < (*message_)[strings::msg_params]
+                                        [strings::vr_commands].length(); ++j) {
+        if ((*it->second)[strings::vr_commands][i].asString() ==
+            (*message_)[strings::msg_params][strings::vr_commands]
+                                                     [j].asString()) {
+          LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandVRSynonym"
+                       "received command vr synonym already exist");
+          return false;
+        }
+      }
+    }
+  }
+  return true;
 }
 
 }  // namespace commands
