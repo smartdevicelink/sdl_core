@@ -185,6 +185,8 @@ class MessageHelper {
     static void SendAddCommandRequestToHMI(const Application* app);
     static void SendAddSubMenuRequestToHMI(const Application* app);
     static void RemoveAppDataFromHMI(const Application* app);
+    static void SendDeleteCommandRequestToHMI(const Application* app);
+    static void SendDeleteSubMenuRequestToHMI(const Application* app);
 
     static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key,
