@@ -17,7 +17,7 @@ public class Const {
 	public static final String PREFS_KEY_DISABLE_LOCK_WHEN_TESTING = "disableLockWhenTesting";
 
 	// Default values
-	public static final int PREFS_DEFAULT_PROTOCOLVERSION = 1;
+	public static final int PREFS_DEFAULT_PROTOCOLVERSION = 2;
 	public static final boolean PREFS_DEFAULT_ISMEDIAAPP = true;
 	public static final String PREFS_DEFAULT_APPNAME = "SyncProxyTester";
 	public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();

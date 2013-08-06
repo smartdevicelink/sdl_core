@@ -278,7 +278,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         break;
 
                     case Const.Transport.KEY_USB:
-                        config = new USBTransportConfig();
+                        config =
+                                new USBTransportConfig(getApplicationContext());
                         appID = APPID_USB;
                         break;
                 }

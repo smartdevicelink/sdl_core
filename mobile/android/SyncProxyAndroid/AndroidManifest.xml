@@ -1,2 +1,15 @@
-<manifest package="com.ford.syncV4" xmlns:android="http://schemas.android.com/apk/res/android"><application android:debuggable="true"></application>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.ford.syncV4">
+
+    <!-- Version 12 is minimum to support the USB Accessory mode -->
+    <uses-sdk android:minSdkVersion="12"/>
+
+    <!-- Required to use the USB Accessory mode -->
+    <uses-feature android:name="android.hardware.usb.accessory"/>
+
+    <application android:debuggable="true">
+
+        <activity android:name=".transport.usb.USBAccessoryAttachmentActivity"/>
+
+    </application>
 </manifest>
