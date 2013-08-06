@@ -1,3 +1,6 @@
+[CW32]
+* SyncProxyAndroid SDK: update result code values.
+
 [CW31]
 * SyncProxyAndroid SDK: fix a crash on sending GenericRequest message.
 * SyncProxyAndroid SDK: cherry-pick Ford's changes: add SyncPData function.
