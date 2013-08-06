@@ -480,6 +480,20 @@ SDL.RPCController = Em.Object.create({
         resultStruct: {},
         
         /**
+         * Validate method for request IsReady
+         * 
+         * @param {Object} params
+         */
+        IsReady: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
          * Validate method for request UI.Alert
          * 
          * @param {Object} params
@@ -1436,6 +1450,20 @@ SDL.RPCController = Em.Object.create({
          * @param {Object} params
          */
         IsReady: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request GetVehicleType
+         * 
+         * @param {Object} params
+         */
+        GetVehicleType: function(params) {
 
             this.resultStruct = {
                 "resultCode": SDL.SDLModel.resultCode["SUCCESS"]

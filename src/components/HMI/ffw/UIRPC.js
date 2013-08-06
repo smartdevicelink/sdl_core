@@ -53,14 +53,11 @@ FFW.UI = FFW.RPCObserver.create({
     // temp var for debug
     appID: 1,
 
-    onVRChoiseSubscribeRequestID: -1,
     onShowNotificationSubscribeRequestID: -1,
-    
-    onVRChoiseUnsubscribeRequestID: -1,
+
     onShowNotificationUnsubscribeRequestID: -1,
 
     // const
-    onVRChoiseNotification: "VR.OnChoise",
     onShowNotificationNotification: "UI.ShowNotification",
 
     /**
@@ -92,7 +89,6 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         // subscribe to notifications
-        this.onVRChoiseSubscribeRequestID = this.client.subscribeToNotification(this.onVRChoiseNotification);
         this.onShowNotificationSubscribeRequestID = this.client.subscribeToNotification(this.onShowNotificationNotification);
     },
 
@@ -104,7 +100,6 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         // unsubscribe from notifications
-        this.onVRChoiseUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onVRChoiseNotification);
         this.onShowNotificationUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onShowNotificationNotification);
     },
 
@@ -140,10 +135,6 @@ FFW.UI = FFW.RPCObserver.create({
     onRPCNotification: function(notification) {
         Em.Logger.log("FFW.UI.onRPCNotification");
         this._super();
-
-        if(notification.method == this.onVRChoiseNotification){
-            this.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"], notification.params.choiceID);
-        }
         
         if(notification.method == this.onShowNotificationNotification){
             // to do
