@@ -14,12 +14,12 @@ import java.nio.ByteBuffer;
 public class AvcEncoder {
 
     public static final String MIME_TYPE = "video/avc";
-    //private EncodedFrameListener frameListener;
+    public EncodedFrameListener frameListener;
     private MediaCodec mediaCodec;
     private byte[] sps;
     private byte[] pps;
     private MediaCodecInfo codecInfo;
-    //private ParameterSetsListener parameterSetsListener;
+    public ParameterSetsListener parameterSetsListener;
 
     public AvcEncoder() {
         try {
@@ -45,7 +45,7 @@ public class AvcEncoder {
         int nCamera = Camera.getNumberOfCameras();
         CamcorderProfile profile = null;
         for (int cameraId = 0; cameraId < nCamera; cameraId++) {
-            profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+            profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_LOW);
             break;
         }
         if (profile == null) {
@@ -125,7 +125,7 @@ public class AvcEncoder {
             }
 
             MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-            int outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
+            int outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, -1);
             while (outputBufferIndex >= 0) {
                 ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
                 byte[] outData = new byte[bufferInfo.size];
@@ -133,7 +133,7 @@ public class AvcEncoder {
                 if (sps != null && pps != null) {
                     ByteBuffer frameBuffer = ByteBuffer.wrap(outData);
                     frameBuffer.putInt(bufferInfo.size - 4);
-                    //frameListener.frameReceived(outData, 0, outData.length);
+                    frameListener.frameReceived(outData, 0, outData.length);
                 } else {
                     ByteBuffer spsPpsBuffer = ByteBuffer.wrap(outData);
                     if (spsPpsBuffer.getInt() == 0x00000001) {
@@ -150,9 +150,9 @@ public class AvcEncoder {
                     System.arraycopy(outData, 4, sps, 0, sps.length);
                     pps = new byte[outData.length - ppsIndex];
                     System.arraycopy(outData, ppsIndex, pps, 0, pps.length);
-                    //if (null != parameterSetsListener) {
-                    //    parameterSetsListener.avcParametersSetsEstablished(sps, pps);
-                    //}
+                    if (null != parameterSetsListener) {
+                        parameterSetsListener.avcParametersSetsEstablished(sps, pps);
+                    }
                 }
                 mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
                 outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 0);

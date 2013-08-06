@@ -11,13 +11,12 @@ import java.io.InputStream;
 public class AssetsReader {
 
     private Context context;
-    private VideoStreaming videoStreaming;
+
 
     public AssetsReader(Context context) {
         if (context == null)
             throw new IllegalArgumentException("Be initialised with null context object should not.  Yeesssssss.");
         this.setContext(context);
-        videoStreaming = new VideoStreaming();
     }
 
     public Context getContext() {

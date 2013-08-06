@@ -6,32 +6,53 @@ import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 
 import com.batutin.android.androidvideostreaming.R;
+import com.batutin.android.androidvideostreaming.reader.AssetsReader;
+import com.batutin.android.androidvideostreaming.reader.FileStreamReaderListener;
+import com.batutin.android.androidvideostreaming.reader.VideoStreaming;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements FileStreamReaderListener, EncodedFrameListener, ParameterSetsListener {
 
     private static final String TAG = "ColorSpaceUtilsTest";
-
     private static final int WIDTH = 256;
     private static final int HEIGHT = 128;
-
+    private AvcEncoder encoder;
+    private ByteArrayOutputStream bb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AvcEncoder encoder =new AvcEncoder();
-        encoder.offerEncoder(new byte[1280*720]);
+        bb = new ByteArrayOutputStream();
+        encoder = new AvcEncoder();
+        encoder.frameListener = this;
+        encoder.parameterSetsListener = this;
+        AssetsReader r = new AssetsReader(this);
+        InputStream is = r.readFileFromAssets("test_video.yuv");
+        VideoStreaming vs = new VideoStreaming();
+        try {
+            vs.readTestVideoFileFromStream(is, this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
 
         //this.encodeDecodeVideo();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -99,7 +120,7 @@ public class MainActivity extends Activity {
                     } else {
                         dstBuf.clear();
                         dstBuf.put(inputFrame);
-                        presentationTimeUs = numInputFrames*1000000/frameRate;
+                        presentationTimeUs = numInputFrames * 1000000 / frameRate;
                         numInputFrames++;
                     }
 
@@ -205,22 +226,22 @@ public class MainActivity extends Activity {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int Y = (x + y) & 255;
-                    int Cb = 255*x/width;
-                    int Cr = 255*y/height;
-                    inputFrame[y*stride + x] = (byte) Y;
-                    inputFrame[stride*sliceHeight + (y/2)*chromaStride + (x/2)] = (byte) Cb;
-                    inputFrame[stride*sliceHeight + chromaStride*(sliceHeight/2) + (y/2)*chromaStride + (x/2)] = (byte) Cr;
+                    int Cb = 255 * x / width;
+                    int Cr = 255 * y / height;
+                    inputFrame[y * stride + x] = (byte) Y;
+                    inputFrame[stride * sliceHeight + (y / 2) * chromaStride + (x / 2)] = (byte) Cb;
+                    inputFrame[stride * sliceHeight + chromaStride * (sliceHeight / 2) + (y / 2) * chromaStride + (x / 2)] = (byte) Cr;
                 }
             }
         } else {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int Y = (x + y) & 255;
-                    int Cb = 255*x/width;
-                    int Cr = 255*y/height;
-                    inputFrame[y*stride + x] = (byte) Y;
-                    inputFrame[stride*sliceHeight + 2*(y/2)*chromaStride + 2*(x/2)] = (byte) Cb;
-                    inputFrame[stride*sliceHeight + 2*(y/2)*chromaStride + 2*(x/2) + 1] = (byte) Cr;
+                    int Cb = 255 * x / width;
+                    int Cr = 255 * y / height;
+                    inputFrame[y * stride + x] = (byte) Y;
+                    inputFrame[stride * sliceHeight + 2 * (y / 2) * chromaStride + 2 * (x / 2)] = (byte) Cb;
+                    inputFrame[stride * sliceHeight + 2 * (y / 2) * chromaStride + 2 * (x / 2) + 1] = (byte) Cr;
                 }
             }
         }
@@ -228,11 +249,11 @@ public class MainActivity extends Activity {
     }
 
     private int calcFrameStride(int stride, int sliceHeight, int chromaStride) {
-        return stride*sliceHeight + 2*chromaStride*sliceHeight/2;
+        return stride * sliceHeight + 2 * chromaStride * sliceHeight / 2;
     }
 
     private int calcChromaStride(int stride) {
-        return stride/2;
+        return stride / 2;
     }
 
     private MediaFormat getMediaFormat(int width, int height, int bitRate, int frameRate, String mimeType, int colorFormat, int stride, int sliceHeight) {
@@ -249,7 +270,7 @@ public class MainActivity extends Activity {
     private int calcSliceHeightForHeight(int height, MediaCodecInfo codecInfo) {
         int sliceHeight = height;
         if (codecInfo.getName().startsWith("OMX.Nvidia.")) {
-            sliceHeight = (sliceHeight + 15)/16*16;
+            sliceHeight = (sliceHeight + 15) / 16 * 16;
         }
         return sliceHeight;
     }
@@ -257,7 +278,7 @@ public class MainActivity extends Activity {
     private int calcStrideForWidth(int width, MediaCodecInfo codecInfo) {
         int stride = width;
         if (codecInfo.getName().startsWith("OMX.Nvidia.")) {
-            stride = (stride + 15)/16*16;
+            stride = (stride + 15) / 16 * 16;
         }
         return stride;
     }
@@ -310,5 +331,52 @@ public class MainActivity extends Activity {
         }
         return codecInfo;
     }
-    
+
+    @Override
+    public void fileReadWillBegin(VideoStreaming source) {
+
+    }
+
+    @Override
+    public void chunkIsReadFromFile(VideoStreaming source, byte[] chunk) {
+        encoder.offerEncoder(chunk);
+    }
+
+    @Override
+    public void fileReadEnded(VideoStreaming source) {
+        try {
+            bb.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] b= bb.toByteArray();
+
+        File sdCard = Environment.getExternalStorageDirectory();
+        File dir = new File (sdCard.getAbsolutePath() + "/dir1/dir2");
+        dir.mkdirs();
+        File file = new File(dir, "filename");
+
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(b);
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void frameReceived(byte[] outData, int i, int length) {
+        try {
+            bb.write(outData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void avcParametersSetsEstablished(byte[] sps, byte[] pps) {
+
+    }
 }
