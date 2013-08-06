@@ -151,6 +151,7 @@ const char application[] = "application";
 const char icon[] = "icon";
 const char device_name[] = "deviceName";
 const char reason[] = "reason";
+const char available[] = "available";
 
 // vehicle info
 const char gps[] = "gps";

@@ -450,12 +450,19 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   ManageHMICommand(is_ui_ready);
 
   utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
-    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::Navigation_IsReady));
+    MessageHelper::CreateModuleInfoSO(
+      hmi_apis::FunctionID::Navigation_IsReady));
   ManageHMICommand(is_navi_ready);
 
   utils::SharedPtr<smart_objects::SmartObject> is_ivi_ready(
-    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_IsReady));
+    MessageHelper::CreateModuleInfoSO(
+      hmi_apis::FunctionID::VehicleInfo_IsReady));
   ManageHMICommand(is_ivi_ready);
+
+  utils::SharedPtr<smart_objects::SmartObject> button_capabilities(
+    MessageHelper::CreateModuleInfoSO(
+      hmi_apis::FunctionID::Buttons_GetCapabilities));
+  ManageHMICommand(button_capabilities);
 }
 
 unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
