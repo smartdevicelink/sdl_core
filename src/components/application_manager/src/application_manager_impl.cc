@@ -512,12 +512,20 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 
   if (message_chaining_.end() != it) {
     (*it->second).DecrementCounter();
+    LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain "
+                 "counter for id " << hmi_correlation_id << " = "
+                 << (*it->second).counter());
     if (0 == (*it->second).counter()) {
       mobile_correlation_id = (*it->second).correlation_id();
-      message_chaining_.erase(it);
+      LOG4CXX_INFO(logger_, "HMI response id = " << hmi_correlation_id <<
+                   " is the final for mobile request id = "
+                   << mobile_correlation_id);
       result = true;
     }
+    message_chaining_.erase(it);
   }
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain size is "
+                 << message_chaining_.size());
 
   return result;
 }
