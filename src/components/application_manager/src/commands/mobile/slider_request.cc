@@ -56,15 +56,15 @@ void SliderRequest::Run() {
     application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == application_impl) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if ((*message_)[strings::msg_params][strings::num_ticks].asInt() <
       (*message_)[strings::msg_params][strings::position].asInt()) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 

@@ -154,15 +154,13 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
   const smart_objects::SmartObject vr_help =
       (*message_)[strings::msg_params].getElement(strings::vr_help);
 
-  for (size_t i = 0; i < vr_help.length(); ++i) {
-    for (size_t j = i + 1; j < vr_help.length(); ++j) {
-
-      if (vr_help.getElement(i).getElement(strings::position).asInt() >
-          vr_help.getElement(j).getElement(strings::position).asInt()) {
-        LOG4CXX_ERROR(logger_, "VR help items order is wrong");
-        return false;
-      }
-
+  // Check if VR Help Items contains sequential positionss
+  size_t i = 0;
+  for (size_t j = 1; j < vr_help.length(); ++i, ++j) {
+    if ((vr_help.getElement(i).getElement(strings::position).asInt() + 1) !=
+        vr_help.getElement(j).getElement(strings::position).asInt()) {
+      LOG4CXX_ERROR(logger_, "VR help items order is wrong");
+      return false;
     }
   }
 
