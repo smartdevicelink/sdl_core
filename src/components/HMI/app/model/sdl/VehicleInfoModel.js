@@ -152,7 +152,6 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
         'batteryPackCurrent': 7.0,
         'batteryPackTemperature': 30,
         'engineTorque': 650,
-        'odometer': 0,
         'tripOdometer': 0,
         'genericbinary': '165165650',
         'satRadioESN': "165165650",
@@ -261,7 +260,12 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
         var data = {};
         
         for (var key in message) {
-            data[key] = this.vehicleData[key];
+            if (this.vehicleData[key]) {
+            	data[key] = this.vehicleData[key];
+            } else {
+            	return null;
+            }
+        	
         }
         
         return data;

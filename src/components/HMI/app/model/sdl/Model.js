@@ -619,38 +619,40 @@ SDL.SDLModel = Em.Object.create( {
 
     onDeactivateApp: function( target, appID ) {
 
-        /**
-         * Close Options menu if opened
-         */
-        if( SDL.OptionsView.active ){
-            SDL.OptionsView.set( 'active', false );
-        }
-
-        var dest = target.split( '.' ), reason;
-
-        switch( dest[0] ){
-            case 'media': {
-                reason = 'AUDIO';
-                break;
-            }
-            case "phone": {
-                reason = 'PHONEMENU';
-                break;
-            }
-            case "navigation": {
-                reason = 'NAVIGATIONMAP';
-                break;
-            }
-            case "settings": {
-                reason = 'SYNCSETTINGS';
-                break;
-            }
-            default: {
-                reason = 'GENERAL';
-                break;
-            }
-        }
-
-        FFW.BasicCommunication.OnAppDeactivated( reason, appID );
+	    if (SDL.SDLController.getApplicationModel(appID)) {
+    		/**
+	         * Close Options menu if opened
+	         */
+	        if( SDL.OptionsView.active ){
+	            SDL.OptionsView.set( 'active', false );
+	        }
+	
+	        var dest = target.split( '.' ), reason;
+	
+	        switch( dest[0] ){
+	            case 'media': {
+	                reason = 'AUDIO';
+	                break;
+	            }
+	            case "phone": {
+	                reason = 'PHONEMENU';
+	                break;
+	            }
+	            case "navigation": {
+	                reason = 'NAVIGATIONMAP';
+	                break;
+	            }
+	            case "settings": {
+	                reason = 'SYNCSETTINGS';
+	                break;
+	            }
+	            default: {
+	                reason = 'GENERAL';
+	                break;
+	            }
+	        }
+	
+	        FFW.BasicCommunication.OnAppDeactivated( reason, appID );
+	    }
     }
 } );

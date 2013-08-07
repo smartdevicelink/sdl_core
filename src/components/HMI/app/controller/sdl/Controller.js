@@ -115,26 +115,26 @@ SDL.SDLController = Em.Object.create({
      * @param {Object}
      */
     defaultActionSoftButton: function(element) {
-        switch(element.groupName){
-
-            case "AlertPopUp": {
-                SDL.AlertPopUp.deactivate(true);
-                break;
-            }
-            case "ScrollableMessage": {
-                SDL.ScrollableMessage.deactivate();
-                break;
-            }
-            case "NonMediaView": {
-                this.getApplicationModel(element.appID).clearAppOverLay();
-                break;
-            }
-            case "MediaView": {
-                this.getApplicationModel(element.appID).clearAppOverLay();
-                break;
-            }
-
-        }
+//        switch(element.groupName){
+//
+//            case "AlertPopUp": {
+//                SDL.AlertPopUp.deactivate(true);
+//                break;
+//            }
+//            case "ScrollableMessage": {
+//                SDL.ScrollableMessage.deactivate();
+//                break;
+//            }
+//            case "NonMediaView": {
+//                this.getApplicationModel(element.appID).clearAppOverLay();
+//                break;
+//            }
+//            case "MediaView": {
+//                this.getApplicationModel(element.appID).clearAppOverLay();
+//                break;
+//            }
+//
+//        }
     },
 
     /**

@@ -135,7 +135,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 	                if(vehicleData){
 	                    resultCode = "SUCCESS";
 	                }else{
-	                    resultCode = "GENERIC_ERROR";
+	                    resultCode = "VEHICLE_DATA_NOT_AVALIABLE";
 	                }
 	    
 	                // send repsonse

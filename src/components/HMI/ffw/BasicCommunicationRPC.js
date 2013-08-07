@@ -475,7 +475,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         // send repsonse
         var JSONMessage = {
             "jsonrpc": "2.0",
-            "method": "UI.OnDeviceChosen",
+            "method": "BasicCommunication.OnDeviceChosen",
             "params": {
                 "deviceInfo": {
                     "name": deviceName,

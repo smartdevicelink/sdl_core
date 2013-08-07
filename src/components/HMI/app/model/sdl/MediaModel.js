@@ -286,12 +286,11 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         }
 
         if(params.customPresets){
-            var i = 0;
-            for(i = 0; i < 6; i++){
+            for(var i = 0; i < 6; i++){
                 if(params.customPresets[i] != '' || params.customPresets[i] != null){
                     this.appInfo.set('customPresets.' + i, params.customPresets[i]);
                 }else{
-                    this.appInfo.set('customPresets.' + i, '');
+                    this.appInfo.set('customPresets.' + i, 'Preset' + i);
                 }
             }
             this.set('mediaPreset', true);

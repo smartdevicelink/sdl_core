@@ -137,7 +137,13 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend( {
         }
 
         if( params.customPresets ){
-            this.appInfo.set( 'customPresets', params.customPresets );
+            for(var i = 0; i < 6; i++){
+                if(params.customPresets[i] != '' || params.customPresets[i] != null){
+                    this.appInfo.set('customPresets.' + i, params.customPresets[i]);
+                }else{
+                    this.appInfo.set('customPresets.' + i, 'Preset' + i);
+                }
+            }
         }
 
         // Get soft buttons if exists
