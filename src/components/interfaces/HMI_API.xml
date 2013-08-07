@@ -1155,7 +1155,7 @@
     </function>
     <function name="OnFindApplications" messagetype="notification">
         <description>This methos is usually invoked by HMI to get list of registered apps.</description>
-    <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
+    <param name="deviceInfo" type="Common.DeviceInfo" mandatory="false">
       <description>Device on which applications should be found.</description>
     </param>
     </function>

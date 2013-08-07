@@ -53,10 +53,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
     onPlayToneUnsubscribeRequestID: -1,
 
     // const
-    //onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
-    //onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
-    //onDeviceListUpdatedNotification: "BasicCommunication.OnDeviceListUpdated",
-    //onPlayToneNotification: "BasicCommunication.PlayTone",
+    onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
+    onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
+    onDeviceListUpdatedNotification: "BasicCommunication.OnDeviceListUpdated",
+    onPlayToneNotification: "BasicCommunication.PlayTone",
 
     /**
      * init object
@@ -138,7 +138,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             if(SDL.States.info.active){
                 SDL.SDLModel.onGetDeviceList(response.result);
             }
-            
+
         }
 
         if(response.result.method == "BasicCommunication.OnAppActivated"){
@@ -237,7 +237,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             this.client.send(JSONMessage);
         }
     },
-    
+
     /**
      * send response from onRPCRequest
      * @param {Number} id
