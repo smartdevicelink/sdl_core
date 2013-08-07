@@ -73,10 +73,8 @@ class OnButtonEventNotification : public CommandNotificationImpl {
      * @brief Sends button event notification to mobile device
      *
      * @param app Application to receive notification
-     * @param is_custom_btn_id Indicates if received notification
-     *  with custom button param
      */
-    void SendButtonEvent(const Application* app, bool is_custom_btn_id);
+    void SendButtonEvent(const Application* app);
 
     DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
 };
