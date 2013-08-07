@@ -13,8 +13,11 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.batutin.android.androidvideostreaming.R;
+import com.batutin.android.androidvideostreaming.reader.AssetsReader;
+import com.batutin.android.androidvideostreaming.reader.VideoStreaming;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
@@ -32,6 +35,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         SurfaceView sv = new SurfaceView(this);
         sv.getHolder().addCallback(this);
         setContentView(sv);
+
     }
 
     protected void onDestroy() {
@@ -65,14 +69,30 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
 
         public PlayerThread(Surface surface) {
             this.surface = surface;
-            byte[] frame = new byte[100*60];
-            av = new AvcEncoder(surface, frame);
+            byte[] frame = new byte[1000*600];
+
+            AssetsReader r = new AssetsReader(DecodeActivity.this);
+            InputStream is = r.readFileFromAssets("test_video.yuv");
+            VideoStreaming vs = new VideoStreaming();
+            try {
+                byte[] b = vs.readTestVideoFileFromStream(is, null);
+                av = new AvcEncoder(surface, b);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
 
         }
 
         @Override
         public void run() {
-            av.doEncodeDecodeVideoFromBuffer(new ThreadPause());
+            /*try {
+                todo();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }*/
+             av.doEncodeDecodeVideoFromBuffer(new ThreadPause());
         }
 
         private void todo() throws IOException {

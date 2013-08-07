@@ -12,14 +12,13 @@ import android.view.Surface;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Random;
 
 public class AvcEncoder {
 
     public static final String MIME_TYPE = "video/avc";
     private static final String TAG = "EncodeDecodeTest";
     // movie length, in frames
-    private static final int NUM_FRAMES = 300;               // two seconds of video
+    private  int NUM_FRAMES = 300;               // two seconds of video
     private static final boolean VERBOSE = true;           // lots of logging
     private static final boolean DEBUG_SAVE_FILE = true;   // save copy of encoded movie
     private static final String DEBUG_FILE_NAME_BASE = "/sdcard/test.";
@@ -39,6 +38,7 @@ public class AvcEncoder {
 
     public AvcEncoder(Surface surface, byte[] frameData) {
         try {
+
             this.surface = surface;
             this.frameData = frameData;
             decoder = MediaCodec.createDecoderByType(MIME_TYPE);
@@ -53,6 +53,7 @@ public class AvcEncoder {
             mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
             encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             encoder.start();
+            NUM_FRAMES = 10 * camcorderProfile.videoFrameRate;
         } catch (IllegalStateException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
@@ -111,8 +112,8 @@ public class AvcEncoder {
     /**
      * Generates the presentation time for frame N, in microseconds.
      */
-    private static long computePresentationTime(int frameIndex) {
-        return 132 + frameIndex * 1000000 / FRAME_RATE;
+    private  long computePresentationTime(int frameIndex) {
+        return frameIndex * 1000000 / camcorderProfile.videoFrameRate;
     }
 
     public void close() throws IOException {
@@ -232,15 +233,15 @@ public class AvcEncoder {
                         inputDone = true;
                         if (VERBOSE) Log.d(TAG, "sent input EOS (with zero-length frame)");
                     } else {
-                        frameData = new byte[camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight];
-                        new Random().nextBytes(frameData);
+                        //frameData = new byte[camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight];
+                        //new Random().nextBytes(frameData);
                         ByteBuffer inputBuf = encoderInputBuffers[inputBufIndex];
 
                         inputBuf.clear();
 
-                        inputBuf.put(frameData);
+                        inputBuf.put(frameData, generateIndex*camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight* 3 / 2, camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight* 3 / 2);
 
-                        encoder.queueInputBuffer(inputBufIndex, 0, frameData.length, ptsUsec, 0);
+                        encoder.queueInputBuffer(inputBufIndex, 0,  camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight* 3 / 2, ptsUsec, 0);
                         if (VERBOSE) Log.d(TAG, "submitted frame " + generateIndex + " to enc");
                     }
                     generateIndex++;
@@ -301,6 +302,7 @@ public class AvcEncoder {
                         MediaFormat format =
                                 MediaFormat.createVideoFormat(MIME_TYPE, camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
                         format.setByteBuffer("csd-0", encodedData);
+
                         decoder.configure(format, surface,
                                 null, 0);
                         decoder.start();
@@ -365,7 +367,7 @@ public class AvcEncoder {
                     // We use a very simple clock to keep the video FPS, or the video
                     // playback will be too fast
                     while (info.presentationTimeUs / 1000 > System.currentTimeMillis() - startMs) {
-                            threadPause.pause();
+                            //threadPause.pause();
 
 
                     }
