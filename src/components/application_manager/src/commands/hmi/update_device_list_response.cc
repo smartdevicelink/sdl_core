@@ -29,28 +29,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/on_device_list_updated_notification.h"
-
+#include "application_manager/commands/hmi/update_device_list_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnDeviceListUpdatedNotification::OnDeviceListUpdatedNotification(
-  const MessageSharedPtr& message): NotificationToHMI(message) {
+UpdateDeviceListResponse::UpdateDeviceListResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-OnDeviceListUpdatedNotification::~OnDeviceListUpdatedNotification() {
+UpdateDeviceListResponse::~UpdateDeviceListResponse() {
 }
 
-void OnDeviceListUpdatedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnDeviceListUpdatedNotification::Run");
+void UpdateDeviceListResponse::Run() {
+  LOG4CXX_INFO(logger_, "UpdateDeviceListResponse::Run");
 
-  SendNotification();
+  // TODO(PV): add check for correctness.
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

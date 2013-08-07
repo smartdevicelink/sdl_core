@@ -43,7 +43,7 @@ log4cxx::LoggerPtr MessageBrokerAdapter::logger_   =
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler)
   : MessageBrokerController(std::string("127.0.0.1"),
                             8087,
-                            "BasicCommunication")
+                            "SDL")
   , HMIMessageAdapter(handler) {
   LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
 }
@@ -96,7 +96,13 @@ void MessageBrokerAdapter::subscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnSystemContext");
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
-  MessageBrokerController::subscribeTo("UI.OnDeviceChosen");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnStartDeviceDiscovery");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnAppActivated");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnExitAllApplications");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnDeviceChosen");
   MessageBrokerController::subscribeTo("UI.OnLanguageChange");
   MessageBrokerController::subscribeTo("VR.OnLanguageChange");
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");

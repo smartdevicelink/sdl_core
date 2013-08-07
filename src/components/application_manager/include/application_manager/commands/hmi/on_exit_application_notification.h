@@ -30,48 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/activate_app_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ActivateAppRequest::ActivateAppRequest(
-  const MessageSharedPtr& message): RequestFromHMI(message) {
-}
+/**
+ * @brief OnExitApplicationNotification command class
+ **/
+class OnExitApplicationNotification : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnExitApplicationNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnExitApplicationNotification(const MessageSharedPtr& message);
 
-ActivateAppRequest::~ActivateAppRequest() {
-}
+    /**
+     * @brief OnExitApplicationNotification class destructor
+     **/
+    virtual ~OnExitApplicationNotification();
 
-void ActivateAppRequest::Run() {
-  LOG4CXX_INFO(logger_, "ActivateAppRequest::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  Application* application =
-    ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::msg_params][strings::app_id]);
-
-  (*message_)[strings::msg_params].erase(strings::app_id);
-  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
-
-  if (!application) {
-    (*message_)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::INVALID_DATA;
-  } else {
-    if (ApplicationManagerImpl::instance()->ActivateApplication(application)) {
-      (*message_)[strings::params][hmi_response::code] =
-        hmi_apis::Common_Result::SUCCESS;
-    } else {
-      (*message_)[strings::params][hmi_response::code] =
-        hmi_apis::Common_Result::GENERIC_ERROR;
-    }
-  }
-
-  SendResponseToHMI();
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnExitApplicationNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_

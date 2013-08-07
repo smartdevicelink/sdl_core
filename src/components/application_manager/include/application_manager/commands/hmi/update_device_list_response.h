@@ -30,49 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/get_app_list_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetAppListRequest::GetAppListRequest(
-    const MessageSharedPtr& message): RequestFromHMI(message) {
-}
+/**
+ * @brief UpdateDeviceListResponse command class
+ **/
+class UpdateDeviceListResponse : public ResponseFromHMI {
+  public:
+    /**
+     * @brief UpdateDeviceListResponse class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit UpdateDeviceListResponse(const MessageSharedPtr& message);
 
-GetAppListRequest::~GetAppListRequest() {
-}
+    /**
+     * @brief UpdateDeviceListResponse class destructor
+     **/
+    virtual ~UpdateDeviceListResponse();
 
-void GetAppListRequest::Run() {
-  LOG4CXX_INFO(logger_, "GetAppListRequest::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
-
-  const std::set<Application*>& applications =
-      ApplicationManagerImpl::instance()->applications();
-
-  int index = 0;
-
-  if (applications.empty())  {
-    (*message_)[strings::params][hmi_response::code] =
-          hmi_apis::Common_Result::eType::NO_APPS_REGISTERED;
-  } else {
-    (*message_)[strings::params][hmi_response::code] =
-          hmi_apis::Common_Result::eType::SUCCESS;
-
-    for (std::set<Application*>::iterator it = applications.begin();
-        applications.end() != it; ++it) {
-      (*message_)[strings::msg_params][strings::app_list][index] = *it;
-      ++index;
-    }
-  }
-
-  SendResponseToHMI();
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_

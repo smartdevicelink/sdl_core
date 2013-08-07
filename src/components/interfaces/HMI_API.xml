@@ -103,64 +103,76 @@
 
  <enum name="Language">
      <element name="EN-US" internal_name="EN_US">
-      <description>US English</description>
+      <description>English - US</description>
     </element>
     <element name="ES-MX" internal_name="ES_MX">
-      <description>Mexican Spanish</description>
+      <description>Spanish - Mexico</description>
     </element>
     <element name="FR-CA" internal_name="FR_CA">
-      <description>Canadian French</description>
+      <description>French - Canada</description>
     </element>
-    <element name="DE-EU" internal_name="DE">
-      <description>EU German</description>
+    <element name="DE-DE" internal_name="DE_DE">
+      <description>German - Germany</description>
     </element>
-     <element name="ES-EU" internal_name="ES">
-      <description>EU Spanish</description>
+     <element name="ES-ES" internal_name="ES_ES">
+      <description>Spanish - Spain</description>
     </element>
-    <element name="EN-EU" internal_name="EN_GB">
-      <description>UK English</description>
+    <element name="EN-GB" internal_name="EN_GB">
+      <description>English - GB</description>
     </element>
-     <element name="RU-RU" internal_name="RU">
-      <description>Russian</description>
+     <element name="RU-RU" internal_name="RU_RU">
+      <description>Russian - Russia</description>
     </element>
-     <element name="TR-TR" internal_name="TR">
-      <description>Turkish</description>
+     <element name="TR-TR" internal_name="TR_TR">
+      <description>Turkish - Turkey</description>
     </element>
-     <element name="PL-EU" internal_name="PL_EU">
-      <description>EU Polish</description>
+     <element name="PL-PL" internal_name="PL_PL">
+      <description>Polish - Poland</description>
     </element>
-     <element name="FR-EU" internal_name="FR">
-      <description>French</description>
+     <element name="FR-FR" internal_name="FR_FR">
+      <description>French - France</description>
     </element>
-     <element name="IT-EU" internal_name="IT">
-      <description>Italian</description>
+     <element name="IT-IT" internal_name="IT_IT">
+      <description>Italian - Italy</description>
     </element>
-     <element name="SV-EU" internal_name="SV_EU">
-      <description>Swedish</description>
+     <element name="SV-SE" internal_name="SV_SE">
+      <description>Swedish - Sweden</description>
     </element>
-     <element name="PT-EU" internal_name="PT">
-      <description>Portuguese</description>
+     <element name="PT-PT" internal_name="PT_PT">
+      <description>Portuguese - Portugal</description>
     </element>
-     <element name="NL-EU" internal_name="NL">
-      <description>Dutch (Standard)</description>
+     <element name="NL-NL" internal_name="NL_NL">
+      <description>Dutch (Standard) - Netherlands</description>
     </element>
      <element name="EN-AU" internal_name="EN_AU">
-      <description>Australian English</description>
+      <description>English - Australia</description>
     </element>
      <element name="ZH-CN" internal_name="ZH_CN">
-      <description>Chinese (Mandarin)</description>
+      <description>Mandarin - China</description>
     </element>
      <element name="ZH-TW" internal_name="ZH_TW">
-      <description>Taiwanese (Mandarin)</description>
+      <description>Mandarin - Taiwan</description>
     </element>
-     <element name="JA-JP" internal_name="JA">
-      <description>Japanese</description>
+     <element name="JA-JP" internal_name="JA_JP">
+      <description>Japanese - Japan</description>
     </element>
      <element name="AR-SA" internal_name="AR_SA">
-      <description>Arabic</description>
+      <description>Arabic - Saudi Arabia</description>
     </element>
-     <element name="KO-KR" internal_name="KO">
-      <description>Korean</description>
+     <element name="KO-KR" internal_name="KO_KR">
+      <description>Korean - South Korea</description>
+    </element>
+     <element name="PT-BR" internal_name="PT_BR">
+      <description>Portuguese - Brazil</description>
+    </element>
+     <element name="CS-CZ" internal_name="CS_CZ">
+      <description>Czech - Czech Republic</description>
+    </element>
+     <element name="DA-DK" internal_name="DA_DK">
+      <description>Danish - Denmark</description>
+    </element>
+     <element name="NO-NO" internal_name="NO_NO">
+      <description>Norwegian - Norway</description>
     </element>
 </enum>
 
@@ -177,7 +189,7 @@
     <description>Default action occurs.  Standard behavior (e.g. SoftButton clears overlay).</description>
   </element>
   <element name="STEAL_FOCUS">
-    <description>App is brought into HMI_FULL.</description>
+    <description>The calling app's dialog or related event should clear and the app should be brought into HMI_FULL.</description>
   </element>
   <element name="KEEP_CONTEXT">
     <description>Current system context is maintained.  An overlay is persisted even though a SoftButton has been pressed and the notification sent.</description>
@@ -199,7 +211,7 @@
 </enum>
 
 <enum name="DeactivateReason">
-  <description>Enum of reasons of user navigating from application used by HMI.</description>
+  <description>Specifies the functionality the User has switched to.</description>
   <element name="AUDIO">
       <description>Navigated to audio(radio, etc)</description>
   </element>
@@ -276,7 +288,7 @@
 </enum>
 
 <enum name="ApplicationsCloseReason">
-  <description>Describes reason for exiting application.</description>
+  <description>Describes the reasons for exiting all of applications.</description>
   <element name="IGNITION_OFF" />
   <element name="MASTER_RESET" />
   <element name="FACTORY_DEFAULTS" />
@@ -578,16 +590,6 @@
   </element>
 </enum>
 
-<enum name="VehicleDataNotificationStatus">
-  <description>Reflects the status of a vehicle data notification.</description>
-  <element name="NOT_SUPPORTED" internal_name="VDNS_NOT_SUPPORTED">
-  </element>
-  <element name="NORMAL" internal_name="VDNS_NORMAL">
-  </element>
-  <element name="ACTIVE" internal_name="VDNS_ACTIVE">
-  </element>
-</enum>
-
 <enum name="CompassDirection">
   <description>The list of potential compass directions</description>
   <element name="NORTH">
@@ -690,7 +692,7 @@
   <param name="value" maxlength="65535" type="String" mandatory="true">
     <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
   </param>
-  <param name="imageType" type="ImageType">
+  <param name="imageType" type="ImageType" mandatory="true">
     <description>Describes, whether it is a static or dynamic image.</description>
   </param>
 </struct>
@@ -802,36 +804,36 @@
 
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
-  <param name="displayType" type="Common.DisplayType">
+  <param name="displayType" type="Common.DisplayType" mandatory="true">
     <description>The type of the display. See DisplayType</description>
   </param>
-  <param name="textFields" type="Common.TextFieldName" minsize="1" maxsize="100" array="true">
+  <param name="textFields" type="Common.TextFieldName" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields that support text data. See TextFieldName</description>
   </param>
-  <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true">
+  <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
-  <param name="graphicSupported" type="Boolean">
+  <param name="graphicSupported" type="Boolean" mandatory="true">
       <description>The display's persistent screen supports referencing image.</description>
     </param>
 </struct>
 
 <struct name="SoftButtonCapabilities">
   <description>Contains information about a SoftButton's capabilities.</description>
-  <param name="shortPressAvailable" type="Boolean">
+  <param name="shortPressAvailable" type="Boolean" mandatory="true">
     <description>The button supports a short press.</description>
     <description>Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.</description>
   </param>
-  <param name="longPressAvailable" type="Boolean">
+  <param name="longPressAvailable" type="Boolean" mandatory="true">
     <description>The button supports a LONG press.</description>
     <description>Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.</description>
   </param>
-  <param name="upDownAvailable" type="Boolean">
+  <param name="upDownAvailable" type="Boolean" mandatory="true">
     <description>The button supports "button down" and "button up".</description>
     <description>Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.</description>
     <description>Whenever the button is released, onButtonEvent( UP) will be invoked.</description>
   </param>
-  <param name="imageSupported" type="Boolean">
+  <param name="imageSupported" type="Boolean" mandatory="true">
     <description>The button supports referencing a static or dynamic image.</description>
   </param>
 </struct>
@@ -934,14 +936,14 @@
 </struct>
 
 <struct name="SingleTireStatus">
-  <param name="status" type="ComponentVolumeStatus">
+  <param name="status" type="ComponentVolumeStatus" mandatory="true">
     <description>See ComponentVolumeStatus.</description>
 </param>
 </struct>
 
 <struct name="DIDResult">
   <description>Individual requested DID result and data</description>
-  <param name="resultCode" type="VehicleDataResultCode">
+  <param name="resultCode" type="VehicleDataResultCode" mandatory="true">
     <description>Individual DID result code.</description>
   </param>
   <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
@@ -953,10 +955,10 @@
 </struct>
 
 <struct name="HeadLampStatus">
-  <param name="lowBeamsOn" type="Boolean">
+  <param name="lowBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the low beam lamps.  References signal "HeadLampLoActv_B_Stat".</description>
 </param>
-  <param name="highBeamsOn" type="Boolean">
+  <param name="highBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the high beam lamps.  References signal "HeadLghtHiOn_B_Stat".</description>
 </param>
 </struct>
@@ -987,103 +989,103 @@
 </struct>
 
 <struct name="BeltStatus">
-  <param name="driverBeltDeployed" type="VehicleDataEventStatus">
+  <param name="driverBeltDeployed" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsDrvBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="passengerBeltDeployed" type="VehicleDataEventStatus">
+  <param name="passengerBeltDeployed" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsPasBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="passengerBuckleBelted" type="VehicleDataEventStatus">
+  <param name="passengerBuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw1PasBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="driverBuckleBelted" type="VehicleDataEventStatus">
+  <param name="driverBuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw1DrvBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="leftRow2BuckleBelted" type="VehicleDataEventStatus">
+  <param name="leftRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw2lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="passengerChildDetected" type="VehicleDataEventStatus">
+  <param name="passengerChildDetected" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw1PasChld_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="rightRow2BuckleBelted" type="VehicleDataEventStatus">
+  <param name="rightRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw2rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="middleRow2BuckleBelted" type="VehicleDataEventStatus">
+  <param name="middleRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw2mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="middleRow3BuckleBelted" type="VehicleDataEventStatus">
+  <param name="middleRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw3mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="leftRow3BuckleBelted" type="VehicleDataEventStatus">
+  <param name="leftRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw3lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="rightRow3BuckleBelted" type="VehicleDataEventStatus">
+  <param name="rightRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw3rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="leftRearInflatableBelted" type="VehicleDataEventStatus">
+  <param name="leftRearInflatableBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw2lRib_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="rightRearInflatableBelted" type="VehicleDataEventStatus">
+  <param name="rightRearInflatableBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw2rRib_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="middleRow1BeltDeployed" type="VehicleDataEventStatus">
+  <param name="middleRow1BeltDeployed" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw1mBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
-  <param name="middleRow1BuckleBelted" type="VehicleDataEventStatus">
+  <param name="middleRow1BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
     <description>References signal "VedsRw1mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 </param>
 </struct>
 
   <struct name="BodyInformation">
-  <param name="parkBrakeActive" type="Boolean">
+  <param name="parkBrakeActive" type="Boolean" mandatory="true">
     <description>References signal "PrkBrkActv_B_Actl".</description>
 </param>
-  <param name="ignitionStableStatus" type="IgnitionStableStatus">
+  <param name="ignitionStableStatus" type="IgnitionStableStatus" mandatory="true">
     <description>References signal "Ignition_Switch_Stable". See IgnitionStableStatus.</description>
 </param>
-  <param name="ignitionStatus" type="IgnitionStatus">
+  <param name="ignitionStatus" type="IgnitionStatus" mandatory="true">
     <description>References signal "Ignition_status". See IgnitionStatus.</description>
 </param>
 </struct>
 
 <struct name="DeviceStatus">
-  <param name="voiceRecOn" type="Boolean">
+  <param name="voiceRecOn" type="Boolean" mandatory="false">
     <description>References signal "CPM_VoiceRec_STAT".</description>
 </param>
-  <param name="btIconOn" type="Boolean">
+  <param name="btIconOn" type="Boolean" mandatory="false">
     <description>References signal "BT_ICON".</description>
 </param>
-  <param name="callActive" type="Boolean">
+  <param name="callActive" type="Boolean" mandatory="false">
     <description>References signal "CPM_Call_Active_STAT".</description>
 </param>
-  <param name="phoneRoaming" type="Boolean">
+  <param name="phoneRoaming" type="Boolean" mandatory="false">
     <description>References signal "CPM_Phone_Roaming_STAT".</description>
 </param>
-  <param name="textMsgAvailable" type="Boolean">
+  <param name="textMsgAvailable" type="Boolean" mandatory="false">
     <description>References signal "CPM_TextMsg_AVAL".</description>
 </param>
-  <param name="battLevelStatus" type="DeviceLevelStatus">
+  <param name="battLevelStatus" type="DeviceLevelStatus" mandatory="false">
     <description>Device battery level status.  References signal "CPM_Batt_Level_STAT". See DeviceLevelStatus.</description>
 </param>
-  <param name="stereoAudioOutputMuted" type="Boolean">
+  <param name="stereoAudioOutputMuted" type="Boolean" mandatory="false">
     <description>References signal "CPM_Stereo_Audio_Output".</description>
 </param>
-  <param name="monoAudioOutputMuted" type="Boolean">
+  <param name="monoAudioOutputMuted" type="Boolean" mandatory="false">
     <description>References signal "CPM_Mono_Audio_Output".</description>
 </param>
-  <param name="signalLevelStatus" type="DeviceLevelStatus">
+  <param name="signalLevelStatus" type="DeviceLevelStatus" mandatory="false">
     <description>Device signal level status.  References signal "CPM_Signal_Strength_STAT". See DeviceLevelStatus.</description>
 </param>
-  <param name="primaryAudioSource" type="PrimaryAudioSource">
+  <param name="primaryAudioSource" type="PrimaryAudioSource" mandatory="false">
     <description>References signal "CPM_Stereo_PAS_Source". See PrimaryAudioSource.</description>
 </param>
-  <param name="eCallEventActive" type="Boolean">
+  <param name="eCallEventActive" type="Boolean" mandatory="false">
     <description>References signal "eCall_Event".</description>
 </param>
 </struct>
 
 <struct name="MyKey">
-  <param name="e911Override" type="VehicleDataStatus">
+  <param name="e911Override" type="VehicleDataStatus" mandatory="true">
     <description>Indicates whether e911 override is on.  References signal "MyKey_e911Override_St". See VehicleDataStatus.</description>
 </param>
 </struct>
@@ -1128,11 +1130,17 @@
     <function name="OnReady" messagetype="notification">
       <description>HMI notifies SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
-    <function name="GetDeviceList" messagetype="request">
-        <description>Request from HMI to SmartDeviceLink to get the list of devices</description>
+    <function name="OnStartDeviceDiscovery" messagetype="notification">
+      <description>Initiated by HMI user.</description>
     </function>
-    <function name="GetDeviceList" messagetype="response">
-        <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
+    <function name="UpdateDeviceList" messagetype="request">
+        <description>Request from SmartDeviceLink to HMI to change device list.</description>
+        <param name="deviceList" type="Common.DeviceInfo" mandatory="true" array="true" minsize="0" maxsize="100"/>
+    </function>
+  <function name="UpdateDeviceList" messagetype="response">
+    </function>
+    <function name="OnUpdateDeviceList" messagetype="notification">
+      <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
 	<function name="AllowDeviceToConnect" messagetype="request">
         <description>Request from SmartDeviceLink to HMI to get the permissions of new device connection.</description>
@@ -1141,29 +1149,27 @@
     <function name="AllowDeviceToConnect" messagetype="response">
 		<param name="allow" type="Boolean" mandatory="true"/>
 	</function>
-    <function name="StartDeviceDiscovery" messagetype="request">
-      <description>Initiated by HMI user. In response optional list of found devices - if not provided, not were found.</description>
+  <function name="OnDeviceChosen" messagetype="notification">
+      <description>Notification is initiated by HMI on user selecting device in list of devices.</description>
+      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true"/>
     </function>
-    <function name="StartDeviceDiscovery" messagetype="response">
-      <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
-    </function>
-    <function name="OnDeviceListUpdated" messagetype="notification">
-        <description>Notification from SmartDeviceLink to HMI about changes in device list.</description>
-        <param name="deviceList" type="Common.DeviceInfo" mandatory="false" array="true" minsize="1" maxsize="100"/>
-    </function>
-    <function name="GetAppList" messagetype="request">
+    <function name="OnFindApplications" messagetype="notification">
         <description>This methos is usually invoked by HMI to get list of registered apps.</description>
+    <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
+      <description>Device on which applications should be found.</description>
+    </param>
     </function>
-    <function name="GetAppList" messagetype="response">
-        <param name="appList" type="Common.HMIApplication" mandatory="false" array="true" minsize="1"/>
+     <function name="UpdateAppList" messagetype="request">
+      <description>Issued by SDL to notify HMI about new applications registered.</description>
+      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
     </function>
-    <function name="ActivateApp" messagetype="request">
-      <description>Invoked by UI component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action. Application is shown on recieving successful response.</description>
+  <function name="UpdateAppList" messagetype="response">
+    </function>
+    <function name="OnAppActivated" messagetype="notification">
+      <description>Invoked by UI component when user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of selected application.</description>
       </param>
-    </function>
-    <function name="ActivateApp" messagetype="response">
     </function>
     <function name="OnAppDeactivated" messagetype="notification">
       <description>Invoked by UI component when user switches to any functionality which is not other mobile application.</description>
@@ -1182,22 +1188,17 @@
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
       <param name="appID" type="Integer" mandatory="true"/>
     </function>
-    <function name="ExitApplication" messagetype="request">
+    <function name="OnExitApplication" messagetype="notification">
       <description>Used by HMI when User chooses to exit application. Sent from HMI to SDL.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that requested this RPC.</description>
       </param>
     </function>
-    <function name="ExitApplication" messagetype="response">
-      <description>Success of operation.</description>
-    </function>
-    <function name="ExitAllApplications" messagetype="request">
+    <function name="OnExitAllApplications" messagetype="notification">
       <description>Sent by HMI to SDL to close all registered applications.</description>
       <param name="reason" type="Common.ApplicationsCloseReason" mandatory="true">
         <description>Specifies reason for exiting all apllications.</description>
       </param>
-    </function>
-    <function name="ExitAllApplications" messagetype="response">
     </function>
     <function name="MixingAudioSupported" messagetype="request">
       <description>Request from SDL to HMI to find out if the last one supports mixing audio (ie recording TTS command and playing audio).</description>
@@ -1447,6 +1448,9 @@
         <description>App labeled on-screen presets (i.e. GEN2).</description>
         <description>If omitted on supported displays, the presets will be shown as not defined.</description>
       </param>
+	  <param name="appID" type="Integer" mandatory="true">
+          <description>Id of application related to this RPC.</description>
+      </param>
     </function>
     <function name="Show" messagetype="response">
     </function>
@@ -1495,7 +1499,7 @@
     </function>
     <function name="DeleteSubMenu" messagetype="request">
       <description>Deletes a submenu from the in-application menu.</description>
-      <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000">
+      <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" >
         <description>The "menuID" of the submenu to delete. (See addSubMenu.menuID)</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -1504,30 +1508,6 @@
     </function>
     <function name="DeleteSubMenu" messagetype="response">
     </function>
-    <function name="CreateInteractionChoiceSet" messagetype="request">
-      <description>Creates interaction choice set to be used later by performInteraction</description>
-      <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
-        <description>Unique ID used for this interaction choice set.</description>
-      </param>
-      <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" />
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that requested this RPC.</description>
-      </param>
-    </function>
-    <function name="CreateInteractionChoiceSet" messagetype="response">
-    </function>
-    <function name="DeleteInteractionChoiceSet" messagetype="request">
-      <description>Deletes interaction choice set that has been created with "CreateInteractionChoiceSet".</description>
-      <description>The interaction may only be deleted when not currently in use by a "performInteraction".</description>
-      <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
-        <description>ID of the interaction choice set to delete.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that requested this RPC.</description>
-      </param>
-    </function>
-    <function name="DeleteInteractionChoiceSet" messagetype="response">
-    </function>
     <function name="PerformInteraction" messagetype="request">
       <description>Triggers an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
       <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
@@ -1535,6 +1515,10 @@
       </param>
       <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
         <description>List of interaction choice set IDs to use with an interaction.</description>
+      </param>
+	  <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false" >
+        <description> The suggested VR Help Items to be displayed on-screen during Perform Interaction.</description>
+        <description>If omitted on supported displays, the default system-generated help items should be used.</description>
       </param>
       <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
         <description>Timeout in milliseconds.</description>
@@ -1648,10 +1632,6 @@
     </function>
     <function name="SetAppIcon" messagetype="response">
     </function>
-    <function name="OnDeviceChosen" messagetype="notification">
-      <description>Notification is initiated by HMI on user selecting device in list of devices.</description>
-      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true"/>
-    </function>
     <function name="Slider" messagetype="request">
       <description>Creates a full screen or pop-up overlay (depending on platform) with a single user controlled slider.</description>
       <param name="numTicks" type="Integer" minvalue="2" maxvalue="26" mandatory="true">
@@ -1753,7 +1733,7 @@
           ETA
           totalDistance.</description>
       </param>
-      <param name="turnIcon" type="Common.Image">
+      <param name="turnIcon" type="Common.Image" mandatory="false">
       </param>
       <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
         <description>Distance till next maneuver (starting from) from previous maneuver.</description>
@@ -1800,7 +1780,7 @@
     </function>
     <function name="OnTBTClientState" messagetype="notification">
       <description>Provides applications with notifications specific to the current Turn-By-Turn client status on the module</description>
-      <param name="state" type="Common.TBTState">
+      <param name="state" type="Common.TBTState" mandatory="true">
         <description>Current State of TBT client</description>
       </param>
     </function>

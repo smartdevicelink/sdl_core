@@ -29,25 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/exit_application_response.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ExitApplicationResponse::ExitApplicationResponse(
-  const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+/**
+ * @brief UpdateAppListResponse command class
+ **/
+class UpdateAppListResponse : public ResponseFromHMI {
+  public:
+    /**
+     * @brief UpdateAppListResponse class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit UpdateAppListResponse(const MessageSharedPtr& message);
 
-ExitApplicationResponse::~ExitApplicationResponse() {
-}
+    /**
+     * @brief UpdateAppListResponse class destructor
+     **/
+    virtual ~UpdateAppListResponse();
 
-void ExitApplicationResponse::Run() {
-  LOG4CXX_INFO(logger_, "ExitApplicationResponse::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  SendResponse();
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(UpdateAppListResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_RESPONSE_H_

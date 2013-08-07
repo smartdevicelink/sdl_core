@@ -30,27 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/start_device_discovery_request.h"
-#include "application_manager/application_manager_impl.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-StartDeviceDiscoveryRequest::StartDeviceDiscoveryRequest(
-    const MessageSharedPtr& message): RequestFromHMI(message) {
-}
+/**
+ * @brief OnExitAllApplicationsNotification command class
+ **/
+class OnExitAllApplicationsNotification : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnExitAllApplicationsNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnExitAllApplicationsNotification(const MessageSharedPtr& message);
 
-StartDeviceDiscoveryRequest::~StartDeviceDiscoveryRequest() {
-}
+    /**
+     * @brief OnExitAllApplicationsNotification class destructor
+     **/
+    virtual ~OnExitAllApplicationsNotification();
 
-void StartDeviceDiscoveryRequest::Run() {
-  LOG4CXX_INFO(logger_, "StartDeviceDiscoveryRequest::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  ApplicationManagerImpl::instance()->StartDevicesDiscovery();
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnExitAllApplicationsNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_

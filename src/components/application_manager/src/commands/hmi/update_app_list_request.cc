@@ -30,43 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/commands/hmi/update_app_list_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief StartDeviceDiscoveryRequest command class
- **/
-class StartDeviceDiscoveryRequest : public RequestFromHMI {
- public:
-  /**
-   * @brief StartDeviceDiscoveryRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit StartDeviceDiscoveryRequest(const MessageSharedPtr& message);
+UpdateAppListRequest::UpdateAppListRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
+}
 
-  /**
-   * @brief StartDeviceDiscoveryRequest class destructor
-   **/
-  virtual ~StartDeviceDiscoveryRequest();
+UpdateAppListRequest::~UpdateAppListRequest() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void UpdateAppListRequest::Run() {
+  LOG4CXX_INFO(logger_, "UpdateAppListRequest::Run");
 
- private:
-   DISALLOW_COPY_AND_ASSIGN(StartDeviceDiscoveryRequest);
-};
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_

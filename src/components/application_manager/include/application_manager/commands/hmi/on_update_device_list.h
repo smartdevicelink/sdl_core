@@ -30,26 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/ui_delete_interaction_choice_set_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIDeleteInteractionChoiceSetRequest::UIDeleteInteractionChoiceSetRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+/**
+ * @brief OnUpdateDeviceList command class
+ **/
+class OnUpdateDeviceList : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnUpdateDeviceList class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnUpdateDeviceList(const MessageSharedPtr& message);
 
-UIDeleteInteractionChoiceSetRequest::~UIDeleteInteractionChoiceSetRequest() {
-}
+    /**
+     * @brief OnUpdateDeviceList class destructor
+     **/
+    virtual ~OnUpdateDeviceList();
 
-void UIDeleteInteractionChoiceSetRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIDeleteInteractionChoiceSetRequest::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  SendRequest();
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnUpdateDeviceList);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_

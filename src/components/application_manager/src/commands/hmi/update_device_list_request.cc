@@ -30,43 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_CREATE_INTERACTION_CHOICE_SET_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_CREATE_INTERACTION_CHOICE_SET_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/update_device_list_request.h"
+#include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief UICreateInteractionChoiceSetRequest command class
- **/
-class UICreateInteractionChoiceSetRequest : public RequestToHMI {
- public:
-  /**
-   * @brief UICreateInteractionChoiceSetRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UICreateInteractionChoiceSetRequest(const MessageSharedPtr& message);
+UpdateDeviceListRequest::UpdateDeviceListRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
+}
 
-  /**
-   * @brief UICreateInteractionChoiceSetRequest class destructor
-   **/
-  virtual ~UICreateInteractionChoiceSetRequest();
+UpdateDeviceListRequest::~UpdateDeviceListRequest() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(UICreateInteractionChoiceSetRequest);
-};
+void UpdateDeviceListRequest::Run() {
+  LOG4CXX_INFO(logger_, "UpdateDeviceListRequest::Run");
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_CREATE_INTERACTION_CHOICE_SET_REQUEST_H_

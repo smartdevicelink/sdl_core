@@ -29,25 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/get_device_list_response.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetDeviceListResponse::GetDeviceListResponse(
-    const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+/**
+ * @brief OnAppActivatedNotification command class
+ **/
+class OnAppActivatedNotification : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnAppActivatedNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnAppActivatedNotification(const MessageSharedPtr& message);
 
-GetDeviceListResponse::~GetDeviceListResponse() {
-}
+    /**
+     * @brief OnAppActivatedNotification class destructor
+     **/
+    virtual ~OnAppActivatedNotification();
 
-void GetDeviceListResponse::Run() {
-  LOG4CXX_INFO(logger_, "GetDeviceListResponse::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  SendResponse();
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnAppActivatedNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_

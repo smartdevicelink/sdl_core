@@ -29,25 +29,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/start_device_discovery_response.h"
+
+#include "application_manager/commands/hmi/on_app_activated_notification.h"
+#include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-StartDeviceDiscoveryResponse::StartDeviceDiscoveryResponse(
-    const MessageSharedPtr& message): ResponseToHMI(message) {
+OnAppActivatedNotification::OnAppActivatedNotification(
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
-StartDeviceDiscoveryResponse::~StartDeviceDiscoveryResponse() {
+OnAppActivatedNotification::~OnAppActivatedNotification() {
 }
 
-void StartDeviceDiscoveryResponse::Run() {
-  LOG4CXX_INFO(logger_, "StartDeviceDiscoveryResponse::Run");
+void OnAppActivatedNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnAppActivatedNotification::Run");
 
-  SendResponse();
+  Application* application =
+    ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::msg_params][strings::app_id]);
+
+  if (!application) {
+    (*message_)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::INVALID_DATA;
+  } else {
+    ApplicationManagerImpl::instance()->ActivateApplication(application);
+  }
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -232,6 +232,7 @@ std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
 
 const std::set<connection_handler::Device>&
 ApplicationManagerImpl::device_list() {
+  // TODO(PV): add updating functionality - request to TM.
   std::set<connection_handler::Device> devices;
   return devices;
 }
@@ -532,7 +533,7 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
     message_chaining_.erase(it);
   }
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain size is "
-                 << message_chaining_.size());
+               << message_chaining_.size());
 
   return result;
 }
@@ -736,16 +737,16 @@ void ApplicationManagerImpl::onErrorSending(
 
 void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
-  // TODO(DK): HMI StartDeviceDiscovery response
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnDeviceListUpdated");
   smart_objects::SmartObject* update_list = new smart_objects::SmartObject;
   smart_objects::SmartObject& so_to_send = *update_list;
   so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
-    hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated;
+    hmi_apis::FunctionID::BasicCommunication_UpdateDeviceList;
   so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
-    hmi_apis::messageType::notification;
+    hmi_apis::messageType::request;
   so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
   so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
-  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = 4435;
+  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = GetNextHMICorrelationID();
   smart_objects::SmartObject* msg_params =
     MessageHelper::CreateDeviceListSO(device_list);
   if (!msg_params) {

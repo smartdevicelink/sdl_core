@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *  · Redistributions of source code must retain the above copyright notice,
@@ -11,7 +11,7 @@
  *  · Neither the name of the Ford Motor Company nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,11 +43,11 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
     getAppListRequestID: -1,
     getDeviceListRequestID: -1,
     activateAppRequestID: -1,
-    
+
     onAppRegisteredSubscribeRequestID: -1,
     onAppUnregisteredSubscribeRequestID: -1,
     onPlayToneSubscribeRequestID: -1,
-    
+
     onAppRegisteredUnsubscribeRequestID: -1,
     onAppUnregisteredUnsubscribeRequestID: -1,
     onPlayToneUnsubscribeRequestID: -1,
@@ -191,16 +191,16 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         if(request.method == "BasicCommunication.MixingAudioSupported"){
             this.MixingAudioSupported(true);
         }
-        
+
         if(request.method == "BasicCommunication.AllowAllApps"){
             this.AllowAllApps(true);
         }
-        
+
         if(request.method == "BasicCommunication.AllowApp"){
             this.AllowApp(true);
         }
     },
-    
+
     /**
      * notification that UI is ready BasicCommunication should be sunscribed to
      * this notification
@@ -220,12 +220,12 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * @param {String} appName
      */
     ActivateApp: function(appID) {
-        Em.Logger.log("FFW.BasicCommunication.ActivateApp");
+        Em.Logger.log("FFW.BasicCommunication.OnAppActivated");
 
-        // send repsonse
+        // send notification
         var JSONMessage = {
             "jsonrpc": "2.0",
-            "method": "BasicCommunication.ActivateApp",
+            "method": "BasicCommunication.OnAppActivated",
             "params": {
                 "appID": appID
             }
@@ -263,18 +263,17 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
     /**
      * Notification when user returned to application
-     * 
+     *
      * @params {Number}
      */
     ActivateApp: function(appID) {
-        Em.Logger.log("FFW.BasicCommunication.ActivateApp");
+        Em.Logger.log("FFW.BasicCommunication.OnAppActivated");
 
         // send request
 
         var JSONMessage = {
             "jsonrpc": "2.0",
-            "id": this.client.idStart,
-            "method": "BasicCommunication.ActivateApp",
+            "method": "BasicCommunication.OnAppActivated",
             "params": {
                 "appID": appID
             }
@@ -284,7 +283,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
     /**
      * Invoked by UI component when user switches to any functionality which is not other mobile application.
-     * 
+     *
      * @params {String}
      * @params {Number}
      */
@@ -303,7 +302,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         };
         this.client.send(JSONMessage);
     },
-    
+
     /**
      * Initiated by HMI user. In response optional list of found devices - if not provided, not were found.
      */
@@ -322,7 +321,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
     /**
      * Used by HMI when User chooses to exit application.
-     * 
+     *
      * @params {Number}
      */
     ExitApplication: function(appID) {
@@ -343,7 +342,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
     /**
      * Sent by HMI to SDL to close all registered applications.
-     * 
+     *
      * @params {String}
      */
     ExitAllApplications: function(reason) {
@@ -364,7 +363,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
     /**
      * Response with params of the last one supports mixing audio (ie recording TTS command and playing audio).
-     * 
+     *
      * @params {Number}
      */
     MixingAudioSupported: function(attenuatedSupported) {
@@ -386,7 +385,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
     /**
      * Response with Results by user/HMI allowing SDL functionality or disallowing access to all mobile apps.
-     * 
+     *
      * @params {Number}
      */
     AllowAllApps: function(allowed) {
@@ -408,7 +407,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
     /**
      * Response with result of allowed application
-     * 
+     *
      * @params {Number}
      */
     AllowApp: function(allowed) {

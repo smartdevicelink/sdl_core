@@ -30,43 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
 
-#include "application_manager/commands/hmi/notification_to_hmi.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief OnDeviceListUpdatedNotification command class
+ * @brief UpdateAppListRequest command class
  **/
-class OnDeviceListUpdatedNotification : public NotificationToHMI {
- public:
-  /**
-   * @brief OnDeviceListUpdatedNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnDeviceListUpdatedNotification(const MessageSharedPtr& message);
+class UpdateAppListRequest : public RequestToHMI {
+  public:
+    /**
+     * @brief UpdateAppListRequest class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit UpdateAppListRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnDeviceListUpdatedNotification class destructor
-   **/
-  virtual ~OnDeviceListUpdatedNotification();
+    /**
+     * @brief UpdateAppListRequest class destructor
+     **/
+    virtual ~UpdateAppListRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnDeviceListUpdatedNotification);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(UpdateAppListRequest);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_

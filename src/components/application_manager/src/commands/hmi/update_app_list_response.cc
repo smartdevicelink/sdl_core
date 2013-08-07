@@ -30,43 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_DELETE_INTERACTION_CHOICE_SET_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_DELETE_INTERACTION_CHOICE_SET_RESPONSE_H_
-
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/hmi/update_app_list_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief UIDeleteInteractionChoiceSetResponse command class
- **/
-class UIDeleteInteractionChoiceSetResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief UIDeleteInteractionChoiceSetResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UIDeleteInteractionChoiceSetResponse(const MessageSharedPtr& message);
+UpdateAppListResponse::UpdateAppListResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
+}
 
-  /**
-   * @brief UIDeleteInteractionChoiceSetResponse class destructor
-   **/
-  virtual ~UIDeleteInteractionChoiceSetResponse();
+UpdateAppListResponse::~UpdateAppListResponse() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void UpdateAppListResponse::Run() {
+  LOG4CXX_INFO(logger_, "UpdateAppListResponse::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(UIDeleteInteractionChoiceSetResponse);
-};
+  // TODO(PV): add check
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_DELETE_INTERACTION_CHOICE_SET_RESPONSE_H_

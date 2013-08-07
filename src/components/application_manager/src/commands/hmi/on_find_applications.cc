@@ -30,43 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_
+#include "application_manager/commands/hmi/on_find_applications.h"
 
-#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief UICreateInteractionChoiceSetResponse command class
- **/
-class UICreateInteractionChoiceSetResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief UICreateInteractionChoiceSetResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UICreateInteractionChoiceSetResponse(const MessageSharedPtr& message);
+OnFindApplications::OnFindApplications(
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
+}
 
-  /**
-   * @brief UICreateInteractionChoiceSetResponse class destructor
-   **/
-  virtual ~UICreateInteractionChoiceSetResponse();
+OnFindApplications::~OnFindApplications() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void OnFindApplications::Run() {
+  LOG4CXX_INFO(logger_, "OnFindApplications::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(UICreateInteractionChoiceSetResponse);
-};
+  // TODO(PV): add UpdateAppsOnDevice to ApplicationManager
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_

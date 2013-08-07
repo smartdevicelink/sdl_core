@@ -30,43 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_
-
-#include "application_manager/commands/hmi/response_to_hmi.h"
+#include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
+#include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief GetDeviceListResponse command class
- **/
-class GetDeviceListResponse : public ResponseToHMI {
- public:
-  /**
-   * @brief GetDeviceListResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit GetDeviceListResponse(const MessageSharedPtr& message);
+OnExitAllApplicationsNotification::OnExitAllApplicationsNotification(
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
+}
 
-  /**
-   * @brief GetDeviceListResponse class destructor
-   **/
-  virtual ~GetDeviceListResponse();
+OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void OnExitAllApplicationsNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnExitAllApplicationsNotification::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(GetDeviceListResponse);
-};
+  const hmi_apis::Common_ApplicationsCloseReason::eType reason =
+    static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
+      (*message_)[strings::msg_params][hmi_request::reason].asInt());
+
+  ApplicationManagerImpl::instance()->UnregisterAllApplications(reason);
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_

@@ -30,43 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_REQUEST_H_
 
-#include "application_manager/commands/hmi/response_to_hmi.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief ActivateAppResponse command class
+ * @brief UpdateDeviceListRequest command class
  **/
-class ActivateAppResponse : public ResponseToHMI {
- public:
-  /**
-   * @brief ActivateAppResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit ActivateAppResponse(const MessageSharedPtr& message);
+class UpdateDeviceListRequest : public RequestToHMI {
+  public:
+    /**
+     * @brief UpdateDeviceListRequest class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit UpdateDeviceListRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief ActivateAppResponse class destructor
-   **/
-  virtual ~ActivateAppResponse();
+    /**
+     * @brief UpdateDeviceListRequest class destructor
+     **/
+    virtual ~UpdateDeviceListRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(ActivateAppResponse);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListRequest);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_REQUEST_H_

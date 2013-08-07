@@ -29,23 +29,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/activate_app_response.h"
+#include "application_manager/commands/hmi/on_update_device_list.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ActivateAppResponse::ActivateAppResponse(
-    const MessageSharedPtr& message): ResponseToHMI(message) {
+OnUpdateDeviceList::OnUpdateDeviceList(
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
-ActivateAppResponse::~ActivateAppResponse() {
+OnUpdateDeviceList::~OnUpdateDeviceList() {
 }
 
-void ActivateAppResponse::Run() {
-  LOG4CXX_INFO(logger_, "ActivateAppResponse::Run");
+void OnUpdateDeviceList::Run() {
+  LOG4CXX_INFO(logger_, "OnUpdateDeviceList::Run");
 
-  SendResponse();
+  ApplicationManagerImpl::instance()->device_list();
 }
 
 }  // namespace commands

@@ -46,7 +46,7 @@ ApplicationImpl::ApplicationImpl(unsigned int app_id)
     audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
     is_app_allowed_(true),
     has_been_activated_(false),
-    device_(NULL) {
+    device_(0) {
 }
 
 ApplicationImpl::~ApplicationImpl() {

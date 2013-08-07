@@ -30,43 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/commands/hmi/on_exit_application_notification.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief GetAppListRequest command class
- **/
-class GetAppListRequest : public RequestFromHMI {
- public:
-  /**
-   * @brief GetAppListRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit GetAppListRequest(const MessageSharedPtr& message);
+OnExitApplicationNotification::OnExitApplicationNotification(const MessageSharedPtr& message)
+  : NotificationFromHMI(message) {
+}
 
-  /**
-   * @brief GetAppListRequest class destructor
-   **/
-  virtual ~GetAppListRequest();
+OnExitApplicationNotification::~OnExitApplicationNotification() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void OnExitApplicationNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnExitApplicationNotification::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(GetAppListRequest);
-};
+  ApplicationManagerImpl::instance()->UnregisterApplication(
+    (*message_)[strings::msg_params][strings::app_id]);
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_

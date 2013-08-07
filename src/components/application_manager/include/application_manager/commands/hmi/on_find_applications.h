@@ -29,25 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/get_app_list_response.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetAppListResponse::GetAppListResponse(
-    const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+/**
+ * @brief OnFindApplications command class
+ **/
+class OnFindApplications : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnFindApplications class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnFindApplications(const MessageSharedPtr& message);
 
-GetAppListResponse::~GetAppListResponse() {
-}
+    /**
+     * @brief OnFindApplications class destructor
+     **/
+    virtual ~OnFindApplications();
 
-void GetAppListResponse::Run() {
-  LOG4CXX_INFO(logger_, "GetAppListResponse::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  SendResponse();
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnFindApplications);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_

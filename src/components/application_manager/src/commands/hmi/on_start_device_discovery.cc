@@ -29,25 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/exit_all_applications_response.h"
+
+#include "application_manager/commands/hmi/on_start_device_discovery.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ExitAllApplicationsResponse::ExitAllApplicationsResponse(
-    const MessageSharedPtr& message): ResponseToHMI(message) {
+OnStartDeviceDiscovery::OnStartDeviceDiscovery(
+  const MessageSharedPtr& message): NotificationFromHMI(message) {
 }
 
-ExitAllApplicationsResponse::~ExitAllApplicationsResponse() {
+OnStartDeviceDiscovery::~OnStartDeviceDiscovery() {
 }
 
-void ExitAllApplicationsResponse::Run() {
-  LOG4CXX_INFO(logger_, "ExitAllApplicationsResponse::Run");
+void OnStartDeviceDiscovery::Run() {
+  LOG4CXX_INFO(logger_, "OnStartDeviceDiscovery::Run");
 
-  SendResponse();
+  ApplicationManagerImpl::instance()->StartDevicesDiscovery();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -36,28 +36,24 @@
 #include "application_manager/message.h"
 #include "interfaces/HMI_API.h"
 
-#include "application_manager/commands/hmi/get_device_list_request.h"
-#include "application_manager/commands/hmi/get_device_list_response.h"
-#include "application_manager/commands/hmi/get_app_list_request.h"
-#include "application_manager/commands/hmi/get_app_list_response.h"
+#include "application_manager/commands/hmi/update_device_list_request.h"
+#include "application_manager/commands/hmi/update_device_list_response.h"
+#include "application_manager/commands/hmi/on_update_device_list.h"
+#include "application_manager/commands/hmi/on_start_device_discovery.h"
+#include "application_manager/commands/hmi/update_app_list_request.h"
+#include "application_manager/commands/hmi/update_app_list_response.h"
+#include "application_manager/commands/hmi/on_find_applications.h"
 #include "application_manager/commands/hmi/allow_all_apps_request.h"
 #include "application_manager/commands/hmi/allow_all_apps_response.h"
 #include "application_manager/commands/hmi/allow_app_request.h"
 #include "application_manager/commands/hmi/allow_app_response.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_request.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
-#include "application_manager/commands/hmi/activate_app_request.h"
-#include "application_manager/commands/hmi/activate_app_response.h"
-#include "application_manager/commands/hmi/exit_all_applications_request.h"
-#include "application_manager/commands/hmi/exit_all_applications_response.h"
-#include "application_manager/commands/hmi/exit_application_request.h"
-#include "application_manager/commands/hmi/exit_application_response.h"
-#include "application_manager/commands/hmi/start_device_discovery_request.h"
-#include "application_manager/commands/hmi/start_device_discovery_response.h"
+#include "application_manager/commands/hmi/on_app_activated_notification.h"
+#include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
+#include "application_manager/commands/hmi/on_exit_application_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
-#include "application_manager/commands/hmi/exit_application_request.h"
-#include "application_manager/commands/hmi/exit_application_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
 #include "application_manager/commands/hmi/button_get_capabilities_response.h"
 #include "application_manager/commands/hmi/ui_add_command_request.h"
@@ -96,10 +92,6 @@
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_request.h"
-#include "application_manager/commands/hmi/ui_create_interaction_choice_set_request.h"
-#include "application_manager/commands/hmi/ui_create_interaction_choice_set_response.h"
-#include "application_manager/commands/hmi/ui_delete_interaction_choice_set_request.h"
-#include "application_manager/commands/hmi/ui_delete_interaction_choice_set_response.h"
 #include "application_manager/commands/hmi/ui_perform_interaction_request.h"
 #include "application_manager/commands/hmi/ui_perform_interaction_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
@@ -149,7 +141,6 @@
 #include "application_manager/commands/hmi/on_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
-#include "application_manager/commands/hmi/on_device_list_updated_notification.h"
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
@@ -175,7 +166,7 @@ log4cxx::LoggerPtr HMICommandFactory::logger_   =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
+  const MessageSharedPtr& message) {
   LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand function_id: " <<
                (*message)[strings::params][strings::function_id].asInt());
 
@@ -187,7 +178,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand response");
   } else if ((*message)[strings::params][strings::message_type] ==
-      MessageType::kErrorResponse) {
+             MessageType::kErrorResponse) {
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand error response");
   } else {
@@ -195,19 +186,15 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
   }
 
   switch ((*message)[strings::params][strings::function_id].asInt()) {
-    case  hmi_apis::FunctionID::BasicCommunication_StartDeviceDiscovery: {
-      if (is_response) {
-        command.reset(new commands::StartDeviceDiscoveryResponse(message));
-      } else {
-        command.reset(new commands::StartDeviceDiscoveryRequest(message));
-      }
+    case  hmi_apis::FunctionID::BasicCommunication_OnStartDeviceDiscovery: {
+      command.reset(new commands::OnStartDeviceDiscovery(message));
       break;
     }
-    case  hmi_apis::FunctionID::BasicCommunication_GetDeviceList: {
+    case  hmi_apis::FunctionID::BasicCommunication_UpdateDeviceList: {
       if (is_response) {
-        command.reset(new commands::GetDeviceListResponse(message));
+        command.reset(new commands::UpdateDeviceListResponse(message));
       } else {
-        command.reset(new commands::GetDeviceListRequest(message));
+        command.reset(new commands::UpdateDeviceListRequest(message));
       }
       break;
     }
@@ -235,12 +222,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::BasicCommunication_ExitAllApplications: {
-      if (is_response) {
-        command.reset(new commands::ExitAllApplicationsResponse(message));
-      } else {
-        command.reset(new commands::ExitAllApplicationsRequest(message));
-      }
+    case  hmi_apis::FunctionID::BasicCommunication_OnExitAllApplications: {
+      command.reset(new commands::OnExitAllApplicationsNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::UI_AddCommand: {
@@ -280,22 +263,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UISetMediaClockTimerResponse(message));
       } else {
         command.reset(new commands::UISetMediaClockTimerRequest(message));
-      }
-      break;
-    }
-    case  hmi_apis::FunctionID::UI_CreateInteractionChoiceSet: {
-      if (is_response) {
-        command.reset(new commands::UICreateInteractionChoiceSetResponse(message));
-      } else {
-        command.reset(new commands::UICreateInteractionChoiceSetRequest(message));
-      }
-      break;
-    }
-    case  hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet: {
-      if (is_response) {
-        command.reset(new commands::UIDeleteInteractionChoiceSetResponse(message));
-      } else {
-        command.reset(new commands::UIDeleteInteractionChoiceSetRequest(message));
       }
       break;
     }
@@ -491,20 +458,12 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case  hmi_apis::FunctionID::BasicCommunication_ActivateApp: {
-      if (is_response) {
-        command.reset(new commands::ActivateAppResponse(message));
-      } else {
-        command.reset(new commands::ActivateAppRequest(message));
-      }
+    case  hmi_apis::FunctionID::BasicCommunication_OnAppActivated: {
+      command.reset(new commands::OnAppActivatedNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::BasicCommunication_ExitApplication: {
-      if (is_response) {
-        command.reset(new commands::ExitApplicationResponse(message));
-      } else {
-        command.reset(new commands::ExitApplicationRequest(message));
-      }
+    case  hmi_apis::FunctionID::BasicCommunication_OnExitApplication: {
+      command.reset(new commands::OnExitApplicationNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::UI_Show: {
@@ -627,7 +586,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnReadyNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::UI_OnDeviceChosen: {
+    case  hmi_apis::FunctionID::BasicCommunication_OnDeviceChosen: {
       command.reset(new commands::OnDeviceChosenNotification(message));
       break;
     }
@@ -639,8 +598,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::hmi::OnDriverDistractionNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::BasicCommunication_OnDeviceListUpdated: {
-      command.reset(new commands::OnDeviceListUpdatedNotification(message));
+    case  hmi_apis::FunctionID::BasicCommunication_OnUpdateDeviceList: {
+      command.reset(new commands::OnUpdateDeviceList(message));
       break;
     }
     case  hmi_apis::FunctionID::BasicCommunication_OnAppRegistered: {
@@ -649,6 +608,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered: {
       command.reset(new commands::OnAppUnregisteredNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnFindApplications: {
+      command.reset(new commands::OnFindApplications(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_UpdateAppList: {
+      if (is_response) {
+        command.reset(new commands::UpdateAppListResponse(message));
+      } else {
+        command.reset(new commands::UpdateAppListRequest(message));
+      }
       break;
     }
     case  hmi_apis::FunctionID::VR_Started: {

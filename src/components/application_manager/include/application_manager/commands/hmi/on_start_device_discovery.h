@@ -30,26 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/ui_create_interaction_choice_set_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UICreateInteractionChoiceSetRequest::UICreateInteractionChoiceSetRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+/**
+ * @brief OnStartDeviceDiscovery command class
+ **/
+class OnStartDeviceDiscovery : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnStartDeviceDiscovery class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnStartDeviceDiscovery(const MessageSharedPtr& message);
 
-UICreateInteractionChoiceSetRequest::~UICreateInteractionChoiceSetRequest() {
-}
+    /**
+     * @brief OnStartDeviceDiscovery class destructor
+     **/
+    virtual ~OnStartDeviceDiscovery();
 
-void UICreateInteractionChoiceSetRequest::Run() {
-  LOG4CXX_INFO(logger_, "UICreateInteractionChoiceSetRequest::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  SendRequest();
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnStartDeviceDiscovery);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_
