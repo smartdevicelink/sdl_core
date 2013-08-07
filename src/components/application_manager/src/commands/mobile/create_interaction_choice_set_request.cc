@@ -88,6 +88,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 }
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
+  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames");
   smart_objects::SmartObject& choice_set =
     (*message_)[strings::msg_params][strings::choice_set];
 
@@ -107,6 +108,7 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
 }
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
+  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms");
   smart_objects::SmartObject& choice_set =
     (*message_)[strings::msg_params][strings::choice_set];
 
@@ -136,6 +138,7 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
 }
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceID(const Application* app) {
+  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceID");
   smart_objects::SmartObject& choice_set =
     (*message_)[strings::msg_params][strings::choice_set];
 
@@ -162,7 +165,7 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceID(const Application* app) {
 
   for (; choice_set_map.end() != it; ++it) {
     for (size_t i = 0; i < (*it->second)[strings::choice_set].length(); ++i) {
-      for (size_t j = 0; j < choice_set.length(); ++i) {
+      for (size_t j = 0; j < choice_set.length(); ++j) {
         if ((*it->second)[strings::choice_set][i][strings::choice_id].asInt() ==
              choice_set[j][strings::choice_id].asInt()) {
           LOG4CXX_ERROR(logger_, "Incoming choice ID already exist");

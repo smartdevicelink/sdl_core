@@ -98,7 +98,6 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(const Application* app) {
 
     PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
-
       if (it->first == (*message_)[strings::msg_params]
           [strings::interaction_choice_set_id].asInt()) {
         LOG4CXX_ERROR_EXT(logger_,

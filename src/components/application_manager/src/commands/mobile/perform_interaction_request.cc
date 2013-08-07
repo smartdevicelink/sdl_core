@@ -75,23 +75,163 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  if (!SendVRAddCommandRequest(app)) {
-    LOG4CXX_ERROR(logger_, "Failed to send VR Addcommand");
+  if (!CheckChoiceSetVRSynonyms(app)) {
+    return;
   }
 
-  if (SendUIPerformInteractionRequest(app)) {
-     app->set_perform_interaction_active(true);
+  if (!CheckChoiceSetMenuNames(app)) {
+    return;
   }
 
+  app->set_perform_interaction_active(true);
+  SendVRAddCommandRequest(app);
+  SendUIPerformInteractionRequest(app);
   SendTTSSpeakRequest(app);
 
   // TODO (DK): need to implement timeout TTS speak request.
 }
 
-bool PerformInteractionRequest::SendVRAddCommandRequest(
+void PerformInteractionRequest::SendVRAddCommandRequest(
+    Application* const app) {
+  smart_objects::SmartObject& choice_list =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+  for (size_t i = 0; i < choice_list.length(); ++i) {
+    smart_objects::SmartObject* choice_set =
+      app->FindChoiceSet(choice_list[i].asInt());
+
+    if (choice_set) {
+      for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+        smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+        msg_params[strings::app_id] = app->app_id();
+        msg_params[strings::cmd_id] =
+          (*choice_set)[strings::choice_set][j][strings::choice_id];
+        msg_params[strings::vr_commands] =
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
+        msg_params[strings::vr_commands] =
+          (*choice_set)[strings::choice_set][j][strings::vr_commands];
+
+        CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand,
+                         msg_params, false);
+      }
+    }
+  }
+}
+
+void PerformInteractionRequest::SendUIPerformInteractionRequest(
+  Application* const app) {
+  smart_objects::SmartObject& choice_list =
+    (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[hmi_request::initial_text][hmi_request::field_name] =
+    TextFieldName::INITIAL_INTERACTION_TEXT;
+  msg_params[hmi_request::initial_text][hmi_request::field_text] =
+    (*message_)[strings::msg_params][hmi_request::initial_text];
+
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    msg_params[strings::timeout] =
+        (*message_)[strings::msg_params][strings::timeout];
+  }
+  else {
+    msg_params[strings::timeout] = 10000;
+  }
+
+  msg_params[strings::app_id] = app->app_id();
+
+  msg_params[strings::choice_set] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (size_t i = 0; i < choice_list.length(); ++i) {
+    smart_objects::SmartObject* choice_set =
+      app->FindChoiceSet(choice_list[i].asInt());
+    if (choice_set) {
+      // save perform interaction choice set
+      app->AddPerformInteractionChoiceSet(choice_list[i].asInt(), *choice_set);
+      for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+        int index = msg_params[strings::choice_set].length();
+        msg_params[strings::choice_set][index] =
+            (*choice_set)[strings::choice_set][j];
+        std::string file_path = file_system::FullPath(app->name());
+        file_path += "/";
+        file_path += msg_params[strings::choice_set][index]
+            [strings::image][strings::value].asString();
+        msg_params[strings::choice_set][index][strings::image][strings::value] =
+            file_path;
+      }
+    }
+  }
+
+  CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
+                   msg_params, true, 1);
+}
+
+void PerformInteractionRequest::SendTTSSpeakRequest(Application* const app) {
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::tts_chunks] =
+      (*message_)[strings::msg_params][strings::initial_prompt];
+  msg_params[strings::app_id] = app->app_id();
+
+  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, false);
+}
+
+bool PerformInteractionRequest::CheckChoiceSetMenuNames(
     Application* const app) {
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+  for (size_t i = 0; i < choice_list.length(); ++i) {
+    // choice_set contains SmartObject msg_params
+    smart_objects::SmartObject* i_choice_set =
+      app->FindChoiceSet(choice_list[i].asInt());
+
+    for (size_t j = 0; j < choice_list.length(); ++j) {
+      smart_objects::SmartObject* j_choice_set =
+        app->FindChoiceSet(choice_list[j].asInt());
+
+      if (i == j) {
+        // skip check the same element
+        continue;
+      }
+
+      if (!i_choice_set || !j_choice_set) {
+        LOG4CXX_ERROR(logger_, "Invalid ID");
+        SendResponse(false, mobile_apis::Result::INVALID_ID);
+        return false;
+      }
+
+      size_t ii = 0;
+      size_t jj = 0;
+      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
+        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
+          std::string ii_menu_name = (*i_choice_set)[strings::choice_set][ii]
+              [strings::menu_name].asString();
+          std::string jj_menu_name = (*j_choice_set)[strings::choice_set][jj]
+              [strings::menu_name].asString();
+
+          if (ii_menu_name == jj_menu_name) {
+            LOG4CXX_ERROR(logger_,
+                          "Incoming choice set has duplicated menu name");
+            SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
+    Application* const app) {
+  smart_objects::SmartObject& choice_list =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
     // choice_set contains SmartObject msg_params
@@ -139,137 +279,9 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
     }
   }
 
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    smart_objects::SmartObject* choice_set =
-      app->FindChoiceSet(choice_list[i].asInt());
-
-    if (!choice_set) {
-      LOG4CXX_ERROR(logger_, "Invalid ID");
-      SendResponse(false, mobile_apis::Result::INVALID_ID);
-      return false;
-    }
-
-
-
-    for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
-      smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-      msg_params[strings::app_id] = app->app_id();
-      msg_params[strings::cmd_id] =
-        (*choice_set)[strings::choice_set][j][strings::choice_id];
-      msg_params[strings::vr_commands] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-      msg_params[strings::vr_commands] =
-        (*choice_set)[strings::choice_set][j][strings::vr_commands];
-
-      CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, false);
-    }
-  }
-
   return true;
 }
 
-bool PerformInteractionRequest::SendUIPerformInteractionRequest(
-  Application* const app) {
-  smart_objects::SmartObject& choice_list =
-    (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    // choice_set contains SmartObject msg_params
-    smart_objects::SmartObject* i_choice_set =
-      app->FindChoiceSet(choice_list[i].asInt());
-
-    for (size_t j = 0; j < choice_list.length(); ++j) {
-      smart_objects::SmartObject* j_choice_set =
-        app->FindChoiceSet(choice_list[j].asInt());
-
-      if (i == j) {
-        // skip check the same element
-        continue;
-      }
-
-      if (!i_choice_set || !j_choice_set) {
-        LOG4CXX_ERROR(logger_, "Invalid ID");
-        SendResponse(false, mobile_apis::Result::INVALID_ID);
-        return false;
-      }
-
-      size_t ii = 0;
-      size_t jj = 0;
-      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
-        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
-          std::string ii_menu_name = (*i_choice_set)[strings::choice_set][ii]
-              [strings::menu_name].asString();
-          std::string jj_menu_name = (*j_choice_set)[strings::choice_set][jj]
-              [strings::menu_name].asString();
-
-          if (ii_menu_name == jj_menu_name) {
-            LOG4CXX_ERROR(logger_,
-                          "Incoming choiceset has duplicated menu name");
-            SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
-            return false;
-          }
-        }
-      }
-    }
-  }
-
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-  msg_params[hmi_request::initial_text][hmi_request::field_name] =
-    TextFieldName::INITIAL_INTERACTION_TEXT;
-  msg_params[hmi_request::initial_text][hmi_request::field_text] =
-    (*message_)[strings::msg_params][hmi_request::initial_text];
-
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    msg_params[strings::timeout] =
-        (*message_)[strings::msg_params][strings::timeout];
-  }
-  else {
-    msg_params[strings::timeout] = 10000;
-  }
-
-  msg_params[strings::app_id] = app->app_id();
-
-  msg_params[strings::choice_set] =
-    smart_objects::SmartObject(smart_objects::SmartType_Array);
-
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    smart_objects::SmartObject* choice_set =
-      app->FindChoiceSet(choice_list[i].asInt());
-    if (choice_set) {
-      // save perform interaction choice set
-      app->AddPerformInteractionChoiceSet(choice_list[i].asInt(), *choice_set);
-      for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
-        int index = msg_params[strings::choice_set].length();
-        msg_params[strings::choice_set][index] =
-            (*choice_set)[strings::choice_set][j];
-        std::string file_path = file_system::FullPath(app->name());
-        file_path += "/";
-        file_path += msg_params[strings::choice_set][index]
-            [strings::image][strings::value].asString();
-        msg_params[strings::choice_set][index][strings::image][strings::value] =
-            file_path;
-      }
-    }
-  }
-
-  CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
-                   msg_params, true, 1);
-  return true;
-}
-
-void PerformInteractionRequest::SendTTSSpeakRequest(Application* const app) {
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-  msg_params[strings::tts_chunks] =
-      (*message_)[strings::msg_params][strings::initial_prompt];
-  msg_params[strings::app_id] = app->app_id();
-
-  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, false);
-}
 }  // namespace commands
 
 }  // namespace application_manager

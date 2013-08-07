@@ -71,18 +71,16 @@ class PerformInteractionRequest : public CommandRequestImpl {
      *
      * @param app_id Application ID
      *
-     * @return TRUE on success, otherwise FALSE
      */
-    bool SendVRAddCommandRequest(Application* const app);
+    void SendVRAddCommandRequest(Application* const app);
 
     /*
      * @brief Sends UI PerformInteraction request to HMI
      *
      * @param app_id Application ID
      *
-     * * @return TRUE on success, otherwise FALSE
      */
-    bool SendUIPerformInteractionRequest(Application* const app);
+    void SendUIPerformInteractionRequest(Application* const app);
 
     /*
      * @brief Sends TTS Speak request to HMI
@@ -90,6 +88,26 @@ class PerformInteractionRequest : public CommandRequestImpl {
      * @param app_id Application ID
      */
     void SendTTSSpeakRequest(Application* const app);
+
+    /*
+     * @brief Checks if incoming choice set doesn't has similar menu names.
+     *
+     * @param app_id Application ID
+     *
+     * return Return TRUE if there are no similar menu names in choice set,
+     * otherwise FALSE
+     */
+    bool CheckChoiceSetMenuNames(Application* const app);
+
+    /*
+     * @brief Checks if incoming choice set doesn't has similar VR synonyms.
+     *
+     * @param app_id Application ID
+     *
+     * return Return TRUE if there are no similar VR synonyms in choice set,
+     * otherwise FALSE
+     */
+    bool CheckChoiceSetVRSynonyms(Application* const app);
 
     DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
