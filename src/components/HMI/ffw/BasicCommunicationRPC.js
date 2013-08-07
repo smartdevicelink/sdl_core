@@ -40,9 +40,9 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         componentName: "BasicCommunication"
     }),
 
-    getAppListRequestID: -1,
-    getDeviceListRequestID: -1,
-    activateAppRequestID: -1,
+    //getAppListRequestID: -1,
+    //getDeviceListRequestID: -1,
+    //activateAppRequestID: -1,
 
     onAppRegisteredSubscribeRequestID: -1,
     onAppUnregisteredSubscribeRequestID: -1,
@@ -52,10 +52,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
     onAppUnregisteredUnsubscribeRequestID: -1,
     onPlayToneUnsubscribeRequestID: -1,
 
-    // const
+    //const
     onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
     onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
-    onDeviceListUpdatedNotification: "BasicCommunication.OnDeviceListUpdated",
+    //onDeviceListUpdatedNotification: "BasicCommunication.OnDeviceListUpdated",
     onPlayToneNotification: "BasicCommunication.PlayTone",
 
     /**
@@ -90,7 +90,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         // subscribe to notifications
         this.onAppRegisteredSubscribeRequestID = this.client.subscribeToNotification(this.onAppRegisteredNotification);
         this.onAppUnregisteredSubscribeRequestID = this.client.subscribeToNotification(this.onAppUnregisteredNotification);
-        this.onDeviceListUpdatedNotificationID = this.client.subscribeToNotification(this.onDeviceListUpdatedNotification);
+        //this.onDeviceListUpdatedNotificationID = this.client.subscribeToNotification(this.onDeviceListUpdatedNotification);
         this.onPlayToneNotificationID = this.client.subscribeToNotification(this.onPlayToneNotification);
 
     },
@@ -105,7 +105,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         // unsubscribe from notifications
         this.onAppRegusteredUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onAppRegisteredNotification);
         this.onAppUnregusteredUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onAppUnregisteredNotification);
-        this.onDeviceListUpdatedNotificationID = this.client.unsubscribeFromNotification(this.onDeviceListUpdatedNotification);
+        //this.onDeviceListUpdatedNotificationID = this.client.unsubscribeFromNotification(this.onDeviceListUpdatedNotification);
         this.onPlayToneUpdatedNotificationID = this.client.unsubscribeFromNotification(this.onPlayToneUpdatedNotification);
     },
 
@@ -133,19 +133,19 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 //                SDL.SDLController.onGetAppList(response.result.appList);
 //            }
 //        }
-
-        if(response.result.method == "BasicCommunication.UpdateDeviceList"){
-            if(SDL.States.info.active){
-                SDL.SDLModel.onGetDeviceList(response.result);
-            }
-
-        }
-
-        if(response.result.method == "BasicCommunication.OnAppActivated"){
-        	if (response.result.code == SDL.SDLModel.resultCode["SUCCESS"]) {
-        		SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
-        	}
-        }
+//
+//        if(response.result.method == "BasicCommunication.UpdateDeviceList"){
+//            if(SDL.States.info.active){
+//                SDL.SDLModel.onGetDeviceList(response.result);
+//            }
+//            
+//        }
+//
+//        if(response.result.method == "BasicCommunication.OnAppActivated"){
+//        	if (response.result.code == SDL.SDLModel.resultCode["SUCCESS"]) {
+//        		SDL.SDLController.getApplicationModel(element.appID).turnOnSDL();
+//        	}
+//        }
     },
 
     /**
@@ -172,10 +172,6 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             // remove app from list
             SDL.SDLModel.onAppUnregistered(notification.params);
         }
-
-//        if(notification.method == this.onDeviceListUpdatedNotification){
-//            SDL.SDLModel.onGetDeviceList(notification.params);
-//        }
 
         if(notification.method == this.onPlayToneNotification){
         	SDL.SDLModel.onPlayTone();
@@ -329,7 +325,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * @params {String}
      * @params {Number}
      */
-    DeactivateApp: function(reason, appID) {
+    OnAppDeactivated: function(reason, appID) {
         Em.Logger.log("FFW.BasicCommunication.OnAppDeactivated");
 
         // send request
@@ -387,7 +383,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * @params {String}
      */
     ExitAllApplications: function(reason) {
-        Em.Logger.log("FFW.BasicCommunication.ExitAllApplications");
+        Em.Logger.log("FFW.BasicCommunication.ExitAllApplicationsResponse");
 
         // send request
 
@@ -408,7 +404,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * @params {Number}
      */
     MixingAudioSupported: function(attenuatedSupported) {
-        Em.Logger.log("FFW.BasicCommunication.MixingAudioSupported");
+        Em.Logger.log("FFW.BasicCommunication.MixingAudioSupportedResponse");
 
         // send request
 
@@ -430,7 +426,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * @params {Number}
      */
     AllowAllApps: function(allowed) {
-        Em.Logger.log("FFW.BasicCommunication.AllowAllApps");
+        Em.Logger.log("FFW.BasicCommunication.AllowAllAppsResponse");
 
         // send request
 
@@ -452,7 +448,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * @params {Number}
      */
     AllowApp: function(allowed) {
-        Em.Logger.log("FFW.BasicCommunication.AllowApp");
+        Em.Logger.log("FFW.BasicCommunication.AllowAppResponse");
 
         // send request
 

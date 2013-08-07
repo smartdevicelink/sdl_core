@@ -651,6 +651,6 @@ SDL.SDLModel = Em.Object.create( {
             }
         }
 
-        FFW.BasicCommunication.DeactivateApp( reason, appID );
+        FFW.BasicCommunication.OnAppDeactivated( reason, appID );
     }
 } );
