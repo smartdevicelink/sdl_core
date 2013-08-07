@@ -121,59 +121,26 @@ FFW.TTS = FFW.RPCObserver.create( {
 
         switch( request.method ){
             case "TTS.Speak": {
-                
-            	Em.Logger.log("FFW." + request.method + "Response");
             	
                 SDL.SDLModel.onPrompt( request.params.ttsChunks.splice( 0, 1 ) );
 
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                        "method": "TTS.Speak"
-                    }
-                };
-                this.client.send( JSONMessage );
+                this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
                 break;
             }
             case "TTS.SetGlobalProperties": {
-                
-            	Em.Logger.log("FFW." + request.method + "Response");
 
                 SDL.SDLModel.setProperties( request.params );
 
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                        "method": "TTS.SetGlobalProperties"
-                    }
-                };
-                this.client.send( JSONMessage );
+                this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
                 break;
             }
             case "TTS.StopSpeaking": {
-                
-            	Em.Logger.log("FFW." + request.method + "Response");
-            	
+
             	SDL.SDLModel.TTSStopSpeaking();
 
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                        "method": "TTS.StopSpeaking"
-                    }
-                };
-                this.client.send( JSONMessage );
+                this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
                 break;
             }
@@ -235,22 +202,10 @@ FFW.TTS = FFW.RPCObserver.create( {
                 break;
             }
             case "TTS.ChangeRegistration": {
-                
-            	Em.Logger.log("FFW." + request.method + "Response");
 
                 SDL.SDLModel.changeRegistrationTTSVR( request.params.language );
 
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                        // protocol
-                        "method": "TTS.ChangeRegistration"
-                    }
-                };
-                this.client.send( JSONMessage );
+                this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
                 break;
             }
@@ -304,6 +259,31 @@ FFW.TTS = FFW.RPCObserver.create( {
                     "data":{
                         "method": method
                     }
+                }
+            };
+            this.client.send(JSONMessage);
+        }
+    },
+
+    /**
+     * send response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     */
+    sendTTSResult: function(resultCode, id, method) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if(resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "method": method
                 }
             };
             this.client.send(JSONMessage);

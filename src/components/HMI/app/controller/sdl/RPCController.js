@@ -272,6 +272,48 @@ SDL.RPCController = Em.Object.create({
             };
 
             return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request OnLanguageChange
+         * 
+         * @param {Object} params
+         */
+        OnLanguageChange: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.language) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'language' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.language != 'string') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'language'!"
+                };
+                
+                return this.resultStruct;
+            }
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
         }
     }),
 	
@@ -494,48 +536,6 @@ SDL.RPCController = Em.Object.create({
         },
 
         /**
-         * Validate method for request GetCapabilities
-         * 
-         * @param {Object} params
-         */
-        GetCapabilities: function(params) {
-
-            this.resultStruct = {
-                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-            };
-
-            return this.resultStruct;
-        },
-
-        /**
-         * Validate method for request GetLanguage
-         * 
-         * @param {Object} params
-         */
-        GetLanguage: function(params) {
-
-            this.resultStruct = {
-                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-            };
-
-            return this.resultStruct;
-        },
-
-        /**
-         * Validate method for request GetSupportedLanguages
-         * 
-         * @param {Object} params
-         */
-        GetSupportedLanguages: function(params) {
-
-            this.resultStruct = {
-                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-            };
-
-            return this.resultStruct;
-        },
-
-        /**
          * Validate method for request UI.Alert
          * 
          * @param {Object} params
@@ -569,6 +569,24 @@ SDL.RPCController = Em.Object.create({
 
                 return this.resultStruct;
             }
+            if (!params.duration) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'duration' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.duration != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'duration'!"
+                };
+                
+                return this.resultStruct;
+            }
             if (!params.appID) {
 
                 this.resultStruct = {
@@ -593,6 +611,60 @@ SDL.RPCController = Em.Object.create({
             };
 
             return this.resultStruct;
+        },
+        
+        /**
+         * Validate method for request Show
+         * 
+         * @param {Object} params
+         */
+        ShowNotification: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.text) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'text' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (params.text.length < 0) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'text'!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.timeout) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'timeout' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.timeout != 'number') {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'timeout'!"
+                };
+
+                return this.resultStruct;
+            }
         },
 
         /**
@@ -627,6 +699,24 @@ SDL.RPCController = Em.Object.create({
                     "resultMessage": "Wrong type of parameter 'showStrings'!"
                 };
 
+                return this.resultStruct;
+            }
+            if (!params.appID) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'appID' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.appID != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'appID'!"
+                };
+                
                 return this.resultStruct;
             }
 
@@ -1093,6 +1183,20 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
+
+        /**
+         * Validate method for request GetCapabilities
+         * 
+         * @param {Object} params
+         */
+        GetCapabilities: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
         
         /**
          * Validate method for request ChangeRegistration
@@ -1146,6 +1250,34 @@ SDL.RPCController = Em.Object.create({
                 
                 return this.resultStruct;
             }
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request GetSupportedLanguages
+         * 
+         * @param {Object} params
+         */
+        GetSupportedLanguages: function(params) {
+
+            this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request GetLanguage
+         * 
+         * @param {Object} params
+         */
+        GetLanguage: function(params) {
 
             this.resultStruct = {
                 "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
@@ -1362,6 +1494,24 @@ SDL.RPCController = Em.Object.create({
                 
                 return this.resultStruct;
             }
+            if (!params.timeout) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'timeout' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (typeof params.timeout != 'number') {
+                
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'timeout'!"
+                };
+                
+                return this.resultStruct;
+            }
             if (!params.appID) {
 
                 this.resultStruct = {
@@ -1413,29 +1563,11 @@ SDL.RPCController = Em.Object.create({
 
                 return this.resultStruct;
             }
-            if (params.audioPassThruDisplayTexts.length < 0) {
+            if (params.audioPassThruDisplayTexts.length < 0 || params.audioPassThruDisplayTexts.length > 2) {
                 
                 this.resultStruct = {
                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                     "resultMessage": "Wrong type of parameter 'audioPassThruDisplayTexts'!"
-                };
-                
-                return this.resultStruct;
-            }
-            if (!params.appID) {
-
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Parameter 'appID' does not exists!"
-                };
-
-                return this.resultStruct;
-            }
-            if (typeof params.appID != 'number') {
-                
-                this.resultStruct = {
-                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                    "resultMessage": "Wrong type of parameter 'appID'!"
                 };
                 
                 return this.resultStruct;

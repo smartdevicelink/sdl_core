@@ -152,17 +152,17 @@ FFW.UI = FFW.RPCObserver.create({
 	        var resultCode = null;
 	
 	        switch(request.method){
+	            case "UI.Alert": {
+	            	
+	                SDL.SDLModel.onUIAlert(request.params, request.id);
+	
+	                break;
+	            }
 	            case "UI.Show": {
 	
 	                SDL.TurnByTurnView.deactivate();
 	                SDL.SDLController.getApplicationModel(request.params.appID).onSDLUIShow(request.params);
 	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-	
-	                break;
-	            }
-	            case "UI.Alert": {
-	
-	                SDL.SDLModel.onUIAlert(request.params, request.id);
 	
 	                break;
 	            }
@@ -211,20 +211,6 @@ FFW.UI = FFW.RPCObserver.create({
 	
 	                break;
 	            }
-	            case "UI.CreateInteractionChoiceSet": {
-	
-	                SDL.SDLController.getApplicationModel(request.params.appID).onCreateInteraction(request.params);
-	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-	
-	                break;
-	            }
-	            case "UI.DeleteInteractionChoiceSet": {
-	
-	                SDL.SDLController.getApplicationModel(request.params.appID).onDeleteInteraction(request.params);
-	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-	
-	                break;
-	            }
 	            case "UI.PerformInteraction": {
 	
 	                SDL.SDLModel.uiPerformInteraction(request.params, request.id);
@@ -234,7 +220,7 @@ FFW.UI = FFW.RPCObserver.create({
 	            case "UI.SetMediaClockTimer": {
 	
 	                var resultCode = SDL.SDLController.getApplicationModel(request.params.appID).sdlSetMediaClockTimer(request.params);
-	                if (resultCode === 0) {
+	                if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
 	                	this.sendUIResult(resultCode, request.id, request.method);
 	                } else {
 	                	this.sendError(resultCode, request.id, request.method, 'Request is ignored, because the intended result is already in effect.');
@@ -263,7 +249,7 @@ FFW.UI = FFW.RPCObserver.create({
 	            }
 	            case "UI.SetAppIcon": {
 	
-	                    SDL.SDLModel.onSDLSetAppIcon(request.params, request.id, request.method);
+	                SDL.SDLModel.onSDLSetAppIcon(request.params, request.id, request.method);
 	
 	                break;
 	            }
@@ -283,41 +269,36 @@ FFW.UI = FFW.RPCObserver.create({
 	                break;
 	            }
 	            case "UI.GetSupportedLanguages": {
-	
-	                    var JSONMessage = {
-	                        "id": request.id,
-	                        "jsonrpc": "2.0",
-	                        "result": {
-	                            "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-	                            "method": "UI.GetSupportedLanguages",
-	                            "languages": SDL.SDLModel.sdlLanguagesList
-	                        }
-	                    };
-	                    this.client.send(JSONMessage);
+
+	            	Em.Logger.log("FFW." + request.method + "Response");
+
+	            	var JSONMessage = {
+                        "id": request.id,
+                        "jsonrpc": "2.0",
+                        "result": {
+                            "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                            "method": "UI.GetSupportedLanguages",
+                            "languages": SDL.SDLModel.sdlLanguagesList
+                        }
+                    };
+                    this.client.send(JSONMessage);
 	
 	                break;
 	            }
 	            case "UI.GetLanguage": {
-	
-	                    var JSONMessage = {
-	                        "jsonrpc": "2.0",
-	                        "id": request.id,
-	                        "result": {
-	                            "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-	                                                        // protocol
-	                            "method": "UI.GetLanguageResponse",
-	                            "language": SDL.SDLModel.hmiUILanguage
-	                        }
-	                    };
-	                    this.client.send(JSONMessage);
-	
-	                break;
-	            }
-	            case "UI.DialNumber": {
-	
-	                SDL.SDLModel.dialNumber(request.params);
-	
-	                this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+
+	            	Em.Logger.log("FFW." + request.method + "Response");
+
+	            	var JSONMessage = {
+                        "jsonrpc": "2.0",
+                        "id": request.id,
+                        "result": {
+                            "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                            "method": "UI.GetLanguage",
+                            "language": SDL.SDLModel.hmiUILanguage
+                        }
+                    };
+                    this.client.send(JSONMessage);
 	
 	                break;
 	            }

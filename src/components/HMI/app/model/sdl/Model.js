@@ -475,7 +475,7 @@ SDL.SDLModel = Em.Object.create( {
         };
         img.onerror = function( event ) {
             // doesn't exist or error loading
-            FFW.UI.sendUIResult( SDL.SDLModel.resultCode["INVALID_DATA"], id, method );
+        	FFW.UI.sendError(SDL.SDLModel.resultCode["INVALID_DATA"], id, method, 'Image does not exist!');
             return false;
         };
 
