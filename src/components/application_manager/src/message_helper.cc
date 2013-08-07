@@ -179,6 +179,28 @@ const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
 
+smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
+  mobile_apis::FunctionID::eType function_id,
+  mobile_apis::Result::eType result,
+  unsigned int correlation_id,
+  unsigned int connection_key) {
+  smart_objects::SmartObject* response = new smart_objects::SmartObject;
+  if (!response) {
+    return NULL;
+  }
+
+  (*response)[strings::params][strings::function_id] = function_id;
+  (*response)[strings::params][strings::message_type] = MessageType::kResponse;
+  (*response)[strings::msg_params][strings::success] = false;
+  (*response)[strings::msg_params][strings::result_code] = result;
+  (*response)[strings::params][strings::correlation_id] = correlation_id;
+  (*response)[strings::params][strings::connection_key] = connection_key;
+  (*response)[strings::params][strings::protocol_type] = commands::CommandImpl::mobile_protocol_type_;
+  (*response)[strings::params][strings::protocol_version] = ProtocolVersion::kV2;
+
+  return response;
+}
+
 smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
   const connection_handler::DeviceList& devices) {
   smart_objects::SmartObject* device_list_so  =

@@ -106,6 +106,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
   if (!InitThread(from_hmh_thread_)) {
     return;
   }
+
+  if (policies_manager_.init()) {
+    LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
+    return;
+  }
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -856,9 +861,46 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     return false;
   }
 
-  LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
-  // TODO(AK): check hmi level here!!!
+  mobile_apis::FunctionID::eType function_id
+        = static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asInt());
 
+  if (mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) {
+    unsigned int app_id = (*message)[strings::params][strings::connection_key]
+        .asUInt();
+    Application* app = ApplicationManagerImpl::instance()->application(app_id);
+    if (NULL == app) {
+      LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
+      return false;
+    }
+
+    if (!policies_manager_.is_valid_hmi_status(function_id, app->hmi_level())) {
+      mobile_apis::FunctionID::eType function_id
+        = static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asInt());
+
+      unsigned int correlation_id
+        = (*message)[strings::params][strings::correlation_id].asUInt();
+
+      unsigned int connection_key
+        = (*message)[strings::params][strings::connection_key].asUInt();
+
+      LOG4CXX_WARN(logger_, "Request blocked by policies. "
+        << "FunctionID: " << static_cast<int>(function_id)
+        << " Application HMI status: " << static_cast<int>(app->hmi_level()));
+
+      smart_objects::SmartObject* response =
+        MessageHelper::CreateBlockedByPoliciesResponse(function_id,
+                                                  mobile_apis::Result::REJECTED,
+                                                  correlation_id,
+                                                  connection_key);
+
+      ApplicationManagerImpl::instance()->SendMessageToMobile(response);
+      return true;
+    }
+  }
+
+  LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
 
   if (!command) {

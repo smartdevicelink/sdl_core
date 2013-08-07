@@ -153,6 +153,12 @@ class MessageHelper {
      */
     static const VehicleData& vehicle_data();
 
+    static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
+      mobile_apis::FunctionID::eType function_id,
+      mobile_apis::Result::eType result,
+      unsigned int correlation_id,
+      unsigned int connection_key);
+
     /*
      * @brief Prepare GetDeviceListResponse
      *

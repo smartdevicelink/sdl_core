@@ -40,17 +40,23 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_chaining.h"
-#include "hmi_message_handler/hmi_message_observer.h"
-#include "mobile_message_handler/mobile_message_observer.h"
-#include "connection_handler/connection_handler_observer.h"
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/policies_manager/policies_manager.h"
+
+#include "hmi_message_handler/hmi_message_observer.h"
+#include "mobile_message_handler/mobile_message_observer.h"
+
+#include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
+
 #include "request_watchdog/watchdog_subscriber.h"
-#include "interfaces/HMI_API.h"
 #include "formatters/CSmartFactory.hpp"
+
+#include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
+
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -438,6 +444,8 @@ class ApplicationManagerImpl : public ApplicationManager
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler*        connection_handler_;
     request_watchdog::Watchdog*                   watchdog_;
+
+    policies_manager::PoliciesManager             policies_manager_;
 
     MessageQueue<utils::SharedPtr<Message>>       messages_from_mobile_;
     MessageQueue<utils::SharedPtr<Message>>       messages_to_mobile_;
