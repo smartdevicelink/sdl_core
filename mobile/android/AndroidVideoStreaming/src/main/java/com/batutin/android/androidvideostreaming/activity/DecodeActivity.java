@@ -3,7 +3,6 @@ package com.batutin.android.androidvideostreaming.activity;
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.view.SurfaceView;
 
 import com.batutin.android.androidvideostreaming.R;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -27,7 +25,6 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
     private static final int IFRAME_INTERVAL = 10;          // 10 seconds between I-frames
     private static final String SAMPLE = Environment.getExternalStorageDirectory() + "/video.mp4";
     private PlayerThread mPlayer = null;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,20 +57,25 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         }
     }
 
-    private class PlayerThread extends Thread {
+    public class PlayerThread extends Thread {
         private MediaExtractor extractor;
         private MediaCodec decoder;
         private Surface surface;
+        private AvcEncoder av;
 
         public PlayerThread(Surface surface) {
             this.surface = surface;
+            byte[] frame = new byte[100*60];
+            av = new AvcEncoder(surface, frame);
+
         }
-
-
-
 
         @Override
         public void run() {
+            av.doEncodeDecodeVideoFromBuffer(new ThreadPause());
+        }
+
+        private void todo() throws IOException {
             extractor = new MediaExtractor();
             AssetFileDescriptor testFd = getResources().openRawResourceFd(R.raw.test_video);
             extractor.setDataSource(testFd.getFileDescriptor(), testFd.getStartOffset(),
@@ -99,7 +101,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
 
             ByteBuffer[] inputBuffers = decoder.getInputBuffers();
             ByteBuffer[] outputBuffers = decoder.getOutputBuffers();
-            BufferInfo info = new BufferInfo();
+            MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
             boolean isEOS = false;
             long startMs = System.currentTimeMillis();
 
@@ -110,9 +112,9 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
                         ByteBuffer buffer = inputBuffers[inIndex];
 
                         int sampleSize = extractor.readSampleData(buffer, 0);
-                        StringBuilder b= new StringBuilder();
+                        StringBuilder b = new StringBuilder();
 
-                        for (int i = 0; i< buffer.remaining(); i++){
+                        for (int i = 0; i < buffer.remaining(); i++) {
                             char buf = (char) buffer.get(i);
                             b.append(buf);
                         }
@@ -172,6 +174,18 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
             decoder.stop();
             decoder.release();
             extractor.release();
+        }
+
+        public class ThreadPause{
+            public void pause(){
+                try {
+                    sleep(10);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
         }
     }
 

@@ -36,7 +36,7 @@ public class MainActivity extends Activity implements FileStreamReaderListener, 
         setContentView(R.layout.activity_main);
 
         bb = new ByteArrayOutputStream();
-        encoder = new AvcEncoder();
+        encoder = new AvcEncoder(null, null);
         encoder.frameListener = this;
         encoder.parameterSetsListener = this;
         AssetsReader r = new AssetsReader(this);
