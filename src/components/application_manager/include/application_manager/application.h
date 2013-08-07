@@ -53,8 +53,8 @@ typedef int ErrorCode;
 
 enum APIVersion {
   kUnknownAPI = -1,
-  kAPIV1 = 0,
-  kAPIV2 = 1
+  kAPIV1 = 1,
+  kAPIV2 = 2
 };
 
 struct Version {
@@ -220,7 +220,7 @@ class DynamicApplicationData {
      * @return ChoiceSet map that is currently in use
      */
     virtual const PerformChoiceSetMap&
-      GetPerformInteractionChoiceSetMap() const = 0;
+    GetPerformInteractionChoiceSetMap() const = 0;
 
     /*
      * @brief Retrieves choice set that is currently in use by perform

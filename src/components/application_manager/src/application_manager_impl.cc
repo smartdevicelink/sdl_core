@@ -298,7 +298,8 @@ Application* ApplicationManagerImpl::RegisterApplication(
       ManageMobileCommand(response);
       return NULL;
     }
-    if ((*it)->name().compare(name) == 0) {
+    if ((*it)->name().compare(name) == 0 &&
+        (*it)->device() == device_id) {
       LOG4CXX_ERROR(logger_, "Application with this name already registered.");
       utils::SharedPtr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
