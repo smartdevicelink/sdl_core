@@ -119,7 +119,7 @@ var StateManager = Em.StateManager.extend( {
              */
             enter: function() {
                 this._super();
-                FFW.BasicCommunication.getAppList();
+                FFW.BasicCommunication.OnFindApplications();
             }
         } ),
 

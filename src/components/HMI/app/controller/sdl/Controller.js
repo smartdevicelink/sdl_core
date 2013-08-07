@@ -402,7 +402,7 @@ SDL.SDLController = Em.Object.create({
     onGetDeviceList: function() {
         SDL.States.goToStates('info.devicelist');
         //FFW.BasicCommunication.getDeviceList();
-        FFW.BasicCommunication.StartDeviceDiscovery();
+        FFW.BasicCommunication.OnStartDeviceDiscovery();
     },
 
     /**

@@ -37,7 +37,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * access to basic RPC functionality
      */
     client: FFW.RPCClient.create({
-        componentName: "BasicCommunicationClient"
+        componentName: "BasicCommunication"
     }),
 
     getAppListRequestID: -1,
@@ -134,7 +134,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             }
         }
 
-        if(response.result.method == "BasicCommunication.GetDeviceList" || response.result.method == "BasicCommunication.StartDeviceDiscovery"){
+        if(response.result.method == "BasicCommunication.UpdateDeviceList"){
             if(SDL.States.info.active){
                 SDL.SDLModel.onGetDeviceList(response.result);
             }
@@ -164,7 +164,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
         if(notification.method == this.onAppRegisteredNotification){
             SDL.SDLModel.onAppRegistered(notification.params.application);
-            this.getAppList();
+            this.OnFindApplications();
         }
 
         if(notification.method == this.onAppUnregisteredNotification){
@@ -172,9 +172,9 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             SDL.SDLModel.onAppUnregistered(notification.params);
         }
 
-        if(notification.method == this.onDeviceListUpdatedNotification){
-            SDL.SDLModel.onGetDeviceList(notification.params);
-        }
+//        if(notification.method == this.onDeviceListUpdatedNotification){
+//            SDL.SDLModel.onGetDeviceList(notification.params);
+//        }
 
         if(notification.method == this.onPlayToneNotification){
         	SDL.SDLModel.onPlayTone();
@@ -198,6 +198,37 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
         if(request.method == "BasicCommunication.AllowApp"){
             this.AllowApp(true);
+        }
+
+        if(request.method == "BasicCommunication.UpdateAppList"){
+        	SDL.SDLModel.onGetDeviceList(request.params);
+
+            this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+        }
+    },
+
+    /**
+     * send response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     */
+    sendBCResult: function(resultCode, id, method) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if(resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "method": method
+                }
+            };
+            this.client.send(JSONMessage);
         }
     },
 
@@ -236,13 +267,11 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
     /**
      * This methos is request to get list of registered apps.
      */
-    getAppList: function() {
-        this.getAppListRequestID = this.client.generateId();
+    OnFindApplications: function() {
 
         var JSONMessage = {
-            "id": this.getAppListRequestID,
             "jsonrpc": "2.0",
-            "method": "BasicCommunication.GetAppList"
+            "method": "BasicCommunication.OnFindApplications"
         };
         this.client.send(JSONMessage);
     },
@@ -306,15 +335,14 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
     /**
      * Initiated by HMI user. In response optional list of found devices - if not provided, not were found.
      */
-    StartDeviceDiscovery: function() {
-        Em.Logger.log("FFW.BasicCommunication.StartDeviceDiscovery");
+    OnStartDeviceDiscovery: function() {
+        Em.Logger.log("FFW.BasicCommunication.OnStartDeviceDiscovery");
 
         // send request
 
         var JSONMessage = {
-            "id": this.client.idStart,
             "jsonrpc": "2.0",
-            "method": "BasicCommunication.StartDeviceDiscovery"
+            "method": "BasicCommunication.OnStartDeviceDiscovery"
         };
         this.client.send(JSONMessage);
     },
