@@ -42,9 +42,11 @@ GMainLoop* FromMicToFileRecorderThread::loop;
 FromMicToFileRecorderThread::FromMicToFileRecorderThread()
   : threads::ThreadDelegate(),
     argc_(5),
-    oKey("-o"),
-    tKey("-t") {
+    oKey_("-o"),
+    tKey_("-t"),
+    sleepThread_(NULL){
   LOG4CXX_TRACE_ENTER(logger_);
+  stopFlagMutex_.init();
 }
 
 void FromMicToFileRecorderThread::setOutputFileName(
@@ -58,7 +60,7 @@ void FromMicToFileRecorderThread::setRecordDuration(int duration) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   std::stringstream stringStream;
-  stringStream << duration;
+  stringStream << duration / 1000;
   durationString_ = stringStream.str();
 }
 
@@ -74,14 +76,18 @@ void FromMicToFileRecorderThread::initArgs() {
   argv_[4] = new gchar[durationString_.length() + 1];
 
   argv_[0] = const_cast<gchar*>(std::string("AudioManager").c_str());
-  argv_[1] = const_cast<gchar*>(oKey.c_str());
+  argv_[1] = const_cast<gchar*>(oKey_.c_str());
   argv_[2] = const_cast<gchar*>(outputFileName_.c_str());
-  argv_[3] = const_cast<gchar*>(tKey.c_str());
+  argv_[3] = const_cast<gchar*>(tKey_.c_str());
   argv_[4] = const_cast<gchar*>(durationString_.c_str());
 }
 
 void FromMicToFileRecorderThread::threadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
+
+  stopFlagMutex_.lock();
+  shouldBeStoped_ = false;
+  stopFlagMutex_.unlock();
 
   initArgs();
 
@@ -167,14 +173,20 @@ void FromMicToFileRecorderThread::threadMain() {
 
   LOG4CXX_TRACE(logger_, "Initializing pipeline ...");
   while (GST_STATE(pipeline) != GST_STATE_PLAYING) {
+    LOG4CXX_TRACE(logger_, "GST_STATE(pipeline) != GST_STATE_PLAYING");
+    stopFlagMutex_.lock();
+    if (shouldBeStoped_) {
+      return;
+    }
+    stopFlagMutex_.unlock();
   }
   LOG4CXX_TRACE(logger_, "Pipeline started ...\n");
 
   // Start up a timer for the pipeline
   if (duration > 0) {
-    GstTimeout* timeout = static_cast<GstTimeout*>(malloc(sizeof(timeout)));
-    timeout->pipeline = pipeline;
-    timeout->duration = duration;
+    GstTimeout timeout;
+    timeout.pipeline = pipeline;
+    timeout.duration = duration;
 
     sleepThread_ = new threads::Thread("SleepThread"
               , new SleepThreadDelegate(timeout));
@@ -185,20 +197,26 @@ void FromMicToFileRecorderThread::threadMain() {
   }
 
   g_main_loop_run(loop);
+
+  gst_element_set_state (pipeline, GST_STATE_NULL);
+
+  LOG4CXX_TRACE(logger_, "Deleting pipeline\n");
+  gst_object_unref(GST_OBJECT (pipeline));
+  g_main_loop_unref(loop);
+
 }
 
-FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(GstTimeout* timeout)
+FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(GstTimeout timeout)
   : threads::ThreadDelegate(),
     timeout_(timeout) {
 }
 
 void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
-  LOG4CXX_TRACE(logger_, "Sleep for " << timeout_->duration << " seconds");
+  LOG4CXX_TRACE(logger_, "Sleep for " << timeout_.duration << " seconds");
 
-  sleep(timeout_->duration);
+  sleep(timeout_.duration);
 
-  LOG4CXX_TRACE(logger_, "Woke up. Call gst_element_send_event()");
-  gst_element_send_event(timeout_->pipeline, gst_event_new_eos());
+  gst_element_send_event(timeout_.pipeline, gst_event_new_eos());
 }
 
 void FromMicToFileRecorderThread::exitThreadMain() {
@@ -209,7 +227,12 @@ void FromMicToFileRecorderThread::exitThreadMain() {
   if(NULL != sleepThread_) {
     sleepThread_->stop();
     delete sleepThread_;
+    sleepThread_ = NULL;
   }
+
+  stopFlagMutex_.lock();
+  shouldBeStoped_ = true;
+  stopFlagMutex_.unlock();
 }
 
 }  // namespace audio_manager

@@ -606,25 +606,42 @@ void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int correlation_id, int max_duration, int sampling_rate,
     int bits_per_sample, int audio_type) {
+  audioManager_ = audio_manager::AudioManagerImpl::getAudioManager();
+
+  LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
+  if (NULL != audioManager_) {
+    audioManager_->startMicrophoneRecording(std::string("record.wav"),
+            static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+            max_duration,
+            static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample));
+  }
+
+
+  LOG4CXX_ERROR(logger_, "START RECORD SENDER");
   AudioPassThruThreadImpl* thread_impl = new AudioPassThruThreadImpl(
-    static_cast<unsigned int>(session_key),
-    static_cast<unsigned int>(correlation_id),
-    static_cast<unsigned int>(max_duration),
-    static_cast<SamplingRate>(sampling_rate),
-    static_cast<AudioCaptureQuality>(bits_per_sample),
-    static_cast<AudioType>(audio_type));
+      "record.wav",
+      static_cast<unsigned int>(session_key),
+      static_cast<unsigned int>(correlation_id),
+      static_cast<unsigned int>(max_duration),
+      static_cast<SamplingRate>(sampling_rate),
+      static_cast<AudioCaptureQuality>(bits_per_sample),
+      static_cast<AudioType>(audio_type));
 
-  thread_impl->Init();
-  perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
-      thread_impl);
+    thread_impl->Init();
+    perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
+        thread_impl);
 
-  perform_audio_thread_->startWithOptions(
-    threads::ThreadOptions(threads::Thread::kMinStackSize));
+    perform_audio_thread_->startWithOptions(
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 void ApplicationManagerImpl::StopAudioPassThruThread() {
   if (!perform_audio_thread_) {
     return;
+  }
+
+  if (NULL != audioManager_) {
+    audioManager_->stopMicrophoneRecording();
   }
 
   perform_audio_thread_->stop();

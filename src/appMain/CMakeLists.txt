@@ -20,6 +20,7 @@ set(LIBRARIES
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
+  AudioManager
 )
 
 include_directories (
@@ -37,10 +38,15 @@ include_directories (
   ../components/hmi_message_handler/include
   ../components/request_watchdog/include
   ../components/smart_objects/include/
+  ../components/audio_manager/include/
   ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/components/
+  /usr/lib/i386-linux-gnu/glib-2.0/include
+  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
 set (SOURCES

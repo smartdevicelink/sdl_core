@@ -9,6 +9,7 @@ include_directories (
     /usr/lib/x86_64-linux-gnu/glib-2.0/include/
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES

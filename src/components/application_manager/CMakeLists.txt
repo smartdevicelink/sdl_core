@@ -6,12 +6,18 @@ include_directories (
   ../smart_objects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
+  ../audio_manager/include
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
+  ../audio_manager/include/
   ../TransportManager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
+  /usr/lib/i386-linux-gnu/glib-2.0/include
+  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
 )
 

@@ -167,8 +167,10 @@ void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
   stopA2DPSource(sockAddr2SourceAddr(device));
 }
 
-void AudioManagerImpl::startMicrophoneRecording(
-    const std::string& outputFileName, int duration) {
+void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileName,
+                 mobile_apis::SamplingRate::eType type,
+                 int duration,
+                 mobile_apis::BitsPerSample::eType) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   FromMicToFileRecorderThread* recordThreadDelegate =

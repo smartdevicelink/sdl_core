@@ -59,11 +59,13 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   int argc_;
   gchar** argv_;
 
-  const std::string oKey;
-  const std::string tKey;
+  const std::string oKey_;
+  const std::string tKey_;
 
   static GMainLoop *loop;
   threads::Thread* sleepThread_;
+  bool shouldBeStoped_;
+  sync_primitives::SynchronisationPrimitives stopFlagMutex_;
 
   std::string outputFileName_, durationString_;
 
@@ -78,12 +80,12 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
 
   class SleepThreadDelegate : public threads::ThreadDelegate {
    public:
-    SleepThreadDelegate(GstTimeout* timeout);
+    SleepThreadDelegate(GstTimeout timeout);
 
     void threadMain();
 
    private:
-    GstTimeout* timeout_;
+    GstTimeout timeout_;
 
     DISALLOW_COPY_AND_ASSIGN(SleepThreadDelegate);
   };

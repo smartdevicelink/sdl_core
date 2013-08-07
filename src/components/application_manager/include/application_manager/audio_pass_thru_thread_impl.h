@@ -86,6 +86,7 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
    * @param audio_type      Type of audio data
    */
   AudioPassThruThreadImpl(
+      const std::string fileName,
       unsigned int session_key, unsigned int correlation_id,
       unsigned int max_duration, const SamplingRate& sampling_rate,
       const AudioCaptureQuality& bits_per_sample, const AudioType& audio_type);
@@ -155,6 +156,9 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
    */
   bool SendEndAudioPassThru();
 
+
+  void sendAudioChunkToMobile();
+
   /*
    * @brief Creates command for corresponding smart object
    *
@@ -172,6 +176,10 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
   SamplingRate                sampling_rate_;
   AudioCaptureQuality         bits_per_sample_;
   AudioType                   audio_type_;
+  const std::string           fileName_;
+  int                         offset_;
+  bool                        shouldBeStoped_;
+  sync_primitives::SynchronisationPrimitives stopFlagMutex_;
 
   static const int            kAudioPassThruTimeout;
   static log4cxx::LoggerPtr   logger_;

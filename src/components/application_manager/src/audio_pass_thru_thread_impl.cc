@@ -47,26 +47,31 @@
 namespace application_manager {
 
 const int AudioPassThruThreadImpl::kAudioPassThruTimeout = 1;
-log4cxx::LoggerPtr AudioPassThruThreadImpl::logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("AudioPassThruThread"));
+log4cxx::LoggerPtr AudioPassThruThreadImpl::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("AudioPassThruThread"));
 
 AudioPassThruThreadImpl::AudioPassThruThreadImpl(
-  unsigned int session_key, unsigned int correlation_id,
-  unsigned int max_duration, const SamplingRate& sampling_rate,
-  const AudioCaptureQuality& bits_per_sample, const AudioType& audio_type):
-  session_key_(session_key),
-  correlation_id_(correlation_id),
-  max_duration_(max_duration),
-  sampling_rate_(sampling_rate),
-  bits_per_sample_(bits_per_sample),
-  audio_type_(audio_type),
-  timer_(NULL) {
+    const std::string fileName, unsigned int session_key,
+    unsigned int correlation_id, unsigned int max_duration,
+    const SamplingRate& sampling_rate,
+    const AudioCaptureQuality& bits_per_sample, const AudioType& audio_type)
+    : session_key_(session_key),
+      correlation_id_(correlation_id),
+      max_duration_(max_duration),
+      sampling_rate_(sampling_rate),
+      bits_per_sample_(bits_per_sample),
+      audio_type_(audio_type),
+      timer_(NULL),
+      fileName_(fileName) {
+  LOG4CXX_TRACE_ENTER(logger_);
+  stopFlagMutex_.init();
 }
 
 AudioPassThruThreadImpl::~AudioPassThruThreadImpl() {
 }
 
 void AudioPassThruThreadImpl::Init() {
+  LOG4CXX_TRACE_ENTER(logger_);
   synchronisation_.init();
   timer_ = new sync_primitives::Timer(&synchronisation_);
   if (!timer_) {
@@ -75,7 +80,7 @@ void AudioPassThruThreadImpl::Init() {
 }
 
 void AudioPassThruThreadImpl::FactoryCreateCommand(
-  smart_objects::SmartObject* cmd) {
+    smart_objects::SmartObject* cmd) {
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(&(*cmd));
   command->Init();
   command->Run();
@@ -88,47 +93,46 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
   smart_objects::SmartObject* end_audio = new smart_objects::SmartObject();
   if (NULL == end_audio) {
     smart_objects::SmartObject* error_response =
-      new smart_objects::SmartObject();
+        new smart_objects::SmartObject();
     if (NULL != error_response) {
       (*error_response)[strings::params][strings::message_type] =
-        MessageType::kResponse;
+          MessageType::kResponse;
       (*error_response)[strings::params][strings::correlation_id] =
-        static_cast<int>(correlation_id_);
+          static_cast<int>(correlation_id_);
 
       (*error_response)[strings::params][strings::connection_key] =
-        static_cast<int>(session_key_);
+          static_cast<int>(session_key_);
       (*error_response)[strings::params][strings::function_id] =
-        mobile_apis::FunctionID::PerformAudioPassThruID;
+          mobile_apis::FunctionID::PerformAudioPassThruID;
 
       (*error_response)[strings::msg_params][strings::success] = false;
       (*error_response)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::OUT_OF_MEMORY;
+          mobile_apis::Result::OUT_OF_MEMORY;
       FactoryCreateCommand(error_response);
     }
     return false;
   }
 
   Application* app = ApplicationManagerImpl::instance()->application(
-                       session_key_);
+      session_key_);
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
     return false;
   }
 
-  (*end_audio)[strings::params][strings::message_type] =
-    MessageType::kResponse;
+  (*end_audio)[strings::params][strings::message_type] = MessageType::kResponse;
   (*end_audio)[strings::params][strings::correlation_id] =
-    static_cast<int>(correlation_id_);
+      static_cast<int>(correlation_id_);
 
   (*end_audio)[strings::params][strings::connection_key] =
-    static_cast<int>(session_key_);
+      static_cast<int>(session_key_);
   (*end_audio)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::EndAudioPassThruID;
+      mobile_apis::FunctionID::EndAudioPassThruID;
 
   (*end_audio)[strings::msg_params][strings::success] = true;
   (*end_audio)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::SUCCESS;
+      mobile_apis::Result::SUCCESS;
 
   // app_id
   (*end_audio)[strings::msg_params][strings::app_id] = app->app_id();
@@ -137,105 +141,63 @@ bool AudioPassThruThreadImpl::SendEndAudioPassThru() {
 }
 
 void AudioPassThruThreadImpl::threadMain() {
-  unsigned int audioLength = 0;
-  std::string filename;
+  LOG4CXX_TRACE_ENTER(logger_);
 
-  if (AudioCaptureQuality::ACQ_8_BIT == bits_per_sample_) {
-    filename = "audio.8bit.wav";
-    audioLength = 5000;
-  } else if (AudioCaptureQuality::ACQ_16_BIT == bits_per_sample_) {
-    filename = "";  // TODO(DK) : audio file
-    // 3 minute audio.
-    audioLength = static_cast<unsigned int>(1000 * 60 * 2.7);
-  } else {
-#if defined(OS_POSIX) && defined(OS_LINUX)
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-#endif
-    LOG4CXX_ERROR_EXT(logger_, "Unknown audio capture quality");
-    if (false == SendEndAudioPassThru()) {
-      LOG4CXX_ERROR_EXT(logger_, "Unable to send EndAudioPassThru");
+  offset_ = 0;
+
+  stopFlagMutex_.lock();
+  shouldBeStoped_ = false;
+  stopFlagMutex_.unlock();
+
+  while (true) {
+
+    sendAudioChunkToMobile();
+
+    stopFlagMutex_.lock();
+    if (shouldBeStoped_) {
+       break;
     }
-
-    ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
-
-#if defined(OS_POSIX) && defined(OS_LINUX)
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-    pthread_exit(NULL);
-#endif
+    stopFlagMutex_.unlock();
   }
+}
+
+void AudioPassThruThreadImpl::sendAudioChunkToMobile() {
+  LOG4CXX_TRACE_ENTER(logger_);
 
   std::vector<unsigned char> binaryData;
-  if (!file_system::ReadBinaryFile(filename, binaryData)) {
+  std::vector<unsigned char>::iterator from;
+  std::vector<unsigned char>::iterator to;
+
+  timer_->StartWait(kAudioPassThruTimeout);
+
+  if (!file_system::ReadBinaryFile(fileName_, binaryData)) {
 #if defined(OS_POSIX) && defined(OS_LINUX)
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif
 
-    LOG4CXX_ERROR_EXT(logger_, "Unable to read file." << filename);
+    LOG4CXX_ERROR_EXT(logger_, "Unable to read file." << fileName_);
     if (false == SendEndAudioPassThru()) {
       LOG4CXX_ERROR_EXT(logger_, "Unable to send EndAudioPassThru");
     }
 
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
-
-#if defined(OS_POSIX) && defined(OS_LINUX)
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-    pthread_exit(NULL);
-#endif
   }
 
   if (binaryData.empty()) {
-#if defined(OS_POSIX) && defined(OS_LINUX)
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-#endif
-
     LOG4CXX_ERROR_EXT(logger_, "Binary data is empty.");
-    if (false == SendEndAudioPassThru()) {
-      LOG4CXX_ERROR_EXT(logger_, "Unable to send EndAudioPassThru");
-    }
-
-    ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
-
-#if defined(OS_POSIX) && defined(OS_LINUX)
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-    pthread_exit(NULL);
-#endif
+    return;
   }
 
-  unsigned int percentOfAudioLength = 0;  // % of audio file.
-  unsigned int dataLength = 0;  // part of file data.
+  LOG4CXX_ERROR_EXT(logger_, "offset = " << offset_);
 
-  // Send only part of file
-  if ((0 != max_duration_) && (max_duration_ < audioLength)) {
-    percentOfAudioLength = (max_duration_ * 100) / audioLength;
-    dataLength = (binaryData.size() * percentOfAudioLength) / 100;
-  } else {
-    percentOfAudioLength = 100;
-    dataLength = binaryData.size();
-  }
+  from = binaryData.begin() + offset_;
+  to = binaryData.end();
 
-  // Part of file in seconds =
-  // audio length in seconds * (%) of audio length / 100%
-  unsigned int seconds = ((audioLength / 1000) * percentOfAudioLength) / 100;
-  // Step is data length * AUDIO_PASS_THRU_TIMEOUT / seconds
-  unsigned int step = dataLength * kAudioPassThruTimeout / seconds;
-
-  std::vector<unsigned char>::iterator from = binaryData.begin();
-  std::vector<unsigned char>::iterator to = from + step;
-
-
-  // Minimal timeout is 1 second now.
-  for (int i = 1; i <= seconds; i += kAudioPassThruTimeout) {
-#if defined(OS_POSIX) && defined(OS_LINUX)
-
-    LOG4CXX_INFO(logger_, "Before timer; kAudioPassThruTimeout "
-                 << kAudioPassThruTimeout << "; seconds " << seconds);
-    timer_->StartWait(kAudioPassThruTimeout);
-
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-#endif
+  if (from != binaryData.end()) {
+    offset_ = offset_ + to - from;
 
     smart_objects::SmartObject* on_audio_pass =
-      new smart_objects::SmartObject();
+        new smart_objects::SmartObject();
     if (!on_audio_pass) {
       LOG4CXX_ERROR_EXT(logger_, "OnAudioPassThru NULL pointer");
       if (false == SendEndAudioPassThru()) {
@@ -243,55 +205,35 @@ void AudioPassThruThreadImpl::threadMain() {
       }
 
       ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
-
-#if defined(OS_POSIX) && defined(OS_LINUX)
-      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-      pthread_exit(NULL);
-#endif
     }
 
     (*on_audio_pass)[strings::params][strings::message_type] =
-      MessageType::kNotification;
+        MessageType::kNotification;
     (*on_audio_pass)[strings::params][strings::correlation_id] =
-      static_cast<int>(correlation_id_);
+        static_cast<int>(correlation_id_);
 
     (*on_audio_pass)[strings::params][strings::connection_key] =
-      static_cast<int>(session_key_);
+        static_cast<int>(session_key_);
     (*on_audio_pass)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::OnAudioPassThruID;
+        mobile_apis::FunctionID::OnAudioPassThruID;
 
     // binary data
     (*on_audio_pass)[strings::params][strings::binary_data] =
-      smart_objects::SmartObject(std::vector<unsigned char>(from, to));
+        smart_objects::SmartObject(std::vector<unsigned char>(from, to));
+
+    binaryData.clear();
 
     FactoryCreateCommand(on_audio_pass);
-#if defined(OS_POSIX) && defined(OS_LINUX)
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-#endif
-
-    from = to;
-    to = to + step;
-
-    if (i == seconds - 1) {
-      // set iterator to the end
-      to = binaryData.end();
-    }
   }
 
-#if defined(OS_POSIX) && defined(OS_LINUX)
-  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-#endif
-
-  ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
-
-#if defined(OS_POSIX) && defined(OS_LINUX)
-  pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-  pthread_exit(NULL);
-#endif
 }
 
 void AudioPassThruThreadImpl::exitThreadMain() {
   LOG4CXX_INFO(logger_, "AudioPassThruThreadImpl::exitThreadMain");
+
+  stopFlagMutex_.lock();
+  shouldBeStoped_ = true;
+  stopFlagMutex_.unlock();
 }
 
 unsigned int AudioPassThruThreadImpl::session_key() const {

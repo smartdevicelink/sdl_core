@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
 #define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
 
+#include "interfaces/MOBILE_API.h"
+
 namespace audio_manager {
 
 class string;
@@ -50,7 +52,10 @@ class AudioManager {
   virtual void playA2DPSource(const std::string& device) = 0;
   virtual void stopA2DPSource(const std::string& device) = 0;
 
-  virtual void startMicrophoneRecording(const std::string& outputFileName, int duration) = 0;
+  virtual void startMicrophoneRecording(const std::string& outputFileName,
+               mobile_apis::SamplingRate::eType type,
+               int duration,
+               mobile_apis::BitsPerSample::eType) = 0;
   virtual void stopMicrophoneRecording() = 0;
 
   virtual ~AudioManager() {

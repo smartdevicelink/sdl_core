@@ -56,6 +56,7 @@
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
+#include "audio_manager/audio_manager_impl.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -431,6 +432,7 @@ class ApplicationManagerImpl : public ApplicationManager
     hmi_apis::Common_Language::eType              vr_language_;
     hmi_apis::Common_Language::eType              tts_language_;
     smart_objects::SmartObject*                   vehicle_type_;
+    audio_manager::AudioManager*                  audioManager_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;

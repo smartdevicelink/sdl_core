@@ -63,7 +63,9 @@ class AudioManagerImpl : AudioManager {
   virtual void stopA2DPSource(const std::string& device);
 
   virtual void startMicrophoneRecording(const std::string& outputFileName,
-                                        int duration);
+                 mobile_apis::SamplingRate::eType type,
+                 int duration,
+                 mobile_apis::BitsPerSample::eType);
   virtual void stopMicrophoneRecording();
 
   virtual ~AudioManagerImpl();
