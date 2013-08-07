@@ -1,3 +1,6 @@
+find_package(Gstreamer-1.0 REQUIRED)
+find_package(Glib-2.0 REQUIRED)
+
 include_directories (
   ./include/
   ../utils/include/
