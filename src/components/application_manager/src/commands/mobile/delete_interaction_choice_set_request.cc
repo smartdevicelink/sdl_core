@@ -70,6 +70,12 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
 
+  if (ChoiceSetInUse(app)) {
+    LOG4CXX_ERROR_EXT(logger_, "Choice set currently in use");
+    SendResponse(false, mobile_apis::Result::IN_USE);
+    return;
+  }
+
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -81,6 +87,27 @@ void DeleteInteractionChoiceSetRequest::Run() {
   SendResponse(true, mobile_apis::Result::SUCCESS);
   /*CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet,
                    msg_params, true);*/
+}
+
+bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(const Application* app) {
+  if (app->is_perform_interaction_active()) {
+
+    // retrieve stored choice sets for perform interaction
+    const PerformChoiceSetMap& choice_set_map =
+        app->GetPerformInteractionChoiceSetMap();
+
+    PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
+    for (; choice_set_map.end() != it; ++it) {
+
+      if (it->first == (*message_)[strings::msg_params]
+          [strings::interaction_choice_set_id].asInt()) {
+        LOG4CXX_ERROR_EXT(logger_,
+                          "DeleteInteractionChoiceSetRequest::ChoiceSetInUse");
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 }  // namespace commands

@@ -80,9 +80,10 @@ void UIPerformInteractionResponse::Run() {
   }
 
   if (app->is_perform_interaction_active()) {
-    const ChoiceSetVRCmdMap& choice_set_map = app->GetChoiceSetVRCommands();
+    const PerformChoiceSetMap& choice_set_map =
+        app->GetPerformInteractionChoiceSetMap();
 
-    ChoiceSetVRCmdMap::const_iterator it = choice_set_map.begin();
+    PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
 
       const smart_objects::SmartObject& choice_set =
@@ -99,7 +100,7 @@ void UIPerformInteractionResponse::Run() {
         CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
       }
     }
-    app->DeleteChoiceSetVRCommands();
+    app->DeletePerformInteractionChoiceSetMap();
     app->set_perform_interaction_active(false);
   }
 

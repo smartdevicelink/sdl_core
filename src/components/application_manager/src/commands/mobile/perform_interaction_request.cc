@@ -149,9 +149,7 @@ bool PerformInteractionRequest::SendVRAddCommandRequest(
       return false;
     }
 
-    // save choice set for sent VR commands
-    app->AddChoiceSetVRCommands(choice_list[i].asInt(),
-                                *choice_set);
+
 
     for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
       smart_objects::SmartObject msg_params =
@@ -241,6 +239,8 @@ bool PerformInteractionRequest::SendUIPerformInteractionRequest(
     smart_objects::SmartObject* choice_set =
       app->FindChoiceSet(choice_list[i].asInt());
     if (choice_set) {
+      // save perform interaction choice set
+      app->AddPerformInteractionChoiceSet(choice_list[i].asInt(), *choice_set);
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
         int index = msg_params[strings::choice_set].length();
         msg_params[strings::choice_set][index] =

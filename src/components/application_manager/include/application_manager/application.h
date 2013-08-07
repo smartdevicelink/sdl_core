@@ -107,9 +107,9 @@ typedef std::map<unsigned int, smart_objects::SmartObject*> SubMenuMap;
 typedef std::map<unsigned int, smart_objects::SmartObject*> ChoiceSetMap;
 
 /*
- * @brief Typedef for interaction choice set VR commands
+ * @brief Typedef for perform interaction choice set
  */
-typedef std::map<unsigned int, smart_objects::SmartObject*> ChoiceSetVRCmdMap;
+typedef std::map<unsigned int, smart_objects::SmartObject*> PerformChoiceSetMap;
 
 class DynamicApplicationData {
   public:
@@ -199,37 +199,38 @@ class DynamicApplicationData {
       unsigned int choice_set_id) = 0;
 
     /*
-     * @brief Adds VR commands for choice set to the application
+     * @brief Adds perform interaction choice set to the application
      *
      * @param choice_set_id Unique ID used for this interaction choice set
-     * @param choice_set SmartObject that represent VR commands
+     * @param choice_set SmartObject that represents choice set
      */
-    virtual void AddChoiceSetVRCommands(
+    virtual void AddPerformInteractionChoiceSet(
       unsigned int choice_set_id,
-      const smart_objects::SmartObject& vr_commands) = 0;
+      const smart_objects::SmartObject& choice_set) = 0;
 
     /*
-     * @brief Deletes entirely ChoiceSet - VR commands map
+     * @brief Deletes entirely perform interaction choice set map
      *
-     * @param choice_set_id Unique ID of the interaction choice set
      */
-    virtual void DeleteChoiceSetVRCommands() = 0;
+    virtual void DeletePerformInteractionChoiceSetMap() = 0;
 
     /*
      * @brief Retrieves entirely ChoiceSet - VR commands map
      *
-     * @return ChoiceSet - VR commands map
+     * @return ChoiceSet map that is currently in use
      */
-    virtual const ChoiceSetVRCmdMap& GetChoiceSetVRCommands() = 0;
+    virtual const PerformChoiceSetMap&
+      GetPerformInteractionChoiceSetMap() const = 0;
 
     /*
-     * @brief Retrieves VR commands for specified choice_set_id id
+     * @brief Retrieves choice set that is currently in use by perform
+     * interaction
      *
      * @param choice_set_id Unique ID of the interaction choice set
      *
-     * @return SmartObject for VR commands
+     * @return SmartObject that represents choice set
      */
-    virtual smart_objects::SmartObject*  FindChoiceSetVRCommands(
+    virtual smart_objects::SmartObject*  FindPerformInteractionChoiceSet(
       unsigned int choice_set_id) const = 0;
 
     /*

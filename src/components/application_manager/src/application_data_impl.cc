@@ -175,7 +175,7 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     commands_(),
     sub_menu_(),
     choice_set_map_(),
-    choice_set_vr_commands_map_(),
+    performinteraction_choice_set_map_(),
     is_perform_interaction_active_(false) {
 }
 
@@ -222,12 +222,11 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   }
   sub_menu_.clear();
 
-  for (ChoiceSetVRCmdMap::iterator it = choice_set_vr_commands_map_.begin();
-       choice_set_vr_commands_map_.end() != it;
-       ++it) {
+  PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
+  for (; performinteraction_choice_set_map_.end() != it; ++it) {
     delete it->second;
   }
-  choice_set_vr_commands_map_.clear();
+  performinteraction_choice_set_map_.clear();
 }
 
 const smart_objects::SmartObject*
@@ -406,29 +405,28 @@ smart_objects::SmartObject*  DynamicApplicationDataImpl::FindChoiceSet(
   return NULL;
 }
 
-void DynamicApplicationDataImpl::AddChoiceSetVRCommands(
+void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(
   unsigned int choice_set_id,
   const smart_objects::SmartObject& vr_commands) {
-  choice_set_vr_commands_map_[choice_set_id] =
+  performinteraction_choice_set_map_[choice_set_id] =
     new smart_objects::SmartObject(vr_commands);
 }
 
-void DynamicApplicationDataImpl::DeleteChoiceSetVRCommands() {
-  for (ChoiceSetVRCmdMap::iterator it = choice_set_vr_commands_map_.begin();
-       choice_set_vr_commands_map_.end() != it;
-       ++it) {
+void DynamicApplicationDataImpl::DeletePerformInteractionChoiceSetMap() {
+  PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
+  for (; performinteraction_choice_set_map_.end() != it; ++it) {
     delete it->second;
   }
-  choice_set_vr_commands_map_.clear();
+  performinteraction_choice_set_map_.clear();
 }
 
 smart_objects::SmartObject*
-DynamicApplicationDataImpl::FindChoiceSetVRCommands(
+DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
   unsigned int choice_set_id) const {
-  ChoiceSetVRCmdMap::const_iterator it =
-    choice_set_vr_commands_map_.find(choice_set_id);
+  PerformChoiceSetMap::const_iterator it =
+      performinteraction_choice_set_map_.find(choice_set_id);
 
-  if (it != choice_set_vr_commands_map_.end()) {
+  if (it != performinteraction_choice_set_map_.end()) {
     return it->second;
   }
 

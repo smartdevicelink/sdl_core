@@ -65,9 +65,10 @@ void OnVRCommandNotification::Run() {
    * and PerformInterActionResponse to mobile
    */
   if (app->is_perform_interaction_active()) {
-    const ChoiceSetVRCmdMap& choice_set_map = app->GetChoiceSetVRCommands();
+    const PerformChoiceSetMap& choice_set_map =
+        app->GetPerformInteractionChoiceSetMap();
 
-    ChoiceSetVRCmdMap::const_iterator it = choice_set_map.begin();
+    PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
 
       const smart_objects::SmartObject& choice_set =

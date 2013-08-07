@@ -111,10 +111,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
     void CleanupFiles();
 
   private:
-    smart_objects::SmartObject*           active_message_;
+    smart_objects::SmartObject*            active_message_;
 
     Version                                version_;
-    unsigned int                                    app_id_;
+    unsigned int                           app_id_;
     std::string                            app_name_;
     bool                                   is_media_;
     bool                                   allowed_support_navigation_;
@@ -125,7 +125,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
     mobile_api::SystemContext::eType       system_context_;
     mobile_api::AudioStreamingState::eType audio_streaming_state_;
     std::string                            app_icon_path_;
-    connection_handler::DeviceHandle device_;
+    connection_handler::DeviceHandle       device_;
 
     std::vector<AppFile>                   app_files_;
     std::set<unsigned int>                 subscribed_buttons_;

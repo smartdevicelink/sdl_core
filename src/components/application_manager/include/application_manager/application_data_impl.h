@@ -153,36 +153,36 @@ class DynamicApplicationDataImpl : public virtual Application {
     smart_objects::SmartObject*  FindChoiceSet(unsigned int choice_set_id);
 
     /*
-     * @brief Adds VR commands for choice set to the application
+     * @brief Adds perform interaction choice set to the application
      *
      * @param choice_set_id Unique ID used for this interaction choice set
-     * @param choice_set SmartObject that represent VR commands
+     * @param choice_set SmartObject that represents choice set
      */
-    void AddChoiceSetVRCommands(unsigned int choice_set_id,
-                                const smart_objects::SmartObject& vr_commands);
+    void AddPerformInteractionChoiceSet(unsigned int choice_set_id,
+                                const smart_objects::SmartObject& choice_set);
 
     /*
-     * @brief Deletes entirely ChoiceSet - VR commands map
+     * @brief Deletes entirely perform interaction choice set map
      *
-     * @param choice_set_id Unique ID of the interaction choice set
      */
-    void DeleteChoiceSetVRCommands();
+    void DeletePerformInteractionChoiceSetMap();
 
     /*
      * @brief Retrieves entirely ChoiceSet - VR commands map
      *
-     * @return ChoiceSet - VR commands map
+     * @return ChoiceSet map that is currently in use
      */
-    inline const ChoiceSetVRCmdMap& GetChoiceSetVRCommands();
+    inline const PerformChoiceSetMap& GetPerformInteractionChoiceSetMap() const;
 
     /*
-     * @brief Retrieves VR commands for specified choice_set_id id
+     * @brief Retrieves choice set that is currently in use by perform
+     * interaction
      *
      * @param choice_set_id Unique ID of the interaction choice set
      *
-     * @return SmartObject for VR commands
+     * @return SmartObject that represents choice set
      */
-    smart_objects::SmartObject*  FindChoiceSetVRCommands(
+    smart_objects::SmartObject*  FindPerformInteractionChoiceSet(
       unsigned int choice_set_id) const;
 
     /*
@@ -240,7 +240,7 @@ class DynamicApplicationDataImpl : public virtual Application {
     CommandsMap                  commands_;
     SubMenuMap                   sub_menu_;
     ChoiceSetMap                 choice_set_map_;
-    ChoiceSetVRCmdMap            choice_set_vr_commands_map_;
+    PerformChoiceSetMap          performinteraction_choice_set_map_;
     bool                         is_perform_interaction_active_;
     bool                         is_reset_global_properties_active_;
 };
@@ -265,8 +265,9 @@ bool DynamicApplicationDataImpl::is_reset_global_properties_active() const {
   return is_reset_global_properties_active_;
 }
 
-const ChoiceSetVRCmdMap& DynamicApplicationDataImpl::GetChoiceSetVRCommands() {
-  return choice_set_vr_commands_map_;
+const PerformChoiceSetMap&
+    DynamicApplicationDataImpl::GetPerformInteractionChoiceSetMap() const {
+  return performinteraction_choice_set_map_;
 }
 
 }  //  namespace application_manager
