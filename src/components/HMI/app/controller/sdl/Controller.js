@@ -99,6 +99,7 @@ SDL.SDLController = Em.Object.create({
      * @type {String}
      */
     componentsReadiness: function(component) {
+    	
     	for (var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
     		if (!SDL.SDLModel.registeredComponents[i].state) {
     			return;
@@ -411,7 +412,9 @@ SDL.SDLController = Em.Object.create({
      * @param element: SDL.Button
      */
     onDeviceChoosed: function(element) {
-        FFW.UI.OnDeviceChosen(element.deviceName, element.id);
+    	SDL.SDLModel.set('CurrDeviceInfo.name', element.deviceName);
+    	SDL.SDLModel.set('CurrDeviceInfo.id', element.id);
+        FFW.BasicCommunication.OnDeviceChosen(element.deviceName, element.id);
         this.turnChangeDeviceViewBack();
     },
 

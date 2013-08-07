@@ -40,6 +40,16 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Boolean}
      */
     AudioPassThruState: false,
+    
+    /**
+     * Current device information
+     *
+     * @param {Object}
+     */
+    CurrDeviceInfo: {
+		"name" : null,
+		"id": null
+	},
 
     /**
      * Driver Distraction State
@@ -208,7 +218,7 @@ SDL.SDLModel = Em.Object.create( {
         {type: "UI", state: false},
         {type: "TTS", state: false},
         {type: "VR", state: false},
-        {type: "BasicCommunicationClient", state: false},
+        {type: "BasicCommunication", state: false},
         {type: "VehicleInfo", state: false},
         {type: "Buttons", state: false},
         {type: "Navigation", state: false}

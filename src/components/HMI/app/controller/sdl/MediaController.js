@@ -92,7 +92,7 @@ SDL.SDLMediaController = Em.Object.create( {
     restoreCurrentApp: function() {
 
         if( SDL.SDLAppController.model.appID === this.currentAppId ){
-            FFW.BasicCommunication.ActivateApp( this.currentAppId );
+            FFW.BasicCommunication.OnAppActivated( this.currentAppId );
             return;
         }
         this.activateApp( SDL.SDLController.getApplicationModel( this.currentAppId ) );

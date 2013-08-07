@@ -53,10 +53,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
     onPlayToneUnsubscribeRequestID: -1,
 
     // const
-    onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
-    onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
-    onDeviceListUpdatedNotification: "BasicCommunication.OnDeviceListUpdated",
-    onPlayToneNotification: "BasicCommunication.PlayTone",
+    //onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
+    //onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
+    //onDeviceListUpdatedNotification: "BasicCommunication.OnDeviceListUpdated",
+    //onPlayToneNotification: "BasicCommunication.PlayTone",
 
     /**
      * init object
@@ -128,16 +128,17 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         Em.Logger.log("FFW.BasicCommunicationRPC.onRPCResult");
         this._super();
 
-        if(response.result.method == "BasicCommunication.GetAppList"){
-            if(SDL.States.info.active){
-                SDL.SDLController.onGetAppList(response.result.appList);
-            }
-        }
+//        if(response.result.method == "BasicCommunication.GetAppList"){
+//            if(SDL.States.info.active){
+//                SDL.SDLController.onGetAppList(response.result.appList);
+//            }
+//        }
 
         if(response.result.method == "BasicCommunication.UpdateDeviceList"){
             if(SDL.States.info.active){
                 SDL.SDLModel.onGetDeviceList(response.result);
             }
+            
         }
 
         if(response.result.method == "BasicCommunication.OnAppActivated"){
@@ -191,18 +192,23 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
         if(request.method == "BasicCommunication.MixingAudioSupported"){
             this.MixingAudioSupported(true);
         }
-
         if(request.method == "BasicCommunication.AllowAllApps"){
             this.AllowAllApps(true);
         }
-
         if(request.method == "BasicCommunication.AllowApp"){
             this.AllowApp(true);
         }
-
+        if(request.method == "BasicCommunication.AllowDeviceToConnect"){
+        	this.AllowDeviceToConnect(request.id, request.method, allow);
+        }
         if(request.method == "BasicCommunication.UpdateAppList"){
+        	if(SDL.States.info.active){
+                SDL.SDLController.onGetAppList(request.params.applications);
+            }
+            this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+        }
+        if(request.method == "BasicCommunication.UpdateDeviceList"){
         	SDL.SDLModel.onGetDeviceList(request.params);
-
             this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
         }
     },
@@ -231,6 +237,30 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             this.client.send(JSONMessage);
         }
     },
+    
+    /**
+     * send response from onRPCRequest
+     * @param {Number} id
+     * @param {String} method
+     * @param {Boolean} allow
+     */
+    AllowDeviceToConnect: function(id, method, allow) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "id": id,
+            "result": {
+                "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL protocol
+                "method": method,
+                "allow": true
+            }
+        };
+        this.client.send(JSONMessage);
+
+    },
 
     /**
      * notification that UI is ready BasicCommunication should be sunscribed to
@@ -250,7 +280,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
      * Send request if application was activated
      * @param {String} appName
      */
-    ActivateApp: function(appID) {
+    OnAppActivated: function(appID) {
         Em.Logger.log("FFW.BasicCommunication.OnAppActivated");
 
         // send notification
@@ -271,7 +301,10 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
         var JSONMessage = {
             "jsonrpc": "2.0",
-            "method": "BasicCommunication.OnFindApplications"
+            "method": "BasicCommunication.OnFindApplications",
+            "params": {
+                "deviceInfo": SDL.SDLModel.CurrDeviceInfo
+            }
         };
         this.client.send(JSONMessage);
     },
@@ -286,26 +319,6 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
             "id": this.getDeviceListRequestID,
             "jsonrpc": "2.0",
             "method": "BasicCommunication.GetDeviceList"
-        };
-        this.client.send(JSONMessage);
-    },
-
-    /**
-     * Notification when user returned to application
-     *
-     * @params {Number}
-     */
-    ActivateApp: function(appID) {
-        Em.Logger.log("FFW.BasicCommunication.OnAppActivated");
-
-        // send request
-
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "BasicCommunication.OnAppActivated",
-            "params": {
-                "appID": appID
-            }
         };
         this.client.send(JSONMessage);
     },
@@ -450,6 +463,28 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
                 "code": 0,
                 "method": "BasicCommunication.AllowApp",
                 "allowed": allowed
+            }
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /**
+     * Notifies if device was choosed
+     * @param {String} deviceName
+     * @param {Number} appID
+     */
+    OnDeviceChosen: function(deviceName, appID) {
+        Em.Logger.log("FFW.UI.OnDeviceChosen");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "UI.OnDeviceChosen",
+            "params": {
+                "deviceInfo": {
+                    "name": deviceName,
+                    "id": appID
+                }
             }
         };
         this.client.send(JSONMessage);

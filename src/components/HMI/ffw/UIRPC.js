@@ -613,28 +613,6 @@ FFW.UI = FFW.RPCObserver.create({
     },
 
     /**
-     * Notifies if device was choosed
-     * @param {String} deviceName
-     * @param {Number} appID
-     */
-    OnDeviceChosen: function(deviceName, appID) {
-        Em.Logger.log("FFW.UI.OnDeviceChosen");
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnDeviceChosen",
-            "params": {
-                "deviceInfo": {
-                    "name": deviceName,
-                    "id": appID
-                }
-            }
-        };
-        this.client.send(JSONMessage);
-    },
-
-    /**
      * Notifies if sdl UI components language was changed
      * @param {String} lang
      */
