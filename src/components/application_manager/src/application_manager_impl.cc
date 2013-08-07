@@ -353,6 +353,7 @@ bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
   Application* app_to_remove = it->second;
   applications_.erase(it);
   application_list_.erase(app_to_remove);
+  delete app_to_remove;
   return true;
 }
 

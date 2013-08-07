@@ -61,10 +61,17 @@ void RegisterAppInterfaceRequest::Run() {
       static_cast<APIVersion>((*message_)[strings::msg_params]
                               [strings::sync_msg_version]
                               [strings::minor_version].asInt());
+    if (version.min_supported_api_version < APIVersion::kAPIV2) {
+      version.min_supported_api_version = APIVersion::kAPIV2;
+    }
+
     version.max_supported_api_version =
       static_cast<APIVersion>((*message_)[strings::msg_params]
                               [strings::sync_msg_version]
                               [strings::major_version].asInt());
+    if (version.max_supported_api_version > APIVersion::kAPIV2) {
+      version.max_supported_api_version = APIVersion::kAPIV2;
+    }
     application_impl->set_version(version);
 
     application_impl->set_mobile_app_id(

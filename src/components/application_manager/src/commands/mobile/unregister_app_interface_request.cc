@@ -45,14 +45,14 @@ void UnregisterAppInterfaceRequest::Run() {
     ApplicationManagerImpl::instance();
 
   if (!app_manager->application(
-      (*message_)[strings::params][strings::connection_key])) {
+        (*message_)[strings::params][strings::connection_key])) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
   if (!app_manager->UnregisterApplication(
-      (*message_)[strings::params][strings::connection_key])) {
+        (*message_)[strings::params][strings::connection_key])) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     LOG4CXX_ERROR(logger_, "Generic error");
     return;
@@ -60,15 +60,22 @@ void UnregisterAppInterfaceRequest::Run() {
 
   SendResponse(true, mobile_apis::Result::SUCCESS);
 
-  smart_objects::SmartObject message;
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!notification) {
+    LOG4CXX_ERROR(logger_, "Not enough memory.");
+    return;
+  }
+
+  smart_objects::SmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
+    hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
 
-  message[strings::params][strings::app_id] =
-      (*message_)[strings::params][strings::connection_key];
+  message[strings::msg_params][strings::app_id] =
+    (*message_)[strings::params][strings::connection_key];
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
