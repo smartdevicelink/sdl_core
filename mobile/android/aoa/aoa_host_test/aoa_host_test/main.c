@@ -140,7 +140,7 @@ static int mainPhase(){
 	int response = 0;
 	int transferred;
     
-    // reading data length
+/*    // reading data length
 	response = libusb_bulk_transfer(handle,IN,buffer,16384, &transferred,0);
     fprintf(stdout, "1: Transferred %d bytes\n", transferred);
 	if(response < 0){error(response);return -1;}
@@ -148,7 +148,7 @@ static int mainPhase(){
         printCharArray(buffer, transferred);
     } else {
         fprintf(stdout, "Length: %u\n", buffer[0]);
-    }
+    }*/
     
     // reading data
 	response = libusb_bulk_transfer(handle,IN,buffer,sizeof(buffer), &transferred,0);
@@ -157,7 +157,7 @@ static int mainPhase(){
     printCharArray(buffer, transferred);
     int dataLength = transferred;
     
-    // writing data length
+/*    // writing data length
     byte *lenBuf = 0;
     int lenBufLen = 0;
     intToByteArray(transferred, &lenBuf, &lenBufLen);
@@ -169,7 +169,7 @@ static int mainPhase(){
         error(response);
         return -1;
     }
-    printf("Sent %d bytes\n", transferred);
+    printf("Sent %d bytes\n", transferred);*/
     
     // writing data
     response = libusb_bulk_transfer(handle, OUT, buffer, dataLength, &transferred, 0);
