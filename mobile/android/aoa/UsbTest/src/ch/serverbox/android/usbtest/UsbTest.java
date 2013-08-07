@@ -194,13 +194,13 @@ public class UsbTest extends Activity {
             mFout = new FileOutputStream(fd);
             mFin = new FileInputStream(fd);
             mBtSend.setEnabled(true);
+
+            l("Accessory " + manufacturer + " opened!");
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "openAccessory error", e);
         } catch (NullPointerException e) {
             Log.e(TAG, "openAccessory error", e);
         }
-
-        l("Accessory " + manufacturer + " opened!");
     }
 
     private void closeAccessory(UsbAccessory accessory) {
