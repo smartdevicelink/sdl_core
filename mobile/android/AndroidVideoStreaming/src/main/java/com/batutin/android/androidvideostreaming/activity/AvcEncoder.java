@@ -9,21 +9,25 @@ import android.media.MediaFormat;
 import android.util.Log;
 import android.view.Surface;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
 
 public class AvcEncoder {
 
     public static final String MIME_TYPE = "video/avc";
     private static final String TAG = "EncodeDecodeTest";
-    // movie length, in frames
-    private  int NUM_FRAMES = 300;               // two seconds of video
     private static final boolean VERBOSE = true;           // lots of logging
     private static final boolean DEBUG_SAVE_FILE = true;   // save copy of encoded movie
     private static final String DEBUG_FILE_NAME_BASE = "/sdcard/test.";
+    private static final int FRAME_RATE = 15;               // 15fps
     public EncodedFrameListener frameListener;
     public ParameterSetsListener parameterSetsListener;
+    private PipedInputStream reader;
+    // movie length, in frames
+    private int NUM_FRAMES = 300;               // two seconds of video
     private MediaCodec encoder;
     private byte[] sps;
     private byte[] pps;
@@ -31,16 +35,17 @@ public class AvcEncoder {
     private CamcorderProfile camcorderProfile;
     private MediaFormat mediaFormat;
     private int colorFormat;
-    private byte[] frameData;
+    //private byte[] frameData;
     private Surface surface;
-    private static final int FRAME_RATE = 15;               // 15fps
     private MediaCodec decoder;
 
-    public AvcEncoder(Surface surface, byte[] frameData) {
+    public AvcEncoder(Surface surface, PipedInputStream reader) {
         try {
 
             this.surface = surface;
-            this.frameData = frameData;
+
+            this.reader = reader;
+            //this.frameData = frameData;
             decoder = MediaCodec.createDecoderByType(MIME_TYPE);
             encoder = MediaCodec.createEncoderByType(MIME_TYPE);
             codecInfo = selectCodec(MIME_TYPE);
@@ -53,7 +58,8 @@ public class AvcEncoder {
             mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
             encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             encoder.start();
-            NUM_FRAMES = 10 * camcorderProfile.videoFrameRate;
+            //NUM_FRAMES = 10 * camcorderProfile.videoFrameRate;
+            NUM_FRAMES = 100;
         } catch (IllegalStateException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
@@ -112,13 +118,15 @@ public class AvcEncoder {
     /**
      * Generates the presentation time for frame N, in microseconds.
      */
-    private  long computePresentationTime(int frameIndex) {
+    private long computePresentationTime(int frameIndex) {
         return frameIndex * 1000000 / camcorderProfile.videoFrameRate;
     }
 
     public void close() throws IOException {
         encoder.stop();
         encoder.release();
+        decoder.stop();
+        decoder.release();
     }
 
     public void offerEncoder(byte[] input) {
@@ -236,12 +244,35 @@ public class AvcEncoder {
                         //frameData = new byte[camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight];
                         //new Random().nextBytes(frameData);
                         ByteBuffer inputBuf = encoderInputBuffers[inputBufIndex];
-
                         inputBuf.clear();
+                        //frameData = new byte[camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2];
+                        ByteArrayOutputStream bb = new ByteArrayOutputStream();
+                        int res = 0;
+                        do {
+                            try {
+                                res = reader.read();
+                                if ( res != -1){
+                                bb.write(res);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } while (res != -1 && bb.size() <= camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
 
-                        inputBuf.put(frameData, generateIndex*camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight* 3 / 2, camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight* 3 / 2);
+                        try {
+                            bb.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        byte[] fd = bb.toByteArray();
 
-                        encoder.queueInputBuffer(inputBufIndex, 0,  camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight* 3 / 2, ptsUsec, 0);
+                        // The size of a frame of video data, in the formats we handle, is stride*sliceHeight
+                        // for Y, and (stride/2)*(sliceHeight/2) for each of the Cb and Cr channels.  Application
+                        // of algebra and assuming that stride==width and sliceHeight==height yields:
+
+                        inputBuf.put(fd, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
+
+                        encoder.queueInputBuffer(inputBufIndex, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2, ptsUsec, 0);
                         if (VERBOSE) Log.d(TAG, "submitted frame " + generateIndex + " to enc");
                     }
                     generateIndex++;
@@ -275,7 +306,7 @@ public class AvcEncoder {
                 } else { // encoderStatus >= 0
                     ByteBuffer encodedData = encoderOutputBuffers[encoderStatus];
                     if (encodedData == null) {
-                        Log.e(TAG,"encoderOutputBuffer " + encoderStatus + " was null");
+                        Log.e(TAG, "encoderOutputBuffer " + encoderStatus + " was null");
                     }
 
                     // It's usually necessary to adjust the ByteBuffer values to match BufferInfo.
@@ -367,7 +398,7 @@ public class AvcEncoder {
                     // We use a very simple clock to keep the video FPS, or the video
                     // playback will be too fast
                     while (info.presentationTimeUs / 1000 > System.currentTimeMillis() - startMs) {
-                            //threadPause.pause();
+                        //threadPause.pause();
 
 
                     }
