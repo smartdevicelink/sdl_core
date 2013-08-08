@@ -1,4 +1,5 @@
 [CW32]
+* SyncProxyAndroid SDK: temporarily turn on verbose logging of BTTransport events.
 * SyncProxyAndroid SDK: update result code values.
 
 [CW31]
