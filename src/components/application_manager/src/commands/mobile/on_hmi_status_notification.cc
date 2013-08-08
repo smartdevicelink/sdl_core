@@ -47,6 +47,7 @@ OnHMIStatusNotification::~OnHMIStatusNotification() {
 }
 
 void OnHMIStatusNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnHMIStatusNotification::Run");
   (*message_)[strings::params][strings::message_type] =
           MessageType::kNotification;
 

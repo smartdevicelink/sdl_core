@@ -48,6 +48,7 @@ DialNumberRequest::~DialNumberRequest() {
 }
 
 void DialNumberRequest::Run() {
+  LOG4CXX_INFO(logger_, "DialNumberRequest::Run");
   SendResponse(false, mobile_apis::
                    Result::UNSUPPORTED_REQUEST);
 }

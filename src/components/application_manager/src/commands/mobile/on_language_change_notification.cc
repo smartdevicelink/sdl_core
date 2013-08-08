@@ -48,6 +48,7 @@ OnLanguageChangeNotification::~OnLanguageChangeNotification() {
 }
 
 void OnLanguageChangeNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnLanguageChangeNotification::Run");
   SendNotification();
 }
 

@@ -69,6 +69,7 @@ void ReadDIDRequest::Run() {
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
     SendResponse(false,
                  mobile_apis::Result::REJECTED);
+    LOG4CXX_ERROR(logger_, "Rejected");
     return;
   }
 
@@ -78,6 +79,7 @@ void ReadDIDRequest::Run() {
   if (!p_vi_read_did) {
     SendResponse(false,
                  mobile_apis::Result::OUT_OF_MEMORY);
+    LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
 

@@ -49,6 +49,7 @@ AddSubMenuResponse::~AddSubMenuResponse() {
 
 void AddSubMenuResponse::Run() {
   if ((*message_)[strings::params][strings::success] == false) {
+    LOG4CXX_ERROR(logger_, "Success = false");
     SendResponse();
     return;
   }

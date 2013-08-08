@@ -53,6 +53,7 @@ void AddCommandResponse::Run() {
 
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
+    LOG4CXX_ERROR(logger_, "Success = false");
     SendResponse();
     return;
   }

@@ -49,8 +49,10 @@ ShowResponse::~ShowResponse() {
 }
 
 void ShowResponse::Run() {
+  LOG4CXX_INFO(logger_, "ShowResponse::Run");
   if ((*message_)[strings::params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 

@@ -55,6 +55,7 @@ void EndAudioPassThruResponse::Run() {
 
   if (false == (*message_)[strings::msg_params][strings::success].asBool()) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 

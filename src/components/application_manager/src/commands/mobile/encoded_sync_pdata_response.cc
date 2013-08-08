@@ -50,12 +50,15 @@ EncodedSyncPDataResponse::~EncodedSyncPDataResponse() {
 }
 
 void EncodedSyncPDataResponse::Run() {
+  LOG4CXX_INFO(logger_, "EncodedSyncPDataResponse::Run");
   if ((*message_)[strings::params][strings::success] == false) {
       SendResponse();
+      LOG4CXX_ERROR(logger_, "Success = false");
       return;
     }
 
-    const int correlation_id = 104;
+    const int correlation_id = (*message_)[strings::params]
+                               [strings::correlation_id].asInt();
 
     if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {

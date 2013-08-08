@@ -56,16 +56,16 @@ void AlertResponse::Run() {
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
-  // TODO(DK) HMI Request Id
   const int correlation_id =
     (*message_)[strings::params][strings::correlation_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id)) {
-    // TODO(DK): HMI code Id
+
     const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
 

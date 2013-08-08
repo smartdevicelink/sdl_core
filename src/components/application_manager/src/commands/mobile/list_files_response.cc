@@ -48,6 +48,7 @@ ListFilesResponse::~ListFilesResponse() {
 }
 
 void ListFilesResponse::Run() {
+  LOG4CXX_INFO(logger_, "ListFilesResponse::Run");
   ApplicationImpl* application =
         static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
         application((*message_)[strings::params][strings::connection_key]));

@@ -53,19 +53,18 @@ void DeleteCommandResponse::Run() {
   if ((*message_)[strings::params][strings::success] == false)
   {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-  // TODO(DK) HMI Request Id
   const int function_id =
       (*message_)[strings::params][strings::function_id].asInt();
 
   const int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asInt();
 
-  // TODO(DK): HMI code Id
   const mobile_apis::Result::eType code =
       static_cast<mobile_apis::Result::eType>(
       (*message_)[strings::msg_params][hmi_response::code].asInt());

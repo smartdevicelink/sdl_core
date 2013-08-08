@@ -41,6 +41,7 @@ namespace application_manager {
 namespace commands {
 
 void RegisterAppInterfaceRequest::Run() {
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run");
   if (ApplicationManagerImpl::instance()->
       application((*message_)[strings::params][strings::connection_key])) {
     SendResponse(false,

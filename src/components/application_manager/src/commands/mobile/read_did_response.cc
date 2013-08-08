@@ -54,6 +54,7 @@ void ReadDIDResponse::Run() {
   // check if response false
   if ((*message_)[strings::msg_params][strings::success] == false) {
     SendResponse();
+    LOG4CXX_ERROR(logger_, "Success = false");
     return;
   }
 
@@ -62,7 +63,7 @@ void ReadDIDResponse::Run() {
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       correlation_id)) {
-    // TODO(DK): HMI code Id
+
     const int code =
       (*message_)[strings::msg_params][hmi_response::code].asInt();
     if (true == code) {
