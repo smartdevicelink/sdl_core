@@ -346,8 +346,7 @@ FFW.UI = FFW.RPCObserver.create({
 	                        },
 	                        "hmiZoneCapabilities":
 	                            [
-	                                "FRONT",
-	                                "BACK"
+	                                "FRONT"
 	                            ],
 	                        "softButtonCapabilities":
 	                            [
