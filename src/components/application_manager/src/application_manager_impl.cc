@@ -35,6 +35,7 @@
 #include "application_manager/application.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/hmi_command_factory.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/audio_pass_thru_thread_impl.h"
 #include "application_manager/message_helper.h"
@@ -865,7 +866,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         = static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
 
-  if (mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) {
+  if ((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) &&
+      ((*message)[strings::params][strings::protocol_type] ==
+          commands::CommandImpl::mobile_protocol_type_)) {
     unsigned int app_id = (*message)[strings::params][strings::connection_key]
         .asUInt();
     Application* app = ApplicationManagerImpl::instance()->application(app_id);
