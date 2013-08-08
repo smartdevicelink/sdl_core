@@ -52,21 +52,6 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 void OnButtonPressNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
 
-  if ((*message_)[strings::msg_params].keyExists(
-        hmi_response::custom_button_id)) {
-    LOG4CXX_INFO_EXT(logger_, "No subscription for custom buttons requires");
-
-    Application* app = ApplicationManagerImpl::instance()->active_application();
-
-    if (NULL == app) {
-      LOG4CXX_WARN_EXT(logger_, "OnButtonPress came but no app is active.");
-      return;
-    }
-
-    SendButtonPress(app, true);
-    return;
-  }
-
   const unsigned int btn_id = static_cast<unsigned int>(
                                 (*message_)[strings::msg_params]
                                 [hmi_response::button_name].asInt());
@@ -85,7 +70,7 @@ void OnButtonPressNotification::Run() {
     if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level()) ||
         (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
          && mobile_apis::ButtonName::OK != btn_id)) {
-      SendButtonPress(subscribed_app, false);
+      SendButtonPress(subscribed_app);
     } else {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
       continue;
@@ -93,8 +78,7 @@ void OnButtonPressNotification::Run() {
   }
 }
 
-void OnButtonPressNotification::SendButtonPress(const Application* app,
-    bool is_custom_btn_id) {
+void OnButtonPressNotification::SendButtonPress(const Application* app) {
   smart_objects::SmartObject* on_btn_press =
     new smart_objects::SmartObject();
 
@@ -119,7 +103,8 @@ void OnButtonPressNotification::SendButtonPress(const Application* app,
   (*on_btn_press)[strings::msg_params][strings::button_press_mode] =
     (*message_)[strings::msg_params][hmi_response::button_mode];
 
-  if (is_custom_btn_id) {
+  if ((*message_)[strings::msg_params].
+      keyExists(hmi_response::custom_button_id)) {
     (*on_btn_press)[strings::msg_params][strings::custom_button_id] =
       (*message_)[strings::msg_params][strings::custom_button_id];
   } else {
