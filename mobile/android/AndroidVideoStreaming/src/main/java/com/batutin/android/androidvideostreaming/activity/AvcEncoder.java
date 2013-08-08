@@ -20,7 +20,7 @@ public class AvcEncoder {
     public static final String MIME_TYPE = "video/avc";
     private static final String TAG = "EncodeDecodeTest";
     private static final boolean VERBOSE = true;           // lots of logging
-    private static final boolean DEBUG_SAVE_FILE = true;   // save copy of encoded movie
+    private static final boolean DEBUG_SAVE_FILE = false;   // save copy of encoded movie
     private static final String DEBUG_FILE_NAME_BASE = "/sdcard/test.";
     private static final int FRAME_RATE = 15;               // 15fps
     public EncodedFrameListener frameListener;
@@ -59,7 +59,7 @@ public class AvcEncoder {
             encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             encoder.start();
             //NUM_FRAMES = 10 * camcorderProfile.videoFrameRate;
-            NUM_FRAMES = 100;
+            NUM_FRAMES = 1000;
         } catch (IllegalStateException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
@@ -257,7 +257,7 @@ public class AvcEncoder {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        } while (res != -1 && bb.size() <= camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
+                        } while (res != -1 && bb.size() < camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
 
                         try {
                             bb.flush();

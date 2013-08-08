@@ -3,7 +3,6 @@ package com.batutin.android.androidvideostreaming.activity;
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -19,6 +18,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.batutin.android.androidvideostreaming.R;
 
@@ -58,7 +58,8 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.decode_activity);
 
-
+        RelativeLayout view = (RelativeLayout)findViewById(R.id.testLayout);
+        //view.setDrawingCacheEnabled(true);
         SurfaceView sv = (SurfaceView) findViewById(R.id.surfaceView);
         sv.getHolder().addCallback(this);
 
@@ -66,10 +67,23 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
 
     private byte[] createTestByteArray() {
         camcorderProfile = getCamcorderProfile();
-        Bitmap b = BitmapFactory.decodeResource(getResources(),
-                R.drawable.lena);
+        //Bitmap b = BitmapFactory.decodeResource(getResources(),
+                //R.drawable.lena);
 
-        byte[] data = getNV21(camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight, b);
+
+        RelativeLayout view = (RelativeLayout)findViewById(R.id.testLayout);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache(), 0,0 , camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
+
+        view.destroyDrawingCache();
+
+        /*View v1 = findViewById(R.id.imageView);
+        v1.setDrawingCacheEnabled(true);
+        Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache(), 0,0 , camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
+        v1.setDrawingCacheEnabled(false);*/
+
+
+        byte[] data = getNV21(camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight,bitmap);
         return data;
     }
 
@@ -150,7 +164,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
 
             PipedOutputStream pipedWriter = new PipedOutputStream();
 
-            if (res == null) {
+            if (bt == null) {
                 res = createTestByteArray();
                 bt = new BitmapThread(pipedWriter, res);
                 mPlayer = new PlayerThread(holder.getSurface(), res, pipedReader);
@@ -202,15 +216,16 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
             try {
 
                 int i = 0;
-                while (i < 30) {
+                while (true) {
 
-                    pw.write(bytes);
+                    pw.write(createTestByteArray());
 
                     pw.flush();
+
                     i++;
                 }
             } catch (Exception e) {
-                Log.e(TAG, e.getLocalizedMessage());
+                Log.e(TAG, e.toString());
                 System.out.println(" PipeThread Exception: " + e);
             }
         }
