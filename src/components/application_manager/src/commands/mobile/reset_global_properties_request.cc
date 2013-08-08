@@ -112,7 +112,6 @@ void ResetGlobalPropertiesRequest::Run() {
     ++chaining_counter;
   }
 
-  LOG4CXX_ERROR(logger_, "##### " << chaining_counter);
   if (vr_help_title || vr_help_items ) {
 
     smart_objects::SmartObject msg_params =
