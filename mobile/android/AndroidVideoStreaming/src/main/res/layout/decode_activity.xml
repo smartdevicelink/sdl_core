@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+
+    <SurfaceView
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            android:id="@+id/surfaceView"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"/>
+
+    <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:id="@+id/imageView"
+            android:src="@drawable/lena"
+            android:layout_below="@+id/surfaceView"
+            android:layout_alignParentLeft="true"/>
+
+
+</RelativeLayout>

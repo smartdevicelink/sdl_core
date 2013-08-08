@@ -32,10 +32,9 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SurfaceView sv = new SurfaceView(this);
+        setContentView(R.layout.decode_activity);
+        SurfaceView sv = (SurfaceView) findViewById(R.id.surfaceView);
         sv.getHolder().addCallback(this);
-        setContentView(sv);
-
     }
 
     protected void onDestroy() {
