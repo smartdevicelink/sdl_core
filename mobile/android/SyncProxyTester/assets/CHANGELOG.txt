@@ -1,4 +1,5 @@
 [CW32]
+* Remove the persistent top-level submenu with id = 0.
 * SyncProxyAndroid SDK: temporarily turn on verbose logging of BTTransport events.
 * SyncProxyAndroid SDK: update result code values.
 

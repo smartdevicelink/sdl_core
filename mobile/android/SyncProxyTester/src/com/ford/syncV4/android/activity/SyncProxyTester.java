@@ -593,12 +593,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		_submenuAdapter
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-		// Add top level menu with parent ID zero
-		SyncSubMenu sm = new SyncSubMenu();
-		sm.setName("Top Level Menu");
-		sm.setSubMenuId(0);
-		addSubMenuToList(sm);
-
 		_commandAdapter = new ArrayAdapter<Integer>(this,
 				android.R.layout.select_dialog_item);
 		_commandAdapter
@@ -1208,37 +1202,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						} else if (adapter.getItem(which) == Names.AddSubMenu) {
                             sendAddSubmenu();
 						} else if (adapter.getItem(which) == Names.DeleteSubMenu) {
-							//something
-							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-							builder.setAdapter(_submenuAdapter, new DialogInterface.OnClickListener() {
-
-								public void onClick(DialogInterface dialog, int which) {
-									SyncSubMenu menu = _submenuAdapter.getItem(which);
-									if (menu.getSubMenuId() != 0) {
-										DeleteSubMenu msg = new DeleteSubMenu();
-										msg.setCorrelationID(autoIncCorrId++);
-										msg.setMenuID(menu.getSubMenuId());
-										try {
-											_msgAdapter.logMessage(msg, true);
-											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-										} catch (SyncException e) {
-											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-										}
-
-										if (_latestDeleteSubmenu != null) {
-											Log.w(logTag, "Latest deleteSubmenu should be null, but equals to " + _latestDeleteSubmenu);
-										}
-										_latestDeleteSubmenu = menu;
-									} else {
-										Toast.makeText(getApplicationContext(),
-												"Sorry, can't delete top-level menu",
-												Toast.LENGTH_LONG).show();
-									}
-								}
-							});
-							AlertDialog dlg = builder.create();
-							dlg.show();
-						} else if (adapter.getItem(which) == Names.SetGlobalProperties) {
+                            sendDeleteSubMenu();
+                        } else if (adapter.getItem(which) == Names.SetGlobalProperties) {
 							sendSetGlobalProperties();
 						} else if (adapter.getItem(which) == Names.ResetGlobalProperties) {
 							sendResetGlobalProperties();
@@ -1759,6 +1724,44 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 					}
 
                    /**
+                    * Opens the dialog for DeleteSubMenu message and sends it.
+                    */
+                   private void sendDeleteSubMenu() {
+                       AlertDialog.Builder builder =
+                               new AlertDialog.Builder(adapter.getContext());
+                       builder.setAdapter(_submenuAdapter,
+                               new DialogInterface.OnClickListener() {
+                                   @Override
+                                   public void onClick(DialogInterface dialog,
+                                                       int which) {
+                                       SyncSubMenu menu =
+                                               _submenuAdapter.getItem(which);
+                                       DeleteSubMenu msg = new DeleteSubMenu();
+                                       msg.setCorrelationID(autoIncCorrId++);
+                                       msg.setMenuID(menu.getSubMenuId());
+                                       try {
+                                           _msgAdapter.logMessage(msg, true);
+                                           ProxyService.getInstance()
+                                                   .getProxyInstance()
+                                                   .sendRPCRequest(msg);
+                                       } catch (SyncException e) {
+                                           _msgAdapter.logMessage(
+                                                   "Error sending message: " +
+                                                           e, Log.ERROR, e);
+                                       }
+
+                                       if (_latestDeleteSubmenu != null) {
+                                           Log.w(logTag,
+                                                   "Latest deleteSubmenu should be null, but equals to " +
+                                                           _latestDeleteSubmenu);
+                                       }
+                                       _latestDeleteSubmenu = menu;
+                                   }
+                               });
+                       builder.show();
+                   }
+
+                   /**
                     * Opens the dialog for GetVehicleData message and sends it.
                     */
                    private void sendGetVehicleData() {
@@ -2068,7 +2071,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                                }
                                if (chkUseParentID.isChecked()) {
                                    SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
-                                   menuParams.setParentID(sm.getSubMenuId());
+                                   if (sm != null) {
+                                       menuParams.setParentID(sm.getSubMenuId());
+                                   }
                                }
                                msg.setMenuParams(menuParams);
 
