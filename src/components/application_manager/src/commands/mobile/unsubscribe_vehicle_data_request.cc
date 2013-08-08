@@ -93,9 +93,12 @@ void UnsubscribeVehicleDataRequest::Run() {
     }
   }
 
-  if (unsubscribed_items == items_to_unsubscribe) {
+  if (0 == items_to_unsubscribe) {
+    SendResponse(false, mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE,
+                 "Provided VehicleData is empty", &response_params);
+  } else if (unsubscribed_items == items_to_unsubscribe) {
     SendResponse(true, mobile_apis::Result::SUCCESS,
-                 "Unsubscribed on all VehicleData", &response_params);
+                 "Unsubscribed on provided VehicleData", &response_params);
   } else if (0 == unsubscribed_items) {
     SendResponse(false, mobile_apis::Result::REJECTED,
                  "Was not subscribed on any VehicleData", &response_params);
