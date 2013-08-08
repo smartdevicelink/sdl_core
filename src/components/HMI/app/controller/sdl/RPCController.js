@@ -52,6 +52,195 @@ SDL.RPCController = Em.Object.create({
      * returns true if mandatory fields is successful
      * and returns false if not
      */
+    BasicCommunication: Em.Object.create({
+
+        resultStruct: {},
+
+        /**
+         * Validate method for request UpdateDeviceList
+         * 
+         * @param {Object} params
+         */
+        UpdateDeviceList: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.deviceList) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'deviceList' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (params.deviceList.length < 0) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'deviceList'!"
+                };
+
+                return this.resultStruct;
+            }
+        	
+        	this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request AllowDeviceToConnect
+         * 
+         * @param {Object} params
+         */
+        AllowDeviceToConnect: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.device) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'device' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+        	
+        	this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request UpdateAppList
+         * 
+         * @param {Object} params
+         */
+        UpdateAppList: function(params) {
+
+            if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (!params.applications) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'applications' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+            if (params.applications.length < 1) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Wrong type of parameter 'applications'!"
+                };
+
+                return this.resultStruct;
+            }
+
+        	this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request MixingAudioSupported
+         * 
+         * @param {Object} params
+         */
+        MixingAudioSupported: function(params) {
+
+        	this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request AllowAllApps
+         * 
+         * @param {Object} params
+         */
+        AllowAllApps: function(params) {
+
+        	this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        },
+
+        /**
+         * Validate method for request AllowApp
+         * 
+         * @param {Object} params
+         */
+        AllowApp: function(params) {
+
+        	if (!params) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'params' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+        	if (!params.app) {
+
+                this.resultStruct = {
+                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                    "resultMessage": "Parameter 'app' does not exists!"
+                };
+
+                return this.resultStruct;
+            }
+
+        	this.resultStruct = {
+                "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+            };
+
+            return this.resultStruct;
+        }
+
+    }),
+
+	/**
+     * Object that contains check methods that
+     * returns true if mandatory fields is successful
+     * and returns false if not
+     */
     TTS: Em.Object.create({
 
         resultStruct: {},
@@ -69,7 +258,7 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
         /**
          * Validate method for request GetLanguage
          * 
@@ -83,7 +272,7 @@ SDL.RPCController = Em.Object.create({
 
             return this.resultStruct;
         },
-        
+
         /**
          * Validate method for request SetGlobalProperties
          * 

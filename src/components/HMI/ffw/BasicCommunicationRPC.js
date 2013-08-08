@@ -184,28 +184,31 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
     onRPCRequest: function(request) {
         Em.Logger.log("FFW.BasicCommunicationRPC.onRPCRequest");
         this._super();
+	
+        if (this.validationCheck(request)) {
 
-        if(request.method == "BasicCommunication.MixingAudioSupported"){
-            this.MixingAudioSupported(true);
-        }
-        if(request.method == "BasicCommunication.AllowAllApps"){
-            this.AllowAllApps(true);
-        }
-        if(request.method == "BasicCommunication.AllowApp"){
-            this.AllowApp(true);
-        }
-        if(request.method == "BasicCommunication.AllowDeviceToConnect"){
-        	this.AllowDeviceToConnect(request.id, request.method, allow);
-        }
-        if(request.method == "BasicCommunication.UpdateAppList"){
-        	if(SDL.States.info.active){
-                SDL.SDLController.onGetAppList(request.params.applications);
-            }
-            this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-        }
-        if(request.method == "BasicCommunication.UpdateDeviceList"){
-        	SDL.SDLModel.onGetDeviceList(request.params);
-            this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+	        if(request.method == "BasicCommunication.MixingAudioSupported"){
+	            this.MixingAudioSupported(true);
+	        }
+	        if(request.method == "BasicCommunication.AllowAllApps"){
+	            this.AllowAllApps(true);
+	        }
+	        if(request.method == "BasicCommunication.AllowApp"){
+	            this.AllowApp(true);
+	        }
+	        if(request.method == "BasicCommunication.AllowDeviceToConnect"){
+	        	this.AllowDeviceToConnect(request.id, request.method, allow);
+	        }
+	        if(request.method == "BasicCommunication.UpdateAppList"){
+	        	if(SDL.States.info.active){
+	                SDL.SDLController.onGetAppList(request.params.applications);
+	            }
+	            this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+	        }
+	        if(request.method == "BasicCommunication.UpdateDeviceList"){
+	        	SDL.SDLModel.onGetDeviceList(request.params);
+	            this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+	        }
         }
     },
 
@@ -297,11 +300,16 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 
         var JSONMessage = {
             "jsonrpc": "2.0",
-            "method": "BasicCommunication.OnFindApplications",
-            "params": {
-                "deviceInfo": SDL.SDLModel.CurrDeviceInfo
-            }
+            "method": "BasicCommunication.OnFindApplications"
         };
+        
+        if (SDL.SDLModel.CurrDeviceInfo.name || SDL.SDLModel.CurrDeviceInfo.id) {
+        	
+        	JSONMessage.params = {
+                "deviceInfo": SDL.SDLModel.CurrDeviceInfo
+            };
+        }
+        
         this.client.send(JSONMessage);
     },
 

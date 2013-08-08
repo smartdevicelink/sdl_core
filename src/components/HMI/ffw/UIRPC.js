@@ -146,11 +146,9 @@ FFW.UI = FFW.RPCObserver.create({
      */
     onRPCRequest: function(request) {
         Em.Logger.log("FFW.UI.onRPCRequest");
-        
+
         if (this.validationCheck(request)) {
 
-	        var resultCode = null;
-	
 	        switch(request.method){
 	            case "UI.Alert": {
 	            	
@@ -624,7 +622,7 @@ FFW.UI = FFW.RPCObserver.create({
             "jsonrpc": "2.0",
             "method": "UI.OnLanguageChange",
             "params": {
-                "hmiDisplayLanguage": lang
+                "language": lang
             }
         };
         this.client.send(JSONMessage);

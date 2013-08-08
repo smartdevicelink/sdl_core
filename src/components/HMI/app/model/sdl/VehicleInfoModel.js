@@ -257,18 +257,28 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
      * @type {Object} message
      */
     getVehicleData: function( message ) {
-        var data = {};
+        var data = {}
+        	text = "Params ",
+        	result = true;
         
-        for (var key in message) {
-            if (this.vehicleData[key]) {
-            	data[key] = this.vehicleData[key];
-            } else {
-            	return null;
-            }
-        	
+        for (var key in message.params) {
+	        if (key != "appID") {
+        		if (this.vehicleData[key]) {
+		        	data[key] = this.vehicleData[key];
+		        } else {
+		        	text += key + ", ";
+		        	result = false;
+		        }
+	        }
         }
         
-        return data;
+        text += "are not avaliable";
+        
+        if (result) {
+        	FFW.VehicleInfo.sendGetVehicleDataResut(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method, data);
+        } else {
+        	FFW.VehicleInfo.sendGetVehicleDataError(SDL.SDLModel.resultCode["VEHICLE_DATA_NOT_AVAILABLE"], message.id, message.method, text, data);
+        }
     },
 
     /**

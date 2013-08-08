@@ -129,31 +129,31 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 	                
 	            	Em.Logger.log("FFW." + request.method + "Response");
 	                
-	                var vehicleData = SDL.SDLVehicleInfoModel.getVehicleData(request.params),
-	                    resultCode;
-	
-	                if(vehicleData){
-	                    resultCode = "SUCCESS";
-	                }else{
-	                    resultCode = "VEHICLE_DATA_NOT_AVALIABLE";
-	                }
-	    
-	                // send repsonse
-	                var JSONMessage = {
-	                    "jsonrpc": "2.0",
-	                    "id": request.id,
-	                    "result": {
-	                        "code": SDL.SDLModel.resultCode[resultCode], // type (enum) from SDL protocol
-	                        "method": "VehicleInfo.GetVehicleData"
-	                    }
-	                };
-	                
-	                if(vehicleData){
-	                    for (var key in vehicleData) {
-	                        JSONMessage.result[key] = vehicleData[key];
-	                    }
-	                }
-	                this.client.send(JSONMessage);
+	                SDL.SDLVehicleInfoModel.getVehicleData(request);
+//	                    resultCode;
+//	
+//	                if(vehicleData){
+//	                    resultCode = "SUCCESS";
+//	                }else{
+//	                    resultCode = "VEHICLE_DATA_NOT_AVALIABLE";
+//	                }
+//	    
+//	                // send repsonse
+//	                var JSONMessage = {
+//	                    "jsonrpc": "2.0",
+//	                    "id": request.id,
+//	                    "result": {
+//	                        "code": SDL.SDLModel.resultCode[resultCode], // type (enum) from SDL protocol
+//	                        "method": "VehicleInfo.GetVehicleData"
+//	                    }
+//	                };
+//	                
+//	                if(vehicleData){
+//	                    for (var key in vehicleData) {
+//	                        JSONMessage.result[key] = vehicleData[key];
+//	                    }
+//	                }
+//	                this.client.send(JSONMessage);
 	                
 	                break;
 	            }
@@ -233,6 +233,57 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
             };
             this.client.send(JSONMessage);
         }
+    },
+
+    /**
+     * Send error response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     */
+    sendGetVehicleDataError: function(resultCode, id, method, message, data) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if(resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "error": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "message": message,
+                    "data": data
+                }
+            };
+            
+            JSONMessage.error.data.method = method;
+            this.client.send(JSONMessage);
+        }
+    },
+    
+
+
+    /**
+     * Send error response from onRPCRequest
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     */
+    sendGetVehicleDataResut: function(resultCode, id, method, data) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "id": id,
+            "result": data
+        };
+        JSONMessage.result.code = resultCode;
+        JSONMessage.result.method = method;
+        this.client.send(JSONMessage);
     },
 
     /**
