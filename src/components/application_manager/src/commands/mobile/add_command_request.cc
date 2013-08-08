@@ -86,8 +86,8 @@ void AddCommandRequest::Run() {
       return;
     }
 
-    // TODO(DK): HMI Request Id
     const int ui_cmd_id = hmi_apis::FunctionID::UI_AddCommand;
+
     (*p_smrt_ui)[strings::params][strings::function_id] =
       ui_cmd_id;
 

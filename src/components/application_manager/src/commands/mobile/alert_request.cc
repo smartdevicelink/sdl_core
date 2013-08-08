@@ -60,7 +60,7 @@ void AlertRequest::Run() {
                            application(app_id));
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key ");
+    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false,
                  mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -71,7 +71,7 @@ void AlertRequest::Run() {
   SendSpeekRequest();
 }
 
-void AlertRequest::SendAlertRequest() const {
+void AlertRequest::SendAlertRequest() {
   const int correlation_id =
     (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
@@ -79,8 +79,15 @@ void AlertRequest::SendAlertRequest() const {
 
   // create HMI alert request
   smart_objects::CSmartObject* ui_alert  = new smart_objects::CSmartObject();
-  // TODO(DK): HMI Request Id
-  const int ui_cmd_id = 31;
+
+  if (NULL == ui_alert) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    return;
+  }
+
+  const int ui_cmd_id = hmi_apis::FunctionID::UI_Alert;
+
   (*ui_alert)[strings::params][strings::function_id] =
     ui_cmd_id;
 
@@ -130,15 +137,22 @@ void AlertRequest::SendAlertRequest() const {
   ApplicationManagerImpl::instance()->SendMessageToHMI(ui_alert);
 }
 
-void AlertRequest::SendSpeekRequest() const {
+void AlertRequest::SendSpeekRequest() {
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       // crate HMI basic communication playtone request
       smart_objects::CSmartObject* tts_speak =
         new smart_objects::CSmartObject();
-      // TODO(DK): HMI tts request Id
-      const int tts_cmd_id = 51;
+
+      if (NULL == tts_speak) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+        return;
+      }
+
+      const int tts_cmd_id = hmi_apis::FunctionID::TTS_Speak;
+
       (*tts_speak)[strings::params][strings::function_id] =
         tts_cmd_id;
 
@@ -151,15 +165,22 @@ void AlertRequest::SendSpeekRequest() const {
   }
 }
 
-void AlertRequest::SendPlayToneRequest() const {
+void AlertRequest::SendPlayToneRequest() {
   // check playtone parameter
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
       smart_objects::CSmartObject* bc_play =
         new smart_objects::CSmartObject();
-      // TODO(DK): HMI Basic communication request Id
-      const int bc_cmd_id = 41;
+
+      if (NULL == bc_play) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+        return;
+      }
+
+      const int bc_cmd_id = hmi_apis::FunctionID::BasicCommunication_PlayTone;
+
       (*bc_play)[strings::params][strings::function_id] =
         bc_cmd_id;
 

@@ -78,6 +78,12 @@ void DeleteCommandRequest::Run() {
       smart_objects::CSmartObject* p_smrt_ui  =
           new smart_objects::CSmartObject();
 
+      if (NULL == p_smrt_ui) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+        return;
+      }
+
       const int ui_cmd_id = hmi_apis::FunctionID::UI_DeleteCommand;
       (*p_smrt_ui)[strings::params][strings::function_id] = ui_cmd_id;
 
@@ -104,8 +110,14 @@ void DeleteCommandRequest::Run() {
       smart_objects::CSmartObject* p_smrt_vr  =
           new smart_objects::CSmartObject();
 
-      // TODO(DK) HMI Request Id
+      if (NULL == p_smrt_vr) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+        return;
+      }
+
       const int vr_cmd_id = hmi_apis::FunctionID::VR_DeleteCommand;
+
       (*p_smrt_vr)[strings::params][strings::function_id] = vr_cmd_id;
 
       (*p_smrt_vr)[strings::msg_params][strings::correlation_id] =

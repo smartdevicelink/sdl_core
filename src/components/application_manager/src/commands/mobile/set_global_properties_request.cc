@@ -78,15 +78,9 @@ void SetGlobalPropertiesRequest::Run() {
     (*message_)[strings::params][strings::connection_key];
 
   smart_objects::CSmartObject* p_smrt_ui  = new smart_objects::CSmartObject();
+
   if (NULL == p_smrt_ui) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false,
-                 mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
-  if (!p_smrt_ui) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     SendResponse(false,
                  mobile_apis::Result::OUT_OF_MEMORY);
     return;
