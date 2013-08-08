@@ -127,33 +127,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 	        switch(request.method){
 	            case "VehicleInfo.GetVehicleData": {
 	                
-	            	Em.Logger.log("FFW." + request.method + "Response");
-	                
 	                SDL.SDLVehicleInfoModel.getVehicleData(request);
-//	                    resultCode;
-//	
-//	                if(vehicleData){
-//	                    resultCode = "SUCCESS";
-//	                }else{
-//	                    resultCode = "VEHICLE_DATA_NOT_AVALIABLE";
-//	                }
-//	    
-//	                // send repsonse
-//	                var JSONMessage = {
-//	                    "jsonrpc": "2.0",
-//	                    "id": request.id,
-//	                    "result": {
-//	                        "code": SDL.SDLModel.resultCode[resultCode], // type (enum) from SDL protocol
-//	                        "method": "VehicleInfo.GetVehicleData"
-//	                    }
-//	                };
-//	                
-//	                if(vehicleData){
-//	                    for (var key in vehicleData) {
-//	                        JSONMessage.result[key] = vehicleData[key];
-//	                    }
-//	                }
-//	                this.client.send(JSONMessage);
 	                
 	                break;
 	            }

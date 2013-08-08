@@ -277,7 +277,7 @@ SDL.SDLVehicleInfoModel = Em.Object.create( {
         if (result) {
         	FFW.VehicleInfo.sendGetVehicleDataResut(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method, data);
         } else {
-        	FFW.VehicleInfo.sendGetVehicleDataError(SDL.SDLModel.resultCode["VEHICLE_DATA_NOT_AVAILABLE"], message.id, message.method, text, data);
+        	FFW.VehicleInfo.sendGetVehicleDataError(SDL.SDLModel.resultCode["DATA_NOT_AVAILABLE"], message.id, message.method, text, data);
         }
     },
 
