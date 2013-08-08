@@ -112,6 +112,7 @@ void ResetGlobalPropertiesRequest::Run() {
     ++chaining_counter;
   }
 
+  LOG4CXX_ERROR(logger_, "##### " << chaining_counter);
   if (vr_help_title || vr_help_items ) {
 
     smart_objects::SmartObject msg_params =
@@ -159,7 +160,10 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   for (unsigned int i = 0; i < help_promt.size(); ++i) {
-    so_help_promt[i] = help_promt[i];
+    smart_objects::SmartObject helpPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    helpPrompt[strings::text] =  help_promt[i];
+    so_help_promt[i][strings::help_prompt] = helpPrompt;
   }
 
   app->set_help_prompt(so_help_promt);
@@ -181,7 +185,10 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   for (unsigned int i = 0; i < time_out_promt.size(); ++i) {
-    so_time_out_promt[i] = time_out_promt[i];
+    smart_objects::SmartObject timeoutPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    timeoutPrompt[strings::text] = time_out_promt[i];
+    so_time_out_promt[i][strings::timeout_promt] = timeoutPrompt;
   }
 
   app->set_timeout_prompt(so_time_out_promt);
