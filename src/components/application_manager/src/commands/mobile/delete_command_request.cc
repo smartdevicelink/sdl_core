@@ -35,6 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 
 namespace application_manager {
@@ -80,7 +81,7 @@ void DeleteCommandRequest::Run() {
 
       if (NULL == p_smrt_ui) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
         return;
       }
 
@@ -112,7 +113,7 @@ void DeleteCommandRequest::Run() {
 
       if (NULL == p_smrt_vr) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
         return;
       }
 

@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
-#include "JSONHandler/SDLRPCObjects/V2/HMILevel.h"
+#include "interfaces/MOBILE_API.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -82,7 +82,7 @@ void AlertRequest::SendAlertRequest() {
 
   if (NULL == ui_alert) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
 
@@ -147,7 +147,7 @@ void AlertRequest::SendSpeekRequest() {
 
       if (NULL == tts_speak) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
         return;
       }
 
@@ -175,7 +175,7 @@ void AlertRequest::SendPlayToneRequest() {
 
       if (NULL == bc_play) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
-        SendResponse(false, NsSmartDeviceLinkRPC::V2::Result::OUT_OF_MEMORY);
+        SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
         return;
       }
 
