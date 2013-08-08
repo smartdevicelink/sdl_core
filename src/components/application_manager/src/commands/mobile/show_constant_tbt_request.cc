@@ -65,8 +65,7 @@ void ShowConstantTBTRequest::Run() {
   const int connection_key =
       (*message_)[strings::params][strings::connection_key];
 
-  // TODO(VS): HMI Request Id
-  const int hmi_request_id = 206;
+  const int hmi_request_id = hmi_apis::FunctionID::Navigation_ShowConstantTBT;
 
   ApplicationManagerImpl::instance()->AddMessageChain(NULL,
         connection_key, correlation_id, hmi_request_id, &(*message_));

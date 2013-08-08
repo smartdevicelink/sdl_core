@@ -52,7 +52,8 @@ void ShowConstantTBTResponse::Run() {
     return;
   }
 
-  const int hmi_correlation_id = 206;
+  const int hmi_correlation_id = (*message_)[strings::params]
+                                 [strings::correlation_id];;
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
       hmi_correlation_id)) {
