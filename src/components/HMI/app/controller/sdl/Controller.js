@@ -266,7 +266,12 @@ SDL.SDLController = Em.Object.create({
      * @param {Number} messageRequestId
      */
     scrollableMessageResponse: function(result, messageRequestId) {
-        FFW.UI.sendUIResult(result, messageRequestId, 'UI.ScrollableMessage');
+        if (result == SDL.SDLModel.resultCode['SUCCESS']) {
+        	FFW.UI.sendUIResult(result, messageRequestId, 'UI.ScrollableMessage');
+        } else {
+        	FFW.UI.sendError(result, messageRequestId, 'UI.ScrollableMessage', "ScrollableMessage request aborted!");
+        }
+        
     },
 
     /**

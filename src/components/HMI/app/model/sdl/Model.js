@@ -405,7 +405,7 @@ SDL.SDLModel = Em.Object.create( {
                 SDL.ScrollableMessage.activate( SDL.SDLController.getApplicationModel( params.appID ).appName, params, messageRequestId );
             }
         }else{
-            SDL.SDLController.scrollableMessageResponse( 'REJECTED', messageRequestId );
+            SDL.SDLController.scrollableMessageResponse( SDL.SDLModel.resultCode["REJECTED"], messageRequestId );
         }
 
     },
