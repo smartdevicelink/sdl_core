@@ -84,6 +84,11 @@ void AddCommandRequest::Run() {
       SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
       return;
     }
+    if (!CheckCommandParentId(app)) {
+      SendResponse(false, mobile_apis::Result::INVALID_ID,
+                   "Parent ID doesn't exist");
+      return;
+    }
     ++chaining_counter;
   }
 
@@ -185,6 +190,24 @@ bool AddCommandRequest::CheckCommandVRSynonym(const Application* app) {
         }
       }
     }
+  }
+  return true;
+}
+
+bool AddCommandRequest::CheckCommandParentId(const Application* app) {
+  if (NULL == app) {
+    return false;
+  }
+
+  const int parent_id = (*message_)[strings::msg_params][strings::menu_params]
+                                   [hmi_request::parent_id].asInt();
+  smart_objects::SmartObject* parent = app->FindSubMenu(parent_id);
+
+
+  if (!parent) {
+      LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandParentId received"
+                   " sumenu doesn't exist");
+      return false;
   }
   return true;
 }

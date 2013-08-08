@@ -167,7 +167,8 @@ class DynamicApplicationData {
     /*
      * @brief Finds menu with the specified id
      */
-    virtual smart_objects::SmartObject*  FindSubMenu(unsigned int menu_id) = 0;
+    virtual smart_objects::SmartObject*  FindSubMenu(
+        unsigned int menu_id) const = 0;
 
     /*
      * @brief Returns true if sub menu with such name already exist

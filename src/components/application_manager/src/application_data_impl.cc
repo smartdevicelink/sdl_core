@@ -360,7 +360,7 @@ void DynamicApplicationDataImpl::RemoveSubMenu(unsigned int menu_id) {
 }
 
 smart_objects::SmartObject*  DynamicApplicationDataImpl::FindSubMenu(
-  unsigned int menu_id) {
+  unsigned int menu_id) const {
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (it != sub_menu_.end()) {
     return it->second;

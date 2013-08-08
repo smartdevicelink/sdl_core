@@ -122,7 +122,7 @@ class DynamicApplicationDataImpl : public virtual Application {
     /*
      * @brief Finds menu with the specified id
      */
-    smart_objects::SmartObject*  FindSubMenu(unsigned int menu_id);
+    smart_objects::SmartObject*  FindSubMenu(unsigned int menu_id) const;
 
     /*
      * @brief Returns true if sub menu with such name already exist
