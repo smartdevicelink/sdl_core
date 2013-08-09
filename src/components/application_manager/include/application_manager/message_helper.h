@@ -191,6 +191,21 @@ class MessageHelper {
       unsigned int correlation_id,
       int result_code);
 
+    /*
+     * @brief Finds "Image" structure in request and verify image file presence
+     *                      in Core.
+     *
+     * @param message SmartObject with request
+     *
+     * @param app current application
+     *
+     * @return true if image file present or there are no "Image" structure in
+     *         request. false if image file doesn't exist
+     *
+     */
+    static bool VerifyImageFiles(smart_objects::SmartObject& message,
+                                 const Application* app);
+
     template<typename From, typename To>
     static To ConvertEnumAPINoCheck(const From& input) {
       return static_cast<To>(input);

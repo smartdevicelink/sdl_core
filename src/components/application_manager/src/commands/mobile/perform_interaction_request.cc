@@ -64,6 +64,12 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
+  if (!MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app)) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 

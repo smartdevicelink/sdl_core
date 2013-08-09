@@ -64,6 +64,12 @@ void AlertRequest::Run() {
     return;
   }
 
+  if (!MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app)) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   SendAlertRequest(app->app_id());
   SendPlayToneRequest(app->app_id());
   SendSpeakRequest(app->app_id());

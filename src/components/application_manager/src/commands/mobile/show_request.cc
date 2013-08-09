@@ -63,6 +63,12 @@ void ShowRequest::Run() {
     return;
   }
 
+  if (!MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app)) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();

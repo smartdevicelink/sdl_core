@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -59,6 +60,12 @@ void CreateInteractionChoiceSetRequest::Run() {
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  if (!MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app)) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 

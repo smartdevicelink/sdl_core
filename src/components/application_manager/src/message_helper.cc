@@ -686,5 +686,43 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
   return response;
 }
 
+bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
+                                     const Application* app) {
+  if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
+    for (int i = 0; i < message.length(); i++) {
+      if (!VerifyImageFiles(message[i], app)) {
+        return false;
+      }
+    }
+  } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map
+      == message.getType()) {
+    if (message.keyExists(strings::image_type)) {
+      const std::string& file_name = message[strings::value];
+
+      std::string relative_file_path = app->name();
+      relative_file_path += "/";
+      relative_file_path += file_name;
+
+      std::string full_file_path = file_system::FullPath(relative_file_path);
+
+      if (!file_system::FileExists(full_file_path)) {
+        return false; // It is main exit point
+      }
+
+      message[strings::value] = full_file_path;
+    } else {
+      std::set <std::string> keys = message.enumerate();
+
+      for (std::set<std::string>::const_iterator key = keys.begin();
+          key != keys.end(); key++) {
+        if (!VerifyImageFiles(message[*key], app)) {
+          return false;
+        }
+      }
+    }
+  } // all other types shoudn't be processed
+
+  return true;
+}
 
 }  //  namespace application_manager
