@@ -89,12 +89,20 @@ typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
   *@param int hmi correlation ID
   *@param MessageChainPtr Mobile request temporary data
 */
-typedef std::map<unsigned int, MessageChainPtr> MessageChain;
+typedef std::map<unsigned int, MessageChainPtr> HMIRequest;
 
 /**
-  *@brief Map of mobile request and hmi requests
+  *@brief Map representing mobile request and pending HMI requests
+  *
+  *@param int mobile correlation ID
+  *@param HMIRequest Sent HMI request
 */
-typedef std::map<unsigned int, MessageChain> MessageChains;
+typedef std::map<unsigned int, HMIRequest> MobileRequest;
+
+/**
+  *@brief Map of application ID and incoming mobile requests
+*/
+typedef std::map<unsigned int, MobileRequest> MessageChain;
 
 
 class ApplicationManagerImpl : public ApplicationManager
@@ -435,7 +443,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @brief List of applications
      */
     std::set<Application*>                        application_list_;
-    MessageChains                                 message_chaining_;
+    MessageChain                                  message_chaining_;
     bool                                          audio_pass_thru_flag_;
     threads::Thread*                              perform_audio_thread_;
     bool                                          is_distracting_driver_;
