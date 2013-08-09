@@ -19,8 +19,16 @@
 
     <Button
             android:layout_height="wrap_content"
-            android:id="@+id/btSebd"
+            android:id="@+id/btSend"
             android:layout_width="match_parent"
             android:text="@string/str_send"
             android:enabled="false"/>
+
+    <Button
+            android:layout_height="wrap_content"
+            android:id="@+id/btWriteBenchmark"
+            android:layout_width="match_parent"
+            android:text="@string/str_writeBenchmark"
+            android:enabled="false"/>
+
 </LinearLayout>

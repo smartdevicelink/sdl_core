@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,8 +27,10 @@ public class UsbTest extends Activity {
     private static final String ACTION_USB_PERMISSION = "ch.serverbox.android.usbtest.USBPERMISSION";
     private static final String ACCESSORY_MANUFACTURER = "Nexus-Computing GmbH";
 
-    private UsbAccessory mAccessory = null;
 	private Button mBtSend = null;
+    private Button mBtWriteBenchmark = null;
+
+    private UsbAccessory mAccessory = null;
 	private FileOutputStream mFout = null;
     private FileInputStream mFin = null;
 
@@ -37,12 +40,19 @@ public class UsbTest extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        mBtSend = (Button)(findViewById(R.id.btSebd));
+        mBtSend = (Button)(findViewById(R.id.btSend));
         mBtSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String s = ((EditText)findViewById(R.id.editText1)).getText().toString();
                 queueWrite(s);
+            }
+        });
+        mBtWriteBenchmark = (Button) findViewById(R.id.btWriteBenchmark);
+        mBtWriteBenchmark.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                writeBenchmark();
             }
         });
 
@@ -139,6 +149,70 @@ public class UsbTest extends Activity {
             }
         }).start();
     }
+
+    private void writeBenchmark() {
+        // write a whole bunch of data non-stop and measure how long it'll take
+        final int ALL_BYTES_LENGTH = 256;
+        byte[] allByteValues = new byte[ALL_BYTES_LENGTH];
+        for (int i = 0; i < ALL_BYTES_LENGTH; ++i) {
+            allByteValues[i] = (byte) i;
+        }
+
+        // 4 KB in one chunk
+        final int BUFFER_LENGTH = 4096;
+        assert BUFFER_LENGTH % ALL_BYTES_LENGTH == 0;
+        final int numCopies = BUFFER_LENGTH / ALL_BYTES_LENGTH;
+
+        ByteArrayOutputStream bas = new ByteArrayOutputStream(BUFFER_LENGTH);
+        for (int i = 0; i < numCopies; ++i) {
+            try {
+                bas.write(allByteValues);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        final byte[] buffer = bas.toByteArray();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 4 MB total
+                final int writeCount = 10000;
+                final int reportPeriod = 1000;
+                int blocksWritten = 0;
+                Log.d(TAG, "Benchmark start");
+                long startTime = System.currentTimeMillis();
+
+                try {
+                    for (blocksWritten = 0; blocksWritten < writeCount;
+                         ++blocksWritten) {
+                        if ((blocksWritten + 1) % reportPeriod == 0) {
+                            Log.d(TAG, "tick");
+                        }
+                        mFout.write(buffer);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                final long runTime = System.currentTimeMillis() - startTime;
+                final int totalBytesWritten = blocksWritten * BUFFER_LENGTH;
+                final double avgSpeed = totalBytesWritten / (runTime / 1000.0);
+                final String msg = "Benchmark finish; run time = " + runTime +
+                        " ms. for " + totalBytesWritten + " bytes, which is " +
+                        "about " + avgSpeed + " B/s";
+                Log.d(TAG, msg);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(UsbTest.this, msg, Toast.LENGTH_LONG)
+                                .show();
+                    }
+                });
+            }
+        }, "BenchmarkThread").start();
+    }
     
 	private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 		@Override
@@ -193,7 +267,7 @@ public class UsbTest extends Activity {
             fd = ((UsbManager) getSystemService(Context.USB_SERVICE)).openAccessory(accessory).getFileDescriptor();
             mFout = new FileOutputStream(fd);
             mFin = new FileInputStream(fd);
-            mBtSend.setEnabled(true);
+            setButtonsEnabled(true);
 
             l("Accessory " + manufacturer + " opened!");
         } catch (IllegalArgumentException e) {
@@ -220,8 +294,13 @@ public class UsbTest extends Activity {
                 }
             }
             mAccessory = null;
-            mBtSend.setEnabled(false);
+            setButtonsEnabled(false);
         }
+    }
+
+    private void setButtonsEnabled(boolean enabled) {
+        mBtSend.setEnabled(enabled);
+        mBtWriteBenchmark.setEnabled(enabled);
     }
 
     private void discoverAccessories() {

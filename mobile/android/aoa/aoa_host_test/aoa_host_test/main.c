@@ -136,16 +136,32 @@ static void intToByteArray(int i, byte **outArray, int *outLen) {
 }
 
 static int mainPhase(){
-	unsigned char buffer[4096];
+    const int BUFFER_LENGTH = 4096;
+	unsigned char buffer[BUFFER_LENGTH];
 	int response = 0;
 	int transferred;
+    int blocksReceived = 0;
+    const int reportPeriod = 1000;
+    const int blocksExpected = 10000;
+    struct timeval startTime;
     
-    while (1) {
+    while (blocksReceived < blocksExpected) {
         // reading data
         response = libusb_bulk_transfer(handle,IN,buffer,sizeof(buffer), &transferred,0);
-        fprintf(stdout, "Received %d bytes\n", transferred);
+//        fprintf(stdout, "Received %d bytes\n", transferred);
         if(response < 0){error(response);return -1;}
-        printCharArray(buffer, transferred);
+        
+        if (blocksReceived == 0) {
+            printf("Benchmark start\n");
+            gettimeofday(&startTime, NULL);
+        }
+        
+        ++blocksReceived;
+        if (blocksReceived % reportPeriod == 0) {
+            printf("tick\n");
+            fflush(stdout);
+        }
+/*        printCharArray(buffer, transferred);
         int dataLength = transferred;
         
         // writing data
@@ -154,8 +170,18 @@ static int mainPhase(){
             error(response);
             return -1;
         }
-        printf("Sent %d bytes\n", transferred);
+        printf("Sent %d bytes\n", transferred);*/
     }
+    
+    struct timeval finishTime;
+    gettimeofday(&finishTime, NULL);
+    unsigned long runTime = ((finishTime.tv_sec - startTime.tv_sec) * 1000000 +
+                             (finishTime.tv_usec - startTime.tv_usec)) / 1000;
+    unsigned int totalBytesRead = blocksReceived * BUFFER_LENGTH;
+    double avgSpeed = totalBytesRead / (runTime / 1000);
+    printf("Benchmark finish; run time = %lu ms. for %u bytes, "
+           "which is about %.2f B/s\n", runTime, totalBytesRead,
+           avgSpeed);
     
     return 0;
 }
