@@ -81,7 +81,6 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class ModuleTest {
-	
 	/**
 	 * Wraps the {@link RPCRequest} class to add some extra fields (pause after
 	 * the request; whether to generate invalid JSON; custom JSON to set in
@@ -202,6 +201,8 @@ public class ModuleTest {
 	 * PutFile message).
 	 */
 	private final static String BINARY_TAG_NAME = "Binary";
+    /** Tag name for float numbers. */
+    private static final String TAG_FLOAT = "Float";
 	/**
 	 * Attribute name for binary data, because it requires special handling when
 	 * creating certain messages (e.g. calling PutFile's
@@ -852,6 +853,12 @@ public class ModuleTest {
 							try {hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));} 
 							catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
 						}
+                    } else if (tempName.equalsIgnoreCase(TAG_FLOAT)) {
+                        logParserDebugInfo("In " + TAG_FLOAT);
+                        if (parser.getAttributeName(0) != null) {
+                            try {hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));}
+                            catch (Exception e) {Log.e(TAG, "Unable to parse " + TAG_FLOAT);}
+                        }
 					} else if (tempName.equalsIgnoreCase("Boolean")) {
 						logParserDebugInfo("In Boolean");
 						if (parser.getAttributeName(0) != null) {
