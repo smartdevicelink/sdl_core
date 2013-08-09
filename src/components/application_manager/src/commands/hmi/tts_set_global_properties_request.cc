@@ -45,6 +45,7 @@ TTSSetGlobalPropertiesRequest::~TTSSetGlobalPropertiesRequest() {
 
 void TTSSetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "TTSSetGlobalPropertiesRequest::Run");
+
   SendRequest();
 }
 

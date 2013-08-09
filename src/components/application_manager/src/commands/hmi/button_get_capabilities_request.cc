@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 ButtonGetCapabilitiesRequest::ButtonGetCapabilitiesRequest(
-    const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 ButtonGetCapabilitiesRequest::~ButtonGetCapabilitiesRequest() {
