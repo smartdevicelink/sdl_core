@@ -1,4 +1,4 @@
-package com.batutin.android.androidvideostreaming.activity;
+package com.batutin.android.androidvideostreaming.media;
 
 import android.test.AndroidTestCase;
 
@@ -18,7 +18,8 @@ public class AvcEncoderTest extends AndroidTestCase {
     }
 
     public void testAvcEncoderCreation() throws Exception {
-        AvcEncoder e = new AvcEncoder();
-        assertNotNull(e);
+            AvcEncoder e = new AvcEncoder(null, null);
+            assertNotNull("object should be created", e);
     }
+
 }

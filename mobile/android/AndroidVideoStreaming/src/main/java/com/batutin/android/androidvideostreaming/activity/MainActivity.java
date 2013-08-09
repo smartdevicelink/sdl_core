@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 
 import com.batutin.android.androidvideostreaming.R;
+import com.batutin.android.androidvideostreaming.media.AvcEncoder;
 import com.batutin.android.androidvideostreaming.reader.AssetsReader;
 import com.batutin.android.androidvideostreaming.reader.FileStreamReaderListener;
 import com.batutin.android.androidvideostreaming.reader.VideoStreaming;
@@ -339,7 +340,7 @@ public class MainActivity extends Activity implements FileStreamReaderListener, 
 
     @Override
     public void chunkIsReadFromFile(VideoStreaming source, byte[] chunk) {
-        encoder.offerEncoder(chunk);
+
     }
 
     @Override

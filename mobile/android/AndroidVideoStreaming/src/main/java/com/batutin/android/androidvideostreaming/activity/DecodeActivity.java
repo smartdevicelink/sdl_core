@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.batutin.android.androidvideostreaming.R;
+import com.batutin.android.androidvideostreaming.media.AvcEncoder;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -56,6 +57,15 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ALog.setTag("EncodeDecodeTest");
+        ALog.setLevel(ALog.Level.D);
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+                String logMessage = String.format("Thread %d Message %s", paramThread.getId(), paramThrowable.getMessage());
+                ALog.e(logMessage);
+            }
+        });
         setContentView(R.layout.decode_activity);
 
         RelativeLayout view = (RelativeLayout)findViewById(R.id.testLayout);
@@ -191,7 +201,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
     public void surfaceDestroyed(SurfaceHolder holder) {
         if (mPlayer != null) {
             try {
-                mPlayer.av.close();
+                mPlayer.av.stop();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -208,12 +218,21 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         public BitmapThread(PipedOutputStream pw, byte[] res) {
             bytes = res;
             this.pw = pw;
-
+            this.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread thread, Throwable ex) {
+                    String logMessage = String.format("Thread %d Message %s", thread.getId(), ex.getMessage());
+                    ALog.e(logMessage);
+                }
+            });
         }
+
+
 
         @Override
         public void run() {
             try {
+
 
                 int i = 0;
                 while (true) {
@@ -239,19 +258,15 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
 
         public PlayerThread(Surface surface, byte[] res, PipedInputStream pipedReader) {
             this.surface = surface;
+            this.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread thread, Throwable ex) {
+                    String logMessage = String.format("Thread %d Message %s", thread.getId(), ex.getMessage());
+                    ALog.e(logMessage);
+                }
+            });
 
-            // Create writer and reader instances
-
-
-            //byte[] frame = new byte[1000*600];
-
-            //AssetsReader r = new AssetsReader(DecodeActivity.this);
-            //InputStream is = r.readFileFromAssets("test_video.yuv");
-            //VideoStreaming vs = new VideoStreaming();
-            //byte[] b = vs.readTestVideoFileFromStream(is, null);
             av = new AvcEncoder(surface, pipedReader);
-
-
         }
 
         @Override

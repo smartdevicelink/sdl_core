@@ -1,13 +1,16 @@
-package com.batutin.android.androidvideostreaming.activity;
+package com.batutin.android.androidvideostreaming.media;
 
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.util.Log;
 import android.view.Surface;
+
+import com.batutin.android.androidvideostreaming.activity.DecodeActivity;
+import com.batutin.android.androidvideostreaming.activity.EncodedFrameListener;
+import com.batutin.android.androidvideostreaming.activity.ParameterSetsListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -22,12 +25,13 @@ public class AvcEncoder {
     private static final boolean VERBOSE = true;           // lots of logging
     private static final boolean DEBUG_SAVE_FILE = false;   // save copy of encoded movie
     private static final String DEBUG_FILE_NAME_BASE = "/sdcard/test.";
-    private static final int FRAME_RATE = 15;               // 15fps
+    public static final int FRAME_RATE = 10;
+
     public EncodedFrameListener frameListener;
     public ParameterSetsListener parameterSetsListener;
     private PipedInputStream reader;
     // movie length, in frames
-    private int NUM_FRAMES = 300;               // two seconds of video
+    private boolean stop = false;               // two seconds of video
     private MediaCodec encoder;
     private byte[] sps;
     private byte[] pps;
@@ -35,36 +39,25 @@ public class AvcEncoder {
     private CamcorderProfile camcorderProfile;
     private MediaFormat mediaFormat;
     private int colorFormat;
-    //private byte[] frameData;
+
     private Surface surface;
     private MediaCodec decoder;
 
-    public AvcEncoder(Surface surface, PipedInputStream reader) {
-        try {
-
-            this.surface = surface;
-
-            this.reader = reader;
-            //this.frameData = frameData;
-            decoder = MediaCodec.createDecoderByType(MIME_TYPE);
-            encoder = MediaCodec.createEncoderByType(MIME_TYPE);
-            codecInfo = selectCodec(MIME_TYPE);
-            camcorderProfile = getCamcorderProfile();
-            mediaFormat = MediaFormat.createVideoFormat("video/avc", camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
-            mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, camcorderProfile.videoBitRate);
-            mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, camcorderProfile.videoFrameRate);
-            colorFormat = selectColorFormat(codecInfo, MIME_TYPE);
-            mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
-            mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
-            encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-            encoder.start();
-            //NUM_FRAMES = 10 * camcorderProfile.videoFrameRate;
-            NUM_FRAMES = 1000;
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            Log.e(this.getClass().getName(), e.getLocalizedMessage());
-        }
+    public AvcEncoder(Surface surface, PipedInputStream reader) throws IllegalStateException {
+        this.surface = surface;
+        this.reader = reader;
+        decoder = MediaCodec.createDecoderByType(MIME_TYPE);
+        encoder = new MediaEncoder().getEncoder();
+        codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
+        camcorderProfile = getCamcorderProfile();
+        mediaFormat = MediaFormat.createVideoFormat("video/avc", camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
+        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, camcorderProfile.videoBitRate);
+        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, camcorderProfile.videoFrameRate);
+        colorFormat = selectColorFormat(codecInfo, MIME_TYPE);
+        mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
+        mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, FRAME_RATE);
+        encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        start();
     }
 
     private static CamcorderProfile getCamcorderProfile() throws NullPointerException {
@@ -78,29 +71,6 @@ public class AvcEncoder {
             throw new NullPointerException("CamcorderProfile is null");
         }
         return profile;
-    }
-
-    /**
-     * Returns the first codec capable of encoding the specified MIME type, or null if no
-     * match was found.
-     */
-    private static MediaCodecInfo selectCodec(String mimeType) {
-        int numCodecs = MediaCodecList.getCodecCount();
-        for (int i = 0; i < numCodecs; i++) {
-            MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
-
-            if (!codecInfo.isEncoder()) {
-                continue;
-            }
-
-            String[] types = codecInfo.getSupportedTypes();
-            for (int j = 0; j < types.length; j++) {
-                if (types[j].equalsIgnoreCase(mimeType)) {
-                    return codecInfo;
-                }
-            }
-        }
-        return null;
     }
 
     private static int selectColorFormat(MediaCodecInfo codecInfo, String mimeType) throws NullPointerException {
@@ -122,62 +92,15 @@ public class AvcEncoder {
         return frameIndex * 1000000 / camcorderProfile.videoFrameRate;
     }
 
-    public void close() throws IOException {
+    public void start(){
+        encoder.start();
+    }
+
+    public void stop() throws IOException {
         encoder.stop();
         encoder.release();
         decoder.stop();
         decoder.release();
-    }
-
-    public void offerEncoder(byte[] input) {
-        try {
-            ByteBuffer[] inputBuffers = encoder.getInputBuffers();
-            ByteBuffer[] outputBuffers = encoder.getOutputBuffers();
-            int inputBufferIndex = encoder.dequeueInputBuffer(-1);
-            if (inputBufferIndex >= 0) {
-                ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
-                inputBuffer.clear();
-                inputBuffer.put(input);
-                encoder.queueInputBuffer(inputBufferIndex, 0, input.length, 0, 0);
-            }
-
-            MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-            int outputBufferIndex = encoder.dequeueOutputBuffer(bufferInfo, -1);
-            while (outputBufferIndex >= 0) {
-                ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
-                byte[] outData = new byte[bufferInfo.size];
-                outputBuffer.get(outData);
-                if (sps != null && pps != null) {
-                    ByteBuffer frameBuffer = ByteBuffer.wrap(outData);
-                    frameBuffer.putInt(bufferInfo.size - 4);
-                    frameListener.frameReceived(outData, 0, outData.length);
-                } else {
-                    ByteBuffer spsPpsBuffer = ByteBuffer.wrap(outData);
-                    if (spsPpsBuffer.getInt() == 0x00000001) {
-                        System.out.println("parsing sps/pps");
-                    } else {
-                        System.out.println("something is amiss?");
-                    }
-                    int ppsIndex = 0;
-                    while (!(spsPpsBuffer.get() == 0x00 && spsPpsBuffer.get() == 0x00 && spsPpsBuffer.get() == 0x00 && spsPpsBuffer.get() == 0x01)) {
-
-                    }
-                    ppsIndex = spsPpsBuffer.position();
-                    sps = new byte[ppsIndex - 8];
-                    System.arraycopy(outData, 4, sps, 0, sps.length);
-                    pps = new byte[outData.length - ppsIndex];
-                    System.arraycopy(outData, ppsIndex, pps, 0, pps.length);
-                    if (null != parameterSetsListener) {
-                        parameterSetsListener.avcParametersSetsEstablished(sps, pps);
-                    }
-                }
-                encoder.releaseOutputBuffer(outputBufferIndex, false);
-                outputBufferIndex = encoder.dequeueOutputBuffer(bufferInfo, 0);
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-
     }
 
     public void doEncodeDecodeVideoFromBuffer(DecodeActivity.PlayerThread.ThreadPause threadPause) {
@@ -232,7 +155,7 @@ public class AvcEncoder {
                 if (VERBOSE) Log.d(TAG, "inputBufIndex=" + inputBufIndex);
                 if (inputBufIndex >= 0) {
                     long ptsUsec = computePresentationTime(generateIndex);
-                    if (generateIndex == NUM_FRAMES) {
+                    if (stop == true) {
                         // Send an empty frame with the end-of-stream flag set.  If we set EOS
                         // on a frame with data, that frame data will be ignored, and the
                         // output will be short one frame.
@@ -251,13 +174,14 @@ public class AvcEncoder {
                         do {
                             try {
                                 res = reader.read();
-                                if ( res != -1){
-                                bb.write(res);
+                                if (res != -1) {
+                                    bb.write(res);
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        } while (res != -1 && bb.size() < camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
+                        }
+                        while (res != -1 && bb.size() < camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
 
                         try {
                             bb.flush();
