@@ -1,6 +1,5 @@
 package com.batutin.android.androidvideostreaming.media;
 
-import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
@@ -49,28 +48,15 @@ public class AvcEncoder {
         decoder = MediaCodec.createDecoderByType(MIME_TYPE);
         encoder = new MediaEncoder().getEncoder();
         codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
-        camcorderProfile = getCamcorderProfile();
+        camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
+        colorFormat = selectColorFormat(codecInfo, MIME_TYPE);
         mediaFormat = MediaFormat.createVideoFormat("video/avc", camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
         mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, camcorderProfile.videoBitRate);
         mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, camcorderProfile.videoFrameRate);
-        colorFormat = selectColorFormat(codecInfo, MIME_TYPE);
         mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
         mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, FRAME_RATE);
         encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         start();
-    }
-
-    private static CamcorderProfile getCamcorderProfile() throws NullPointerException {
-        int nCamera = Camera.getNumberOfCameras();
-        CamcorderProfile profile = null;
-        for (int cameraId = 0; cameraId < nCamera; cameraId++) {
-            profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_LOW);
-            break;
-        }
-        if (profile == null) {
-            throw new NullPointerException("CamcorderProfile is null");
-        }
-        return profile;
     }
 
     private static int selectColorFormat(MediaCodecInfo codecInfo, String mimeType) throws NullPointerException {
