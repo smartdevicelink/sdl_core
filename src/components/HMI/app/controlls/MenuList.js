@@ -145,6 +145,8 @@ SDL.MenuList = Em.ContainerView.extend( {
         icon: 'images/media/ico_arrow_up.png',
 
         action: 'pageUp',
+        
+        onDown: false,
 
         target: 'parentView'
     } ),
@@ -170,6 +172,8 @@ SDL.MenuList = Em.ContainerView.extend( {
         icon: 'images/media/ico_arrow_down.png',
 
         action: 'pageDown',
+        
+        onDown: false,
 
         target: 'parentView'
     } ),
