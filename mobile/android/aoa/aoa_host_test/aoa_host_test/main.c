@@ -136,48 +136,26 @@ static void intToByteArray(int i, byte **outArray, int *outLen) {
 }
 
 static int mainPhase(){
-	unsigned char buffer[500000];
+	unsigned char buffer[4096];
 	int response = 0;
 	int transferred;
     
-/*    // reading data length
-	response = libusb_bulk_transfer(handle,IN,buffer,16384, &transferred,0);
-    fprintf(stdout, "1: Transferred %d bytes\n", transferred);
-	if(response < 0){error(response);return -1;}
-    if (transferred > 1) {
+    while (1) {
+        // reading data
+        response = libusb_bulk_transfer(handle,IN,buffer,sizeof(buffer), &transferred,0);
+        fprintf(stdout, "Received %d bytes\n", transferred);
+        if(response < 0){error(response);return -1;}
         printCharArray(buffer, transferred);
-    } else {
-        fprintf(stdout, "Length: %u\n", buffer[0]);
-    }*/
-    
-    // reading data
-	response = libusb_bulk_transfer(handle,IN,buffer,sizeof(buffer), &transferred,0);
-    fprintf(stdout, "2: Transferred %d bytes\n", transferred);
-	if(response < 0){error(response);return -1;}
-    printCharArray(buffer, transferred);
-    int dataLength = transferred;
-    
-/*    // writing data length
-    byte *lenBuf = 0;
-    int lenBufLen = 0;
-    intToByteArray(transferred, &lenBuf, &lenBufLen);
-    printCharArray(lenBuf, lenBufLen);
-    
-    response = libusb_bulk_transfer(handle, OUT, lenBuf, lenBufLen, &transferred, 0);
-    free(lenBuf), lenBuf = 0;
-    if (response < 0) {
-        error(response);
-        return -1;
+        int dataLength = transferred;
+        
+        // writing data
+        response = libusb_bulk_transfer(handle, OUT, buffer, dataLength, &transferred, 0);
+        if (response < 0) {
+            error(response);
+            return -1;
+        }
+        printf("Sent %d bytes\n", transferred);
     }
-    printf("Sent %d bytes\n", transferred);*/
-    
-    // writing data
-    response = libusb_bulk_transfer(handle, OUT, buffer, dataLength, &transferred, 0);
-    if (response < 0) {
-        error(response);
-        return -1;
-    }
-    printf("Sent %d bytes\n", transferred);
     
     return 0;
 }

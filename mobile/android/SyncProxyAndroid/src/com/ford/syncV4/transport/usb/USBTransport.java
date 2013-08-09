@@ -22,7 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 
 /**
  * Class that implements USB transport.
@@ -34,6 +33,8 @@ import java.util.Arrays;
  * sends an initial request (one byte currently) and waits for a reply (one
  * byte as well). Then it notifies of a successful connection. It's not part of
  * the official SDL protocol specification at the moment.
+ *
+ * TODO: use SyncTrace and/or DebugTool loggers
  */
 public class USBTransport extends SyncTransport {
     /**
@@ -159,13 +160,40 @@ public class USBTransport extends SyncTransport {
     @Override
     protected boolean sendBytesOverTransport(byte[] msgBytes, int offset,
                                              int length) {
-        logI("sendBytesOverTransport() " + Arrays.toString(msgBytes) +
-                ", offset " + offset + ", length " + length);
-        return false;
+        logD("SendBytes: array size " + msgBytes.length + ", offset " + offset +
+                ", length " + length);
+
+        boolean result = false;
+        final State state = getState();
+        switch (state) {
+            case CONNECTED:
+                synchronized (this) {
+                    if (mOutputStream != null) {
+                        try {
+                            mOutputStream.write(msgBytes, offset, length);
+                            result = true;
+                            logI("Bytes successfully sent");
+                        } catch (IOException e) {
+                            logW("Failed to send bytes", e);
+                        }
+                    } else {
+                        logW("Can't send bytes when output stream is null");
+                    }
+                }
+                break;
+
+            default:
+                logW("Can't send bytes from " + state + " state");
+                break;
+        }
+
+        return result;
     }
 
     /**
      * Opens a USB connection if not open yet.
+     *
+     * TODO: throw SyncException on different errors
      *
      * @throws SyncException
      */
@@ -445,6 +473,8 @@ public class USBTransport extends SyncTransport {
          * to connect to the accessory, sends an initial request (to make sure
          * there is someone on the other side), waits for a reply, and starts
          * a read loop until interrupted.
+         *
+         * TODO: add isInterrupted checks
          */
         @Override
         public void run() {
@@ -496,6 +526,33 @@ public class USBTransport extends SyncTransport {
             synchronized (USBTransport.this) {
                 setState(State.CONNECTED);
                 handleTransportConnected();
+            }
+
+            final int READ_BUFFER_SIZE = 4096;
+            byte[] buffer = new byte[READ_BUFFER_SIZE];
+            int bytesRead = 0;
+
+            // read loop
+            while (true) {
+                try {
+                    bytesRead = mInputStream.read(buffer);
+                    if (bytesRead == -1) {
+                        Log.i(TAG, "EOF reached, disconnecting!");
+                        disconnect();
+                        return;
+                    }
+                } catch (IOException e) {
+                    Log.w(TAG, "Can't read data, disconnecting!", e);
+                    disconnect();
+                    return;
+                }
+
+                Log.d(TAG, "Read " + bytesRead + " bytes");
+                if (bytesRead > 0) {
+                    synchronized (USBTransport.this) {
+                        handleReceivedBytes(buffer, bytesRead);
+                    }
+                }
             }
         }
     }
