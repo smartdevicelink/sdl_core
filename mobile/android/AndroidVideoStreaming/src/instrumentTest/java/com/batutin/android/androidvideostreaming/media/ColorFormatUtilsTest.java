@@ -1,0 +1,25 @@
+package com.batutin.android.androidvideostreaming.media;
+
+import android.media.MediaCodecInfo;
+
+/**
+ * Created by Andrew Batutin on 8/9/13.
+ */
+public class ColorFormatUtilsTest extends MediaUtilsTest {
+
+    private MediaCodecInfo codecInfo;
+
+    public ColorFormatUtilsTest() {
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
+    }
+
+    public void testSelectColorFormatShouldReturnColorFormat() throws Exception {
+        int colorFormat = ColorFormatUtils.selectColorFormat(codecInfo, MIME_TYPE);
+        assertTrue(colorFormat > 0);
+    }
+}

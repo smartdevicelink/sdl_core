@@ -49,7 +49,7 @@ public class AvcEncoder {
         encoder = new MediaEncoder().getEncoder();
         codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
         camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
-        colorFormat = selectColorFormat(codecInfo, MIME_TYPE);
+        colorFormat = ColorFormatUtils.selectColorFormat(codecInfo, MIME_TYPE);
         mediaFormat = MediaFormat.createVideoFormat("video/avc", camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
         mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, camcorderProfile.videoBitRate);
         mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, camcorderProfile.videoFrameRate);
@@ -57,18 +57,6 @@ public class AvcEncoder {
         mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, FRAME_RATE);
         encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         start();
-    }
-
-    private static int selectColorFormat(MediaCodecInfo codecInfo, String mimeType) throws NullPointerException {
-        MediaCodecInfo.CodecCapabilities capabilities = codecInfo.getCapabilitiesForType(mimeType);
-        if (capabilities.colorFormats == null || capabilities.colorFormats.length == 0) {
-            throw new NullPointerException("Unable to get color formats");
-        }
-        for (int i = 0; i < capabilities.colorFormats.length; i++) {
-            int colorFormat = capabilities.colorFormats[i];
-            return colorFormat;
-        }
-        return 0;   // not reached
     }
 
     /**

@@ -20,15 +20,19 @@ public class CodecInfoUtils {
         ALog.d("start getting MediaCodecInfo");
         List<MediaCodecInfo> infoList = getSupportedMediaCodecInfoList(mimeType);
         if (infoList == null || infoList.size() <= 0) {
-            ALog.d("failed getting MediaCodecInfo");
+            ALog.e("failed getting MediaCodecInfo");
             throw new IllegalArgumentException("no available codecs");
         }
-        return infoList.get(0);
+        MediaCodecInfo codecI = infoList.get(0);
+        ALog.d("MediaCodecInfo " + codecI.toString() + " found");
+        return codecI;
     }
 
     public static List<MediaCodecInfo> getSupportedMediaCodecInfoList(String mimeType) throws IllegalArgumentException {
+        ALog.d("start getting MediaCodecInfo list");
         int numCodecs = MediaCodecList.getCodecCount();
         if (numCodecs <= 0) {
+            ALog.e("failed getting MediaCodecInfo list");
             throw new IllegalArgumentException("no available codecs");
         }
         List<MediaCodecInfo> infoList = new ArrayList<MediaCodecInfo>(1);
@@ -41,6 +45,7 @@ public class CodecInfoUtils {
                 infoList.add(codecInfo);
             }
         }
+        ALog.d("MediaCodecInfo list " + infoList.toString() + " found");
         return infoList;
     }
 
