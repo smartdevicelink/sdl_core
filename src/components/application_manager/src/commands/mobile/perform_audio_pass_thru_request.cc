@@ -128,13 +128,23 @@ void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    msg_params[hmi_request::tts_chunks][0] =
-      (*message_)[str::msg_params][str::audio_pass_display_text1];
+    smart_objects::SmartObject chunk =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    chunk[strings::text] =
+        (*message_)[str::msg_params][str::audio_pass_display_text1];
+
+    msg_params[hmi_request::tts_chunks][0] = chunk;
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    msg_params[hmi_request::tts_chunks][1] =
-      (*message_)[str::msg_params][str::audio_pass_display_text2];
+    smart_objects::SmartObject chunk =
+            smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    chunk[strings::text] =
+        (*message_)[str::msg_params][str::audio_pass_display_text2];
+
+    msg_params[hmi_request::tts_chunks][1] = chunk;
   }
 
   // app_id
