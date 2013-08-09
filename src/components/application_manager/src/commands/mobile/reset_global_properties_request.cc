@@ -162,7 +162,7 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
     smart_objects::SmartObject helpPrompt =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
     helpPrompt[strings::text] =  help_promt[i];
-    so_help_promt[i][strings::help_prompt] = helpPrompt;
+    so_help_promt[i] = helpPrompt;
   }
 
   app->set_help_prompt(so_help_promt);
@@ -187,7 +187,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
     smart_objects::SmartObject timeoutPrompt =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
-    so_time_out_promt[i][strings::timeout_promt] = timeoutPrompt;
+    so_time_out_promt[i] = timeoutPrompt;
   }
 
   app->set_timeout_prompt(so_time_out_promt);
