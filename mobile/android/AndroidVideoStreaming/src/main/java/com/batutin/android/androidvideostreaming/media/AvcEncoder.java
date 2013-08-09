@@ -4,15 +4,13 @@ import android.media.CamcorderProfile;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.util.Log;
 import android.view.Surface;
 
-import com.batutin.android.androidvideostreaming.activity.DecodeActivity;
+import com.batutin.android.androidvideostreaming.activity.ALog;
 import com.batutin.android.androidvideostreaming.activity.EncodedFrameListener;
 import com.batutin.android.androidvideostreaming.activity.ParameterSetsListener;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
@@ -20,25 +18,16 @@ import java.nio.ByteBuffer;
 public class AvcEncoder {
 
     public static final String MIME_TYPE = "video/avc";
-    private static final String TAG = "EncodeDecodeTest";
-    private static final boolean VERBOSE = true;           // lots of logging
-    private static final boolean DEBUG_SAVE_FILE = false;   // save copy of encoded movie
-    private static final String DEBUG_FILE_NAME_BASE = "/sdcard/test.";
     public static final int FRAME_RATE = 10;
-
     public EncodedFrameListener frameListener;
     public ParameterSetsListener parameterSetsListener;
     private PipedInputStream reader;
-    // movie length, in frames
-    private boolean stop = false;               // two seconds of video
+    private boolean stop = false;
     private MediaCodec encoder;
-    private byte[] sps;
-    private byte[] pps;
     private MediaCodecInfo codecInfo;
     private CamcorderProfile camcorderProfile;
     private MediaFormat mediaFormat;
     private int colorFormat;
-
     private Surface surface;
     private MediaCodec decoder;
 
@@ -50,30 +39,24 @@ public class AvcEncoder {
         codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
         camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
         colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo.getCapabilitiesForType(MIME_TYPE));
-        MediaFormatUtils.createMediaFormat(camcorderProfile, colorFormat, FRAME_RATE, MIME_TYPE);
+        mediaFormat = MediaFormatUtils.createMediaFormat(camcorderProfile, colorFormat, FRAME_RATE, MIME_TYPE);
         encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         start();
     }
 
-    /**
-     * Generates the presentation time for frame N, in microseconds.
-     */
-    private long computePresentationTime(int frameIndex) {
-        return frameIndex * 1000000 / camcorderProfile.videoFrameRate;
-    }
-
-    public void start(){
+    public void start() {
         encoder.start();
     }
 
     public void stop() throws IOException {
+        this.stop = true;
         encoder.stop();
         encoder.release();
         decoder.stop();
         decoder.release();
     }
 
-    public void doEncodeDecodeVideoFromBuffer(DecodeActivity.PlayerThread.ThreadPause threadPause) {
+    public void doEncodeDecodeVideoFromBuffer() {
 
         long startMs = System.currentTimeMillis();
 
@@ -93,26 +76,13 @@ public class AvcEncoder {
         long rawSize = 0;
         long encodedSize = 0;
 
-        // Save a copy to disk.  Useful for debugging the test.  Note this is a raw elementary
-        // stream, not a .mp4 file, so not all players will know what to do with it.
-        FileOutputStream outputStream = null;
-        if (DEBUG_SAVE_FILE) {
-            String fileName = DEBUG_FILE_NAME_BASE + camcorderProfile.videoFrameWidth + "x" + camcorderProfile.videoFrameHeight + ".mp4";
-            try {
-                outputStream = new FileOutputStream(fileName);
-                Log.d(TAG, "encoded output will be saved as " + fileName);
-            } catch (IOException ioe) {
-                Log.w(TAG, "Unable to create debug output file " + fileName);
-                throw new RuntimeException(ioe);
-            }
-        }
 
         // Loop until the output side is done.
         boolean inputDone = false;
         boolean encoderDone = false;
         boolean outputDone = false;
         while (!outputDone) {
-            if (VERBOSE) Log.d(TAG, "loop");
+            ALog.v("loop");
 
             // If we're not done submitting frames, generate a new one and submit it.  By
             // doing this on every loop we're working to ensure that the encoder always has
@@ -122,7 +92,7 @@ public class AvcEncoder {
             // the encoder device, so a short timeout can keep us from spinning hard.
             if (!inputDone) {
                 int inputBufIndex = encoder.dequeueInputBuffer(TIMEOUT_USEC);
-                if (VERBOSE) Log.d(TAG, "inputBufIndex=" + inputBufIndex);
+                ALog.v("inputBufIndex=" + inputBufIndex);
                 if (inputBufIndex >= 0) {
                     long ptsUsec = computePresentationTime(generateIndex);
                     if (stop == true) {
@@ -132,7 +102,7 @@ public class AvcEncoder {
                         encoder.queueInputBuffer(inputBufIndex, 0, 0, ptsUsec,
                                 MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                         inputDone = true;
-                        if (VERBOSE) Log.d(TAG, "sent input EOS (with zero-length frame)");
+                        ALog.i("sent input EOS (with zero-length frame)");
                     } else {
                         //frameData = new byte[camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight];
                         //new Random().nextBytes(frameData);
@@ -167,12 +137,12 @@ public class AvcEncoder {
                         inputBuf.put(fd, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
 
                         encoder.queueInputBuffer(inputBufIndex, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2, ptsUsec, 0);
-                        if (VERBOSE) Log.d(TAG, "submitted frame " + generateIndex + " to enc");
+                        ALog.v("submitted frame " + generateIndex + " to enc");
                     }
                     generateIndex++;
                 } else {
                     // either all in use, or we timed out during initial setup
-                    if (VERBOSE) Log.d(TAG, "input buffer not available");
+                    ALog.i("input buffer not available");
                 }
             }
 
@@ -186,21 +156,21 @@ public class AvcEncoder {
                 int encoderStatus = encoder.dequeueOutputBuffer(info, TIMEOUT_USEC);
                 if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                     // no output available yet
-                    if (VERBOSE) Log.d(TAG, "no output from encoder available");
+                    ALog.i("no output from encoder available");
                 } else if (encoderStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                     // not expected for an encoder
                     encoderOutputBuffers = encoder.getOutputBuffers();
-                    if (VERBOSE) Log.d(TAG, "encoder output buffers changed");
+                    ALog.i("encoder output buffers changed");
                 } else if (encoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     // not expected for an encoder
                     MediaFormat newFormat = encoder.getOutputFormat();
-                    if (VERBOSE) Log.d(TAG, "encoder output format changed: " + newFormat);
+                    ALog.i("encoder output format changed: " + newFormat);
                 } else if (encoderStatus < 0) {
-                    Log.e(TAG, "unexpected result from encoder.dequeueOutputBuffer: " + encoderStatus);
+                    ALog.e("unexpected result from encoder.dequeueOutputBuffer: " + encoderStatus);
                 } else { // encoderStatus >= 0
                     ByteBuffer encodedData = encoderOutputBuffers[encoderStatus];
                     if (encodedData == null) {
-                        Log.e(TAG, "encoderOutputBuffer " + encoderStatus + " was null");
+                        ALog.i("encoderOutputBuffer " + encoderStatus + " was null");
                     }
 
                     // It's usually necessary to adjust the ByteBuffer values to match BufferInfo.
@@ -208,17 +178,7 @@ public class AvcEncoder {
                     encodedData.limit(info.offset + info.size);
 
                     encodedSize += info.size;
-                    if (outputStream != null) {
-                        byte[] data = new byte[info.size];
-                        encodedData.get(data);
-                        encodedData.position(info.offset);
-                        try {
-                            outputStream.write(data);
-                        } catch (IOException ioe) {
-                            Log.w(TAG, "failed writing debug data to file");
-                            throw new RuntimeException(ioe);
-                        }
-                    }
+
                     if ((info.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
                         // Codec config info.  Only expected on first packet.  One way to
                         // handle this is to manually stuff the data into the MediaFormat
@@ -234,7 +194,7 @@ public class AvcEncoder {
                         decoderInputBuffers = decoder.getInputBuffers();
                         decoderOutputBuffers = decoder.getOutputBuffers();
                         decoderConfigured = true;
-                        if (VERBOSE) Log.d(TAG, "decoder configured (" + info.size + " bytes)");
+                        ALog.i("decoder configured (" + info.size + " bytes)");
                     } else {
                         // Get a decoder input buffer, blocking until it's available.
 
@@ -246,7 +206,7 @@ public class AvcEncoder {
                                 info.presentationTimeUs, info.flags);
 
                         encoderDone = (info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0;
-                        if (VERBOSE) Log.d(TAG, "passed " + info.size + " bytes to decoder"
+                        ALog.v("passed " + info.size + " bytes to decoder"
                                 + (encoderDone ? " (EOS)" : ""));
                     }
 
@@ -264,37 +224,28 @@ public class AvcEncoder {
                 int decoderStatus = decoder.dequeueOutputBuffer(info, TIMEOUT_USEC);
                 if (decoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                     // no output available yet
-                    if (VERBOSE) Log.d(TAG, "no output from decoder available");
+                    ALog.i( "no output from decoder available");
                 } else if (decoderStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                     // The storage associated with the direct ByteBuffer may already be unmapped,
                     // so attempting to access data through the old output buffer array could
                     // lead to a native crash.
-                    if (VERBOSE) Log.d(TAG, "decoder output buffers changed");
+                    ALog.i( "decoder output buffers changed");
                     decoderOutputBuffers = decoder.getOutputBuffers();
                 } else if (decoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     // this happens before the first frame is returned
                     decoderOutputFormat = decoder.getOutputFormat();
-                    if (VERBOSE) Log.d(TAG, "decoder output format changed: " +
+                    ALog.i("decoder output format changed: " +
                             decoderOutputFormat);
                 } else if (decoderStatus < 0) {
-                    Log.e(TAG, "unexpected result from deocder.dequeueOutputBuffer: " + decoderStatus);
+                    ALog.e("unexpected result from deocder.dequeueOutputBuffer: " + decoderStatus);
                 } else {  // decoderStatus >= 0
 
-                    if (VERBOSE) Log.d(TAG, "surface decoder given buffer " + decoderStatus +
+                    ALog.v( "surface decoder given buffer " + decoderStatus +
                             " (size=" + info.size + ")");
                     rawSize += info.size;
                     if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                        if (VERBOSE) Log.d(TAG, "output EOS");
+                        ALog.i( "output EOS");
                         outputDone = true;
-                    }
-
-
-                    // We use a very simple clock to keep the video FPS, or the video
-                    // playback will be too fast
-                    while (info.presentationTimeUs / 1000 > System.currentTimeMillis() - startMs) {
-                        //threadPause.pause();
-
-
                     }
                     // As soon as we call releaseOutputBuffer, the buffer will be forwarded
                     // to SurfaceTexture to convert to a texture.  The API doesn't guarantee
@@ -307,15 +258,15 @@ public class AvcEncoder {
             }
         }
 
-        if (VERBOSE) Log.d(TAG, "decoded " + checkIndex + " frames at "
-                + camcorderProfile.videoFrameWidth + "x" + camcorderProfile.videoFrameHeight + ": raw=" + rawSize + ", enc=" + encodedSize);
-        if (outputStream != null) {
-            try {
-                outputStream.close();
-            } catch (IOException ioe) {
-                Log.w(TAG, "failed closing debug file");
-                throw new RuntimeException(ioe);
-            }
-        }
+        ALog.i( "decoded " + checkIndex + " frames at "
+                + mediaFormat.getInteger(MediaFormat.KEY_WIDTH) + "x" + mediaFormat.getInteger(MediaFormat.KEY_HEIGHT) + ": raw=" + rawSize + ", enc=" + encodedSize);
+
+    }
+
+    /**
+     * Generates the presentation time for frame N, in microseconds.
+     */
+    private long computePresentationTime(int frameIndex) {
+        return frameIndex * 1000000 / camcorderProfile.videoFrameRate;
     }
 }

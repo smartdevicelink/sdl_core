@@ -6,16 +6,16 @@
 
 
     <SurfaceView
-            android:layout_width="352dp"
-            android:layout_height="288dp"
+            android:layout_width="352px"
+            android:layout_height="288px"
             android:id="@+id/surfaceView"
             android:layout_alignParentLeft="true"
 
             android:layout_alignParentTop="true"/>
 
     <RelativeLayout
-            android:layout_width="176dp"
-            android:layout_height="144dp"
+            android:layout_width="320px"
+            android:layout_height="240px"
             android:id="@+id/testLayout"
             android:layout_below="@+id/surfaceView"
 
