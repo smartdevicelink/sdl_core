@@ -81,11 +81,9 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create( {
         if( appName ){
 
             var self = this;
-
-            for (var i = 0; i < params.messageText.length; i++) {
-                if (params.messageText[i].fieldName == "scrollableMessageBody"){
-                    this.set( 'listOfCommands.items', params.messageText[i].fieldText );
-                }
+            
+            if (params.messageText.fieldName == 'scrollableMessageBody') {
+            	this.set( 'listOfCommands.items', params.messageText.fieldText);
             }
 
             this.set( 'messageRequestId', messageRequestId );
