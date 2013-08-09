@@ -21,7 +21,7 @@ public class ColorFormatUtilsTest extends MediaUtilsTest {
     }
 
     public void testSelectColorFormatShouldReturnColorFormat() throws Exception {
-        int colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo, MIME_TYPE);
+        int colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo.getCapabilitiesForType(MIME_TYPE));
         assertTrue(colorFormat > 0);
     }
 
@@ -29,5 +29,15 @@ public class ColorFormatUtilsTest extends MediaUtilsTest {
         Map<String, Integer> colorFormatList = ColorFormatUtils.getColorFormatList(codecInfo.getCapabilitiesForType(MIME_TYPE));
         assertNotNull(colorFormatList);
         assertTrue(colorFormatList.size() > 0);
+    }
+
+    public void testGetColorSpaceNameShouldReturnValidName() throws Exception {
+      String name = ColorFormatUtils.getColorSpaceName(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+        assertEquals(name, ColorFormatUtils.colorFormatNamesMap.get(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar));
+    }
+
+    public void testGetColorSpaceNameShouldReturnUnknown() throws Exception {
+        String name = ColorFormatUtils.getColorSpaceName(-1);
+        assertEquals("Unknown", name);
     }
 }

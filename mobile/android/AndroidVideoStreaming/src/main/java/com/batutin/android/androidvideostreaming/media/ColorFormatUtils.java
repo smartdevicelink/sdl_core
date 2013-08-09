@@ -4,8 +4,10 @@ import android.media.MediaCodecInfo;
 
 import com.batutin.android.androidvideostreaming.activity.ALog;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ColorFormatUtils {
@@ -64,19 +66,45 @@ public class ColorFormatUtils {
         colorFormatNamesMap = Collections.unmodifiableMap(aMap);
     }
 
-    public static int selectFirstColorFormat(MediaCodecInfo codecInfo, String mimeType) throws NullPointerException {
+    public static final List<Integer> acceptableColorSpaceList;
+
+    static {
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV411Planar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV411PackedPlanar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV422Planar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV422PackedPlanar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV422SemiPlanar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYCbYCr);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYCrYCb);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatCbYCrY);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatCrYCbY);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV444Interleaved);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV422PackedSemiPlanar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar);
+        list.add(MediaCodecInfo.CodecCapabilities.COLOR_QCOM_FormatYUV420SemiPlanar);
+        acceptableColorSpaceList = Collections.unmodifiableList(list);
+    }
+
+    public static int selectFirstColorFormat(MediaCodecInfo.CodecCapabilities capabilities) throws IllegalArgumentException {
         ALog.d("Start color format selecting");
-        MediaCodecInfo.CodecCapabilities capabilities = codecInfo.getCapabilitiesForType(mimeType);
         if (capabilities.colorFormats == null || capabilities.colorFormats.length == 0) {
             ALog.e("Color format not found");
-            throw new NullPointerException("Unable to get color formats");
+            throw new IllegalArgumentException("Unable to get color formats");
         }
         for (int i = 0; i < capabilities.colorFormats.length; i++) {
             int colorFormat = capabilities.colorFormats[i];
-            ALog.d("Color format " + colorFormat + " selected");
-            return colorFormat;
+            if (acceptableColorSpaceList.contains(colorFormat)) {
+                ALog.d("Color format " + getColorSpaceName(colorFormat) + " selected");
+                return colorFormat;
+            }
         }
-        return 0;   // not reached
+        ALog.e("color format was not found in range" + acceptableColorSpaceList.toString());
+        throw new IllegalArgumentException("color format was not found in range" + acceptableColorSpaceList.toString());
     }
 
     public static Map<String, Integer> getColorFormatList(MediaCodecInfo.CodecCapabilities capabilities) {
@@ -88,7 +116,7 @@ public class ColorFormatUtils {
         return coorFormatList;
     }
 
-    private static String getColorSpaceName(int colorFormat) {
+    public static String getColorSpaceName(int colorFormat) {
         if (colorFormatNamesMap.containsKey(colorFormat) == false) {
             return "Unknown";
         } else {
