@@ -499,19 +499,26 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
       if (data) {
         chain->set_data(*data);
       }
-      MessageChainPtr ptr(chain);
-      message_chaining_[hmi_correlation_id] = ptr;
+      // create entry for new messageChaining
+      MessageChain hmi_request;
+      hmi_request[hmi_correlation_id] = MessageChainPtr(chain);
+      message_chaining_[correlation_id] = hmi_request;
+
       return chain;
     } else {
       LOG4CXX_ERROR(logger_, "Null pointer message received.");
       return NULL;
     }
   } else {
-    MessageChains::iterator it =  message_chaining_.begin();
-    for (; message_chaining_.end() != it; ++it) {
-      if ((*it->second) == *msg_chaining) {
-        message_chaining_[hmi_correlation_id] = it->second;
-        return &(*it->second);
+    MessageChains::iterator i =  message_chaining_.begin();
+    for (; message_chaining_.end() != i; ++i) {
+      MessageChain::iterator j = i->second.begin();
+      for (; i->second.end() != j; ++j) {
+        if ((*j->second) == *msg_chaining) {
+          // copy existing MessageChaining
+          i->second[hmi_correlation_id] = j->second;
+          return &(*j->second);
+        }
       }
     }
     return NULL;
@@ -524,24 +531,28 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
                << hmi_correlation_id);
 
   bool result = false;
-  MessageChains::iterator it = message_chaining_.find(hmi_correlation_id);
+  MessageChains::iterator i =  message_chaining_.begin();
+  for (; message_chaining_.end() != i; ++i) {
+    MessageChain::iterator it = i->second.find(hmi_correlation_id);
 
-  if (message_chaining_.end() != it) {
-    (*it->second).DecrementCounter();
-    LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain "
-                 "counter for id " << hmi_correlation_id << " = "
-                 << (*it->second).counter());
-    if (0 == (*it->second).counter()) {
-      mobile_correlation_id = (*it->second).correlation_id();
-      LOG4CXX_INFO(logger_, "HMI response id = " << hmi_correlation_id <<
-                   " is the final for mobile request id = "
-                   << mobile_correlation_id);
-      result = true;
+    if (i->second.end() != it) {
+      (*it->second).DecrementCounter();
+      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain "
+                   "mobile request id " << i->first << " is waiting for "
+                   << (*it->second).counter() << " responses");
+      if (0 == (*it->second).counter()) {
+        mobile_correlation_id = i->first;
+
+        LOG4CXX_INFO(logger_, "HMI response id  " << hmi_correlation_id <<
+                     " is the final for mobile request id  "
+                     << mobile_correlation_id);
+
+        i->second.clear();
+        message_chaining_.erase(i);
+        result = true;
+      }
     }
-    message_chaining_.erase(it);
   }
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain size is "
-               << message_chaining_.size());
 
   return result;
 }
@@ -551,13 +562,14 @@ MessageChaining* ApplicationManagerImpl::GetMessageChain(
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::GetMessageChain id "
                << hmi_correlation_id);
 
-  MessageChains::const_iterator it =
-    message_chaining_.find(hmi_correlation_id);
+  MessageChains::const_iterator i =  message_chaining_.begin();
+  for (; message_chaining_.end() != i; ++i) {
+    MessageChain::const_iterator it = i->second.find(hmi_correlation_id);
 
-  if (message_chaining_.end() != it) {
-    return &(*it->second);
+    if (i->second.end() != it) {
+      return &(*it->second);
+    }
   }
-
   return NULL;
 }
 

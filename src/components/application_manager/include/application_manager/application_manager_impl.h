@@ -84,9 +84,17 @@ namespace application_manager {
 typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
 
 /**
-  *@brief Map of messages between mobile app and hmi
+  *@brief Map representing hmi request
+  *
+  *@param int hmi correlation ID
+  *@param MessageChainPtr Mobile request temporary data
 */
-typedef std::map<unsigned int, MessageChainPtr> MessageChains;
+typedef std::map<unsigned int, MessageChainPtr> MessageChain;
+
+/**
+  *@brief Map of mobile request and hmi requests
+*/
+typedef std::map<unsigned int, MessageChain> MessageChains;
 
 
 class ApplicationManagerImpl : public ApplicationManager
