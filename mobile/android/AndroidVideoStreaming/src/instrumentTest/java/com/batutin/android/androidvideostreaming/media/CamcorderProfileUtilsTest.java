@@ -1,14 +1,13 @@
 package com.batutin.android.androidvideostreaming.media;
 
 import android.media.CamcorderProfile;
-import android.test.AndroidTestCase;
 
 import java.util.Map;
 
 /**
  * Created by Andrew Batutin on 8/9/13.
  */
-public class CamcorderProfileUtilsTest extends AndroidTestCase{
+public class CamcorderProfileUtilsTest extends MediaUtilsTest{
 
     public CamcorderProfileUtilsTest() {
     }

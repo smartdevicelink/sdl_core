@@ -50,11 +50,7 @@ public class AvcEncoder {
         codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
         camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
         colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo.getCapabilitiesForType(MIME_TYPE));
-        mediaFormat = MediaFormat.createVideoFormat("video/avc", camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
-        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, camcorderProfile.videoBitRate);
-        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, camcorderProfile.videoFrameRate);
-        mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
-        mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, FRAME_RATE);
+        MediaFormatUtils.createMediaFormat(camcorderProfile, colorFormat, FRAME_RATE, MIME_TYPE);
         encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         start();
     }

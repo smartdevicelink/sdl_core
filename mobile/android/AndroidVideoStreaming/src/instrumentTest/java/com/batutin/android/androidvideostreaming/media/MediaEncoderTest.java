@@ -1,11 +1,9 @@
 package com.batutin.android.androidvideostreaming.media;
 
-import android.test.AndroidTestCase;
-
 /**
  * Created by Andrew Batutin on 8/9/13.
  */
-public class MediaEncoderTest extends AndroidTestCase {
+public class MediaEncoderTest extends MediaUtilsTest {
 
     private MediaEncoder sut;
 

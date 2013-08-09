@@ -1,16 +1,13 @@
 package com.batutin.android.androidvideostreaming.media;
 
 import android.media.MediaCodecInfo;
-import android.test.AndroidTestCase;
 
 import java.util.List;
 
 /**
  * Created by Andrew Batutin on 8/9/13.
  */
-public class CodecInfoUtilsTest extends AndroidTestCase {
-
-    public static final String MIME_TYPE = "video/avc";
+public class CodecInfoUtilsTest extends MediaUtilsTest {
 
     public CodecInfoUtilsTest() {
     }
