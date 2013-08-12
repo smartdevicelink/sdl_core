@@ -96,7 +96,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(TSchemaItemParameter<size_t>(),
+        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(
+            TSchemaItemParameter<size_t>(),
+            TSchemaItemParameter<size_t>(),
             TSchemaItemParameter<std::string>("Default string")); // Default value, no max length
 
         //Object - valid string
@@ -139,7 +141,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(TSchemaItemParameter<size_t>(25),
+        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(
+            TSchemaItemParameter<size_t>(0),
+            TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));
 
         //Object - valid string
@@ -172,7 +176,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(TSchemaItemParameter<size_t>(25),
+        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(
+            TSchemaItemParameter<size_t>(0),
+            TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));
 
         obj["str"] = "New valid string";
@@ -232,7 +238,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(TSchemaItemParameter<size_t>(25),
+        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(
+            TSchemaItemParameter<size_t>(0),
+            TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));
 
         obj[0] = "New valid string";

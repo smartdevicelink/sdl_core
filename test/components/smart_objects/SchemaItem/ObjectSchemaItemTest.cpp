@@ -97,7 +97,8 @@ class ObjectSchemaItemTest : public ::testing::Test {
             , TSchemaItemParameter<TestType::eType>());
 
       utils::SharedPtr<ISchemaItem> info_SchemaItem =
-        CStringSchemaItem::create(TSchemaItemParameter<size_t>(10)
+        CStringSchemaItem::create(TSchemaItemParameter<size_t>(0)
+                                  , TSchemaItemParameter<size_t>(10)
                                   , TSchemaItemParameter<std::string>());
 
       utils::SharedPtr<ISchemaItem> tryAgainTime_SchemaItem =
