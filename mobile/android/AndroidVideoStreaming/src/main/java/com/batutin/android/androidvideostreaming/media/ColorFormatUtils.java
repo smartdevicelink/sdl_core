@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class ColorFormatUtils {
 
-
+    private static final String MIME_TYPE = "video/avc";
     public static final Map<Integer, String> colorFormatNamesMap;
 
     static {
@@ -88,6 +88,10 @@ public class ColorFormatUtils {
         list.add(MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar);
         list.add(MediaCodecInfo.CodecCapabilities.COLOR_QCOM_FormatYUV420SemiPlanar);
         acceptableColorSpaceList = Collections.unmodifiableList(list);
+    }
+
+    public static int selectFirstVideoAvcColorFormat() throws IllegalArgumentException {
+        return selectFirstColorFormat(CodecInfoUtils.selectFirstVideoAvcCodec().getCapabilitiesForType(MIME_TYPE));
     }
 
     public static int selectFirstColorFormat(MediaCodecInfo.CodecCapabilities capabilities) throws IllegalArgumentException {

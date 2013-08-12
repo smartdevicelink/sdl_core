@@ -20,6 +20,11 @@ public class ColorFormatUtilsTest extends MediaUtilsTest {
         codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
     }
 
+    public void testSelectAvcColorFormatShouldReturnColorFormat() throws Exception {
+        int colorFormat = ColorFormatUtils.selectFirstVideoAvcColorFormat();
+        assertTrue(colorFormat > 0);
+    }
+
     public void testSelectColorFormatShouldReturnColorFormat() throws Exception {
         int colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo.getCapabilitiesForType(MIME_TYPE));
         assertTrue(colorFormat > 0);

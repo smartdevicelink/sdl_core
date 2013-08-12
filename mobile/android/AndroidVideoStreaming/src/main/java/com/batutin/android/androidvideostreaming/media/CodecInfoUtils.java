@@ -12,6 +12,10 @@ public class CodecInfoUtils {
 
     public static final String MIME_TYPE = "video/avc";
 
+    public static MediaCodecInfo selectFirstVideoAvcCodec() throws IllegalArgumentException {
+        return selectFirstCodec(MIME_TYPE);
+    }
+
     /**
      * Returns the first codec capable of encoding the specified MIME type, or null if no
      * match was found.

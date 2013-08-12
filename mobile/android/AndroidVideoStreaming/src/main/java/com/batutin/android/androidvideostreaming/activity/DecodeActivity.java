@@ -19,7 +19,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.batutin.android.androidvideostreaming.R;
-import com.batutin.android.androidvideostreaming.media.AvcEncoder;
+import com.batutin.android.androidvideostreaming.media.VideoAvcCoder;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -271,7 +271,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         private MediaExtractor extractor;
         private MediaCodec decoder;
         private Surface surface;
-        public AvcEncoder av;
+        public VideoAvcCoder av;
 
         public PlayerThread(Surface surface, byte[] res, PipedInputStream pipedReader) {
             this.surface = surface;
@@ -293,7 +293,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
                 }
             });
 
-            av = new AvcEncoder(surface, pipedReader);
+            av = new VideoAvcCoder(surface, pipedReader);
         }
 
         @Override

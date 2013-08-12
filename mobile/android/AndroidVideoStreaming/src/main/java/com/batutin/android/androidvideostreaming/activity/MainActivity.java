@@ -11,7 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 
 import com.batutin.android.androidvideostreaming.R;
-import com.batutin.android.androidvideostreaming.media.AvcEncoder;
+import com.batutin.android.androidvideostreaming.media.VideoAvcCoder;
 import com.batutin.android.androidvideostreaming.reader.AssetsReader;
 import com.batutin.android.androidvideostreaming.reader.FileStreamReaderListener;
 import com.batutin.android.androidvideostreaming.reader.VideoStreaming;
@@ -28,7 +28,7 @@ public class MainActivity extends Activity implements FileStreamReaderListener, 
     private static final String TAG = "ColorSpaceUtilsTest";
     private static final int WIDTH = 256;
     private static final int HEIGHT = 128;
-    private AvcEncoder encoder;
+    private VideoAvcCoder encoder;
     private ByteArrayOutputStream bb;
 
     @Override
@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements FileStreamReaderListener, 
         setContentView(R.layout.activity_main);
 
         bb = new ByteArrayOutputStream();
-        encoder = new AvcEncoder(null, null);
+        encoder = new VideoAvcCoder(null, null);
         encoder.frameListener = this;
         encoder.parameterSetsListener = this;
         AssetsReader r = new AssetsReader(this);

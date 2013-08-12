@@ -2,7 +2,6 @@ package com.batutin.android.androidvideostreaming.media;
 
 import android.media.CamcorderProfile;
 import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.view.Surface;
 
@@ -15,33 +14,32 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
 
-public class AvcEncoder {
+public class VideoAvcCoder {
 
-    public static final String MIME_TYPE = "video/avc";
     public static final int FRAME_RATE = 10;
     public EncodedFrameListener frameListener;
     public ParameterSetsListener parameterSetsListener;
     private PipedInputStream reader;
     private boolean stop = false;
     private MediaEncoder mediaEncoder;
+    private MediaDecoder mediaDecoder;
     private Surface surface;
-    private MediaCodec decoder;
 
-    public AvcEncoder(Surface surface, PipedInputStream reader) throws IllegalStateException {
+
+    public VideoAvcCoder(Surface surface, PipedInputStream reader) throws IllegalStateException {
         this.surface = surface;
         this.reader = reader;
         MediaFormat mediaFormat = createEncoderParamets();
-        decoder = MediaCodec.createDecoderByType(MIME_TYPE);
+        mediaDecoder = new MediaDecoder();
         mediaEncoder = new MediaEncoder();
         mediaEncoder.configureMediaEncoder(mediaFormat);
         start();
     }
 
     private MediaFormat createEncoderParamets() {
-        MediaCodecInfo codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
         CamcorderProfile camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
-        int colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo.getCapabilitiesForType(MIME_TYPE));
-        MediaFormat mediaFormat = MediaFormatUtils.createEncoderMediaFormat(camcorderProfile, colorFormat, FRAME_RATE, MIME_TYPE);
+        int colorFormat = ColorFormatUtils.selectFirstVideoAvcColorFormat();
+        MediaFormat mediaFormat = MediaFormatUtils.createVideoAvcEncoderMediaFormat(camcorderProfile, colorFormat, FRAME_RATE);
         return mediaFormat;
     }
 
@@ -57,8 +55,7 @@ public class AvcEncoder {
         try {
             this.stop = true;
             mediaEncoder.stop();
-            decoder.stop();
-            decoder.release();
+            mediaDecoder.stop();
         } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
         }
@@ -190,25 +187,21 @@ public class AvcEncoder {
                         // handle this is to manually stuff the data into the MediaFormat
                         // and pass that to configure().  We do that here to exercise the API.
 
-                        MediaFormat format =
-                                MediaFormat.createVideoFormat(MIME_TYPE,mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH), mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT));
-                        format.setByteBuffer("csd-0", encodedData);
-
-                        decoder.configure(format, surface,
-                                null, 0);
-                        decoder.start();
-                        decoderInputBuffers = decoder.getInputBuffers();
-                        decoderOutputBuffers = decoder.getOutputBuffers();
+                        MediaFormat format = MediaFormatUtils.createVideoAvcDecoderMediaFormat(mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH), mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT), encodedData);
+                        mediaDecoder.configureMediaDecoder(format,surface);
+                        mediaDecoder.start();
+                        decoderInputBuffers = mediaDecoder.getDecoder().getInputBuffers();
+                        decoderOutputBuffers = mediaDecoder.getDecoder().getOutputBuffers();
                         decoderConfigured = true;
                         ALog.i("decoder configured (" + info.size + " bytes)");
                     } else {
                         // Get a decoder input buffer, blocking until it's available.
 
-                        int inputBufIndex = decoder.dequeueInputBuffer(-1);
+                        int inputBufIndex = mediaDecoder.getDecoder().dequeueInputBuffer(-1);
                         ByteBuffer inputBuf = decoderInputBuffers[inputBufIndex];
                         inputBuf.clear();
                         inputBuf.put(encodedData);
-                        decoder.queueInputBuffer(inputBufIndex, 0, info.size,
+                        mediaDecoder.getDecoder().queueInputBuffer(inputBufIndex, 0, info.size,
                                 info.presentationTimeUs, info.flags);
 
                         encoderDone = (info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0;
@@ -227,7 +220,7 @@ public class AvcEncoder {
             // If we're decoding to a Surface, we'll get notified here as usual but the
             // ByteBuffer references will be null.  The data is sent to Surface instead.
             if (decoderConfigured) {
-                int decoderStatus = decoder.dequeueOutputBuffer(info, TIMEOUT_USEC);
+                int decoderStatus = mediaDecoder.getDecoder().dequeueOutputBuffer(info, TIMEOUT_USEC);
                 if (decoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                     // no output available yet
                     ALog.i("no output from decoder available");
@@ -236,10 +229,10 @@ public class AvcEncoder {
                     // so attempting to access data through the old output buffer array could
                     // lead to a native crash.
                     ALog.i("decoder output buffers changed");
-                    decoderOutputBuffers = decoder.getOutputBuffers();
+                    decoderOutputBuffers = mediaDecoder.getDecoder().getOutputBuffers();
                 } else if (decoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     // this happens before the first frame is returned
-                    decoderOutputFormat = decoder.getOutputFormat();
+                    decoderOutputFormat = mediaDecoder.getDecoder().getOutputFormat();
                     ALog.i("decoder output format changed: " +
                             decoderOutputFormat);
                 } else if (decoderStatus < 0) {
@@ -257,9 +250,7 @@ public class AvcEncoder {
                     // to SurfaceTexture to convert to a texture.  The API doesn't guarantee
                     // that the texture will be available before the call returns, so we
                     // need to wait for the onFrameAvailable callback to fire.
-                    decoder.releaseOutputBuffer(decoderStatus, true);
-
-
+                    mediaDecoder.getDecoder().releaseOutputBuffer(decoderStatus, true);
                 }
             }
         }

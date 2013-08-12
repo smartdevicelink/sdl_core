@@ -12,6 +12,11 @@ public class CodecInfoUtilsTest extends MediaUtilsTest {
     public CodecInfoUtilsTest() {
     }
 
+    public void testSelectAvcCodecShouldReturnCodec() throws Exception {
+        MediaCodecInfo info = CodecInfoUtils.selectFirstVideoAvcCodec();
+        assertNotNull(info);
+    }
+
     public void testSelectCodecShouldReturnCodec() throws Exception {
         MediaCodecInfo info = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
         assertNotNull(info);

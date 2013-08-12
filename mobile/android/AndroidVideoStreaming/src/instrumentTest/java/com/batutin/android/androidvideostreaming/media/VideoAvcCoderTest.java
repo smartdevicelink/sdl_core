@@ -3,10 +3,10 @@ package com.batutin.android.androidvideostreaming.media;
 /**
  * Created by Andrew Batutin on 8/5/13.
  */
-public class AvcEncoderTest extends MediaUtilsTest {
+public class VideoAvcCoderTest extends MediaUtilsTest {
 
 
-    public AvcEncoderTest() {
+    public VideoAvcCoderTest() {
     }
 
     @Override
@@ -15,7 +15,7 @@ public class AvcEncoderTest extends MediaUtilsTest {
     }
 
     public void testAvcEncoderCreation() throws Exception {
-            AvcEncoder e = new AvcEncoder(null, null);
+            VideoAvcCoder e = new VideoAvcCoder(null, null);
             assertNotNull("object should be created", e);
     }
 
