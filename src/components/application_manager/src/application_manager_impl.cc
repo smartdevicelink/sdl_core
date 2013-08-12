@@ -923,9 +923,10 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         = static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
 
-  if ((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) &&
+  if (((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) &&
       ((*message)[strings::params][strings::protocol_type] ==
-          commands::CommandImpl::mobile_protocol_type_)) {
+          commands::CommandImpl::mobile_protocol_type_)) &&
+      (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
     unsigned int app_id = (*message)[strings::params][strings::connection_key]
         .asUInt();
     Application* app = ApplicationManagerImpl::instance()->application(app_id);
