@@ -368,6 +368,17 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::EncodedSyncPDataID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(
+          new commands::EncodedSyncPDataResponse(message));
+      } else {
+        command.reset(
+          new commands::EncodedSyncPDataRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {

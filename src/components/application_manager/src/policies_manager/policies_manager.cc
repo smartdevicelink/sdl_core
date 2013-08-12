@@ -61,6 +61,7 @@ std::map<std::string, FunctionID::eType> kFunctionIDs {
   { "Speak", FunctionID::SpeakID },
   { "SetMediaClockTimer", FunctionID::SetMediaClockTimerID },
   { "EncodedSyncPData", FunctionID::EncodedSyncPDataID },
+  { "SyncPData", FunctionID::SyncPDataID },
   { "PerformAudioPassThru", FunctionID::PerformAudioPassThruID },
   { "EndAudioPassThru", FunctionID::EndAudioPassThruID },
   { "SubscribeButton", FunctionID::SubscribeButtonID },
