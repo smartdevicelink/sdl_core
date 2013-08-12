@@ -294,14 +294,12 @@ SDL.SDLVehicleInfoModel = Em.Object
 
         /**
          * Function send all vehicle conditions on FFW.VehicleInfo.OnVehicleData
-         * fo notification when data changes
+         * for notification when data changes
          */
         onVehicleDataChanged: function() {
 
             var jsonData = {};
-            for ( var i in this.vehicleData) {
-                jsonData[i] = this.vehicleData[i];
-            }
+            jsonData["prndl"] = this.vehicleData["prndl"];
             FFW.VehicleInfo.OnVehicleData(jsonData);
 
         }.observes('this.vehicleData.prndl')
