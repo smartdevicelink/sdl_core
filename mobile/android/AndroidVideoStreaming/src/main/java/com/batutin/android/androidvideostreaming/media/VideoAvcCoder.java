@@ -9,14 +9,14 @@ import com.batutin.android.androidvideostreaming.activity.ALog;
 import com.batutin.android.androidvideostreaming.activity.EncodedFrameListener;
 import com.batutin.android.androidvideostreaming.activity.ParameterSetsListener;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
 
 public class VideoAvcCoder {
 
-    public static final int FRAME_RATE = 10;
+
+    private final PresentationTimeCalc presentationTimeCalc;
     public EncodedFrameListener frameListener;
     public ParameterSetsListener parameterSetsListener;
     private PipedInputStream reader;
@@ -25,21 +25,33 @@ public class VideoAvcCoder {
     private MediaDecoder mediaDecoder;
     private Surface surface;
 
-
     public VideoAvcCoder(Surface surface, PipedInputStream reader) throws IllegalStateException {
         this.surface = surface;
         this.reader = reader;
-        MediaFormat mediaFormat = createEncoderParamets();
+        MediaFormat mediaFormat = createEncoderParameters();
         mediaDecoder = new MediaDecoder();
         mediaEncoder = new MediaEncoder();
         mediaEncoder.configureMediaEncoder(mediaFormat);
+        presentationTimeCalc = new PresentationTimeCalc(MediaEncoder.FRAME_RATE);
         start();
     }
 
-    private MediaFormat createEncoderParamets() {
+    public PipedInputStream getReader() {
+        return reader;
+    }
+
+    public MediaEncoder getMediaEncoder() {
+        return mediaEncoder;
+    }
+
+    public MediaDecoder getMediaDecoder() {
+        return mediaDecoder;
+    }
+
+    private MediaFormat createEncoderParameters() {
         CamcorderProfile camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
         int colorFormat = ColorFormatUtils.selectFirstVideoAvcColorFormat();
-        MediaFormat mediaFormat = MediaFormatUtils.createVideoAvcEncoderMediaFormat(camcorderProfile, colorFormat, FRAME_RATE);
+        MediaFormat mediaFormat = MediaFormatUtils.createVideoAvcEncoderMediaFormat(camcorderProfile, colorFormat, MediaEncoder.FRAME_RATE);
         return mediaFormat;
     }
 
@@ -72,7 +84,7 @@ public class VideoAvcCoder {
         MediaFormat decoderOutputFormat = null;
         int generateIndex = 0;
         int checkIndex = 0;
-        int badFrames = 0;
+
         boolean decoderConfigured = false;
 
         // Just out of curiosity.
@@ -97,49 +109,18 @@ public class VideoAvcCoder {
                 int inputBufIndex = mediaEncoder.getEncoder().dequeueInputBuffer(TIMEOUT_USEC);
                 ALog.v("inputBufIndex=" + inputBufIndex);
                 if (inputBufIndex >= 0) {
-                    long ptsUsec = computePresentationTime(generateIndex);
+                    long presentationTimeUs = presentationTimeCalc.computePresentationTime(generateIndex);
                     if (stop == true) {
                         // Send an empty frame with the end-of-stream flag set.  If we set EOS
                         // on a frame with data, that frame data will be ignored, and the
                         // output will be short one frame.
-                        mediaEncoder.getEncoder().queueInputBuffer(inputBufIndex, 0, 0, ptsUsec,
+                        mediaEncoder.getEncoder().queueInputBuffer(inputBufIndex, 0, 0, presentationTimeUs,
                                 MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                         inputDone = true;
                         ALog.i("sent input EOS (with zero-length frame)");
                     } else {
-                        //frameData = new byte[camcorderProfile.videoFrameWidth*camcorderProfile.videoFrameHeight];
-                        //new Random().nextBytes(frameData);
-                        ByteBuffer inputBuf = encoderInputBuffers[inputBufIndex];
-                        inputBuf.clear();
-                        //frameData = new byte[camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2];
-                        ByteArrayOutputStream bb = new ByteArrayOutputStream();
-                        int res = 0;
-                        do {
-                            try {
-                                res = reader.read();
-                                if (res != -1) {
-                                    bb.write(res);
-                                }
-                            } catch (IOException e) {
-                                ALog.e(e.getMessage());
-                            }
-                        }
-                        while (res != -1 && bb.size() < mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2);
 
-                        try {
-                            bb.flush();
-                        } catch (IOException e) {
-                            ALog.e(e.getMessage());
-                        }
-                        byte[] fd = bb.toByteArray();
-
-                        // The size of a frame of video data, in the formats we handle, is stride*sliceHeight
-                        // for Y, and (stride/2)*(sliceHeight/2) for each of the Cb and Cr channels.  Application
-                        // of algebra and assuming that stride==width and sliceHeight==height yields:
-
-                        inputBuf.put(fd, 0, mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2);
-
-                        mediaEncoder.getEncoder().queueInputBuffer(inputBufIndex, 0, mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2, ptsUsec, 0);
+                        mediaEncoder.enqueueFrame(inputBufIndex, presentationTimeUs, reader);
                         ALog.v("submitted frame " + generateIndex + " to enc");
                     }
                     generateIndex++;
@@ -188,7 +169,7 @@ public class VideoAvcCoder {
                         // and pass that to configure().  We do that here to exercise the API.
 
                         MediaFormat format = MediaFormatUtils.createVideoAvcDecoderMediaFormat(mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH), mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT), encodedData);
-                        mediaDecoder.configureMediaDecoder(format,surface);
+                        mediaDecoder.configureMediaDecoder(format, surface);
                         mediaDecoder.start();
                         decoderInputBuffers = mediaDecoder.getDecoder().getInputBuffers();
                         decoderOutputBuffers = mediaDecoder.getDecoder().getOutputBuffers();
@@ -254,16 +235,8 @@ public class VideoAvcCoder {
                 }
             }
         }
-
         ALog.i("decoded " + checkIndex + " frames at "
                 + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) + "x" + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) + ": raw=" + rawSize + ", enc=" + encodedSize);
-
     }
 
-    /**
-     * Generates the presentation time for frame N, in microseconds.
-     */
-    private long computePresentationTime(int frameIndex) {
-        return frameIndex * 1000000 / mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_FRAME_RATE);
-    }
 }

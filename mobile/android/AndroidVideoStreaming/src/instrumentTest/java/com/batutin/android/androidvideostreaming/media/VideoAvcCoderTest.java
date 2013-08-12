@@ -18,5 +18,4 @@ public class VideoAvcCoderTest extends MediaUtilsTest {
             VideoAvcCoder e = new VideoAvcCoder(null, null);
             assertNotNull("object should be created", e);
     }
-
 }
