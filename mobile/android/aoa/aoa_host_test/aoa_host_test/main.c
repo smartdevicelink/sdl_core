@@ -28,6 +28,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define IN 0x81
 #define OUT 0x02
@@ -161,7 +162,6 @@ static int mainPhase(){
             printf("tick\n");
             fflush(stdout);
         }
-/*        printCharArray(buffer, transferred);
         int dataLength = transferred;
         
         // writing data
@@ -170,17 +170,18 @@ static int mainPhase(){
             error(response);
             return -1;
         }
-        printf("Sent %d bytes\n", transferred);*/
+        assert(transferred == dataLength);
+//        printf("Sent %d bytes\n", transferred);
     }
     
     struct timeval finishTime;
     gettimeofday(&finishTime, NULL);
     unsigned long runTime = ((finishTime.tv_sec - startTime.tv_sec) * 1000000 +
                              (finishTime.tv_usec - startTime.tv_usec)) / 1000;
-    unsigned int totalBytesRead = blocksReceived * BUFFER_LENGTH;
-    double avgSpeed = totalBytesRead / (runTime / 1000);
+    unsigned int totalBytes = blocksReceived * BUFFER_LENGTH * 2;
+    double avgSpeed = totalBytes / (runTime / 1000);
     printf("Benchmark finish; run time = %lu ms. for %u bytes, "
-           "which is about %.2f B/s\n", runTime, totalBytesRead,
+           "which is about %.2f B/s\n", runTime, totalBytes,
            avgSpeed);
     
     return 0;

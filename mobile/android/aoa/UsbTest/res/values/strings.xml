@@ -5,5 +5,5 @@
     <string name="str_send">Send</string>
     <string name="str_desc">Send Number to Computer</string>
     <string name="str_number">1234</string>
-    <string name="str_writeBenchmark">USB Write Benchmark</string>
+    <string name="str_rwBenchmark">USB Read-Write Benchmark</string>
 </resources>

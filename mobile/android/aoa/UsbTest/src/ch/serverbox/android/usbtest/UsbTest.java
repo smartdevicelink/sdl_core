@@ -181,6 +181,7 @@ public class UsbTest extends Activity {
                 final int writeCount = 10000;
                 final int reportPeriod = 1000;
                 int blocksWritten = 0;
+                byte[] readBuffer = new byte[BUFFER_LENGTH];
                 Log.d(TAG, "Benchmark start");
                 long startTime = System.currentTimeMillis();
 
@@ -191,16 +192,19 @@ public class UsbTest extends Activity {
                             Log.d(TAG, "tick");
                         }
                         mFout.write(buffer);
+
+                        int bytesRead = mFin.read(readBuffer);
+                        assert bytesRead == BUFFER_LENGTH;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
                 final long runTime = System.currentTimeMillis() - startTime;
-                final int totalBytesWritten = blocksWritten * BUFFER_LENGTH;
-                final double avgSpeed = totalBytesWritten / (runTime / 1000.0);
+                final int totalBytes = blocksWritten * BUFFER_LENGTH * 2;
+                final double avgSpeed = totalBytes / (runTime / 1000.0);
                 final String msg = "Benchmark finish; run time = " + runTime +
-                        " ms. for " + totalBytesWritten + " bytes, which is " +
+                        " ms. for " + totalBytes + " bytes, which is " +
                         "about " + avgSpeed + " B/s";
                 Log.d(TAG, msg);
                 runOnUiThread(new Runnable() {

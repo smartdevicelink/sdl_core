@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/btWriteBenchmark"
             android:layout_width="match_parent"
-            android:text="@string/str_writeBenchmark"
+            android:text="@string/str_rwBenchmark"
             android:enabled="false"/>
 
 </LinearLayout>
