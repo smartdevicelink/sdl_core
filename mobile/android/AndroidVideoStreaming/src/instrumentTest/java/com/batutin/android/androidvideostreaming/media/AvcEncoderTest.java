@@ -12,7 +12,6 @@ public class AvcEncoderTest extends MediaUtilsTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
     }
 
     public void testAvcEncoderCreation() throws Exception {

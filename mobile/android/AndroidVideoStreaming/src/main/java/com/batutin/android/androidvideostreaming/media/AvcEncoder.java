@@ -23,35 +23,42 @@ public class AvcEncoder {
     public ParameterSetsListener parameterSetsListener;
     private PipedInputStream reader;
     private boolean stop = false;
-    private MediaCodec encoder;
     private MediaCodecInfo codecInfo;
     private CamcorderProfile camcorderProfile;
     private MediaFormat mediaFormat;
     private int colorFormat;
+    private MediaEncoder mediaEncoder;
     private Surface surface;
     private MediaCodec decoder;
 
     public AvcEncoder(Surface surface, PipedInputStream reader) throws IllegalStateException {
         this.surface = surface;
         this.reader = reader;
+        createEncoderParamets();
         decoder = MediaCodec.createDecoderByType(MIME_TYPE);
-        encoder = new MediaEncoder().getEncoder();
+        mediaEncoder = new MediaEncoder();
+        mediaEncoder.configureMediaEncoder(mediaFormat);
+        start();
+    }
+
+    private void createEncoderParamets() {
         codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
         camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
         colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo.getCapabilitiesForType(MIME_TYPE));
         mediaFormat = MediaFormatUtils.createMediaFormat(camcorderProfile, colorFormat, FRAME_RATE, MIME_TYPE);
-        encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-        start();
     }
 
     public void start() {
-        encoder.start();
+        try {
+            mediaEncoder.start();
+        }catch (IllegalStateException exp){
+            ALog.e(exp.getMessage());
+        }
     }
 
     public void stop() throws IOException {
         this.stop = true;
-        encoder.stop();
-        encoder.release();
+        mediaEncoder.stop();
         decoder.stop();
         decoder.release();
     }
@@ -61,8 +68,8 @@ public class AvcEncoder {
         long startMs = System.currentTimeMillis();
 
         final int TIMEOUT_USEC = 10000;
-        ByteBuffer[] encoderInputBuffers = encoder.getInputBuffers();
-        ByteBuffer[] encoderOutputBuffers = encoder.getOutputBuffers();
+        ByteBuffer[] encoderInputBuffers = mediaEncoder.getEncoder().getInputBuffers();
+        ByteBuffer[] encoderOutputBuffers = mediaEncoder.getEncoder().getOutputBuffers();
         ByteBuffer[] decoderInputBuffers = null;
         ByteBuffer[] decoderOutputBuffers = null;
         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
@@ -91,7 +98,7 @@ public class AvcEncoder {
             // We don't really want a timeout here, but sometimes there's a delay opening
             // the encoder device, so a short timeout can keep us from spinning hard.
             if (!inputDone) {
-                int inputBufIndex = encoder.dequeueInputBuffer(TIMEOUT_USEC);
+                int inputBufIndex = mediaEncoder.getEncoder().dequeueInputBuffer(TIMEOUT_USEC);
                 ALog.v("inputBufIndex=" + inputBufIndex);
                 if (inputBufIndex >= 0) {
                     long ptsUsec = computePresentationTime(generateIndex);
@@ -99,7 +106,7 @@ public class AvcEncoder {
                         // Send an empty frame with the end-of-stream flag set.  If we set EOS
                         // on a frame with data, that frame data will be ignored, and the
                         // output will be short one frame.
-                        encoder.queueInputBuffer(inputBufIndex, 0, 0, ptsUsec,
+                        mediaEncoder.getEncoder().queueInputBuffer(inputBufIndex, 0, 0, ptsUsec,
                                 MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                         inputDone = true;
                         ALog.i("sent input EOS (with zero-length frame)");
@@ -118,7 +125,7 @@ public class AvcEncoder {
                                     bb.write(res);
                                 }
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                ALog.e(e.getMessage());
                             }
                         }
                         while (res != -1 && bb.size() < camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
@@ -126,7 +133,7 @@ public class AvcEncoder {
                         try {
                             bb.flush();
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            ALog.e(e.getMessage());
                         }
                         byte[] fd = bb.toByteArray();
 
@@ -136,7 +143,7 @@ public class AvcEncoder {
 
                         inputBuf.put(fd, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
 
-                        encoder.queueInputBuffer(inputBufIndex, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2, ptsUsec, 0);
+                        mediaEncoder.getEncoder().queueInputBuffer(inputBufIndex, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2, ptsUsec, 0);
                         ALog.v("submitted frame " + generateIndex + " to enc");
                     }
                     generateIndex++;
@@ -153,17 +160,17 @@ public class AvcEncoder {
             //
             // Once we get EOS from the encoder, we don't need to do this anymore.
             if (!encoderDone) {
-                int encoderStatus = encoder.dequeueOutputBuffer(info, TIMEOUT_USEC);
+                int encoderStatus = mediaEncoder.getEncoder().dequeueOutputBuffer(info, TIMEOUT_USEC);
                 if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                     // no output available yet
                     ALog.i("no output from encoder available");
                 } else if (encoderStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                     // not expected for an encoder
-                    encoderOutputBuffers = encoder.getOutputBuffers();
+                    encoderOutputBuffers = mediaEncoder.getEncoder().getOutputBuffers();
                     ALog.i("encoder output buffers changed");
                 } else if (encoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     // not expected for an encoder
-                    MediaFormat newFormat = encoder.getOutputFormat();
+                    MediaFormat newFormat = mediaEncoder.getEncoder().getOutputFormat();
                     ALog.i("encoder output format changed: " + newFormat);
                 } else if (encoderStatus < 0) {
                     ALog.e("unexpected result from encoder.dequeueOutputBuffer: " + encoderStatus);
@@ -210,7 +217,7 @@ public class AvcEncoder {
                                 + (encoderDone ? " (EOS)" : ""));
                     }
 
-                    encoder.releaseOutputBuffer(encoderStatus, false);
+                    mediaEncoder.getEncoder().releaseOutputBuffer(encoderStatus, false);
                 }
             }
 
