@@ -23,10 +23,6 @@ public class AvcEncoder {
     public ParameterSetsListener parameterSetsListener;
     private PipedInputStream reader;
     private boolean stop = false;
-    private MediaCodecInfo codecInfo;
-    private CamcorderProfile camcorderProfile;
-    private MediaFormat mediaFormat;
-    private int colorFormat;
     private MediaEncoder mediaEncoder;
     private Surface surface;
     private MediaCodec decoder;
@@ -34,38 +30,41 @@ public class AvcEncoder {
     public AvcEncoder(Surface surface, PipedInputStream reader) throws IllegalStateException {
         this.surface = surface;
         this.reader = reader;
-        createEncoderParamets();
+        MediaFormat mediaFormat = createEncoderParamets();
         decoder = MediaCodec.createDecoderByType(MIME_TYPE);
         mediaEncoder = new MediaEncoder();
         mediaEncoder.configureMediaEncoder(mediaFormat);
         start();
     }
 
-    private void createEncoderParamets() {
-        codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
-        camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
-        colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo.getCapabilitiesForType(MIME_TYPE));
-        mediaFormat = MediaFormatUtils.createMediaFormat(camcorderProfile, colorFormat, FRAME_RATE, MIME_TYPE);
+    private MediaFormat createEncoderParamets() {
+        MediaCodecInfo codecInfo = CodecInfoUtils.selectFirstCodec(MIME_TYPE);
+        CamcorderProfile camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
+        int colorFormat = ColorFormatUtils.selectFirstColorFormat(codecInfo.getCapabilitiesForType(MIME_TYPE));
+        MediaFormat mediaFormat = MediaFormatUtils.createEncoderMediaFormat(camcorderProfile, colorFormat, FRAME_RATE, MIME_TYPE);
+        return mediaFormat;
     }
 
     public void start() {
         try {
             mediaEncoder.start();
-        }catch (IllegalStateException exp){
+        } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
         }
     }
 
     public void stop() throws IOException {
-        this.stop = true;
-        mediaEncoder.stop();
-        decoder.stop();
-        decoder.release();
+        try {
+            this.stop = true;
+            mediaEncoder.stop();
+            decoder.stop();
+            decoder.release();
+        } catch (IllegalStateException exp) {
+            ALog.e(exp.getMessage());
+        }
     }
 
     public void doEncodeDecodeVideoFromBuffer() {
-
-        long startMs = System.currentTimeMillis();
 
         final int TIMEOUT_USEC = 10000;
         ByteBuffer[] encoderInputBuffers = mediaEncoder.getEncoder().getInputBuffers();
@@ -128,7 +127,7 @@ public class AvcEncoder {
                                 ALog.e(e.getMessage());
                             }
                         }
-                        while (res != -1 && bb.size() < camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
+                        while (res != -1 && bb.size() < mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2);
 
                         try {
                             bb.flush();
@@ -141,9 +140,9 @@ public class AvcEncoder {
                         // for Y, and (stride/2)*(sliceHeight/2) for each of the Cb and Cr channels.  Application
                         // of algebra and assuming that stride==width and sliceHeight==height yields:
 
-                        inputBuf.put(fd, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2);
+                        inputBuf.put(fd, 0, mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2);
 
-                        mediaEncoder.getEncoder().queueInputBuffer(inputBufIndex, 0, camcorderProfile.videoFrameWidth * camcorderProfile.videoFrameHeight * 3 / 2, ptsUsec, 0);
+                        mediaEncoder.getEncoder().queueInputBuffer(inputBufIndex, 0, mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2, ptsUsec, 0);
                         ALog.v("submitted frame " + generateIndex + " to enc");
                     }
                     generateIndex++;
@@ -192,7 +191,7 @@ public class AvcEncoder {
                         // and pass that to configure().  We do that here to exercise the API.
 
                         MediaFormat format =
-                                MediaFormat.createVideoFormat(MIME_TYPE, camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
+                                MediaFormat.createVideoFormat(MIME_TYPE,mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH), mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT));
                         format.setByteBuffer("csd-0", encodedData);
 
                         decoder.configure(format, surface,
@@ -231,12 +230,12 @@ public class AvcEncoder {
                 int decoderStatus = decoder.dequeueOutputBuffer(info, TIMEOUT_USEC);
                 if (decoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                     // no output available yet
-                    ALog.i( "no output from decoder available");
+                    ALog.i("no output from decoder available");
                 } else if (decoderStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                     // The storage associated with the direct ByteBuffer may already be unmapped,
                     // so attempting to access data through the old output buffer array could
                     // lead to a native crash.
-                    ALog.i( "decoder output buffers changed");
+                    ALog.i("decoder output buffers changed");
                     decoderOutputBuffers = decoder.getOutputBuffers();
                 } else if (decoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     // this happens before the first frame is returned
@@ -247,11 +246,11 @@ public class AvcEncoder {
                     ALog.e("unexpected result from deocder.dequeueOutputBuffer: " + decoderStatus);
                 } else {  // decoderStatus >= 0
 
-                    ALog.v( "surface decoder given buffer " + decoderStatus +
+                    ALog.v("surface decoder given buffer " + decoderStatus +
                             " (size=" + info.size + ")");
                     rawSize += info.size;
                     if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                        ALog.i( "output EOS");
+                        ALog.i("output EOS");
                         outputDone = true;
                     }
                     // As soon as we call releaseOutputBuffer, the buffer will be forwarded
@@ -265,8 +264,8 @@ public class AvcEncoder {
             }
         }
 
-        ALog.i( "decoded " + checkIndex + " frames at "
-                + mediaFormat.getInteger(MediaFormat.KEY_WIDTH) + "x" + mediaFormat.getInteger(MediaFormat.KEY_HEIGHT) + ": raw=" + rawSize + ", enc=" + encodedSize);
+        ALog.i("decoded " + checkIndex + " frames at "
+                + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) + "x" + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) + ": raw=" + rawSize + ", enc=" + encodedSize);
 
     }
 
@@ -274,6 +273,6 @@ public class AvcEncoder {
      * Generates the presentation time for frame N, in microseconds.
      */
     private long computePresentationTime(int frameIndex) {
-        return frameIndex * 1000000 / camcorderProfile.videoFrameRate;
+        return frameIndex * 1000000 / mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_FRAME_RATE);
     }
 }

@@ -1,6 +1,6 @@
 package com.batutin.android.androidvideostreaming.media;
 
-public class MediaFormatSetting {
+public class EncoderMediaFormatSetting {
     private final int videoFrameWidth;
     private final int videoFrameHeight;
     private final int videoBitRate;
@@ -9,7 +9,7 @@ public class MediaFormatSetting {
     private final int frameRate;
     private final String mimeType;
 
-    public MediaFormatSetting(int videoFrameWidth, int videoFrameHeight, int videoBitRate, int videoFrameRate, int colorFormat, int frameRate, String mimeType) {
+    public EncoderMediaFormatSetting(int videoFrameWidth, int videoFrameHeight, int videoBitRate, int videoFrameRate, int colorFormat, int frameRate, String mimeType) {
         this.videoFrameWidth = videoFrameWidth;
         this.videoFrameHeight = videoFrameHeight;
         this.videoBitRate = videoBitRate;

@@ -8,67 +8,64 @@ import com.batutin.android.androidvideostreaming.activity.ALog;
 /**
  * Created by Andrew Batutin on 8/9/13.
  */
-public class MediaEncoder {
-
-    public static final String MIME_TYPE = "video/avc";
-    private MediaCodec encoder;
-    private MediaFormat mediaFormat;
-    private boolean isConfigured = false;
-    private boolean isRunning = false;
+public class MediaEncoder extends AbstractMediaCoder implements MediaCoderState {
 
     public MediaEncoder() {
-        encoder = createVideoAvcEncoder();
-    }
-
-    public boolean isRunning() {
-        return isRunning;
-    }
-
-    public boolean isConfigured() {
-        return isConfigured;
-    }
-
-    public MediaFormat getMediaFormat() {
-        return mediaFormat;
+        codec = createMediaEncoder();
     }
 
     public MediaCodec getEncoder() {
-        return encoder;
+        return codec;
     }
 
+    private MediaCodec createMediaEncoder() {
+        ALog.d("Start codec creation");
+        MediaCodec codec = createMediaCodec();
+        ALog.d("End codec creation");
+        return codec;
+    }
+
+    @Override
+    protected MediaCodec createMediaCodec() {
+        MediaCodec codec = MediaCodec.createEncoderByType(MIME_TYPE);
+        return codec;
+    }
+
+    @Override
     public void start() throws IllegalStateException {
-        if (isRunning == false) {
-            encoder.start();
-            isRunning = true;
-            ALog.d("Encoder started");
+        if (isRunning == false){
+            ALog.d("Encoder is going to start");
         } else {
-            ALog.d("Encoder already have been started");
+            ALog.d("Encoder is already started");
+        }
+        super.start();
+        if (isRunning == true){
+            ALog.d("Encoder is started");
+        } else {
+            ALog.d("Encoder is stopped");
         }
     }
 
-    public void stop() {
-        if (isRunning == true) {
-            encoder.stop();
-            encoder.release();
-            isRunning = false;
-            ALog.d("Encoder stopped");
+    @Override
+    public void stop() throws IllegalStateException {
+        if (isRunning == true){
+            ALog.d("Encoder is going to stop");
         } else {
-            ALog.d("Encoder have not been started yet");
+            ALog.d("Encoder is already stopped");
+        }
+        super.stop();
+        if (isRunning == false){
+            ALog.d("Encoder is stopped");
+        } else {
+            ALog.d("Encoder is running");
         }
     }
 
     public void configureMediaEncoder(MediaFormat format) {
         ALog.d("Start encoder configure");
         mediaFormat = format;
-        encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        codec.configure(getMediaFormat(), null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         isConfigured = true;
         ALog.d("End encoder configure");
-    }
-
-    private MediaCodec createVideoAvcEncoder() {
-        ALog.d("Start encoder creation");
-        MediaCodec codec = MediaCodec.createEncoderByType(MIME_TYPE);
-        ALog.d("End encoder creation");
-        return codec;
     }
 }
