@@ -55,11 +55,13 @@ class String(object):
     """String type.
 
     Instance variables:
+    min_length -- minimum string length
     max_length -- maximum string length
 
     """
 
-    def __init__(self, max_length=None):
+    def __init__(self, min_length=None, max_length=None):
+        self.min_length = min_length
         self.max_length = max_length
 
 

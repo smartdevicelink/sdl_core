@@ -629,6 +629,7 @@ class CodeGenerator(object):
                 is Model.FunctionParam else None))
 
     def _gen_schema_item_decl_code(self, param, member_name, default_value):
+
         """Generate schema item initialization code.
 
         Generates type-specific code that initializes schema item
@@ -666,9 +667,10 @@ class CodeGenerator(object):
         elif type(param) is Model.String:
             code = self._impl_code_string_item_template.substitute(
                 params=self._gen_schema_item_param_values(
-                    [[u"size_t", param.max_length],
+                    [[u"size_t", param.min_length],
+                     [u"size_t", param.max_length],
                      [u"std::string", u"".join(
-                    [u'"', default_value, u'"']) if default_value
+                     [u'"', default_value, u'"']) if default_value
                          is not None else u""]]))
         elif type(param) is Model.Array:
             code = self._impl_code_array_item_template.substitute(
