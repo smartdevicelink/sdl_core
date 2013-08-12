@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,130 +31,140 @@
  * @version 1.0
  */
 
-SDL.Button = Em.View.extend( Ember.TargetActionSupport, {
-    classNames:
-        [
-            'ffw-button',
-            'notpressed'
-        ],
+SDL.Button = Em.View
+    .extend(Ember.TargetActionSupport,
+        {
+            classNames: [
+                'ffw-button', 'notpressed'
+            ],
 
-    classNameBindings:
-        [
-            'pressed',
-            'disabled',
-            'hidden'
-        ],
+            classNameBindings: [
+                'pressed', 'disabled', 'hidden'
+            ],
 
-    /** Pressed state binding */
-    pressed: false,
+            /** Pressed state binding */
+            pressed: false,
 
-    /** Disable actions on button */
-    disabled: false,
+            /** Disable actions on button */
+            disabled: false,
 
-    /** Button icon class */
-    icon: null,
+            /** Button icon class */
+            icon: null,
 
-    /** Button text */
-    text: null,
+            /** Button text */
+            text: null,
 
-    rightText: null,
+            rightText: null,
 
-    target: this.target ? this.target : this,
+            target: this.target ? this.target : this,
 
-    /** Arrow icon */
-    arrow: false,
+            /** Arrow icon */
+            arrow: false,
 
-    /** Button timer flag */
-    timer: 0,
+            /** Button timer flag */
+            timer: 0,
 
-    timerId: null,
-    /** Touch leave event flag */
-    touchleave: false,
+            timerId: null,
+            /** Touch leave event flag */
+            touchleave: false,
 
-    onDown: true,
+            onDown: true,
 
-    helpMode: false,
-    /**  */
-    targetElement: null,
+            helpMode: false,
+            /**  */
+            targetElement: null,
 
-    actionDown: function( event ) {
-        if( this.get( 'disabled' ) ){
-            return;
-        }
+            actionDown: function(event) {
 
-        var self = this;
+                if (this.get('disabled')) { return; }
 
-        this.set( 'pressed', true );
-        /** Set Mouse Leave Event Flag to false */
-        this.set( 'mouseleave', false );
+                var self = this;
 
+                this.set('pressed', true);
+                /** Set Mouse Leave Event Flag to false */
+                this.set('mouseleave', false);
 
-        // Default trigger action
-        if( this.onDown ){
-            this.triggerAction();
-        }
+                // Default trigger action
+                if (this.onDown) {
+                    this.triggerAction();
+                }
 
-        // Call trigger with timeout
-        if( this.timer ){
-            this.timerId = setInterval( function() {
-                self.triggerAction();
-            }, this.timer );
-        }
-    },
+                // Call trigger with timeout
+                if (this.timer) {
+                    this.timerId = setInterval(function() {
 
-    actionUp: function( event ) {
-        this.set( 'pressed', false );
+                        self.triggerAction();
+                    }, this.timer);
+                }
+            },
 
-        if( this.timer ){
-            clearInterval( this.timerId );
-        }
+            actionUp: function(event) {
 
-        if( this.get( 'disabled' ) ){
-            if( this.touchleave == true ){
-                this.set( 'touchleave', false );
+                this.set('pressed', false);
+
+                if (this.timer) {
+                    clearInterval(this.timerId);
+                }
+
+                if (this.get('disabled')) {
+                    if (this.touchleave == true) {
+                        this.set('touchleave', false);
+                    }
+                    return;
+                }
+
+                if (!this.onDown) {
+                    this.triggerAction();
+                }
+            },
+
+            /** Only for desktop */
+            mouseLeave: function(event) {
+
+                this.set('pressed', false);
+
+                if (this.timer) {
+                    clearInterval(this.timerId);
+                }
+            },
+
+            /**
+             * Only for IOS Simulation of mouseleave event for touch devices If
+             * target element looses focus during touch move event events dont
+             * trigger
+             */
+            touchMove: function(event) {
+
+                /** Set Mouse Leave Event Flag to true */
+                this.set('touchleave', this.targetElement !== document
+                    .elementFromPoint(event.originalEvent.touches[0].pageX,
+                        event.originalEvent.touches[0].pageY));
+            },
+
+            // component default template
+            defaultTemplate: Em.Handlebars
+                .compile('<img class="ico" {{bindAttr src="view.icon"}} />'
+                    + '<span>{{view.text}}</span>'),
+
+            templates: {
+                text: Em.Handlebars.compile('<span>{{view.text}}</span>'),
+
+                icon: Em.Handlebars
+                    .compile('<img class="ico" {{bindAttr src="view.icon"}} />'),
+
+                rightText: Em.Handlebars
+                    .compile('<img class="ico" {{bindAttr src="view.icon"}} />'
+                        + '<span class="rightTextButton" >{{view.text}}</span>'
+                        + '<span class="right_text">{{view.rightText}}</span>'),
+
+                arrow: Em.Handlebars
+                    .compile('<img class="ico" {{bindAttr src="view.icon"}} />'
+                        + '<span>{{view.text}}</span>'
+                        + '<img class="arrow-ico" src="images/common/arrow_ico.png" />'),
+
+                rightIcon: Em.Handlebars
+                    .compile('<img class="ico" {{bindAttr src="view.icon"}} />'
+                        + '<span>{{view.text}}</span>'
+                        + '<img class="right_ico" {{bindAttr src="view.righticon"}} />')
             }
-            return;
-        }
-
-        if( !this.onDown ){
-            this.triggerAction();
-        }
-    },
-
-    /** Only for desktop */
-    mouseLeave: function( event ) {
-        this.set( 'pressed', false );
-
-        if( this.timer ){
-            clearInterval( this.timerId );
-        }
-    },
-
-    /**
-     * Only for IOS Simulation of mouseleave event for touch
-     * devices If target element looses focus during touch move
-     * event events dont trigger
-     */
-    touchMove: function( event ) {
-        /** Set Mouse Leave Event Flag to true */
-        this.set( 'touchleave', this.targetElement !== document.elementFromPoint( event.originalEvent.touches[0].pageX, event.originalEvent.touches[0].pageY ) );
-    },
-
-    // component default template
-    defaultTemplate: Em.Handlebars.compile( '<img class="ico" {{bindAttr src="view.icon"}} />' + '<span>{{view.text}}</span>' ),
-
-    templates: {
-        text: Em.Handlebars.compile( '<span>{{view.text}}</span>' ),
-
-        icon: Em.Handlebars.compile( '<img class="ico" {{bindAttr src="view.icon"}} />' ),
-
-        rightText: Em.Handlebars.compile( '<img class="ico" {{bindAttr src="view.icon"}} />' + '<span class="rightTextButton" >{{view.text}}</span>'
-                        + '<span class="right_text">{{view.rightText}}</span>' ),
-
-        arrow: Em.Handlebars.compile( '<img class="ico" {{bindAttr src="view.icon"}} />' + '<span>{{view.text}}</span>'
-                        + '<img class="arrow-ico" src="images/common/arrow_ico.png" />' ),
-
-        rightIcon: Em.Handlebars.compile( '<img class="ico" {{bindAttr src="view.icon"}} />' + '<span>{{view.text}}</span>'
-                        + '<img class="right_ico" {{bindAttr src="view.righticon"}} />' )
-    }
-} );
+        });

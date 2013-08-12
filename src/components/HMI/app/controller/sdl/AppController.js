@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,15 +31,16 @@
  * @version 1.0
  */
 
-SDL.SDLAppController = Em.Object.create({
-    
+SDL.SDLAppController = Em.Object.create( {
+
     init: function() {
+
         this._super();
 
         FFW.UI.set('isReady', true);
         FFW.Navigation.set('isReady', true);
     },
-    
+
     /**
      * Active application model binding type {SDLAppModel}
      */
@@ -49,17 +49,18 @@ SDL.SDLAppController = Em.Object.create({
     /**
      * Handeler for command button press
      * 
-     * @param element: SDL.Button
+     * @param element:
+     *            SDL.Button
      */
     onCommand: function(element) {
 
         // if submenu
-        if(element.menuID >= 0){
+        if (element.menuID >= 0) {
 
             // activate driver destruction if necessary
-            if(SDL.SDLModel.driverDistractionState){
+            if (SDL.SDLModel.driverDistractionState) {
                 SDL.DriverDistraction.activate();
-            }else{
+            } else {
                 this.onSubMenu(element.menuID);
             }
 
@@ -75,15 +76,18 @@ SDL.SDLAppController = Em.Object.create({
      * @param {Number}
      */
     onSubMenu: function(id) {
+
         this.model.set('currentSubMenuId', id);
     },
 
     /**
      * Handeler for command button press
      * 
-     * @param element: SDL.Button
+     * @param element:
+     *            SDL.Button
      */
     onVRCommand: function(element) {
+
         FFW.VR.onCommand(element.commandID, element.appID);
     },
 
@@ -91,11 +95,14 @@ SDL.SDLAppController = Em.Object.create({
      * Handeler for preform interaction choice send response to device and
      * deactivate interactions window
      * 
-     * @param element: SDL.Button
+     * @param element:
+     *            SDL.Button
      */
     onChoiceInteraction: function(element) {
 
-        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"], element.performInteractionRequestID, element.choiceID);
+        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"],
+            element.performInteractionRequestID,
+            element.choiceID);
 
         SDL.InteractionChoicesView.deactivate(false);
     },
@@ -104,6 +111,7 @@ SDL.SDLAppController = Em.Object.create({
      * Open commands list
      */
     openCommandsList: function() {
+
         SDL.OptionsView.activate();
     },
 
@@ -113,8 +121,9 @@ SDL.SDLAppController = Em.Object.create({
      */
     deactivateApp: function() {
 
-        if(this.model){
-            SDL.SDLModel.onDeactivateApp(SDL.States.nextState, this.model.appID);
+        if (this.model) {
+            SDL.SDLModel
+                .onDeactivateApp(SDL.States.nextState, this.model.appID);
         }
 
     },
@@ -123,10 +132,11 @@ SDL.SDLAppController = Em.Object.create({
      * Method clears all applications data and unregister models
      */
     onSDLDisconected: function() {
+
         var i = 0, apps = SDL.SDLModel.registeredApps;
 
-        for(i = 0; i < apps.length; i++){
-            SDL.SDLModel.onAppUnregistered({
+        for (i = 0; i < apps.length; i++) {
+            SDL.SDLModel.onAppUnregistered( {
                 "appID": apps[i].appID
             });
         }

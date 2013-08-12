@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,162 +31,169 @@
  * @version 1.0
  */
 
-SDL.MenuList = Em.ContainerView.extend( {
+SDL.MenuList = Em.ContainerView
+    .extend( {
 
-    /**
-     * Add new item to container
-     * 
-     * @param buttons: SoftButton[]
-     */
-    addItems: function( buttons, appID ) {
+        /**
+         * Add new item to container
+         * 
+         * @param buttons:
+         *            SoftButton[]
+         */
+        addItems: function(buttons, appID) {
 
-        this.deleteItems();
+            this.deleteItems();
 
-        if( buttons ){
-            for( var i = 0; i < buttons.length; i++ ){
-                this.get( 'content.childViews' ).pushObject( SDL.Button.create( SDL.PresetEventsCustom, {
-                    text: buttons[i].text,
-                    icon: buttons[i].image,
-                    softButtonID: buttons[i].softButtonID,
-                    systemAction: buttons[i].systemAction,
-                    groupName: this.groupName,
-                    appID: appID
-                } ) );
+            if (buttons) {
+                for ( var i = 0; i < buttons.length; i++) {
+                    this.get('content.childViews').pushObject(SDL.Button
+                        .create(SDL.PresetEventsCustom, {
+                            text: buttons[i].text,
+                            icon: buttons[i].image,
+                            softButtonID: buttons[i].softButtonID,
+                            systemAction: buttons[i].systemAction,
+                            groupName: this.groupName,
+                            appID: appID
+                        }));
+                }
             }
-        }
-    },
+        },
 
-    /**
-     * Delete existing Soft Buttons from container
-     */
-    deleteItems: function() {
+        /**
+         * Delete existing Soft Buttons from container
+         */
+        deleteItems: function() {
 
-        this.get( 'content.childViews' ).removeObjects( this.get( 'content.childViews' ).filterProperty( 'softButtonID' ) );
-    },
+            this.get('content.childViews').removeObjects(this
+                .get('content.childViews').filterProperty('softButtonID'));
+        },
 
-    classNames:
-        [
+        classNames: [
             'ffw_list_menu'
         ],
 
-    attributeBindings:
-        [
+        attributeBindings: [
             'elementHeight:style'
         ],
 
-    // Position of current page
-    page: 0,
+        // Position of current page
+        page: 0,
 
-    // Items per one page
-    itemsOnPage: 5,
+        // Items per one page
+        itemsOnPage: 5,
 
-    // Height of one item
-    ITEM_HEIGHT: 50,
+        // Height of one item
+        ITEM_HEIGHT: 50,
 
-    pageHeight: function() {
-        return this.itemsOnPage * this.ITEM_HEIGHT;
-    }.property( 'this.itemsOnPage' ),
+        pageHeight: function() {
 
-    elementHeight: function() {
-        return 'height:' + String( this.get( 'pageHeight' ) + this.ITEM_HEIGHT - 2 ) + 'px;';
-    }.property( 'this.pageHeight' ),
+            return this.itemsOnPage * this.ITEM_HEIGHT;
+        }.property('this.itemsOnPage'),
 
-    // Position of content block
-    contentPositon: function() {
-        return 'top:' + String( -( this.get( 'page' ) * this.get( 'pageHeight' ) ) ) + 'px; height:'
-                        + String( this.get( 'pageHeight' ) - ( Boolean( this.get( 'onLastPage' ) && this.get( 'page' ) ) * this.ITEM_HEIGHT ) ) + 'px;';
-    }.property( 'onLastPage' ),
+        elementHeight: function() {
 
-    // Property for show or hide 'down' button
-    onLastPage: function() {
-        return( ( this.get( 'page' ) * this.itemsOnPage ) < ( this.get( 'content.childViews.length' ) - this.itemsOnPage ) );
-    }.property( 'page', 'content.childViews.length' ),
+            return 'height:'
+                + String(this.get('pageHeight') + this.ITEM_HEIGHT - 2) + 'px;';
+        }.property('this.pageHeight'),
 
-    // Handeler to go previous page
-    pageUp: function() {
-        if( this.get( 'page' ) ){
-            this.set( 'page', ( this.get( 'page' ) - 1 ) );
-        }
-    },
+        // Position of content block
+        contentPositon: function() {
 
-    // Handeler to go next page
-    pageDown: function() {
-        if( this.get( 'onLastPage' ) ){
-            this.set( 'page', ( this.get( 'page' ) + 1 ) );
-        }
-    },
+            return 'top:'
+                + String(-(this.get('page') * this.get('pageHeight')))
+                + 'px; height:'
+                + String(this.get('pageHeight')
+                    - (Boolean(this.get('onLastPage') && this.get('page')) * this.ITEM_HEIGHT))
+                + 'px;';
+        }.property('onLastPage'),
 
-    childViews:
-        [
-            'upButton',
-            'content',
-            'downButton'
+        // Property for show or hide 'down' button
+        onLastPage: function() {
+
+            return ((this.get('page') * this.itemsOnPage) < (this
+                .get('content.childViews.length') - this.itemsOnPage));
+        }.property('page', 'content.childViews.length'),
+
+        // Handeler to go previous page
+        pageUp: function() {
+
+            if (this.get('page')) {
+                this.set('page', (this.get('page') - 1));
+            }
+        },
+
+        // Handeler to go next page
+        pageDown: function() {
+
+            if (this.get('onLastPage')) {
+                this.set('page', (this.get('page') + 1));
+            }
+        },
+
+        childViews: [
+            'upButton', 'content', 'downButton'
         ],
 
-    upButton: SDL.Button.extend( {
+        upButton: SDL.Button.extend( {
 
-        classNames:
-            [
-                'control',
-                'up_button'
+            classNames: [
+                'control', 'up_button'
             ],
 
-        hidden: function() {
-            if( this.get( 'parentView.page' ) ){
-                return false;
-            }else{
-                return true;
-            }
-        }.property( 'parentView.page' ),
+            hidden: function() {
 
-        templateName: 'icon',
+                if (this.get('parentView.page')) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }.property('parentView.page'),
 
-        icon: 'images/media/ico_arrow_up.png',
+            templateName: 'icon',
 
-        action: 'pageUp',
-        
-        onDown: false,
+            icon: 'images/media/ico_arrow_up.png',
 
-        target: 'parentView'
-    } ),
+            action: 'pageUp',
 
-    downButton: SDL.Button.extend( {
+            onDown: false,
 
-        classNames:
-            [
-                'control',
-                'down_button'
+            target: 'parentView'
+        }),
+
+        downButton: SDL.Button.extend( {
+
+            classNames: [
+                'control', 'down_button'
             ],
 
-        hidden: function() {
-            if( this.get( 'parentView.onLastPage' ) ){
-                return false;
-            }else{
-                return true;
-            }
-        }.property( 'parentView.onLastPage' ),
+            hidden: function() {
 
-        templateName: 'icon',
+                if (this.get('parentView.onLastPage')) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }.property('parentView.onLastPage'),
 
-        icon: 'images/media/ico_arrow_down.png',
+            templateName: 'icon',
 
-        action: 'pageDown',
-        
-        onDown: false,
+            icon: 'images/media/ico_arrow_down.png',
 
-        target: 'parentView'
-    } ),
+            action: 'pageDown',
 
-    content: Em.ContainerView.extend( {
+            onDown: false,
 
-        classNames:
-            [
+            target: 'parentView'
+        }),
+
+        content: Em.ContainerView.extend( {
+
+            classNames: [
                 'content'
             ],
 
-        attributeBindings:
-            [
+            attributeBindings: [
                 'parentView.contentPositon:style'
             ]
-    } )
-} );
+        })
+    });

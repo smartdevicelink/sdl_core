@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,82 +31,88 @@
  * @version 1.0
  */
 
-SDL.warningView = Em.ContainerView.extend( {
+SDL.warningView = Em.ContainerView
+    .extend( {
 
-    classNameBindings:
-        [
-            'fade:fadeAnimation:fadeWarning',
-            'hide:inactive_state',
+        classNameBindings: [
+            'fade:fadeAnimation:fadeWarning', 'hide:inactive_state',
         ],
 
-    elementId: 'warning_view',
+        elementId: 'warning_view',
 
-    childViews:
-        [
-            'content',
-            'button'
+        childViews: [
+            'content', 'button'
         ],
 
-    content: Em.View.extend( {
+        content: Em.View
+            .extend( {
 
-        classNames: 'message',
+                classNames: 'message',
 
-        template: Ember.Handlebars.compile( '<div class="warning_text"> {{SDL.locale.label.view_warning}}</div>' + '<div class="text">' + '<br>'
-                        + '<p>{{SDL.locale.label.view_warning_paragraph1}} </p><br>' + '<p> {{SDL.locale.label.view_warning_paragraph2}} </p><br>' + '</div>' )
-    } ),
+                template: Ember.Handlebars
+                    .compile('<div class="warning_text"> {{SDL.locale.label.view_warning}}</div>'
+                        + '<div class="text">'
+                        + '<br>'
+                        + '<p>{{SDL.locale.label.view_warning_paragraph1}} </p><br>'
+                        + '<p> {{SDL.locale.label.view_warning_paragraph2}} </p><br>'
+                        + '</div>')
+            }),
 
-    button: Em.View.create( {
+        button: Em.View.create( {
 
-        elementId: 'warning_ok_button',
+            elementId: 'warning_ok_button',
 
-        classNameBindings:
-            [
-                'isReady: visible_display',
-                'pressed:pressed'
+            classNameBindings: [
+                'isReady: visible_display', 'pressed:pressed'
             ],
 
-        classNames:
-            [
-                'okbut',
-                'ffw-button'
+            classNames: [
+                'okbut', 'ffw-button'
             ],
-        /**
-         * Check for webkit fillmode animation support Android < 4 version
-         * doesnt support webkit animation fillmode
-         */
-        checkForCCS3AnimationSupport: function() {
-            if( FFW.isAndroid ){
-                return $( 'body' )[0].style.webkitAnimationFillMode === '';
-            }else{
-                return false;
+            /**
+             * Check for webkit fillmode animation support Android < 4 version
+             * doesnt support webkit animation fillmode
+             */
+            checkForCCS3AnimationSupport: function() {
+
+                if (FFW.isAndroid) {
+                    return $('body')[0].style.webkitAnimationFillMode === '';
+                } else {
+                    return false;
+                }
+            },
+
+            template: Ember.Handlebars.compile('<span>OK</span>'),
+
+            /* this method is called when the web part is fully loaded */
+            appLoaded: function() {
+
+                var self = this;
+                /** Show OK Button after 2 second delay */
+                setTimeout(function() {
+
+                    self.set('isReady', true);
+                }, 2000);
+            }.observes('SDL.appReady'),
+
+            actionDown: function(event) {
+
+                this.set('pressed', true);
+            },
+
+            actionUp: function(event) {
+
+                this.set('pressed', false);
+
+                var self = this;
+
+                this._parentView.set('fade', this
+                    .checkForCCS3AnimationSupport());
+
+                setTimeout(function() {
+
+                    self._parentView.set('hide', true);
+                }, 1000);
             }
-        },
-
-        template: Ember.Handlebars.compile( '<span>OK</span>' ),
-
-        /* this method is called when the web part is fully loaded */
-        appLoaded: function() {
-            var self = this;
-            /** Show OK Button after 2 second delay */
-            setTimeout( function() {
-                self.set( 'isReady', true );
-            }, 2000 );
-        }.observes( 'SDL.appReady' ),
-
-        actionDown: function( event ) {
-            this.set( 'pressed', true );
-        },
-
-        actionUp: function( event ) {
-            this.set( 'pressed', false );
-
-            var self = this;
-
-            this._parentView.set( 'fade', this.checkForCCS3AnimationSupport() );
-
-            setTimeout( function() {
-                self._parentView.set( 'hide', true );
-            }, 1000 );
-        }
-    } )
-} );
+        })
+    });

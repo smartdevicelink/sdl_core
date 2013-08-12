@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,73 +31,76 @@
  * @version 1.0
  */
 
-SDL.SDLNonMediaModel = SDL.SDLAppModel.extend( {
+SDL.SDLNonMediaModel = SDL.SDLAppModel
+    .extend( {
 
-    init: function() {
+        init: function() {
 
-        this._super();
+            this._super();
 
-        // init properties here
-        this.set( 'appInfo', Em.Object.create( {
-            field1: '<field1>',
-            field2: '<field2>',
-            field3: '<field3>',
-            field4: '<field4>',
-            mainImage: 'images/sdl/audio_icon.jpg',
-            image: '',
-            customPresets: []
-        } ) );
+            // init properties here
+            this.set('appInfo', Em.Object.create( {
+                field1: '<field1>',
+                field2: '<field2>',
+                field3: '<field3>',
+                field4: '<field4>',
+                mainImage: 'images/sdl/audio_icon.jpg',
+                image: '',
+                customPresets: []
+            }));
 
-        // this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
+            // this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
 
-        this.set( 'commandsList', [] );
-        this.set( 'softButtons', [] );
-    },
+            this.set('commandsList', []);
+            this.set('softButtons', []);
+        },
 
-    /**
-     * Method hides sdl activation button and sdl application
-     * 
-     * @param {Number}
-     */
-    onDeleteApplication: function( appID ) {
-        SDL.NonMediaController.onDeleteApplication( appID );
-    },
+        /**
+         * Method hides sdl activation button and sdl application
+         * 
+         * @param {Number}
+         */
+        onDeleteApplication: function(appID) {
 
-    /**
-     * Activate current application model
-     */
-    turnOnSDL: function() {
-        SDL.NonMediaController.activateApp( this );
-    },
+            SDL.NonMediaController.onDeleteApplication(appID);
+        },
 
-    /**
-     * Method to clear App OverLay
-     */
-    clearAppOverLay: function() {
+        /**
+         * Activate current application model
+         */
+        turnOnSDL: function() {
 
-        clearInterval( this.timer );
-        this.appInfo.set( 'field1', '' );
-        this.appInfo.set( 'field2', '' );
-        this.appInfo.set( 'field3', '' );
-        this.appInfo.set( 'field4', '' );
-        this.appInfo.set( 'alignment', '' );
-        this.appInfo.set( 'mainImage', 'images/sdl/audio_icon.jpg' );
-        this.updateSoftButtons();
-        for( i = 0; i < 6; i++ ){
-            this.appInfo.set( 'customPresets.' + i, '' );
-        }
+            SDL.NonMediaController.activateApp(this);
+        },
 
-    },
+        /**
+         * Method to clear App OverLay
+         */
+        clearAppOverLay: function() {
 
-    /**
-     * Applin UI Show handler
-     * 
-     * @param {Object}
-     */
-    onSDLUIShow: function( params ) {
-        
-        for (var i = 0; i < params.showStrings.length; i++) {
-            switch (params.showStrings[i].fieldName) {
+            clearInterval(this.timer);
+            this.appInfo.set('field1', '');
+            this.appInfo.set('field2', '');
+            this.appInfo.set('field3', '');
+            this.appInfo.set('field4', '');
+            this.appInfo.set('alignment', '');
+            this.appInfo.set('mainImage', 'images/sdl/audio_icon.jpg');
+            this.updateSoftButtons();
+            for (i = 0; i < 6; i++) {
+                this.appInfo.set('customPresets.' + i, '');
+            }
+
+        },
+
+        /**
+         * Applin UI Show handler
+         * 
+         * @param {Object}
+         */
+        onSDLUIShow: function(params) {
+
+            for ( var i = 0; i < params.showStrings.length; i++) {
+                switch (params.showStrings[i].fieldName) {
                 case 'mainField1': {
                     this.appInfo.set('field1', params.showStrings[i].fieldText);
                     break;
@@ -116,43 +118,50 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend( {
                     break;
                 }
                 case 'statusBar': {
-                    this.appInfo.set('statusText', params.showStrings[i].fieldText);
+                    this.appInfo.set('statusText',
+                        params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mediaClock': {
-                    this.appInfo.set('mediaClock', params.showStrings[i].fieldText);
+                    this.appInfo.set('mediaClock',
+                        params.showStrings[i].fieldText);
                     break;
                 }
                 case 'mediaTrack': {
-                    this.appInfo.set('mediaTrack', params.showStrings[i].fieldText);
+                    this.appInfo.set('mediaTrack',
+                        params.showStrings[i].fieldText);
                     break;
                 }
-            }
-        }
-
-        if( params.graphic.value ){
-            this.appInfo.set( 'mainImage', params.graphic );
-        }else{
-            this.appInfo.set( 'mainImage', 'images/sdl/audio_icon.jpg' );
-        }
-
-        if( params.customPresets ){
-            for(var i = 0; i < 6; i++){
-                if(params.customPresets[i] != '' || params.customPresets[i] != null){
-                    this.appInfo.set('customPresets.' + i, params.customPresets[i]);
-                }else{
-                    this.appInfo.set('customPresets.' + i, 'Preset' + i);
                 }
             }
-        }
 
-        // Get soft buttons if exists
-        if( params.softButtons ){
-            this.updateSoftButtons( params.softButtons );
-        }
-    },
+            if (params.graphic.value) {
+                this.appInfo.set('mainImage', params.graphic);
+            } else {
+                this.appInfo.set('mainImage', 'images/sdl/audio_icon.jpg');
+            }
 
-    sdlSetMediaClockTimer: function() {
-        return;
-    }
-} );
+            // Magic number is a count of Preset Buttons on HMI = 6
+            if (params.customPresets) {
+                for ( var i = 0; i < 6; i++) {
+                    if (params.customPresets[i] != ''
+                        || params.customPresets[i] != null) {
+                        this.appInfo.set('customPresets.' + i,
+                            params.customPresets[i]);
+                    } else {
+                        this.appInfo.set('customPresets.' + i, 'Preset' + i);
+                    }
+                }
+            }
+
+            // Get soft buttons if exists
+            if (params.softButtons) {
+                this.updateSoftButtons(params.softButtons);
+            }
+        },
+
+        sdlSetMediaClockTimer: function() {
+
+            return;
+        }
+    });

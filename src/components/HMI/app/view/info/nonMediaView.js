@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,188 +31,184 @@
  * @version 1.0
  */
 
-SDL.InfoNonMedia = Em.ContainerView.create( {
+SDL.InfoNonMedia = Em.ContainerView
+    .create( {
 
-    elementId: 'info_nonMedia',
+        elementId: 'info_nonMedia',
 
-    controller: SDL.SDLAppController,
+        controller: SDL.SDLAppController,
 
-    childViews:
-        [
+        childViews: [
             'content'
         ],
 
-    classNameBindings:
-        [
+        classNameBindings: [
             'SDL.States.info.nonMedia.active:active_state:inactive_state'
         ],
 
-    content: Em.ContainerView.extend( {
-        classNames:
-            [
-                'inner_content'
-            ],
-
-        childViews:
-            [
-                'deviceName',
-                'image',
-                'fields',
-                'innerMenu',
-                'presets'
-            ],
-
-        /**
-         * Deactivate View
-         */
-        deactivate: function() {
-            SDL.States.goToStates( 'info.apps' );
-        },
-
-        deviceName: SDL.Label.extend( {
-
-            classNames:
-                [
-                    'app_title'
+        content: Em.ContainerView
+            .extend( {
+                classNames: [
+                    'inner_content'
                 ],
 
-            contentBinding: 'SDL.SDLAppController.model.deviceName'
-        } ),
-
-        image: Em.View.extend( {
-
-            classNames:
-                [
-                    'app_image'
+                childViews: [
+                    'deviceName', 'image', 'fields', 'innerMenu', 'presets'
                 ],
 
-            template: Ember.Handlebars.compile( '<img width="150px" {{bindAttr src="SDL.SDLAppController.model.appInfo.mainImage"}}>' )
-        } ),
+                /**
+                 * Deactivate View
+                 */
+                deactivate: function() {
 
-        fields: Em.ContainerView.extend( {
+                    SDL.States.goToStates('info.apps');
+                },
 
-            classNames:
-                [
-                    'app_fields'
-                ],
+                deviceName: SDL.Label.extend( {
 
-            childViews:
-                [
-                    'field1',
-                    'field2',
-                    'field3',
-                    'field4'
-                ],
-
-            field1: SDL.Label.extend( {
-                contentBinding: 'controller.model.appInfo.field1'
-            } ),
-
-            field2: SDL.Label.extend( {
-                contentBinding: 'controller.model.appInfo.field2'
-            } ),
-
-            field3: SDL.Label.extend( {
-                contentBinding: 'controller.model.appInfo.field3'
-            } ),
-
-            field4: SDL.Label.extend( {
-                contentBinding: 'controller.model.appInfo.field4'
-            } )
-
-        } ),
-
-        innerMenu: SDL.MenuList.extend( {
-
-            refreshItems: function() {
-                if( SDL.SDLAppController.model.appID == SDL.NonMediaController.currentAppId ){
-                    this.addItems( SDL.SDLAppController.model.softButtons, SDL.SDLAppController.model.appID );
-                }
-            }.observes( 'SDL.SDLAppController.model.softButtons.@each' ),
-
-            groupName: "NonMediaView",
-
-            content: Em.ContainerView.extend( {
-
-                classNames:
-                    [
-                        'content'
+                    classNames: [
+                        'app_title'
                     ],
 
-                attributeBindings:
-                    [
-                        'parentView.contentPositon:style'
+                    contentBinding: 'SDL.SDLAppController.model.deviceName'
+                }),
+
+                image: Em.View
+                    .extend( {
+
+                        classNames: [
+                            'app_image'
+                        ],
+
+                        template: Ember.Handlebars
+                            .compile('<img width="150px" {{bindAttr src="SDL.SDLAppController.model.appInfo.mainImage"}}>')
+                    }),
+
+                fields: Em.ContainerView.extend( {
+
+                    classNames: [
+                        'app_fields'
                     ],
 
-                childViews:
-                    [
-                        'optionsButton'
+                    childViews: [
+                        'field1', 'field2', 'field3', 'field4'
                     ],
 
-                optionsButton: SDL.Button.extend( {
-                    text: 'Options',
+                    field1: SDL.Label.extend( {
+                        contentBinding: 'controller.model.appInfo.field1'
+                    }),
 
-                    templateName: 'arrow',
+                    field2: SDL.Label.extend( {
+                        contentBinding: 'controller.model.appInfo.field2'
+                    }),
 
-                    action: 'openCommandsList',
-                    target: 'SDL.SDLAppController'
-                } )
-            } )
-        } ),
+                    field3: SDL.Label.extend( {
+                        contentBinding: 'controller.model.appInfo.field3'
+                    }),
 
-        presets: Em.ContainerView.extend( {
-            classNames:
-                [
-                    'presets'
-                ],
+                    field4: SDL.Label.extend( {
+                        contentBinding: 'controller.model.appInfo.field4'
+                    })
 
-            classNameBindings:
-                [
-                    'hidden'
-                ],
+                }),
 
-            hidden: function() {
+                innerMenu: SDL.MenuList
+                    .extend( {
 
-                if( SDL.SDLAppController.model ){
-                    return !Boolean( SDL.SDLAppController.model.get( 'appInfo.customPresets' ).length );
-                }
+                        refreshItems: function() {
 
-            }.property( 'SDL.SDLAppController.model.appInfo.customPresets.@each' ),
+                            if (SDL.SDLAppController.model.appID == SDL.NonMediaController.currentAppId) {
+                                this
+                                    .addItems(SDL.SDLAppController.model.softButtons,
+                                        SDL.SDLAppController.model.appID);
+                            }
+                        }
+                            .observes('SDL.SDLAppController.model.softButtons.@each'),
 
-            childViews:
-                [
-                    'perset1',
-                    'perset2',
-                    'perset3',
-                    'perset4',
-                    'perset5',
-                    'perset6'
-                ],
+                        groupName: "NonMediaView",
 
-            perset1: SDL.SDLPresetButton.extend( {
-                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.0',
-                presetName: 'PRESET_1'
-            } ),
-            perset2: SDL.SDLPresetButton.extend( {
-                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.1',
-                presetName: 'PRESET_2'
-            } ),
-            perset3: SDL.SDLPresetButton.extend( {
-                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.2',
-                presetName: 'PRESET_3'
-            } ),
-            perset4: SDL.SDLPresetButton.extend( {
-                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.3',
-                presetName: 'PRESET_4'
-            } ),
-            perset5: SDL.SDLPresetButton.extend( {
-                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.4',
-                presetName: 'PRESET_5'
-            } ),
-            perset6: SDL.SDLPresetButton.extend( {
-                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.5',
-                presetName: 'PRESET_6'
-            } )
-        } )
-    } )
-} );
+                        content: Em.ContainerView.extend( {
+
+                            classNames: [
+                                'content'
+                            ],
+
+                            attributeBindings: [
+                                'parentView.contentPositon:style'
+                            ],
+
+                            childViews: [
+                                'optionsButton'
+                            ],
+
+                            optionsButton: SDL.Button.extend( {
+                                text: 'Options',
+
+                                templateName: 'arrow',
+
+                                action: 'openCommandsList',
+                                target: 'SDL.SDLAppController'
+                            })
+                        })
+                    }),
+
+                presets: Em.ContainerView
+                    .extend( {
+                        classNames: [
+                            'presets'
+                        ],
+
+                        classNameBindings: [
+                            'hidden'
+                        ],
+
+                        hidden: function() {
+
+                            if (SDL.SDLAppController.model) { return !Boolean(SDL.SDLAppController.model
+                                .get('appInfo.customPresets').length); }
+
+                        }
+                            .property('SDL.SDLAppController.model.appInfo.customPresets.@each'),
+
+                        childViews: [
+                            'perset1',
+                            'perset2',
+                            'perset3',
+                            'perset4',
+                            'perset5',
+                            'perset6'
+                        ],
+
+                        perset1: SDL.SDLPresetButton
+                            .extend( {
+                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.0',
+                                presetName: 'PRESET_1'
+                            }),
+                        perset2: SDL.SDLPresetButton
+                            .extend( {
+                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.1',
+                                presetName: 'PRESET_2'
+                            }),
+                        perset3: SDL.SDLPresetButton
+                            .extend( {
+                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.2',
+                                presetName: 'PRESET_3'
+                            }),
+                        perset4: SDL.SDLPresetButton
+                            .extend( {
+                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.3',
+                                presetName: 'PRESET_4'
+                            }),
+                        perset5: SDL.SDLPresetButton
+                            .extend( {
+                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.4',
+                                presetName: 'PRESET_5'
+                            }),
+                        perset6: SDL.SDLPresetButton
+                            .extend( {
+                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.5',
+                                presetName: 'PRESET_6'
+                            })
+                    })
+            })
+    });

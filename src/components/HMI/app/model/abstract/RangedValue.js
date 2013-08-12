@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -45,33 +44,33 @@ SDL.RangedValue = Em.Object.extend( {
      *       than value is switched to off (0)
      */
     increase: function() {
-        if( !this.enabled ){
+
+        if (!this.enabled) {
             this.enable();
             return;
         }
 
-        if( this.value < this.range ){
-            this.set( 'value', this.value + 1 );
-        }else{
-            if( !this.cycle ){
-                return;
-            }
-            this.set( 'value', 0 );
+        if (this.value < this.range) {
+            this.set('value', this.value + 1);
+        } else {
+            if (!this.cycle) { return; }
+            this.set('value', 0);
         }
     },
     /**
      * Toggle indicators one by one
      */
     toggleIndicators: function() {
-        if( !this.enabled ){
+
+        if (!this.enabled) {
             this.enable();
             return;
         }
 
-        if( this.value < this.range - 1 ){
-            this.set( 'value', this.value + 1 );
-        }else{
-            this.set( 'value', 0 );
+        if (this.value < this.range - 1) {
+            this.set('value', this.value + 1);
+        } else {
+            this.set('value', 0);
         }
     },
     /**
@@ -79,18 +78,17 @@ SDL.RangedValue = Em.Object.extend( {
      *       than value is changed to the range value
      */
     decrease: function() {
-        if( !this.enabled ){
+
+        if (!this.enabled) {
             this.enable();
             return;
         }
 
-        if( this.value >= this.minValue ){
-            if( !this.cycle && ( this.value == this.minValue ) ){
-                return;
-            }
-            this.set( 'value', this.value - 1 );
-        }else{
-            this.set( 'value', this.range );
+        if (this.value >= this.minValue) {
+            if (!this.cycle && (this.value == this.minValue)) { return; }
+            this.set('value', this.value - 1);
+        } else {
+            this.set('value', this.range);
         }
     },
 
@@ -98,37 +96,42 @@ SDL.RangedValue = Em.Object.extend( {
      * @desc Switch off
      */
     off: function() {
-        this.set( 'beforeOff', this.value );
-        this.set( 'value', 0 );
+
+        this.set('beforeOff', this.value);
+        this.set('value', 0);
     },
 
     /**
      * Switch on
      */
     on: function() {
-        this.set( 'value', this.range );
+
+        this.set('value', this.range);
     },
 
     /**
      * Switch visual enable
      */
     enable: function() {
-        this.set( 'enabled', true );
+
+        this.set('enabled', true);
     },
 
     /**
      * Switch visual disable
      */
     disable: function() {
-        this.set( 'enabled', false );
+
+        this.set('enabled', false);
     },
 
     /**
      * Revert to value before toggle Off
      */
     revert: function() {
-        if( this.beforeOff ){
-            this.set( 'value', this.beforeOff );
+
+        if (this.beforeOff) {
+            this.set('value', this.beforeOff);
         }
     }
-} )
+})
