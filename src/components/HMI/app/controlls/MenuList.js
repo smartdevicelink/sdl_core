@@ -50,6 +50,9 @@ SDL.MenuList = Em.ContainerView
                         .create(SDL.PresetEventsCustom, {
                             text: buttons[i].text,
                             icon: buttons[i].image,
+                            groupName: "AlertPopUp",
+                            classNameBindings: ['isHighlighted:isHighlighted'],
+                            isHighlighted: buttons[i].isHighlighted ? true : false,
                             softButtonID: buttons[i].softButtonID,
                             systemAction: buttons[i].systemAction,
                             groupName: this.groupName,

@@ -44,6 +44,13 @@
 	z-index: 1;
 }
 
+/**
+ * Important Class for SoftButtons Highlightening
+ */
+.isHighlighted{
+	color: gold;
+}
+
 .sdl-window .back-button {
 	top: 80px;
 	left: 5px;

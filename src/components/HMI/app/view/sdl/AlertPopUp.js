@@ -175,6 +175,8 @@ SDL.AlertPopUp = Em.ContainerView.create({
                 this.get('softbuttons.buttons.childViews').pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
                     systemAction: params[i].systemAction,
                     groupName: "AlertPopUp",
+                    classNameBindings: ['isHighlighted:isHighlighted'],
+                    isHighlighted: params[i].isHighlighted ? true : false,
                     softButtonID: params[i].softButtonID,
                     icon: params[i].image,
                     text: params[i].text,
