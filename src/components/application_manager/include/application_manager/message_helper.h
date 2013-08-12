@@ -39,6 +39,7 @@
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 
+
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;

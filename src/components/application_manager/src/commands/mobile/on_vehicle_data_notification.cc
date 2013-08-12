@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -50,70 +51,35 @@ OnVehicleDataNotification::~OnVehicleDataNotification() {
 void OnVehicleDataNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVehicleDataNotification::Run");
 
-  if ((*message_)[strings::msg_params].keyExists(hmi_notification::prndl)) {
-    const unsigned int prndl =
-      static_cast<unsigned int>(
-        (*message_)[strings::msg_params][hmi_notification::prndl].asInt());
+  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
+  VehicleData::const_iterator it = vehicle_data.begin();
 
-    // TODO(DK) : need to create enum for vehicleData
-    const std::vector<Application*>& applications =
-      ApplicationManagerImpl::instance()->applications_by_ivi(prndl);
+  for (; vehicle_data.end() != it; ++it) {
+    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
+      const std::vector<Application*>& applications =
+          ApplicationManagerImpl::instance()->applications_by_ivi(it->second);
 
-    std::vector<Application*>::const_iterator it = applications.begin();
-    for (; applications.end() != it; ++it) {
-      Application* app = *it;
-      if (!app) {
-        LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-        continue;
+      std::vector<Application*>::const_iterator it = applications.begin();
+      for (; applications.end() != it; ++it) {
+        Application* app = *it;
+        if (!app) {
+          LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+          continue;
+        }
+
+        LOG4CXX_INFO(
+            logger_,
+            "Send OnVehicleData PRNDL notification to " << app->name()
+                << " application id " << app->app_id());
+
+        (*message_)[strings::params][strings::connection_key] = app->app_id();
+
+        SendNotification();
       }
 
-      LOG4CXX_INFO(logger_, "Send OnVehicleData PRNDL notification to "
-                   << app->name() << " application id " << app->app_id());
-      SendVehicleData(app);
+      return;
     }
   }
-}
-
-void OnVehicleDataNotification::SendVehicleData(const Application* app) {
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "SendVehicleData NULL pointer");
-    return;
-  }
-
-  smart_objects::SmartObject* on_vehicle_data =
-    new smart_objects::SmartObject();
-
-  if (!on_vehicle_data) {
-    LOG4CXX_ERROR_EXT(logger_, "SendVehicleData NULL pointer");
-    return;
-  }
-
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-
-  (*on_vehicle_data)[strings::params][strings::message_type] =
-    MessageType::kNotification;
-  (*on_vehicle_data)[strings::params][strings::correlation_id] =
-    correlation_id;
-
-  (*on_vehicle_data)[strings::params][strings::app_id] =
-    app->app_id();
-
-  (*on_vehicle_data)[strings::params][strings::connection_key] =
-    connection_key;
-  (*on_vehicle_data)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::OnVehicleDataID;
-  (*on_vehicle_data)[strings::msg_params][strings::prndl] =
-    (*message_)[strings::msg_params][hmi_notification::prndl];
-
-  (*on_vehicle_data)[strings::msg_params][strings::success] = true;
-  (*on_vehicle_data)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::SUCCESS;
-
-  message_.reset(on_vehicle_data);
-  SendNotification();
 }
 
 }  // namespace commands
