@@ -106,16 +106,13 @@ public class VideoAvcCoder {
             // We don't really want a timeout here, but sometimes there's a delay opening
             // the encoder device, so a short timeout can keep us from spinning hard.
             if (!inputDone) {
-                int inputBufIndex = mediaEncoder.getEncoder().dequeueInputBuffer(TIMEOUT_USEC);
+                int inputBufIndex = mediaEncoder.getEncoder().dequeueInputBuffer(-1);
                 ALog.v("inputBufIndex=" + inputBufIndex);
                 if (inputBufIndex >= 0) {
                     long presentationTimeUs = presentationTimeCalc.computePresentationTime(generateIndex);
                     if (stop == true) {
-                        // Send an empty frame with the end-of-stream flag set.  If we set EOS
-                        // on a frame with data, that frame data will be ignored, and the
-                        // output will be short one frame.
-                        mediaEncoder.getEncoder().queueInputBuffer(inputBufIndex, 0, 0, presentationTimeUs,
-                                MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+
+                        mediaEncoder.enqueueEndOfStreamFrame(inputBufIndex, presentationTimeUs);
                         inputDone = true;
                         ALog.i("sent input EOS (with zero-length frame)");
                     } else {
@@ -137,7 +134,7 @@ public class VideoAvcCoder {
             //
             // Once we get EOS from the encoder, we don't need to do this anymore.
             if (!encoderDone) {
-                int encoderStatus = mediaEncoder.getEncoder().dequeueOutputBuffer(info, TIMEOUT_USEC);
+                int encoderStatus = mediaEncoder.getEncoder().dequeueOutputBuffer(info, -1);
                 if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                     // no output available yet
                     ALog.i("no output from encoder available");
@@ -156,40 +153,21 @@ public class VideoAvcCoder {
                     if (encodedData == null) {
                         ALog.i("encoderOutputBuffer " + encoderStatus + " was null");
                     }
-
                     // It's usually necessary to adjust the ByteBuffer values to match BufferInfo.
-                    encodedData.position(info.offset);
-                    encodedData.limit(info.offset + info.size);
-
-                    encodedSize += info.size;
-
+                    encodedSize = matchBufferInfo(info, encodedSize, encodedData);
                     if ((info.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
                         // Codec config info.  Only expected on first packet.  One way to
                         // handle this is to manually stuff the data into the MediaFormat
                         // and pass that to configure().  We do that here to exercise the API.
-
-                        MediaFormat format = MediaFormatUtils.createVideoAvcDecoderMediaFormat(mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH), mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT), encodedData);
-                        mediaDecoder.configureMediaDecoder(format, surface);
-                        mediaDecoder.start();
-                        decoderInputBuffers = mediaDecoder.getDecoder().getInputBuffers();
-                        decoderOutputBuffers = mediaDecoder.getDecoder().getOutputBuffers();
-                        decoderConfigured = true;
-                        ALog.i("decoder configured (" + info.size + " bytes)");
+                        startDecoder(encodedData);
+                        ALog.i("decoder configured (" + info.size + " bytes) and started");
                     } else {
                         // Get a decoder input buffer, blocking until it's available.
-
-                        int inputBufIndex = mediaDecoder.getDecoder().dequeueInputBuffer(-1);
-                        ByteBuffer inputBuf = decoderInputBuffers[inputBufIndex];
-                        inputBuf.clear();
-                        inputBuf.put(encodedData);
-                        mediaDecoder.getDecoder().queueInputBuffer(inputBufIndex, 0, info.size,
-                                info.presentationTimeUs, info.flags);
-
-                        encoderDone = (info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0;
+                        mediaDecoder.queueEncodedData(info, encodedData, this);
+                        encoderDone = isEncoderDone(info);
                         ALog.v("passed " + info.size + " bytes to decoder"
                                 + (encoderDone ? " (EOS)" : ""));
                     }
-
                     mediaEncoder.getEncoder().releaseOutputBuffer(encoderStatus, false);
                 }
             }
@@ -200,7 +178,7 @@ public class VideoAvcCoder {
             //
             // If we're decoding to a Surface, we'll get notified here as usual but the
             // ByteBuffer references will be null.  The data is sent to Surface instead.
-            if (decoderConfigured) {
+            if (mediaDecoder.isConfigured()) {
                 int decoderStatus = mediaDecoder.getDecoder().dequeueOutputBuffer(info, TIMEOUT_USEC);
                 if (decoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                     // no output available yet
@@ -237,6 +215,25 @@ public class VideoAvcCoder {
         }
         ALog.i("decoded " + checkIndex + " frames at "
                 + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) + "x" + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) + ": raw=" + rawSize + ", enc=" + encodedSize);
+    }
+
+    private long matchBufferInfo(MediaCodec.BufferInfo info, long encodedSize, ByteBuffer encodedData) {
+        encodedData.position(info.offset);
+        encodedData.limit(info.offset + info.size);
+        encodedSize += info.size;
+        return encodedSize;
+    }
+
+    private boolean isEncoderDone(MediaCodec.BufferInfo info) {
+        boolean encoderDone;
+        encoderDone = (info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0;
+        return encoderDone;
+    }
+
+    private void startDecoder(ByteBuffer csd0) {
+        MediaFormat format = MediaFormatUtils.createVideoAvcDecoderMediaFormat(mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH), mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT), csd0);
+        mediaDecoder.configureMediaDecoder(format, surface);
+        mediaDecoder.start();
     }
 
 }

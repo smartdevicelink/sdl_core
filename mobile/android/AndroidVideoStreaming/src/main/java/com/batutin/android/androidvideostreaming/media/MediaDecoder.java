@@ -6,6 +6,8 @@ import android.view.Surface;
 
 import com.batutin.android.androidvideostreaming.activity.ALog;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created by Andrew Batutin on 8/12/13.
  */
@@ -70,5 +72,14 @@ public class MediaDecoder extends AbstractMediaCoder {
         } else {
             ALog.d("Decoder is running");
         }
+    }
+
+    public void queueEncodedData(MediaCodec.BufferInfo info, ByteBuffer encodedData, VideoAvcCoder videoAvcCoder) {
+        int inputBufIndex = videoAvcCoder.getMediaDecoder().getDecoder().dequeueInputBuffer(-1);
+        ByteBuffer inputBuf = videoAvcCoder.getMediaDecoder().getDecoder().getInputBuffers()[inputBufIndex];
+        inputBuf.clear();
+        inputBuf.put(encodedData);
+        videoAvcCoder.getMediaDecoder().getDecoder().queueInputBuffer(inputBufIndex, 0, info.size,
+                info.presentationTimeUs, info.flags);
     }
 }
