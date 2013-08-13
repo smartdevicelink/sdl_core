@@ -79,8 +79,12 @@ void SetGlobalPropertiesResponse::Run() {
 
   if (!IsPendingResponseExist()) {
 
-    if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
-        (hmi_apis::Common_Result::SUCCESS == result_tts)) {
+    if (((hmi_apis::Common_Result::SUCCESS == result_ui) &&
+         (hmi_apis::Common_Result::SUCCESS == result_tts))      ||
+         ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
+         (hmi_apis::Common_Result::INVALID_ENUM == result_tts)) ||
+         ((hmi_apis::Common_Result::INVALID_ENUM == result_ui) &&
+         (hmi_apis::Common_Result::SUCCESS == result_tts))) {
       SendResponse(true);
     } else {
       // TODO: check ui and tts response code
