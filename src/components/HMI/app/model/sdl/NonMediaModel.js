@@ -135,21 +135,21 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
                 }
             }
 
-            if (params.graphic.value) {
-                this.appInfo.set('mainImage', params.graphic);
+            if (params.graphic) {
+                this.appInfo.set('mainImage', params.graphic.value);
             } else {
                 this.appInfo.set('mainImage', 'images/sdl/audio_icon.jpg');
             }
 
             // Magic number is a count of Preset Buttons on HMI = 6
             if (params.customPresets) {
+                this.appInfo.set('customPresets', []);
                 for ( var i = 0; i < 6; i++) {
                     if (params.customPresets[i] != ''
                         || params.customPresets[i] != null) {
-                        this.appInfo.set('customPresets.' + i,
-                            params.customPresets[i]);
+                        this.appInfo.get('customPresets').pushObject(params.customPresets[i]);
                     } else {
-                        this.appInfo.set('customPresets.' + i, 'Preset' + i);
+                        this.appInfo.get('customPresets').pushObject('Preset' + i);
                     }
                 }
             }
