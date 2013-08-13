@@ -480,6 +480,19 @@ public class USBTransport extends SyncTransport {
         public void run() {
             Log.d(TAG, "USB reader started!");
 
+            if (!connect())
+                return;
+
+            readFromTransport();
+        }
+
+        /**
+         * Attemps to open connection to USB accessory, and perform a handshake
+         * (described in the comment to the USBTransport class).
+         *
+         * @return true if connected successfully
+         */
+        private boolean connect() {
             FileDescriptor fd;
             synchronized (USBTransport.this) {
                 final ParcelFileDescriptor parcelFD =
@@ -487,7 +500,7 @@ public class USBTransport extends SyncTransport {
                 if (parcelFD == null) {
                     Log.w(TAG, "Can't open accessory, disconnecting!");
                     disconnect();
-                    return;
+                    return false;
                 }
                 fd = parcelFD.getFileDescriptor();
                 mInputStream = new FileInputStream(fd);
@@ -502,7 +515,7 @@ public class USBTransport extends SyncTransport {
             } catch (IOException e) {
                 Log.w(TAG, "Can't send initial request, disconnecting!", e);
                 disconnect();
-                return;
+                return false;
             }
 
             // waiting for a one-byte reply
@@ -513,24 +526,32 @@ public class USBTransport extends SyncTransport {
                     Log.w(TAG, "Can't read initial response, EOF reached" +
                             ", disconnecting!");
                     disconnect();
-                    return;
+                    return false;
                 }
                 reply = (byte) intReply;
             } catch (IOException e) {
                 Log.w(TAG, "Can't read initial response, disconnecting!", e);
                 disconnect();
-                return;
+                return false;
             }
-
             Log.d(TAG, "Received reply: " + reply);
+
             synchronized (USBTransport.this) {
                 setState(State.CONNECTED);
                 handleTransportConnected();
             }
 
+            return true;
+        }
+
+        /**
+         * Continuously reads data from the transport's input stream, blocking
+         * when no data is available.
+         */
+        private void readFromTransport() {
             final int READ_BUFFER_SIZE = 4096;
             byte[] buffer = new byte[READ_BUFFER_SIZE];
-            int bytesRead = 0;
+            int bytesRead;
 
             // read loop
             while (true) {
