@@ -99,6 +99,7 @@ bool CommandResponseImpl::IsPendingResponseExist() {
     connection_key = msg_chain->connection_key();
   }
   else {
+    LOG4CXX_INFO(logger_, "There is no pending response.");
     return false;
   }
 
