@@ -124,18 +124,6 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         private final PipedOutputStream pipedOutputStream;
         private boolean stop = false;
 
-        public BitmapGeneratorThread(PipedOutputStream pipedOutputStream) {
-
-            this.pipedOutputStream = pipedOutputStream;
-
-            this.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-                @Override
-                public void uncaughtException(Thread thread, Throwable ex) {
-                    defaultExceptionHandler(thread, ex);
-                }
-            });
-        }
-
         public synchronized boolean isStop() {
             return stop;
         }
@@ -146,6 +134,18 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
 
         public synchronized PipedOutputStream getPipedOutputStream() {
             return pipedOutputStream;
+        }
+
+        public BitmapGeneratorThread(PipedOutputStream pipedOutputStream) {
+
+            this.pipedOutputStream = pipedOutputStream;
+
+            this.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread thread, Throwable ex) {
+                    defaultExceptionHandler(thread, ex);
+                }
+            });
         }
 
         @Override
