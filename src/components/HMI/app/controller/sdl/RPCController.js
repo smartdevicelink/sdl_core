@@ -1721,7 +1721,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.timeout) {
+                    if (params.timeout == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
