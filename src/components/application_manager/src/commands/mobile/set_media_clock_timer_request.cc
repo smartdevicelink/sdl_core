@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 SetMediaClockRequest::SetMediaClockRequest(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 SetMediaClockRequest::~SetMediaClockRequest() {
@@ -52,8 +52,8 @@ SetMediaClockRequest::~SetMediaClockRequest() {
 void SetMediaClockRequest::Run() {
   LOG4CXX_INFO(logger_, "SetMediaClockRequest::Run");
 
-  unsigned int app_id =
-    (*message_)[strings::params][strings::connection_key].asUInt();
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+      .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -62,14 +62,31 @@ void SetMediaClockRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
-  // copy entirely msg
-  msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::app_id] = app->app_id();
+  if (isDataValid()) {
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    // copy entirely msg
+    msg_params = (*message_)[strings::msg_params];
+    msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer,
-                   msg_params, true);
+    CreateHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer, msg_params,
+                     true);
+  } else {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+  }
+
+}
+
+bool SetMediaClockRequest::isDataValid() {
+  if (!(*message_)[strings::msg_params].keyExists(strings::start_time)
+      && ((*message_)[strings::msg_params][strings::update_mode]
+          == mobile_apis::UpdateMode::COUNTUP
+          || (*message_)[strings::msg_params][strings::update_mode]
+              == mobile_apis::UpdateMode::COUNTDOWN)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 }  // namespace commands

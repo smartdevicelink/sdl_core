@@ -62,6 +62,9 @@ class SetMediaClockRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+
+  bool isDataValid();
+
   DISALLOW_COPY_AND_ASSIGN(SetMediaClockRequest);
 };
 
