@@ -232,6 +232,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_set_media_clock_timer_response.cc
 ./src/commands/hmi/ui_show_request.cc
 ./src/commands/hmi/ui_show_response.cc
+./src/commands/hmi/ui_show_vr_help_request.cc
+./src/commands/hmi/ui_show_vr_help_response.cc
 ./src/commands/hmi/vi_is_ready_request.cc
 ./src/commands/hmi/vi_is_ready_response.cc
 ./src/commands/hmi/vi_read_did_request.cc

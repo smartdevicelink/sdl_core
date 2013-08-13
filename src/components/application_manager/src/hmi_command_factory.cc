@@ -94,6 +94,8 @@
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/ui_perform_interaction_request.h"
 #include "application_manager/commands/hmi/ui_perform_interaction_response.h"
+#include "application_manager/commands/hmi/ui_show_vr_help_request.h"
+#include "application_manager/commands/hmi/ui_show_vr_help_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -279,6 +281,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UISetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::UISetGlobalPropertiesRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::UI_ShowVrHelp: {
+      if (is_response) {
+        command.reset(new commands::UIShowVrHelpRequest(message));
+      } else {
+        command.reset(new commands::UIShowVrHelpResponse(message));
       }
       break;
     }

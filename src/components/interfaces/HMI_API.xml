@@ -1225,7 +1225,7 @@
     </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
-    </function>	
+    </function>
 	<function name="AllowDeviceToConnect" messagetype="request">
         <description>Request from SmartDeviceLink to HMI to get the permissions of new device connection.</description>
         <param name="device" type="Common.DeviceInfo" mandatory="true"/>
@@ -1656,13 +1656,27 @@
       </param>
       <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
-
-		</param>
+		  </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that concerns this RPC.</description>
       </param>
     </function>
     <function name="SetGlobalProperties" messagetype="response">
+    </function>
+    <function name="ShowVrHelp" messagetype="request">
+      <description>Request from SDL to show help about available VR commands.</description>
+      <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
+        <description>VR Help Title text.</description>
+        <description>If omitted on supported displays, the default HU system help title should be used.</description>
+      </param>
+      <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
+          <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that concerns this RPC.</description>
+      </param>
+    </function>
+    <function name="ShowVrHelp" messagetype="response">
     </function>
     <function name="OnCommand" messagetype="notification">
       <description>Notification must be initiated by HMI on user choosing menu item.</description>

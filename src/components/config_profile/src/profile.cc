@@ -156,13 +156,13 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "GLOBAL PROPERTIES", "HelpPromt", value))
       && ('\0' != *value)) {
-      char* str = NULL;
-      str = strtok (value,",");
-      while (str != NULL) {
-        LOG4CXX_INFO (logger_, "Add HelpPromt string" << str);
-        help_promt_.push_back(std::string(str));
-        str = strtok (NULL, ",");
-      }
+    char* str = NULL;
+    str = strtok(value, ",");
+    while (str != NULL) {
+      LOG4CXX_INFO(logger_, "Add HelpPromt string" << str);
+      help_promt_.push_back(std::string(str));
+      str = strtok(NULL, ",");
+    }
   }
 
   time_out_promt_.clear();
@@ -170,13 +170,27 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "GLOBAL PROPERTIES", "TimeOutPromt", value))
       && ('\0' != *value)) {
-      char* str = NULL;
-      str = strtok (value,",");
-      while (str != NULL) {
-        LOG4CXX_INFO (logger_, "Add TimeOutPromt string" << str);
-        time_out_promt_.push_back(std::string(str));
-        str = strtok (NULL, ",");
-      }
+    char* str = NULL;
+    str = strtok(value, ",");
+    while (str != NULL) {
+      LOG4CXX_INFO(logger_, "Add TimeOutPromt string" << str);
+      time_out_promt_.push_back(std::string(str));
+      str = strtok(NULL, ",");
+    }
+  }
+
+  vr_commands_.clear();
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "VR COMMANDS", "HelpCommand", value))
+      && ('\0' != *value)) {
+    char* str = NULL;
+    str = strtok(value, ",");
+    while (str != NULL) {
+      LOG4CXX_INFO(logger_, "Add vr command string" << str);
+      vr_commands_.push_back(std::string(str));
+      str = strtok(NULL, ",");
+    }
   }
 }
 

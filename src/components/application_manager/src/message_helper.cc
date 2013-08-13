@@ -376,6 +376,47 @@ void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
   }
 }
 
+void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
+  if (!app) {
+    return;
+  }
+
+  if (app->vr_help_title() || app->vr_help()) {
+
+    smart_objects::SmartObject* ui_global_properties =
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    if (!ui_global_properties) {
+      return;
+    }
+
+    (*ui_global_properties)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::UI_ShowVrHelp;
+    (*ui_global_properties)[strings::params][strings::message_type] =
+      hmi_apis::messageType::request;
+    (*ui_global_properties)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+    (*ui_global_properties)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+    (*ui_global_properties)[strings::params][strings::correlation_id] =
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+    smart_objects::SmartObject ui_msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    if (app->vr_help_title()) {
+      ui_msg_params[strings::vr_help_title] = (*app->vr_help_title());
+    }
+    if (app->vr_help()) {
+      ui_msg_params[strings::vr_help] = (*app->vr_help());
+    }
+    ui_msg_params[strings::app_id] = app->app_id();
+
+    (*ui_global_properties)[strings::msg_params] = ui_msg_params;
+
+    ApplicationManagerImpl::instance()->ManageHMICommand(ui_global_properties);
+  }
+}
+
 void MessageHelper::SendShowRequestToHMI(const Application* app) {
   if (!app) {
     return;
@@ -695,7 +736,7 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
       }
     }
   } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map
-      == message.getType()) {
+             == message.getType()) {
     if (message.keyExists(strings::image_type)) {
       const std::string& file_name = message[strings::value];
 
@@ -714,7 +755,7 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
       std::set <std::string> keys = message.enumerate();
 
       for (std::set<std::string>::const_iterator key = keys.begin();
-          key != keys.end(); key++) {
+           key != keys.end(); key++) {
         if (!VerifyImageFiles(message[*key], app)) {
           return false;
         }

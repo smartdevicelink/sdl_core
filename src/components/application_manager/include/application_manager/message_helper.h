@@ -178,6 +178,9 @@ class MessageHelper {
 
     static void SendAppDataToHMI(const Application* app);
     static void SendGlobalPropertiesToHMI(const Application* app);
+
+    static void SendShowVrHelpToHMI(const Application* app);
+
     static void SendShowRequestToHMI(const Application* app);
     static void SendShowConstantTBTRequestToHMI(const Application* app);
     static void SendAddCommandRequestToHMI(const Application* app);
