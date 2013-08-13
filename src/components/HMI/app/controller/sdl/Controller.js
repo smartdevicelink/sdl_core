@@ -434,7 +434,7 @@ SDL.SDLController = Em.Object
          */
         findNewApps: function() {
 
-            FFW.BasicCommunication.getAppList();
+            FFW.BasicCommunication.OnFindApplications();
         },
         /**
          * Method activates selected registered application

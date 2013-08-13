@@ -377,8 +377,6 @@ SDL.SDLModel = Em.Object
             }
 
             SDL.SDLController.registerApplication(params, applicationType);
-
-            SDL.VRPopUp.AddActivateApp(params.appID, params.appName);
         },
 
         /**
@@ -390,8 +388,6 @@ SDL.SDLModel = Em.Object
         onAppUnregistered: function(params) {
 
             if (SDL.SDLController.getApplicationModel(params.appID)) {
-
-                SDL.VRPopUp.UnregisterApp(params.appID);
 
                 SDL.SDLController.unregisterApplication(params.appID);
             }
