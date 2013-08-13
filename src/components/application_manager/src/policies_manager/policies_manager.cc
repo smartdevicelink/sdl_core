@@ -80,7 +80,7 @@ std::map<std::string, FunctionID::eType> kFunctionIDs {
   { "GenericResponse", FunctionID::GenericResponseID },
   { "PutFile", FunctionID::PutFileID },
   { "DeleteFile", FunctionID::DeleteFileID },
-  { "ListFilesID", FunctionID::ListFilesID },
+  { "ListFiles", FunctionID::ListFilesID },
   { "SetAppIcon", FunctionID::SetAppIconID },
   { "SetDisplayLayout", FunctionID::SetDisplayLayoutID },
   { "OnHMIStatus", FunctionID::OnHMIStatusID },
