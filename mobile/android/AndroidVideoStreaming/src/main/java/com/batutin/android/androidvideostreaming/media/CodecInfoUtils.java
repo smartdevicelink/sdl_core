@@ -3,7 +3,7 @@ package com.batutin.android.androidvideostreaming.media;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 
-import com.batutin.android.androidvideostreaming.activity.ALog;
+import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.batutin.android.androidvideostreaming.activity;
+package com.batutin.android.androidvideostreaming.utils;
 
 
 import android.os.Environment;

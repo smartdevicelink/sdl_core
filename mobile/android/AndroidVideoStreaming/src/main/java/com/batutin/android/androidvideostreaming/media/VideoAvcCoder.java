@@ -5,9 +5,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.view.Surface;
 
-import com.batutin.android.androidvideostreaming.activity.ALog;
-import com.batutin.android.androidvideostreaming.activity.EncodedFrameListener;
-import com.batutin.android.androidvideostreaming.activity.ParameterSetsListener;
+import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -17,8 +15,6 @@ public class VideoAvcCoder {
 
 
     private final PresentationTimeCalc presentationTimeCalc;
-    public EncodedFrameListener frameListener;
-    public ParameterSetsListener parameterSetsListener;
     private PipedInputStream reader;
     private boolean stop = false;
     private MediaEncoder mediaEncoder;
@@ -55,7 +51,7 @@ public class VideoAvcCoder {
         return mediaFormat;
     }
 
-    public void start() {
+    public void start() throws IllegalStateException {
         try {
             mediaEncoder.start();
         } catch (IllegalStateException exp) {
@@ -63,13 +59,25 @@ public class VideoAvcCoder {
         }
     }
 
-    public void stop() throws IOException {
+    public synchronized void shouldStop() {
+        this.stop = true;
+    }
+
+    @Override
+    public String toString() {
+        String message = " " + mediaDecoder.toString() + " " + mediaEncoder.toString();
+        return super.toString() + message;
+    }
+
+    public synchronized void stop() throws IllegalStateException {
         try {
-            this.stop = true;
+            reader.close();
             mediaEncoder.stop();
             mediaDecoder.stop();
         } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
+        } catch (IOException e) {
+            ALog.e(e.getMessage());
         }
     }
 
@@ -215,6 +223,7 @@ public class VideoAvcCoder {
         }
         ALog.i("decoded " + checkIndex + " frames at "
                 + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) + "x" + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) + ": raw=" + rawSize + ", enc=" + encodedSize);
+        stop();
     }
 
     private long matchBufferInfo(MediaCodec.BufferInfo info, long encodedSize, ByteBuffer encodedData) {
@@ -235,5 +244,4 @@ public class VideoAvcCoder {
         mediaDecoder.configureMediaDecoder(format, surface);
         mediaDecoder.start();
     }
-
 }

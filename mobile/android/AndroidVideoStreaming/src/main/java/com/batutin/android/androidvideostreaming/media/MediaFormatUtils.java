@@ -3,7 +3,7 @@ package com.batutin.android.androidvideostreaming.media;
 import android.media.CamcorderProfile;
 import android.media.MediaFormat;
 
-import com.batutin.android.androidvideostreaming.activity.ALog;
+import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.nio.ByteBuffer;
 

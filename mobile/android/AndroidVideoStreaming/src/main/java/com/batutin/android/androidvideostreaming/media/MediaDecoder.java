@@ -4,7 +4,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.view.Surface;
 
-import com.batutin.android.androidvideostreaming.activity.ALog;
+import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.nio.ByteBuffer;
 

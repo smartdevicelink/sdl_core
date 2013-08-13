@@ -3,7 +3,7 @@ package com.batutin.android.androidvideostreaming.media;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 
-import com.batutin.android.androidvideostreaming.activity.ALog;
+import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.util.HashMap;
 import java.util.Map;
