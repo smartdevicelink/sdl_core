@@ -31,6 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
+#include <string.h>
 #include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -129,12 +131,13 @@ bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
             // skip check the same element
             continue;
           }
-          if (choice_set[i][strings::vr_commands][ii].asString() ==
-              choice_set[j][strings::vr_commands][jj].asString()) {
+          std::string vr_cmd_i =
+              choice_set[i][strings::vr_commands][ii].asString();
+          std::string vr_cmd_j =
+              choice_set[j][strings::vr_commands][jj].asString();
+          if (0 == strcasecmp(vr_cmd_i.c_str(), vr_cmd_j.c_str())) {
             LOG4CXX_ERROR(logger_, "Choice set has duplicated VR synonym " <<
-                          choice_set[i][strings::vr_commands][ii].asString() <<
-                          " " <<
-                          choice_set[j][strings::vr_commands][jj].asString());
+                          vr_cmd_i << " and " <<  vr_cmd_j);
             return false;
           }
         }

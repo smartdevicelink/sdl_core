@@ -32,6 +32,7 @@
  */
 
 #include <string>
+#include <string.h>
 #include "application_manager/commands/mobile/perform_interaction_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -221,9 +222,9 @@ bool PerformInteractionRequest::CheckChoiceSetMenuNames(
               [strings::menu_name].asString();
 
           if (ii_menu_name == jj_menu_name) {
-            LOG4CXX_ERROR(logger_,
-                          "Incoming choice set has duplicated menu name");
-            SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+            LOG4CXX_ERROR(logger_,"Choice set has duplicated menu name");
+            SendResponse(false, mobile_apis::Result::DUPLICATE_NAME,
+                         "Choice set has duplicated menu name");
             return false;
           }
         }
@@ -272,10 +273,13 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
 
           for (size_t iii = 0; iii < ii_vr_commands.length(); ++iii) {
             for (size_t jjj = 0; jjj < jj_vr_commands.length(); ++jjj) {
-              if (ii_vr_commands[iii].asString() ==
-                  jj_vr_commands[jjj].asString()) {
+
+              std::string vr_cmd_i = ii_vr_commands[iii].asString();
+              std::string vr_cmd_j = jj_vr_commands[jjj].asString();
+              if (0 == strcasecmp(vr_cmd_i.c_str(), vr_cmd_j.c_str())) {
                 LOG4CXX_ERROR(logger_, "Choice set has duplicated VR synonym");
-                SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+                SendResponse(false, mobile_apis::Result::DUPLICATE_NAME,
+                             "Choice set has duplicated VR synonym");
                 return false;
               }
             }
