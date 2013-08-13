@@ -98,6 +98,9 @@ bool CommandResponseImpl::IsPendingResponseExist() {
   if (msg_chain) {
     connection_key = msg_chain->connection_key();
   }
+  else {
+    return false;
+  }
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
         correlation_id, mobile_correlation_id)) {
