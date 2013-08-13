@@ -52,6 +52,7 @@
 typedef unsigned char byte;
 
 static int mainPhase();
+static int mainPhaseBenchmark();
 static int init(const uint16_t vid, const uint16_t pid);
 static int deInit(void);
 static void error(int code);
@@ -72,13 +73,18 @@ static struct libusb_device_handle* handle;
 
 int main (int argc, char *argv[]){
     if (argc < 3) {
-        printf("%s takes two parameters: USB VID and PID of the device to "
-               "connect to, eg:\n%s 0x1234 0xFEDC", argv[0], argv[0]);
+        printf("%s takes the following parameters in order:\n"
+               "* [mandatory] USB VID and\n"
+               "* [mandatory] USB PID of the device to connect to\n"
+               "* [optional] -b flag to run throughput benchmark test (use with "
+               "UsbTest android app)\n"
+               "e.g.:\n%s 0x1234 0xFEDC\n", argv[0], argv[0]);
         return -1;
     }
     
     long vid = strtol(argv[1], NULL, 0);
     long pid = strtol(argv[2], NULL, 0);
+    int runBenchmark = (argc >= 4) && (strcmp(argv[3], "-b") == 0);
     
 	int ret = init(vid, pid);
     switch (ret) {
@@ -111,7 +117,9 @@ int main (int argc, char *argv[]){
             // other error
             return -1;
     }
-	if(mainPhase() < 0){
+    
+    ret = runBenchmark ? mainPhaseBenchmark() : mainPhase();
+	if(ret < 0){
 		fprintf(stdout, "Error during main phase\n");
 		deInit();
 		return -1;
@@ -136,7 +144,32 @@ static void intToByteArray(int i, byte **outArray, int *outLen) {
     *outArray = buf;
 }
 
-static int mainPhase(){
+static int mainPhase() {
+    unsigned char buffer[4096];
+	int response = 0;
+	int transferred;
+    
+    while (1) {
+        // reading data
+        response = libusb_bulk_transfer(handle,IN,buffer,sizeof(buffer), &transferred,0);
+        fprintf(stdout, "Received %d bytes\n", transferred);
+        if(response < 0){error(response);return -1;}
+        printCharArray(buffer, transferred);
+        int dataLength = transferred;
+        
+        // writing data
+        response = libusb_bulk_transfer(handle, OUT, buffer, dataLength, &transferred, 0);
+        if (response < 0) {
+            error(response);
+            return -1;
+        }
+        printf("Sent %d bytes\n", transferred);
+    }
+    
+    return 0;
+}
+
+static int mainPhaseBenchmark(){
     const int BUFFER_LENGTH = 4096;
 	unsigned char buffer[BUFFER_LENGTH];
 	int response = 0;
