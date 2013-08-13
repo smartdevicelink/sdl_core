@@ -83,8 +83,10 @@ bool SetMediaClockRequest::isDataValid() {
           == mobile_apis::UpdateMode::COUNTUP
           || (*message_)[strings::msg_params][strings::update_mode]
               == mobile_apis::UpdateMode::COUNTDOWN)) {
+    LOG4CXX_INFO(logger_, "Data is invalid");
     return false;
   } else {
+    LOG4CXX_INFO(logger_, "Data is valid");
     return true;
   }
 }
