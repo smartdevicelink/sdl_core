@@ -133,12 +133,6 @@ void ShowRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
     msg_params[strings::graphic] =
       (*message_)[strings::msg_params][strings::graphic];
-    std::string file_path = file_system::FullPath(app->name());
-    file_path += "/";
-    file_path += (*message_)[strings::msg_params][strings::graphic]
-                         [strings::value].asString();
-
-    msg_params[strings::graphic][strings::value] = file_path;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {

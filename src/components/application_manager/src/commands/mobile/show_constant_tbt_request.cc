@@ -95,6 +95,16 @@ void ShowConstantTBTRequest::Run() {
       (*message_)[strings::msg_params][strings::navigation_text_2];
   }
 
+
+  if (msg_params.keyExists(strings::eta)) {
+    // erase useless param
+    msg_params.erase(strings::eta);
+    msg_params[hmi_request::navi_texts][2][hmi_request::field_name] =
+      TextFieldName::ETA;
+    msg_params[hmi_request::navi_texts][2][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::eta];
+  }
+
   app->set_tbt_show_command(msg_params);
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,
                    msg_params, true, 1);
