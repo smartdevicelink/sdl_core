@@ -20,8 +20,6 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.android:support-v4:r6'
-    compile project(':SyncProxyAndroid')
 }
 
 
