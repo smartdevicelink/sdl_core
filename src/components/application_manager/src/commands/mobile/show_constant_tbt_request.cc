@@ -77,21 +77,22 @@ void ShowConstantTBTRequest::Run() {
   msg_params[hmi_request::navi_texts] =
     smart_objects::SmartObject(smart_objects::SmartType_Array);
 
+  int index = 0;
   if (msg_params.keyExists(strings::navigation_text_1)) {
     // erase useless parametr
     msg_params.erase(strings::navigation_text_1);
-    msg_params[hmi_request::navi_texts][0][hmi_request::field_name] =
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
       TextFieldName::NAVI_TEXT1;
-    msg_params[hmi_request::navi_texts][0][hmi_request::field_text] =
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::navigation_text_1];
   }
 
   if (msg_params.keyExists(strings::navigation_text_2)) {
     // erase useless param
     msg_params.erase(strings::navigation_text_2);
-    msg_params[hmi_request::navi_texts][1][hmi_request::field_name] =
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
       TextFieldName::NAVI_TEXT2;
-    msg_params[hmi_request::navi_texts][1][hmi_request::field_text] =
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::navigation_text_2];
   }
 
@@ -99,10 +100,19 @@ void ShowConstantTBTRequest::Run() {
   if (msg_params.keyExists(strings::eta)) {
     // erase useless param
     msg_params.erase(strings::eta);
-    msg_params[hmi_request::navi_texts][2][hmi_request::field_name] =
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
       TextFieldName::ETA;
-    msg_params[hmi_request::navi_texts][2][hmi_request::field_text] =
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::eta];
+  }
+
+  if (msg_params.keyExists(strings::total_distance)) {
+    // erase useless param
+    msg_params.erase(strings::total_distance);
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+      TextFieldName::TOTAL_DISTANCE;
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::total_distance];
   }
 
   app->set_tbt_show_command(msg_params);
