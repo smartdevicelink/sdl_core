@@ -267,7 +267,7 @@ FFW.UI = FFW.RPCObserver
                 }
                 case "UI.ScrollableMessage": {
 
-                    SDL.SDLModel.onSDLScrolableMessage(request.params,
+                    SDL.SDLModel.onSDLScrolableMessage(request,
                         request.id);
 
                     break;

@@ -280,9 +280,27 @@ SDL.SDLModel = Em.Object
          * @type {Array}
          */
         sdlLanguagesList: [
-            'EN-US', 'ES-MX', 'FR-CA', 'DE-DE', 'ES-ES', 'EN-GB', 'RU-RU',
-            'TR-TR', 'PL-PL', 'FR-FR', 'IT-IT', 'SV-SE', 'PT-PT', 'NL-NL',
-            'ZH-TW', 'JA-JP', 'AR-SA', 'KO-KR', 'PT-BR', 'CS-CZ', 'DA-DK',
+            'EN-US',
+            'ES-MX',
+            'FR-CA',
+            'DE-DE',
+            'ES-ES',
+            'EN-GB',
+            'RU-RU',
+            'TR-TR',
+            'PL-PL',
+            'FR-FR',
+            'IT-IT',
+            'SV-SE',
+            'PT-PT',
+            'NL-NL',
+            'ZH-TW',
+            'JA-JP',
+            'AR-SA',
+            'KO-KR',
+            'PT-BR',
+            'CS-CZ',
+            'DA-DK',
             'NO-NO'
         ],
 
@@ -388,21 +406,26 @@ SDL.SDLModel = Em.Object
          * @param {Number}
          *            messageRequestId Identification of unique request
          */
-        onSDLScrolableMessage: function(params, messageRequestId) {
+        onSDLScrolableMessage: function(request, messageRequestId) {
 
             if (!SDL.ScrollableMessage.active) {
                 if (SDL.SDLModel.driverDistractionState) {
                     SDL.DriverDistraction.activate();
+                    FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"],
+                        request.id,
+                        request.method,
+                        'DD mode is active!');
                 } else {
                     SDL.ScrollableMessage.activate(SDL.SDLController
-                        .getApplicationModel(params.appID).appName,
-                        params,
+                        .getApplicationModel(request.params.appID).appName,
+                        request.params,
                         messageRequestId);
                 }
             } else {
-                SDL.SDLController
-                    .scrollableMessageResponse(SDL.SDLModel.resultCode["REJECTED"],
-                        messageRequestId);
+                FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"],
+                    request.id,
+                    request.method,
+                    'Higher priority request is being processed on HMI!');
             }
 
         },
