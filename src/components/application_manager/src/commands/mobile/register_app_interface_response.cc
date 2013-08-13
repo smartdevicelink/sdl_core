@@ -42,7 +42,7 @@ namespace commands  {
 void RegisterAppInterfaceResponse::Run()  {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceResponse::Run");
 
-  SendResponse(true);
+  SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 
 }  // namespace commands
