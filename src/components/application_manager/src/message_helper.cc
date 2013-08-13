@@ -36,6 +36,7 @@
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
+#include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
@@ -599,12 +600,13 @@ void MessageHelper::SendAddSubMenuRequestToHMI(const Application* app) {
   }
 }
 
-void MessageHelper::RemoveAppDataFromHMI(const Application* app) {
+void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
   SendDeleteCommandRequestToHMI(app);
   SendDeleteSubMenuRequestToHMI(app);
+  ResetGlobalproperties(app);
 }
 
-void MessageHelper::SendDeleteCommandRequestToHMI(const Application* app) {
+void MessageHelper::SendDeleteCommandRequestToHMI(Application* const app) {
   if (!app) {
     return;
   }
@@ -666,7 +668,7 @@ void MessageHelper::SendDeleteCommandRequestToHMI(const Application* app) {
   }
 }
 
-void MessageHelper::SendDeleteSubMenuRequestToHMI(const Application* app) {
+void MessageHelper::SendDeleteSubMenuRequestToHMI(Application* const app) {
   if (!app) {
     return;
   }
@@ -725,6 +727,63 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
   response_data[strings::params][strings::connection_key] = connection_key;
 
   return response;
+}
+
+void MessageHelper::ResetGlobalproperties(Application* const app) {
+  //reset help_promt
+  const std::vector<std::string>& help_promt =
+        profile::Profile::instance()->help_promt();
+
+  smart_objects::SmartObject so_help_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (unsigned int i = 0; i < help_promt.size(); ++i) {
+    smart_objects::SmartObject helpPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    helpPrompt[strings::text] =  help_promt[i];
+    so_help_promt[i] = helpPrompt;
+  }
+
+  app->set_help_prompt(so_help_promt);
+
+  //reset timeout prompt
+  const std::vector<std::string>& time_out_promt =
+      profile::Profile::instance()->time_out_promt();
+
+  smart_objects::SmartObject so_time_out_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (unsigned int i = 0; i < time_out_promt.size(); ++i) {
+    smart_objects::SmartObject timeoutPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    timeoutPrompt[strings::text] = time_out_promt[i];
+    so_time_out_promt[i] = timeoutPrompt;
+  }
+
+  app->set_timeout_prompt(so_time_out_promt);
+
+  //reset VR help title
+  smart_objects::SmartObject help_title(app->name());
+  app->set_vr_help_title(help_title);
+
+  //reset VR help items
+  const CommandsMap& cmdMap = app->commands_map();
+  smart_objects::SmartObject vr_help_items;
+
+  int index = 0;
+  CommandsMap::const_iterator command_it = cmdMap.begin();
+
+  for (; cmdMap.end() != command_it; ++command_it) {
+    if (true == (*command_it->second).keyExists(strings::vr_commands)) {
+      // use only first
+      vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
+    }
+  }
+
+  app->set_vr_help(vr_help_items);
+
+  // send global properties
+  SendGlobalPropertiesToHMI(app);
 }
 
 bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
