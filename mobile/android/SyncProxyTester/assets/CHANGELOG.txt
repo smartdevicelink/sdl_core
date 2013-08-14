@@ -1,3 +1,6 @@
+[CW33]
+* SyncProxyAndroid SDK: fix two bugs with sending huge RPC requests.
+
 [CW32]
 + Add Float tag parsing to XML tests parser.
 * Remove the persistent top-level submenu with id = 0.
