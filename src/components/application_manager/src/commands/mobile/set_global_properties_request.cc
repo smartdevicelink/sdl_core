@@ -67,6 +67,13 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
+  if (0 == (*message_)[strings::msg_params].length()) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA,
+                 "Missing conditional parameters");
+    return;
+  }
+
   // by default counter is 1 for TTS request. If only one param specified
   // for TTS REJECT response will be sent
   unsigned int chaining_counter = 1;
