@@ -47,26 +47,26 @@
 namespace protocol_handler {
 
 log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ProtocolHandler"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ProtocolHandler"));
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
-    NsSmartDeviceLink::NsTransportManager::ITransportManager* transportManager)
-    : protocol_observer_(0),
-      session_observer_(0),
-      transport_manager_(transportManager),
-      handle_messages_from_mobile_app_(NULL),
-      handle_messages_to_mobile_app_(NULL) {
+  NsSmartDeviceLink::NsTransportManager::ITransportManager* transportManager)
+  : protocol_observer_(0),
+    session_observer_(0),
+    transport_manager_(transportManager),
+    handle_messages_from_mobile_app_(NULL),
+    handle_messages_to_mobile_app_(NULL) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   handle_messages_from_mobile_app_ = new threads::Thread(
-      "MessagesFromMobileAppHandler", new MessagesFromMobileAppHandler(this));
+    "MessagesFromMobileAppHandler", new MessagesFromMobileAppHandler(this));
   handle_messages_from_mobile_app_->startWithOptions(
-      threads::ThreadOptions(threads::Thread::kMinStackSize));
+    threads::ThreadOptions(threads::Thread::kMinStackSize));
 
   handle_messages_to_mobile_app_ = new threads::Thread(
-      "MessagesToMobileAppHandler", new MessagesToMobileAppHandler(this));
+    "MessagesToMobileAppHandler", new MessagesToMobileAppHandler(this));
   handle_messages_to_mobile_app_->startWithOptions(
-      threads::ThreadOptions(threads::Thread::kMinStackSize));
+    threads::ThreadOptions(threads::Thread::kMinStackSize));
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -105,9 +105,9 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
 }
 
 void ProtocolHandlerImpl::sendEndSessionNAck(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    unsigned int sessionID, unsigned char serviceType) {
-   LOG4CXX_TRACE_ENTER(logger_);
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  unsigned int sessionID, unsigned char serviceType) {
+  LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
                         0x0, FRAME_DATA_END_SESSION_NACK, sessionID, 0, 0);
@@ -122,9 +122,9 @@ void ProtocolHandlerImpl::sendEndSessionNAck(
 }
 
 void ProtocolHandlerImpl::sendStartSessionAck(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    unsigned char sessionID, unsigned char protocolVersion,
-    unsigned int hashCode, unsigned char serviceType) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  unsigned char sessionID, unsigned char protocolVersion,
+  unsigned int hashCode, unsigned char serviceType) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolPacket packet(protocolVersion, COMPRESS_OFF, FRAME_TYPE_CONTROL,
@@ -133,9 +133,9 @@ void ProtocolHandlerImpl::sendStartSessionAck(
 
   if (RESULT_OK == sendFrame(connectionHandle, packet)) {
     LOG4CXX_INFO(
-        logger_,
-        "sendStartSessionAck() for connection " << connectionHandle
-          << " for serviceType " << serviceType << " sessionID " << sessionID);
+      logger_,
+      "sendStartSessionAck() for connection " << connectionHandle
+      << " for serviceType " << serviceType << " sessionID " << sessionID);
   } else {
     LOG4CXX_ERROR(logger_, "sendStartSessionAck() - BT write FAIL");
   }
@@ -144,8 +144,8 @@ void ProtocolHandlerImpl::sendStartSessionAck(
 }
 
 void ProtocolHandlerImpl::sendStartSessionNAck(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    unsigned char serviceType) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  unsigned char serviceType) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   unsigned char versionFlag = PROTOCOL_VERSION_1;
@@ -166,7 +166,7 @@ void ProtocolHandlerImpl::sendMessageToMobileApp(const RawMessage* message) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!message) {
     LOG4CXX_ERROR(logger_,
-                    "Invalid message for sending to mobile app is received.");
+                  "Invalid message for sending to mobile app is received.");
     LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
@@ -175,13 +175,13 @@ void ProtocolHandlerImpl::sendMessageToMobileApp(const RawMessage* message) {
 }
 
 void ProtocolHandlerImpl::onFrameReceived(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    const uint8_t* data, size_t dataSize) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  const uint8_t* data, size_t dataSize) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (connectionHandle && dataSize > 0 && data) {
     LOG4CXX_INFO_EXT(logger_,
-                       "Received from TM " << data << "; size " << dataSize);
-    IncomingMessage * message = new IncomingMessage;
+                     "Received from TM " << data << "; size " << dataSize);
+    IncomingMessage* message = new IncomingMessage;
     message->data = new unsigned char[dataSize];
     memcpy(message->data, data, dataSize);
     message->data_size = dataSize;
@@ -189,30 +189,30 @@ void ProtocolHandlerImpl::onFrameReceived(
     messages_from_mobile_app_.push(message);
   } else {
     LOG4CXX_ERROR(
-        logger_,
-        "Invalid incoming message received in"
-          << " ProtocolHandler from Transport Manager.");
+      logger_,
+      "Invalid incoming message received in"
+      << " ProtocolHandler from Transport Manager.");
   }
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void ProtocolHandlerImpl::onFrameSendCompleted(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    int userData,
-    NsSmartDeviceLink::NsTransportManager::ESendStatus sendStatus) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  int userData,
+  NsSmartDeviceLink::NsTransportManager::ESendStatus sendStatus) {
   if (NsSmartDeviceLink::NsTransportManager::SendStatusOK != sendStatus) {
     LOG4CXX_ERROR(logger_, "Failed to send frame with number " << userData);
   } else {
     LOG4CXX_INFO_EXT(logger_, "Frame with number " << userData <<
-                  " successfully sent");
+                     " successfully sent");
   }
 
 }
 
 RESULT_CODE ProtocolHandlerImpl::sendFrame(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    const ProtocolPacket& packet) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  const ProtocolPacket& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!packet.packet()) {
     LOG4CXX_ERROR(logger_, "Failed to create packet.");
@@ -222,8 +222,8 @@ RESULT_CODE ProtocolHandlerImpl::sendFrame(
   }
 
   LOG4CXX_INFO_EXT(
-      logger_,
-      "Packet to be sent of size: "  << packet.packet_size() << " packet id "<< packet.packet_id());
+    logger_,
+    "Packet to be sent of size: "  << packet.packet_size() << " packet id " << packet.packet_id());
 
   if (transport_manager_) {
     transport_manager_->sendFrame(connectionHandle, packet.packet(),
@@ -240,10 +240,10 @@ RESULT_CODE ProtocolHandlerImpl::sendFrame(
 }
 
 RESULT_CODE ProtocolHandlerImpl::sendSingleFrameMessage(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    const unsigned char sessionID, unsigned int protocolVersion,
-    const unsigned char servType, const unsigned int dataSize,
-    const unsigned char* data, const bool compress) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  const unsigned char sessionID, unsigned int protocolVersion,
+  const unsigned char servType, const unsigned int dataSize,
+  const unsigned char* data, const bool compress) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   unsigned char versionF = PROTOCOL_VERSION_1;
@@ -260,16 +260,16 @@ RESULT_CODE ProtocolHandlerImpl::sendSingleFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::sendMultiFrameMessage(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    const unsigned char sessionID, unsigned int protocolVersion,
-    const unsigned char servType, const unsigned int dataSize,
-    const unsigned char* data, const bool compress,
-    const unsigned int maxDataSize) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  const unsigned char sessionID, unsigned int protocolVersion,
+  const unsigned char servType, const unsigned int dataSize,
+  const unsigned char* data, const bool compress,
+  const unsigned int maxDataSize) {
   LOG4CXX_TRACE_ENTER(logger_);
   RESULT_CODE retVal = RESULT_OK;
 
   LOG4CXX_INFO_EXT(
-      logger_, " data size " << dataSize << " maxDataSize " << maxDataSize);
+    logger_, " data size " << dataSize << " maxDataSize " << maxDataSize);
 
   unsigned char versionF = PROTOCOL_VERSION_1;
   if (2 == protocolVersion) {
@@ -288,11 +288,11 @@ RESULT_CODE ProtocolHandlerImpl::sendMultiFrameMessage(
   }
 
   LOG4CXX_INFO_EXT(
-      logger_,
-      "Data size " << dataSize << " of " << numOfFrames
-        << " frames with last frame " << lastDataSize);
+    logger_,
+    "Data size " << dataSize << " of " << numOfFrames
+    << " frames with last frame " << lastDataSize);
 
-  unsigned char *outDataFirstFrame = new unsigned char[FIRST_FRAME_DATA_SIZE];
+  unsigned char* outDataFirstFrame = new unsigned char[FIRST_FRAME_DATA_SIZE];
   outDataFirstFrame[0] = dataSize >> 24;
   outDataFirstFrame[1] = dataSize >> 16;
   outDataFirstFrame[2] = dataSize >> 8;
@@ -346,8 +346,8 @@ RESULT_CODE ProtocolHandlerImpl::sendMultiFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::handleMessage(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    ProtocolPacket* packet) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   switch (packet->frame_type()) {
@@ -359,29 +359,30 @@ RESULT_CODE ProtocolHandlerImpl::handleMessage(
     }
     case FRAME_TYPE_SINGLE: {
       LOG4CXX_INFO(
-          logger_,
-          "FRAME_TYPE_SINGLE: of size " << packet->data_size()
-            << ";message " << packet -> data());
+        logger_,
+        "FRAME_TYPE_SINGLE: of size " << packet->data_size()
+        << ";message " << packet -> data());
 
       if (!session_observer_) {
         LOG4CXX_ERROR(
-            logger_,
-            "Cannot handle message from Transport"
-              << " Manager: ISessionObserver doesn't exist.");
+          logger_,
+          "Cannot handle message from Transport"
+          << " Manager: ISessionObserver doesn't exist.");
 
         LOG4CXX_TRACE_EXIT(logger_);
         return RESULT_FAIL;
       }
 
       int connectionKey = session_observer_->keyFromPair(connectionHandle,
-                                                         packet->session_id());
+                          packet->session_id());
 
       RawMessage* rawMessage = new RawMessage(connectionKey, packet->version(),
                                               packet->data(),
                                               packet->data_size());
 
-      if (protocol_observer_)
+      if (protocol_observer_) {
         protocol_observer_->onMessageReceived(rawMessage);
+      }
 
       break;
     }
@@ -402,8 +403,8 @@ RESULT_CODE ProtocolHandlerImpl::handleMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::handleMultiFrameMessage(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    ProtocolPacket* packet) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if (!session_observer_) {
@@ -414,10 +415,10 @@ RESULT_CODE ProtocolHandlerImpl::handleMultiFrameMessage(
   }
 
   LOG4CXX_INFO_EXT(
-      logger_, "Packet " << packet << "; sessionID " << packet -> session_id());
+    logger_, "Packet " << packet << "; sessionID " << packet -> session_id());
 
   int key = session_observer_->keyFromPair(connectionHandle,
-                                           packet->session_id());
+            packet->session_id());
 
   if (packet->frame_type() == FRAME_TYPE_FIRST) {
     LOG4CXX_INFO(logger_, "handleMultiFrameMessage() - FRAME_TYPE_FIRST");
@@ -435,11 +436,11 @@ RESULT_CODE ProtocolHandlerImpl::handleMultiFrameMessage(
     LOG4CXX_INFO(logger_, "handleMultiFrameMessage() - Consecutive frame");
 
     std::map<int, ProtocolPacket*>::iterator it =
-        incomplete_multi_frame_messages_.find(key);
+      incomplete_multi_frame_messages_.find(key);
 
     if (it == incomplete_multi_frame_messages_.end()) {
       LOG4CXX_ERROR(
-          logger_, "Frame of multiframe message for non-existing session id");
+        logger_, "Frame of multiframe message for non-existing session id");
 
       LOG4CXX_TRACE_EXIT(logger_);
       return RESULT_FAIL;
@@ -450,7 +451,7 @@ RESULT_CODE ProtocolHandlerImpl::handleMultiFrameMessage(
     if (it->second->appendData(packet->data(), packet->data_size())
         != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
-                      "Failed to append frame for multiframe message.");
+                    "Failed to append frame for multiframe message.");
 
       LOG4CXX_TRACE_EXIT(logger_);
       return RESULT_FAIL;
@@ -459,8 +460,8 @@ RESULT_CODE ProtocolHandlerImpl::handleMultiFrameMessage(
     if (packet->frame_data() == FRAME_DATA_LAST_FRAME) {
       if (!protocol_observer_) {
         LOG4CXX_ERROR(
-            logger_,
-            "Cannot handle multiframe message: no IProtocolObserver is set.");
+          logger_,
+          "Cannot handle multiframe message: no IProtocolObserver is set.");
 
         LOG4CXX_TRACE_EXIT(logger_);
         return RESULT_FAIL;
@@ -468,8 +469,8 @@ RESULT_CODE ProtocolHandlerImpl::handleMultiFrameMessage(
 
       ProtocolPacket* completePacket = it->second;
       RawMessage* rawMessage = new RawMessage(
-          key, completePacket->version(), completePacket->data(),
-          completePacket->total_data_bytes());
+        key, completePacket->version(), completePacket->data(),
+        completePacket->total_data_bytes());
 
       protocol_observer_->onMessageReceived(rawMessage);
 
@@ -482,8 +483,8 @@ RESULT_CODE ProtocolHandlerImpl::handleMultiFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::handleControlMessage(
-    NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-    const ProtocolPacket* packet) {
+  NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+  const ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if (!session_observer_) {
@@ -505,7 +506,7 @@ RESULT_CODE ProtocolHandlerImpl::handleControlMessage(
 
     bool success = true;
     int sessionHashCode = session_observer_->onSessionEndedCallback(
-        connectionHandle, currentSessionID, hashCode);
+                            connectionHandle, currentSessionID, hashCode);
 
     if (-1 != sessionHashCode) {
       // TODO(PV): check hash code only for second version of protocol.
@@ -522,8 +523,8 @@ RESULT_CODE ProtocolHandlerImpl::handleControlMessage(
       message_counters_.erase(currentSessionID);
     } else {
       LOG4CXX_INFO_EXT(
-          logger_,
-          "Refused to end session " << packet -> service_type() << " type.");
+        logger_,
+        "Refused to end session " << packet -> service_type() << " type.");
       sendEndSessionNAck(connectionHandle, currentSessionID,
                          packet->service_type());
     }
@@ -531,21 +532,22 @@ RESULT_CODE ProtocolHandlerImpl::handleControlMessage(
 
   if (packet->frame_data() == FRAME_DATA_START_SESSION) {
     LOG4CXX_INFO(logger_,
-                   "handleControlMessage() - FRAME_DATA_START_SESSION");
+                 "handleControlMessage() - FRAME_DATA_START_SESSION");
     LOG4CXX_INFO_EXT(
-        logger_, "Version 2 " << (packet -> version() == PROTOCOL_VERSION_2));
+      logger_, "Version 2 " << (packet -> version() == PROTOCOL_VERSION_2));
 
     int sessionId = session_observer_->onSessionStartedCallback(
-        connectionHandle);
+                      connectionHandle);
     if (-1 != sessionId) {
+      // supported protocol version starting from 2nd.
       sendStartSessionAck(
-          connectionHandle, sessionId, packet->version(),
-          session_observer_->keyFromPair(connectionHandle, sessionId),
-          packet->service_type());
+        connectionHandle, sessionId, PROTOCOL_VERSION_2,
+        session_observer_->keyFromPair(connectionHandle, sessionId),
+        packet->service_type());
     } else {
       LOG4CXX_INFO_EXT(
-          logger_,
-          "Refused to create session " << packet -> service_type() << " type.");
+        logger_,
+        "Refused to create session " << packet -> service_type() << " type.");
       sendStartSessionNAck(connectionHandle, packet->service_type());
     }
   }
