@@ -830,6 +830,9 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
   static unsigned int tab = 0;
   std::string tab_buffer;
 
+  if (tab == 0)
+    printf("\n-------------------------------------------------------------");
+
   for (unsigned int i = 0; i < tab; ++i)
     tab_buffer += "\t";
 
@@ -884,6 +887,8 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
 
   if (0 != tab)
     --tab;
+  else
+    printf("\n-------------------------------------------------------------\n");
 
   return true;
 }
