@@ -62,6 +62,12 @@ void SetMediaClockRequest::Run() {
     return;
   }
 
+  if (!app->is_media_application()) {
+    LOG4CXX_ERROR(logger_, "Application is not media application");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
+  }
+
   if (isDataValid()) {
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
