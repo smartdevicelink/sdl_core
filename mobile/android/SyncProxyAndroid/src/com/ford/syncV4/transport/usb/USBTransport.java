@@ -37,6 +37,8 @@ import java.io.OutputStream;
  * the official SDL protocol specification at the moment.
  *
  * TODO: use DebugTool logger
+ * TODO: use State pattern
+ * TODO: use handleTransportError()
  */
 public class USBTransport extends SyncTransport {
     /**

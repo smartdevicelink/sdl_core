@@ -12,6 +12,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BA194BDB17BB97EA0074404B /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		BA1AE00C179953CF00FEBC57 /* aoa_host_test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = aoa_host_test; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA1AE00F179953CF00FEBC57 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		BA1AE01A17995A0F00FEBC57 /* libusb-1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libusb-1.0.0.dylib"; path = "/usr/local/Cellar/libusb/1.0.9/lib/libusb-1.0.0.dylib"; sourceTree = "<absolute>"; };
@@ -48,6 +49,7 @@
 		BA1AE00E179953CF00FEBC57 /* aoa_host_test */ = {
 			isa = PBXGroup;
 			children = (
+				BA194BDB17BB97EA0074404B /* Makefile */,
 				BA1AE00F179953CF00FEBC57 /* main.c */,
 				BA1AE01A17995A0F00FEBC57 /* libusb-1.0.0.dylib */,
 			);
