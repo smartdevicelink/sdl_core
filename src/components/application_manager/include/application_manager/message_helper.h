@@ -211,6 +211,8 @@ class MessageHelper {
     static bool VerifyImageFiles(smart_objects::SmartObject& message,
                                  const Application* app);
 
+    static bool PrintSmartObject(smart_objects::SmartObject& object);
+
     template<typename From, typename To>
     static To ConvertEnumAPINoCheck(const From& input) {
       return static_cast<To>(input);

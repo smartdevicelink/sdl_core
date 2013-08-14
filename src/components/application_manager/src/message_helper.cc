@@ -825,4 +825,67 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
   return true;
 }
 
+// TODO(AK): change printf to logger
+bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
+  static unsigned int tab = 0;
+  std::string tab_buffer;
+
+  for (unsigned int i = 0; i < tab; ++i)
+    tab_buffer += "\t";
+
+  switch (object.getType()) {
+    case NsSmartDeviceLink::NsSmartObjects::SmartType_Array: {
+      for (int i = 0; i < object.length(); i++) {
+        ++tab;
+
+        printf("\n%s%d: ", tab_buffer.c_str(), i);
+        if (!PrintSmartObject(object[i])) {
+          printf("\n");
+          return false;
+        }
+      }
+      break;
+    }
+    case NsSmartDeviceLink::NsSmartObjects::SmartType_Map: {
+      std::set<std::string> keys = object.enumerate();
+
+      for (std::set<std::string>::const_iterator key = keys.begin();
+          key != keys.end(); key++) {
+        ++tab;
+
+        printf("\n%s%s: ", tab_buffer.c_str(), (*key).c_str());
+        if (!PrintSmartObject(object[*key])) {
+          printf("\n");
+          return false;
+        }
+      }
+      break;
+    }
+    case NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean:
+      object.asBool() ? printf("true\n") : printf("false\n");
+      break;
+    case NsSmartDeviceLink::NsSmartObjects::SmartType_Double: {
+      printf("%f", object.asDouble());
+      break;
+    }
+    case NsSmartDeviceLink::NsSmartObjects::SmartType_Integer:
+      printf("%d", object.asInt());
+      break;
+    case NsSmartDeviceLink::NsSmartObjects::SmartType_String:
+      printf("%s", object.asString().c_str());
+      break;
+    case NsSmartDeviceLink::NsSmartObjects::SmartType_Character:
+      printf("%c", object.asChar());
+      break;
+    default:
+      printf("PrintSmartObject - default case\n");
+      break;
+  }
+
+  if (0 != tab)
+    --tab;
+
+  return true;
+}
+
 }  //  namespace application_manager

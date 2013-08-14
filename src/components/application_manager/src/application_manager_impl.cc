@@ -919,6 +919,10 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     return false;
   }
 
+#ifdef DEBUG
+  MessageHelper::PrintSmartObject(*message);
+#endif
+
   mobile_apis::FunctionID::eType function_id
         = static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
@@ -1020,6 +1024,11 @@ bool ApplicationManagerImpl::ManageHMICommand(
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
     return false;
   }
+
+#ifdef DEBUG
+  MessageHelper::PrintSmartObject(*message);
+#endif
+
   CommandSharedPtr command = HMICommandFactory::CreateCommand(message);
 
   if (!command) {
