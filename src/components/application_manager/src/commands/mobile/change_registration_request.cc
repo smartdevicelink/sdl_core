@@ -71,8 +71,8 @@ void ChangeRegistrationRequest::Run() {
   if (false == IsLanguageSupportedByUI(hmi_language) ||
       false == IsLanguageSupportedByVR(language)     ||
       false == IsLanguageSupportedByTTS(language)) {
-    LOG4CXX_ERROR(logger_, "Language is not supported by any of modules");
-    SendResponse(false, mobile_apis::Result::REJECTED);
+    LOG4CXX_ERROR(logger_, "Language is not supported");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -89,7 +89,7 @@ void ChangeRegistrationRequest::Run() {
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
-                     msg_params, true, has_actually_changed);
+                     msg_params, true, chaining_counter);
 
     has_actually_changed = true;
   }
@@ -136,7 +136,6 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 
   if (false == is_language_supported) {
     LOG4CXX_ERROR(logger_, "Language isn't supported by UI");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
@@ -161,7 +160,6 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 
   if (false == is_language_supported) {
     LOG4CXX_ERROR(logger_, "Language isn't supported by VR");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
@@ -186,7 +184,6 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
 
   if (false == is_language_supported) {
     LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
