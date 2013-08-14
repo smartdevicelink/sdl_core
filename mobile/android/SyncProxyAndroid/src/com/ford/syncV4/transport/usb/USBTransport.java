@@ -11,6 +11,8 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.trace.SyncTrace;
+import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.SyncTransport;
@@ -34,7 +36,7 @@ import java.io.OutputStream;
  * byte as well). Then it notifies of a successful connection. It's not part of
  * the official SDL protocol specification at the moment.
  *
- * TODO: use SyncTrace and/or DebugTool loggers
+ * TODO: use DebugTool logger
  */
 public class USBTransport extends SyncTransport {
     /**
@@ -49,6 +51,11 @@ public class USBTransport extends SyncTransport {
      * String tag for logging.
      */
     private static final String TAG = USBTransport.class.getSimpleName();
+    /**
+     * Key for SyncTrace.
+     */
+    private static final String SYNC_LIB_TRACE_KEY =
+            "42baba60-eb57-11df-98cf-0800200c9a66";
     /**
      * Broadcast action: sent when the user has granted access to the USB
      * accessory.
@@ -172,7 +179,12 @@ public class USBTransport extends SyncTransport {
                         try {
                             mOutputStream.write(msgBytes, offset, length);
                             result = true;
+
                             logI("Bytes successfully sent");
+                            SyncTrace.logTransportEvent(TAG + ": bytes sent",
+                                    null, InterfaceActivityDirection.Transmit,
+                                    msgBytes, offset, length,
+                                    SYNC_LIB_TRACE_KEY);
                         } catch (IOException e) {
                             logW("Failed to send bytes", e);
                         }
@@ -233,6 +245,10 @@ public class USBTransport extends SyncTransport {
         synchronized (this) {
             logI("Disconnect from state " + getState());
             setState(State.IDLE);
+
+            SyncTrace.logTransportEvent(TAG + ": disconnect", null,
+                    InterfaceActivityDirection.None, null, 0,
+                    SYNC_LIB_TRACE_KEY);
 
             if (mReaderThread != null) {
                 logI("Interrupting USB reader");
@@ -322,6 +338,11 @@ public class USBTransport extends SyncTransport {
                     openAccessory(accessory);
                 } else {
                     logI("Requesting permission to use " + accessory);
+                    SyncTrace.logTransportEvent(TAG + ": requesting permission",
+                            SyncTrace.getUSBAccessoryInfo(accessory),
+                            InterfaceActivityDirection.None, null, 0,
+                            SYNC_LIB_TRACE_KEY);
+
                     PendingIntent permissionIntent = PendingIntent
                             .getBroadcast(getContext(), 0,
                                     new Intent(ACTION_USB_PERMISSION), 0);
@@ -480,8 +501,9 @@ public class USBTransport extends SyncTransport {
         public void run() {
             Log.d(TAG, "USB reader started!");
 
-            if (!connect())
+            if (!connect()) {
                 return;
+            }
 
             readFromTransport();
         }
@@ -506,7 +528,14 @@ public class USBTransport extends SyncTransport {
                 mInputStream = new FileInputStream(fd);
                 mOutputStream = new FileOutputStream(fd);
             }
+
             Log.i(TAG, "Accessory opened!");
+            synchronized (USBTransport.this) {
+                SyncTrace.logTransportEvent(TAG + ": accessory opened",
+                        SyncTrace.getUSBAccessoryInfo(mAccessory),
+                        InterfaceActivityDirection.None, null, 0,
+                        SYNC_LIB_TRACE_KEY);
+            }
 
             // sending initial request "Is there anybody out there?"
             try {
@@ -569,6 +598,10 @@ public class USBTransport extends SyncTransport {
                 }
 
                 Log.d(TAG, "Read " + bytesRead + " bytes");
+                SyncTrace.logTransportEvent(TAG + ": read bytes", null,
+                        InterfaceActivityDirection.Receive, buffer, bytesRead,
+                        SYNC_LIB_TRACE_KEY);
+
                 if (bytesRead > 0) {
                     synchronized (USBTransport.this) {
                         handleReceivedBytes(buffer, bytesRead);
