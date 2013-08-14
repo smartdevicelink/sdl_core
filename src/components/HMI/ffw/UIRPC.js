@@ -544,6 +544,11 @@ FFW.UI = FFW.RPCObserver
                     }
                 };
                 this.client.send(JSONMessage);
+            } else {
+                this.sendError(resultCode,
+                    id,
+                    "UI.Alert",
+                    'Alert request aborted.');
             }
         },
 

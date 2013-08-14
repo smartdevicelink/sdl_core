@@ -156,11 +156,11 @@ SDL.SDLController = Em.Object
 
             switch (element.groupName) {
             case "AlertPopUp": {
-                SDL.AlertPopUp.set('timer', 0);
+                clearTimeout(SDL.AlertPopUp.timer);
                 break;
             }
             case "ScrollableMessage": {
-                SDL.ScrollableMessage.set('timer', 0);
+                clearTimeout(SDL.ScrollableMessage.timer);
                 break;
             }
             }
