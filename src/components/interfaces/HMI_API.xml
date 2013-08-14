@@ -1344,7 +1344,7 @@
   </function>
   <function name="AddCommand" messagetype="request">
     <description>Request from SDL to add a command(string with associated id) to VR.</description>
-    <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
+    <param name="cmdID" type="Integer" mandatory="true" minvalue="0">
       <description>ID of a command (further to be used in OnCommand notification).</description>
     </param>
     <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="100" array="true">
@@ -1555,7 +1555,7 @@
     </function>
     <function name="AddCommand" messagetype="request">
       <description>Request from SDL to add a command to the application menu.</description>
-      <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <param name="cmdID" type="Integer" minvalue="0" mandatory="true">
         <description>ID of the command to be added.</description>
       </param>
       <param name="menuParams" type="Common.MenuParams" mandatory="false">
