@@ -154,10 +154,8 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
                 }
             }
 
-            // Get soft buttons if exists
-            if (params.softButtons) {
-                this.updateSoftButtons(params.softButtons);
-            }
+            this.updateSoftButtons(params.softButtons);
+
         },
 
         sdlSetMediaClockTimer: function() {

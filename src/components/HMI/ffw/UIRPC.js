@@ -72,7 +72,7 @@ FFW.UI = FFW.RPCObserver
         connect: function() {
 
             this.client.connect(this, 400); // Magic number is unique identifier
-                                            // for component
+            // for component
         },
 
         /**
@@ -267,8 +267,7 @@ FFW.UI = FFW.RPCObserver
                 }
                 case "UI.ScrollableMessage": {
 
-                    SDL.SDLModel.onSDLScrolableMessage(request,
-                        request.id);
+                    SDL.SDLModel.onSDLScrolableMessage(request, request.id);
 
                     break;
                 }
@@ -313,9 +312,9 @@ FFW.UI = FFW.RPCObserver
                         "jsonrpc": "2.0",
                         "result": {
                             "code": SDL.SDLModel.resultCode["SUCCESS"], // type
-                                                                        // (enum)
-                                                                        // from
-                                                                        // SDL
+                            // (enum)
+                            // from
+                            // SDL
                             "method": "UI.GetSupportedLanguages",
                             "languages": SDL.SDLModel.sdlLanguagesList
                         }
@@ -333,9 +332,9 @@ FFW.UI = FFW.RPCObserver
                         "id": request.id,
                         "result": {
                             "code": SDL.SDLModel.resultCode["SUCCESS"], // type
-                                                                        // (enum)
-                                                                        // from
-                                                                        // SDL
+                            // (enum)
+                            // from
+                            // SDL
                             "method": "UI.GetLanguage",
                             "language": SDL.SDLModel.hmiUILanguage
                         }
@@ -439,6 +438,16 @@ FFW.UI = FFW.RPCObserver
                     };
 
                     this.client.send(JSONMessage);
+
+                    break;
+                }
+                case "UI.ShowVrHelp": {
+
+                    SDL.SDLModel.ShowVrHelp(request);
+
+                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
                     break;
                 }

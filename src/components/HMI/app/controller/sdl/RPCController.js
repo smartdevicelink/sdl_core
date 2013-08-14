@@ -1825,12 +1825,55 @@ SDL.RPCController = Em.Object
                 },
 
                 /**
-                 * Validate method for request EndAudioPassThru
+                 * Validate method for request ClosePopUp
                  * 
                  * @param {Object}
                  *            params
                  */
                 ClosePopUp: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
+                 * Validate method for request ShowVrHelp
+                 * 
+                 * @param {Object}
+                 *            params
+                 */
+                ShowVrHelp: function(params) {
+
+                    if (!params) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (!params.appID) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'appID' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.appID != 'number') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'appID'!"
+                        };
+
+                        return this.resultStruct;
+                    }
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
