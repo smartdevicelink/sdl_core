@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,90 +31,99 @@
  * @version 1.0
  */
 
-SDL.InteractionChoicesView = SDL.SDLAbstractView.create( {
+SDL.InteractionChoicesView = SDL.SDLAbstractView
+    .create( {
 
-    elementId: 'perform_interaction_view',
+        elementId: 'perform_interaction_view',
 
-    childViews:
-        [
-            'backButton',
-            'captionText',
-            'listOfChoices'
+        childViews: [
+            'backButton', 'captionText', 'listOfChoices'
         ],
 
-    listOfChoices: SDL.List.extend( {
-        elementId: 'perform_interaction_view_list',
-        itemsOnPage: 5,
-        items: []
-    } ),
+        listOfChoices: SDL.List.extend( {
+            elementId: 'perform_interaction_view_list',
+            itemsOnPage: 5,
+            items: []
+        }),
 
-    timer: null,
+        timer: null,
 
-    /**
-     * Identifier of current request
-     */
-    performInteractionRequestID: null,
+        /**
+         * Identifier of current request
+         */
+        performInteractionRequestID: null,
 
-    /**
-     * Deactivate window
-     */
-    deactivate: function( ABORTED ) {
+        /**
+         * Deactivate window
+         */
+        deactivate: function(ABORTED) {
 
-        clearTimeout( this.timer );
-        this.set( 'active', false );
+            clearTimeout(this.timer);
+            this.set('active', false);
 
-        if( ABORTED ){
-            SDL.SDLController.interactionChoiseCloseResponse( SDL.SDLModel.resultCode["ABORTED"], this.performInteractionRequestID );
+            if (ABORTED) {
+                SDL.SDLController
+                    .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["ABORTED"],
+                        this.performInteractionRequestID);
+            } else {
+                SDL.SDLController
+                    .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["TIMED_OUT"],
+                        this.performInteractionRequestID);
+            }
+        },
+
+        /**
+         * Clean choices caption and list before new proform
+         */
+        clean: function() {
+
+            this.set('captionText.content', 'Interaction Choices');
+            this.listOfChoices.items = [];
+            this.listOfChoices.list.refresh();
+        },
+
+        /**
+         * Update choises list with actual set id
+         * 
+         * @param data:
+         *            Array
+         */
+        preformChoices: function(data, performInteractionRequestID, timeout) {
+
+            if (!data) {
+                Em.Logger.error('No choices to preform');
+                return;
+            }
+
+            this
+                .set('performInteractionRequestID', performInteractionRequestID);
+
+            var i = 0, length = data.length, self = this;
+
+            // temp for testing
+            for (i = 0; i < length; i++) {
+                this.listOfChoices.items
+                    .push( {
+                        type: SDL.Button,
+                        params: {
+                            text: data[i].menuName,
+                            choiceID: data[i].choiceID,
+                            action: 'onChoiceInteraction',
+                            onDown: false,
+                            target: 'SDL.SDLAppController',
+                            performInteractionRequestID: performInteractionRequestID,
+                            templateName: 'text',
+                            icon: data[i].image ? data[i].image.value : null
+                        }
+                    });
+            }
+
+            this.listOfChoices.list.refresh();
+
+            clearTimeout(this.timer);
+            this.timer = setTimeout(function() {
+
+                self.deactivate(false);
+            }, timeout);
         }
-    },
-
-    /**
-     * Clean choices caption and list before new proform
-     */
-    clean: function() {
-        this.set( 'captionText.content', 'Interaction Choices' );
-        this.listOfChoices.items = [];
-        this.listOfChoices.list.refresh();
-    },
-
-    /**
-     * Update choises list with actual set id
-     * 
-     * @param data: Array
-     */
-    preformChoices: function( data, performInteractionRequestID, timeout ) {
-
-        if( !data ){
-            Em.Logger.error( 'No choices to preform' );
-            return;
-        }
-
-        this.set( 'performInteractionRequestID', performInteractionRequestID );
-
-        var i = 0, length = data.length, self = this;
-
-        // temp for testing
-        for( i = 0; i < length; i++ ){
-            this.listOfChoices.items.push( {
-                type: SDL.Button,
-                params: {
-                    text: data[i].menuName,
-                    choiceID: data[i].choiceID,
-                    action: 'onChoiceInteraction',
-                    onDown: false,
-                    target: 'SDL.SDLAppController',
-                    performInteractionRequestID: performInteractionRequestID,
-                    templateName: 'text',
-                    icon: data[i].image ? data[i].image.value : null
-                }
-            } );
-        }
-
-        this.listOfChoices.list.refresh();
-
-        clearTimeout( this.timer );
-        this.timer = setTimeout( function() {
-            self.deactivate( true );
-        }, timeout );
-    }
-} );
+    });
