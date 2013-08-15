@@ -48,6 +48,15 @@ namespace commands {
  **/
 class PerformInteractionRequest : public CommandRequestImpl {
   public:
+    /*
+     * @brief Typedef for InteractionMode
+     */
+    typedef enum {
+      MANUAL_ONLY              = 0,
+      VR_ONLY,
+      BOTH
+    } InteractionMode;
+
     /**
      * @brief PerformInteractionRequest class constructor
      *
@@ -88,6 +97,14 @@ class PerformInteractionRequest : public CommandRequestImpl {
      * @param app_id Application ID
      */
     void SendTTSSpeakRequest(Application* const app);
+
+
+    /*
+     * @brief Sends UI Show VR help request to HMI
+     *
+     * @param app_id Application ID
+     */
+    void SendUIShowVRHelpRequest(Application* const app);
 
     /*
      * @brief Checks if incoming choice set doesn't has similar menu names.

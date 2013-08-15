@@ -189,6 +189,7 @@ const char timeout_prompt[] = "timeoutPrompt";
 const char scroll_message_body[] = "scrollableMessageBody";
 const char data_result[] = "dataResult";
 const char dtc_list[] = "dtcList";
+const char interaction_mode[] = "interactionMode";
 }  // namespace strings
 
 namespace mobile_notification {

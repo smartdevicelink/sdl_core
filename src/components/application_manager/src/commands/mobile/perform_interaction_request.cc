@@ -82,17 +82,47 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  if (!CheckChoiceSetVRSynonyms(app)) {
-    return;
+  switch ((*message_)[strings::msg_params][strings::interaction_mode].asInt()) {
+    case InteractionMode::BOTH: {
+      if (!CheckChoiceSetVRSynonyms(app)) {
+        return;
+      }
+
+      if (!CheckChoiceSetMenuNames(app)) {
+        return;
+      }
+
+      app->set_perform_interaction_active(true);
+      SendVRAddCommandRequest(app);
+      SendUIPerformInteractionRequest(app);
+      break;
+    }
+    case InteractionMode::MANUAL_ONLY: {
+      if (!CheckChoiceSetMenuNames(app)) {
+        return;
+      }
+
+      app->set_perform_interaction_active(true);
+      SendUIPerformInteractionRequest(app);
+      break;
+    }
+    case InteractionMode::VR_ONLY: {
+      if (!CheckChoiceSetVRSynonyms(app)) {
+        return;
+      }
+
+      // TODO (DK): need to implement timeout
+      app->set_perform_interaction_active(true);
+      SendUIShowVRHelpRequest(app);
+      SendVRAddCommandRequest(app);
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Unknown interaction mode");
+      return;
+    }
   }
 
-  if (!CheckChoiceSetMenuNames(app)) {
-    return;
-  }
-
-  app->set_perform_interaction_active(true);
-  SendVRAddCommandRequest(app);
-  SendUIPerformInteractionRequest(app);
   SendTTSSpeakRequest(app);
 
   // TODO (DK): need to implement timeout TTS speak request.
@@ -185,6 +215,20 @@ void PerformInteractionRequest::SendTTSSpeakRequest(Application* const app) {
   msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, false);
+}
+
+void PerformInteractionRequest::SendUIShowVRHelpRequest(
+    Application* const app) {
+  /*
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::vr_help_title] = (*app->vr_help_title());
+  msg_params[strings::vr_help] = (*app->vr_help());
+  msg_params[strings::app_id] = app->app_id();
+
+  CreateHMIRequest(hmi_apis::FunctionID::UI_ShowVrHelp, msg_params, false);
+  */
 }
 
 bool PerformInteractionRequest::CheckChoiceSetMenuNames(
