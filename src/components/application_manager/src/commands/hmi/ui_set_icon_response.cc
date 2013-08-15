@@ -57,7 +57,7 @@ void UISetIconResponse::Run() {
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOG4CXX_ERROR(logger_, "There is no pending response");
     return;
   }
 
