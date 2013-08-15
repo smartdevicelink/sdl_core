@@ -106,12 +106,13 @@ public class MediaEncoder extends AbstractMediaCoder implements MediaCoderState 
         return getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2;
     }
 
-    public void enqueueFrame(int inputBufIndex, long presentationTimeUs, PipedInputStream reader) {
+    public byte[] enqueueFrame(int inputBufIndex, long presentationTimeUs, PipedInputStream reader) {
         ByteBuffer encoderInputBuffer = getEncoder().getInputBuffers()[inputBufIndex];
         encoderInputBuffer.clear();
         byte[] dataToEncode = getDataToEncode(reader);
         encoderInputBuffer.put(dataToEncode, 0, dataToEncode.length);
         getEncoder().queueInputBuffer(inputBufIndex, 0, frameSize(), presentationTimeUs, 0);
+        return dataToEncode;
     }
 
     // Send an empty frame with the end-of-stream flag set.  If we set EOS

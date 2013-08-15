@@ -56,7 +56,7 @@ public class VideoStreamingActivity extends Activity {
     }
 
     private void configureLogger() {
-        ALog.setTag("DecodeActivity");
+        ALog.setTag("AndroidVideoStreaming");
         ALog.setLevel(ALog.Level.V);
     }
 
@@ -76,13 +76,14 @@ public class VideoStreamingActivity extends Activity {
 
         @Override
         public void run() {
-
+            runTcpServer();
         }
 
         private void runTcpServer() {
             ServerSocket ss = null;
             try {
-                ss = new ServerSocket(80);
+                ss = new ServerSocket(21111);
+                ALog.d("Server created " + ss.getInetAddress().toString());
                 //accept connections
                 Socket s = ss.accept();
                 BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));

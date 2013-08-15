@@ -107,7 +107,9 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     public void endStream(View v) {
+        mBitmapGenerator.shouldStop();
         mPlayer.videoAvcCoder.shouldStop();
+
     }
 
     private byte[] createTestByteArray() {
@@ -124,12 +126,8 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         private final PipedOutputStream pipedOutputStream;
         private boolean stop = false;
 
-        public synchronized boolean isStop() {
-            return stop;
-        }
-
-        public synchronized void setStop(boolean shouldStop) {
-            this.stop = shouldStop;
+        public synchronized void shouldStop() {
+            this.stop = true;
         }
 
         public synchronized PipedOutputStream getPipedOutputStream() {
