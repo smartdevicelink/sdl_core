@@ -455,8 +455,6 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
         ui_msg_params[strings::vr_help] = (*app->vr_help());
       }
       ui_msg_params[strings::app_id] = app->app_id();
-
-      (*show_vr_help)[strings::msg_params] = ui_msg_params;
     }
   }
 
@@ -470,6 +468,7 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
     commands::CommandImpl::hmi_protocol_type_;
   (*show_vr_help)[strings::params][strings::correlation_id] =
     ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  (*show_vr_help)[strings::msg_params] = ui_msg_params;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(show_vr_help);
 }
@@ -890,11 +889,13 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
   static unsigned int tab = 0;
   std::string tab_buffer;
 
-  if (tab == 0)
+  if (tab == 0) {
     printf("\n-------------------------------------------------------------");
+  }
 
-  for (unsigned int i = 0; i < tab; ++i)
+  for (unsigned int i = 0; i < tab; ++i) {
     tab_buffer += "\t";
+  }
 
   switch (object.getType()) {
     case NsSmartDeviceLink::NsSmartObjects::SmartType_Array: {
@@ -913,7 +914,7 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
       std::set<std::string> keys = object.enumerate();
 
       for (std::set<std::string>::const_iterator key = keys.begin();
-          key != keys.end(); key++) {
+           key != keys.end(); key++) {
         ++tab;
 
         printf("\n%s%s: ", tab_buffer.c_str(), (*key).c_str());
@@ -945,10 +946,11 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
       break;
   }
 
-  if (0 != tab)
+  if (0 != tab) {
     --tab;
-  else
+  } else {
     printf("\n-------------------------------------------------------------\n");
+  }
 
   return true;
 }

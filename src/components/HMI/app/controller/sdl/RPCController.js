@@ -1841,7 +1841,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ShowVrHelp
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1856,23 +1856,17 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if ("appID" in params) {
 
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'appID' does not exists!"
-                        };
+                        if (typeof params.appID != 'number') {
 
-                        return this.resultStruct;
-                    }
-                    if (typeof params.appID != 'number') {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Wrong type of parameter 'appID'!"
+                            };
 
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'appID'!"
-                        };
-
-                        return this.resultStruct;
+                            return this.resultStruct;
+                        }
                     }
 
                     this.resultStruct = {
