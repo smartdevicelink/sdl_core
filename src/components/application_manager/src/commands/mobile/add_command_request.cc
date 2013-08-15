@@ -188,13 +188,14 @@ bool AddCommandRequest::CheckCommandVRSynonym(const Application* app) {
     for (size_t i = 0; i < (*it->second)[strings::vr_commands].length(); ++i) {
       for (size_t j = 0; j < (*message_)[strings::msg_params]
                                         [strings::vr_commands].length(); ++j) {
-        if ((*it->second)[strings::vr_commands][i].asString() ==
-            (*message_)[strings::msg_params][strings::vr_commands]
-                                                     [j].asString()) {
-          LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandVRSynonym"
+          std::string vr_cmd_i = (*it->second).asString();
+          std::string vr_cmd_j = (*message_).asString();
+
+          if (0 == strcasecmp(vr_cmd_i.c_str(), vr_cmd_j.c_str())) {
+            LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandVRSynonym"
                        "received command vr synonym already exist");
-          return false;
-        }
+            return false;
+          }
       }
     }
   }
