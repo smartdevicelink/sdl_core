@@ -79,11 +79,11 @@ class AlertRequest : public CommandRequestImpl {
   void SendSpeakRequest(int app_id);
 
   /*
-   * @brief Sends Basic communication playtone request
+   * @brief Sends Basic communication playtone notification
    *
    * @param app_id Id of application requested this RPC
    */
-  void SendPlayToneRequest(int app_id);
+  void SendPlayToneNotification(int app_id);
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };

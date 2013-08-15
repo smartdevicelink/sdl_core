@@ -52,9 +52,6 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
 
-  (*message_)[strings::params][strings::message_type] =
-    MessageType::kNotification;
-
   const std::set<Application*>& applications =
     ApplicationManagerImpl::instance()->applications();
 

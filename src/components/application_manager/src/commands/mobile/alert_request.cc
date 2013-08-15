@@ -81,7 +81,7 @@ void AlertRequest::Run() {
   }
 
   SendAlertRequest(app->app_id());
-  SendPlayToneRequest(app->app_id());
+  SendPlayToneNotification(app->app_id());
   SendSpeakRequest(app->app_id());
 }
 
@@ -145,7 +145,7 @@ void AlertRequest::SendSpeakRequest(int app_id) {
   }
 }
 
-void AlertRequest::SendPlayToneRequest(int app_id) {
+void AlertRequest::SendPlayToneNotification(int app_id) {
   // check playtone parameter
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {

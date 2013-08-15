@@ -61,22 +61,6 @@ void OnDriverDistractionNotification::Run() {
       (*message_)[strings::msg_params][hmi_notification::state].asInt());
   ApplicationManagerImpl::instance()->set_driver_distraction(state);
 
-  std::set<Application*>::const_iterator it = app_list.begin();
-  for (; app_list.end() != it; ++it) {
-    const Application* app = *it;
-    if (NULL != app) {
-      const mobile_api::HMILevel::eType hmiLevel = app->hmi_level();
-      if (mobile_api::HMILevel::HMI_FULL == hmiLevel ||
-          mobile_api::HMILevel::HMI_BACKGROUND == hmiLevel) {
-        NotifyMobileApp(app);
-      }
-    }
-  }
-  return;
-}
-
-void OnDriverDistractionNotification::NotifyMobileApp(
-  const Application* app) {
   smart_objects::SmartObject* on_driver_distraction =
     new smart_objects::SmartObject();
 
@@ -88,11 +72,8 @@ void OnDriverDistractionNotification::NotifyMobileApp(
   (*on_driver_distraction)[strings::params][strings::function_id] =
       mobile_api::FunctionID::OnDriverDistractionID;
 
-  (*on_driver_distraction)[strings::params][strings::message_type] =
-      MessageType::kNotification;
-
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
-      (*message_)[strings::msg_params][hmi_notification::state];
+      state;
 
   SendNotificationToMobile(on_driver_distraction);
 }
