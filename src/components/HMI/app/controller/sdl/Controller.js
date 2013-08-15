@@ -44,7 +44,7 @@ SDL.SDLController = Em.Object
             if (SDL.TBTClientStateView.active || SDL.VehicleInfo.active
                 || SDL.DriverDistraction.active || SDL.ExitApp.active
                 || SDL.SliderView.active || SDL.InteractionChoicesView.active
-                || SDL.ScrollableMessage.active) { return 'HMI_OBSCURED'; }
+                || SDL.ScrollableMessage.active || SDL.VRHelpListView.active) { return 'HMI_OBSCURED'; }
             if (SDL.OptionsView.active) { return 'MENU'; }
             if (SDL.States.info.nonMedia.active
                 || SDL.States.media.sdlmedia.active) {
@@ -62,7 +62,8 @@ SDL.SDLController = Em.Object
             'SDL.States.media.sdlmedia.active',
             'SDL.ExitApp.active',
             'SDL.ScrollableMessage.active',
-            'SDL.InteractionChoicesView.active'),
+            'SDL.InteractionChoicesView.active',
+            'SDL.VRHelpListView.active'),
         /**
          * List of SDL application models
          * 

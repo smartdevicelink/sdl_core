@@ -374,7 +374,9 @@
 
 /* 	SDL Perform Interaction Choise,
 	SDL TBT Turn List */
-#tbtTurnListView .list,#perform_interaction_view .list {
+#tbtTurnListView .list,
+#perform_interaction_view .list,
+#vr_help_list_view .list {
 	position: absolute;
 	width: 650px;
 	height: 251px;
@@ -383,11 +385,15 @@
 	top: 154px;
 }
 
-#tbtTurnListView .list span,#perform_interaction_view .list span {
+#tbtTurnListView .list span,
+#perform_interaction_view .list span,
+#vr_help_list_view .list span{
 	margin-left: 15px;
 }
 
-#tbtTurnListView .list-content,#perform_interaction_view .list-content {
+#tbtTurnListView .list-content,
+#perform_interaction_view .list-content,
+#vr_help_list_view .list-content {
 	width: 578px;
 }
 

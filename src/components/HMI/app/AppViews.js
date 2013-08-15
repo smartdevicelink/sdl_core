@@ -48,6 +48,7 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.TBTTurnList,
         SDL.OptionsView,
         SDL.InteractionChoicesView,
+        SDL.VRHelpListView,
         SDL.ScrollableMessage,
         SDL.SliderView,
         SDL.StatusClimateView,

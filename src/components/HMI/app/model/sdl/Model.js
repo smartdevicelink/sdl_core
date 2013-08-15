@@ -339,6 +339,16 @@ SDL.SDLModel = Em.Object
         },
 
         /**
+         * Method to VRHelpList on UI with request parameters
+         * 
+         * @param {Object}
+         */
+        ShowVrHelp: function(params) {
+
+            SDL.VRHelpListView.showVRHelp(params);
+        },
+
+        /**
          * Method to set language for UI component with parameters sent from
          * SDLCore to UIRPC
          * 
