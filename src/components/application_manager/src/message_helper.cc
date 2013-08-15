@@ -424,25 +424,33 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if (!app) {
-    // TODO(PV): default params
-    ui_msg_params[strings::vr_help_title] = "Available Vr Commands List";
+    ui_msg_params[strings::vr_help_title] =
+      profile::Profile::instance()->vr_help_title();
     smart_objects::SmartObject* vr_commands_array = CreateGeneralVrCommand();
     if (!vr_commands_array) {
       return;
     }
 
-    ui_msg_params[strings::vr_help] = *vr_commands_array;
+    ui_msg_params[strings::vr_help] = smart_objects::SmartObject(smart_objects::SmartType_Array);
     int help_size = vr_commands_array->length();
+    for (int i = 0; i < help_size; ++i) {
+      smart_objects::SmartObject item(smart_objects::SmartType_Map);
+      item[strings::text] = (*vr_commands_array).getElement(i);
+      item[strings::position] = i;
+      ui_msg_params[strings::vr_help][i++] = item;
+    }
     const std::set<Application*>& apps =
       ApplicationManagerImpl::instance()->applications();
-    int i = 0;
+    int i = help_size;
     for (std::set<Application*>::const_iterator it = apps.begin();
          apps.end() != it;
          ++it) {
       if ((*it)->vr_synonyms()) {
         for (int j = 0; j < (*((*it)->vr_synonyms())).length(); ++j) {
-          ui_msg_params[strings::vr_help][i++] =
-            (*((*it)->vr_synonyms())).getElement(j);
+          smart_objects::SmartObject item(smart_objects::SmartType_Map);
+          item[strings::text] = (*((*it)->vr_synonyms())).getElement(j);
+          item[strings::position] = i;
+          ui_msg_params[strings::vr_help][i++] = item;
         }
       }
     }
@@ -455,6 +463,8 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
         ui_msg_params[strings::vr_help] = (*app->vr_help());
       }
       ui_msg_params[strings::app_id] = app->app_id();
+    } else {
+      // TODO(PV): default params
     }
   }
 

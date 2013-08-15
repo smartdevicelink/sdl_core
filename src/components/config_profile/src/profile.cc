@@ -98,6 +98,10 @@ const unsigned int Profile::max_cmd_id() const {
   return max_cmd_id_;
 }
 
+const std::string& Profile::vr_help_title() const {
+  return vr_help_title_;
+}
+
 const uint16_t& Profile::server_port() const {
   return server_port_;
 }
@@ -196,6 +200,15 @@ void Profile::UpdateValues() {
       time_out_promt_.push_back(std::string(str));
       str = strtok(NULL, ",");
     }
+  }
+
+  vr_help_title_ = "";
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "GLOBAL PROPERTIES", "HelpTitle", value))
+      && ('\0' != *value)) {
+    vr_help_title_ = value;
+    LOG4CXX_INFO(logger_, "Add HelpTitle string" << vr_help_title_);
   }
 
   vr_commands_.clear();

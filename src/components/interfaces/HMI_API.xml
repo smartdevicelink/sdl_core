@@ -855,13 +855,13 @@
 </struct>
 
 <struct name="VrHelpItem">
-  <param name="text" maxlength="500" type="String">
+  <param name="text" maxlength="500" type="String" mandatory="true">
     <description>Text to display for VR Help item</description>
   </param>
-  <param name="image" type="Common.Image">
+  <param name="image" type="Common.Image" mandatory="false">
     <description>Image struct for VR Help item</description>
   </param>
-  <param name="position" type="Integer" minvalue="1" maxvalue="8">
+  <param name="position" type="Integer" minvalue="1" maxvalue="8" mandatory="true">
     <description>Position to display item in VR Help list</description>
   </param>
 </struct>

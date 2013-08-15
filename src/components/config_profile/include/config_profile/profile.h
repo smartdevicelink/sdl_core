@@ -115,6 +115,11 @@ class Profile {
       */
     bool is_mixing_audio_supported() const;
 
+    /**
+      * @brief Returns title for Vr Help
+      */
+    const std::string& vr_help_title() const;
+
     // Members section
 
   protected:
@@ -175,6 +180,7 @@ class Profile {
     uint64_t                        min_tread_stack_size_;
     bool                            is_mixing_audio_supported_;
     unsigned int                    max_cmd_id_;
+    std::string                     vr_help_title_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };
