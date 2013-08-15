@@ -134,10 +134,16 @@ public class WiProProtocol extends AbstractProtocol {
 				
 				int currentOffset = 0;
 				byte frameSequenceNumber = 0;
-				
+
 				for (int i = 0; i < frameCount; i++) {
 					if (i < (frameCount - 1)) {
-						frameSequenceNumber = (byte)(i + 1);
+						++frameSequenceNumber;
+						if (frameSequenceNumber ==
+								ProtocolFrameHeader.FrameDataFinalConsecutiveFrame) {
+							// we can't use 0x00 as frameSequenceNumber, because
+							// it's reserved for the last frame
+							++frameSequenceNumber;
+						}
 					} else {
 						frameSequenceNumber = ProtocolFrameHeader.FrameDataFinalConsecutiveFrame;
 					} // end-if

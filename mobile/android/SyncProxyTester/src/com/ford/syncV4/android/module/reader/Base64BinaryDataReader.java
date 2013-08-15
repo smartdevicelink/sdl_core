@@ -1,6 +1,10 @@
 package com.ford.syncV4.android.module.reader;
 
+import android.util.Log;
+
 import com.ford.syncV4.util.Base64;
+
+import java.io.IOException;
 
 /**
  * Decodes the binary data from a Base64-encoded input string. The string must
@@ -10,6 +14,7 @@ import com.ford.syncV4.util.Base64;
  * 
  */
 public class Base64BinaryDataReader implements BinaryDataReader {
+    private static final String TAG = Base64BinaryDataReader.class.getSimpleName();
 	private static final String BASE64_PREFIX = "base64:";
 
 	/*
@@ -37,7 +42,12 @@ public class Base64BinaryDataReader implements BinaryDataReader {
 		}
 		
 		String str = input.substring(BASE64_PREFIX.length());
-		return Base64.decode(str);
-	}
+        try {
+            return Base64.decode(str);
+        } catch (IOException e) {
+            Log.e(TAG, "Can't decode base64 string", e);
+            return null;
+        }
+    }
 
 }

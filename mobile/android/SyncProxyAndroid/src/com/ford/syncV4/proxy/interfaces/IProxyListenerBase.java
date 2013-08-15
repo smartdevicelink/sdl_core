@@ -10,7 +10,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
-import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
@@ -41,6 +40,7 @@ import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
@@ -48,7 +48,8 @@ import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 
 public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 											ISyncEncodedSyncPDataListener,
-											ISyncTBTClientStateListener{
+											ISyncSyncPDataListener,
+											ISyncTBTClientStateListener {
 
 	/**
 	 * onOnHMIStatus being called indicates that there has been an HMI Level change,
@@ -160,6 +161,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
 	public void onEncodedSyncPDataResponse(EncodedSyncPDataResponse response);
+
+	public void onSyncPDataResponse(SyncPDataResponse response);
 	
 	/**
 	 * onPerformInteractionResponse being called indicates that SYNC has
@@ -290,6 +293,4 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	public void onShowConstantTBTResponse(ShowConstantTBTResponse response);
 	
 	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
-	
-	public void onDialNumberResponse(DialNumberResponse response);
 }

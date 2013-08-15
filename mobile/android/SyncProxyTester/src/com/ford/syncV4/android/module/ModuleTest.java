@@ -49,7 +49,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
-import com.ford.syncV4.proxy.rpc.DialNumber;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
@@ -73,6 +72,7 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
@@ -81,7 +81,6 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class ModuleTest {
-	
 	/**
 	 * Wraps the {@link RPCRequest} class to add some extra fields (pause after
 	 * the request; whether to generate invalid JSON; custom JSON to set in
@@ -202,6 +201,8 @@ public class ModuleTest {
 	 * PutFile message).
 	 */
 	private final static String BINARY_TAG_NAME = "Binary";
+    /** Tag name for float numbers. */
+    private static final String TAG_FLOAT = "Float";
 	/**
 	 * Attribute name for binary data, because it requires special handling when
 	 * creating certain messages (e.g. calling PutFile's
@@ -504,8 +505,8 @@ public class ModuleTest {
 									rpc = new SetMediaClockTimer();
 								} else if (name.equalsIgnoreCase(Names.EncodedSyncPData)) {
 									rpc = new EncodedSyncPData();
-								} else if (name.equalsIgnoreCase(Names.DialNumber)) {
-									rpc = new DialNumber();
+								} else if (name.equalsIgnoreCase(Names.SyncPData)) {
+									rpc = new SyncPData();
 								} else if (name.equalsIgnoreCase(Names.PerformAudioPassThru)) {
 									rpc = new PerformAudioPassThru();
 								} else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {
@@ -852,6 +853,12 @@ public class ModuleTest {
 							try {hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));} 
 							catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
 						}
+                    } else if (tempName.equalsIgnoreCase(TAG_FLOAT)) {
+                        logParserDebugInfo("In " + TAG_FLOAT);
+                        if (parser.getAttributeName(0) != null) {
+                            try {hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));}
+                            catch (Exception e) {Log.e(TAG, "Unable to parse " + TAG_FLOAT);}
+                        }
 					} else if (tempName.equalsIgnoreCase("Boolean")) {
 						logParserDebugInfo("In Boolean");
 						if (parser.getAttributeName(0) != null) {

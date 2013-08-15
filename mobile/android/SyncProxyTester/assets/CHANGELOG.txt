@@ -1,3 +1,39 @@
+[CW33]
+* SyncProxyAndroid SDK: fix two bugs with sending huge RPC requests.
+
+[CW32]
++ Add Float tag parsing to XML tests parser.
+* Remove the persistent top-level submenu with id = 0.
+* SyncProxyAndroid SDK: temporarily turn on verbose logging of BTTransport events.
+* SyncProxyAndroid SDK: update result code values.
+
+[CW31]
+* SyncProxyAndroid SDK: fix a crash on sending GenericRequest message.
+* SyncProxyAndroid SDK: cherry-pick Ford's changes: add SyncPData function.
++ Add the SetDisplayLayout dialog.
+- SyncProxyAndroid SDK: remove DialNumber function.
+* SyncProxyAndroid SDK: update FunctionID values. NB: The SDLCore must use the same values to be compatible!
+* SyncProxyAndroid SDK: add incoming JSON message check.
+* SyncProxyAndroid SDK: log when protocol version is set, and each marshalled request.
+* SyncProxyTester always uses protocol version 2.
+* SyncProxyAndroid SDK: VehicleData parameters are sent as booleans (based on Ford's changes).
+* SyncProxyAndroid SDK: cherry-pick Ford's changes: update GetVehicleDataResponse class.
+* SyncProxyAndroid SDK: fix a bug when negative function ID corrupted the binary RPC header.
+* Fix a crash with EncodedSyncPData message (replaced the Base64 codec).
+
+[CW30]
+* GetDTCs dialog and message: add dtcMask and remove encrypted parameter.
++ PerformAudioPassThru dialog and message: add muteAudio parameter.
+* ImageType value is DYNAMIC by default.
+* SetGlobalProperties, AddCommand, CreateInteractionChoiceSet, PerformInteraction dialogs: allow to set multiple VR commands/synonyms parameters as comma-separated strings.
+* Update VehicleData and Language values.
+* ButtonSubscriptions dialog: add ButtonName.CUSTOM_NAME value.
++ AddSubMenu dialog: add subMenuID and position parameters.
++ AddCommand dialog: add commandID and position parameters.
++ Show dialog: add graphic's image type parameter.
+* AddCommand dialog: the user can omit sending parentID parameter.
++ Add the EncodedSyncPData dialog.
+
 [CW28]
 * Cherry-pick Ford's changes: generate test error report with actual and expected responses.
 

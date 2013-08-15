@@ -2,7 +2,6 @@ package com.ford.syncV4.proxy.interfaces;
 
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
-import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
@@ -117,9 +116,7 @@ public interface ISyncALMLifeCycleListener {
 	public void onShowConstantTBTResponse(ShowConstantTBTResponse response);
 
 	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
-	
-	public void onDialNumberResponse(DialNumberResponse response);
-	
+
 	/**
 	 * **Deprecated** - onSyncConntected() being called indicates that the proxy, for the first time in it's active 
 	 * life-cycle, has entered a state in which the application may create SYNC related resources (addCommands, ChoiceSets). 

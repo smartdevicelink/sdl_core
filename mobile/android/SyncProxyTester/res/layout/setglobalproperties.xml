@@ -1,110 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scrollView1"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
-    
-	<LinearLayout
-	    android:id="@+id/setglobalproperties_Root"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_marginLeft="10dip"
-	    android:layout_marginRight="10dip"
-	    android:minWidth="300dp"
-	    android:orientation="vertical"
-	    android:paddingLeft="10dip"
-	    android:paddingRight="10dip" >
-	
-	    <CheckBox
-	        android:id="@+id/setglobalproperties_choiceHelpPrompt"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:checked="true"
-	        android:text="Help prompt (comma-separated)" />
-	
-	    <EditText
-	        android:id="@+id/setglobalproperties_helpPrompt"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:freezesText="true"
-	        android:inputType="textCapSentences"
-	        android:text="Help prompt 1,Second help prompt"
-	        android:visibility="visible" >
-	    </EditText>
-	
-	    <CheckBox
-	        android:id="@+id/setglobalproperties_choiceTimeoutPrompt"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:checked="true"
-	        android:text="Timeout prompt (comma-separated)" />
-	
-	    <EditText
-	        android:id="@+id/setglobalproperties_timeoutPrompt"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:freezesText="true"
-	        android:inputType="textCapSentences"
-	        android:text="First timeout prompt,Another timeout prompt"
-	        android:visibility="visible" >
-	    </EditText>
-	
-	    <CheckBox
-	        android:id="@+id/setglobalproperties_choiceVRHelpTitle"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:checked="true"
-	        android:text="VR help title" />
-	
-	    <EditText
-	        android:id="@+id/setglobalproperties_vrHelpTitle"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:freezesText="true"
-	        android:inputType="textCapSentences"
-	        android:text="This is the VR help title"
-	        android:visibility="visible" />
-	
-	    <LinearLayout
-	        android:id="@+id/setglobalproperties_vrHelpItemLayout"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
-	
-	        <CheckBox
-	            android:id="@+id/setglobalproperties_choiceVRHelpItem"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:checked="true"
-	            android:text="VR help item #" />
-	
-	        <EditText
-	            android:id="@+id/setglobalproperties_vrHelpItemPos"
-	            android:layout_width="0dp"
-	            android:layout_height="wrap_content"
-	            android:layout_weight="1"
-	            android:inputType="number"
-	            android:text="1" >
-	        </EditText>
-	
-	    </LinearLayout>
-	
-	    <EditText
-	        android:id="@+id/setglobalproperties_vrHelpItemText"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:freezesText="true"
-	        android:inputType="textCapSentences"
-	        android:text="VR help item text"
-	        android:visibility="visible" />
-	
-	    <EditText
-	        android:id="@+id/setglobalproperties_vrHelpItemImage"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:freezesText="true"
-	        android:inputType="textCapSentences"
-	        android:text="imageFilename"
-	        android:visibility="visible" />
-	
-	</LinearLayout>
+            android:id="@+id/scrollView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:id="@+id/setglobalproperties_Root"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="10dip"
+            android:minWidth="300dp"
+            android:orientation="vertical"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip">
+
+        <CheckBox
+                android:id="@+id/setglobalproperties_choiceHelpPrompt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/setglobalproperties_helpPrompt"/>
+
+        <EditText
+                android:id="@+id/setglobalproperties_helpPrompt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapSentences"
+                android:text="@string/setglobalproperties_helpPromptDefault"
+                android:visibility="visible"/>
+
+        <CheckBox
+                android:id="@+id/setglobalproperties_choiceTimeoutPrompt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/setglobalproperties_timeoutPrompt"/>
+
+        <EditText
+                android:id="@+id/setglobalproperties_timeoutPrompt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapSentences"
+                android:text="@string/setglobalproperties_timeoutPromptDefault"
+                android:visibility="visible"/>
+
+        <CheckBox
+                android:id="@+id/setglobalproperties_choiceVRHelpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/setglobalproperties_vrHelpTitle"/>
+
+        <EditText
+                android:id="@+id/setglobalproperties_vrHelpTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapSentences"
+                android:text="@string/setglobalproperties_vrHelpTitleDefault"
+                android:visibility="visible"/>
+
+        <CheckBox
+                android:id="@+id/setglobalproperties_choiceVRHelpItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/setglobalproperties_vrHelp"/>
+
+        <EditText
+                android:id="@+id/setglobalproperties_vrHelpItemPos"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:inputType="text"
+                android:text="@string/setglobalproperties_vrHelpItemPosDefault"/>
+
+        <EditText
+                android:id="@+id/setglobalproperties_vrHelpItemText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapSentences"
+                android:text="@string/setglobalproperties_vrHelpItemDefault"
+                android:visibility="visible"/>
+
+        <EditText
+                android:id="@+id/setglobalproperties_vrHelpItemImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapSentences"
+                android:text="@string/setglobalproperties_vrHelpItemImageDefault"
+                android:visibility="visible"/>
+
+    </LinearLayout>
 </ScrollView>

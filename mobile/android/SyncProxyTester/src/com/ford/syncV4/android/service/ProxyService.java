@@ -47,7 +47,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
-import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
@@ -64,6 +63,7 @@ import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
@@ -87,6 +87,7 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
@@ -232,9 +233,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				boolean isMediaApp = settings.getBoolean(
 						Const.PREFS_KEY_ISMEDIAAPP,
 						Const.PREFS_DEFAULT_ISMEDIAAPP);
-				int versionNumber = settings.getInt(
-						Const.PREFS_KEY_PROTOCOLVERSION,
-						Const.PREFS_DEFAULT_PROTOCOLVERSION);
+				int versionNumber = getCurrentProtocolVersion();
 				String appName = settings.getString(Const.PREFS_KEY_APPNAME,
 						Const.PREFS_DEFAULT_APPNAME);
 				Language lang = Language.valueOf(settings.getString(
@@ -304,9 +303,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 
 	private int getCurrentProtocolVersion() {
-		return getSharedPreferences(Const.PREFS_NAME, 0).getInt(
-				Const.PREFS_KEY_PROTOCOLVERSION,
-				Const.PREFS_DEFAULT_PROTOCOLVERSION);
+		return Const.PROTOCOL_VERSION_2;
 	}
 	
 	private boolean getAutoSetAppIconFlag() {
@@ -552,36 +549,33 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				
 				if (hmiChange && firstHMIStatusChange) {
 					firstHMIStatusChange = false;
-					
-					boolean setAppIconSupported = getCurrentProtocolVersion() >= 2;
-					if (setAppIconSupported) {
-						InputStream is = null;
-						try {
-							PutFile putFile = new PutFile();
-							putFile.setFileType(FileType.GRAPHIC_PNG);
-							putFile.setSyncFileName(ICON_SYNC_FILENAME);
-							putFile.setCorrelationID(nextCorrID());
-							putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-							_msgAdapter.logMessage(putFile, true);
-							getProxyInstance().sendRPCRequest(putFile);
 
-							if (getAutoSetAppIconFlag()) {
-								SetAppIcon setAppIcon = new SetAppIcon();
-								setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-								setAppIcon.setCorrelationID(nextCorrID());
-								_msgAdapter.logMessage(setAppIcon, true);
-								getProxyInstance().sendRPCRequest(setAppIcon);
-							}
+                    InputStream is = null;
+                    try {
+                        PutFile putFile = new PutFile();
+                        putFile.setFileType(FileType.GRAPHIC_PNG);
+                        putFile.setSyncFileName(ICON_SYNC_FILENAME);
+                        putFile.setCorrelationID(nextCorrID());
+                        putFile.setBulkData(contentsOfResource(R.raw.fiesta));
+                        _msgAdapter.logMessage(putFile, true);
+                        getProxyInstance().sendRPCRequest(putFile);
 
-							// upload turn icons
-							sendIconFromResource(R.drawable.turn_left);
-							sendIconFromResource(R.drawable.turn_right);
-							sendIconFromResource(R.drawable.turn_forward);
-							sendIconFromResource(R.drawable.action);
-						} catch (SyncException e) {
-							Log.w(TAG, "Failed to set app icon", e);
-						}
-					}
+                        if (getAutoSetAppIconFlag()) {
+                            SetAppIcon setAppIcon = new SetAppIcon();
+                            setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+                            setAppIcon.setCorrelationID(nextCorrID());
+                            _msgAdapter.logMessage(setAppIcon, true);
+                            getProxyInstance().sendRPCRequest(setAppIcon);
+                        }
+
+                        // upload turn icons
+                        sendIconFromResource(R.drawable.turn_left);
+                        sendIconFromResource(R.drawable.turn_right);
+                        sendIconFromResource(R.drawable.turn_forward);
+                        sendIconFromResource(R.drawable.action);
+                    } catch (SyncException e) {
+                        Log.w(TAG, "Failed to set app icon", e);
+                    }
 				}
 			}
 		}
@@ -820,7 +814,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 	@Override
 	public void onEncodedSyncPDataResponse(EncodedSyncPDataResponse response) {
-		Log.i("syncp", response.getInfo() + response.getResultCode() + response.getSuccess());
+		Log.i("syncp", "onEncodedSyncPDataResponse: "+response.getInfo() + response.getResultCode() + response.getSuccess());
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
@@ -1280,8 +1274,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		else Log.i(TAG, "" + notification);
 		
 		EncodedSyncPDataHeader encodedSyncPDataHeader;
-		encodedSyncPDataHeader = EncodedSyncPDataHeader.parseEncodedSyncPDataHeader(
-				Base64.decode(notification.getData().get(0)));
+        try {
+            encodedSyncPDataHeader = EncodedSyncPDataHeader.parseEncodedSyncPDataHeader(
+                    Base64.decode(notification.getData().get(0)));
+        } catch (IOException e) {
+            Log.e(TAG, "Can't decode base64 string", e);
+            return;
+        }
 
 		if (encodedSyncPDataHeader.getServiceType() == 3 && encodedSyncPDataHeader.getCommandType() == 1) {
 			writeToFile(encodedSyncPDataHeader.getPayload());
@@ -1384,18 +1383,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 
 	@Override
-	public void onDialNumberResponse(DialNumberResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (isModuleTesting()) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
-	
-	@Override
 	public IBinder onBind(Intent intent) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("Service on Bind");
@@ -1427,5 +1414,25 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
+	}
+
+	@Override
+	public void onSyncPDataResponse(SyncPDataResponse response) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+        else Log.i(TAG, "" + response);
+
+        if (isModuleTesting()) {
+            ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+        }
+		
+	}
+
+	@Override
+	public void onOnSyncPData(OnSyncPData notification) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+        else Log.i(TAG, "" + notification);
 	}
 }

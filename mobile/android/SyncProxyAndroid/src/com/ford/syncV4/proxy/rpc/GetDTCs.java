@@ -23,14 +23,15 @@ public class GetDTCs extends RPCRequest {
     public Integer getEcuName() {
     	return (Integer) parameters.get(Names.ecuName);
     }
-    public void setEncrypted(Boolean encrypted) {
-    	if (encrypted != null) {
-    		parameters.put(Names.encrypted, encrypted);
-    	} else {
-    		parameters.remove(Names.encrypted);
-    	}
+
+    public void setDTCMask(Integer dtcMask) {
+        if (dtcMask != null) {
+            parameters.put(Names.dtcMask, dtcMask);
+        } else {
+            parameters.remove(Names.dtcMask);
+        }
     }
-    public Boolean getEncrypted() {
-    	return (Boolean) parameters.get(Names.encrypted);
+    public Integer getDTCMask() {
+        return (Integer) parameters.get(Names.dtcMask);
     }
 }

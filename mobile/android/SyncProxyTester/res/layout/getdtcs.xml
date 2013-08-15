@@ -1,36 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/itemRoot"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="10dip"
-    android:layout_marginRight="10dip"
-    android:minWidth="300px"
-    android:orientation="vertical"
-    android:paddingLeft="20dip"
-    android:paddingRight="20dip" >
+              android:id="@+id/itemRoot"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="10dip"
+              android:layout_marginRight="10dip"
+              android:minWidth="300dp"
+              android:orientation="vertical"
+              android:paddingLeft="20dip"
+              android:paddingRight="20dip">
 
-    <TextView 
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" 
-        android:layout_weight="1"
-        android:textStyle="bold"
-        android:text="ECU Name">
-    </TextView>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:text="@string/getdtcs_ecuName"/>
 
     <EditText
-        android:id="@+id/txtECUNameDTC"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:freezesText="true"
-        android:inputType="number"
-        android:maxLength="5"
-        android:text="2000"
-        android:visibility="visible" >
+            android:id="@+id/getdtcs_txtECUNameDTC"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="number"
+            android:maxLength="5"
+            android:text="@string/getdtcs_ecuNameDefault"/>
 
-    </EditText>
-    <CheckBox android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/chkEncryptedDTC"
-        android:text="Encrypted?" android:checked="false">
-    </CheckBox>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:text="@string/getdtcs_dtcMask"/>
+
+    <EditText
+            android:id="@+id/getdtcs_dtcMask"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="number"
+            android:maxLength="3"
+            android:text="@string/getdtcs_dtcMaskDefault"/>
+
 </LinearLayout>
