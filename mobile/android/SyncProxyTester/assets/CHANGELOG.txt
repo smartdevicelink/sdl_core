@@ -1,4 +1,5 @@
 [CW33]
+* Use SyncMsgVersion 2.1.
 + The user can send UnregisterAppInterface message from GUI.
 * SyncProxyAndroid SDK: fix two bugs with sending huge RPC requests.
 

@@ -87,6 +87,7 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
@@ -255,6 +256,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 								Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
 								Const.Transport.PREFS_DEFAULT_TRANSPORT_RECONNECT_DEFAULT);
 
+                SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+                syncMsgVersion.setMajorVersion(2);
+                syncMsgVersion.setMinorVersion(1);
 				if (transportType == Const.Transport.KEY_BLUETOOTH) {
 					_syncProxy = new SyncProxyALM(this,
 							/*sync proxy configuration resources*/null,
@@ -263,7 +267,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 							/*ngn media app*/null,
 							/*vr synonyms*/null,
 							/*is media app*/isMediaApp,
-							/*syncMsgVersion*/null,
+							syncMsgVersion,
 							/*language desired*/lang,
 							/*HMI Display Language Desired*/hmiLang,
 							/*App ID*/"8675309",
@@ -279,7 +283,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 							/*ngn media app*/null,
 							/*vr synonyms*/null,
 							/*is media app*/isMediaApp,
-							/*syncMsgVersion*/null,
+							syncMsgVersion,
 							/*language desired*/lang,
 							/*HMI Display Language Desired*/hmiLang,
 							/*App ID*/"8675308",
