@@ -108,6 +108,7 @@ void RegisterAppInterfaceRequest::Run() {
     SendRegisterAppInterfaceResponseToMobile(*application_impl);
     MessageHelper::SendOnAppRegisteredNotificationToHMI(*application_impl);
     MessageHelper::SendHMIStatusNotification(*application_impl);
+    MessageHelper::SendVrCommandsOnRegisterAppToHMI(application_impl);
   }
 }
 

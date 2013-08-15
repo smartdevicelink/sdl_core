@@ -49,7 +49,8 @@ Profile::Profile()
   , time_out_promt_()
   , server_port_(8087)
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
-  , is_mixing_audio_supported_(false) {
+  , is_mixing_audio_supported_(false)
+  , max_cmd_id_(2000000000) {
   UpdateValues();
 }
 
@@ -89,6 +90,13 @@ const std::vector<std::string>& Profile::time_out_promt() const {
   return time_out_promt_;
 }
 
+const std::vector<std::string>& Profile::vr_commands() const {
+  return vr_commands_;
+}
+
+const unsigned int Profile::max_cmd_id() const {
+  return max_cmd_id_;
+}
 
 const uint16_t& Profile::server_port() const {
   return server_port_;
@@ -149,6 +157,17 @@ void Profile::UpdateValues() {
       is_mixing_audio_supported_ = true;
     }
     LOG4CXX_INFO(logger_, "Set MixingAudioSupported to " << value);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "MaxCmdID", value))
+      && ('\0' != *value)) {
+    max_cmd_id_ = atoi(value);
+    if (max_cmd_id_ < 0) {
+      max_cmd_id_ = 20000000000;
+    }
+    LOG4CXX_INFO(logger_, "Set Maximum Command ID to " << max_cmd_id_);
   }
 
   help_promt_.clear();

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: ·
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,7 +10,7 @@
  * with the distribution. · Neither the name of the Ford Motor Company nor the
  * names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -59,7 +59,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request UpdateDeviceList
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -102,7 +102,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AllowDeviceToConnect
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -136,7 +136,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request UpdateAppList
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -179,7 +179,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request MixingAudioSupported
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -194,7 +194,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AllowAllApps
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -209,7 +209,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AllowApp
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -254,7 +254,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -269,7 +269,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetLanguage
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -284,7 +284,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request SetGlobalProperties
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -327,7 +327,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetSupportedLanguages
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -342,7 +342,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request StopSpeaking
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -357,7 +357,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Speak
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -418,7 +418,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ChangeRegistration
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -479,7 +479,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request OnLanguageChange
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -532,7 +532,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -547,7 +547,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Navigation.ShowConstantTBT
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -662,7 +662,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Navigation.UpdateTurnList
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -705,7 +705,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Navigation.AlertManeuver
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -731,7 +731,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -746,7 +746,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request UI.Alert
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -825,7 +825,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Show
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -880,7 +880,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Show
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -941,7 +941,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AddCommand
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1002,7 +1002,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request DeleteCommand
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1063,7 +1063,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AddSubMenu
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1133,7 +1133,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request DeleteSubMenu
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1205,7 +1205,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request PerformInteraction
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1302,7 +1302,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request SetMediaClockTimer
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1363,7 +1363,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request SetGlobalProperties
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1406,7 +1406,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetCapabilities
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1421,7 +1421,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ChangeRegistration
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1482,7 +1482,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetSupportedLanguages
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1497,7 +1497,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetLanguage
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1512,7 +1512,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request SetAppIcon
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1573,7 +1573,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Slider
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1688,7 +1688,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ScrollableMessage
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1767,7 +1767,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request PerformAudioPassThru
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1811,7 +1811,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request EndAudioPassThru
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1826,7 +1826,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ClosePopUp
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1894,7 +1894,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1909,7 +1909,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetVehicleType
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -1924,7 +1924,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ReadDID
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2003,7 +2003,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetDTCs
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2064,7 +2064,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetVehicleData
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2117,7 +2117,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2132,7 +2132,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetLanguage
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2147,7 +2147,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetSupportedLanguages
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2162,7 +2162,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AddCommand
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2213,23 +2213,16 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if ("appID" in params) {
+                        if (typeof params.appID != 'number') {
 
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'appID' does not exists!"
-                        };
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Wrong type of parameter 'appID'!"
+                            };
 
-                        return this.resultStruct;
-                    }
-                    if (typeof params.appID != 'number') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'appID'!"
-                        };
-
-                        return this.resultStruct;
+                            return this.resultStruct;
+                        }
                     }
 
                     this.resultStruct = {
@@ -2241,7 +2234,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request DeleteCommand
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2302,7 +2295,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ChangeRegistration
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */

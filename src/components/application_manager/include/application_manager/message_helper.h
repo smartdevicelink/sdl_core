@@ -136,6 +136,17 @@ class MessageHelper {
       const Application& application_impl);
 
     /**
+     * @brief Sendss Vr Command 'Help'
+     */
+    static void SendHelpVrCommand();
+
+    /**
+     * @brief Send Vr Synonyms of application name to HMI
+     * so that app can be activated via VR.
+     */
+    static void SendVrCommandsOnRegisterAppToHMI(Application* app);
+
+    /**
      * @brief Sends OnAppInterfaceUnregistered notification to mobile
      *
      *@param connection_key Connection key
@@ -184,6 +195,10 @@ class MessageHelper {
     static void SendShowRequestToHMI(const Application* app);
     static void SendShowConstantTBTRequestToHMI(const Application* app);
     static void SendAddCommandRequestToHMI(const Application* app);
+    static void SendAddVRCommandToHMI(
+      unsigned int cmd_id,
+      const smart_objects::SmartObject& vr_commands,
+      unsigned int app_id);
     static void SendAddSubMenuRequestToHMI(const Application* app);
     static void RemoveAppDataFromHMI(Application* const app);
     static void SendDeleteCommandRequestToHMI(Application* const app);
@@ -219,6 +234,7 @@ class MessageHelper {
     }
 
   private:
+    static smart_objects::SmartObject* CreateGeneralVrCommand() ;
     MessageHelper();
 
     static const VehicleData      vehicle_data_;

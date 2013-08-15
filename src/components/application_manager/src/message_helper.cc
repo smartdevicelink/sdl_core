@@ -154,6 +154,41 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
+smart_objects::SmartObject* MessageHelper::CreateGeneralVrCommand() {
+  smart_objects::SmartObject* vr_help_command =
+    new smart_objects::SmartObject(smart_objects::SmartType_Array);
+  if (!vr_help_command) {
+    return NULL;
+  }
+  smart_objects::SmartObject& help_object = *vr_help_command;
+  const std::vector<std::string>& vr_general_cmds =
+    profile::Profile::instance()->vr_commands();
+  for (int i = 0; i < vr_general_cmds.size(); ++i) {
+    help_object[i] = vr_general_cmds[i];
+  }
+  return vr_help_command;
+}
+
+void MessageHelper::SendHelpVrCommand() {
+  smart_objects::SmartObject* vr_help_command = CreateGeneralVrCommand();
+  if (!vr_help_command) {
+    return;
+  }
+  unsigned int max_cmd_id = profile::Profile::instance()->max_cmd_id();
+  SendAddVRCommandToHMI(max_cmd_id + 1, *vr_help_command, 0);
+}
+
+void MessageHelper::SendVrCommandsOnRegisterAppToHMI(Application* app) {
+  unsigned int max_cmd_id = profile::Profile::instance()->max_cmd_id();
+
+  if (app->vr_synonyms()) {
+    SendAddVRCommandToHMI(
+      max_cmd_id + app->app_id(),
+      *app->vr_synonyms(),
+      app->app_id());
+  }
+}
+
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   int connection_key,
   mobile_api::AppInterfaceUnregisteredReason::eType reason) {
@@ -196,8 +231,10 @@ smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
   (*response)[strings::msg_params][strings::result_code] = result;
   (*response)[strings::params][strings::correlation_id] = correlation_id;
   (*response)[strings::params][strings::connection_key] = connection_key;
-  (*response)[strings::params][strings::protocol_type] = commands::CommandImpl::mobile_protocol_type_;
-  (*response)[strings::params][strings::protocol_version] = ProtocolVersion::kV2;
+  (*response)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::mobile_protocol_type_;
+  (*response)[strings::params][strings::protocol_version] =
+    ProtocolVersion::kV2;
 
   return response;
 }
@@ -306,7 +343,6 @@ void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
 
   // UI global properties
   if (app->vr_help_title() || app->vr_help()) {
-
     smart_objects::SmartObject* ui_global_properties =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -342,7 +378,6 @@ void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
 
   // TTS global properties
   if (app->help_promt() || app->timeout_promt()) {
-
     smart_objects::SmartObject* tts_global_properties =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -378,44 +413,65 @@ void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
 }
 
 void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
-  if (!app) {
+  smart_objects::SmartObject* show_vr_help =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!show_vr_help) {
     return;
   }
 
-  if (app->vr_help_title() || app->vr_help()) {
+  smart_objects::SmartObject ui_msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    smart_objects::SmartObject* ui_global_properties =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-    if (!ui_global_properties) {
+  if (!app) {
+    // TODO(PV): default params
+    ui_msg_params[strings::vr_help_title] = "Available Vr Commands List";
+    smart_objects::SmartObject* vr_commands_array = CreateGeneralVrCommand();
+    if (!vr_commands_array) {
       return;
     }
 
-    (*ui_global_properties)[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::UI_ShowVrHelp;
-    (*ui_global_properties)[strings::params][strings::message_type] =
-      hmi_apis::messageType::request;
-    (*ui_global_properties)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*ui_global_properties)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*ui_global_properties)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-
-    smart_objects::SmartObject ui_msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-    if (app->vr_help_title()) {
-      ui_msg_params[strings::vr_help_title] = (*app->vr_help_title());
+    ui_msg_params[strings::vr_help] = *vr_commands_array;
+    int help_size = vr_commands_array->length();
+    const std::set<Application*>& apps =
+      ApplicationManagerImpl::instance()->applications();
+    int i = 0;
+    for (std::set<Application*>::const_iterator it = apps.begin();
+         apps.end() != it;
+         ++it) {
+      if ((*it)->vr_synonyms()) {
+        for (int j = 0; j < (*((*it)->vr_synonyms())).length(); ++j) {
+          ui_msg_params[strings::vr_help][i++] =
+            (*((*it)->vr_synonyms())).getElement(j);
+        }
+      }
     }
-    if (app->vr_help()) {
-      ui_msg_params[strings::vr_help] = (*app->vr_help());
+  } else {
+    if (app->vr_help_title() || app->vr_help()) {
+      if (app->vr_help_title()) {
+        ui_msg_params[strings::vr_help_title] = (*app->vr_help_title());
+      }
+      if (app->vr_help()) {
+        ui_msg_params[strings::vr_help] = (*app->vr_help());
+      }
+      ui_msg_params[strings::app_id] = app->app_id();
+
+      (*show_vr_help)[strings::msg_params] = ui_msg_params;
     }
-    ui_msg_params[strings::app_id] = app->app_id();
-
-    (*ui_global_properties)[strings::msg_params] = ui_msg_params;
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(ui_global_properties);
   }
+
+  (*show_vr_help)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::UI_ShowVrHelp;
+  (*show_vr_help)[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  (*show_vr_help)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*show_vr_help)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+  (*show_vr_help)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(show_vr_help);
 }
 
 void MessageHelper::SendShowRequestToHMI(const Application* app) {
@@ -484,7 +540,6 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
   for (; commands.end() != i; ++i) {
     // UI Interface
     if ((*i->second).keyExists(strings::menu_params)) {
-
       smart_objects::SmartObject* ui_command =
         new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -511,7 +566,6 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
 
       if (((*i->second)[strings::cmd_icon].keyExists(strings::value)) &&
           (0 < (*i->second)[strings::cmd_icon][strings::value].length())) {
-
         msg_params[strings::cmd_icon] = (*i->second)[strings::cmd_icon];
 
         std::string file_path = file_system::FullPath(app->name());
@@ -527,35 +581,43 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
 
     // VR Interface
     if ((*i->second).keyExists(strings::vr_commands)) {
-
-      smart_objects::SmartObject* vr_command =
-        new smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-      if (!vr_command) {
-        return;
-      }
-
-      (*vr_command)[strings::params][strings::function_id] =
-        hmi_apis::FunctionID::VR_AddCommand;
-      (*vr_command)[strings::params][strings::message_type] =
-        hmi_apis::messageType::request;
-      (*vr_command)[strings::params][strings::protocol_version] =
-        commands::CommandImpl::protocol_version_;
-      (*vr_command)[strings::params][strings::protocol_type] =
-        commands::CommandImpl::hmi_protocol_type_;
-      (*vr_command)[strings::params][strings::correlation_id] =
-        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-
-      smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-      msg_params[strings::cmd_id] = i->first;
-      msg_params[strings::vr_commands] = (*i->second)[strings::vr_commands];
-      msg_params[strings::app_id] = app->app_id();
-      (*vr_command)[strings::msg_params] = msg_params;
-
-      ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
+      SendAddVRCommandToHMI(i->first,
+                            (*i->second)[strings::vr_commands],
+                            app->app_id());
     }
   }
+}
+
+void MessageHelper::SendAddVRCommandToHMI(unsigned int cmd_id,
+    const smart_objects::SmartObject& vr_commands, unsigned int app_id) {
+  smart_objects::SmartObject* vr_command =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!vr_command) {
+    return;
+  }
+
+  (*vr_command)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::VR_AddCommand;
+  (*vr_command)[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  (*vr_command)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*vr_command)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+  (*vr_command)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  if (0 != cmd_id) {
+    msg_params[strings::cmd_id] = cmd_id;
+  }
+  msg_params[strings::vr_commands] = vr_commands;
+  msg_params[strings::app_id] = app_id;
+  (*vr_command)[strings::msg_params] = msg_params;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
 }
 
 void MessageHelper::SendAddSubMenuRequestToHMI(const Application* app) {
@@ -566,7 +628,6 @@ void MessageHelper::SendAddSubMenuRequestToHMI(const Application* app) {
   const SubMenuMap& sub_menu = app->sub_menu_map();
   SubMenuMap::const_iterator i = sub_menu.begin();
   for (; sub_menu.end() != i; ++i) {
-
     smart_objects::SmartObject* ui_sub_menu =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -676,7 +737,6 @@ void MessageHelper::SendDeleteSubMenuRequestToHMI(Application* const app) {
   const SubMenuMap& sub_menu = app->sub_menu_map();
   SubMenuMap::const_iterator i = sub_menu.begin();
   for (; sub_menu.end() != i; ++i) {
-
     smart_objects::SmartObject* delete_sub_menu =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -730,43 +790,43 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
 }
 
 void MessageHelper::ResetGlobalproperties(Application* const app) {
-  //reset help_promt
+  // reset help_promt
   const std::vector<std::string>& help_promt =
-        profile::Profile::instance()->help_promt();
+    profile::Profile::instance()->help_promt();
 
   smart_objects::SmartObject so_help_promt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   for (unsigned int i = 0; i < help_promt.size(); ++i) {
     smart_objects::SmartObject helpPrompt =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     helpPrompt[strings::text] =  help_promt[i];
     so_help_promt[i] = helpPrompt;
   }
 
   app->set_help_prompt(so_help_promt);
 
-  //reset timeout prompt
+  // reset timeout prompt
   const std::vector<std::string>& time_out_promt =
-      profile::Profile::instance()->time_out_promt();
+    profile::Profile::instance()->time_out_promt();
 
   smart_objects::SmartObject so_time_out_promt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   for (unsigned int i = 0; i < time_out_promt.size(); ++i) {
     smart_objects::SmartObject timeoutPrompt =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
     so_time_out_promt[i] = timeoutPrompt;
   }
 
   app->set_timeout_prompt(so_time_out_promt);
 
-  //reset VR help title
+  // reset VR help title
   smart_objects::SmartObject help_title(app->name());
   app->set_vr_help_title(help_title);
 
-  //reset VR help items
+  // reset VR help items
   const CommandsMap& cmdMap = app->commands_map();
   smart_objects::SmartObject vr_help_items;
 

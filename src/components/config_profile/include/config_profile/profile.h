@@ -96,6 +96,11 @@ class Profile {
     const std::vector<std::string>& vr_commands() const;
 
     /**
+     * @brief Maximum command id available for mobile app
+     */
+    const unsigned int max_cmd_id() const;
+
+    /**
      * @brief Returns server port
      */
     const uint16_t& server_port() const;
@@ -169,6 +174,7 @@ class Profile {
     uint16_t                        server_port_;
     uint64_t                        min_tread_stack_size_;
     bool                            is_mixing_audio_supported_;
+    unsigned int                    max_cmd_id_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

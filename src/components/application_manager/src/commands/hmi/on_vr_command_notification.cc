@@ -35,6 +35,8 @@
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "application_manager/message_helper.h"
+#include "config_profile/profile.h"
 
 namespace application_manager {
 
@@ -50,8 +52,28 @@ OnVRCommandNotification::~OnVRCommandNotification() {
 void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
 
+  const unsigned int cmd_id =
+    (*message_)[strings::msg_params][strings::cmd_id].asUInt();
+
+  // Check if this is one of standart VR commands (i.e. "Help")
+  unsigned int max_cmd_id = profile::Profile::instance()->max_cmd_id();
+  if (cmd_id > max_cmd_id) {
+    if (max_cmd_id + 1 == cmd_id) {
+      Application* active_app =
+        ApplicationManagerImpl::instance()->active_application();
+      MessageHelper::SendShowVrHelpToHMI(active_app);
+    } else {
+      Application* app = ApplicationManagerImpl::instance()->application(
+                           cmd_id - max_cmd_id);
+      if (app) {
+        ApplicationManagerImpl::instance()->ActivateApplication(app);
+      }
+    }
+    return;
+  }
+
   const unsigned int app_id =
-      (*message_)[strings::msg_params][strings::app_id].asUInt();
+    (*message_)[strings::msg_params][strings::app_id].asUInt();
   Application* app = ApplicationManagerImpl::instance()->
                      application(app_id);
 
@@ -66,21 +88,19 @@ void OnVRCommandNotification::Run() {
    */
   if (app->is_perform_interaction_active()) {
     const PerformChoiceSetMap& choice_set_map =
-        app->GetPerformInteractionChoiceSetMap();
+      app->GetPerformInteractionChoiceSetMap();
 
     PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
-
       const smart_objects::SmartObject& choice_set =
         (*it->second).getElement(strings::choice_set);
 
       for (size_t j = 0; j < choice_set.length(); ++j) {
-
         smart_objects::SmartObject msg_params =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
         msg_params[strings::app_id] = app->app_id();
         msg_params[strings::cmd_id] =
-            choice_set.getElement(j).getElement(strings::choice_id);
+          choice_set.getElement(j).getElement(strings::choice_id);
 
         CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
       }

@@ -286,9 +286,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_ShowVrHelp: {
       if (is_response) {
-        command.reset(new commands::UIShowVrHelpRequest(message));
-      } else {
         command.reset(new commands::UIShowVrHelpResponse(message));
+      } else {
+        command.reset(new commands::UIShowVrHelpRequest(message));
       }
       break;
     }

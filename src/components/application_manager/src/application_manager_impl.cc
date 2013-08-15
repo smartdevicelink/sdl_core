@@ -538,7 +538,7 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
   } else {
 
     MessageChain::iterator it =  message_chaining_.find(connection_key);
-    if ( message_chaining_.end() != it) {
+    if (message_chaining_.end() != it) {
 
       MobileRequest::iterator i = it->second.find(correlation_id);
       if (it->second.end() != i) {
@@ -576,8 +576,8 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 
         (*it->second).DecrementCounter();
         LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain "
-            "mobile request id " << (*it->second).correlation_id() <<
-            " is waiting for " << (*it->second).counter() << " responses");
+                     "mobile request id " << (*it->second).correlation_id() <<
+                     " is waiting for " << (*it->second).counter() << " responses");
 
         if (0 == (*it->second).counter()) {
           mobile_correlation_id = (*it->second).correlation_id();
@@ -675,28 +675,28 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
   LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
   if (NULL != audioManager_) {
     audioManager_->startMicrophoneRecording(std::string("record.wav"),
-            static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
-            max_duration,
-            static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample));
+                                            static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+                                            max_duration,
+                                            static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample));
   }
 
 
   LOG4CXX_ERROR(logger_, "START RECORD SENDER");
   AudioPassThruThreadImpl* thread_impl = new AudioPassThruThreadImpl(
-      "record.wav",
-      static_cast<unsigned int>(session_key),
-      static_cast<unsigned int>(correlation_id),
-      static_cast<unsigned int>(max_duration),
-      static_cast<SamplingRate>(sampling_rate),
-      static_cast<AudioCaptureQuality>(bits_per_sample),
-      static_cast<AudioType>(audio_type));
+    "record.wav",
+    static_cast<unsigned int>(session_key),
+    static_cast<unsigned int>(correlation_id),
+    static_cast<unsigned int>(max_duration),
+    static_cast<SamplingRate>(sampling_rate),
+    static_cast<AudioCaptureQuality>(bits_per_sample),
+    static_cast<AudioType>(audio_type));
 
-    thread_impl->Init();
-    perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
-        thread_impl);
+  thread_impl->Init();
+  perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
+      thread_impl);
 
-    perform_audio_thread_->startWithOptions(
-      threads::ThreadOptions(threads::Thread::kMinStackSize));
+  perform_audio_thread_->startWithOptions(
+    threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 void ApplicationManagerImpl::StopAudioPassThruThread() {
@@ -742,6 +742,8 @@ void ApplicationManagerImpl::set_is_vr_cooperating(bool value) {
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages));
     ManageHMICommand(get_all_languages);
+
+    MessageHelper::SendHelpVrCommand();
   }
 }
 
@@ -924,15 +926,15 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 #endif
 
   mobile_apis::FunctionID::eType function_id
-        = static_cast<mobile_apis::FunctionID::eType>(
-          (*message)[strings::params][strings::function_id].asInt());
+    = static_cast<mobile_apis::FunctionID::eType>(
+        (*message)[strings::params][strings::function_id].asInt());
 
   if (((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) &&
-      ((*message)[strings::params][strings::protocol_type] ==
-          commands::CommandImpl::mobile_protocol_type_)) &&
+       ((*message)[strings::params][strings::protocol_type] ==
+        commands::CommandImpl::mobile_protocol_type_)) &&
       (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
     unsigned int app_id = (*message)[strings::params][strings::connection_key]
-        .asUInt();
+                          .asUInt();
     Application* app = ApplicationManagerImpl::instance()->application(app_id);
     if (NULL == app) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -942,7 +944,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     if (!policies_manager_.is_valid_hmi_status(function_id, app->hmi_level())) {
       mobile_apis::FunctionID::eType function_id
         = static_cast<mobile_apis::FunctionID::eType>(
-          (*message)[strings::params][strings::function_id].asInt());
+            (*message)[strings::params][strings::function_id].asInt());
 
       unsigned int correlation_id
         = (*message)[strings::params][strings::correlation_id].asUInt();
@@ -951,14 +953,14 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         = (*message)[strings::params][strings::connection_key].asUInt();
 
       LOG4CXX_WARN(logger_, "Request blocked by policies. "
-        << "FunctionID: " << static_cast<int>(function_id)
-        << " Application HMI status: " << static_cast<int>(app->hmi_level()));
+                   << "FunctionID: " << static_cast<int>(function_id)
+                   << " Application HMI status: " << static_cast<int>(app->hmi_level()));
 
       smart_objects::SmartObject* response =
         MessageHelper::CreateBlockedByPoliciesResponse(function_id,
-                                                  mobile_apis::Result::REJECTED,
-                                                  correlation_id,
-                                                  connection_key);
+            mobile_apis::Result::REJECTED,
+            correlation_id,
+            connection_key);
 
       ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return true;

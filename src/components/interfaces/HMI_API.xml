@@ -1350,7 +1350,7 @@
     <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="100" array="true">
       <description>List of strings to be used as VR commands.</description>
     </param>
-    <param name="appID" type="Integer" mandatory="true">
+    <param name="appID" type="Integer" mandatory="false">
       <description>ID of application that requested this RPC.</description>
     </param>
   </function>
@@ -1672,7 +1672,7 @@
       <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
           <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
       </param>
-      <param name="appID" type="Integer" mandatory="true">
+      <param name="appID" type="Integer" mandatory="false">
         <description>ID of application that concerns this RPC.</description>
       </param>
     </function>
