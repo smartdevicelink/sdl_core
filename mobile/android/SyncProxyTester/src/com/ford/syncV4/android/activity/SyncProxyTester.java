@@ -118,6 +118,7 @@ import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
+import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
@@ -959,6 +960,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, Names.AlertManeuver);
 			addToFunctionsAdapter(adapter, Names.UpdateTurnList);
             addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
+            addToFunctionsAdapter(adapter, Names.UnregisterAppInterface);
 			addToFunctionsAdapter(adapter, GenericRequest);
 			
 			adapter.sort(new Comparator<String>() {
@@ -1711,6 +1713,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							sendUpdateTurnList();
 						} else if (adapter.getItem(which) == Names.SetDisplayLayout) {
 							sendSetDisplayLayout();
+                        } else if (adapter.getItem(which) ==
+                                Names.UnregisterAppInterface) {
+                            sendUnregisterAppInterface();
 						} else if (adapter.getItem(which) == GenericRequest) {
 							sendGenericRequest();
 						}
@@ -1722,6 +1727,23 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 						messageSelectCount.put(function, curCount + 1);
 					}
+
+                   /**
+                    * Sends UnregisterAppInterface message.
+                    */
+                   private void sendUnregisterAppInterface() {
+                       UnregisterAppInterface msg =
+                               new UnregisterAppInterface();
+                       msg.setCorrelationID(autoIncCorrId++);
+                       _msgAdapter.logMessage(msg, true);
+                       try {
+                           ProxyService.getInstance().getProxyInstance()
+                                   .sendRPCRequest(msg);
+                       } catch (SyncException e) {
+                           _msgAdapter.logMessage("Error sending message: " + e,
+                                   Log.ERROR, e);
+                       }
+                   }
 
                    /**
                     * Opens the dialog for DeleteSubMenu message and sends it.

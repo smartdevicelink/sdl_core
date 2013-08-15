@@ -1,4 +1,5 @@
 [CW33]
++ The user can send UnregisterAppInterface message from GUI.
 * SyncProxyAndroid SDK: fix two bugs with sending huge RPC requests.
 
 [CW32]
