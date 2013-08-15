@@ -443,7 +443,7 @@ FFW.UI = FFW.RPCObserver
                 }
                 case "UI.ShowVrHelp": {
 
-                    SDL.SDLModel.ShowVrHelp(request);
+                    SDL.SDLModel.ShowVrHelp(request.params);
 
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
