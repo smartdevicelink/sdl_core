@@ -1,14 +1,5 @@
 package com.ford.syncV4.android.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Vector;
-
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -100,6 +91,15 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.util.Base64;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Vector;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting {
 	static final String TAG = "SyncProxyTester";
@@ -258,7 +258,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
                 SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
                 syncMsgVersion.setMajorVersion(2);
-                syncMsgVersion.setMinorVersion(1);
+                syncMsgVersion.setMinorVersion(2);
 				if (transportType == Const.Transport.KEY_BLUETOOTH) {
 					_syncProxy = new SyncProxyALM(this,
 							/*sync proxy configuration resources*/null,
