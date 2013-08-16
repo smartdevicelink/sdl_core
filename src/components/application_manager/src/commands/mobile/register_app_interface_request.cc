@@ -63,7 +63,9 @@ void RegisterAppInterfaceRequest::Run() {
       [strings::sync_msg_version]
       [strings::minor_version].asInt();
     if (min_version < APIVersion::kAPIV2) {
-      min_version = APIVersion::kAPIV2;
+      LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
+      SendResponse(false, mobile_apis::Result::UNSUPPORTED_VERSION);
+      return;
     }
     version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
@@ -71,8 +73,10 @@ void RegisterAppInterfaceRequest::Run() {
       (*message_)[strings::msg_params]
       [strings::sync_msg_version]
       [strings::major_version].asInt();
-    if (max_version > APIVersion::kAPIV2 || max_version < min_version) {
-      max_version = APIVersion::kAPIV2;
+    if (max_version > APIVersion::kAPIV2) {
+      LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
+      SendResponse(false, mobile_apis::Result::UNSUPPORTED_VERSION);
+      return;
     }
     version.max_supported_api_version = static_cast<APIVersion>(max_version);
 
