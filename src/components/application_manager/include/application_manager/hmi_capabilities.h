@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 
+#include "interfaces/MOBILE_API.h"
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
@@ -270,6 +272,15 @@ struct HMICapabilities {
      */
     void set_preset_bank_capabilities(
       const smart_objects::SmartObject& preset_bank_capabilities);
+
+    /*
+     * @brief Verify is image type supported
+     *
+     * @image_type Image type
+     *
+     *@return true if image type is supported, false if not
+     */
+    bool VerifyImageType(mobile_apis::ImageType::eType image_type);
 
   protected:
     bool is_vr_cooperating_;

@@ -210,5 +210,9 @@ void HMICapabilities::set_preset_bank_capabilities(
     new smart_objects::SmartObject(preset_bank_capabilities);
 }
 
+bool HMICapabilities::VerifyImageType(mobile_apis::ImageType::eType image_type) {
+  return image_type == mobile_apis::ImageType::DYNAMIC;
+}
+
 
 }  //  namespace application_manager

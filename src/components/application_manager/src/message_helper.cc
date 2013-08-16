@@ -875,7 +875,13 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
       std::string full_file_path = file_system::FullPath(relative_file_path);
 
       if (!file_system::FileExists(full_file_path)) {
-        return false; // It is main exit point
+        return false; // first exit point
+      }
+
+      if (!ApplicationManagerImpl::instance()->VerifyImageType(
+          static_cast<mobile_apis::ImageType::eType>(message[strings::image_type]
+              .asInt()))) {
+        return false;  // second exit point
       }
 
       message[strings::value] = full_file_path;
