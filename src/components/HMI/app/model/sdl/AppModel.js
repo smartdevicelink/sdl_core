@@ -167,27 +167,57 @@ SDL.SDLAppModel = Em.Object
          * 
          * @param {Object}
          */
-        addCommand: function(params) {
+        addCommand: function(request) {
 
-            if (params.menuParams) {
-                this.get('commandsList').pushObject( {
-                    commandID: params.cmdID,
-                    name: params.menuParams.menuName
-                        ? params.menuParams.menuName : "",
-                    parent: params.menuParams.parentID != null
-                        ? params.menuParams.parentID : -1,
-                    position: params.menuParams.position
-                        ? params.menuParams.position : 0,
-                    icon: params.cmdIcon ? params.cmdIcon.value : null
-                });
+            if (request.params.menuParams) {
+                // Magic number is limit of 1000 commands added on one menu
+                if (this.get('commandsList').filterProperty('parent',
+                    request.params.menuParams.parentID).length <= 999) {
+                    this.get('commandsList').pushObject( {
+                        commandID: request.params.cmdID,
+                        name: request.params.menuParams.menuName
+                            ? request.params.menuParams.menuName : "",
+                        parent: request.params.menuParams.parentID != null
+                            ? request.params.menuParams.parentID : -1,
+                        position: request.params.menuParams.position
+                            ? request.params.menuParams.position : 0,
+                        icon: request.params.cmdIcon
+                            ? request.params.cmdIcon.value : null
+                    });
+
+                    FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+                } else {
+                    FFW.UI
+                        .sendError(SDL.SDLModel.resultCode["REJECTED"],
+                            request.id,
+                            request.method,
+                            'Adding more than 1000 item to the top menu or to submenu is not allowed.');
+                }
             } else {
-                this.get('commandsList').pushObject( {
-                    commandID: params.cmdID,
-                    name: '',
-                    parent: -1,
-                    position: 0,
-                    icon: params.cmdIcon ? params.cmdIcon.value : null
-                });
+                // Magic number 999 is limit of 1000 commands added on one menu
+                // Magic number -1 is parent id number of top level menu 
+                if (this.get('commandsList').filterProperty('parent', -1).length <= 999) {
+                    this.get('commandsList').pushObject( {
+                        commandID: request.params.cmdID,
+                        name: '',
+                        parent: -1,
+                        position: 0,
+                        icon: request.params.cmdIcon
+                            ? request.params.cmdIcon.value : null
+                    });
+
+                    FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+                } else {
+                    FFW.UI
+                        .sendError(SDL.SDLModel.resultCode["REJECTED"],
+                            request.id,
+                            request.method,
+                            'Adding more than 1000 item to the top menu or to submenu is not allowed');
+                }
             }
         },
 
@@ -207,16 +237,30 @@ SDL.SDLAppModel = Em.Object
          * 
          * @param {Object}
          */
-        addSubMenu: function(params) {
+        addSubMenu: function(request) {
 
-            this.get('commandsList').pushObject( {
-                menuID: params.menuID,
-                name: params.menuParams.menuName ? params.menuParams.menuName
-                    : '',
-                parent: -1,
-                position: params.menuParams.position
-                    ? params.menuParams.position : 0
-            });
+            // Magic number 999 is limit of 1000 commands added on one menu
+            // Magic number -1 is parent id number of top level menu 
+            if (this.get('commandsList').filterProperty('parent', -1).length <= 999) {
+                this.get('commandsList').pushObject( {
+                    menuID: request.params.menuID,
+                    name: request.params.menuParams.menuName ? request.params.menuParams.menuName
+                        : '',
+                    parent: -1,
+                    position: request.params.menuParams.position
+                        ? request.params.menuParams.position : 0
+                });
+
+                FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                    request.id,
+                    request.method);
+            } else {
+                FFW.UI
+                    .sendError(SDL.SDLModel.resultCode["REJECTED"],
+                        request.id,
+                        request.method,
+                        'Adding more than 1000 item to the top menu or to submenu is not allowed');
+            }
         },
 
         /**

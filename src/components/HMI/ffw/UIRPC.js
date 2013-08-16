@@ -197,10 +197,7 @@ FFW.UI = FFW.RPCObserver
                 case "UI.AddCommand": {
 
                     SDL.SDLController.getApplicationModel(request.params.appID)
-                        .addCommand(request.params);
-                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
+                        .addCommand(request);
 
                     break;
                 }
@@ -217,10 +214,7 @@ FFW.UI = FFW.RPCObserver
                 case "UI.AddSubMenu": {
 
                     SDL.SDLController.getApplicationModel(request.params.appID)
-                        .addSubMenu(request.params);
-                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
+                        .addSubMenu(request);
 
                     break;
                 }
