@@ -1,14 +1,17 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
 
+# required to find 'glibconfig.h'
+find_package(PkgConfig)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+add_definitions(${GLIB2_CFLAGS})
+
 include_directories (
   ./include
   ../utils/include/
   ../interfaces
   ../../thirdPartyLibs/logger/include/
   ../../thirdPartyLibs/MessageBroker/include/
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
