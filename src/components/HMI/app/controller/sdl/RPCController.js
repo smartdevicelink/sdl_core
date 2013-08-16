@@ -1148,7 +1148,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.menuID) {
+                    if (params.menuID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1933,7 +1933,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.ecuName) {
+                    if (params.ecuName == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2012,7 +2012,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.ecuName) {
+                    if (params.ecuName == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2171,7 +2171,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.cmdID) {
+                    if (params.cmdID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
