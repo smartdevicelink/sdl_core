@@ -100,7 +100,7 @@ void UnsubscribeVehicleDataRequest::Run() {
     SendResponse(true, mobile_apis::Result::SUCCESS,
                  "Unsubscribed on provided VehicleData", &response_params);
   } else if (0 == unsubscribed_items) {
-    SendResponse(false, mobile_apis::Result::REJECTED,
+    SendResponse(false, mobile_apis::Result::IGNORED,
                  "Was not subscribed on any VehicleData", &response_params);
   } else if (unsubscribed_items < items_to_unsubscribe) {
     SendResponse(false, mobile_apis::Result::WARNINGS,

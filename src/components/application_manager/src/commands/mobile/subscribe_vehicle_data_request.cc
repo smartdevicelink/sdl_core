@@ -99,8 +99,8 @@ void SubscribeVehicleDataRequest::Run() {
     SendResponse(true, mobile_apis::Result::SUCCESS,
                  "Subscribed on provided VehicleData", &response_params);
   } else if (0 == subscribed_items) {
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "Already subscribed on all VehicleData", &response_params);
+    SendResponse(false, mobile_apis::Result::IGNORED,
+                "Already subscribed on provided VehicleData", &response_params);
   } else if (subscribed_items < items_to_subscribe) {
     SendResponse(false, mobile_apis::Result::WARNINGS,
                  "Already subscribed on some VehicleData", &response_params);
