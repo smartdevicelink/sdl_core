@@ -68,6 +68,22 @@ void AlertManeuverRequest::Run() {
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
                    msg_params, true);
+
+  // check TTSChunk parameter
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
+    if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
+      // crate HMI basic communication playtone request
+      smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+      msg_params[hmi_request::tts_chunks] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+      msg_params[hmi_request::tts_chunks] =
+        (*message_)[strings::msg_params][strings::tts_chunks];
+      msg_params[strings::app_id] = app->app_id();
+      CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
+    }
+  }
 }
 
 }  // namespace commands

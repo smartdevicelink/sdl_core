@@ -300,7 +300,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
           connection_key,
           mobile_apis::FunctionID::RegisterAppInterfaceID,
           message[strings::params][strings::correlation_id],
-          mobile_apis::Result::APPLICATION_REGISTERED_ALREADY));
+          mobile_apis::Result::DUPLICATE_NAME));
       ManageMobileCommand(response);
       return NULL;
     }
