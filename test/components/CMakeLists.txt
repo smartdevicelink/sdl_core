@@ -20,7 +20,7 @@ add_subdirectory(./protocol_handler)
 add_subdirectory(./utils)
 
 # --- Mobile Message Handler
-add_subdirectory(./mobile_message_handler)
+#add_subdirectory(./mobile_message_handler)
 
 # --- Audio Manager
 add_subdirectory(./audio_manager)
