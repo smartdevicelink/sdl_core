@@ -36,6 +36,8 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
 
+#include "utils/macro.h"
+
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
@@ -70,6 +72,8 @@ class RawMessage {
    */
   int connection_key() const;
 
+  void set_connection_key(unsigned int );
+
   /**
    * \brief Getter for message string
    */
@@ -84,6 +88,10 @@ class RawMessage {
    * \brief Getter for protocol version
    */
   unsigned int protocol_version() const;
+
+  bool IsWaiting() const;
+
+  void set_waiting(bool v);
 
  private:
   /**
@@ -107,6 +115,20 @@ class RawMessage {
    * used for tranferring message.
    */
   unsigned int protocol_version_;
+
+  /**
+   * specifies current state of message in queue. if false message is "ready to be processed"
+   * otherwise it is "waiting for response"
+   *
+   */
+  bool waiting_;
+
+  /**
+   * \brief Id of connection (for service messages like start/end session)
+   *
+   */
+
+  DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
 }  // namespace protocol_handler
 

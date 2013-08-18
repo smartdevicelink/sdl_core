@@ -38,11 +38,19 @@
 namespace protocol_handler {
 
 RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
-                       unsigned char* data, unsigned int dataSize)
+                       unsigned char* data, unsigned int data_size)
     : connection_key_(connectionKey),
       protocol_version_(protocolVersion),
-      data_(data),
-      data_size_(dataSize) {
+      waiting_(false),
+      data_size_(data_size){
+  if (data_size > 0) {
+    data_ = new unsigned char[data_size];
+    for (int i = 0; i < data_size; ++i) {
+      data_[i] = data[i];
+    }
+  } else {
+    data_ = 0;
+  }
 }
 
 RawMessage::~RawMessage() {
@@ -56,6 +64,10 @@ int RawMessage::connection_key() const {
   return connection_key_;
 }
 
+void RawMessage::set_connection_key(unsigned int key){
+  connection_key_ = key;
+}
+
 unsigned char* RawMessage::data() const {
   return data_;
 }
@@ -67,4 +79,13 @@ unsigned int RawMessage::data_size() const {
 unsigned int RawMessage::protocol_version() const {
   return protocol_version_;
 }
+
+bool RawMessage::IsWaiting() const {
+  return waiting_;
+}
+
+void RawMessage::set_waiting(bool v) {
+  waiting_ = v;
+}
+
 }  // namespace protocol_handler

@@ -35,7 +35,10 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 
+#include "utils/shared_ptr.h"
 #include "protocol_handler/raw_message.h"
+#include "transport_manager/common.h"
+
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
@@ -43,25 +46,30 @@
 namespace protocol_handler {
 /**
  * \class ProtocolHandler
- * \brief Interface for component parsing protocol header 
+ * \brief Interface for component parsing protocol header
  * on the messages between SDL and mobile application.
  */
-class ProtocolHandler
-{
-public:
+class ProtocolHandler {
+  public:
 
-  /**
-   * \brief Method for sending message to Mobile Application.
-   * \param message RawMessage with params to be sent to Mobile App.
-   */
-  virtual void sendMessageToMobileApp(const RawMessage* message) = 0;
+    /**
+     * \brief Method for sending message to Mobile Application.
+     * \param message RawMessage with params to be sent to Mobile App.
+     */
+    virtual void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) = 0;
 
-protected:
-	/**
-   * \brief Destructor
-   */
-	virtual ~ProtocolHandler(){
-	}
+    /**
+     * \brief Returns size of frame to be formed from raw bytes.
+     * expects first bytes of message which will be treated as frame header.
+     */
+    virtual unsigned int GetPacketSize(unsigned int size, unsigned char* data) = 0;
+
+  protected:
+    /**
+     * \brief Destructor
+     */
+    virtual ~ProtocolHandler() {
+    }
 };
 }
 

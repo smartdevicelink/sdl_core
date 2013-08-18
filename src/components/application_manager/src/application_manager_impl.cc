@@ -264,16 +264,16 @@ Application* ApplicationManagerImpl::RegisterApplication(
     return NULL;
   }
 
-  int app_id = 0;
+  unsigned int app_id = 0;
   std::list<int> sessions_list;
-  int device_id = 0;
+  unsigned int device_id = 0;
 
   if (connection_handler_) {
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
       static_cast<connection_handler::ConnectionHandlerImpl*>(
         connection_handler_);
-    if (con_handler_impl->GetDataOnSessionKey(connection_key, app_id,
-        sessions_list, device_id) == -1) {
+    if (con_handler_impl->GetDataOnSessionKey(connection_key, &app_id,
+        &sessions_list, &device_id) == -1) {
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
       utils::SharedPtr<smart_objects::SmartObject> response(
@@ -340,6 +340,44 @@ Application* ApplicationManagerImpl::RegisterApplication(
     MessageHelper::ConvertEnumAPINoCheck < hmi_apis::Common_Language::eType,
     mobile_apis::Language::eType > (
       ui_language_));
+
+  Version version;
+  int min_version  =
+    message[strings::msg_params]
+    [strings::sync_msg_version]
+    [strings::minor_version].asInt();
+  if (min_version < APIVersion::kAPIV2) {
+    LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
+    utils::SharedPtr<smart_objects::SmartObject> response(
+      MessageHelper::CreateNegativeResponse(
+        connection_key,
+        mobile_apis::FunctionID::RegisterAppInterfaceID,
+        message[strings::params][strings::correlation_id],
+        mobile_apis::Result::UNSUPPORTED_VERSION));
+    ManageMobileCommand(response);
+    delete application;
+    return NULL;
+  }
+  version.min_supported_api_version = static_cast<APIVersion>(min_version);
+
+  int max_version =
+    message[strings::msg_params]
+    [strings::sync_msg_version]
+    [strings::major_version].asInt();
+  if (max_version > APIVersion::kAPIV2) {
+    LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
+    utils::SharedPtr<smart_objects::SmartObject> response(
+      MessageHelper::CreateNegativeResponse(
+        connection_key,
+        mobile_apis::FunctionID::RegisterAppInterfaceID,
+        message[strings::params][strings::correlation_id],
+        mobile_apis::Result::UNSUPPORTED_VERSION));
+    ManageMobileCommand(response);
+    delete application;
+    return NULL;
+  }
+  version.max_supported_api_version = static_cast<APIVersion>(max_version);
+  application->set_version(version);
 
   applications_.insert(std::pair<int, Application*>(
                          app_id, application));
@@ -718,13 +756,13 @@ std::string ApplicationManagerImpl::GetDeviceName(
   DCHECK(connection_handler_);
 
   std::string device_name = "";
-  std::list<int> applications_list;
+  std::list<unsigned int> applications_list;
   connection_handler::ConnectionHandlerImpl* con_handler_impl =
     static_cast<connection_handler::ConnectionHandlerImpl*>(
       connection_handler_);
   if (con_handler_impl->GetDataOnDeviceID(handle,
-                                          device_name,
-                                          applications_list) == -1) {
+                                          &device_name,
+                                          &applications_list) == -1) {
     LOG4CXX_ERROR(logger_, "Failed to extract device name for id " << handle);
   } else {
     LOG4CXX_INFO(logger_, "\t\t\t\t\tDevice name is " << device_name);

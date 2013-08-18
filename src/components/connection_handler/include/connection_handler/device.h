@@ -51,7 +51,8 @@ namespace connection_handler {
 /**
  * \brief Type for DeviceHandle
  */
-typedef int DeviceHandle;
+typedef unsigned int DeviceHandle;
+typedef std::vector<int > AppList;
 
 /**
  * \class Device
@@ -91,6 +92,7 @@ class Device {
    * \brief User-friendly device name.
    */
   std::string user_friendly_name_;
+
 
   /**
    * \brief For logging.

@@ -17,7 +17,7 @@ include_directories (
   ../src/components/request_watchdog/include
   ../src/components/audio_manager/include
   ../src/components/protocol_handler/include
-  ../src/components/TransportManager/include
+  ../src/components/transport_manager/include
   ../src/components/connection_handler/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
@@ -31,6 +31,7 @@ include_directories (
   ../test/components/utils/include
   ../test/components/json_handler/include
   ../test/components/smart_objects
+  ../test/components/transport_manager
   ../test/components/
   ../test/thirdPartyLibs/jsoncpp/include
   ../test/components/application_manager

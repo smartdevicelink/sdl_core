@@ -46,7 +46,7 @@ log4cxx::LoggerPtr Device::logger_ =
 
 Device::Device(DeviceHandle device_handle, std::string user_friendly_name)
     : device_handle_(device_handle),
-      user_friendly_name_(user_friendly_name) {
+      user_friendly_name_(user_friendly_name){
 }
 
 Device::~Device() {
