@@ -64,7 +64,7 @@ set(LIBRARIES
     test_RequestWatchdogTest
     test_ProtocolHandlerTest
     test_JSONCPPTest
-    test_MobileMessageHandlerTest
+    #test_MobileMessageHandlerTest
     MOBILE_API
     jsoncpp
     Utils
