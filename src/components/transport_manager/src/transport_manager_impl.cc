@@ -678,14 +678,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL: {
           LOG4CXX_INFO(logger_, "Event ON_CONNECT_FAIL");
-          if (connection == NULL) {
-            LOG4CXX_ERROR(
-                logger_,
-                "Connection ('" << device_id << ", " << app_handle << ") not found");
-            break;
-          }
-          DeviceHandle device_handle = converter_.UidToHandle(
-              connection->device);
+          DeviceHandle device_handle = converter_.UidToHandle(device_id);
           DeviceInfo info(device_handle, device_id, da->DeviceName(device_id));
           raiseEvent(&TransportManagerListener::OnConnectionFailed, info,
                      ConnectError());
