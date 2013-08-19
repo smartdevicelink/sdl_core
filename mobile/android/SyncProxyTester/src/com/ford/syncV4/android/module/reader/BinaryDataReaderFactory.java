@@ -22,6 +22,8 @@ public class BinaryDataReaderFactory {
 	public BinaryDataReaderFactory() {
 		readers.add(new Base64BinaryDataReader());
 		readers.add(new FileBinaryDataReader());
+        // should always be the last one
+        readers.add(new PlainStringBinaryDataReader());
 	}
 
 	/**

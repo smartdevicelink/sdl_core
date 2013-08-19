@@ -32,6 +32,7 @@ import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
 import com.ford.syncV4.android.marshaller.CustomJsonRPCMarshaller;
 import com.ford.syncV4.android.marshaller.InvalidJsonRPCMarshaller;
+import com.ford.syncV4.android.module.reader.BinaryDataReader;
 import com.ford.syncV4.android.module.reader.BinaryDataReaderFactory;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
@@ -601,10 +602,15 @@ public class ModuleTest {
 								logParserDebugInfo("" + hash);
 								//TODO: Iterate through hash table and add it to parameters
 								for (Object key : hash.keySet()) {
-									if (((String)key).equals(BULK_DATA_ATTR)) {
-										rpc.setBulkData((byte[]) hash.get(key));
+                                    final Object value = hash.get(key);
+                                    if (((String) key).equals(BULK_DATA_ATTR)) {
+                                        if (value instanceof byte[]) {
+                                            rpc.setBulkData((byte[]) value);
+                                        } else {
+                                            rpc.setBulkData(new byte[]{ });
+                                        }
 									} else {
-										rpc.setParameters((String) key, hash.get(key));
+										rpc.setParameters((String) key, value);
 									}
 								}
 								
@@ -873,7 +879,15 @@ public class ModuleTest {
 					} else if (tempName.equalsIgnoreCase(BINARY_TAG_NAME)) {
 						logParserDebugInfo("In " + BINARY_TAG_NAME);
 						String srcData = parser.getAttributeValue(0);
-						byte[] data = binaryDataReaderFactory.getReaderForString(srcData).read(srcData);
+                        final BinaryDataReader reader = binaryDataReaderFactory
+                                .getReaderForString(srcData);
+                        byte[] data;
+                        if (reader != null) {
+                            data = reader.read(srcData);
+                        } else {
+                            // if reader can't be found, set empty data
+                            data = new byte[]{ };
+                        }
 						if (data != null) {
 							hash.put(BULK_DATA_ATTR, data);
 						}
@@ -927,114 +941,155 @@ public class ModuleTest {
 		
 		Thread newThread = new Thread(new Runnable() {
 			public void run () {
-				threadContext = this;
-				
-				int numResponses = expecting.size();
-				if (numResponses > 0) ProxyService.waiting(true);
-				
-				IJsonRPCMarshaller defaultMarshaller = ProxyService.getProxyInstance().getJsonRPCMarshaller();
-				IJsonRPCMarshaller invalidMarshaller = new InvalidJsonRPCMarshaller();
-				CustomJsonRPCMarshaller customMarshaller = new CustomJsonRPCMarshaller(null);
-				
-				for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
-					RPCRequest rpc = wrapper.getRequest();
-					boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
-					String customJSON = wrapper.getCustomJSON();
-					if (customJSON != null) {
-						customMarshaller.setStubbedValue(customJSON);
-					}
-					
-					_msgAdapter.logMessage(rpc, true);
-					IJsonRPCMarshaller currentMarshaller = (customJSON != null) ? customMarshaller
-							: (generateInvalidJSON ? invalidMarshaller
-									: defaultMarshaller);
-					ProxyService.getProxyInstance().setJsonRPCMarshaller(currentMarshaller);
-					try {
-						ProxyService.getProxyInstance().sendRPCRequest(rpc);
-					} catch (SyncException e) {
-						_msgAdapter.logMessage("Error sending RPC", Log.ERROR, e, true);
-					}
-					
-					// restore the default marshaller
-					ProxyService.getProxyInstance().setJsonRPCMarshaller(defaultMarshaller);
-					
-					long pause = wrapper.getPause();
-					if (pause > 0) {
-						Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName() + "." + rpc.getFunctionName());
-						try {
-							// delay between requests of one test
-							synchronized (this) {
-								this.wait(pause);
-							}
-						} catch (InterruptedException e) {
-							_msgAdapter.logMessage("InterruptedException", true);
-						}
-					} else {
-						Log.i(TAG, "No pause after " + currentTest.getName() + "." + rpc.getFunctionName());
-					}
-				}
-				
-				long pause = currentTest.getPause();
-				if (pause > 0) {
-					Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName());
-					try {
-						// delay after the test
-						synchronized (this) {
-							this.wait(pause);
-						}
-					} catch (InterruptedException e) {
-						_msgAdapter.logMessage("InterruptedException", true);
-					}
-				} else {
-					Log.i(TAG, "No pause after " + currentTest.getName());
-				}
-				
-				// wait for incoming messages
-				try {
-					synchronized (this) {
-						this.wait(100);
-					}
-				} catch (InterruptedException e) {
-					_msgAdapter.logMessage("InterruptedException", true);
-				}
-				
-				ProxyService.waiting(false);
-				
-				if (expecting.equals(responses)) {
-					pass = true;
-					if (integration) {
-						_mainInstance.runOnUiThread(new Runnable() {
-							public void run() {
-								AlertDialog.Builder alert = new AlertDialog.Builder(_mainInstance);
-								alert.setMessage(userPrompt);
-								alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-									@Override
-									public void onClick(DialogInterface dialog, int which) {
-										pass = true;
-										synchronized (threadContext) { threadContext.notify();}
-									}
-								});
-								alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-									@Override
-									public void onClick(DialogInterface dialog, int which) {
-										pass = false;
-										synchronized (threadContext) { threadContext.notify();}
-									}
-								});
-								alert.show();
-							}
-						});
-	
-						try {
-							synchronized (this) { this.wait();}
-						} catch (InterruptedException e) {
-							_msgAdapter.logMessage("InterruptedException", true);
-						}
-					}
-				}
-				
-				// restore the default marshaller
-				ProxyService.getProxyInstance().setJsonRPCMarshaller(defaultMarshaller);
+                if (currentTest != null && currentTest.getRequests() != null) {
+                    threadContext = this;
+
+                    int numResponses = expecting.size();
+                    if (numResponses > 0) ProxyService.waiting(true);
+
+                    IJsonRPCMarshaller defaultMarshaller =
+                            ProxyService.getProxyInstance()
+                                    .getJsonRPCMarshaller();
+                    IJsonRPCMarshaller invalidMarshaller =
+                            new InvalidJsonRPCMarshaller();
+                    CustomJsonRPCMarshaller customMarshaller =
+                            new CustomJsonRPCMarshaller(null);
+
+                    for (RPCRequestWrapper wrapper : currentTest
+                            .getRequests()) {
+                        RPCRequest rpc = wrapper.getRequest();
+                        boolean generateInvalidJSON =
+                                wrapper.isGenerateInvalidJSON();
+                        String customJSON = wrapper.getCustomJSON();
+                        if (customJSON != null) {
+                            customMarshaller.setStubbedValue(customJSON);
+                        }
+
+                        _msgAdapter.logMessage(rpc, true);
+                        IJsonRPCMarshaller currentMarshaller =
+                                (customJSON != null) ? customMarshaller :
+                                        (generateInvalidJSON ?
+                                                invalidMarshaller :
+                                                defaultMarshaller);
+                        ProxyService.getProxyInstance()
+                                .setJsonRPCMarshaller(currentMarshaller);
+                        try {
+                            ProxyService.getProxyInstance().sendRPCRequest(rpc);
+                        } catch (SyncException e) {
+                            _msgAdapter
+                                    .logMessage("Error sending RPC", Log.ERROR,
+                                            e, true);
+                        }
+
+                        // restore the default marshaller
+                        ProxyService.getProxyInstance()
+                                .setJsonRPCMarshaller(defaultMarshaller);
+
+                        long pause = wrapper.getPause();
+                        if (pause > 0) {
+                            Log.v(TAG, "Pause for " + pause + " ms. after " +
+                                    currentTest.getName() + "." +
+                                    rpc.getFunctionName());
+                            try {
+                                // delay between requests of one test
+                                synchronized (this) {
+                                    this.wait(pause);
+                                }
+                            } catch (InterruptedException e) {
+                                _msgAdapter.logMessage("InterruptedException",
+                                        true);
+                            }
+                        } else {
+                            Log.i(TAG,
+                                    "No pause after " + currentTest.getName() +
+                                            "." + rpc.getFunctionName());
+                        }
+                    }
+
+                    long pause = currentTest.getPause();
+                    if (pause > 0) {
+                        Log.v(TAG, "Pause for " + pause + " ms. after " +
+                                currentTest.getName());
+                        try {
+                            // delay after the test
+                            synchronized (this) {
+                                this.wait(pause);
+                            }
+                        } catch (InterruptedException e) {
+                            _msgAdapter
+                                    .logMessage("InterruptedException", true);
+                        }
+                    } else {
+                        Log.i(TAG, "No pause after " + currentTest.getName());
+                    }
+
+                    // wait for incoming messages
+                    try {
+                        synchronized (this) {
+                            this.wait(100);
+                        }
+                    } catch (InterruptedException e) {
+                        _msgAdapter.logMessage("InterruptedException", true);
+                    }
+
+                    ProxyService.waiting(false);
+
+                    if (expecting.equals(responses)) {
+                        pass = true;
+                        if (integration) {
+                            _mainInstance.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    AlertDialog.Builder alert =
+                                            new AlertDialog.Builder(
+                                                    _mainInstance);
+                                    alert.setMessage(userPrompt);
+                                    alert.setPositiveButton("Yes",
+                                            new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(
+                                                        DialogInterface dialog,
+                                                        int which) {
+                                                    pass = true;
+                                                    synchronized (threadContext) {
+                                                        threadContext.notify();
+                                                    }
+                                                }
+                                            });
+                                    alert.setNegativeButton("No",
+                                            new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(
+                                                        DialogInterface dialog,
+                                                        int which) {
+                                                    pass = false;
+                                                    synchronized (threadContext) {
+                                                        threadContext.notify();
+                                                    }
+                                                }
+                                            });
+                                    alert.show();
+                                }
+                            });
+
+                            try {
+                                synchronized (this) {
+                                    this.wait();
+                                }
+                            } catch (InterruptedException e) {
+                                _msgAdapter.logMessage("InterruptedException",
+                                        true);
+                            }
+                        }
+                    }
+
+                    // restore the default marshaller
+                    ProxyService.getProxyInstance()
+                            .setJsonRPCMarshaller(defaultMarshaller);
+                } else {
+                    Log.e(TAG, "Current test " + currentTest +
+                            " or its requests " + currentTest.getRequests() +
+                            " is null!");
+                }
 				
 				synchronized (_instance) { _instance.notify();}
 				

@@ -1,3 +1,6 @@
+[CW34]
+* Fix a crash when trying to send SyncPData request from XML test.
+
 [CW33]
 * Use SyncMsgVersion 2.2.
 + The user can send UnregisterAppInterface message from GUI.
