@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONNECTION_H_
-#define CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CONNECTION_H_
 
 #include "utils/shared_ptr.h"
 #include "transport_manager/device_adapter/device_adapter.h"
@@ -48,6 +48,10 @@ namespace device_adapter {
  **/
 class Connection {
  public:
+
+  /**
+   * @brief Constructor
+   */
   Connection() {}
   /**
    * @brief Destructor.

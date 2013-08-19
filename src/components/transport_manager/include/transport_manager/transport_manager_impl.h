@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_
 
 #include <queue>
 #include <map>
@@ -53,8 +53,15 @@ using ::transport_manager::AdapterIterator;
 using ::transport_manager::device_adapter::DeviceAdapterSptr;
 using ::transport_manager::device_adapter::DeviceAdapterListener;
 
+/**
+ * namespace transport_manager
+ * @brief transport_manager namespace
+ */
 namespace transport_manager {
 
+/**
+ * @brief Transport manager states ???
+ */
 enum {
   E_SUCCESS = 0,
   E_TM_IS_NOT_INITIALIZED,
@@ -253,18 +260,16 @@ class TransportManagerImpl : public TransportManager {
   }
 
   /**
-   * @brief post new mesage into TM's queue
+   * @brief Post new message into TM's message queue
    *
-   * @param new message container
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @param message shared pointer to message
    **/
   void postMessage(const RawMessageSptr message);
 
   /**
    * @brief update message in queue
    *
-   * @param
+   * @param message shared pointer to raw massage
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
@@ -383,12 +388,12 @@ class TransportManagerImpl : public TransportManager {
   pthread_t messsage_queue_thread_;
 
   /**
-   * @brief conditional event thread
+   * @brief Conditional event thread
    **/
   pthread_t event_queue_thread_;
 
   /**
-   * @brief condition variable to wake up event
+   * @brief Condition variable to wake up event
    **/
   pthread_cond_t device_listener_thread_wakeup_;
 
@@ -397,8 +402,15 @@ class TransportManagerImpl : public TransportManager {
    **/
   mutable pthread_mutex_t event_queue_mutex_;
 
+  /**
+   * @brief Flag that TM is initialized
+   */
   bool is_initialized_;
  private:
+
+  /**
+   * @brief Structure that contains conversion functions (Device ID -> Device Handle; Device Handle -> Device ID)
+   */
   struct Handle2GUIDConverter {
     typedef std::vector<DeviceUID> ConversionTable;
 
@@ -429,8 +441,15 @@ class TransportManagerImpl : public TransportManager {
 
     ConversionTable conversion_table_;
   };
+
+  /**
+   * @brief Converter variable (Device ID -> Device Handle; Device Handle -> Device ID)
+   */
   Handle2GUIDConverter converter_;
 
+  /**
+   * @brief Structure that contains internal connection parameters
+   */
   struct ConnectionInternal {
     DeviceAdapterSptr device_adapter;
     ConnectionUID id;

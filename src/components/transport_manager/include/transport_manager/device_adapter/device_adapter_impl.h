@@ -1,6 +1,6 @@
 /**
  * \file DeviceAdapterImpl.hpp
- * \brief DeviceAdapterImpl class header.
+ * \brief DeviceAdapterImpl class header
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_IMPL_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_IMPL_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_IMPL_H_
 
 #include <queue>
 #include <set>
@@ -46,7 +46,14 @@
 #include "transport_manager/device_adapter/device_adapter_controller.h"
 #include "transport_manager/device_adapter/connection.h"
 
+/**
+ * @brief transport_manager namespace
+ */
 namespace transport_manager {
+
+/**
+ * @brief device_adapter namespace
+ */
 namespace device_adapter {
 
 class DeviceAdapterListener;
@@ -76,14 +83,26 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
 
  public:
   /**
-   * @brief Run device adapter.
+   * @brief Run device adapter
    *
    * Called from transport manager to start device adapter.
+   *
+   * @return Error information about possible reason of initialization failure
    **/
   virtual DeviceAdapter::Error init();
 
+  /**
+   * @brief Add listener to the container(list) of device adapter listeners.
+   *
+   * @param listener pointer to the device adapter listener
+   */
   virtual void addListener(DeviceAdapterListener *listener);
 
+  /**
+   * @brief Remove listener from the container(list) of device dapter listeners.
+   *
+   * @param listener pointer to the device adapter listener
+   */
   virtual void removeListener(DeviceAdapterListener *listener);
 
   /**
@@ -91,7 +110,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * List of new devices will be supplied in onDeviceListUpdated callback.
    *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
+   * @return Error information about possible reason of searching devices failure
    **/
   virtual DeviceAdapter::Error searchDevices();
 
@@ -101,7 +120,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @param device_handle Handle of device to connect to.
    * @param app_handle Handle of application to connect to.
    *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
+   * @return Error information about possible reason of connection to the device failure
    **/
   virtual DeviceAdapter::Error connect(const DeviceUID& device_handle,
                                        const ApplicationHandle& app_handle);
@@ -109,9 +128,10 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Disconnect from specified session.
    *
-   * @param session_id Session identifier to disconnect.
+   * @param device_handle handle of device to disconnect from.
+   * @param app_handle  handle of application.
    *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
+   * @return Error information about possible reason of disconnection from the device failure
    **/
   virtual DeviceAdapter::Error disconnect(const DeviceUID& device_handle,
                                           const ApplicationHandle& app_handle);
@@ -121,37 +141,94 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @param device_handle Device handle to disconnect.
    *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
+   * @return Error information about possible reason of disconnecting from device failure.
    **/
   virtual DeviceAdapter::Error disconnectDevice(const DeviceUID& device_handle);
 
   /**
    * @brief Send frame.
    *
-   * @param ConnectionHandle Connection handle.
-   * @param Data Frame payload data.
-   * @param DataSize Size of data in bytes.
-   * @param UserData Any user data.
+   * @param device_handle device unique identifier.
+   * @param app_handle handle of application.
+   * @param data smart pointer to the raw message.
    *
-   * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
+   * @return Error information about possible reason of sending data failure
    **/
   virtual DeviceAdapter::Error sendData(const DeviceUID& device_handle,
                                         const ApplicationHandle& app_handle,
                                         const RawMessageSptr data);
 
+  /**
+   * @brief Start client listener.
+   *
+   * @return Error information about possible reason of starting client listener failure.
+   */
   virtual DeviceAdapter::Error startClientListening();
+
+  /**
+   * @brief Stop client listener.
+   *
+   * @return Error information about possible reason of stopping client listener failure.
+   */
   virtual DeviceAdapter::Error stopClientListening();
 
+  /**
+   * @brief Notify that device scanner is available.
+   *
+   * @return true - available, false - not available.
+   */
   virtual bool isSearchDevicesSupported() const;
+
+  /**
+   * @brief Notify that server connection factory is available.
+   *
+   * @return true - available, false - not available.
+   */
   virtual bool isServerOriginatedConnectSupported() const;
+
+  /**
+   * @brief Notify that listener of client connection is available.
+   *
+   * @return true - available, false - not available.
+   */
   virtual bool isClientOriginatedConnectSupported() const;
 
+  /**
+   * @brief Create container(vector) of device unique identifiers.
+   *
+   * @return container(vector) of device unique identifiers.
+   */
   virtual DeviceList getDeviceList() const;
+
+  /**
+   * @brief Get container(vector) of application unique identifiers that available at specified device.
+   *
+   * @param device_handle handle of device.
+   *
+   * @return container(vector) that holds application unique identifiers.
+   */
   virtual ApplicationList getApplicationList(
       const DeviceUID& device_handle) const;
+
+  /**
+   * @brief Find device in container(map)
+   *
+   * @param device_handle device unique identifier
+   *
+   * @return smart pointer to device
+   */
   virtual DeviceSptr findDevice(const DeviceUID& device_handle) const;
 
+  /**
+   * @brief Search for specified device
+   *
+   * @param devices container(vector) of smart pointers to devices
+   */
   virtual void searchDeviceDone(const DeviceVector& devices);
+
+  /**
+   *
+   */
   virtual void searchDeviceFailed(const SearchDeviceError& error);
   virtual DeviceSptr addDevice(DeviceSptr device);
 

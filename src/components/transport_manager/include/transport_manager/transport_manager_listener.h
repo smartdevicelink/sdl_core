@@ -70,7 +70,7 @@ class TransportManagerListener {
   /**
    * \brief Informs about failure during DisconnectDevice procedure of TM
    * \param device Information about disconnected device
-   * \param error Information about possible reason of loosing connection
+   * \param error Information about possible reason of disconnecting failure
    */
   virtual void OnDisconnectFailed(const DeviceHandle& device,
                                   const DisconnectDeviceError& error) = 0;
@@ -85,6 +85,7 @@ class TransportManagerListener {
    * @brief Notifies about error on receiving message from TM.
    *
    * @param error Occured error
+   * @param connection_id connection unique identifier
    **/
   virtual void OnTMMessageReceiveFailed(ConnectionUID connection_id,
                                         const DataReceiveError& error) = 0;
@@ -96,8 +97,7 @@ class TransportManagerListener {
   virtual void OnTMMessageSend() = 0;
 
   /**
-   * @brief Notifies about error occured during
-   * sending message.
+   * @brief Notifies about error occured during sending message.
    *
    * @param error Describes occured error.
    * @param message Message during sending which error occured.

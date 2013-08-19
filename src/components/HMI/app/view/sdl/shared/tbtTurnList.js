@@ -78,14 +78,24 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create( {
 
         this.tbtTurnListList.list.refresh();
 
-        var i = 0, turnListArray = SDL.SDLController.getApplicationModel( appID ).turnList;
+        var turnListArray = SDL.SDLController.getApplicationModel( appID ).turnList,
         length = turnListArray.length;
-        for( i = 0; i < length; i++ ){
+        for( var i = 0; i < length; i++ ){
             this.get( 'tbtTurnListList.list.childViews' ).pushObject( SDL.Label.create( {
-                icon: turnListArray[i].turnIcon.value,
+                icon: turnListArray[i].turnIcon ? turnListArray[i].turnIcon.value : "",
                 content: turnListArray[i].navigationText,
-                templateName: turnListArray[i].turnIcon.value ? 'icon' : 'text',
+                templateName: turnListArray[i].turnIcon ? 'icon' : 'text',
                 classNames: 'list-item'
+            } ) );
+        }
+        turnListArray = SDL.SDLController.getApplicationModel( appID ).turnListSoftButtons;
+        length = turnListArray.length;
+        for( var i = 0; i < length; i++ ){
+            this.get( 'tbtTurnListList.list.childViews' ).pushObject( SDL.Button.create( {
+                icon: turnListArray[i].image ? turnListArray[i].image.value : "",
+                text: turnListArray[i].text,
+                templateName: turnListArray[i].image ? 'rightIcon' : 'text',
+                classNames: 'list-item softButton'
             } ) );
         }
     }

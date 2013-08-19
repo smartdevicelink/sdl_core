@@ -55,8 +55,8 @@ void PutFileRequest::Run() {
     application((*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -73,8 +73,8 @@ void PutFileRequest::Run() {
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     LOG4CXX_ERROR(logger_, "Binary data empty");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -94,6 +94,7 @@ void PutFileRequest::Run() {
 
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
+      LOG4CXX_ERROR(logger_, "Unable to save file");
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {

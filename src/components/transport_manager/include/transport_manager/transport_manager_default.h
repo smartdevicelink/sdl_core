@@ -1,6 +1,6 @@
 /*
  * \file transport_manager_default.h
- * \brief 
+ * \brief Transport manager default class, derived from TransportManagerImpl class
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TRANSPORT_MANAGER_DEFAULT_H_
-#define TRANSPORT_MANAGER_DEFAULT_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/bluetooth/bluetooth_adapter.h"
