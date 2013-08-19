@@ -50,7 +50,7 @@ void DeleteFileResponse::Run() {
 
   (*message_)[strings::msg_params][strings::space_available] =
       static_cast<int>(file_system::AvailableSpace());
-  SendResponse(true);
+  SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 
 }  // namespace commands
