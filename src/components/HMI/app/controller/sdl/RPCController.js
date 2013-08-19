@@ -724,19 +724,6 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if ("turnList" in params) {
-                        for ( var btn in params.turnList) {
-                            if ("turnIcon" in params.turnList[btn]
-                                && params.turnList[btn].turnIcon.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-
-                                return this.resultStruct;
-                            }
-                        }
-                    }
                     if (!params.turnList) {
 
                         this.resultStruct = {
@@ -754,6 +741,20 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
+                    }
+                    if ("turnList" in params) {
+                        
+                        for ( var i = 0; i < params.turnList.length; i++) {
+                            if (params.turnList[i].image && params.turnList[i].image.imageType !== "DYNAMIC") {
+
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+
+                                return this.resultStruct;e;
+                            }
+                        }
                     }
 
                     this.resultStruct = {

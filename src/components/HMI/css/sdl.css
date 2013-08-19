@@ -51,6 +51,16 @@
 	color: gold;
 }
 
+.softButton .ico{
+	width: 50px;
+	height: auto;
+	float: left;
+}
+
+.softButton .rightTextButton{
+	left: 0;
+}
+
 .sdl-window .back-button {
 	top: 80px;
 	left: 5px;
