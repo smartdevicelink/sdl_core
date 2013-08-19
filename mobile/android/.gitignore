@@ -38,3 +38,6 @@ SPTAlice
 
 # DS_Store
  *.DS_Store
+
+# Gradle
+ .gradle/
