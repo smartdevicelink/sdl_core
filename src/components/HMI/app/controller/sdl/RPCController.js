@@ -562,6 +562,26 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
+                    if ("softButtons" in params) {
+                        for (var i=0; i < params.softButtons.length; i++) {
+                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
+                    }
+                    if ("turnIcon" in params && params.turnIcon.imageType !== "DYNAMIC") {
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Unsupported image type!"
+                        };
+
+                        return this.resultStruct;
+                    }
                     if (!params.navigationTexts) {
 
                         this.resultStruct = {
@@ -677,6 +697,30 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
+                    if ("softButtons" in params) {
+                        for (var i=0; i < params.softButtons.length; i++) {
+                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
+                    }
+                    if ("turnList" in params) {
+                        for (var btn in params.turnList) {
+                            if ("turnIcon" in params.turnList[btn] && params.turnList[btn].turnIcon.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
+                    }
                     if (!params.turnList) {
 
                         this.resultStruct = {
@@ -710,6 +754,21 @@ SDL.RPCController = Em.Object
                  *            params
                  */
                 AlertManeuver: function(params) {
+
+                    if (params) {
+                        if ("softButtons" in params) {
+                            for (var i=0; i < params.softButtons.length; i++) {
+                                if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
+                                    this.resultStruct = {
+                                        "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                        "resultMessage": "Unsupported image type!"
+                                    };
+            
+                                    return this.resultStruct;
+                                }
+                            }
+                        }
+                    }
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
@@ -760,6 +819,18 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
+                    }
+                    if ("softButtons" in params) {
+                        for (var i=0; i < params.softButtons.length; i++) {
+                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
                     }
                     if (!params.alertStrings) {
 
@@ -840,6 +911,14 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
+                    if ("icon" in params && params.icon.imageType !== "DYNAMIC") {
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Unsupported image type!"
+                        };
+
+                        return this.resultStruct;
+                    }
                     if (!params.text) {
 
                         this.resultStruct = {
@@ -891,6 +970,26 @@ SDL.RPCController = Em.Object
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if ("softButtons" in params) {
+                        for (var i=0; i < params.softButtons.length; i++) {
+                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
+                    }
+                    if ("graphic" in params && params.graphic.imageType !== "DYNAMIC") {
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Unsupported image type!"
                         };
 
                         return this.resultStruct;
@@ -952,6 +1051,14 @@ SDL.RPCController = Em.Object
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if ("cmdIcon" in params && params.cmdIcon.imageType !== "DYNAMIC") {
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Unsupported image type!"
                         };
 
                         return this.resultStruct;
@@ -1256,6 +1363,30 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
+                    if ("choiseSet" in params) {
+                        for (var i=0; i < params.choiseSet.length; i++) {
+                            if (params.choiseSet[i].image && params.choiseSet[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
+                    }
+                    if ("vrHelp" in params) {
+                        for (var i=0; i < params.vrHelp.length; i++) {
+                            if (params.vrHelp[i].image && params.vrHelp[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
+                    }
                     if (!params.timeout) {
 
                         this.resultStruct = {
@@ -1377,6 +1508,18 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
+                    }
+                    if ("vrHelp" in params) {
+                        for (var i=0; i < params.vrHelp.length; i++) {
+                            if (params.vrHelp[i].image && params.vrHelp[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
                     }
                     if (!params.appID) {
 
@@ -1545,6 +1688,14 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
+                    if ("syncFileName" in params && params.syncFileName.imageType !== "DYNAMIC") {
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Unsupported image type!"
+                        };
+
+                        return this.resultStruct;
+                    }
                     if (!params.appID) {
 
                         this.resultStruct = {
@@ -1703,6 +1854,18 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
+                    if ("softButtons" in params) {
+                        for (var i=0; i < params.softButtons.length; i++) {
+                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
+                    }
                     if (!params.messageText) {
 
                         this.resultStruct = {
@@ -1855,6 +2018,18 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
+                    }
+                    if ("vrHelp" in params) {
+                        for (var i=0; i < params.vrHelp.length; i++) {
+                            if (params.vrHelp[i].image && params.vrHelp[i].image.imageType !== "DYNAMIC") {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+        
+                                return this.resultStruct;
+                            }
+                        }
                     }
                     if ("appID" in params) {
 
