@@ -89,16 +89,14 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
 
   for (; commands.end() != it; ++it) {
     if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
-        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
-      for (size_t i = 0; i < (*it->second)[strings::vr_commands].length();
-                                                                    ++i) {
-        smart_objects::SmartObject msg_params =
-            smart_objects::SmartObject(smart_objects::SmartType_Map);
-        msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
-        msg_params[strings::app_id] = app->app_id();
+      (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
 
-        CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
-      }
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
+      msg_params[strings::app_id] = app->app_id();
+
+      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
     }
   }
 }
@@ -109,7 +107,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(Application* const app) {
   const CommandsMap& commands = app->commands_map();
   CommandsMap::const_iterator it = commands.begin();
 
-  for (; commands.end() != it; ++it) {
+  while (commands.end() != it) {
     if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
         (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
 
@@ -119,7 +117,13 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(Application* const app) {
         msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
 
         app->RemoveCommand((*it->second)[strings::cmd_id].asInt());
+
+        it = commands.begin(); // Can not relay on
+                               // iterators after erase was called
+
         CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, msg_params);
+    } else {
+      ++it;
     }
   }
 }

@@ -879,8 +879,8 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
       }
 
       if (!ApplicationManagerImpl::instance()->VerifyImageType(
-          static_cast<mobile_apis::ImageType::eType>(message[strings::image_type]
-              .asInt()))) {
+          static_cast<mobile_apis::ImageType::eType>(
+              message[strings::image_type].asInt()))) {
         return false;  // second exit point
       }
 
