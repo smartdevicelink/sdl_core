@@ -973,23 +973,28 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
     unsigned int app_id = (*message)[strings::params][strings::connection_key]
                           .asUInt();
+
+    mobile_apis::FunctionID::eType function_id
+      = static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asInt());
+
+    unsigned int correlation_id
+      = (*message)[strings::params][strings::correlation_id].asUInt();
+
+    unsigned int connection_key
+      = (*message)[strings::params][strings::connection_key].asUInt();
+
     Application* app = ApplicationManagerImpl::instance()->application(app_id);
     if (NULL == app) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
+      smart_objects::SmartObject* response =
+          MessageHelper::CreateNegativeResponse(connection_key, function_id,
+              correlation_id, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+      ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return false;
     }
 
     if (!policies_manager_.is_valid_hmi_status(function_id, app->hmi_level())) {
-      mobile_apis::FunctionID::eType function_id
-        = static_cast<mobile_apis::FunctionID::eType>(
-            (*message)[strings::params][strings::function_id].asInt());
-
-      unsigned int correlation_id
-        = (*message)[strings::params][strings::correlation_id].asUInt();
-
-      unsigned int connection_key
-        = (*message)[strings::params][strings::connection_key].asUInt();
-
       LOG4CXX_WARN(logger_, "Request blocked by policies. "
                    << "FunctionID: " << static_cast<int>(function_id)
                    << " Application HMI status: " << static_cast<int>(app->hmi_level()));

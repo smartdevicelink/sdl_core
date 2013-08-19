@@ -51,15 +51,6 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  if (!app_manager->UnregisterApplication(
-        (*message_)[strings::params][strings::connection_key])) {
-    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-    LOG4CXX_ERROR(logger_, "Generic error");
-    return;
-  }
-
-  SendResponse(true, mobile_apis::Result::SUCCESS);
-
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!notification) {
@@ -78,6 +69,15 @@ void UnregisterAppInterfaceRequest::Run() {
     (*message_)[strings::params][strings::connection_key];
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
+
+  if (!app_manager->UnregisterApplication(
+        (*message_)[strings::params][strings::connection_key])) {
+    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+    LOG4CXX_ERROR(logger_, "Generic error");
+    return;
+  }
+
+  SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 
 }  // namespace commands
