@@ -1,6 +1,6 @@
 /*
  * \file info.h
- * \brief 
+ * \brief Info class, DeviceInfo class, AdapterInfo definitions
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -39,50 +39,113 @@
 #include <string>
 #include "transport_manager/common.h"
 
+/**
+ * @brief transport_manager name space
+ */
 namespace transport_manager {
 
+/**
+ * @brief Info class
+ */
 class Info {
  protected:
+
+  /**
+   * @brief Info class object name
+   */
   std::string name_;
 
  public:
-  Info() {}
+
+  /**
+   * @brief Default constructor
+   */
+  Info() {
+  }
+
+  /**
+   * @brief Constructor
+   *
+   * @param name Info class object name
+   */
   explicit Info(std::string name)
       : name_(name) {
   }
-  std::string name() const{
+
+  /**
+   * @brief Returns name_
+   */
+  std::string name() const {
     return name_;
   }
-  virtual ~Info() {}
+
+  /**
+   * @brief Destructor
+   */
+  virtual ~Info() {
+  }
 };
 
+/**
+ * @brief derived from Info class, contains information about device
+ */
 class DeviceInfo : public Info {
  protected:
+  /**
+   * @brief string object that holds mac address
+   */
   std::string mac_address_;
+
+  /**
+   * @brief variable that holds handle of device
+   */
   DeviceHandle device_handle_;
 
  public:
+  /**
+   * @brief Constructor
+   */
   DeviceInfo(DeviceHandle device_handle, std::string mac_address,
              std::string name)
       : Info(name),
         mac_address_(mac_address),
-        device_handle_(device_handle) {}
+        device_handle_(device_handle) {
+  }
 
+  /**
+   * @brief Returns mac_address
+   */
   std::string mac_address() const {
     return mac_address_;
   }
+
+  /**
+   * @brief Returns device_handle
+   */
   DeviceHandle device_handle() const {
     return device_handle_;
   }
+
+  /**
+   * @brief friend bool operator ==
+   */
   friend bool operator ==(const DeviceInfo &first, const DeviceInfo &second);
 };
 
+/**
+ * @brief assigns fields of one DeviceInfo class to another
+ *
+ * @param DeviceInfo class, DeviceInfo class
+ */
 inline bool operator ==(const DeviceInfo &first, const DeviceInfo &second) {
   return first.name_ == second.name_
       && first.mac_address_ == second.mac_address_
       && first.device_handle_ == second.device_handle_;
 }
 
+/**
+ * @brief AdapterInfo class
+ */
 class AdapterInfo : public Info {
 
 };

@@ -1,6 +1,6 @@
 /*
  * \file timer.h
- * \brief 
+ * \brief Timer class
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

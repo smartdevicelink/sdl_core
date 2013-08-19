@@ -1,6 +1,6 @@
 /**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+ * \file common.h
+ * \brief common definition.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 
 #include <set>
 #include <vector>
@@ -42,19 +42,41 @@
 #include "protocol_handler/raw_message.h"
 #include "utils/shared_ptr.h"
 
-namespace transport_manager {
 /**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
+ * @brief - transport_manager namespace
+ */
+namespace transport_manager {
+
+/**
+ * @brief Shared pointer for RawMessage class
  **/
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
+
+/**
+ * @brief Type definition for variable that holds external representation of device handle
+ */
 typedef unsigned int DeviceHandle;
+
+/**
+ * @brief Type definition for variable that holds external representation of connection unique identifier
+ */
 typedef unsigned int ConnectionUID;
+
+/**
+ * @brief Type definition for variable that holds external representation of device unique identifier
+ */
 typedef std::string DeviceUID;
+
+/**
+ * @brief Type definition for variable that holds external representation of application handle
+ */
 typedef int ApplicationHandle;
+
+/**
+ * @brief Type definition for vector that contains ApplicationHandle variables
+ */
 typedef std::vector<ApplicationHandle> ApplicationList;
 
 }  //  namespace transport_manager
 
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON.H
