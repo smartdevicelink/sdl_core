@@ -33,53 +33,83 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pthread.h>
-
 #include <transport_manager/timer.h>
+
+#include "errno.h"
 
 namespace transport_manager {
 
-Timer::Timer()
-    : thread_(0),
-      milliseconds(0),
-      routine(nullptr),
-      routineParam(nullptr),
-      need_to_process(false) {
+Timer::Timer() : thread_(0),
+    milliseconds_(0),
+    func_(0),
+    params_(0),
+    single_shot_(false) {
+  pthread_cond_init(&cond_, nullptr);
+  pthread_mutex_init(&mutex_, nullptr);
 }
 
-Timer::Timer(unsigned long milliseconds, void (*routine)(void*), void *param)
+Timer::Timer(unsigned long milliseconds, Callback func, void *params, bool single_shot)
     : thread_(0),
-      milliseconds(milliseconds),
-      routine(routine),
-      routineParam(param),
-      need_to_process(true) {
+      milliseconds_(milliseconds),
+      func_(func),
+      params_(params),
+      single_shot_(single_shot) {
+  pthread_cond_init(&cond_, nullptr);
+  pthread_mutex_init(&mutex_, nullptr);
+}
+
+Timer::Timer(const Timer &other)
+    : thread_(0),
+      milliseconds_(other.milliseconds_),
+      func_(other.func_),
+      params_(other.params_),
+      single_shot_(other.single_shot_) {
+  pthread_cond_init(&cond_, nullptr);
+  pthread_mutex_init(&mutex_, nullptr);
+}
+
+Timer::~Timer() {
+  pthread_mutex_destroy(&mutex_);
+  pthread_cond_destroy(&cond_);
+}
+
+Timer& Timer::operator = (const Timer &other)
+{
+    if (this != &other)
+    {
+      milliseconds_ = other.milliseconds_;
+      func_ = other.func_;
+      params_ = other.params_;
+      single_shot_ = other.single_shot_;
+    }
+    return *this;
 }
 
 void Timer::start() {
-  pthread_cond_init(&cond_, nullptr);
-  pthread_mutex_init(&mutex_, nullptr);
   pthread_create(&thread_, nullptr, &threadRoutine, this);
 }
 
 void Timer::stop() {
-  need_to_process = false;
+  pthread_mutex_lock(&mutex_);
   pthread_cond_signal(&cond_);
-  void *retval;
-  pthread_join(thread_, &retval);
-  pthread_mutex_destroy(&mutex_);
-  pthread_cond_destroy(&cond_);
+  pthread_mutex_unlock(&mutex_);
 }
 
 void* Timer::threadRoutine(void* p) {
   Timer *t = static_cast<Timer*>(p);
   timespec time;
-  time.tv_nsec = t->milliseconds * 1000000;
-  pthread_mutex_lock(&t->mutex_);
-  pthread_cond_timedwait(&t->cond_, &t->mutex_, &time);
-  if (t->need_to_process) {
-    t->routine(t->routineParam);
-  }
-  // TODO (dmitry.chmerev@luxoft.com): to stop or not to stop? That's the question
+  time.tv_nsec = t->milliseconds_ * 1000000;
+  do {
+    pthread_mutex_lock(&t->mutex_);
+    int ret = pthread_cond_timedwait(&t->cond_, &t->mutex_, &time);
+    pthread_mutex_unlock(&t->mutex_);
+    if (ret == ETIMEDOUT) {
+      t->func_(t->params_);
+    } else {
+      break;
+    }
+  } while (!t->single_shot_);
   return nullptr;
 }
-}
+
+}  // namespace transport_manager

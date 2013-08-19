@@ -33,28 +33,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TIMER_H_
-#define TIMER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIMER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIMER_H_
 
 #include <pthread.h>
 
 namespace transport_manager {
 
+typedef void (*Callback)(void* param);
+
 class Timer {
+ public:
+  Timer();
+  Timer(unsigned long milliseconds, Callback func, void *params, bool single_shot);
+  Timer(const Timer &other);
+  ~Timer();
+  Timer& operator = (const Timer &other);
+  void start();
+  void stop();
+
+ private:
   pthread_t thread_;
   pthread_cond_t cond_;
   pthread_mutex_t mutex_;
-  unsigned long milliseconds;
-  void (*routine)(void*);
-  void *routineParam;
-  static void *threadRoutine(void*);
-  volatile bool need_to_process;
- public:
-  Timer();
-  Timer(unsigned long milliseconds, void (*routine)(void*), void *param);
-  void start();
-  void stop();
-};
-}
+  unsigned long milliseconds_;
+  Callback func_;
+  void *params_;
+  volatile bool single_shot_;
 
-#endif /* TIMER_H_ */
+  static void *threadRoutine(void* param);
+};
+
+}  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIMER_H_

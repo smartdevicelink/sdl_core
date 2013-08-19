@@ -226,7 +226,7 @@ int TransportManagerImpl::disconnect(const ConnectionUID &cid) {
     void **param = new void*[2];
     param[0] = this;
     param[1] = &connection;
-    Timer timer(config_.disconnectTimeout, &disconnectFailedRoutine, &param);
+    Timer timer(config_.disconnectTimeout, &disconnectFailedRoutine, &param, true);
     connection->timer = timer;
     timer.start();
   } else {
@@ -364,26 +364,6 @@ int TransportManagerImpl::removeDeviceAdapter(
   }
   return E_SUCCESS;
 }
-
-/*TODO: see declaration
- void TransportManagerImpl::addAdapterListener(device_adapter::DeviceAdapterSptr adapter,
- device_adapter::DeviceAdapterListener *listener) {
- LOG4CXX_INFO(
- logger_,
- "Add device adapter listener is called for adapter " << adapter << " listener " << listener);
- AdapterHandler::AdapterList al =
- const_cast<AdapterHandler::AdapterList &>(adapter_handler_.device_adapters());
- AdapterHandler::AdapterList::iterator it = std::find(al.begin(), al.end(),
- adapter);
- if (NULL == (*it)) {  // FIXME: Don't dereference vector::end()
- LOG4CXX_ERROR(logger_, "Device adapter is not known");
- return;
- }
- (*it)->addListener(listener);
- LOG4CXX_INFO(logger_, "Add device adapter listener call complete");
-
- }
- */
 
 int TransportManagerImpl::searchDevices(void) {
   if (search_in_progress_)
@@ -890,12 +870,11 @@ void TransportManagerImpl::messageQueueThread(void) {
         ConnectionInternal* connection = getConnection(
             active_msg->connection_key());
         if (connection == NULL) {
-          LOG4CXX_ERROR(
-              logger_,
-              "Connection " << active_msg->connection_key() << " not found");
-          //todo:(YK) add extended information string to error class and describe in this error instance that connection is lost
+          std::stringstream ss;
+          ss << "Connection " << active_msg->connection_key() << " not found";
+          LOG4CXX_ERROR(logger_, ss.str());
           raiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
-                     DataSendError(), active_msg);
+                     DataSendError(ss.str()), active_msg);
           message_queue_.remove(active_msg);
           continue;
         }
@@ -905,11 +884,10 @@ void TransportManagerImpl::messageQueueThread(void) {
             "Got adapter " << device_adapter.get() << "[" << device_adapter->getDeviceType() << "]" << " by session id " << active_msg->connection_key())
 
         if (!device_adapter.valid()) {
-          LOG4CXX_ERROR(logger_,
-                        "Device adapter is not found - message removed");
-          //todo:(YK) add extended information string to error class and describe in this error instance that adapter is lost
+          std::string error_text = "Device adapter is not found - message removed";
+          LOG4CXX_ERROR(logger_, error_text);
           raiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
-                     DataSendError(), active_msg);
+                     DataSendError(error_text), active_msg);
           message_queue_.remove(active_msg);
         } else {
           if (DeviceAdapter::OK

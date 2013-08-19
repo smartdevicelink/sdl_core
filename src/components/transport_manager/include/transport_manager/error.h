@@ -32,12 +32,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
+
+#include <string>
 
 namespace transport_manager {
 
 class BaseError {
+ public:
+  BaseError() {}
+  explicit BaseError(const std::string& desc) : description_(desc) {}
+  BaseError(const BaseError& other) : description_(other.description_) {}
+  virtual ~BaseError() {}
+  virtual const std::string& text() const {
+    return description_;
+  }
+
+ private:
+  std::string description_;
 };
 
 class SearchDeviceError : public BaseError {
@@ -56,6 +69,9 @@ class DataReceiveError : public BaseError {
 };
 
 class DataSendError : public BaseError {
+ public:
+  DataSendError() : BaseError() {}
+  explicit DataSendError(const std::string &desc) : BaseError(desc) {}
 };
 
 class DataSendTimeoutError : public DataSendError {
@@ -64,6 +80,6 @@ class DataSendTimeoutError : public DataSendError {
 class CommunicationError : public BaseError {
 };
 
-}  // namespace
+}  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR_H_

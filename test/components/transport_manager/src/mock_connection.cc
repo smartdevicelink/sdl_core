@@ -69,6 +69,7 @@ bool MockConnection::establish(ConnectError **error) {
     set_socket(peer_sock);
     return true;
   }
+  *error = new ConnectError();
   return false;
 }
 

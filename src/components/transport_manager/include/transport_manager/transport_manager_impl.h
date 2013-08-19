@@ -66,7 +66,7 @@ enum {
 };
 
 struct TransportManagerAttr {
-  unsigned long disconnectTimeout;
+  unsigned long disconnectTimeout; /* milliseconds */
 };
 
 /**
@@ -197,16 +197,6 @@ class TransportManagerImpl : public TransportManager {
   virtual int addDeviceAdapter(device_adapter::DeviceAdapterSptr device_adapter);
 
   int removeDeviceAdapter(device_adapter::DeviceAdapterSptr device_adapter);
-
-  /**
-   * @brief register listener that would be used to catch adapter's events
-   *
-   * @param event listener
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-//todo: discuss with Alexandr and Polina - do we nedd this feature?
-//  virtual void addAdapterListener(device_adapter::DeviceAdapterSptr adapter, device_adapter::DeviceAdapterListener *listener);
 
   /**
    * @brief remove device from internal storages
