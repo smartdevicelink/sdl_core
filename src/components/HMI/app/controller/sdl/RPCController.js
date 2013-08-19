@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: ·
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,7 +10,7 @@
  * with the distribution. · Neither the name of the Ford Motor Company nor the
  * names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,6 +49,24 @@ SDL.RPCController = Em.Object
         },
 
         /**
+         * Method to check supported image type in request
+         * 
+         * @param {Object}
+         *            array
+         */
+        checkImagesArray: function(array) {
+
+            var error = false;
+            for ( var i = 0; i < array.length; i++) {
+                if (array[i].image && array[i].image.imageType !== "DYNAMIC") {
+
+                    error = true;
+                }
+            }
+            return error;
+        },
+
+        /**
          * Object that contains check methods that returns true if mandatory
          * fields is successful and returns false if not
          */
@@ -59,7 +77,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request UpdateDeviceList
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -102,7 +120,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AllowDeviceToConnect
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -136,7 +154,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request UpdateAppList
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -179,7 +197,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request MixingAudioSupported
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -194,7 +212,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AllowAllApps
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -209,7 +227,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AllowApp
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -254,7 +272,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -269,7 +287,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetLanguage
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -284,7 +302,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request SetGlobalProperties
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -327,7 +345,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetSupportedLanguages
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -342,7 +360,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request StopSpeaking
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -357,7 +375,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Speak
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -418,7 +436,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ChangeRegistration
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -479,7 +497,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request OnLanguageChange
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -532,7 +550,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -547,7 +565,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Navigation.ShowConstantTBT
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -563,18 +581,17 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        for (var i=0; i < params.softButtons.length; i++) {
-                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
-                    if ("turnIcon" in params && params.turnIcon.imageType !== "DYNAMIC") {
+                    if ("turnIcon" in params
+                        && params.turnIcon.imageType !== "DYNAMIC") {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -682,7 +699,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Navigation.UpdateTurnList
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -698,25 +715,24 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        for (var i=0; i < params.softButtons.length; i++) {
-                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
                     if ("turnList" in params) {
-                        for (var btn in params.turnList) {
-                            if ("turnIcon" in params.turnList[btn] && params.turnList[btn].turnIcon.imageType !== "DYNAMIC") {
+                        for ( var btn in params.turnList) {
+                            if ("turnIcon" in params.turnList[btn]
+                                && params.turnList[btn].turnIcon.imageType !== "DYNAMIC") {
                                 this.resultStruct = {
                                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                     "resultMessage": "Unsupported image type!"
                                 };
-        
+
                                 return this.resultStruct;
                             }
                         }
@@ -749,7 +765,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Navigation.AlertManeuver
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -757,15 +773,13 @@ SDL.RPCController = Em.Object
 
                     if (params) {
                         if ("softButtons" in params) {
-                            for (var i=0; i < params.softButtons.length; i++) {
-                                if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
-                                    this.resultStruct = {
-                                        "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                        "resultMessage": "Unsupported image type!"
-                                    };
-            
-                                    return this.resultStruct;
-                                }
+                            if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+
+                                return this.resultStruct;
                             }
                         }
                     }
@@ -790,7 +804,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -805,7 +819,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request UI.Alert
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -821,15 +835,13 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        for (var i=0; i < params.softButtons.length; i++) {
-                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
                     if (!params.alertStrings) {
@@ -896,7 +908,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Show
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -959,7 +971,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Show
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -975,18 +987,17 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        for (var i=0; i < params.softButtons.length; i++) {
-                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
-                    if ("graphic" in params && params.graphic.imageType !== "DYNAMIC") {
+                    if ("graphic" in params
+                        && params.graphic.imageType !== "DYNAMIC") {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1040,7 +1051,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AddCommand
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1055,7 +1066,8 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if ("cmdIcon" in params && params.cmdIcon.imageType !== "DYNAMIC") {
+                    if ("cmdIcon" in params
+                        && params.cmdIcon.imageType !== "DYNAMIC") {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1109,7 +1121,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request DeleteCommand
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1170,7 +1182,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AddSubMenu
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1240,7 +1252,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request DeleteSubMenu
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1312,7 +1324,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request PerformInteraction
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1364,27 +1376,23 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("choiseSet" in params) {
-                        for (var i=0; i < params.choiseSet.length; i++) {
-                            if (params.choiseSet[i].image && params.choiseSet[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.choiseSet)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
                     if ("vrHelp" in params) {
-                        for (var i=0; i < params.vrHelp.length; i++) {
-                            if (params.vrHelp[i].image && params.vrHelp[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
                     if (!params.timeout) {
@@ -1433,7 +1441,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request SetMediaClockTimer
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1494,7 +1502,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request SetGlobalProperties
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1510,15 +1518,13 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("vrHelp" in params) {
-                        for (var i=0; i < params.vrHelp.length; i++) {
-                            if (params.vrHelp[i].image && params.vrHelp[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
                     if (!params.appID) {
@@ -1549,7 +1555,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetCapabilities
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1564,7 +1570,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ChangeRegistration
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1625,7 +1631,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetSupportedLanguages
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1640,7 +1646,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetLanguage
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1655,7 +1661,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request SetAppIcon
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1688,7 +1694,8 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if ("syncFileName" in params && params.syncFileName.imageType !== "DYNAMIC") {
+                    if ("syncFileName" in params
+                        && params.syncFileName.imageType !== "DYNAMIC") {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1724,7 +1731,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request Slider
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1839,7 +1846,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ScrollableMessage
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1855,15 +1862,13 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        for (var i=0; i < params.softButtons.length; i++) {
-                            if (params.softButtons[i].image && params.softButtons[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
                     if (!params.messageText) {
@@ -1930,7 +1935,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request PerformAudioPassThru
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1974,7 +1979,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request EndAudioPassThru
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -1989,7 +1994,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ClosePopUp
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2004,7 +2009,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ShowVrHelp
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2020,15 +2025,13 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("vrHelp" in params) {
-                        for (var i=0; i < params.vrHelp.length; i++) {
-                            if (params.vrHelp[i].image && params.vrHelp[i].image.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-        
-                                return this.resultStruct;
-                            }
+                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
+                            this.resultStruct = {
+                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                "resultMessage": "Unsupported image type!"
+                            };
+
+                            return this.resultStruct;
                         }
                     }
                     if ("appID" in params) {
@@ -2063,7 +2066,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2078,7 +2081,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetVehicleType
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2093,7 +2096,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ReadDID
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2172,7 +2175,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetDTCs
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2233,7 +2236,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetVehicleData
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2286,7 +2289,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2301,7 +2304,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetLanguage
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2316,7 +2319,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetSupportedLanguages
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2331,7 +2334,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request AddCommand
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2403,7 +2406,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request DeleteCommand
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
@@ -2464,7 +2467,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request ChangeRegistration
-                 *
+                 * 
                  * @param {Object}
                  *            params
                  */
