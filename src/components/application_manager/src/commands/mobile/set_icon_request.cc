@@ -57,8 +57,8 @@ void SetIconRequest::Run() {
     application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -72,8 +72,8 @@ void SetIconRequest::Run() {
   std::string full_file_path = file_system::FullPath(relative_file_path);
 
   if (!file_system::FileExists(full_file_path)) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     LOG4CXX_ERROR(logger_, "No such file");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -81,7 +81,13 @@ void SetIconRequest::Run() {
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::app_id] = app->app_id();
-  msg_params[strings::sync_file_name] = full_file_path;
+  msg_params[strings::sync_file_name] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  msg_params[strings::sync_file_name][strings::value] = full_file_path;
+
+  msg_params[strings::sync_file_name][strings::image_type] =
+      ImageType::DYNAMIC;
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, msg_params, true, 1);
 }

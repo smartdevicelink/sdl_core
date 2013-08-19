@@ -78,7 +78,7 @@ void GetVehicleDataRequest::Run() {
   msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
-                   msg_params, true);
+                   msg_params, true, 1);
 }
 
 }  // namespace commands
