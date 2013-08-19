@@ -39,10 +39,13 @@
 #include <signal.h>
 #include <errno.h>
 #include <arpa/inet.h>
-#include <netinet/in.h>
 #include <unistd.h>
 #include <sys/types.h>
+
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+
 
 #include "transport_manager/device_adapter/device_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
@@ -111,6 +114,15 @@ void TcpClientListener::thread() {
             sizeof(device_name) / sizeof(device_name[0]));
     LOG4CXX_INFO(logger_, "Connected client " << device_name);
 
+    int yes = 1;
+    int keepidle = 3;  // 3 seconds to disconnection detecting
+    int keepcnt = 1;
+    int keepintvl = 1;
+    setsockopt(connection_fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
+    setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
+    setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
+    setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
+
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
     DeviceSptr device = controller_->addDevice(tcp_device);
     tcp_device = static_cast<TcpDevice*>(device.get());
@@ -122,8 +134,9 @@ void TcpClientListener::thread() {
                                 controller_));
     connection->set_socket(connection_fd);
     const DeviceAdapter::Error error = connection->start();
-    if (error != DeviceAdapter::OK)
+    if (error != DeviceAdapter::OK) {
       delete connection;
+    }
   }
 
   LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
