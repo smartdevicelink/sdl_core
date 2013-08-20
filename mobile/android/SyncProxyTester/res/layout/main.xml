@@ -31,6 +31,21 @@
 				android:layout_height="wrap_content" android:id="@+id/btnSendMessage"
 				android:text="Send Message" android:enabled="true"></Button>
 		</TableRow>
+
+        <TableRow android:id="@+id/LinearLayout05"
+                  android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+            <Button android:layout_weight="1" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/btnStartVideoSession"
+                    android:text="Start Video Session" android:enabled="true" android:onClick="startVideoSession"></Button>
+        </TableRow>
+        <TableRow android:id="@+id/LinearLayout06"
+                  android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+            <Button android:layout_weight="1" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/btnStopVideoSession"
+                    android:text="Stop Video Session" android:enabled="false" android:onClick="stopVideoSession"></Button>
+        </TableRow>
 	</TableLayout>	
 	
 	<ScrollView android:layout_width="fill_parent"
