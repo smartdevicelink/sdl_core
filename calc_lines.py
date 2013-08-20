@@ -44,6 +44,7 @@ def proceedFile(file):
     countLines = 0
     countComments = 0
         
+    countSize = os.path.getsize(file)
     f = open(file, 'r')
         
     inComment = False
@@ -93,7 +94,7 @@ def proceedFile(file):
             if indStart == 0:
                 continue
         countLines += 1
-    return [countLines, countComments]
+    return [countLines, countComments, countSize]
 
 #
 # Proceed files in the specified directory
@@ -101,24 +102,30 @@ def proceedFile(file):
 def proceedDir(dir):
     linesHeaderCode = 0
     linesHeaderComments = 0
+    sizeHeaders = 0
     linesSourceCode = 0
     linesSourceComments = 0
+    sizeSources = 0
     (listHeaders, listSources) = getFiles(dir)
     for f in listHeaders:
-        (sources, comments) = proceedFile(f)
+        (sources, comments, size) = proceedFile(f)
         linesHeaderCode += sources
         linesHeaderComments += comments
+        sizeHeaders += size
     for f in listSources:
-        (sources, comments) = proceedFile(f)
+        (sources, comments, size) = proceedFile(f)
         linesSourceCode += sources
         linesSourceComments += comments
+        sizeSources += size
 
     linesCode = linesHeaderCode + linesSourceCode
     linesComments = linesHeaderComments + linesSourceComments
 
     print 'Directory: ' + dir
-    print 'Number of scanned C++ header files: %d' % len(listHeaders)
-    print 'Number of scanned C++ source files: %d' % len(listSources)
+    print 'Number of scanned C++ header files: %d. Size %.1fKb' % \
+        (len(listHeaders), sizeHeaders / 1024)
+    print 'Number of scanned C++ source files: %d. Size %.1fKb' % \
+        (len(listSources), sizeSources / 1024)
     print 'Number of source code lines: %d (header files: %d, source files: %d)' % (linesCode, linesHeaderCode, linesSourceCode)
     print 'Number of comment lines: %d (header files: %d, source files: %d)' % (linesComments, linesHeaderComments, linesSourceComments)
     print '----'
@@ -135,21 +142,24 @@ def proceedDir(dir):
     print 'Code coverage by comments: %f%% (header files: %f%%, source files: %f%%)' % (pt, ph, pc)
     print 
     
-    return [linesComments, linesCode]
+    return [linesComments, linesCode, sizeHeaders + sizeSources]
 
 #
 # main 
 #
 summary_lines = 0
 summary_comments = 0
+summary_size = 0
 coverage = 0.0
 for dir in applink_source:
-    (comments, code) = proceedDir(dir)
+    (comments, code, size) = proceedDir(dir)
     summary_comments += comments
     summary_lines += code
+    summary_size += size
 if summary_lines > 0:
     coverage = (float)(summary_comments) / (float)(summary_lines) * 100.0 
 
 print 
 print '--- SUMMARY ---'
+print 'Size of source code: %.1fKb' % (summary_size / 1024)
 print 'Comments code coverage: %f%%' % (coverage)
