@@ -68,12 +68,16 @@ void SliderRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params][strings::num_ticks].asInt() !=
-        (*message_)[strings::msg_params][strings::slider_footer].length()) {
-      LOG4CXX_ERROR(logger_, "INVALID_DATA");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
+  if ((*message_)[strings::msg_params].keyExists(strings::slider_footer)) {
+    if (1 < (*message_)[strings::msg_params][strings::slider_footer].asInt()) {
+      if ((*message_)[strings::msg_params][strings::num_ticks].asInt() !=
+            (*message_)[strings::msg_params][strings::slider_footer].length()) {
+          LOG4CXX_ERROR(logger_, "INVALID_DATA");
+          SendResponse(false, mobile_apis::Result::INVALID_DATA);
+          return;
+      }
     }
+  }
 
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
