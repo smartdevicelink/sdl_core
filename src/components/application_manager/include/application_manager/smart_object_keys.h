@@ -102,6 +102,7 @@ const char alert_text2[] = "alertText2";
 const char alert_text3[] = "alertText3";
 const char tts_chunks[] = "ttsChunks";
 const char initial_prompt[] = "initialPrompt";
+const char initial_text[] = "initialText";
 const char duration[] = "duration";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";

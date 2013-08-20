@@ -226,28 +226,29 @@ void PerformInteractionRequest::SendUIShowVRHelpRequest(
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
-  if (app->vr_help_title()) {
-    msg_params[strings::vr_help_title] = (*app->vr_help_title());
-  } else {
-    msg_params[strings::vr_help_title] =
-      profile::Profile::instance()->vr_help_title();
-  }
+  msg_params[strings::vr_help_title] =
+      (*message_)[strings::msg_params][strings::initial_text].asString();
 
-  // copy choice set VR synonyms
-  int index = 0;
-  for (int i = 0; i < choice_list.length(); ++i) {
-    smart_objects::SmartObject* i_choice_set =
-      app->FindChoiceSet(choice_list[i].asInt());
-    if (i_choice_set) {
-      for (int j = 0; j < (*i_choice_set)[strings::choice_set].length(); ++j) {
-        smart_objects::SmartObject& vr_commands =
-          (*i_choice_set)[strings::choice_set][j][strings::vr_commands];
-        if (0 < vr_commands.length()) {
-          // copy only first synonym
-          smart_objects::SmartObject item(smart_objects::SmartType_Map);
-          item[strings::text] = vr_commands[0].asString();
-          item[strings::position] = index;
-          msg_params[strings::vr_help][index++] = item;
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+      msg_params[strings::vr_help] =
+          (*message_)[strings::msg_params][strings::vr_help];
+  } else {
+    // copy choice set VR synonyms
+    int index = 0;
+    for (int i = 0; i < choice_list.length(); ++i) {
+      smart_objects::SmartObject* choice_set =
+        app->FindChoiceSet(choice_list[i].asInt());
+      if (choice_set) {
+        for (int j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+          smart_objects::SmartObject& vr_commands =
+            (*choice_set)[strings::choice_set][j][strings::vr_commands];
+          if (0 < vr_commands.length()) {
+            // copy only first synonym
+            smart_objects::SmartObject item(smart_objects::SmartType_Map);
+            item[strings::text] = vr_commands[0].asString();
+            item[strings::position] = index;
+            msg_params[strings::vr_help][index++] = item;
+          }
         }
       }
     }
