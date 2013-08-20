@@ -29,15 +29,15 @@ android {
         }
     }
 
-    productFlavors {
-        mainfalvor {
+/*    productFlavors {
+        mainFlavor {
             packageName "com.ford.syncV4.android.mainfalvor"
 
         }
 
-        additionalflavor {
+        additionalFlavor {
             packageName "com.ford.syncV4.android.additionalflavor"
 
         }
-    }
+    }*/
 }
