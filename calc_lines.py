@@ -3,14 +3,14 @@
 # Calculates number of lines, number of commented lines and commens coverage
 # metric.
 # 
-# Change applink_source tuple to set directories to scan
+# Change sdl_source tuple to set directories to scan
 #
 
 import os
 import string
 
 # Scan following directories (recursive)
-applink_source = ('src/appMain', 'src/components')
+sdl_source = ('src/appMain', 'src/components')
 
 # Scan files which have following extensions
 source_exts = ('.c', '.cc', '.cpp', '.cxx')
@@ -122,12 +122,14 @@ def proceedDir(dir):
     linesComments = linesHeaderComments + linesSourceComments
 
     print 'Directory: ' + dir
-    print 'Number of scanned C++ header files: %d. Size: %0.1f Kb' % \
-        (len(listHeaders), sizeHeaders / 1024.0)
-    print 'Number of scanned C++ source files: %d. Size: %0.1f Kb' % \
-        (len(listSources), sizeSources / 1024.0)
-    print 'Number of source code lines: %d (header files: %d, source files: %d)' % (linesCode, linesHeaderCode, linesSourceCode)
-    print 'Number of comment lines: %d (header files: %d, source files: %d)' % (linesComments, linesHeaderComments, linesSourceComments)
+    print 'Number of scanned C++ header files: %d. Size: %0.1f Kb' \
+        % (len(listHeaders), sizeHeaders / 1024.0)
+    print 'Number of scanned C++ source files: %d. Size: %0.1f Kb' \
+        % (len(listSources), sizeSources / 1024.0)
+    print 'Number of source code lines: %d (header files: %d, source files: %d)' \
+        % (linesCode, linesHeaderCode, linesSourceCode)
+    print 'Number of comment lines: %d (header files: %d, source files: %d)' \
+        % (linesComments, linesHeaderComments, linesSourceComments)
     print '----'
 
     pt = 0
@@ -139,7 +141,8 @@ def proceedDir(dir):
         ph = (float)(linesHeaderComments)/(float)(linesHeaderCode) * 100.0
     if (linesSourceCode) > 0:
         pc = (float)(linesSourceComments)/(float)(linesSourceCode) * 100.0
-    print 'Code coverage by comments: %f%% (header files: %f%%, source files: %f%%)' % (pt, ph, pc)
+    print 'Code coverage by comments: %f%% (header files: %f%%, source files: %f%%)' \
+        % (pt, ph, pc)
     print 
     
     return [linesComments, linesCode, sizeHeaders + sizeSources]
@@ -151,7 +154,7 @@ summary_lines = 0
 summary_comments = 0
 summary_size = 0
 coverage = 0.0
-for dir in applink_source:
+for dir in sdl_source:
     (comments, code, size) = proceedDir(dir)
     summary_comments += comments
     summary_lines += code
