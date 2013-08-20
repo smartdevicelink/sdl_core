@@ -21,5 +21,11 @@ android {
         }
 
         instrumentTest.setRoot('tests')
+
+        instrumentTest {
+
+            java.srcDirs = ['instrumentTest/java']
+
+        }
     }
 }

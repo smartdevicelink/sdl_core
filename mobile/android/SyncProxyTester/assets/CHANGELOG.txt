@@ -1,4 +1,5 @@
 [CW34]
+* SyncProxyAndroid SDK: EndSession message includes hash ID that was received with StartSessionACK.
 * Fix a crash when trying to send SyncPData request from XML test.
 
 [CW33]
