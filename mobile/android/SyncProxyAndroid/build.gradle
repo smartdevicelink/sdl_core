@@ -20,6 +20,10 @@ android {
             assets.srcDirs = ['assets']
         }
 
-        instrumentTest.setRoot('tests')
+        instrumentTest {
+
+            java.srcDirs = ['instrumentTest/java']
+
+        }
     }
 }

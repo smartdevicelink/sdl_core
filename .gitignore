@@ -19,3 +19,9 @@ install_manifest.txt
 tags
 # Mac OS Specific
 .DS_Store
+# Android specific
+*.iml
+*.orig
+.idea
+.gradle
+local.properties
