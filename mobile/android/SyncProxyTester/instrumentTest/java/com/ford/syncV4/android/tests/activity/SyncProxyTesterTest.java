@@ -49,7 +49,7 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
 
     public void testStopVideoSessionButtonEnabled() {
         Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
-        assertFalse("startSessionButton should be disabled", stopSessionButton.isEnabled());
+        assertFalse("stopSessionButton should be disabled", stopSessionButton.isEnabled());
     }
 
     @UiThreadTest
@@ -57,4 +57,26 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
         Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
         assertTrue("On click listener should be set", stopSessionButton.performClick());
     }
+
+    // Logic
+    @UiThreadTest
+    public void testStartVideoSessionButtonClickEnablesStopButton() throws Exception {
+        Button startSessionButton = (Button) sut.findViewById(R.id.btnStartVideoSession);
+        Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
+        startSessionButton.performClick();
+        assertTrue("stopSessionButton should be enabled", stopSessionButton.isEnabled());
+        assertFalse("startSessionButton should be disabled", startSessionButton.isEnabled());
+    }
+
+    // Logic
+    @UiThreadTest
+    public void testStopVideoSessionButtonClickEnablesStartButton() throws Exception {
+        Button startSessionButton = (Button) sut.findViewById(R.id.btnStartVideoSession);
+        Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
+        startSessionButton.performClick();
+        stopSessionButton.performClick();
+        assertFalse("stopSessionButton should be disabled", stopSessionButton.isEnabled());
+        assertTrue("startSessionButton should be enabled", startSessionButton.isEnabled());
+    }
+
 }

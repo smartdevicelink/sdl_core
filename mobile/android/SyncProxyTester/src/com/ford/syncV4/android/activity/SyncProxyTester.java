@@ -818,7 +818,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                 return true;
             case MNU_UNREGISTER:
             /*
-			endSyncProxyInstance();
+            endSyncProxyInstance();
         	startSyncProxyService();
         	*/
                 if (ProxyService.getInstance() == null) {
@@ -3715,11 +3715,23 @@ public class SyncProxyTester extends Activity implements OnClickListener {
     }
 
     public void startVideoSession(View v) {
-        //TODO implement start video
+        toggleStartStopVideoSessionButtons();
     }
 
     public void stopVideoSession(View v) {
-        //TODO implement start video
+        toggleStartStopVideoSessionButtons();
+    }
+
+    private void toggleStartStopVideoSessionButtons() {
+        Button startSessionButton = (Button) this.findViewById(R.id.btnStartVideoSession);
+        Button stopSessionButton = (Button) this.findViewById(R.id.btnStopVideoSession);
+        if (startSessionButton.isEnabled()) {
+            startSessionButton.setEnabled(false);
+            stopSessionButton.setEnabled(true);
+        } else {
+            startSessionButton.setEnabled(true);
+            stopSessionButton.setEnabled(false);
+        }
     }
 
     /**
