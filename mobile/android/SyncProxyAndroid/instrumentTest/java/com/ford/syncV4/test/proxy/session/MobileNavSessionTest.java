@@ -34,4 +34,6 @@ public class MobileNavSessionTest extends InstrumentationTestCase{
         MobileNavSession mobileNavSessionSession = new MobileNavSession(_protocol);
         assertNotNull("mobile Nav session should be created", mobileNavSessionSession);
     }
+
+
 }
