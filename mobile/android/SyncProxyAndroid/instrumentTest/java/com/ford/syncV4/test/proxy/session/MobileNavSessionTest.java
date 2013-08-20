@@ -24,6 +24,7 @@ public class MobileNavSessionTest extends InstrumentationTestCase{
         super.setUp();
         System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
         _protocol = createMockWiProProtocol();
+        _sut = new MobileNavSession(_protocol);
     }
 
     private WiProProtocol createMockWiProProtocol(){
@@ -35,5 +36,8 @@ public class MobileNavSessionTest extends InstrumentationTestCase{
         assertNotNull("mobile Nav session should be created", mobileNavSessionSession);
     }
 
-
+    public void testMobileNavigationStartSession() throws Exception {
+        _sut.startSession();
+        assertTrue("should get here",true);
+    }
 }
