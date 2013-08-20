@@ -2,12 +2,11 @@ apply plugin: 'android-library'
 
 repositories {
     mavenCentral()
-
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
-    instrumentTestCompile 'org.mockito:mockito-all:1.9.5'
+    instrumentTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
 android {
