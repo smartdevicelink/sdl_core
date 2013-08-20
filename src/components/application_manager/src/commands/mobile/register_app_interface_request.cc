@@ -43,17 +43,13 @@ namespace commands {
 
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run"
-               << (*message_)[strings::params]
-               [strings::connection_key].asInt());
+      << (*message_)[strings::params][strings::connection_key].asInt());
 
   Application* application_impl =
-    ApplicationManagerImpl::instance()->
-    RegisterApplication(message_);
+      ApplicationManagerImpl::instance()->RegisterApplication(message_);
 
   if (!application_impl) {
-    LOG4CXX_ERROR_EXT(
-      logger_,
-      "Application " <<
+    LOG4CXX_ERROR_EXT(logger_, "Application " <<
       ((*message_)[strings::msg_params][strings::app_name].asString()) <<
       "  hasn't been registered!");
   } else {
@@ -94,7 +90,9 @@ void RegisterAppInterfaceRequest::Run() {
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   const Application& application_impl) {
   mobile_apis::Result::eType result =  mobile_apis::Result::SUCCESS;
-  smart_objects::SmartObject* params = new smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject* params =
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
   if (!params) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
@@ -120,9 +118,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     LOG4CXX_WARN_EXT(logger_, "Wrong language on registering application "
                      << application_impl.name());
     LOG4CXX_ERROR_EXT(
-      logger_, "vr " << (*message_)[strings::msg_params][strings::language_desired].asInt() << " - " <<
-      app_manager->active_vr_language() << "ui " << (*message_)[strings::msg_params][strings::hmi_display_language_desired].asInt()
-      << " - " << app_manager->active_ui_language());
+      logger_, "vr " << (*message_)[strings::msg_params]
+          [strings::language_desired].asInt() << " - " <<
+          app_manager->active_vr_language() << "ui " << (*message_)
+          [strings::msg_params][strings::hmi_display_language_desired].asInt()
+          << " - " << app_manager->active_ui_language());
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 

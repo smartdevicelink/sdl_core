@@ -37,6 +37,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
@@ -219,16 +220,40 @@ void PerformInteractionRequest::SendTTSSpeakRequest(Application* const app) {
 
 void PerformInteractionRequest::SendUIShowVRHelpRequest(
     Application* const app) {
-  /*
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject& choice_list =
+    (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  msg_params[strings::vr_help_title] = (*app->vr_help_title());
-  msg_params[strings::vr_help] = (*app->vr_help());
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
+  if (app->vr_help_title()) {
+    msg_params[strings::vr_help_title] = (*app->vr_help_title());
+  } else {
+    msg_params[strings::vr_help_title] =
+      profile::Profile::instance()->vr_help_title();
+  }
+
+  // copy choice set VR synonyms
+  int index = 0;
+  for (int i = 0; i < choice_list.length(); ++i) {
+    smart_objects::SmartObject* i_choice_set =
+      app->FindChoiceSet(choice_list[i].asInt());
+    if (i_choice_set) {
+      for (int j = 0; j < (*i_choice_set)[strings::choice_set].length(); ++j) {
+        smart_objects::SmartObject& vr_commands =
+          (*i_choice_set)[strings::choice_set][j][strings::vr_commands];
+        if (0 < vr_commands.length()) {
+          // copy only first synonym
+          smart_objects::SmartObject item(smart_objects::SmartType_Map);
+          item[strings::text] = vr_commands[0].asString();
+          item[strings::position] = index;
+          msg_params[strings::vr_help][index++] = item;
+        }
+      }
+    }
+  }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_ShowVrHelp, msg_params, false);
-  */
 }
 
 bool PerformInteractionRequest::CheckChoiceSetMenuNames(
