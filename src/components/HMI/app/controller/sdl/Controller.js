@@ -181,7 +181,7 @@ SDL.SDLController = Em.Object
                     .performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
             }
             if (SDL.InteractionChoicesView.active) {
-                SDL.InteractionChoicesView.deactivate(true);
+                SDL.InteractionChoicesView.deactivate("ABORTED");
             }
             if (SDL.ScrollableMessage.active) {
                 SDL.ScrollableMessage.deactivate(true);
@@ -190,6 +190,14 @@ SDL.SDLController = Em.Object
                 SDL.SliderView.deactivate(true);
             }
         },
+
+        /**
+         * Method to close InteractionChoices view
+         */
+        InteractionChoicesDeactivate: function(){
+            SDL.InteractionChoicesView.deactivate("ABORTED");
+        },
+
         /**
          * Method to close AlertMeneuverPopUp view
          */

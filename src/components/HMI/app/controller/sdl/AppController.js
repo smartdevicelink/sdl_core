@@ -104,7 +104,7 @@ SDL.SDLAppController = Em.Object.create( {
             element.performInteractionRequestID,
             element.choiceID);
 
-        SDL.InteractionChoicesView.deactivate(false);
+        SDL.InteractionChoicesView.deactivate("SUCCESS");
     },
 
     /**

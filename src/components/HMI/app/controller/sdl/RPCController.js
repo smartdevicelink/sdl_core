@@ -83,7 +83,7 @@ SDL.RPCController = Em.Object
                  */
                 UpdateDeviceList: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -92,7 +92,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.deviceList) {
+                    if (params.deviceList == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -126,7 +126,7 @@ SDL.RPCController = Em.Object
                  */
                 AllowDeviceToConnect: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -135,7 +135,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.device) {
+                    if (params.device == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -160,7 +160,7 @@ SDL.RPCController = Em.Object
                  */
                 UpdateAppList: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -169,7 +169,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.applications) {
+                    if (params.applications == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -233,7 +233,7 @@ SDL.RPCController = Em.Object
                  */
                 AllowApp: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -242,7 +242,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.app) {
+                    if (params.app == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -308,7 +308,7 @@ SDL.RPCController = Em.Object
                  */
                 SetGlobalProperties: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -317,7 +317,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -381,7 +381,7 @@ SDL.RPCController = Em.Object
                  */
                 Speak: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -390,7 +390,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.ttsChunks) {
+                    if (params.ttsChunks == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -408,7 +408,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -442,7 +442,7 @@ SDL.RPCController = Em.Object
                  */
                 ChangeRegistration: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -451,7 +451,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.language) {
+                    if (params.language == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -469,7 +469,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -503,7 +503,7 @@ SDL.RPCController = Em.Object
                  */
                 OnLanguageChange: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -512,7 +512,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.language) {
+                    if (params.language == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -571,7 +571,7 @@ SDL.RPCController = Em.Object
                  */
                 ShowConstantTBT: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -599,7 +599,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.navigationTexts) {
+                    if (params.navigationTexts == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -617,7 +617,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.turnIcon) {
+                    if (params.turnIcon == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -635,7 +635,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.distanceToManeuver) {
+                    if (params.distanceToManeuver == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -653,7 +653,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.distanceToManeuverScale) {
+                    if (params.distanceToManeuverScale == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -671,7 +671,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -705,7 +705,7 @@ SDL.RPCController = Em.Object
                  */
                 UpdateTurnList: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -724,7 +724,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (!params.turnList) {
+                    if (params.turnList == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -826,7 +826,7 @@ SDL.RPCController = Em.Object
                  */
                 Alert: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -845,7 +845,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (!params.alertStrings) {
+                    if (params.alertStrings == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -863,7 +863,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.duration) {
+                    if (params.duration == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -881,7 +881,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -915,7 +915,7 @@ SDL.RPCController = Em.Object
                  */
                 ShowNotification: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -932,7 +932,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.text) {
+                    if (params.text == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -950,7 +950,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.timeout) {
+                    if (params.timeout == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -978,7 +978,7 @@ SDL.RPCController = Em.Object
                  */
                 Show: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1006,7 +1006,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.showStrings) {
+                    if (params.showStrings == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1024,7 +1024,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1058,7 +1058,7 @@ SDL.RPCController = Em.Object
                  */
                 AddCommand: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1094,7 +1094,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1128,7 +1128,7 @@ SDL.RPCController = Em.Object
                  */
                 DeleteCommand: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1137,7 +1137,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.cmdID) {
+                    if (params.cmdID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1155,7 +1155,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1189,7 +1189,7 @@ SDL.RPCController = Em.Object
                  */
                 AddSubMenu: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1225,7 +1225,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1259,7 +1259,7 @@ SDL.RPCController = Em.Object
                  */
                 DeleteSubMenu: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1286,7 +1286,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (arams.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1331,7 +1331,7 @@ SDL.RPCController = Em.Object
                  */
                 PerformInteraction: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1340,7 +1340,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.initialText) {
+                    if (params.initialText == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1358,7 +1358,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.choiceSet) {
+                    if (params.choiceSet == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1396,7 +1396,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (!params.timeout) {
+                    if (params.timeout == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1414,7 +1414,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1448,7 +1448,7 @@ SDL.RPCController = Em.Object
                  */
                 SetMediaClockTimer: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1457,7 +1457,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.updateMode) {
+                    if (params.updateMode == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1475,7 +1475,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1509,7 +1509,7 @@ SDL.RPCController = Em.Object
                  */
                 SetGlobalProperties: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1528,7 +1528,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1577,7 +1577,7 @@ SDL.RPCController = Em.Object
                  */
                 ChangeRegistration: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1586,7 +1586,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.language) {
+                    if (params.language == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1604,7 +1604,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1668,7 +1668,7 @@ SDL.RPCController = Em.Object
                  */
                 SetAppIcon: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1677,7 +1677,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.syncFileName) {
+                    if (params.syncFileName == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1704,7 +1704,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1738,7 +1738,7 @@ SDL.RPCController = Em.Object
                  */
                 Slider: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1747,7 +1747,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.numTicks) {
+                    if (params.numTicks == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1765,7 +1765,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.position) {
+                    if (params.position == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1783,7 +1783,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.sliderHeader) {
+                    if (params.sliderHeader == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1819,7 +1819,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1853,7 +1853,7 @@ SDL.RPCController = Em.Object
                  */
                 ScrollableMessage: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1872,7 +1872,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (!params.messageText) {
+                    if (params.messageText == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1908,7 +1908,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1942,7 +1942,7 @@ SDL.RPCController = Em.Object
                  */
                 PerformAudioPassThru: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1951,7 +1951,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.audioPassThruDisplayTexts) {
+                    if (params.audioPassThruDisplayTexts == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2016,7 +2016,7 @@ SDL.RPCController = Em.Object
                  */
                 ShowVrHelp: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2103,7 +2103,7 @@ SDL.RPCController = Em.Object
                  */
                 ReadDID: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2130,7 +2130,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.didLocation) {
+                    if (params.didLocation == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2148,7 +2148,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2182,7 +2182,7 @@ SDL.RPCController = Em.Object
                  */
                 GetDTCs: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2209,7 +2209,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2243,7 +2243,7 @@ SDL.RPCController = Em.Object
                  */
                 GetVehicleData: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2252,7 +2252,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2341,7 +2341,7 @@ SDL.RPCController = Em.Object
                  */
                 AddCommand: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2368,7 +2368,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.vrCommands) {
+                    if (params.vrCommands == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2413,7 +2413,7 @@ SDL.RPCController = Em.Object
                  */
                 DeleteCommand: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2422,7 +2422,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.cmdID) {
+                    if (params.cmdID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2440,7 +2440,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2474,7 +2474,7 @@ SDL.RPCController = Em.Object
                  */
                 ChangeRegistration: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2483,7 +2483,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.language) {
+                    if (params.language == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2501,7 +2501,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
