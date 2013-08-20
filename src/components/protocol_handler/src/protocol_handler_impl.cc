@@ -218,7 +218,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(
   if (message.valid()) {
     LOG4CXX_INFO_EXT(logger_,
                      "Received from TM " << message->data()
-                     << " with connection_key " << message->connection_key());
+                     << " with connection id " << message->connection_key());
     messages_from_mobile_app_.push(message);
   } else {
     LOG4CXX_ERROR(
@@ -480,9 +480,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
   LOG4CXX_INFO_EXT(
     logger_, "Packet " << packet << "; session_id " << packet -> session_id());
 
-  int key = original_message->connection_key();
-  /*session_observer_->KeyFromPair(connection_handle,
-            packet->session_id());*/
+  int key = session_observer_->KeyFromPair(original_message->connection_key(),
+            packet->session_id());
 
   if (packet->frame_type() == FRAME_TYPE_FIRST) {
     LOG4CXX_INFO(logger_, "handleMultiFrameMessage() - FRAME_TYPE_FIRST");
@@ -522,6 +521,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     }
 
     if (packet->frame_data() == FRAME_DATA_LAST_FRAME) {
+      LOG4CXX_INFO(logger_, "Last frame of multiframe message size "
+                   << packet->data_size() << "; connection key " << key);
       if (!protocol_observer_) {
         LOG4CXX_ERROR(
           logger_,
