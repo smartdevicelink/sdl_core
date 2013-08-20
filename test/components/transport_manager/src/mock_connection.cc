@@ -76,3 +76,4 @@ bool MockConnection::establish(ConnectError **error) {
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
+

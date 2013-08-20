@@ -699,14 +699,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL: {
           LOG4CXX_INFO(logger_, "Event ON_DISCONNECT_FAIL")
-          if (connection == NULL) {
-            LOG4CXX_ERROR(
-                logger_,
-                "Connection ('" << device_id << ", " << app_handle << ") not found")
-            break;
-          }
-          DeviceHandle device_handle = converter_.UidToHandle(
-              connection->device);
+          DeviceHandle device_handle = converter_.UidToHandle(device_id);
           raiseEvent(&TransportManagerListener::OnDisconnectFailed,
                      device_handle, DisconnectDeviceError());
         }

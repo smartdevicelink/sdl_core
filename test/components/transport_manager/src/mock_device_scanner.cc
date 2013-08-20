@@ -57,8 +57,9 @@ DeviceAdapter::Error MockDeviceScanner::init() {
 DeviceAdapter::Error MockDeviceScanner::scan() {
   if (is_search_failed_) {
     controller_->searchDeviceFailed(SearchDeviceError());
+  } else {
+    controller_->searchDeviceDone(devices_);
   }
-  controller_->searchDeviceDone(devices_);
   return DeviceAdapter::OK;
 }
 
@@ -78,10 +79,12 @@ bool MockDeviceScanner::isInitialised() const {
 }
 
 void MockDeviceScanner::addDevice(const std::string& name,
-                                  const std::string& unique_id) {
+                                  const std::string& unique_id, bool start) {
   MockDevice* dev = new MockDevice(name, unique_id, controller_);
   dev->addApplication();
-  dev->start();
+  if (start) {
+    dev->start();
+  }
   devices_.push_back(dev);
 }
 

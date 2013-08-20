@@ -468,11 +468,11 @@ class TransportManagerImpl : public TransportManager {
                             const ApplicationHandle& application);
 
   protocol_handler::ProtocolHandler *protocol_handler_;//YK: temp solution until B1.0 release
-void addDataToContainer(ConnectionUID id, std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, unsigned char * data, unsigned int data_size);
-bool getFrameSize(unsigned char *data,  unsigned int data_size, unsigned int &frame_size);
-bool getFrame(std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, ConnectionUID id, unsigned int frame_size, unsigned char **frame);
+  void addDataToContainer(ConnectionUID id, std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, unsigned char * data, unsigned int data_size);
+  bool getFrameSize(unsigned char *data,  unsigned int data_size, unsigned int &frame_size);
+  bool getFrame(std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, ConnectionUID id, unsigned int frame_size, unsigned char **frame);
 
-friend bool DeviceAdapterListenerImpl::FindSharedPtr(const DeviceAdapter*, AdapterIterator&);
+  friend bool DeviceAdapterListenerImpl::FindSharedPtr(const DeviceAdapter*, AdapterIterator&);
 };//class ;
 
 }  // namespace transport_manager
