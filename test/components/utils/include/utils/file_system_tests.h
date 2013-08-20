@@ -76,8 +76,9 @@ namespace utils  {
 
     std::vector<std::string> list;
     list = file_system::ListFiles("./Test directory");
-
+    
     ASSERT_FALSE(list.empty());
+    std::sort(list.begin(), list.end());
     ASSERT_EQ("test file", list[0]);
     ASSERT_EQ("test file 2", list[1]);
 
