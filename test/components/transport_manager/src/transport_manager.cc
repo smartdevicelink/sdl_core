@@ -66,14 +66,14 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
-ACTION_P(SignalTest, test){
-if (test->thread_id != pthread_self()) {
-  pthread_mutex_lock(&test->test_mutex);
-  pthread_cond_signal(&test->test_cond);
-  pthread_mutex_unlock(&test->test_mutex);
-} else {
-  test->one_thread = true;
-}
+ACTION_P(SignalTest, test) {
+  if (test->thread_id != pthread_self()) {
+    pthread_mutex_lock(&test->test_mutex);
+    pthread_cond_signal(&test->test_cond);
+    pthread_mutex_unlock(&test->test_mutex);
+  } else {
+    test->one_thread = true;
+  }
 }
 
 class TransportManagerTest : public ::testing::Test {
@@ -82,6 +82,7 @@ class TransportManagerTest : public ::testing::Test {
   pthread_t thread_id;
   static pthread_mutex_t test_mutex;
   static pthread_cond_t test_cond;
+  int number;
 
  protected:
   static TransportManagerImpl *tm;
@@ -93,10 +94,11 @@ class TransportManagerTest : public ::testing::Test {
     pthread_cond_init(&test_cond, NULL);
     mock_adapter = new MockDeviceAdapter();
     mock_adapter->init();
-    TransportManagerAttr cfg { 0 };
+    TransportManagerAttr cfg {0};
 
     tm = new TransportManagerImpl(cfg);
-    protocol_handler::ProtocolHandlerImpl* protocol_handler = new protocol_handler::ProtocolHandlerImpl(tm); //FIXME this is a temporary workaround
+    protocol_handler::ProtocolHandlerImpl* protocol_handler =
+        new protocol_handler::ProtocolHandlerImpl(tm);  // FIXME this is a temporary workaround
     tm->set_protocol_handler(protocol_handler);
 
     tm_listener = new MockTransportManagerListener();
@@ -129,19 +131,17 @@ class TransportManagerTest : public ::testing::Test {
     timespec elapsed;
     clock_gettime(CLOCK_REALTIME, &elapsed);
     elapsed.tv_sec += seconds;
-    return pthread_cond_timedwait(&test_cond, &test_mutex, &elapsed) == 0;
+    return pthread_cond_timedwait(&test_cond, &test_mutex, &elapsed) != ETIMEDOUT;
   }
 };
 
 TransportManagerImpl * TransportManagerTest::tm;
 
-class MyTransportListener :
-    public ::transport_manager::TransportManagerListenerImpl {
-  TransportManagerTest * test;
+class MyTransportListener : public ::transport_manager::TransportManagerListenerImpl {
  public:
-
-  MyTransportListener(TransportManagerTest * test)
-      : test(test),
+  explicit MyTransportListener(TransportManagerTest * test)
+      : TransportManagerListenerImpl(),
+        test(test),
         connection(0),
         device_handle(0) {
   }
@@ -168,12 +168,15 @@ class MyTransportListener :
 
   void OnTMMessageReceived(const RawMessageSptr message) {
     static int count = 0;
-    if (++count == 25) {
+    if (++count == 100) {
       pthread_mutex_lock(&test->test_mutex);
       pthread_cond_signal(&test->test_cond);
       pthread_mutex_unlock(&test->test_mutex);
     }
   }
+
+ private:
+  TransportManagerTest * test;
 };
 
 pthread_mutex_t TransportManagerTest::test_mutex;
@@ -184,6 +187,7 @@ MockTransportManagerListener *TransportManagerTest::tm_listener = nullptr;
 
 TEST_F(TransportManagerTest, ScanDeviceFailed) {
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(0);
+  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(0);
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(1);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
 
@@ -193,8 +197,20 @@ TEST_F(TransportManagerTest, ScanDeviceFailed) {
   mock_adapter->get_device_scanner()->reset();
 }
 
+TEST_F(TransportManagerTest, ScanDeviceNoFound) {
+  EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
+  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(1);
+  EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(0);
+  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
+
+  tm->searchDevices();
+  EXPECT_TRUE(waitCond(1));
+  mock_adapter->get_device_scanner()->reset();
+}
+
 TEST_F(TransportManagerTest, ScanDeviceDone) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
+  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(0);
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(1);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
 
@@ -206,6 +222,7 @@ TEST_F(TransportManagerTest, ScanDeviceDone) {
 
 TEST_F(TransportManagerTest, ScanManyDeviceDone) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
+  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(0);
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(2);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
   mock_adapter->get_device_scanner()->addDevice("TestDevice1", "MA:CA:DR:ES:S1");
@@ -215,100 +232,46 @@ TEST_F(TransportManagerTest, ScanManyDeviceDone) {
   mock_adapter->get_device_scanner()->reset();
 }
 
-TEST_F(TransportManagerTest, ConnectDeviceDone) {
+TEST_F(TransportManagerTest, ConnectDisconnectSendReciveDone) {
   const DeviceInfo kInfo(1, "MA:CA:DR:ES:S", "TestDeviceName");
   const ConnectionUID kConnection = 1;
 
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(1);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1);
-  EXPECT_CALL(*tm_listener, OnConnectionFailed(_, _)).Times(0);
   MyTransportListener *myListener = new MyTransportListener(this);
   mock_adapter->get_device_scanner()->addDevice(kInfo.name(), kInfo.mac_address());
   tm->addEventListener(myListener);
   tm->searchDevices();
   EXPECT_TRUE(waitCond(10));
 
-  EXPECT_CALL(*tm_listener, OnConnectionEstablished(kInfo, kConnection)).Times(1);
-  tm->connectDevice(myListener->device_handle);
-  EXPECT_TRUE(waitCond(10));
-
-  EXPECT_CALL(*tm_listener, OnConnectionClosed(myListener->connection)).Times(1).WillOnce(SignalTest(this));
-  tm->disconnect(myListener->connection);
-
-  EXPECT_TRUE(waitCond(10));
-  tm->removeEventListener(myListener);
-  delete myListener;
-  mock_adapter->get_device_scanner()->reset();
-}
-
-TEST_F(TransportManagerTest, ConnectDeviceFailed) {
-  const DeviceUID device_id = "TestDeviceName";
-  const DeviceInfo info (1, "MA:CA:DR:ES:S", "TestDeviceName");
-  EXPECT_CALL(*tm_listener, OnConnectionEstablished(_, _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnConnectionFailed(_, _)).Times(1).WillOnce(SignalTest(this));
-
-  tm->connectDevice(1);
-  EXPECT_TRUE(waitCond(1));
-  mock_adapter->get_device_scanner()->reset();
-}
-
-TEST_F(TransportManagerTest, DisconnectDeviceFailed) {
-  const DeviceHandle kDevice = 2;
-  EXPECT_CALL(*tm_listener, OnConnectionClosed(_)).Times(0);
-  EXPECT_CALL(*tm_listener, OnDeviceConnectionLost(kDevice, _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnConnectionClosedFailure(_, _)).Times(1);
-  EXPECT_CALL(*tm_listener, OnDisconnectFailed(kDevice, _)).Times(1).WillOnce(SignalTest(this));
-
-  tm->disconnectDevice(kDevice);
-  EXPECT_TRUE(waitCond(1));
-}
-
-TEST_F(TransportManagerTest, DisconnectDeviceDone) {
-  const DeviceHandle kDevice = 3;
-  const ApplicationHandle &kApplication = 1;
-  EXPECT_CALL(*tm_listener, OnConnectionClosedFailure(_, _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnDisconnectFailed(kDevice, _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnConnectionClosed(_)).Times(1);
-  EXPECT_CALL(*tm_listener, OnDeviceConnectionLost(kDevice, _)).Times(1).WillOnce(SignalTest(this));
-
-  mock_adapter->connect("TestDevice", kApplication);
-  tm->disconnectDevice(kDevice);
-  EXPECT_TRUE(waitCond(1));
-}
-
-TEST_F(TransportManagerTest, SendReceive) {
-  const DeviceUID device_id = "TestDeviceName";
-  const DeviceInfo info(1, "MA:CA:DR:ES:S", "TestDeviceName");
-
-  EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(1);
-  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
-
-  MyTransportListener *myListener = new MyTransportListener(this);
-  mock_adapter->get_device_scanner()->addDevice(info.name(), info.mac_address());
-  tm->addEventListener(myListener);
-  tm->searchDevices();
-  EXPECT_TRUE(waitCond(10));
-
   EXPECT_CALL(*tm_listener, OnConnectionFailed(_, _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnConnectionEstablished(_, _)).Times(1);
-  tm->connectDevice(myListener->device_handle);
+  EXPECT_CALL(*tm_listener, OnConnectionEstablished(kInfo, kConnection)).Times(1);
+  tm->connectDevice(kInfo.device_handle());
   EXPECT_TRUE(waitCond(10));
 
+  const int kTimes = 100; // Times of send message
+  const unsigned int kVersionProtocol = 1;
   EXPECT_CALL(*tm_listener, OnTMMessageSendFailed(_, _)).Times(0);
   EXPECT_CALL(*tm_listener, OnTMMessageReceiveFailed(_, _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnTMMessageSend()).Times(25);
-  EXPECT_CALL(*tm_listener, OnTMMessageReceived(_)).Times(25);
-  unsigned char *data = new unsigned char[2 * 1024 * 1024];
-  for ( int i = 0; i < 25; ++i)
-  {
-    const RawMessageSptr kMessage = new RawMessage(myListener->connection, 1, data, 8 * 1024);
+  EXPECT_CALL(*tm_listener, OnConnectionClosed(kConnection)).Times(0);
+  EXPECT_CALL(*tm_listener, OnTMMessageSend()).Times(kTimes);
+  EXPECT_CALL(*tm_listener, OnTMMessageReceived(_)).Times(kTimes);
+
+  const unsigned int kSize = 12;
+  unsigned char data[kSize] = { 0x20, 0x07, 0x01, 0x00,
+                                0x00, 0x00, 0x00, 0x00,
+                                0x00, 0x00, 0x00, 0x00 };
+  for (int i = 0; i < kTimes; ++i) {
+    const RawMessageSptr kMessage = new RawMessage(kConnection, kVersionProtocol,
+                                                   data, kSize);
     tm->sendMessageToDevice(kMessage);
   }
-  delete[] data;
-  EXPECT_TRUE(waitCond(1));
+  EXPECT_TRUE(waitCond(10));
 
-  EXPECT_CALL(*tm_listener, OnConnectionClosed(_)).Times(1).WillOnce(SignalTest(this));
-  tm->disconnect(myListener->connection);
+  EXPECT_CALL(*tm_listener, OnConnectionClosedFailure(_, _)).Times(0);
+  EXPECT_CALL(*tm_listener, OnDisconnectFailed(kInfo.device_handle(), _)).Times(0);
+  EXPECT_CALL(*tm_listener, OnConnectionClosed(kConnection)).Times(1).WillOnce(SignalTest(this));
+  tm->disconnectDevice(kInfo.device_handle());
   EXPECT_TRUE(waitCond(10));
 
   tm->removeEventListener(myListener);
@@ -316,8 +279,8 @@ TEST_F(TransportManagerTest, SendReceive) {
   mock_adapter->get_device_scanner()->reset();
 }
 
-} // namespace transport_manager
-} // namespace components
+}  // namespace transport_manager
+}  // namespace components
 }  // namespace test
 
 int main(int argc, char** argv) {
