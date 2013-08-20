@@ -6,5 +6,5 @@ buildscript {
         classpath 'com.android.tools.build:gradle:0.5.+'
     }
 }
-ext.compileSdkVersion=18
-ext.buildToolsVersion="18.0.1"
+ext.compileSdkVersion = 18
+ext.buildToolsVersion = "18.0.1"
