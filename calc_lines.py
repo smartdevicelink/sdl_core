@@ -122,10 +122,10 @@ def proceedDir(dir):
     linesComments = linesHeaderComments + linesSourceComments
 
     print 'Directory: ' + dir
-    print 'Number of scanned C++ header files: %d. Size %.1fKb' % \
-        (len(listHeaders), sizeHeaders / 1024)
-    print 'Number of scanned C++ source files: %d. Size %.1fKb' % \
-        (len(listSources), sizeSources / 1024)
+    print 'Number of scanned C++ header files: %d. Size: %0.1f Kb' % \
+        (len(listHeaders), sizeHeaders / 1024.0)
+    print 'Number of scanned C++ source files: %d. Size: %0.1f Kb' % \
+        (len(listSources), sizeSources / 1024.0)
     print 'Number of source code lines: %d (header files: %d, source files: %d)' % (linesCode, linesHeaderCode, linesSourceCode)
     print 'Number of comment lines: %d (header files: %d, source files: %d)' % (linesComments, linesHeaderComments, linesSourceComments)
     print '----'
@@ -161,5 +161,5 @@ if summary_lines > 0:
 
 print 
 print '--- SUMMARY ---'
-print 'Size of source code: %.1fKb' % (summary_size / 1024)
+print 'Size of source code: %0.1f Kb' % (summary_size / 1024.0)
 print 'Comments code coverage: %f%%' % (coverage)
