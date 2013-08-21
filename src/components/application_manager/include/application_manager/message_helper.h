@@ -201,6 +201,7 @@ class MessageHelper {
       unsigned int app_id);
     static void SendAddSubMenuRequestToHMI(const Application* app);
     static void RemoveAppDataFromHMI(Application* const app);
+    static void SendOnAppUnregNotificationToHMI(Application* const app);
     static void SendDeleteCommandRequestToHMI(Application* const app);
     static void SendDeleteSubMenuRequestToHMI(Application* const app);
     static void ResetGlobalproperties(Application* const app);

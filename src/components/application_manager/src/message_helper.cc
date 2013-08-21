@@ -248,18 +248,16 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
     return NULL;
   }
 
-  if (!devices.empty())  {
-    (*device_list_so)[strings::device_list] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    smart_objects::SmartObject& list_so =
-      (*device_list_so)[strings::device_list];
-    int index = 0;
-    for (connection_handler::DeviceList::const_iterator it = devices.begin();
-         devices.end() != it; ++it) {
-      list_so[index][strings::name] = it->second.user_friendly_name();
-      list_so[index][strings::id] = it->second.device_handle();
-      ++index;
-    }
+  (*device_list_so)[strings::device_list] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+  smart_objects::SmartObject& list_so =
+    (*device_list_so)[strings::device_list];
+  int index = 0;
+  for (connection_handler::DeviceList::const_iterator it = devices.begin();
+       devices.end() != it; ++it) {
+    list_so[index][strings::name] = it->second.user_friendly_name();
+    list_so[index][strings::id] = it->second.device_handle();
+    ++index;
   }
   return device_list_so;
 }
@@ -710,6 +708,26 @@ void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
   SendDeleteCommandRequestToHMI(app);
   SendDeleteSubMenuRequestToHMI(app);
   ResetGlobalproperties(app);
+}
+
+void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app) {
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!notification) {
+    return;
+  }
+
+  smart_objects::SmartObject& message = *notification;
+
+  message[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+
+  message[strings::msg_params][strings::app_id] =
+    app->app_id();
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
 void MessageHelper::SendDeleteCommandRequestToHMI(Application* const app) {

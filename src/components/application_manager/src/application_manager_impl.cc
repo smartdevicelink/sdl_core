@@ -879,6 +879,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   if (!msg_params) {
     LOG4CXX_WARN(logger_, "Failed to create sub-smart object.");
     delete update_list;
+    return;
   }
   so_to_send[jhs::S_MSG_PARAMS] = *msg_params;
   ManageHMICommand(update_list);
@@ -895,6 +896,25 @@ void ApplicationManagerImpl::OnSessionStartedCallback(
 
 void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
     int first_session_key) {
+  LOG4CXX_INFO_EXT(logger_, "\n\t\t\t\tRemoving session " << session_key
+                   << " with first session " << first_session_key);
+  if (session_key == first_session_key) {
+    std::map<int, Application*>::iterator it = applications_.find(first_session_key);
+    if (it == applications_.end()) {
+      LOG4CXX_ERROR(logger_, "Trying to remove not existing session.");
+      for (std::map<int, Application*>::iterator itr = applications_.begin();
+           applications_.end() != itr;
+           ++itr) {
+        LOG4CXX_ERROR(logger_, "\n\t\t\tapplication session " << itr->first);
+      }
+      return;
+    }
+    MessageHelper::RemoveAppDataFromHMI(it->second);
+    MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
+    UnregisterApplication(first_session_key);
+  } else {
+    applications_.erase(session_key);
+  }
 }
 
 void ApplicationManagerImpl::onTimeoutExpired(request_watchdog::RequestInfo) {
