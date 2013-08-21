@@ -71,7 +71,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testSendMobileNavSmallFrameProtocolMessageSucceed() throws Exception {
         ProtocolMessage message = generateMobileNavProtocolMessage(8);
-        currentData = generateByteArray(8);
+        currentData = generateByteArray(0,8);
         currentFrameHeader = ProtocolFrameHeaderFactory.createSingleSendData(SessionType.Mobile_Nav, SESSION_ID, currentData.length, MESSAGE_ID, VERSION);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsSmallFrame");
         sut.SendMessage(message);
@@ -79,7 +79,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testSendMobileNavFirstBigFrameProtocolMessageSucceed() throws Exception {
         ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 2);
-        currentData = generateByteArray(WiProProtocol.MAX_DATA_SIZE * 2);
+        currentData = generateByteArray(0, WiProProtocol.MAX_DATA_SIZE * 2);
         currentFrameHeader = ProtocolFrameHeaderFactory.createMultiSendDataFirst(SessionType.Mobile_Nav, SESSION_ID, MESSAGE_ID, VERSION);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsFirstBigFrame");
         sut.SendMessage(message);
@@ -87,9 +87,17 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testSendMobileNavConsecutiveBigFrameProtocolMessageSucceed() throws Exception {
         ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 3);
-        currentData = generateByteArray(WiProProtocol.MAX_DATA_SIZE);
+        currentData = generateByteArray(0, WiProProtocol.MAX_DATA_SIZE);
         currentFrameHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(SessionType.Mobile_Nav, SESSION_ID, currentData.length, FRAME_SEQUENCE_NUMBER, MESSAGE_ID, VERSION);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsSecondBigFrame");
+        sut.SendMessage(message);
+    }
+
+    public void testSendMobileNavLastBigFrameProtocolMessageSucceed() throws Exception {
+        ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 3);
+        currentData = generateByteArray(WiProProtocol.MAX_DATA_SIZE * 2, WiProProtocol.MAX_DATA_SIZE);
+        currentFrameHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(SessionType.Mobile_Nav, SESSION_ID, currentData.length, (byte) 0, MESSAGE_ID, VERSION);
+        currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsLastBigFrame");
         sut.SendMessage(message);
     }
 
@@ -103,7 +111,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     }
 
     private ProtocolMessage generateMobileNavProtocolMessage(int i) {
-        byte[] frame = generateByteArray(i);
+        byte[] frame = generateByteArray(0,i);
         ProtocolMessage message = new ProtocolMessage();
         message.setData(frame);
         message.setVersion((byte) 2);
@@ -112,10 +120,10 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         return message;
     }
 
-    private byte[] generateByteArray(int size) {
+    private byte[] generateByteArray(int offset, int size) {
         byte[] b = new byte[size];
         for (int i = 0; i < size; i++) {
-            b[i] = (byte) i;
+            b[i] = (byte) (i + offset);
         }
         return b;
     }
@@ -176,10 +184,32 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     public void checkCurrentArgumentsSecondBigFrame(byte[] data, ProtocolFrameHeader messageHeader, int offset, int length) throws Exception {
         if (messageHeader.getFrameType() == FrameType.Consecutive && messageHeader.getFrameData() == (byte) 1) {
             assertTrue("Length of data should be less then WiProProtocol.MAX_DATA_SIZE", length <= WiProProtocol.MAX_DATA_SIZE);
-            byte[] res = new byte[length];
-            System.arraycopy(data, 0, res, 0, length);
+            byte[] res = getDataToCheck(data, offset, length);
             assertTrue("Arrays should be equal.", Arrays.equals(currentData, res));
             assertTrue("Offset should be 0 for second frame", offset == 0);
+            assertEquals("SessionType should be equal.", currentFrameHeader.getSessionType(), messageHeader.getSessionType());
+            assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
+            assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
+            assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
+            assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
+            assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
+        }
+    }
+
+    private byte[] getDataToCheck(byte[] data, int offset, int length) {
+        byte[] res = new byte[length];
+        System.arraycopy(data, offset, res, 0, length);
+        return res;
+    }
+
+    public void checkCurrentArgumentsLastBigFrame(byte[] data, ProtocolFrameHeader messageHeader, int offset, int length) throws Exception {
+        if (messageHeader.getFrameType() == FrameType.Consecutive && messageHeader.getFrameData() == (byte) 0) {
+            assertTrue("Length of data should be less then WiProProtocol.MAX_DATA_SIZE", length <= WiProProtocol.MAX_DATA_SIZE);
+            byte[] res = getDataToCheck(data, offset, length);
+            assertTrue("Arrays should be equal.", Arrays.equals(currentData, res));
+            assertTrue("Offset should be 'WiProProtocol.MAX_DATA_SIZE * 3 - length' for last frame", offset == WiProProtocol.MAX_DATA_SIZE * 3 - length);
             assertEquals("SessionType should be equal.", currentFrameHeader.getSessionType(), messageHeader.getSessionType());
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
