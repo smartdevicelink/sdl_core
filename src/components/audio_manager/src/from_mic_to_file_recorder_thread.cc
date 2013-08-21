@@ -222,7 +222,9 @@ void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
 void FromMicToFileRecorderThread::exitThreadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  g_main_loop_quit(loop);
+  if(NULL != loop) {
+    g_main_loop_quit(loop);
+  }
 
   if(NULL != sleepThread_) {
     sleepThread_->stop();
