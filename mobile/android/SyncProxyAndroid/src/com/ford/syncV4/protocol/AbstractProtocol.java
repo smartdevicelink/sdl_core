@@ -8,7 +8,7 @@ import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 public abstract class AbstractProtocol {
 	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
 	
-	private IProtocolListener _protocolListener = null;
+	protected IProtocolListener _protocolListener = null;
 	//protected IProtocolListener ProtocolListener() { return _protocolListener; }
 	
 	// Lock to ensure all frames are sent uninterupted 

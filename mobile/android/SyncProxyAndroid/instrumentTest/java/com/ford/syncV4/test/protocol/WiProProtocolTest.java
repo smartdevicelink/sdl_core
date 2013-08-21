@@ -12,6 +12,10 @@ import com.ford.syncV4.protocol.enums.SessionType;
 import java.util.Arrays;
 import java.util.Hashtable;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyByte;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,9 +41,14 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void SendMessage(ProtocolMessage protocolMsg) {
-                _messageLocks = mock(Hashtable.class);
-                when(_messageLocks.get((byte) 0)).thenReturn("mockLock");
+                prepareMockItems();
                 super.SendMessage(protocolMsg);
+            }
+
+            private void prepareMockItems() {
+                _messageLocks = mock(Hashtable.class);
+                when(_messageLocks.get(anyByte())).thenReturn("mockLock");
+                doThrow(new IllegalStateException("should not get protocol error")).when(_protocolListener).onProtocolError(anyString(), any(Exception.class));
             }
 
             @Override
@@ -56,20 +65,35 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     }
 
     public void testSendMobileNavSmallFrameProtocolMessageSucceed() throws Exception {
-        ProtocolMessage message = generateMobileNavProtocolMessage();
-        currentData = new byte[]{1, 2, 3, 4, 5, 7};
+        ProtocolMessage message = generateMobileNavProtocolMessage(8);
+        currentData = generateByteArray(8);
         currentFrameHeader = ProtocolFrameHeaderFactory.createSingleSendData(SessionType.Mobile_Nav, (byte) 48, currentData.length, 1, (byte) 2);
         sut.SendMessage(message);
     }
 
-    private ProtocolMessage generateMobileNavProtocolMessage() {
-        byte[] frame = new byte[]{1, 2, 3, 4, 5, 7};
+    public void testSendMobileNavBigFrameProtocolMessageSucceed() throws Exception {
+        ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 2);
+        currentData = generateByteArray(WiProProtocol.MAX_DATA_SIZE * 2);
+        currentFrameHeader = ProtocolFrameHeaderFactory.createSingleSendData(SessionType.Mobile_Nav, (byte) 48, currentData.length, 1, (byte) 2);
+        sut.SendMessage(message);
+    }
+
+    private ProtocolMessage generateMobileNavProtocolMessage(int i) {
+        byte[] frame = generateByteArray(i);
         ProtocolMessage message = new ProtocolMessage();
         message.setData(frame);
-        message.setVersion((byte)2);
+        message.setVersion((byte) 2);
         message.setSessionID((byte) 48);
         message.setSessionType(SessionType.Mobile_Nav);
         return message;
+    }
+
+    private byte[] generateByteArray(int size) {
+        byte[] b = new byte[size];
+        for (int i = 0; i < size; i++) {
+            b[i] = (byte) i;
+        }
+        return b;
     }
 
     public void checkCurrentArguments(byte[] data, ProtocolFrameHeader messageHeader) throws Exception {
