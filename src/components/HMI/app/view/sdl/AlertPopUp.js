@@ -116,11 +116,11 @@ SDL.AlertPopUp = Em.ContainerView.create({
     /**
      * Deactivate PopUp
      */
-    deactivate: function(ABORTED) {
+    deactivate: function() {
         this.set('active', false);
         clearTimeout(this.timer);
 
-        SDL.SDLController.alertResponse(ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
+        SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
 
         SDL.SDLController.onSystemContextChange();
     },

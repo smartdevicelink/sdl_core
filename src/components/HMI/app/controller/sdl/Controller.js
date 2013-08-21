@@ -122,7 +122,7 @@ SDL.SDLController = Em.Object
 
             switch (element.groupName) {
             case "AlertPopUp": {
-                SDL.AlertPopUp.deactivate(true);
+                SDL.AlertPopUp.deactivate();
                 break;
             }
             case "ScrollableMessage": {
@@ -185,7 +185,7 @@ SDL.SDLController = Em.Object
         closePopUp: function() {
 
             if (SDL.AlertPopUp.active) {
-                SDL.AlertPopUp.deactivate(true);
+                SDL.AlertPopUp.deactivate();
             }
             if (SDL.AudioPassThruPopUp.active) {
                 SDL.AudioPassThruPopUp.deactivate();
