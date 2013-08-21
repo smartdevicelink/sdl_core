@@ -1686,7 +1686,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (typeof params.syncFileName != 'string') {
+                    if (typeof params.syncFileName != 'object') {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
