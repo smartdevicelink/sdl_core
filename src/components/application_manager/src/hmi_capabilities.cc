@@ -36,7 +36,12 @@
 namespace application_manager {
 
 HMICapabilities::HMICapabilities()
-  : attenuated_supported_(false),
+  : is_vr_ready_response_recieved_(false),
+    is_tts_ready_response_recieved_(false),
+    is_ui_ready_response_recieved_(false),
+    is_navi_ready_response_recieved_(false),
+    is_ivi_ready_response_recieved_(false),
+    attenuated_supported_(false),
     ui_supported_languages_(NULL),
     tts_supported_languages_(NULL),
     vr_supported_languages_(NULL),
@@ -213,6 +218,5 @@ void HMICapabilities::set_preset_bank_capabilities(
 bool HMICapabilities::VerifyImageType(mobile_apis::ImageType::eType image_type) {
   return image_type == mobile_apis::ImageType::DYNAMIC;
 }
-
 
 }  //  namespace application_manager

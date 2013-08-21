@@ -41,9 +41,38 @@ namespace application_manager {
 
 namespace commands {
 
+RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
+    const MessageSharedPtr& message)
+ : CommandRequestImpl(message),
+ timer_(NULL) {
+}
+
+RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {
+  if (timer_) {
+    delete timer_;
+  }
+}
+
+bool RegisterAppInterfaceRequest::Init() {
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Init");
+
+  synchronisation_.init();
+  timer_ = new sync_primitives::Timer(&synchronisation_);
+  if (!timer_) {
+    LOG4CXX_ERROR_EXT(logger_, "Init NULL pointer");
+    return false;
+  }
+  return true;
+}
+
 void RegisterAppInterfaceRequest::Run() {
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run"
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run "
       << (*message_)[strings::params][strings::connection_key].asInt());
+
+  // wait till all HMI capabilities initialized
+  while (!ApplicationManagerImpl::instance()->IsHMICapabilitiesInitialized()) {
+    timer_->StartWait(1);
+  }
 
   Application* application_impl =
       ApplicationManagerImpl::instance()->RegisterApplication(message_);

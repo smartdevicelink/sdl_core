@@ -246,6 +246,8 @@ ApplicationManagerImpl::device_list() {
 Application* ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
+
+
   DCHECK(request_for_registration);
   smart_objects::SmartObject& message = *request_for_registration;
   unsigned int connection_key =
@@ -341,10 +343,9 @@ Application* ApplicationManagerImpl::RegisterApplication(
       ui_language_));
 
   Version version;
-  int min_version  =
-    message[strings::msg_params]
-    [strings::sync_msg_version]
+  int min_version = message[strings::msg_params][strings::sync_msg_version]
     [strings::minor_version].asInt();
+
   if (min_version < APIVersion::kAPIV2) {
     LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
     utils::SharedPtr<smart_objects::SmartObject> response(
@@ -359,10 +360,9 @@ Application* ApplicationManagerImpl::RegisterApplication(
   }
   version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
-  int max_version =
-    message[strings::msg_params]
-    [strings::sync_msg_version]
+  int max_version = message[strings::msg_params][strings::sync_msg_version]
     [strings::major_version].asInt();
+
   if (max_version > APIVersion::kAPIV2) {
     LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
     utils::SharedPtr<smart_objects::SmartObject> response(
@@ -477,11 +477,6 @@ void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
-  if (!connection_handler_) {
-    LOG4CXX_WARN(logger_, "Connection handler is not set.");
-  } else {
-    connection_handler_->StartTransportManager();
-  }
 
   utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
     MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady));
@@ -509,6 +504,12 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
     MessageHelper::CreateModuleInfoSO(
       hmi_apis::FunctionID::Buttons_GetCapabilities));
   ManageHMICommand(button_capabilities);
+
+  if (!connection_handler_) {
+    LOG4CXX_WARN(logger_, "Connection handler is not set.");
+  } else {
+    connection_handler_->StartTransportManager();
+  }
 }
 
 unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
@@ -712,9 +713,9 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
   LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
   if (NULL != audioManager_) {
     audioManager_->startMicrophoneRecording(std::string("record.wav"),
-                                            static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
-                                            max_duration,
-                                            static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample));
+      static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+      max_duration,
+      static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample));
   }
 
 
@@ -771,6 +772,7 @@ std::string ApplicationManagerImpl::GetDeviceName(
 }
 
 void ApplicationManagerImpl::set_is_vr_cooperating(bool value) {
+  is_vr_ready_response_recieved_ = true;
   is_vr_cooperating_ = value;
   if (is_vr_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
@@ -785,6 +787,7 @@ void ApplicationManagerImpl::set_is_vr_cooperating(bool value) {
 }
 
 void ApplicationManagerImpl::set_is_tts_cooperating(bool value) {
+  is_tts_ready_response_recieved_ = true;
   is_tts_cooperating_ = value;
   if (is_tts_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
@@ -797,6 +800,7 @@ void ApplicationManagerImpl::set_is_tts_cooperating(bool value) {
 }
 
 void ApplicationManagerImpl::set_is_ui_cooperating(bool value) {
+  is_ui_ready_response_recieved_ = true;
   is_ui_cooperating_ = value;
   if (is_ui_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
@@ -812,10 +816,12 @@ void ApplicationManagerImpl::set_is_ui_cooperating(bool value) {
 }
 
 void ApplicationManagerImpl::set_is_navi_cooperating(bool value) {
+  is_navi_ready_response_recieved_ = true;
   is_navi_cooperating_ = value;
 }
 
 void ApplicationManagerImpl::set_is_ivi_cooperating(bool value) {
+  is_ivi_ready_response_recieved_ = true;
   is_ivi_cooperating_ = value;
   if (is_ivi_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_type(
@@ -995,8 +1001,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
     if (!policies_manager_.is_valid_hmi_status(function_id, app->hmi_level())) {
       LOG4CXX_WARN(logger_, "Request blocked by policies. "
-                   << "FunctionID: " << static_cast<int>(function_id)
-                   << " Application HMI status: " << static_cast<int>(app->hmi_level()));
+         << "FunctionID: " << static_cast<int>(function_id)
+         << " Application HMI status: " << static_cast<int>(app->hmi_level()));
 
       smart_objects::SmartObject* response =
         MessageHelper::CreateBlockedByPoliciesResponse(function_id,
@@ -1314,6 +1320,49 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
     }
   }
   return *mobile_so_factory_;
+}
+
+bool ApplicationManagerImpl::IsHMICapabilitiesInitialized() {
+
+  bool result = true;
+  if (is_vr_ready_response_recieved_ && is_tts_ready_response_recieved_ &&
+      is_ui_ready_response_recieved_ && is_navi_ready_response_recieved_ &&
+      is_ivi_ready_response_recieved_) {
+
+    if (is_vr_cooperating_) {
+      if ((!vr_supported_languages_) ||
+          (hmi_apis::Common_Language::INVALID_ENUM == vr_language_)) {
+        result = false;
+      }
+    }
+
+    if (is_tts_cooperating_) {
+      if ((!tts_supported_languages_) ||
+          (hmi_apis::Common_Language::INVALID_ENUM == tts_language_)) {
+        result = false;
+      }
+    }
+
+    if (is_ui_cooperating_) {
+      if ((!ui_supported_languages_) ||
+          (hmi_apis::Common_Language::INVALID_ENUM == ui_language_)) {
+        result = false;
+      }
+    }
+
+    if (is_ivi_cooperating_) {
+      if (!vehicle_type_) {
+        result = false;
+      }
+    }
+  } else {
+    result = false;
+  }
+
+  LOG4CXX_INFO(logger_, "HMICapabilities::IsHMICapabilitiesInitialized() "
+               << result);
+
+  return result;
 }
 
 }  // namespace application_manager

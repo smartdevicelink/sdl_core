@@ -68,6 +68,9 @@ AudioPassThruThreadImpl::AudioPassThruThreadImpl(
 }
 
 AudioPassThruThreadImpl::~AudioPassThruThreadImpl() {
+  if (timer_) {
+    delete timer_;
+  }
 }
 
 void AudioPassThruThreadImpl::Init() {
