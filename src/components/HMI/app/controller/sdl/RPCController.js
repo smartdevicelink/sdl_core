@@ -1286,7 +1286,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (arams.appID == null) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
