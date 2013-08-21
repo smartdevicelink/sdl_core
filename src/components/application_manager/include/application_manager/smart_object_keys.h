@@ -217,6 +217,7 @@ const char show_strings[] = "showStrings";
 
 namespace hmi_response {
 const char code[] = "code";
+const char message[] = "message";
 const char method[] = "method";
 const char try_again_time[] = "tryAgainTime";
 const char custom_button_id[] = "customButtonID";
