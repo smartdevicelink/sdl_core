@@ -139,7 +139,7 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
      * dynamic footer mode
      */
     changeFooterText: function() {
-        if( this.footerLabel.data.length > 1 ){
+        if( this.footerLabel.data && this.footerLabel.data.length > 1 ){
             this.set( 'footerLabel.content', this.footerLabel.data[this.adjustControl.sliderValue.value - 1] );
         }
     }.observes( 'adjustControl.sliderValue.value' )
