@@ -33,6 +33,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     public static final int MESSAGE_ID = 1;
     public static final byte SESSION_ID = (byte) 48;
     public static final byte FRAME_SEQUENCE_NUMBER = (byte) 1;
+    public static final int FRAME_SIZE_SHIFT = 100;
     Method currentCheckMethod;
     private WiProProtocol sut;
     private ProtocolFrameHeader currentFrameHeader;
@@ -101,6 +102,14 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         sut.SendMessage(message);
     }
 
+    public void testSendMobileNabLastUnAlightedBigFrameProtocolMessageSucceed() throws Exception {
+        ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 3 + FRAME_SIZE_SHIFT);
+        currentData = generateByteArray(WiProProtocol.MAX_DATA_SIZE * 3, FRAME_SIZE_SHIFT);
+        currentFrameHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(SessionType.Mobile_Nav, SESSION_ID, currentData.length, (byte) 0, MESSAGE_ID, VERSION);
+        currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsLastUnAlightedBigFrame");
+        sut.SendMessage(message);
+    }
+
     private Method generateCurrentCheckMethod(String checkMethodName) throws NoSuchMethodException {
         Class[] parameterTypes = new Class[4];
         parameterTypes[0] = byte[].class;
@@ -163,7 +172,14 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void checkCurrentArgumentsSmallFrame(byte[] data, ProtocolFrameHeader messageHeader, int offset, int length) throws Exception {
         assertTrue(Arrays.equals(currentData, data));
-        assertEquals(currentFrameHeader, messageHeader);
+        assertEquals("SessionType should be equal.", currentFrameHeader.getSessionType(), messageHeader.getSessionType());
+        assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
+        assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
+        assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
+        assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+        assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
+        assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
+        assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
     }
 
     public void checkCurrentArgumentsFirstBigFrame(byte[] data, ProtocolFrameHeader messageHeader, int offset, int length) throws Exception {
@@ -209,7 +225,24 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertTrue("Length of data should be less then WiProProtocol.MAX_DATA_SIZE", length <= WiProProtocol.MAX_DATA_SIZE);
             byte[] res = getDataToCheck(data, offset, length);
             assertTrue("Arrays should be equal.", Arrays.equals(currentData, res));
-            assertTrue("Offset should be 'WiProProtocol.MAX_DATA_SIZE * 3 - length' for last frame", offset == WiProProtocol.MAX_DATA_SIZE * 3 - length);
+            assertTrue("Offset should be 2976 for last frame", offset == WiProProtocol.MAX_DATA_SIZE * 3 - length);
+            assertEquals("SessionType should be equal.", currentFrameHeader.getSessionType(), messageHeader.getSessionType());
+            assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
+            assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
+            assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
+            assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
+            assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
+        }
+    }
+
+    public void checkCurrentArgumentsLastUnAlightedBigFrame(byte[] data, ProtocolFrameHeader messageHeader, int offset, int length) throws Exception {
+        if (messageHeader.getFrameType() == FrameType.Consecutive && messageHeader.getFrameData() == (byte) 0) {
+            assertTrue("Length of data should be == 100", length == FRAME_SIZE_SHIFT);
+            assertTrue("Offset of data should be == 4464", offset == WiProProtocol.MAX_DATA_SIZE * 3);
+            byte[] res = getDataToCheck(data, offset, length);
+            assertTrue("Arrays should be equal.", Arrays.equals(currentData, res));
             assertEquals("SessionType should be equal.", currentFrameHeader.getSessionType(), messageHeader.getSessionType());
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
