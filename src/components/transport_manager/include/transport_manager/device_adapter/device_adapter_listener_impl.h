@@ -62,7 +62,8 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
     ON_SEND_FAIL,
     ON_RECEIVED_DONE,
     ON_RECEIVED_FAIL,
-    ON_COMMUNICATION_ERROR
+    ON_COMMUNICATION_ERROR,
+    ON_UNEXPECTED_DISCONNECT
   };
 
   explicit DeviceAdapterListenerImpl(transport_manager::TransportManagerImpl *tm);

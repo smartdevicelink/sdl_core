@@ -74,6 +74,7 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
 
 void ConnectionHandlerImpl::OnTMMessageReceived(
   const transport_manager::RawMessageSptr message) {}
+
 void ConnectionHandlerImpl::OnTMMessageReceiveFailed(
   transport_manager::ConnectionUID connection_id,
   const transport_manager::DataReceiveError& error) {}
@@ -81,6 +82,22 @@ void ConnectionHandlerImpl::OnTMMessageSendFailed(
   const transport_manager::DataSendError& error,
   const transport_manager::RawMessageSptr message) {}
 void ConnectionHandlerImpl::OnTMMessageSend() {}
+
+void ConnectionHandlerImpl::OnDeviceListUpdated(const std::vector<transport_manager::DeviceInfo>& device_info_list) {
+  device_list_during_search_.clear();
+
+  for (auto device_info : device_info_list) {
+    device_list_during_search_.insert(
+      DeviceList::value_type(device_info.device_handle(),
+                             Device(device_info.device_handle(),
+                                    device_info.name(),
+                                    device_info.mac_address())));
+  }
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnDeviceListUpdated(
+      device_list_during_search_);
+  }
+}
 
 void ConnectionHandlerImpl::OnDeviceFound(
   const transport_manager::DeviceInfo& device_info) {

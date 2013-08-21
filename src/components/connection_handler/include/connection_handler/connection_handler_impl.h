@@ -83,6 +83,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void set_connection_handler_observer(
       ConnectionHandlerObserver* observer);
 
+    virtual void OnDeviceListUpdated(const std::vector<transport_manager::DeviceInfo>&);
+
     /**
      * \brief Available devices list updated.
      *

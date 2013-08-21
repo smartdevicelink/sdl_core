@@ -366,15 +366,17 @@ int TransportManagerImpl::removeDeviceAdapter(
 }
 
 int TransportManagerImpl::searchDevices(void) {
+  if (!this->is_initialized_) {
+    LOG4CXX_ERROR(logger_, "TM is not initialized")
+    return E_TM_IS_NOT_INITIALIZED;
+  }
+
   if (search_in_progress_)
     return E_SEARCH_IN_PROGRESS;
   da_scanned = 0;
   search_in_progress_ = true;
+  device_list_.clear();
   LOG4CXX_INFO(logger_, "Search device called")
-  if (false == this->is_initialized_) {
-    LOG4CXX_ERROR(logger_, "TM is not initialized")
-    return E_TM_IS_NOT_INITIALIZED;
-  }
 
   for (std::vector<DeviceAdapterSptr>::iterator it = device_adapters_.begin();
       it != device_adapters_.end(); ++it) {
@@ -389,12 +391,12 @@ int TransportManagerImpl::searchDevices(void) {
         case device_adapter::DeviceAdapter::NOT_SUPPORTED:
           LOG4CXX_ERROR(
               logger_,
-              "Search feature is not supported " << (*it).get() << "[" << (*it)->getDeviceType() << "]")
+              "Search feature is not supported " << it->get() << "[" << (*it)->getDeviceType() << "]")
           break;
         case device_adapter::DeviceAdapter::BAD_STATE:
           LOG4CXX_ERROR(
               logger_,
-              "Transport Adapter has bad state " << (*it).get() << "[" << (*it)->getDeviceType() << "]")
+              "Transport Adapter has bad state " << it->get() << "[" << (*it)->getDeviceType() << "]")
           break;
       }
       return scanResult;
@@ -450,12 +452,13 @@ int TransportManagerImpl::Visibility(const bool &on_off) const {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-  for (std::vector<DeviceAdapterSptr>::const_iterator it = device_adapters_
-      .begin(); it != device_adapters_.end(); ++it) {
+  for (std::vector<DeviceAdapterSptr>::const_iterator it =
+      device_adapters_.begin();
+      it != device_adapters_.end(); ++it) {
     if (on_off) {
       ret = (*it)->startClientListening();
     } else {
-      (ret = (*it)->stopClientListening());
+      ret = (*it)->stopClientListening();
     }
     if (DeviceAdapter::Error::NOT_SUPPORTED == ret) {
       LOG4CXX_INFO(
@@ -466,6 +469,10 @@ int TransportManagerImpl::Visibility(const bool &on_off) const {
 
   LOG4CXX_INFO(logger_, "Visibility change requested complete")
   return E_SUCCESS;
+}
+
+const std::vector<DeviceInfo>& TransportManagerImpl::getDeviceList() const {
+  return device_list_;
 }
 
 void TransportManagerImpl::postMessage(const RawMessageSptr message) {
@@ -479,6 +486,9 @@ void TransportManagerImpl::postMessage(const RawMessageSptr message) {
 }
 
 void TransportManagerImpl::removeMessage(const RawMessageSptr message) {
+  // TODO: Reconsider necessity of this method, remove if it's useless,
+  //       make to work otherwise.
+  //       2013-08-21 dchmerev@luxoft.com
   LOG4CXX_INFO(logger_, "Remove message called " << message.get())
   pthread_mutex_lock(&message_queue_mutex_);
   std::remove(message_queue_.begin(), message_queue_.end(), message);
@@ -619,6 +629,7 @@ void TransportManagerImpl::eventListenerThread(void) {
 
       device_adapter::DeviceList dev_list;
       ConnectionInternal* connection = getConnection(device_id, app_handle);
+      std::vector<DeviceInfo>::iterator device_info_iterator;
 
       switch (event_type) {
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE:
@@ -634,6 +645,7 @@ void TransportManagerImpl::eventListenerThread(void) {
             device_to_adapter_map_.insert(std::make_pair(*item, da));
             DeviceHandle device_handle = converter_.UidToHandle(*item);
             DeviceInfo info(device_handle, *item, da->DeviceName(*item));
+            device_list_.push_back(info);
             raiseEvent(&TransportManagerListener::OnDeviceFound, info);
 
             LOG4CXX_INFO(logger_, "Callback called")
@@ -675,14 +687,15 @@ void TransportManagerImpl::eventListenerThread(void) {
               &TransportManagerListener::OnConnectionEstablished,
               DeviceInfo(device_handle, device_id, da->DeviceName(device_id)),
               connection_id_counter_);
+          device_list_.push_back(DeviceInfo(device_handle, device_id,
+                                            da->DeviceName(device_id)));
+          raiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_list_);
           break;
-        case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL: {
-          LOG4CXX_INFO(logger_, "Event ON_CONNECT_FAIL");
-          DeviceHandle device_handle = converter_.UidToHandle(device_id);
-          DeviceInfo info(device_handle, device_id, da->DeviceName(device_id));
-          raiseEvent(&TransportManagerListener::OnConnectionFailed, info,
+        case DeviceAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL:
+          LOG4CXX_INFO(logger_, "Event ON_CONNECT_FAIL")
+          raiseEvent(&TransportManagerListener::OnConnectionFailed,
+                     DeviceInfo(converter_.UidToHandle(device_id), device_id, da->DeviceName(device_id)),
                      ConnectError());
-        }
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_DISCONNECT_DONE");
@@ -809,7 +822,7 @@ void TransportManagerImpl::eventListenerThread(void) {
           if (connection == NULL) {
             LOG4CXX_ERROR(
                 logger_,
-                "Connection ('" << device_id << ", " << app_handle << ") not found");
+                "Connection ('" << device_id << ", " << app_handle << ") not found")
             break;
           }
 
@@ -819,7 +832,19 @@ void TransportManagerImpl::eventListenerThread(void) {
           break;
         case DeviceAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR:
           LOG4CXX_INFO(logger_, "Event ON_COMMUNICATION_ERROR")
-          ;
+          break;
+        case DeviceAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT:
+          LOG4CXX_INFO(logger_, "Event ON_UNEXPECTED_DISCONNECT")
+          // Remove device from list
+          for (auto it = device_list_.begin();
+              it != device_list_.end();
+              ++it) {
+            if (it->device_handle() == device_handle) {
+              device_list_.erase(it);
+              break;
+            }
+          }
+          raiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_list_);
           break;
       }  // switch
       delete error;
@@ -895,9 +920,6 @@ void TransportManagerImpl::messageQueueThread(void) {
   LOG4CXX_INFO(logger_, "Message queue thread finished")
 }
 
-pthread_cond_t* TransportManagerImpl::getDeviceListenerThreadWakeup(void) {
-  return &device_listener_thread_wakeup_;
-}
 void TransportManagerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler *ph) {
   //YK: temp solution until B1.0 release
