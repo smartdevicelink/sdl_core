@@ -64,7 +64,11 @@ void AlertManeuverRequest::Run() {
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[hmi_request::soft_buttons] =
-    (*message_)[strings::msg_params][strings::soft_buttons];
+                smart_objects::SmartObject(smart_objects::SmartType_Array);
+  if ((*message_)[strings::params].keyExists("softButtons")) {
+    msg_params[hmi_request::soft_buttons] =
+      (*message_)[strings::params][strings::soft_buttons];
+  }
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
                    msg_params, true);
@@ -80,6 +84,7 @@ void AlertManeuverRequest::Run() {
         smart_objects::SmartObject(smart_objects::SmartType_Array);
       msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
+
       msg_params[strings::app_id] = app->app_id();
       CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
     }
