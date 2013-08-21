@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER_IMPL
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_LISTENER_IMPL
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_LISTENER_IMPL
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_LISTENER_IMPL
 
 #include "transport_manager/device_adapter/device_adapter_listener.h"
 #include "transport_manager/device_adapter/device_adapter.h"
@@ -43,14 +43,27 @@
 using transport_manager::device_adapter::DeviceAdapter;
 using transport_manager::device_adapter::DeviceAdapterSptr;
 
+/**
+ * @namespace Transport manager namespace.
+ */
 namespace transport_manager {
 
+/**
+ * @typedef Type definition of iterator to container(vector) that holds smart pointers to the device adapters.
+ */
 typedef std::vector<DeviceAdapterSptr>::const_iterator AdapterIterator;
 
 class TransportManagerImpl;
 
+/**
+ * @brief Implemestation of DeviceAdapterListener class.
+ */
 class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
  public:
+
+  /**
+   * @enum Available types of events.
+   */
   enum EventTypeEnum {
     ON_SEARCH_DONE = 0,
     ON_SEARCH_FAIL,
@@ -65,10 +78,28 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
     ON_COMMUNICATION_ERROR
   };
 
+  /**
+   * @brief Constructor.
+   *
+   * @param tm Pointer to the transport manager implementation class.
+   */
   explicit DeviceAdapterListenerImpl(transport_manager::TransportManagerImpl *tm);
+
+  /**
+   * @brief Dectructor.
+   */
   virtual ~DeviceAdapterListenerImpl();
 
+  /**
+   * @brief Trying to find specified device adapter in the internal container.
+   *
+   * @param device_adapter pointer to the device adapter.
+   */
   virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter);
+
+  /**
+   * @brief
+   */
   virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
                                     const SearchDeviceError& error);
 

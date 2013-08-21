@@ -41,12 +41,12 @@
 using utils::SharedPtr;
 
 /**
- * @brief Transport manager namespace.
+ * @namespace Transport manager namespace.
  */
 namespace transport_manager {
 
 /**
- * @brief Device adapter namespace, part of transport manager namespace.
+ * @namespace Device adapter namespace, part of transport manager namespace.
  */
 namespace device_adapter {
 
@@ -65,20 +65,23 @@ class Connection {
   virtual ~Connection() {}
 
   /**
-   * @brief Send data.
+   * @brief Send data frame.
    *
-   * @param message smart pointer to raw message
+   * @param Message smart pointer to the raw message.
    *
    * @return Error information about possible reason of sending data failure.
    */
   virtual DeviceAdapter::Error sendData(RawMessageSptr message) = 0;
 
   /**
-   * @brief End the current connection.
+   * @brief Disconnect the current connection.
    */
   virtual DeviceAdapter::Error disconnect() = 0;
 };
 
+/**
+ * @typedef Type definition of smart pointer to the Connection class.
+ */
 typedef utils::SharedPtr<Connection> ConnectionSptr;
 
 }  // namespace device_adapter

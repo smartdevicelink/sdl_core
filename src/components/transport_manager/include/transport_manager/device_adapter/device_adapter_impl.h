@@ -47,12 +47,12 @@
 #include "transport_manager/device_adapter/connection.h"
 
 /**
- * @brief transport manager namespace
+ * @namespace transport manager namespace.
  */
 namespace transport_manager {
 
 /**
- * @brief device adapter namespace, part of transport manager namespace
+ * @namespace Device adapter namespace, part of transport manager namespace.
  */
 namespace device_adapter {
 
@@ -69,9 +69,9 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Constructor.
    *
-   * @param device_scanner pointer to device scanner.
-   * @param server_connection_factory pointer to the factory that create connections from server.
-   * @param client_connection_listener pointer to the listener of client connection.
+   * @param device_scanner Pointer to device scanner.
+   * @param server_connection_factory Pointer to the factory that create connections from server.
+   * @param client_connection_listener Pointer to the listener of client connection.
    **/
   DeviceAdapterImpl(DeviceScanner* device_scanner,
                     ServerConnectionFactory* server_connection_factory,
@@ -103,14 +103,14 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
    *
-   * @param listener pointer to the device adapter listener.
+   * @param listener Pointer to the device adapter listener.
    */
   virtual void addListener(DeviceAdapterListener *listener);
 
   /**
    * @brief Remove listener from the container(list) of device adapter listeners.
    *
-   * @param listener pointer to the device adapter listener.
+   * @param listener Pointer to the device adapter listener.
    */
   virtual void removeListener(DeviceAdapterListener *listener);
 
@@ -118,14 +118,18 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @brief Start scanning for new devices.
    *
    * List of new devices will be supplied in onDeviceListUpdated callback.
+   *
+   * @return Error information about possible reason of search devices failure.
    **/
   virtual DeviceAdapter::Error searchDevices();
 
   /**
    * @brief Connect to the specified application discovered on device.
    *
-   * @param device_handle device unique identifier to connect to.
+   * @param device_handle Device unique identifier to connect to.
    * @param app_handle Handle of application to connect to.
+   *
+   * @return Error information about possible reason of connecting failure.
    **/
   virtual DeviceAdapter::Error connect(const DeviceUID& device_handle,
                                        const ApplicationHandle& app_handle);
@@ -133,8 +137,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Disconnect from specified session.
    *
-   * @param devcie_handle device unique identifier.
-   * @param app_handle handle of application.
+   * @param devcie_handle Device unique identifier.
+   * @param app_handle Handle of application.
    *
    * @return Error information about possible reason of disconnecting failure.
    **/
@@ -145,15 +149,17 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @brief Disconnect from all sessions on specified device.
    *
    * @param device_handle Device handle to disconnect.
+   *
+   * @return Error information about possible reason of disconnecting specified device failure.
    **/
   virtual DeviceAdapter::Error disconnectDevice(const DeviceUID& device_handle);
 
   /**
-   * @brief Send frame.
+   * @brief Send frame of data.
    *
-   * @param ConnectionHandle Connection handle.
-   * @param Data Frame payload data.
-   * @param DataSize Size of data in bytes.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param data Smart pointer to the raw message.
    **/
   virtual DeviceAdapter::Error sendData(const DeviceUID& device_handle,
                                         const ApplicationHandle& app_handle,
@@ -169,44 +175,44 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Stop client listener.
    *
-   * @return Error information about possible reason of stopping client listener failure.
+   * @return Error information about possible reason of stopping client listener.
    */
   virtual DeviceAdapter::Error stopClientListening();
 
   /**
    * @brief Notify that device scanner is available.
    *
-   * @return true - available, false - not available.
+   * @return True - available, false - not available.
    */
   virtual bool isSearchDevicesSupported() const;
 
   /**
    * @brief Notify that server connection factory is available.
    *
-   * @return true - available, false - not available.
+   * @return True - available, false - not available.
    */
   virtual bool isServerOriginatedConnectSupported() const;
 
   /**
    * @brief Notify that listener of client connection is available.
    *
-   * @return true - available, false - not available.
+   * @return True - available, false - not available.
    */
   virtual bool isClientOriginatedConnectSupported() const;
 
   /**
    * @brief Create container(vector) of device unique identifiers.
    *
-   * @return container(vector) of device unique identifiers.
+   * @return Container(vector) of device unique identifiers.
    */
   virtual DeviceList getDeviceList() const;
 
   /**
    * @brief Get container(vector) of application unique identifiers that available at specified device.
    *
-   * @param device_handle device unique identifier.
+   * @param device_handle Device unique identifier.
    *
-   * @return container(vector) that holds application unique identifiers.
+   * @return Container(vector) that holds application unique identifiers.
    */
   virtual ApplicationList getApplicationList(
       const DeviceUID& device_handle) const;
@@ -214,40 +220,40 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Find device in the internal container(map).
    *
-   * @param device_handle device unique identifier.
+   * @param device_handle Device unique identifier.
    *
-   * @return smart pointer to device.
+   * @return Smart pointer to device.
    */
   virtual DeviceSptr findDevice(const DeviceUID& device_handle) const;
 
   /**
-   * @brief Search for specified device ????'
+   * @brief Search for device in container of devices, if it is not there - adds it.
    *
-   * @param devices container(vector) of smart pointers to devices.
+   * @param devices Container(vector) of smart pointers to devices.
    */
   virtual void searchDeviceDone(const DeviceVector& devices);
 
   /**
-   * @brief ????
-   * @param error error class that contains details of this error situation.
+   * @brief Launch onSearchDeviceFailed event in device adapter listener.
+   * @param error Error class that contains details of this error situation.
    */
   virtual void searchDeviceFailed(const SearchDeviceError& error);
 
   /**
    * @brief Add device to the container(map), if container doesn't hold it yet.
    *
-   * @param device smart pointer to the device.
+   * @param device Smart pointer to the device.
    *
-   * @return smart pointer to the device.
+   * @return Smart pointer to the device.
    */
   virtual DeviceSptr addDevice(DeviceSptr device);
 
   /**
    * @brief Create connection and fill its parameters.
    *
-   * @param connection  smart pointer to the connection.
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
+   * @param connection  Smart pointer to the connection.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
    */
   virtual void connectionCreated(ConnectionSptr connection,
                                  const DeviceUID& device_handle,
@@ -256,8 +262,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Set state of specified connection - FINILIZING.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
    */
   virtual void connectionFinished(const DeviceUID& device_handle,
                                   const ApplicationHandle& app_handle);
@@ -265,9 +271,9 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Set specified connection state to FINILIZING and launch onUnexpectedDisconnect event in the device adapter listener.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
-   * @param error error class that contains details of this error situation.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param error Error class that contains details of this error situation.
    */
   virtual void connectionAborted(const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle,
@@ -276,8 +282,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Set state of specified connection - ESTABLISHED and launch onConnectDone event in device adapter listener.
    *
-   * @param devcie_handle device unique identifier.
-   * @param app_handle handle of application.
+   * @param devcie_handle Device unique identifier.
+   * @param app_handle Handle of application.
    */
   virtual void connectDone(const DeviceUID& device_handle,
                            const ApplicationHandle& app_handle);
@@ -285,8 +291,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Delete connection from the container of connections and launch onConnectFailed event in the device adapter listener.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
    */
   virtual void connectFailed(const DeviceUID& device_handle,
                              const ApplicationHandle& app_handle,
@@ -295,8 +301,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Delete specified connection from the container(map) of connections and launch event in the device adapter listener.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
    */
   virtual void disconnectDone(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle);
@@ -304,9 +310,9 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Launch onDataReceiveDone event in the device adapter listener.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
-   * @param message smart pointer to the raw message.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param message Smart pointer to the raw message.
    */
   virtual void dataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
@@ -315,9 +321,9 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Launch onDataReceiveFailed event in the device adapter listener.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
-   * @param error class that contains details of this error situation.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param error Class that contains details of this error situation.
    */
   virtual void dataReceiveFailed(const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle,
@@ -326,9 +332,9 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Launch onDataSendDone event in the device adapter listener.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
-   * @param message smart pointer to raw message.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param message Smart pointer to raw message.
    */
   virtual void dataSendDone(const DeviceUID& device_handle,
                             const ApplicationHandle& app_handle,
@@ -337,10 +343,10 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Launch onDataSendFailed event in the device adapter listener.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
-   * @param message smart pointer to raw message.
-   * @param error class that contains details of this error situation.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param message Smart pointer to raw message.
+   * @param error Class that contains details of this error situation.
    */
   virtual void dataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
@@ -350,9 +356,9 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Return name of device.
    *
-   * @param device_id device unique identifier.
+   * @param device_id Device unique identifier.
    *
-   * @return string.
+   * @return String with name.
    */
   virtual std::string DeviceName(const DeviceUID &device_id) const;
 
@@ -361,7 +367,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Find connection that has state - ESTABLISHED.
    *
-   * @param device_handle device unique identifier.
+   * @param device_handle Device unique identifier.
    *
    * @return ConnectionSptr smart pointer to the connection.
    */
