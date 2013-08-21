@@ -68,8 +68,6 @@ void DeviceAdapterListenerImpl::onSearchDeviceDone(
       *it, "", 0, RawMessageSptr(), new BaseError());
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onSearchDeviceFailed(
@@ -88,8 +86,6 @@ void DeviceAdapterListenerImpl::onSearchDeviceFailed(
       err);
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onConnectDone(
@@ -107,8 +103,6 @@ void DeviceAdapterListenerImpl::onConnectDone(
       RawMessageSptr(), new BaseError());
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onConnectFailed(
@@ -127,8 +121,6 @@ void DeviceAdapterListenerImpl::onConnectFailed(
       err);
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDisconnectDone(
@@ -146,8 +138,6 @@ void DeviceAdapterListenerImpl::onDisconnectDone(
       new BaseError());
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDisconnectFailed(
@@ -166,8 +156,6 @@ void DeviceAdapterListenerImpl::onDisconnectFailed(
       err);
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDisconnectDeviceDone(
@@ -196,8 +184,6 @@ void DeviceAdapterListenerImpl::onDataReceiveDone(
       new BaseError());
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDataReceiveFailed(
@@ -218,8 +204,6 @@ void DeviceAdapterListenerImpl::onDataReceiveFailed(
       err);
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDataSendDone(
@@ -236,8 +220,6 @@ void DeviceAdapterListenerImpl::onDataSendDone(
       *it, device, app_id, data_container,
       new BaseError());
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onDataSendFailed(
@@ -257,8 +239,6 @@ void DeviceAdapterListenerImpl::onDataSendFailed(
       err);
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 void DeviceAdapterListenerImpl::onConnectRequested(
@@ -270,6 +250,18 @@ void DeviceAdapterListenerImpl::onUnexpectedDisconnect(
     const device_adapter::DeviceAdapter* device_adapter,
     const DeviceUID& device, const ApplicationHandle& application,
     const CommunicationError& error) {
+  AdapterIterator it;
+  if (!FindSharedPtr(device_adapter, it)) {
+    LOG4CXX_ERROR(logger_, "Can't find device adapter " << device_adapter);
+    return;
+  }
+
+  DeviceAdapterEvent event(
+      DeviceAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
+      *it, device, application, RawMessageSptr(),
+      nullptr);
+
+  transport_manager_impl_->receiveEventFromDevice(event);
 }
 
 void DeviceAdapterListenerImpl::onCommunicationError(
@@ -287,8 +279,6 @@ void DeviceAdapterListenerImpl::onCommunicationError(
       new BaseError());
 
   transport_manager_impl_->receiveEventFromDevice(event);
-
-  pthread_cond_signal(transport_manager_impl_->getDeviceListenerThreadWakeup());
 }
 
 bool DeviceAdapterListenerImpl::FindSharedPtr(

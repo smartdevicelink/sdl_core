@@ -63,7 +63,7 @@ namespace transport_manager {
 class MockTransportManagerListener :
     public ::transport_manager::TransportManagerListener {
  public:
-
+  MOCK_METHOD1(OnDeviceListUpdated, void(const std::vector<DeviceInfo>&));
   MOCK_METHOD1(OnDeviceFound, void(const DeviceInfo &device_info));
   MOCK_METHOD0(OnNoDeviceFound, void());
   MOCK_METHOD0(OnScanDevicesFinished, void());

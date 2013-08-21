@@ -38,19 +38,20 @@
 
 #include "transport_manager/info.h"
 #include "transport_manager/transport_manager_listener.h"
+#include "transport_manager/transport_manager_impl.h"
 
 namespace transport_manager {
 
 class TransportManagerListenerImpl : public TransportManagerListener {
+  const TransportManagerImpl *transport_manager_;
  public:
   virtual ~TransportManagerListenerImpl(){};
 
-  virtual void OnDeviceFound(const DeviceInfo& device_info) {}
-  virtual void OnNoDeviceFound() {}
-  virtual void OnScanDevicesFinished() {
-  }
-  virtual void OnScanDevicesFailed(const SearchDeviceError& error) {
-  }
+  virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) {}
+  virtual void OnDeviceFound(const DeviceInfo& device_info) { }
+  virtual void OnNoDeviceFound() { }
+  virtual void OnScanDevicesFinished() { }
+  virtual void OnScanDevicesFailed(const SearchDeviceError& error) { }
   virtual void OnConnectionEstablished(const DeviceInfo &device_info,
                                        const ConnectionUID &connection_id) {}
   virtual void OnConnectionFailed(const DeviceInfo &device_info,
@@ -61,7 +62,7 @@ class TransportManagerListenerImpl : public TransportManagerListener {
                                          const DisconnectError& error) {
   }
   virtual void OnDeviceConnectionLost(const DeviceHandle& device,
-                                      const DisconnectDeviceError& error){}
+                                      const DisconnectDeviceError& error){  }
   virtual void OnDisconnectFailed(const DeviceHandle& device,
                                   const DisconnectDeviceError& error) {}
   virtual void OnTMMessageReceived(const RawMessageSptr message) {}

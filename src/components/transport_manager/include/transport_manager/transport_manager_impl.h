@@ -218,17 +218,9 @@ class TransportManagerImpl : public TransportManager {
    */
   virtual int Visibility(const bool &on_off)const;
 
+  const std::vector<DeviceInfo>& getDeviceList() const;
 
   virtual void set_protocol_handler(protocol_handler::ProtocolHandler *ph);//YK: temp solution until B1.0 release
-
-  /**
-   * @brief interface function to wake up adapter listener thread
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  pthread_cond_t *getDeviceListenerThreadWakeup(void);
 
   std::vector<Connection> getConnectionList();
 
@@ -399,6 +391,9 @@ class TransportManagerImpl : public TransportManager {
 
   bool is_initialized_;
  private:
+
+  std::vector<DeviceInfo> device_list_;
+
   struct Handle2GUIDConverter {
     typedef std::vector<DeviceUID> ConversionTable;
 
