@@ -111,8 +111,10 @@ void AlertRequest::SendAlertRequest(int app_id) {
     (*message_)[strings::msg_params][strings::alert_text3];
 
   // softButtons
-  msg_params[hmi_request::soft_buttons] =
-    (*message_)[strings::msg_params][strings::soft_buttons];
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    msg_params[hmi_request::soft_buttons] =
+      (*message_)[strings::msg_params][strings::soft_buttons];
+  }
   // app_id
   msg_params[strings::app_id] = app_id;
 
