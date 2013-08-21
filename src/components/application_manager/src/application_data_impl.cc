@@ -176,7 +176,8 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     sub_menu_(),
     choice_set_map_(),
     performinteraction_choice_set_map_(),
-    is_perform_interaction_active_(false) {
+    is_perform_interaction_active_(false),
+    is_reset_global_properties_active_(false) {
 }
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
