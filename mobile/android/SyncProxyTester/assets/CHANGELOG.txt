@@ -1,4 +1,5 @@
 [CW34]
+* PerformInteraction, Show, SetGlobalProperties, Soft Buttons dialogs: use image filenames with extensions by default.
 * SyncProxyAndroid SDK: EndSession message includes hash ID that was received with StartSessionACK.
 * Fix a crash when trying to send SyncPData request from XML test.
 
