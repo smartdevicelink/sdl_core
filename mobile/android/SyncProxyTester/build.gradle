@@ -41,3 +41,50 @@ android {
         }
     }*/
 }
+
+task saveBuildInfo {
+    doFirst {
+        def git_version = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'log', '-1', '--format=%h'
+            standardOutput = git_version
+        }
+        git_version = git_version.toString().trim()
+
+        def git_branch = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'symbolic-ref', '--short', '-q', 'HEAD'
+            standardOutput = git_branch
+            // ignore error output as we might not be on a branch
+            ignoreExitValue = true
+        }
+
+        def git_branch_or_tag
+        if (git_branch.size() > 0) {
+            git_branch_or_tag = git_branch.toString().trim()
+        } else {
+            def git_tag = new ByteArrayOutputStream()
+            exec {
+                commandLine 'git', 'describe', '--tags', '--exact-match'
+                standardOutput = git_tag
+                // ignore error output
+                errorOutput = new ByteArrayOutputStream()
+                ignoreExitValue = true
+            }
+
+            git_branch_or_tag = git_tag.toString().trim()
+        }
+
+        def build_time = new Date().toString()
+
+        def result_line = git_branch_or_tag + "-" + git_version + " (" +
+                build_time + ")\n"
+        def assetsDir = android.sourceSets.main.assets.srcDirs.toArray()[0]
+        def buildInfoFile = new File(assetsDir, 'build.info').getAbsolutePath()
+        new File(buildInfoFile).write(result_line)
+    }
+}
+
+gradle.projectsEvaluated {
+    SyncProxyTester:packageDebug.dependsOn(saveBuildInfo)
+}
