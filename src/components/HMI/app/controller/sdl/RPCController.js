@@ -2016,35 +2016,28 @@ SDL.RPCController = Em.Object
                  */
                 ShowVrHelp: function(params) {
 
-                    if (params == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'params' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if ("vrHelp" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
+                    if (params) {
+                        if ("vrHelp" in params) {
+                            if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+    
+                                return this.resultStruct;
+                            }
                         }
-                    }
-                    if ("appID" in params) {
-
-                        if (typeof params.appID != 'number') {
-
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Wrong type of parameter 'appID'!"
-                            };
-
-                            return this.resultStruct;
+                        if ("appID" in params) {
+    
+                            if (typeof params.appID != 'number') {
+    
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Wrong type of parameter 'appID'!"
+                                };
+    
+                                return this.resultStruct;
+                            }
                         }
                     }
 

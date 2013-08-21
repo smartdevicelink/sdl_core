@@ -170,6 +170,10 @@
 	position: absolute;
 }
 
+#VRPopUp.move{
+	left: 800px;
+}
+
 #VRPopUp span,#info_apps_deviceList_list .list-content span,#sdl_view_container .list-content span,#sdl_options .list-content span
 	{
 	margin-left: 15px;

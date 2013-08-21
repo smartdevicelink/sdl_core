@@ -88,6 +88,7 @@ SDL.SDLController = Em.Object
                 }
             }
         },
+
         /**
          * Notify SDLCore that HMI is ready and all components are registered
          * 
@@ -100,6 +101,17 @@ SDL.SDLController = Em.Object
             }
             FFW.BasicCommunication.onReady();
         }.observes('SDL.SDLModel.registeredComponents.@each.state'),
+
+        /**
+         * Move VR list to right side when VRHelpList was activated
+         * 
+         * @type {String}
+         */
+        VRMove: function() {
+
+            SDL.SDLModel.set('VRHelpListActivated', SDL.VRHelpListView.active);
+        },
+
         /**
          * Default action for SoftButtons: closes window, popUp or clears
          * applications screen
@@ -194,7 +206,8 @@ SDL.SDLController = Em.Object
         /**
          * Method to close InteractionChoices view
          */
-        InteractionChoicesDeactivate: function(){
+        InteractionChoicesDeactivate: function() {
+
             SDL.InteractionChoicesView.deactivate("ABORTED");
         },
 

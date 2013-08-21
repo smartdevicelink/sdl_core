@@ -80,6 +80,13 @@ SDL.SDLModel = Em.Object
         phoneCall: false,
 
         /**
+         * Flag to be set true when VRHelpList are activated
+         * 
+         * @param {Boolean}
+         */
+        VRHelpListActivated: false,
+
+        /**
          * Default values for global properties
          */
         globalPropertiesDefault: {

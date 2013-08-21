@@ -236,6 +236,7 @@ div {
 #VRPopUp.active {
 	opacity: 1;
 	display: block;
+	transition: all 1s;
 }
 
 #VRPopUp .list {

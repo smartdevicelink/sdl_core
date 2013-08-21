@@ -51,6 +51,8 @@ SDL.VRHelpListView = SDL.SDLAbstractView.create( {
     deactivate: function() {
 
         this._super();
+
+        SDL.SDLController.VRMove();
         SDL.SDLController.onSystemContextChange();
     },
 
@@ -75,26 +77,31 @@ SDL.VRHelpListView = SDL.SDLAbstractView.create( {
         this.clean();
 
         this.set('active', true);
+        
+        SDL.SDLController.VRMove();
+        
+        if (params) {
 
-        if (params.vrHelpTitle) {
-            this.captionText.set('content', params.vrHelpTitle);
-        }
-
-        if (params.vrHelp) {
-            for (i = 0; i < params.vrHelp.length; i++) {
-                this.helpList.items.push( {
-                    type: SDL.Label,
-                    params: {
-                        content: params.vrHelp[i].text,
-                        icon: params.vrHelp[i].image
-                            ? params.vrHelp[i].image.value : null,
-                        templateName: params.vrHelp[i].image ? "icon" : null
-                    }
-                });
+            if (params.vrHelpTitle) {
+                this.captionText.set('content', params.vrHelpTitle);
             }
+    
+            if (params.vrHelp) {
+                for (i = 0; i < params.vrHelp.length; i++) {
+                    this.helpList.items.push( {
+                        type: SDL.Label,
+                        params: {
+                            content: params.vrHelp[i].text,
+                            icon: params.vrHelp[i].image
+                                ? params.vrHelp[i].image.value : null,
+                            templateName: params.vrHelp[i].image ? "icon" : null
+                        }
+                    });
+                }
+            }
+    
+            this.helpList.list.refresh();
         }
-
-        this.helpList.list.refresh();
         SDL.SDLController.onSystemContextChange();
     }
 });

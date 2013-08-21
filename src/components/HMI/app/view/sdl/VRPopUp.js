@@ -40,7 +40,8 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     classNameBindings:
         [
-            'SDL.SDLModel.VRActive:active'
+            'SDL.SDLModel.VRActive:active',
+            'SDL.SDLModel.VRHelpListActivated:move'
         ],
 
     childViews:
