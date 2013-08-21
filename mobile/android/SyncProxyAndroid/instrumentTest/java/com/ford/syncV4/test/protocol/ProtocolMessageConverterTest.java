@@ -14,14 +14,13 @@ public class ProtocolMessageConverterTest extends AndroidTestCase {
     public ProtocolMessageConverterTest() {
     }
 
-    public void testMobileNavDataPayloadCreation() throws Exception {
+    public void  testMobileNavDataPayloadCreation() throws Exception {
         byte [] frame = new byte[]{1,2,3,4,5,7};
         ProtocolMessage message = new ProtocolMessage();
         message.setData(frame);
         message.setSessionType(SessionType.Mobile_Nav);
         ProtocolMessageConverter converter = new ProtocolMessageConverter(message, 2);
         byte[] result = converter.generate().getData();
-
-
+        assertEquals("for mobile nav data should be same as ProtocolMessage.data", result, frame);
     }
 }

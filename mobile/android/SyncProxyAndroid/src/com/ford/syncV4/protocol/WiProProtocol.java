@@ -28,7 +28,7 @@ public class WiProProtocol extends AbstractProtocol {
     int messageID = 0;
     Hashtable<Integer, MessageFrameAssembler> _assemblerForMessageID = new Hashtable<Integer, MessageFrameAssembler>();
     Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> _assemblerForSessionID = new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
-    Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
+    protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
     // NOTE: To date, not implemented on SYNC
     private int _heartbeatSendInterval_ms = 0;
     // NOTE: To date, not implemented on SYNC

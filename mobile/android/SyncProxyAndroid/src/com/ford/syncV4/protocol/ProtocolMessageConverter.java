@@ -27,6 +27,11 @@ public class ProtocolMessageConverter {
     public ProtocolMessageConverter generate() {
         _data = null;
         _sessionType = _protocolMsg.getSessionType();
+        // TODO - get rid of this ugly if statements
+        if (_sessionType == SessionType.Mobile_Nav && _version ==2){
+            _data = _protocolMsg.getData();
+            return this;
+        }
         if (_version == 2) {
             if (_protocolMsg.getBulkData() != null) {
                 _data = new byte[12 + _protocolMsg.getJsonSize() + _protocolMsg.getBulkData().length];

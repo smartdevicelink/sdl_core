@@ -51,4 +51,16 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertTrue(header.getMessageID() == 48);
         assertTrue(header.getSessionID() == (byte) 48);
     }
+
+    public void testMobileNavDataSessionFrameCreation() throws Exception {
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createSingleSendData(SessionType.Mobile_Nav, (byte) 48, 10, 48, (byte) 2);
+        assertEquals(header.getSessionType(), SessionType.Mobile_Nav);
+        assertEquals(header.getFrameType(), FrameType.Single);
+        assertEquals(header.getFrameData(), 0x00);
+        assertEquals(header.getVersion(), (byte) 2);
+        assertEquals(header.isCompressed(), false);
+        assertEquals(header.getDataSize(), 10);
+        assertTrue(header.getMessageID() == 48);
+        assertTrue(header.getSessionID() == (byte) 48);
+    }
 }
