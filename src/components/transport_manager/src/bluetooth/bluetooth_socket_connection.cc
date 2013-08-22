@@ -34,6 +34,9 @@
  */
 
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
+
+#include <unistd.h>
+
 #include "transport_manager/bluetooth/bluetooth_device.h"
 #include "transport_manager/device_adapter/device_adapter_controller.h"
 
