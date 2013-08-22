@@ -333,14 +333,12 @@ Application* ApplicationManagerImpl::RegisterApplication(
 
   application->set_name(name);
   application->set_device(device_id);
-  application->set_language(
-    MessageHelper::ConvertEnumAPINoCheck < hmi_apis::Common_Language::eType,
-    mobile_apis::Language::eType > (
-      vr_language_));
-  application->set_ui_language(
-    MessageHelper::ConvertEnumAPINoCheck < hmi_apis::Common_Language::eType,
-    mobile_apis::Language::eType > (
-      ui_language_));
+
+  application->set_language(static_cast<mobile_api::Language::eType>(
+         message[strings::msg_params][strings::language_desired].asInt()));
+  application->set_ui_language(static_cast<mobile_api::Language::eType>(
+          message[strings::msg_params]
+                  [strings::hmi_display_language_desired].asInt()));
 
   Version version;
   int min_version = message[strings::msg_params][strings::sync_msg_version]
