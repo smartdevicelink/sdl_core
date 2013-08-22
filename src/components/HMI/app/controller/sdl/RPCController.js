@@ -1347,99 +1347,99 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (params.initialText == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'initialText' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.initialText != 'object') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'initialText'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.choiceSet == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'interactionChoiceSetIDList' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.choiceSet.length < 0) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'interactionChoiceSetIDList'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if ("choiseSet" in params) {
-                        if (SDL.RPCController
-                            .checkImagesArray(params.choiseSet)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
-                    }
-                    if ("vrHelp" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
-                    }
-                    if (params.timeout == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'timeout' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.timeout != 'number') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'timeout'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.appID == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'appID' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.appID != 'number') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'appID'!"
-                        };
-
-                        return this.resultStruct;
-                    }
+//                    if (params.initialText == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'initialText' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (typeof params.initialText != 'object') {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Wrong type of parameter 'initialText'!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (params.choiceSet == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'interactionChoiceSetIDList' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (typeof params.choiceSet.length < 0) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Wrong type of parameter 'interactionChoiceSetIDList'!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if ("choiseSet" in params) {
+//                        if (SDL.RPCController
+//                            .checkImagesArray(params.choiseSet)) {
+//                            this.resultStruct = {
+//                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                                "resultMessage": "Unsupported image type!"
+//                            };
+//
+//                            return this.resultStruct;
+//                        }
+//                    }
+//                    if ("vrHelp" in params) {
+//                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
+//                            this.resultStruct = {
+//                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                                "resultMessage": "Unsupported image type!"
+//                            };
+//
+//                            return this.resultStruct;
+//                        }
+//                    }
+//                    if (params.timeout == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'timeout' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (typeof params.timeout != 'number') {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Wrong type of parameter 'timeout'!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (params.appID == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'appID' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (typeof params.appID != 'number') {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Wrong type of parameter 'appID'!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]

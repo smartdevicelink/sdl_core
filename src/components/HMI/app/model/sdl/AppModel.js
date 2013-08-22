@@ -294,11 +294,17 @@ SDL.SDLAppModel = Em.Object
 
             SDL.InteractionChoicesView.clean();
 
-            SDL.InteractionChoicesView.preformChoices(message.choiceSet,
-                performInteractionRequestId,
-                message.timeout);
+            if ("choiceSet" in message && "timeout" in message) {
 
-            SDL.InteractionChoicesView.activate(message.initialText.fieldText);
+                SDL.InteractionChoicesView.preformChoices(message.choiceSet,
+                    performInteractionRequestId,
+                    message.timeout);
+
+                SDL.InteractionChoicesView.activate(message.initialText.fieldText);
+
+            } else {
+                SDL.InteractionChoicesView.activate("");
+            }
 
             SDL.SDLController.VRMove();
         },
