@@ -138,6 +138,10 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
+// TODO(DK): We need subscribe perform interaction with on command notification
+  CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
+      smart_objects::SmartObject(smart_objects::SmartType_Map), true, 1);
+
   for (size_t i = 0; i < choice_list.length(); ++i) {
     smart_objects::SmartObject* choice_set =
       app->FindChoiceSet(choice_list[i].asInt());
@@ -160,10 +164,6 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
           smart_objects::SmartObject(smart_objects::SmartType_Array);
         msg_params[strings::vr_commands] =
           (*choice_set)[strings::choice_set][j][strings::vr_commands];
-
-// TODO(DK): We need subscribe perform interaction with on command notification
-        CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
-            smart_objects::SmartObject(smart_objects::SmartType_Map), true, 1);
 
         CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand,
                          msg_params, false);

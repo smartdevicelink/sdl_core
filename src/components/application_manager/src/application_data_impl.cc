@@ -177,6 +177,7 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     choice_set_map_(),
     performinteraction_choice_set_map_(),
     is_perform_interaction_active_(false),
+    perform_interaction_choice_(-1),
     is_reset_global_properties_active_(false) {
 }
 
@@ -436,6 +437,10 @@ DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
 
 void DynamicApplicationDataImpl::set_perform_interaction_active(bool active) {
   is_perform_interaction_active_ = active;
+}
+
+void DynamicApplicationDataImpl::set_perform_interaction_choice(int choice) {
+  perform_interaction_choice_ = choice;
 }
 
 void DynamicApplicationDataImpl::set_reset_global_properties_active(

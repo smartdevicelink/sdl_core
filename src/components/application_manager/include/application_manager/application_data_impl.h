@@ -215,6 +215,22 @@ class DynamicApplicationDataImpl : public virtual Application {
     inline bool is_perform_interaction_active() const;
 
     /*
+     * @brief Sets the choice that was selected in
+     * response to PerformInteraction
+     *
+     * @param choice Choice that was selected
+     */
+    void set_perform_interaction_choice(int choice);
+
+    /*
+     * @brief Retrieve the choice that was selected in
+     * response to PerformInteraction
+     *
+     * @return Choice that was selected in response to PerformInteraction
+     */
+    inline int perform_interaction_choice() const;
+
+    /*
      * @brief Sets reset global properties state
      *
      * @param active Current state of the reset global properties
@@ -242,6 +258,7 @@ class DynamicApplicationDataImpl : public virtual Application {
     ChoiceSetMap                 choice_set_map_;
     PerformChoiceSetMap          performinteraction_choice_set_map_;
     bool                         is_perform_interaction_active_;
+    int                          perform_interaction_choice_;
     bool                         is_reset_global_properties_active_;
 };
 
@@ -259,6 +276,10 @@ const ChoiceSetMap& DynamicApplicationDataImpl::choice_set_map() const {
 
 bool DynamicApplicationDataImpl::is_perform_interaction_active() const {
   return is_perform_interaction_active_;
+}
+
+int DynamicApplicationDataImpl::perform_interaction_choice() const {
+  return perform_interaction_choice_;
 }
 
 bool DynamicApplicationDataImpl::is_reset_global_properties_active() const {

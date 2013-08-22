@@ -102,6 +102,20 @@ void UIPerformInteractionResponse::Run() {
     }
     app->DeletePerformInteractionChoiceSetMap();
     app->set_perform_interaction_active(false);
+
+    // during perform interaction HMI sends response aborted. We changed it
+    if (hmi_apis::Common_Result::ABORTED ==
+        (*message_)[strings::params][hmi_response::code].asInt()) {
+      (*message_)[strings::params][hmi_response::code] =
+          hmi_apis::Common_Result::SUCCESS;
+
+      // cope stored from on vr command choice
+      (*message_)[strings::msg_params][strings::choice_id] =
+          app->perform_interaction_choice();
+      //reset
+      app->set_perform_interaction_choice(0);
+    }
+
   }
 
   // prepare SmartObject for mobile factory

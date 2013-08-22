@@ -265,6 +265,22 @@ class DynamicApplicationData {
     virtual bool is_perform_interaction_active() const = 0;
 
     /*
+     * @brief Sets the choice that was selected in
+     * response to PerformInteraction
+     *
+     * @param choice Choice that was selected
+     */
+    virtual void set_perform_interaction_choice(int choice) = 0;
+
+    /*
+     * @brief Retrieve the choice that was selected in
+     * response to PerformInteraction
+     *
+     * @return Choice that was selected in response to PerformInteraction
+     */
+    virtual int perform_interaction_choice() const = 0;
+
+    /*
      * @brief Sets reset global properties state
      *
      * @param active Current state of the reset global properties
