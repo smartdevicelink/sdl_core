@@ -39,6 +39,7 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/audio_pass_thru_thread_impl.h"
 #include "application_manager/message_helper.h"
+#include "request_watchdog/request_watchdog.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "formatters/formatter_json_rpc.h"
@@ -81,6 +82,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     from_hmh_thread_(NULL),
     to_hmh_thread_(NULL),
     hmi_so_factory_(NULL) {
+  LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   from_mobile_thread_ = new threads::Thread(
     "application_manager::FromMobileThreadImpl",
     new FromMobileThreadImpl(this));
@@ -142,6 +144,9 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   }
 
   if (watchdog_) {
+    watchdog_->removeListener(this);
+
+    // TODO(AK): Is it correct?
     delete watchdog_;
   }
 
@@ -246,8 +251,6 @@ ApplicationManagerImpl::device_list() {
 Application* ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
-
-
   DCHECK(request_for_registration);
   smart_objects::SmartObject& message = *request_for_registration;
   unsigned int connection_key =
@@ -342,7 +345,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
 
   Version version;
   int min_version = message[strings::msg_params][strings::sync_msg_version]
-    [strings::minor_version].asInt();
+                    [strings::minor_version].asInt();
 
   if (min_version < APIVersion::kAPIV2) {
     LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
@@ -359,7 +362,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
   version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
   int max_version = message[strings::msg_params][strings::sync_msg_version]
-    [strings::major_version].asInt();
+                    [strings::major_version].asInt();
 
   if (max_version > APIVersion::kAPIV2) {
     LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
@@ -538,7 +541,6 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
 
       MessageChain::iterator it =  message_chaining_.find(connection_key);
       if (message_chaining_.end() == it) {
-
         // Create new HMI request
         HMIRequest  hmi_request;
         hmi_request[hmi_correlation_id] = MessageChainPtr(chain);
@@ -553,7 +555,6 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
         // check if mobile correlation ID exist
         MobileRequest::iterator mob_request = it->second.find(correlation_id);
         if (it->second.end() == mob_request) {
-
           // Create new HMI request
           HMIRequest  hmi_request;
           hmi_request[hmi_correlation_id] = MessageChainPtr(chain);
@@ -572,13 +573,10 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
       return NULL;
     }
   } else {
-
     MessageChain::iterator it =  message_chaining_.find(connection_key);
     if (message_chaining_.end() != it) {
-
       MobileRequest::iterator i = it->second.find(correlation_id);
       if (it->second.end() != i) {
-
         HMIRequest::iterator j = i->second.begin();
         for (; i->second.end() != j; ++j) {
           if ((*j->second) == *msg_chaining) {
@@ -602,18 +600,16 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 
   MessageChain::iterator i =  message_chaining_.begin();
   for (; message_chaining_.end() != i; ++i) {
-
     MobileRequest::iterator j = i->second.begin();
     for (; i->second.end() != j; ++j) {
-
       HMIRequest::iterator it = j->second.find(hmi_correlation_id);
 
       if (j->second.end() != it) {
-
         (*it->second).DecrementCounter();
         LOG4CXX_INFO(logger_, "ApplicationManagerImpl::DecreaseMessageChain "
                      "mobile request id " << (*it->second).correlation_id() <<
-                     " is waiting for " << (*it->second).counter() << " responses");
+                     " is waiting for " << (*it->second).counter()
+                     << " responses");
 
         if (0 == (*it->second).counter()) {
           mobile_correlation_id = (*it->second).correlation_id();
@@ -624,9 +620,31 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 
           j->second.clear();
           i->second.erase(j);
+
           result = true;
         }
       }
+    }
+  }
+
+  return result;
+}
+
+bool ApplicationManagerImpl::RemoveMobileRequestFromMessageChain(
+  unsigned int mobile_correlation_id, unsigned int connection_key) {
+  LOG4CXX_INFO(
+    logger_,
+    "ApplicationManagerImpl::RemoveMobileRequestFromMessageChain id "
+    << mobile_correlation_id);
+
+  bool result = false;
+
+  MessageChain::iterator connection_chain = message_chaining_.find(connection_key);
+  if (connection_chain != message_chaining_.end()) {
+    MobileRequest::iterator request = connection_chain->second.find(mobile_correlation_id);
+    if (request != connection_chain->second.end()) {
+      connection_chain->second.erase(request);
+      result = true;
     }
   }
 
@@ -640,10 +658,8 @@ MessageChaining* ApplicationManagerImpl::GetMessageChain(
 
   MessageChain::const_iterator i =  message_chaining_.begin();
   for (; message_chaining_.end() != i; ++i) {
-
     MobileRequest::const_iterator j = i->second.begin();
     for (; i->second.end() != j; ++j) {
-
       HMIRequest::const_iterator it = j->second.find(hmi_correlation_id);
 
       if (j->second.end() != it) {
@@ -711,9 +727,9 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
   LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
   if (NULL != audioManager_) {
     audioManager_->startMicrophoneRecording(std::string("record.wav"),
-      static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
-      max_duration,
-      static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample));
+                                            static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+                                            max_duration,
+                                            static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample));
   }
 
 
@@ -915,7 +931,20 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
   }
 }
 
-void ApplicationManagerImpl::onTimeoutExpired(request_watchdog::RequestInfo) {
+void ApplicationManagerImpl::onTimeoutExpired(
+  request_watchdog::RequestInfo info) {
+  printf("\n\n\n!!!!!onTimeoutExpired!!!!!\n\n\n");
+
+  RemoveMobileRequestFromMessageChain(info.correlationID_, info.connectionID_);
+  /*watchdog_->removeRequest(info.connectionID_,
+                           info.correlationID_);*/
+
+  smart_objects::SmartObject* result = MessageHelper::CreateNegativeResponse(
+                                         info.connectionID_,
+                                         info.functionID_,
+                                         info.correlationID_,
+                                         mobile_api::Result::TIMED_OUT);
+  ManageMobileCommand(result);
 }
 
 void ApplicationManagerImpl::set_hmi_message_handler(
@@ -935,7 +964,11 @@ void ApplicationManagerImpl::set_connection_handler(
 
 void ApplicationManagerImpl::set_watchdog(
   request_watchdog::Watchdog* watchdog) {
+  LOG4CXX_INFO(logger_, "set_watchdog");
+  DCHECK(watchdog);
   watchdog_ = watchdog;
+
+  watchdog_->addListener(this);
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
@@ -967,6 +1000,13 @@ void ApplicationManagerImpl::SendMessageToMobile(
     LOG4CXX_WARN(logger_,
                  "Cannot send message to Mobile: failed to create string");
     return;
+  }
+
+  smart_objects::SmartObject& msg_to_mobile = *message;
+  if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
+    watchdog_->removeRequest(
+      msg_to_mobile[strings::params][strings::connection_key],
+      msg_to_mobile[strings::params][strings::correlation_id]);
   }
 
   messages_to_mobile_.push(message_to_send);
@@ -1011,16 +1051,16 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     if (NULL == app) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
       smart_objects::SmartObject* response =
-          MessageHelper::CreateNegativeResponse(connection_key, function_id,
-              correlation_id, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+        MessageHelper::CreateNegativeResponse(connection_key, function_id,
+                                              correlation_id, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
       ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return false;
     }
 
     if (!policies_manager_.is_valid_hmi_status(function_id, app->hmi_level())) {
       LOG4CXX_WARN(logger_, "Request blocked by policies. "
-         << "FunctionID: " << static_cast<int>(function_id)
-         << " Application HMI status: " << static_cast<int>(app->hmi_level()));
+                   << "FunctionID: " << static_cast<int>(function_id)
+                   << " Application HMI status: " << static_cast<int>(app->hmi_level()));
 
       smart_objects::SmartObject* response =
         MessageHelper::CreateBlockedByPoliciesResponse(function_id,
@@ -1291,6 +1331,20 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     return;
   }
 
+  smart_objects::SmartObject& cmd_from_mobile = *so_from_mobile;
+  if (!watchdog_) {
+    watchdog_ = request_watchdog::RequestWatchdog::instance();
+    DCHECK(watchdog_);
+    watchdog_->addListener(this);
+  }
+  LOG4CXX_INFO(logger_, "Adding request to watchdog. " << (int)watchdog_);
+  watchdog_->addRequest(request_watchdog::RequestInfo(
+                          cmd_from_mobile[strings::params][strings::function_id],
+                          cmd_from_mobile[strings::params][strings::connection_key],
+                          cmd_from_mobile[strings::params][strings::correlation_id],
+                          10000));
+
+  LOG4CXX_INFO(logger_, "Added request to watchdog.");
   if (!ManageMobileCommand(so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }

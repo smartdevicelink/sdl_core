@@ -442,6 +442,9 @@ class ApplicationManagerImpl : public ApplicationManager
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
 
+    bool RemoveMobileRequestFromMessageChain(
+      unsigned int mobile_correlation_id, unsigned int connection_key);
+
     /**
      * @brief Map of connection keys and associated applications
      */
