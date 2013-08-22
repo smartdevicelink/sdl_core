@@ -581,7 +581,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -715,7 +716,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -743,16 +745,18 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("turnList" in params) {
-                        
+
                         for ( var i = 0; i < params.turnList.length; i++) {
-                            if (params.turnList[i].image && params.turnList[i].image.imageType !== "DYNAMIC") {
+                            if (params.turnList[i].image
+                                && params.turnList[i].image.imageType !== "DYNAMIC") {
 
                                 this.resultStruct = {
                                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                     "resultMessage": "Unsupported image type!"
                                 };
 
-                                return this.resultStruct;e;
+                                return this.resultStruct;
+                                e;
                             }
                         }
                     }
@@ -774,7 +778,8 @@ SDL.RPCController = Em.Object
 
                     if (params) {
                         if ("softButtons" in params) {
-                            if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                            if (SDL.RPCController
+                                .checkImagesArray(params.softButtons)) {
                                 this.resultStruct = {
                                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                     "resultMessage": "Unsupported image type!"
@@ -836,7 +841,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -988,7 +994,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -1377,7 +1384,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("choiseSet" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.choiseSet)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.choiseSet)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -1863,7 +1871,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -2018,24 +2027,25 @@ SDL.RPCController = Em.Object
 
                     if (params) {
                         if ("vrHelp" in params) {
-                            if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
+                            if (SDL.RPCController
+                                .checkImagesArray(params.vrHelp)) {
                                 this.resultStruct = {
                                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                     "resultMessage": "Unsupported image type!"
                                 };
-    
+
                                 return this.resultStruct;
                             }
                         }
                         if ("appID" in params) {
-    
+
                             if (typeof params.appID != 'number') {
-    
+
                                 this.resultStruct = {
                                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                     "resultMessage": "Wrong type of parameter 'appID'!"
                                 };
-    
+
                                 return this.resultStruct;
                             }
                         }

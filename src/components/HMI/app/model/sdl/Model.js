@@ -348,6 +348,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * Method to VRHelpList on UI with request parameters
+         * It opens VrHelpList PopUp with current list of readable VR commands
          * 
          * @param {Object}
          */
