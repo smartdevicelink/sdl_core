@@ -86,5 +86,5 @@ task saveBuildInfo {
 }
 
 gradle.projectsEvaluated {
-    SyncProxyTester:packageDebug.dependsOn(saveBuildInfo)
+    packageDebug.dependsOn(saveBuildInfo)
 }
