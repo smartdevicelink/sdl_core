@@ -205,6 +205,9 @@ SDL.SDLController = Em.Object
             if (SDL.SliderView.active) {
                 SDL.SliderView.deactivate(true);
             }
+            if (SDL.VRHelpListView.active) {
+                SDL.VRHelpListView.deactivate();
+            }
         },
 
         /**
