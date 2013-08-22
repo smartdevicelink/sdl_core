@@ -30,6 +30,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         super.setUp();
         System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
         sut = new SyncConnection(mock(ISyncConnectionListener.class), mock(BaseTransportConfig.class));
+        WiProProtocol protocol = (WiProProtocol)sut.getWiProProtocol();
+        protocol.setVersion(VERSION);
     }
 
     public void testSyncConnectionShouldBeCreated() throws Exception {
@@ -55,4 +57,21 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.startMobileNavSession();
     }
 
+    public void testOnTransportBytesReceivedReturnedStartSessionACK() throws Exception {
+        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), mock(BaseTransportConfig.class)){
+
+            @Override
+            public void onProtocolSessionStarted(SessionType sessionType, byte sessionID, byte version, String correlationID) {
+                super.onProtocolSessionStarted(sessionType, sessionID, version, correlationID);
+                assertEquals("Correlation ID is empty string so far", "",correlationID);
+                assertEquals("SessionType should be equal.", header.getSessionType(), sessionType);
+                assertEquals("Frame headers should be equal.", header.getSessionID(),sessionID);
+                assertEquals("Version should be equal.", header.getVersion(), version);
+            }
+        };
+        WiProProtocol protocol = (WiProProtocol)connection.getWiProProtocol();
+        protocol.setVersion(VERSION);
+        connection.onTransportBytesReceived(header.assembleHeaderBytes(), header.assembleHeaderBytes().length);
+    }
 }
