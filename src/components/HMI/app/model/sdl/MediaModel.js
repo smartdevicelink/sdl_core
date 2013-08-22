@@ -48,7 +48,8 @@ SDL.SDLMediaModel = SDL.SDLAppModel
                 customPresets: [
                     '<no definition>', '<no definition>', '<no definition>',
                     '<no definition>', '<no definition>', '<no definition>'
-                ]
+                ],
+                alignment: "text-align:left"
             }));
 
             this.set('isPlaying', true);
@@ -277,7 +278,20 @@ SDL.SDLMediaModel = SDL.SDLAppModel
             }
 
             if (params.alignment) {
-                this.appInfo.set('alignment', params.alignment);
+                switch (params.alignment) {
+                    case "CENTERED": {
+                        this.appInfo.set('alignment', "text-align:center");
+                        break;
+                    }
+                    case "LEFT_ALIGNED": {
+                        this.appInfo.set('alignment', "text-align:left");
+                        break;
+                    }
+                    case "RIGHT_ALIGNED": {
+                        this.appInfo.set('alignment', "text-align:right");
+                        break;
+                    }
+                }
             }
 
             if (params.graphic) {

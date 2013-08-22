@@ -737,6 +737,8 @@ SDL.SDLModel = Em.Object
                 }
                 }
 
+                SDL.TurnByTurnView.deactivate();
+
                 FFW.BasicCommunication.OnAppDeactivated(reason, appID);
             }
         }

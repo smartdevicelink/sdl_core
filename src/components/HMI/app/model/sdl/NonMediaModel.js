@@ -46,7 +46,8 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
                 field4: '<field4>',
                 mainImage: 'images/sdl/audio_icon.jpg',
                 image: '',
-                customPresets: []
+                customPresets: [],
+                alignment: "text-align:left"
             }));
 
             // this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
@@ -132,6 +133,23 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
                         params.showStrings[i].fieldText);
                     break;
                 }
+                }
+            }
+
+            if (params.alignment) {
+                switch (params.alignment) {
+                    case "CENTERED": {
+                        this.appInfo.set('alignment', "text-align:center");
+                        break;
+                    }
+                    case "LEFT_ALIGNED": {
+                        this.appInfo.set('alignment', "text-align:left");
+                        break;
+                    }
+                    case "RIGHT_ALIGNED": {
+                        this.appInfo.set('alignment', "text-align:right");
+                        break;
+                    }
                 }
             }
 
