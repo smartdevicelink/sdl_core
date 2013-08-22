@@ -109,7 +109,11 @@ SDL.SDLController = Em.Object
          */
         VRMove: function() {
 
-            SDL.SDLModel.set('VRHelpListActivated', SDL.VRHelpListView.active);
+            if (SDL.VRHelpListView.active || SDL.InteractionChoicesView.active) {
+                SDL.SDLModel.set('VRHelpListActivated', true);
+            } else {
+                SDL.SDLModel.set('VRHelpListActivated', false);
+            }
         },
 
         /**

@@ -299,6 +299,8 @@ SDL.SDLAppModel = Em.Object
                 message.timeout);
 
             SDL.InteractionChoicesView.activate(message.initialText.fieldText);
+
+            SDL.SDLController.VRMove();
         },
 
         /**

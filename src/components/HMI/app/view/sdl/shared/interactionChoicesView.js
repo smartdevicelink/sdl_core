@@ -71,6 +71,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
             clearTimeout(this.timer);
             this.set('active', false);
+            SDL.SDLController.VRMove();
 
             switch (ABORTED) {
             case "ABORTED": {
