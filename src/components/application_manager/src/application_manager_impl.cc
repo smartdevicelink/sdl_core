@@ -108,7 +108,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     return;
   }
 
-  if (policies_manager_.init()) {
+  if (!policies_manager_.init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
   }
