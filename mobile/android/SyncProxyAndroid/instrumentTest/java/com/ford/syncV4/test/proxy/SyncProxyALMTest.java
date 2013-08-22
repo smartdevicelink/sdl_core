@@ -2,12 +2,15 @@ package com.ford.syncV4.test.proxy;
 
 import android.test.InstrumentationTestCase;
 
+import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+
+import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,5 +53,38 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                             2,
                 conf);
         assertNotNull("Sync Proxy should not be null", syncProxy);
+    }
+
+    public void testSendVideoFrameShouldAddFrameToQueue() throws Exception {
+        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+        syncMsgVersion.setMajorVersion(2);
+        syncMsgVersion.setMinorVersion(2);
+        TCPTransportConfig conf  = mock(TCPTransportConfig.class);
+        when(conf.getTransportType()).thenReturn(TransportType.TCP);
+        final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
+        final byte[] testRTP = new byte[10];
+        SyncProxyALM syncProxy = new SyncProxyALM(listenerALM,
+							/*sync proxy configuration resources*/null,
+							/*enable advanced lifecycle management true,*/
+                "appName",
+							/*ngn media app*/null,
+							/*vr synonyms*/null,
+							/*is media app*/true,
+                syncMsgVersion,
+							/*language desired*/Language.EN_US,
+							/*HMI Display Language Desired*/Language.EN_US,
+							/*App ID*/"8675308",
+							/*autoActivateID*/null,
+							/*callbackToUIThre1ad*/ false,
+							/*preRegister*/ false,
+                2,
+                conf){
+            @Override
+            protected void dispatchIncomingMessage(ProtocolMessage message) {
+                super.dispatchIncomingMessage(message);
+                assertTrue("Arrays should be equal", Arrays.equals(testRTP, message.getData()));
+            }
+        };
+        syncProxy.sendVideoFrame(testRTP);
     }
 }

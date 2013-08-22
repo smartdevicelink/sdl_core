@@ -155,7 +155,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	public static final String TAG = "SyncProxy";
 	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
 
-	private SyncConnection _syncConnection;
+    private SyncConnection _syncConnection;
 	private proxyListenerType _proxyListener = null;
 	
 	// Protected Correlation IDs
@@ -179,6 +179,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 	// RPC Session ID
 	private byte _rpcSessionID = 0;
+    private byte _mobileNavSessionID = 100;
 	
 	// Device Info for logging
 	private TraceDeviceInfo _traceDeviceInterrogator = null;
@@ -1100,7 +1101,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	
 	
 	// Function to initialize new proxy connection
-	private void initializeProxy() throws SyncException {		
+	private void initializeProxy() throws SyncException {
 		// Reset all of the flags and state variables
 		_haveReceivedFirstNonNoneHMILevel = false;
 		_haveReceivedFirstFocusLevel = false;
@@ -1278,10 +1279,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 
-	
-	
+
+
 	/************* Functions used by the Message Dispatching Queues ****************/
-	private void dispatchIncomingMessage(ProtocolMessage message) {
+	protected void dispatchIncomingMessage(ProtocolMessage message) {
 		try{
 			// Dispatching logic
 			if (message.getSessionType().equals(SessionType.RPC)) {
@@ -1451,15 +1452,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			byte[] msgBytes = _jsonRPCMarshaller.marshall(request, _wiproVersion);
             Log.d(TAG, "Version: " + _wiproVersion + " | msg: " + new String(msgBytes));
 
-			ProtocolMessage pm = new ProtocolMessage();
-			pm.setData(msgBytes);
-			pm.setSessionID(_rpcSessionID);
-			pm.setMessageType(MessageType.RPC);
-			pm.setSessionType(SessionType.RPC);
-			pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
-			pm.setCorrID(request.getCorrelationID());
-			if (request.getBulkData() != null) 
-				pm.setBulkData(request.getBulkData());
+            ProtocolMessage pm = createProtocolMessage(request, msgBytes);
 			
 			// Queue this outgoing message
 			synchronized(OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
@@ -1481,8 +1474,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			_proxyHeartBeat.changePendingRequestCount(true);
 		} // end-if
 	}
-	
-	private void handleRPCMessage(Hashtable hash) {
+
+    private ProtocolMessage createProtocolMessage(RPCRequest request, byte[] msgBytes) {
+        ProtocolMessage pm = new ProtocolMessage();
+        pm.setData(msgBytes);
+        pm.setSessionID(_rpcSessionID);
+        pm.setMessageType(MessageType.RPC);
+        pm.setSessionType(SessionType.RPC);
+        pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
+        pm.setCorrID(request.getCorrelationID());
+        if (request.getBulkData() != null)
+            pm.setBulkData(request.getBulkData());
+        return pm;
+    }
+
+    private void handleRPCMessage(Hashtable hash) {
 		RPCMessage rpcMsg = new RPCMessage(hash);
 		String functionName = rpcMsg.getFunctionName();
 		String messageType = rpcMsg.getMessageType();
@@ -2494,16 +2500,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 		
 		SyncTrace.logProxyEvent("Application called sendRPCRequest method for RPCRequest: ." + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
-			
-		// Test if SyncConnection is null
-		synchronized(CONNECTION_REFERENCE_LOCK) {
-			if (_syncConnection == null || !_syncConnection.getIsConnected()) {
-				SyncTrace.logProxyEvent("Application attempted to send and RPCRequest without a connected transport.", SYNC_LIB_TRACE_KEY);
-				throw new SyncException("There is no valid connection to SYNC. sendRPCRequest cannot be called until SYNC has been connected.", SyncExceptionCause.SYNC_UNAVAILALBE);
-			}
-		}
-		
-		// Test for illegal correlation ID
+
+        checkSyncConnection();
+
+
+        // Test for illegal correlation ID
 		if (isCorrelationIDProtected(request.getCorrelationID())) {
 			
 			SyncTrace.logProxyEvent("Application attempted to use the reserved correlation ID, " + request.getCorrelationID(), SYNC_LIB_TRACE_KEY);
@@ -2532,8 +2533,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		
 		sendRPCRequestPrivate(request);
 	} // end-method
-	
-	/**
+
+    private void checkSyncConnection() throws SyncException {
+        // Test if SyncConnection is null
+        synchronized(CONNECTION_REFERENCE_LOCK) {
+            if (_syncConnection == null || !_syncConnection.getIsConnected()) {
+                SyncTrace.logProxyEvent("Application attempted to send and RPCRequest without a connected transport.", SYNC_LIB_TRACE_KEY);
+                throw new SyncException("There is no valid connection to SYNC. sendRPCRequest cannot be called until SYNC has been connected.", SyncExceptionCause.SYNC_UNAVAILALBE);
+            }
+        }
+    }
+
+    /**
 	 * Returns whether the class allows some extra testing features. For this,
 	 * the _proxyListener must be an instance of the IProxyListenerALMTesting
 	 * class.
@@ -2609,7 +2620,40 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 
-	/******************** Public Helper Methods *************************/
+    public void sendVideoFrame(byte[] rtpPacket) throws SyncException {
+        if (rtpPacket == null){
+            throw new SyncException("RTP packet was null", SyncExceptionCause.INVALID_ARGUMENT);
+        }
+        //TODO add SyncConnection state check
+        sendRTPPacket(rtpPacket);
+    }
+
+    private void sendRTPPacket(byte[] rtpPacket) throws SyncException {
+        ProtocolMessage pm = createProtocolMessage(rtpPacket);
+        try {
+            // Queue this outgoing message
+            synchronized(OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+                if (_outgoingProxyMessageDispatcher != null) {
+                    _outgoingProxyMessageDispatcher.queueMessage(pm);
+                }
+            }
+        } catch (OutOfMemoryError e) {
+            SyncTrace.logProxyEvent("OutOfMemory exception while sending RTP packet", SYNC_LIB_TRACE_KEY);
+            throw new SyncException("OutOfMemory exception while sending RTP packet ", e, SyncExceptionCause.INVALID_ARGUMENT);
+        }
+    }
+
+    private ProtocolMessage createProtocolMessage(byte[] rtpPacket) {
+        ProtocolMessage pm = new ProtocolMessage();
+        pm.setData(rtpPacket);
+        pm.setSessionID(_mobileNavSessionID);
+        pm.setMessageType(MessageType.VIDEO);
+        pm.setSessionType(SessionType.Mobile_Nav);
+        return pm;
+    }
+
+
+    /******************** Public Helper Methods *************************/
 	
 	/**
 	 *Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
