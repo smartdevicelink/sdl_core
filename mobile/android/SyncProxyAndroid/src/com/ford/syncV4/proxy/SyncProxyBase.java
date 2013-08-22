@@ -1,25 +1,5 @@
 package com.ford.syncV4.proxy;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
@@ -149,6 +129,26 @@ import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.DebugTool;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.util.Hashtable;
+import java.util.Vector;
 
 public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> {
 	// Used for calls to Android Log class.
@@ -2479,7 +2479,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	/**
 	 * Takes an RPCRequest and sends it to SYNC.  Responses are captured through callback on IProxyListener.  
 	 * 
-	 * @param msg
+	 * @param request
 	 * @throws SyncException
 	 */
 	public void sendRPCRequest(RPCRequest request) throws SyncException {
@@ -2544,9 +2544,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		return _proxyListener instanceof IProxyListenerALMTesting;
 	}
 	
-	public void sendRPCRequest(RPCMessage request) throws SyncException {
+	/*public void sendRPCRequest(RPCMessage request) throws SyncException {
 		sendRPCRequest(request);
-	}
+	}*/
 	
 	protected void notifyProxyClosed(final String info, final Exception e) {		
 		SyncTrace.logProxyEvent("NotifyProxyClose", SYNC_LIB_TRACE_KEY);
