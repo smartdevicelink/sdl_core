@@ -913,12 +913,14 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
   SendGlobalPropertiesToHMI(app);
 }
 
-bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
+mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
+                                     smart_objects::SmartObject& message,
                                      const Application* app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
     for (int i = 0; i < message.length(); i++) {
-      if (!VerifyImageFiles(message[i], app)) {
-        return false;
+      mobile_apis::Result::eType res = VerifyImageFiles(message[i], app);
+      if (mobile_apis::Result::SUCCESS != res) {
+        return res;
       }
     }
   } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map
@@ -933,13 +935,13 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
       std::string full_file_path = file_system::FullPath(relative_file_path);
 
       if (!file_system::FileExists(full_file_path)) {
-        return false; // first exit point
+        return mobile_apis::Result::INVALID_DATA; // first exit point
       }
 
       if (!ApplicationManagerImpl::instance()->VerifyImageType(
           static_cast<mobile_apis::ImageType::eType>(
               message[strings::image_type].asInt()))) {
-        return false;  // second exit point
+        return mobile_apis::Result::UNSUPPORTED_RESOURCE;  // second exit point
       }
 
       message[strings::value] = full_file_path;
@@ -948,14 +950,15 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
 
       for (std::set<std::string>::const_iterator key = keys.begin();
            key != keys.end(); key++) {
-        if (!VerifyImageFiles(message[*key], app)) {
-          return false;
+        mobile_apis::Result::eType res = VerifyImageFiles(message[*key], app);
+        if (mobile_apis::Result::SUCCESS != res) {
+          return res;
         }
       }
     }
   } // all other types shoudn't be processed
 
-  return true;
+  return mobile_apis::Result::SUCCESS;
 }
 
 // TODO(AK): change printf to logger

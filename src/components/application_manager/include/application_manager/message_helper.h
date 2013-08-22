@@ -220,11 +220,10 @@ class MessageHelper {
      *
      * @param app current application
      *
-     * @return true if image file present or there are no "Image" structure in
-     *         request. false if image file doesn't exist
+     * @return verification result
      *
      */
-    static bool VerifyImageFiles(smart_objects::SmartObject& message,
+    static  mobile_apis::Result::eType VerifyImageFiles(smart_objects::SmartObject& message,
                                  const Application* app);
 
     static bool PrintSmartObject(smart_objects::SmartObject& object);
