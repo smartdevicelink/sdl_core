@@ -235,7 +235,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \return True if device exists.
      */
     bool DoesDeviceExistInTMList(
-      const connection_handler::DeviceList& device_list,
+      const std::vector<transport_manager::DeviceInfo>& device_list,
       const connection_handler::DeviceHandle device_handle);
 
     /**
@@ -243,7 +243,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param DeviceHandle Handle of device for checking.
      */
     void AddDeviceInDeviceListIfNotExist(
-      const Device& device);
+      const transport_manager::DeviceInfo& device);
 
     /**
      * \brief Disconnect application.
@@ -267,8 +267,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief List of devices
      */
     DeviceList device_list_;
-
-    DeviceList device_list_during_search_;
 
     /**
      * \brief List of connections

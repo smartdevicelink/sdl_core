@@ -84,25 +84,40 @@ void ConnectionHandlerImpl::OnTMMessageSendFailed(
 void ConnectionHandlerImpl::OnTMMessageSend() {}
 
 void ConnectionHandlerImpl::OnDeviceListUpdated(const std::vector<transport_manager::DeviceInfo>& device_info_list) {
-  device_list_during_search_.clear();
-
-  for (auto device_info : device_info_list) {
-    device_list_during_search_.insert(
-      DeviceList::value_type(device_info.device_handle(),
-                             Device(device_info.device_handle(),
-                                    device_info.name(),
-                                    device_info.mac_address())));
+  for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
+       ++itr) {
+    if (!DoesDeviceExistInTMList(device_info_list, (*itr).first)) {
+      // Device has been removed. Perform all needed actions.
+      // 1. Delete all the connections and sessions of this device
+      // 2. Delete device from a list
+      // 3. Let observer know that device has been deleted.
+      DeviceHandle device_for_remove_handle = (*itr).first;
+      for (ConnectionListIterator it = connection_list_.begin();
+           it != connection_list_.end(); ++it) {
+        if (device_for_remove_handle
+            == (*it).second.connection_device_handle()) {
+          RemoveConnection((*it).first);
+        }
+      }
+      device_list_.erase(device_for_remove_handle);
+      if (connection_handler_observer_) {
+        connection_handler_observer_->RemoveDevice(device_for_remove_handle);
+      }
+    }
+  }
+  for (std::vector<transport_manager::DeviceInfo>::const_iterator it_in =
+         device_info_list.begin(); it_in != device_info_list.end(); ++it_in) {
+    AddDeviceInDeviceListIfNotExist((*it_in));
   }
   if (connection_handler_observer_) {
-    connection_handler_observer_->OnDeviceListUpdated(
-      device_list_during_search_);
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
 
 void ConnectionHandlerImpl::OnDeviceFound(
   const transport_manager::DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "CConnectionHandler::onDeviceListUpdated()");
-  DeviceList::iterator it = device_list_during_search_.find(
+  /*DeviceList::iterator it = device_list_during_search_.find(
                               device_info.device_handle());
   if (device_list_during_search_.end() != it) {
     LOG4CXX_WARN(logger_, "Device found for second time. Skipping it");
@@ -118,7 +133,7 @@ void ConnectionHandlerImpl::OnDeviceFound(
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(
       device_list_during_search_);
-  }
+  }*/
 }
 
 void  ConnectionHandlerImpl::OnNoDeviceFound() {
@@ -143,13 +158,13 @@ void  ConnectionHandlerImpl::OnNoDeviceFound() {
 }
 
 bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
-  const connection_handler::DeviceList& device_list,
+  const std::vector<transport_manager::DeviceInfo>& device_list,
   const connection_handler::DeviceHandle device_handle) {
   bool result = false;
-  for (connection_handler::DeviceList::const_iterator it_in =
+  for (std::vector<transport_manager::DeviceInfo>::const_iterator it_in =
          device_list.begin();
        it_in != device_list.end(); ++it_in) {
-    if (it_in->first == device_handle) {
+    if (it_in->device_handle() == device_handle) {
       result = true;
       break;
     }
@@ -158,19 +173,21 @@ bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
 }
 
 void ConnectionHandlerImpl::AddDeviceInDeviceListIfNotExist(
-  const Device& device) {
-  DeviceListIterator it = device_list_.find(device.device_handle());
+  const transport_manager::DeviceInfo& device_info) {
+  DeviceListIterator it = device_list_.find(device_info.device_handle());
   if (device_list_.end() == it) {
     LOG4CXX_INFO(logger_, "Adding new device!");
     device_list_.insert(
-      DeviceList::value_type(device.device_handle(),
-                             device));
+      DeviceList::value_type(device_info.device_handle(),
+                             Device(device_info.device_handle(),
+                                    device_info.name(),
+                                    device_info.mac_address())));
   }
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {
   LOG4CXX_INFO(logger_, "scan devices finished successfully.");
-  for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
+  /*for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
        ++itr) {
     if (!DoesDeviceExistInTMList(device_list_during_search_, (*itr).first)) {
       // Device has been removed. Perform all needed actions.
@@ -196,7 +213,7 @@ void ConnectionHandlerImpl::OnScanDevicesFinished() {
        it_in != device_list_during_search_.end(); ++it_in) {
     AddDeviceInDeviceListIfNotExist(it_in->second);
   }
-  device_list_during_search_.clear();
+  device_list_during_search_.clear();*/
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFailed(
@@ -469,7 +486,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
   }
-  device_list_during_search_.clear();
+  //device_list_during_search_.clear();
   transport_manager_->searchDevices();
 }
 
