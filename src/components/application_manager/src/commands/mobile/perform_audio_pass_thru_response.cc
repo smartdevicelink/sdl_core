@@ -62,7 +62,7 @@ void PerformAudioPassThruResponse::Run() {
   }
 
   if (!IsPendingResponseExist()) {
-    ApplicationManagerImpl::instance()->StopAudioPassThruThread();
+    //ApplicationManagerImpl::instance()->StopAudioPassThruThread();
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
 
     SendResponse(true);
