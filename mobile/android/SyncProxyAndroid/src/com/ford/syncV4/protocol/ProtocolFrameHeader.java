@@ -52,7 +52,7 @@ public class ProtocolFrameHeader {
 		return msg;
 	}
 	
-	protected byte[] assembleHeaderBytes() {
+	public byte[] assembleHeaderBytes() {
 		// important notice here: the '& 0xFF' expressions below added because
 		// if byte is negative, it corrupts more significant bits when cast to
 		// int

@@ -120,6 +120,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 		}
 	}
 
+    public void startMobileNavSession(){
+        if(_protocol != null){
+            _protocol.StartProtocolSession(SessionType.Mobile_Nav);
+        }
+    }
+
 	@Override
 	public void onTransportDisconnected(String info) {
 		// Pass directly to connection listener
