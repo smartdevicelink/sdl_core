@@ -136,7 +136,6 @@ void FromMicToFileRecorderThread::threadMain() {
 
   // Initialize gstreamer and setup the main loop information
   gst_init(&argc_, &argv_);
-  loop = g_main_loop_new(NULL, FALSE);
 
   pipeline = gst_pipeline_new("vga2usb-h264");
 
@@ -196,6 +195,8 @@ void FromMicToFileRecorderThread::threadMain() {
     }
   }
 
+  loop = g_main_loop_new(NULL, FALSE);
+
   g_main_loop_run(loop);
 
   gst_element_set_state (pipeline, GST_STATE_NULL);
@@ -216,14 +217,20 @@ void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
 
   sleep(timeout_.duration);
 
-  gst_element_send_event(timeout_.pipeline, gst_event_new_eos());
+  if(NULL != loop) {
+    if(g_main_loop_is_running(loop)) {
+      gst_element_send_event(timeout_.pipeline, gst_event_new_eos());
+    }
+  }
 }
 
 void FromMicToFileRecorderThread::exitThreadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if(NULL != loop) {
-    g_main_loop_quit(loop);
+    if(g_main_loop_is_running(loop)) {
+      g_main_loop_quit(loop);
+    }
   }
 
   if(NULL != sleepThread_) {
