@@ -101,6 +101,11 @@ class Profile {
     const unsigned int max_cmd_id() const;
 
     /**
+     * @brief Default timeout for waiting for response to mobile app
+     */
+    const unsigned int default_timeout() const;
+
+    /**
      * @brief Returns server port
      */
     const uint16_t& server_port() const;
@@ -180,6 +185,7 @@ class Profile {
     uint64_t                        min_tread_stack_size_;
     bool                            is_mixing_audio_supported_;
     unsigned int                    max_cmd_id_;
+    unsigned int                    default_timeout_;
     std::string                     vr_help_title_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);

@@ -338,10 +338,10 @@ Application* ApplicationManagerImpl::RegisterApplication(
   application->set_device(device_id);
 
   application->set_language(static_cast<mobile_api::Language::eType>(
-         message[strings::msg_params][strings::language_desired].asInt()));
+                              message[strings::msg_params][strings::language_desired].asInt()));
   application->set_ui_language(static_cast<mobile_api::Language::eType>(
-          message[strings::msg_params]
-                  [strings::hmi_display_language_desired].asInt()));
+                                 message[strings::msg_params]
+                                 [strings::hmi_display_language_desired].asInt()));
 
   Version version;
   int min_version = message[strings::msg_params][strings::sync_msg_version]
@@ -1337,12 +1337,16 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     DCHECK(watchdog_);
     watchdog_->addListener(this);
   }
-  LOG4CXX_INFO(logger_, "Adding request to watchdog. " << (int)watchdog_);
-  watchdog_->addRequest(request_watchdog::RequestInfo(
-                          cmd_from_mobile[strings::params][strings::function_id],
-                          cmd_from_mobile[strings::params][strings::connection_key],
-                          cmd_from_mobile[strings::params][strings::correlation_id],
-                          10000));
+  unsigned int default_timeout =
+    profile::Profile::instance()->default_timeout();
+  LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
+               << default_timeout);
+  watchdog_->addRequest(
+    request_watchdog::RequestInfo(
+      cmd_from_mobile[strings::params][strings::function_id],
+      cmd_from_mobile[strings::params][strings::connection_key],
+      cmd_from_mobile[strings::params][strings::correlation_id],
+      default_timeout));
 
   LOG4CXX_INFO(logger_, "Added request to watchdog.");
   if (!ManageMobileCommand(so_from_mobile)) {
