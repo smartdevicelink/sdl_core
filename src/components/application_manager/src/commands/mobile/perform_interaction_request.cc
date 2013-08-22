@@ -197,12 +197,6 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
         int index = msg_params[strings::choice_set].length();
         msg_params[strings::choice_set][index] =
             (*choice_set)[strings::choice_set][j];
-        std::string file_path = file_system::FullPath(app->name());
-        file_path += "/";
-        file_path += msg_params[strings::choice_set][index]
-            [strings::image][strings::value].asString();
-        msg_params[strings::choice_set][index][strings::image][strings::value] =
-            file_path;
       }
     }
   }
