@@ -607,7 +607,7 @@ SDL.SDLModel = Em.Object
                 SDL.SDLController.getApplicationModel(message.params.appID)
                     .onSlider(message);
             } else {
-                FFW.UI.sendSliderResult('ABORTED', message.id);
+                FFW.UI.sendSliderResult(this.resultCode["ABORTED"], message.id);
             }
         },
 
