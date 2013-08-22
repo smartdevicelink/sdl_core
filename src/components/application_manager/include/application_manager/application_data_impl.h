@@ -231,6 +231,22 @@ class DynamicApplicationDataImpl : public virtual Application {
     inline int perform_interaction_choice() const;
 
     /*
+     * @brief Sets the trigger source that was selected in
+     * response to PerformInteraction
+     *
+     * @param choice Choice that was selected (0-MENU; 1-VR)
+     */
+    void set_perform_interaction_trigger_source(const int& source);
+
+    /*
+     * @brief Retrieve the trigger source that was selected in
+     * response to PerformInteraction
+     *
+     * @return Choice that was selected in response to PerformInteraction
+     */
+    inline int perform_interaction_trigger_source() const;
+
+    /*
      * @brief Sets reset global properties state
      *
      * @param active Current state of the reset global properties
@@ -259,6 +275,7 @@ class DynamicApplicationDataImpl : public virtual Application {
     PerformChoiceSetMap          performinteraction_choice_set_map_;
     bool                         is_perform_interaction_active_;
     int                          perform_interaction_choice_;
+    int                          perform_interaction_trigger_;
     bool                         is_reset_global_properties_active_;
 };
 
@@ -280,6 +297,10 @@ bool DynamicApplicationDataImpl::is_perform_interaction_active() const {
 
 int DynamicApplicationDataImpl::perform_interaction_choice() const {
   return perform_interaction_choice_;
+}
+
+int DynamicApplicationDataImpl::perform_interaction_trigger_source() const {
+  return perform_interaction_trigger_;
 }
 
 bool DynamicApplicationDataImpl::is_reset_global_properties_active() const {
