@@ -1026,6 +1026,14 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   MessageHelper::PrintSmartObject(*message);
 #endif
 
+  LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
+  CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
+
+  if (!command) {
+    LOG4CXX_WARN(logger_, "Failed to create mobile command from smart object");
+    return false;
+  }
+
   mobile_apis::FunctionID::eType function_id
     = static_cast<mobile_apis::FunctionID::eType>(
         (*message)[strings::params][strings::function_id].asInt());
@@ -1071,14 +1079,6 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return true;
     }
-  }
-
-  LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
-  CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
-
-  if (!command) {
-    LOG4CXX_WARN(logger_, "Failed to create mobile command from smart object");
-    return false;
   }
 
   if (command->Init()) {
@@ -1325,6 +1325,8 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
+
+  printf("\n\n\nfunction_id: %d\n\n\n", message->function_id());
 
   if (!ConvertMessageToSO(*message, *so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");

@@ -54,8 +54,6 @@ void GenericResponse::Run() {
   response[strings::msg_params][strings::success] = false;
   */
 
-  (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::GenericResponseID;
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message_)[strings::msg_params][strings::success] = false;
   (*message_)[strings::msg_params][strings::result_code] =
