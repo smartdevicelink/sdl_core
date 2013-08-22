@@ -863,12 +863,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		stopService(new Intent(this, ProxyService.class));
 		finish();
 		saveMessageSelectCount();
+        // the delay should be long enough, so that UnregisterAppInterface and
+        // EndSession messages are sent
 		new Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {
 				android.os.Process.killProcess(android.os.Process.myPid());
 			}
-		}, 1000);
+		}, 2000);
 	}
 
 	private String getAssetsContents(String filename, String defaultString) {
