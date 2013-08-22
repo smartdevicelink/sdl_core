@@ -48,7 +48,7 @@ using ::transport_manager::device_adapter::DeviceAdapterController;
 using ::transport_manager::ConnectError;
 using ::transport_manager::RawMessageSptr;
 using ::transport_manager::device_adapter::ThreadedSocketConnection;
-
+using ::transport_manager::device_adapter::DeviceAdapter;
 namespace test {
 namespace components {
 namespace transport_manager {
@@ -60,8 +60,6 @@ class MockConnection : public ThreadedSocketConnection{
   MockConnection(const ::transport_manager::DeviceUID& device_handle,
                  const ApplicationHandle& app_handle,
                  DeviceAdapterController* adapter);
-  //DeviceAdapter::Error sendData(RawMessageSptr message);
-  //DeviceAdapter::Error disconnect();
   bool establish(ConnectError **error);
 };
 

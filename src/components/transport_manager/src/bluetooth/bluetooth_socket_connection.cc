@@ -82,16 +82,28 @@ bool BluetoothSocketConnection::establish(ConnectError** error) {
     return false;
   }
 
-  const int connect_status = ::connect(rfcomm_socket,
-                                       (struct sockaddr*) &remoteSocketAddress,
-                                       sizeof(remoteSocketAddress));
-
+  int attempts = 4;
+  int connect_status = 0;
+  LOG4CXX_INFO(logger_, "start rfcomm connect attempts");
+  do {
+    connect_status = ::connect(rfcomm_socket,
+                               (struct sockaddr*) &remoteSocketAddress,
+                               sizeof(remoteSocketAddress));
+    if (0 == connect_status) {
+      LOG4CXX_INFO(logger_, "rfcomm connect ok");
+      break;
+    }
+    LOG4CXX_INFO(logger_, "rfcomm connect errno " << errno);
+    if (errno != 111 && errno != 104) {
+      break;
+    }
+    sleep(2);
+  } while (--attempts > 0);
+  LOG4CXX_INFO(logger_, "rfcomm connect attempts finished");
   if (0 != connect_status) {
     LOG4CXX_ERROR_WITH_ERRNO(
         logger_,
-        "Failed to connect to remote device " <<
-        BluetoothDevice::getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) <<
-        " for session " << this);
+        "Failed to connect to remote device " << BluetoothDevice::getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
     *error = new ConnectError();
     LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")")
     return false;
@@ -104,5 +116,4 @@ bool BluetoothSocketConnection::establish(ConnectError** error) {
 
 }  // namespace device_adapter
 }  // namespace transport_manager
-
 

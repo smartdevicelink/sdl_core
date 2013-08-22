@@ -225,17 +225,9 @@ class TransportManagerImpl : public TransportManager {
    */
   virtual int Visibility(const bool &on_off)const;
 
+  const std::vector<DeviceInfo>& getDeviceList() const;
 
   virtual void set_protocol_handler(protocol_handler::ProtocolHandler *ph);//YK: temp solution until B1.0 release
-
-  /**
-   * @brief interface function to wake up adapter listener thread
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  pthread_cond_t *getDeviceListenerThreadWakeup(void);
 
   std::vector<Connection> getConnectionList();
 
@@ -408,9 +400,8 @@ class TransportManagerImpl : public TransportManager {
   bool is_initialized_;
  private:
 
-  /**
-   * @brief Structure that contains conversion functions (Device ID -> Device Handle; Device Handle -> Device ID)
-   */
+  std::vector<DeviceInfo> device_list_;
+
   struct Handle2GUIDConverter {
     typedef std::vector<DeviceUID> ConversionTable;
 
@@ -487,11 +478,11 @@ class TransportManagerImpl : public TransportManager {
                             const ApplicationHandle& application);
 
   protocol_handler::ProtocolHandler *protocol_handler_;//YK: temp solution until B1.0 release
-void addDataToContainer(ConnectionUID id, std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, unsigned char * data, unsigned int data_size);
-bool getFrameSize(unsigned char *data,  unsigned int data_size, unsigned int &frame_size);
-bool getFrame(std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, ConnectionUID id, unsigned int frame_size, unsigned char **frame);
+  void addDataToContainer(ConnectionUID id, std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, unsigned char * data, unsigned int data_size);
+  bool getFrameSize(unsigned char *data,  unsigned int data_size, unsigned int &frame_size);
+  bool getFrame(std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, ConnectionUID id, unsigned int frame_size, unsigned char **frame);
 
-friend bool DeviceAdapterListenerImpl::FindSharedPtr(const DeviceAdapter*, AdapterIterator&);
+  friend bool DeviceAdapterListenerImpl::FindSharedPtr(const DeviceAdapter*, AdapterIterator&);
 };//class ;
 
 }  // namespace transport_manager

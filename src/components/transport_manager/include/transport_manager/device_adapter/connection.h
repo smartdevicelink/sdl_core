@@ -1,6 +1,6 @@
 /**
  * \file connection.h
- * \brief
+ * \brief Connection class header.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -40,7 +40,14 @@
 
 using utils::SharedPtr;
 
+/**
+ * @brief Transport manager namespace.
+ */
 namespace transport_manager {
+
+/**
+ * @brief Device adapter namespace, part of transport manager namespace.
+ */
 namespace device_adapter {
 
 /**
@@ -48,20 +55,27 @@ namespace device_adapter {
  **/
 class Connection {
  public:
-
   /**
-   * @brief Constructor
+   * @brief Constructor.
    */
   Connection() {}
   /**
    * @brief Destructor.
-   *
-   * Clears map of frames to send.
    **/
   virtual ~Connection() {}
 
+  /**
+   * @brief Send data.
+   *
+   * @param message smart pointer to raw message
+   *
+   * @return Error information about possible reason of sending data failure.
+   */
   virtual DeviceAdapter::Error sendData(RawMessageSptr message) = 0;
 
+  /**
+   * @brief End the current connection.
+   */
   virtual DeviceAdapter::Error disconnect() = 0;
 };
 

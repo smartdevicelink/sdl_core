@@ -47,7 +47,10 @@ class TransportManagerListener {
   virtual ~TransportManagerListener() {
   }
 
+  virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) = 0;
+
   virtual void OnDeviceFound(const DeviceInfo &device_info) = 0;
+
   virtual void OnNoDeviceFound() = 0;
   virtual void OnScanDevicesFinished() = 0;
   virtual void OnScanDevicesFailed(const SearchDeviceError& error) = 0;
@@ -60,7 +63,7 @@ class TransportManagerListener {
                                          const DisconnectError& error) = 0;
 
   /**
-   * \brief Informs about loosing connection with device
+   * \brief Informs about losing connection with device
    * \param device Information about disconnected device
    * \param error Information about possible reason of loosing connection
    */

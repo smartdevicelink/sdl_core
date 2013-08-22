@@ -1,6 +1,6 @@
 /**
  * \file client_connection_listener.h
- * \brief
+ * \brief Client connection listener header.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -37,16 +37,52 @@
 
 #include "transport_manager/device_adapter/device_adapter.h"
 
+/**
+ * @brief Transport manager namespace.
+ */
 namespace transport_manager {
+
+/**
+ * @brief Device adapter namespace, part of transport manager namespace.
+ */
 namespace device_adapter {
+
 
 class ClientConnectionListener {
  public:
+  /**
+   * @brief Run client connection listener.
+   *
+   * @return Error information about possible reason of starting client listener failure.
+   */
   virtual DeviceAdapter::Error init() = 0;
+
+  /**
+   * @brief Stop client connection listener.
+   */
   virtual void terminate() = 0;
+
+  /**
+   * @brief Check initialization.
+   *
+   * @return true if initialized.
+   * @return false if not initialized.
+   */
   virtual bool isInitialised() const = 0;
+
+  /**
+   * @brief Start to listen for connection from client.
+   */
   virtual DeviceAdapter::Error startListening() = 0;
+
+  /**
+   * @brief Stop to listen for connection from client.
+   */
   virtual DeviceAdapter::Error stopListening() = 0;
+
+  /**
+   * @brief Destructor
+   */
   virtual ~ClientConnectionListener() {
   }
 };
