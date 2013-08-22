@@ -100,8 +100,12 @@ void ChangeRegistrationResponse::Run() {
           data[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
-    if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
-        (hmi_apis::Common_Result::SUCCESS == result_vr)) {
+    if (((hmi_apis::Common_Result::SUCCESS == result_ui)
+          && (hmi_apis::Common_Result::SUCCESS == result_vr))      ||
+          ((hmi_apis::Common_Result::SUCCESS == result_ui)
+          && (hmi_apis::Common_Result::INVALID_ENUM == result_vr)) ||
+          ((hmi_apis::Common_Result::INVALID_ENUM == result_ui)
+          && (hmi_apis::Common_Result::SUCCESS == result_vr))) {
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
       SendResponse(false);
