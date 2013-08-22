@@ -69,7 +69,7 @@ void SliderRequest::Run() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::slider_footer)) {
-    if (1 < (*message_)[strings::msg_params][strings::slider_footer].asInt()) {
+    if (1 < (*message_)[strings::msg_params][strings::slider_footer].length()) {
       if ((*message_)[strings::msg_params][strings::num_ticks].asInt() !=
             (*message_)[strings::msg_params][strings::slider_footer].length()) {
           LOG4CXX_ERROR(logger_, "INVALID_DATA");
