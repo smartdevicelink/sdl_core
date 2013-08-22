@@ -653,7 +653,7 @@ SDL.SDLModel = Em.Object
             var message = '';
             if (ttsChunks) {
                 for ( var i = 0; i < ttsChunks.length; i++) {
-                    message += ttsChunks[i].text + '\n';
+                    message += ttsChunks[i].text + ' ';
                 }
                 SDL.TTSPopUp.ActivateTTS(message);
             }
