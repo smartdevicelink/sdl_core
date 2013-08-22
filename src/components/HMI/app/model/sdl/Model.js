@@ -594,7 +594,7 @@ SDL.SDLModel = Em.Object
                     SDL.SDLController.getApplicationModel(message.appID)
                         .onPreformInteraction(message, performInteractionRequestId);
                 } else {
-                    SDL.SDLController.interactionChoiseCloseResponse('ABORTED',
+                    SDL.SDLController.interactionChoiseCloseResponse(this.resultCode["ABORTED"],
                         performInteractionRequestId);
                 }
             }
