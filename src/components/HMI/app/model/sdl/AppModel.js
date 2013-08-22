@@ -294,7 +294,7 @@ SDL.SDLAppModel = Em.Object
 
             SDL.InteractionChoicesView.clean();
 
-            if ("choiceSet" in message && "timeout" in message) {
+            if (message) {
 
                 SDL.InteractionChoicesView.preformChoices(message.choiceSet,
                     performInteractionRequestId,
@@ -303,6 +303,9 @@ SDL.SDLAppModel = Em.Object
                 SDL.InteractionChoicesView.activate(message.initialText.fieldText);
 
             } else {
+                SDL.InteractionChoicesView.preformChoices([],
+                    performInteractionRequestId,
+                    30000);
                 SDL.InteractionChoicesView.activate("");
             }
 
@@ -312,7 +315,7 @@ SDL.SDLAppModel = Em.Object
         /**
          * SDL UI CreateInteraction response handeler push set of commands to
          * voice recognition list
-         * 
+         *
          * @param {Object}
          */
         onCreateInteraction: function(message) {
@@ -325,7 +328,7 @@ SDL.SDLAppModel = Em.Object
          * SDL UI DeleteInteraction response handeler close current interaction
          * set window (if opened) and delete current set commands from voice
          * recognition list
-         * 
+         *
          * @param {Object}
          */
         onDeleteInteraction: function(message) {
@@ -336,7 +339,7 @@ SDL.SDLAppModel = Em.Object
         /**
          * SDL UI Slider response handeler open Slider window with received
          * parameters
-         * 
+         *
          * @param {Object}
          */
         onSlider: function(message) {

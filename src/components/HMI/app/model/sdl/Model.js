@@ -586,12 +586,17 @@ SDL.SDLModel = Em.Object
          */
         uiPerformInteraction: function(message, performInteractionRequestId) {
 
-            if (!SDL.InteractionChoicesView.active) {
-                SDL.SDLController.getApplicationModel(message.appID)
-                    .onPreformInteraction(message, performInteractionRequestId);
+            if (!message) {
+                SDL.SDLAppController.model.onPreformInteraction(message, performInteractionRequestId);
             } else {
-                SDL.SDLController.interactionChoiseCloseResponse('ABORTED',
-                    performInteractionRequestId);
+
+                if (!SDL.InteractionChoicesView.active) {
+                    SDL.SDLController.getApplicationModel(message.appID)
+                        .onPreformInteraction(message, performInteractionRequestId);
+                } else {
+                    SDL.SDLController.interactionChoiseCloseResponse('ABORTED',
+                        performInteractionRequestId);
+                }
             }
         },
 

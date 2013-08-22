@@ -1338,15 +1338,15 @@ SDL.RPCController = Em.Object
                  */
                 PerformInteraction: function(params) {
 
-                    if (params == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'params' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
+//                    if (params == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'params' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
 //                    if (params.initialText == null) {
 //
 //                        this.resultStruct = {
