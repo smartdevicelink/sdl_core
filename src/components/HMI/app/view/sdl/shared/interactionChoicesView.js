@@ -132,7 +132,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                             onDown: false,
                             target: 'SDL.SDLAppController',
                             performInteractionRequestID: performInteractionRequestID,
-                            templateName: 'text',
+                            templateName: data[i].image ? 'rightIcon' : 'text',
                             icon: data[i].image ? data[i].image.value : null
                         }
                     });

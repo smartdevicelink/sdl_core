@@ -338,15 +338,12 @@ SDL.SDLAppModel = Em.Object
             SDL.SliderView.loadData(message);
 
             SDL.SliderView.activate(this.appName);
+            setTimeout(function() {
 
-            if (message.params.timeout !== 0) {
-                setTimeout(function() {
-
-                    if (SDL.SliderView.active) {
-                        SDL.SliderView.deactivate();
-                    }
-                }, message.params.timeout);
-            }
+                if (SDL.SliderView.active) {
+                    SDL.SliderView.deactivate();
+                }
+            }, message.params.timeout);
 
         }
     });
