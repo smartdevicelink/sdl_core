@@ -116,10 +116,10 @@ void PerformInteractionRequest::Run() {
         return;
       }
 
-      // TODO (DK): need to implement timeout
+      // TODO(DK): need to implement timeout
       app->set_perform_interaction_active(true);
-      SendUIShowVRHelpRequest(app);
       SendVRAddCommandRequest(app);
+      SendUIShowVRHelpRequest(app);
       break;
     }
     default: {
@@ -130,7 +130,7 @@ void PerformInteractionRequest::Run() {
 
   SendTTSSpeakRequest(app);
 
-  // TODO (DK): need to implement timeout TTS speak request.
+  // TODO(DK): need to implement timeout TTS speak request.
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(
@@ -143,6 +143,13 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
       app->FindChoiceSet(choice_list[i].asInt());
 
     if (choice_set) {
+      if (InteractionMode::VR_ONLY ==
+          (*message_)[strings::msg_params][strings::interaction_mode].asInt()) {
+        // save perform interaction choice set
+        app->AddPerformInteractionChoiceSet(
+            choice_list[i].asInt(), *choice_set);
+      }
+
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
         smart_objects::SmartObject msg_params =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -153,6 +160,10 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
           smart_objects::SmartObject(smart_objects::SmartType_Array);
         msg_params[strings::vr_commands] =
           (*choice_set)[strings::choice_set][j][strings::vr_commands];
+
+// TODO(DK): We need subscribe perform interaction with on command notification
+        CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
+            smart_objects::SmartObject(smart_objects::SmartType_Map), true, 1);
 
         CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand,
                          msg_params, false);
@@ -177,8 +188,7 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
     msg_params[strings::timeout] =
         (*message_)[strings::msg_params][strings::timeout];
-  }
-  else {
+  } else {
     msg_params[strings::timeout] = 10000;
   }
 
@@ -290,7 +300,7 @@ bool PerformInteractionRequest::CheckChoiceSetMenuNames(
               [strings::menu_name].asString();
 
           if (ii_menu_name == jj_menu_name) {
-            LOG4CXX_ERROR(logger_,"Choice set has duplicated menu name");
+            LOG4CXX_ERROR(logger_, "Choice set has duplicated menu name");
             SendResponse(false, mobile_apis::Result::DUPLICATE_NAME,
                          "Choice set has duplicated menu name");
             return false;
@@ -341,7 +351,6 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
 
           for (size_t iii = 0; iii < ii_vr_commands.length(); ++iii) {
             for (size_t jjj = 0; jjj < jj_vr_commands.length(); ++jjj) {
-
               std::string vr_cmd_i = ii_vr_commands[iii].asString();
               std::string vr_cmd_j = jj_vr_commands[jjj].asString();
               if (0 == strcasecmp(vr_cmd_i.c_str(), vr_cmd_j.c_str())) {

@@ -144,7 +144,8 @@ class DynamicApplicationData {
                             const smart_objects::SmartObject& command) = 0;
 
     /*
-     * @brief Deletes all commands from the application menu with the specified command id
+     * @brief Deletes all commands from the application
+     * menu with the specified command id
      */
     virtual void RemoveCommand(unsigned int cmd_id) = 0;
 

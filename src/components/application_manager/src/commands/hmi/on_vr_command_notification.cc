@@ -105,8 +105,10 @@ void OnVRCommandNotification::Run() {
         CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
       }
     }
+
     CreateHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp,
                      smart_objects::SmartObject(smart_objects::SmartType_Map));
+
   } else {
     (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::eType::OnCommandID;

@@ -48,13 +48,15 @@ namespace commands {
  **/
 class PerformInteractionRequest : public CommandRequestImpl {
   public:
+
     /*
      * @brief Typedef for InteractionMode
      */
     typedef enum {
       MANUAL_ONLY              = 0,
       VR_ONLY,
-      BOTH
+      BOTH,
+      INVALID_ENUM
     } InteractionMode;
 
     /**
