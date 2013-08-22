@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * General comments:
@@ -152,6 +154,7 @@ public class TCPTransport extends SyncTransport {
                 logInfo("TCPTransport: openConnection request accepted. Starting transport thread");
                 try {
                     mThread = new TCPTransportThread();
+                    mThread.setName(TCPTransportThread.class.getSimpleName());
                     mThread.setDaemon(true);
                     mThread.start();
 
@@ -195,7 +198,7 @@ public class TCPTransport extends SyncTransport {
      * @param stopThread True if not only disconnection must be done but also thread that handles connection must be
      *                   also stopped so no reconnect attempts will be made
      */
-    private synchronized void disconnect(String message, Exception exception, boolean stopThread) {
+    private synchronized void disconnect(String message, final Exception exception, boolean stopThread) {
 
         if(getCurrentState() == TCPTransportState.DISCONNECTING) {
             logInfo("TCPTransport: disconnecting already in progress");
@@ -232,7 +235,13 @@ public class TCPTransport extends SyncTransport {
             // This disconnect was caused by an error, notify the proxy
             // that there was a transport error.
             logInfo("Disconnect is incorrect. Handling it as error");
-            handleTransportError(disconnectMsg, exception);
+            final String finalDisconnectMsg = disconnectMsg;
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    handleTransportError(finalDisconnectMsg, exception);
+                }
+            }, 0);
         }
     }
 

@@ -1,4 +1,5 @@
 [CW34]
+* Fix SyncProxyTester freezing when trying to send a message after WiFi is connected and then turned off.
 * Fix Exit context menu item: it sends EndSession message before exiting.
 * PerformInteraction, Show, SetGlobalProperties, Soft Buttons dialogs: use image filenames with extensions by default.
 * SyncProxyAndroid SDK: EndSession message includes hash ID that was received with StartSessionACK.
