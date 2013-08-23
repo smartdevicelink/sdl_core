@@ -40,9 +40,6 @@
 
 using transport_manager::device_adapter::DeviceAdapterSptr;
 
-/**
- * @namespace Transport manager namespace.
- */
 namespace transport_manager {
 
 class DeviceAdapterEvent {

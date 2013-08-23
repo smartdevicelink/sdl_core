@@ -38,14 +38,8 @@
 #include "transport_manager/device_adapter/device.h"
 #include "transport_manager/device_adapter/connection.h"
 
-/**
- * @namespace Transport manager namespace.
- */
 namespace transport_manager {
 
-/**
- * @namespace Device adapter namespace, part of transport manager namespace.
- */
 namespace device_adapter {
 
 

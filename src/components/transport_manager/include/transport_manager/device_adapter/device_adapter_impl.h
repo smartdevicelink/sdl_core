@@ -46,14 +46,8 @@
 #include "transport_manager/device_adapter/device_adapter_controller.h"
 #include "transport_manager/device_adapter/connection.h"
 
-/**
- * @namespace transport manager namespace.
- */
 namespace transport_manager {
 
-/**
- * @namespace Device adapter namespace, part of transport manager namespace.
- */
 namespace device_adapter {
 
 class DeviceAdapterListener;

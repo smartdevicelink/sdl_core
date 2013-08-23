@@ -1,6 +1,6 @@
 /**
  * \file server_connection_factory.h
- * \brief
+ * \brief Server connection factory class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,21 +32,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SERVER_CONNECTION_FACTORY_H_
-#define SERVER_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_SERVER_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_SERVER_CONNECTION_FACTORY_H_
 
 #include "transport_manager/device_adapter/device_adapter.h"
 
 namespace transport_manager {
 namespace device_adapter {
 
+/**
+ * @brief Implement transport dependent connection that was originated by the user.
+ */
 class ServerConnectionFactory {
  public:
+  /**
+   * @brief Start server connection factory.
+   *
+   * @return Information about possible reason of error during initialization.
+   */
   virtual DeviceAdapter::Error init() = 0;
+
+  /**
+   * @brief
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   *
+   * @return Information about posible reason of error.
+   */
   virtual DeviceAdapter::Error createConnection(
       const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
+
+  /**
+   * @brief
+   */
   virtual void terminate() = 0;
+
+  /**
+   * @brief Check device scanner for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
   virtual bool isInitialised() const = 0;
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~ServerConnectionFactory() {
   }
 };

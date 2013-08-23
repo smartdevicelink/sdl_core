@@ -1,6 +1,6 @@
 /*
  * \file info.h
- * \brief 
+ * \brief Information classes header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,50 +33,106 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_INFO_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_INFO_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_INFO_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_INFO_H_
 
 #include <string>
 #include "transport_manager/common.h"
 
 namespace transport_manager {
 
+/**
+ * @brief Base information class.
+ */
 class Info {
  protected:
+
+  /**
+   * @brief Variable that hold name.
+   */
   std::string name_;
 
  public:
+
+  /**
+   * @brief Constructor.
+   */
   Info() {}
+
+  /**
+   * @brief Constructor.
+   */
   explicit Info(std::string name)
       : name_(name) {
   }
+
+  /**
+   * @brief Return string with name.
+   */
   std::string name() const{
     return name_;
   }
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~Info() {}
 };
 
+/**
+ * @brief Hold information about device.
+ */
 class DeviceInfo : public Info {
  protected:
+
+  /**
+   * @brief Variable that hold MAC adress of device.
+   */
   std::string mac_address_;
+
+  /**
+   * @brief Variable that hold handle of device.
+   */
   DeviceHandle device_handle_;
 
  public:
+
+  /**
+   * @brief Constructor.
+   *
+   * @param device_handle Handle of device.
+   * @param mac_adress MAC adress of device.
+   * @param name Name of device.
+   */
   DeviceInfo(DeviceHandle device_handle, std::string mac_address,
              std::string name)
       : Info(name),
         mac_address_(mac_address),
         device_handle_(device_handle) {}
 
+  /**
+   * @brief Set mac_adress field.
+   */
   std::string mac_address() const {
     return mac_address_;
   }
+
+  /**
+   * @brief Set device_handle field.
+   */
   DeviceHandle device_handle() const {
     return device_handle_;
   }
+
+  /**
+   * @brief Overloaded operator "==".
+   */
   friend bool operator ==(const DeviceInfo &first, const DeviceInfo &second);
 };
 
+/**
+ * @brief Overloaded operator "==".
+ */
 inline bool operator ==(const DeviceInfo &first, const DeviceInfo &second) {
   return first.name_ == second.name_
       && first.mac_address_ == second.mac_address_
