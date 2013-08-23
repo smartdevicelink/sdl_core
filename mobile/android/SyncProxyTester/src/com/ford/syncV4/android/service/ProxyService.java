@@ -679,13 +679,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				Log.w(TAG, "mainActivity not found");
 			}
 		}
-		
-		if (!isModuleTesting()) {
-			if(((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.SYNC_PROXY_CYCLED
-					&& ((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.BLUETOOTH_DISABLED) {
-				reset();
-			}
-		}
+
+        if (!isModuleTesting()) {
+            final SyncExceptionCause cause =
+                    ((SyncException) e).getSyncExceptionCause();
+            if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
+                    (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
+                    (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
+                reset();
+            }
+        }
 	}
 	
 	public void reset(){
