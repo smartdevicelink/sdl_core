@@ -330,7 +330,6 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
 
   SendGlobalPropertiesToHMI(app);
   SendShowRequestToHMI(app);
-  SendShowConstantTBTRequestToHMI(app);
   SendAddCommandRequestToHMI(app);
 }
 
@@ -431,7 +430,7 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
     }
 
     ui_msg_params[strings::vr_help] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
     int help_size = vr_commands_array->length();
     for (int i = 0; i < help_size; ++i) {
@@ -494,7 +493,7 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
         for (int i = 0; i < (*it->second)[strings::vr_commands].length(); ++i) {
           smart_objects::SmartObject item(smart_objects::SmartType_Map);
           item[strings::text] =
-              (*it->second)[strings::vr_commands][i].asString();
+            (*it->second)[strings::vr_commands][i].asString();
           item[strings::position] = index;
           ui_msg_params[strings::vr_help][index++] = item;
         }
@@ -846,9 +845,9 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
   response_data[strings::params][strings::correlation_id] =
     correlation_id;
   response_data[strings::params][strings::protocol_type] =
-      commands::CommandImpl::mobile_protocol_type_;
+    commands::CommandImpl::mobile_protocol_type_;
   response_data[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
+    commands::CommandImpl::protocol_version_;
   response_data[strings::msg_params][strings::result_code] = result_code;
   response_data[strings::msg_params][strings::success] = false;
   response_data[strings::params][strings::connection_key] = connection_key;
@@ -914,8 +913,8 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
-                                     smart_objects::SmartObject& message,
-                                     const Application* app) {
+  smart_objects::SmartObject& message,
+  const Application* app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
     for (int i = 0; i < message.length(); i++) {
       mobile_apis::Result::eType res = VerifyImageFiles(message[i], app);
@@ -939,7 +938,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
       }
 
       if (!ApplicationManagerImpl::instance()->VerifyImageType(
-          static_cast<mobile_apis::ImageType::eType>(
+            static_cast<mobile_apis::ImageType::eType>(
               message[strings::image_type].asInt()))) {
         return mobile_apis::Result::UNSUPPORTED_RESOURCE;  // second exit point
       }
