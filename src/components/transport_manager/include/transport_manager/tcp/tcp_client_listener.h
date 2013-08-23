@@ -1,6 +1,6 @@
 /**
  * \file tcp_client_listener.h
- * \brief
+ * \brief TcpClientListener class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TCP_CLIENT_LISTENER_H_
-#define TCP_CLIENT_LISTENER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 
 #include "transport_manager/device_adapter/client_connection_listener.h"
 
@@ -43,16 +43,61 @@ namespace device_adapter {
 
 class DeviceAdapterController;
 
+/**
+ * @brief Listener of device adapter that use TCP transport.
+ */
 class TcpClientListener : public ClientConnectionListener {
  public:
+
+  /**
+   * @breaf Constructor.
+   *
+   * @param controller Pointer to the device adapter controller.
+   * @param port Port No.
+   */
   TcpClientListener(DeviceAdapterController* controller, const uint16_t port);
+
+  /**
+   * @brief Start TCP client listener thread.
+   */
   void thread();
  protected:
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~TcpClientListener();
+
+  /**
+   * @brief Run TCP client listener.
+   *
+   * @return Error information about possible reason of starting TCP listener listener failure.
+   */
   virtual DeviceAdapter::Error init();
+
+  /**
+   * @brief Stop TCP client listener.
+   */
   virtual void terminate();
+
+  /**
+   * @brief Check initialization.
+   *
+   * @return True if initialized.
+   * @return False if not initialized.
+   */
   virtual bool isInitialised() const;
+
+  /**
+   * @brief
+   *
+   * @return Error information about possible reason of failure.
+   */
   virtual DeviceAdapter::Error startListening();
+
+  /**
+   * @brief Terminate TCP client listener thread.
+   */
   virtual DeviceAdapter::Error stopListening();
  private:
   const uint16_t port_;

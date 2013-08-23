@@ -1,6 +1,6 @@
 /**
  * \file bluetooth_connection_factory.h
- * \brief
+ * \brief BluetoothConnectionFactory class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
 
 #include "transport_manager/device_adapter/server_connection_factory.h"
 
@@ -43,15 +43,50 @@ namespace device_adapter {
 
 class DeviceAdapterController;
 
+/**
+ * @brief Create connections.
+ */
 class BluetoothConnectionFactory : public ServerConnectionFactory {
  public:
+
+  /**
+   * @brief Constructor.
+   *
+   * @param controller Pointer to the device adapter controller.
+   */
   BluetoothConnectionFactory(DeviceAdapterController* controller);
  protected:
+
+  /**
+   * @brief Start BT connection factory.
+   */
   virtual DeviceAdapter::Error init();
+
+  /**
+   * @brief Create bluetooth socket connection.
+   *
+   * @param device_uid Device unique identifier.
+   * @param ap_handle Handle of application.
+   */
   virtual DeviceAdapter::Error createConnection(const DeviceUID& device_uid,
                                                 const ApplicationHandle& app_handle);
+
+  /**
+   * @brief
+   */
   virtual void terminate();
+
+  /**
+   * @brief Check for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
   virtual bool isInitialised() const;
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~BluetoothConnectionFactory();
  private:
   DeviceAdapterController* controller_;

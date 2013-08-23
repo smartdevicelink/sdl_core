@@ -33,20 +33,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H
 
 #include "transport_manager/device_adapter/device_adapter_impl.h"
 
 namespace transport_manager {
 namespace device_adapter {
 
+/**
+ * @brief Device adapter that use TCP transport.
+ */
 class TcpDeviceAdapter : public DeviceAdapterImpl {
  public:
+  /**
+   * @brief Constructor.
+   */
   TcpDeviceAdapter();
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~TcpDeviceAdapter();
+
+  /**
+   * @brief Default port.
+   */
   static const uint16_t default_port = 12345;
  protected:
+
+  /**
+   * @brief Return type of device.
+   *
+   * @return String with device type.
+   */
   virtual DeviceType getDeviceType() const;
 };
 

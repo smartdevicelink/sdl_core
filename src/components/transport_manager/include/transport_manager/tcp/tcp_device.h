@@ -1,6 +1,6 @@
 /**
  * \file tcp_device.h
- * \brief
+ * \brief TcpDevice class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TCP_DEVICE_H_
-#define TCP_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
 #include "transport_manager/device_adapter/device.h"
 
@@ -51,14 +51,16 @@
 namespace transport_manager {
 namespace device_adapter {
 
+/**
+ * @brief Information about device that use TCP transport.
+ */
 class TcpDevice : public Device {
  public:
   /**
    * @brief Constructor.
    *
-   * @param address Bluetooth address.
-   * @param name Human-readable device name.
-   * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
+   * @param in_addr Address.
+   * @param name Device Name.
    **/
   TcpDevice(const in_addr_t& in_addr, const std::string& name);
 
@@ -67,22 +69,63 @@ class TcpDevice : public Device {
   /**
    * @brief Compare devices.
    *
-   * This method checks whether two SBluetoothDevice structures
-   * refer to the same device.
-   *
    * @param other Device to compare with.
    *
-   * @return true if devices are equal, false otherwise.
+   * @return True if devices are equal, false otherwise.
    **/
   virtual bool isSameAs(const Device* other) const;
 
+  /**
+   * @brief Update list of applications available on device.
+   *
+   * @return Container with list of applications.
+   */
   virtual ApplicationList getApplicationList() const;
 
+  /**
+   * @brief Add an application to the container of applications.
+   *
+   * @param socket Value of socket.
+   */
   ApplicationHandle addIncomingApplication(const int socket);
+
+  /**
+   * @brief Add application that was discovered before.
+   *
+   * @param Port No.
+   */
   ApplicationHandle addDiscoveredApplication(const int port);
+
+  /**
+   * @brief Remove application from the container of applications.
+   *
+   * @param app_handle Handle of application.
+   */
   void removeApplication(const ApplicationHandle app_handle);
+
+  /**
+   * @brief Return application's socket value.
+   *
+   * @param app_handle Handle of application.
+   *
+   * @return Application's socket value.
+   */
   int getApplicationSocket(const ApplicationHandle app_handle) const;
+
+  /**
+   * @brief Return application's port No.
+   *
+   * @param app_handle Handle of application.
+   *
+   * @return Application's port No.
+   */
   int getApplicationPort(const ApplicationHandle app_handle) const;
+
+  /**
+   * @brief Return address.
+   *
+   * @return Address.
+   */
   in_addr_t getAddress() const {
     return in_addr_;
   }
