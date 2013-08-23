@@ -2,9 +2,8 @@
 bin
 gen
 out
-SyncProxyTester/assets/build.info
 
-SPTAlice
+build.info
 
 # built application files
  *.apk

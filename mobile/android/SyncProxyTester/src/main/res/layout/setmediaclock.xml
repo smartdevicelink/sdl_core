@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:minWidth="300px" android:layout_width="fill_parent"
+	android:orientation="vertical" android:id="@+id/itemRoot"
+	android:paddingLeft="20dip" android:paddingRight="20dip"
+	android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:textStyle="bold"
+		android:text="Hours">
+	</TextView>
+	<EditText android:text="0" android:id="@+id/txtHours"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:visibility="visible" android:freezesText="true">
+	</EditText>
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="1"
+		android:textStyle="bold" android:text="Minutes">
+	</TextView>
+	<EditText android:text="12" android:id="@+id/txtMinutes"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:visibility="visible" android:freezesText="true">
+	</EditText>
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="1"
+		android:textStyle="bold" android:text="Seconds">
+	</TextView>
+	<EditText android:text="34" android:id="@+id/txtSeconds"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:visibility="visible" android:freezesText="true">
+	</EditText>
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="1"
+		android:textStyle="bold" android:text="Update Mode">
+	</TextView>
+	<Spinner android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/spnUpdateMode"
+		android:text="12:34">
+	</Spinner>
+</LinearLayout>
