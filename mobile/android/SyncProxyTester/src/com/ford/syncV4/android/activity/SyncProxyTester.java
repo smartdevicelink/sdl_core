@@ -961,7 +961,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
     }
 
 /*	public void startSyncProxyService() {
-    	// Get the local Bluetooth adapter
+        // Get the local Bluetooth adapter
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //BT Adapter exists, is enabled, and there are paired devices with the name SYNC
@@ -2846,7 +2846,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-								/*
+                                /*
 								 * the number of items to send is determined as max of turn items
 								 * and icon items. only when the both fields are empty, we
 								 * don't send anything.
@@ -3716,6 +3716,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
     public void startVideoSession(View v) {
         toggleStartStopVideoSessionButtons();
+        try {
+            ProxyService.getInstance().getProxyInstance().sendVideoFrame(new byte[10]);
+        } catch (Exception e) {
+            _msgAdapter.logMessage("Error sending message: " + e,
+                    Log.ERROR, e);
+        }
+        finally {
+        }
     }
 
     public void stopVideoSession(View v) {

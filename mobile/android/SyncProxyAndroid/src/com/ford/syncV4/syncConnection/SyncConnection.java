@@ -16,7 +16,7 @@ import com.ford.syncV4.transport.TransportType;
 
 public class SyncConnection implements IProtocolListener, ITransportListener {
 
-    protected  SyncTransport _transport = null;
+    protected SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
     ISyncConnectionListener _connectionListener = null;
     // Thread safety locks
@@ -75,6 +75,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
             } // end-if
         }
 
+        closeMobileNavSession(rpcSessionID);
+
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
                 _transport.disconnect();
@@ -131,6 +133,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
                 _protocol.StartProtocolSession(SessionType.RPC);
             }
         }
+        startMobileNavSession();
     }
 
     public void startMobileNavSession() {

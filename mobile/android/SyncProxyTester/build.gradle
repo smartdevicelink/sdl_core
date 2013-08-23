@@ -23,16 +23,13 @@ android {
         }
 
         instrumentTest {
-
             java.srcDirs = ['instrumentTest/java']
-
         }
     }
 
     productFlavors {
         mainfalvor {
             packageName "com.ford.syncV4.android.mainfalvor"
-
         }
 
         additionalflavor {

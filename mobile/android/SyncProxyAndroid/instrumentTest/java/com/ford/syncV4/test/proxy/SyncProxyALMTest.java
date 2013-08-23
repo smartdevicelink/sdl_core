@@ -94,28 +94,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
     }
 
     public void testSyncProxyBaseShouldBeCreated() throws Exception {
-        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-        syncMsgVersion.setMajorVersion(2);
-        syncMsgVersion.setMinorVersion(2);
-        TCPTransportConfig conf = mock(TCPTransportConfig.class);
-        when(conf.getTransportType()).thenReturn(TransportType.TCP);
-        IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
-        SyncProxyALM syncProxy = new SyncProxyALM(listenerALM,
-                            /*sync proxy configuration resources*/null,
-							/*enable advanced lifecycle management true,*/
-                "appName",
-							/*ngn media app*/null,
-							/*vr synonyms*/null,
-							/*is media app*/true,
-                syncMsgVersion,
-							/*language desired*/Language.EN_US,
-							/*HMI Display Language Desired*/Language.EN_US,
-							/*App ID*/"8675308",
-							/*autoActivateID*/null,
-							/*callbackToUIThread*/ false,
-							/*preRegister*/ false,
-                2,
-                conf);
+        SyncProxyALM syncProxy = getSyncProxyALM();
         assertNotNull("Sync Proxy should not be null", syncProxy);
     }
 
@@ -260,6 +239,5 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         message.setSessionID((byte) 48);
         message.setSessionType(SessionType.Mobile_Nav);
         proxyALM.dispatchIncomingMessage(message);
-
     }
 }

@@ -1106,6 +1106,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void handleMobileNavMessage(ProtocolMessage message){
+        Log.i(TAG, "Mobile Nav Session message received" + message.toString());
         // TODO handle incoming mobile nav sessions
     }
 
@@ -2382,7 +2383,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void startMobileNavSession(byte sessionID, String correlationID) {
-        // TODO yet to implement
+        Log.i(TAG, "Mobile Nav Session started" + correlationID);
+        // TODO yet to implement startMobileNavSession
     }
 
     // Queue internal callback message
