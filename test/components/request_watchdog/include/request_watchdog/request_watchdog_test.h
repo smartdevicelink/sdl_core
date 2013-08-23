@@ -138,7 +138,7 @@ void RequestWatchdogSubscriber::onTimeoutExpired(request_watchdog::RequestInfo r
                << "\n");
 }
 
-TEST_F(RequestWatchdogTest, Constructor) {
+/*TEST_F(RequestWatchdogTest, Constructor) {
   test::components::request_watchdog_test::
   RequestWatchdogSubscriber* object1 =
     new test::components::request_watchdog_test::
@@ -147,7 +147,7 @@ TEST_F(RequestWatchdogTest, Constructor) {
   EXPECT_CALL(*object1, destructor()).Times(0);
   EXPECT_CALL(*object1, destructor()).Times(1);
   delete object1;
-}
+}*/
 
 /*TEST_F(RequestWatchdogTest, TimeoutExpiredCallbackTest) {
   request_watchdog::WatchdogSubscriber* subscriber_one =
@@ -211,7 +211,7 @@ TEST_F(RequestWatchdogTest, Constructor) {
   delete subscriber_two;
 }*/
 
-TEST_F(RequestWatchdogTest, GetWachdogInsanceSingleThread) {
+/*TEST_F(RequestWatchdogTest, GetWachdogInsanceSingleThread) {
   request_watchdog::Watchdog* watchdogInstance =
     request_watchdog::RequestWatchdog::instance();
 
@@ -258,7 +258,7 @@ TEST_F(RequestWatchdogTest, SimpleAddRemoveRequest) {
   watchdogInstance->removeRequest(
     requestOne.connectionID_, requestOne.correlationID_);
   ASSERT_EQ(0, watchdogInstance->getRegesteredRequestsNumber());
-}
+}*/
 
 }  //  namespace request_watchdog_test
 }  //  namespace components
