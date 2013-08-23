@@ -67,6 +67,7 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
+import com.ford.syncV4.android.module.GenericRequest;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.service.ProxyService;
@@ -151,8 +152,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	private static final String ButtonSubscriptions = "ButtonSubscriptions";
 	private static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
-	/** Name of a generic request. See {@link GenericRequest}. */
-	private static final String GenericRequest = "GenericRequest";
 
 	/**
 	 * The name of the file where all the data coming with
@@ -271,21 +270,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
      * Shared ArrayAdapter containing ImageType values.
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
-
-    /**
-	 * A custom {@link RPCRequest} subclass that is not present in the
-	 * specification. Used to test that the response is {@link GenericResponse}.
-	 */
-	class GenericRequest extends RPCRequest {
-		public GenericRequest() {
-			super("GenericRequest");
-		}
-		
-		public GenericRequest(Hashtable hash) {
-			super(hash);
-		}
-	}
-	
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -963,7 +947,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, Names.UpdateTurnList);
             addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
             addToFunctionsAdapter(adapter, Names.UnregisterAppInterface);
-			addToFunctionsAdapter(adapter, GenericRequest);
+			addToFunctionsAdapter(adapter, GenericRequest.NAME);
 			
 			adapter.sort(new Comparator<String>() {
 				@Override
@@ -1718,7 +1702,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                         } else if (adapter.getItem(which) ==
                                 Names.UnregisterAppInterface) {
                             sendUnregisterAppInterface();
-						} else if (adapter.getItem(which) == GenericRequest) {
+						} else if (adapter.getItem(which) == GenericRequest.NAME) {
 							sendGenericRequest();
 						}
 						

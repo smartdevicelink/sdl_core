@@ -572,6 +572,8 @@ public class ModuleTest {
 									startTime.setSeconds(0);
 									((SetMediaClockTimer) rpc).setStartTime(startTime);
 									((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.RESUME);
+                                } else if (name.equalsIgnoreCase(GenericRequest.NAME)) {
+                                    rpc = new GenericRequest();
 								} else {
 									rpc = new SetGlobalProperties();
 								}
