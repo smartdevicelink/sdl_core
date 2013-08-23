@@ -39,6 +39,9 @@
 #include <string>
 #include "transport_manager/common.h"
 
+/**
+ * @brief transport_manager name space
+ */
 namespace transport_manager {
 
 /**
@@ -60,7 +63,9 @@ class Info {
   Info() {}
 
   /**
-   * @brief Constructor.
+   * @brief Constructor
+   *
+   * @param name Info class object name.
    */
   explicit Info(std::string name)
       : name_(name) {
@@ -108,17 +113,18 @@ class DeviceInfo : public Info {
              std::string name)
       : Info(name),
         mac_address_(mac_address),
-        device_handle_(device_handle) {}
+        device_handle_(device_handle) {
+  }
 
   /**
-   * @brief Set mac_adress field.
+   * @brief Return mac_adress.
    */
   std::string mac_address() const {
     return mac_address_;
   }
 
   /**
-   * @brief Set device_handle field.
+   * @brief Return device_handle field.
    */
   DeviceHandle device_handle() const {
     return device_handle_;
@@ -131,7 +137,7 @@ class DeviceInfo : public Info {
 };
 
 /**
- * @brief Overloaded operator "==".
+ * @brief Assign fields of one DeviceInfo class to another.
  */
 inline bool operator ==(const DeviceInfo &first, const DeviceInfo &second) {
   return first.name_ == second.name_
@@ -139,6 +145,9 @@ inline bool operator ==(const DeviceInfo &first, const DeviceInfo &second) {
       && first.device_handle_ == second.device_handle_;
 }
 
+/**
+ * @brief AdapterInfo class
+ */
 class AdapterInfo : public Info {
 
 };

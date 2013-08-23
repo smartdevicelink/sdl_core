@@ -50,7 +50,13 @@ class DeviceAdapterListener;
 typedef std::string DeviceType;
 typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
+/**
+ * @brief Type definition of container(vector) that holds device unique identifiers.
+ */
 typedef std::vector<DeviceUID> DeviceList;
+/**
+ * @brief Type definition for container(list) that holds pointers to device adapter listeners
+ */
 typedef std::list<DeviceAdapterListener *> DeviceAdapterListenerList;
 
 class DeviceAdapter {
@@ -106,14 +112,14 @@ class DeviceAdapter {
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
    *
-   * @param listener pointer to the device adapter listener.
+   * @param listener Pointer to the device adapter listener.
    */
   virtual void addListener(DeviceAdapterListener* listener) = 0;
 
   /**
    * @brief Remove listener from the container(list) of device adapter listeners.
    *
-   * @param listener pointer to the device adapter listener.
+   * @param listener Pointer to the device adapter listener.
    */
   virtual void removeListener(DeviceAdapterListener* listener) = 0;
 
@@ -128,6 +134,8 @@ class DeviceAdapter {
    * @brief Start scanning for new devices.
    *
    * List of new devices will be supplied in onDeviceListUpdated callback.
+   *
+   * @return Error information about possible reason of searching devices failure.
    **/
   virtual Error searchDevices() = 0;
 
@@ -141,8 +149,10 @@ class DeviceAdapter {
   /**
    * @brief Connect to the specified application discovered on device.
    *
-   * @param device_handle device unique identifier to connect to.
-   * @param app_handle handle of application to connect to.
+   * @param device_handle Handle of device to connect to.
+   * @param app_handle Handle of application to connect to.
+   *
+   * @return Error information about possible reason of connection to the device failure.
    **/
   virtual Error connect(const DeviceUID& device_handle,
                         const ApplicationHandle& app_handle) = 0;
@@ -171,10 +181,10 @@ class DeviceAdapter {
   /**
    * @brief Disconnect from specified session.
    *
-   * @param devcie_handle device unique identifier.
-   * @param app_handle handle of application.
+   * @param device_handle Handle of device to disconnect from.
+   * @param app_handle Handle of application.
    *
-   * @return Error information about possible reason of disconnecting failure.
+   * @return Error information about possible reason of disconnection from the device failure.
    **/
   virtual Error disconnect(const DeviceUID& device_handle,
                            const ApplicationHandle& app_handle) = 0;
@@ -183,15 +193,19 @@ class DeviceAdapter {
    * @brief Disconnect from all sessions on specified device.
    *
    * @param device_handle Device handle to disconnect.
+   *
+   * @return Error information about possible reason of disconnecting from device failure
    **/
   virtual Error disconnectDevice(const DeviceUID& device_handle) = 0;
 
   /**
    * @brief Send frame.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
-   * @param data Smart pointer to the frame.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param data Smart pointer to the raw message.
+   *
+   * @return Error information about possible reason of sending data failure.
    **/
   virtual Error sendData(const DeviceUID& device_handle,
                          const ApplicationHandle& app_handle,
@@ -207,9 +221,9 @@ class DeviceAdapter {
   /**
    * @brief Get container(vector) of application unique identifiers that available at specified device.
    *
-   * @param device_handle device unique identifier.
+   * @param device_handle Device unique identifier.
    *
-   * @return container(vector) that holds application unique identifiers.
+   * @return Container(vector) that holds application unique identifiers.
    */
   virtual ApplicationList getApplicationList(
       const DeviceUID& device_handle) const = 0;

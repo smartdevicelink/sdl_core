@@ -46,6 +46,9 @@
 #include "transport_manager/device_adapter/device_adapter_controller.h"
 #include "transport_manager/device_adapter/connection.h"
 
+/**
+ * @brief transport_manager namespace
+ */
 namespace transport_manager {
 
 namespace device_adapter {
@@ -123,7 +126,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @param device_handle Device unique identifier to connect to.
    * @param app_handle Handle of application to connect to.
    *
-   * @return Error information about possible reason of connecting failure.
+   * @return Error information about possible reason of connecting to device failure.
    **/
   virtual DeviceAdapter::Error connect(const DeviceUID& device_handle,
                                        const ApplicationHandle& app_handle);
@@ -144,7 +147,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @param device_handle Device handle to disconnect.
    *
-   * @return Error information about possible reason of disconnecting specified device failure.
+   * @return Error information about possible reason of disconnecting from specified device failure.
    **/
   virtual DeviceAdapter::Error disconnectDevice(const DeviceUID& device_handle);
 
@@ -154,6 +157,8 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    * @param data Smart pointer to the raw message.
+   *
+   * @return Error information about possible reason of sending data failure
    **/
   virtual DeviceAdapter::Error sendData(const DeviceUID& device_handle,
                                         const ApplicationHandle& app_handle,
@@ -169,7 +174,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
   /**
    * @brief Stop client listener.
    *
-   * @return Error information about possible reason of stopping client listener.
+   * @return Error information about possible reason of stopping client listener failure.
    */
   virtual DeviceAdapter::Error stopClientListening();
 
@@ -362,6 +367,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    * @brief Find connection that has state - ESTABLISHED.
    *
    * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
    *
    * @return ConnectionSptr smart pointer to the connection.
    */

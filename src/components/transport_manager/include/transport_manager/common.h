@@ -1,6 +1,6 @@
 /**
- * \file transport_manager.h
- * \brief Class transport_manager header.
+ * \file common.h
+ * \brief common definition.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -42,11 +42,13 @@
 #include "protocol_handler/raw_message.h"
 #include "utils/shared_ptr.h"
 
-namespace transport_manager {
 /**
- * @brief type for
- *
- * @see @ref components_transportmanager_client_connection_management
+ * @brief - transport_manager namespace
+ */
+namespace transport_manager {
+
+/**
+ * @brief Shared pointer for RawMessage class
  **/
 
 /**
@@ -75,10 +77,10 @@ typedef std::string DeviceUID;
 typedef int ApplicationHandle;
 
 /**
- * @brief Type definition for variable that hold container(vector) for handles of applications.
+ * @brief Type definition for vector that contain ApplicationHandle variables.
  */
 typedef std::vector<ApplicationHandle> ApplicationList;
 
 }  //  namespace transport_manager
 
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON.H

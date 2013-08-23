@@ -34,9 +34,9 @@
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -62,25 +62,10 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
-  std::string file_path;
-
-  const size_t turn_list_size = (*message_)[strings::msg_params]
-                                [strings::turn_list].length();
-
-  for (int i = 0; i < turn_list_size; ++i) {
-    file_path = app->name() + "/" +
-                (*message_)[strings::msg_params][strings::turn_list][i]
-                [strings::turn_icon][strings::value].asString();
-    file_path = file_system::FullPath(file_path);
-
-    if (!file_system::FileExists(file_path)) {
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      LOG4CXX_ERROR(logger_, "File is not exists");
-      return;
-    }
-
-    (*message_)[strings::msg_params][strings::turn_list][i]
-    [strings::turn_icon][strings::value] = file_path;
+  if (!MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app)) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
   }
 
   smart_objects::SmartObject msg_params =
