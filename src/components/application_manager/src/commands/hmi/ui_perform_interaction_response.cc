@@ -108,14 +108,24 @@ void UIPerformInteractionResponse::Run() {
         (*message_)[strings::params][hmi_response::code].asInt()) {
       (*message_)[strings::params][hmi_response::code] =
           hmi_apis::Common_Result::SUCCESS;
-
-      // cope stored from on vr command choice
-      (*message_)[strings::msg_params][strings::choice_id] =
-          app->perform_interaction_choice();
-      //reset
-      app->set_perform_interaction_choice(0);
     }
 
+    if (hmi_apis::Common_Result::SUCCESS ==
+        (*message_)[strings::params][hmi_response::code].asInt()) {
+      if (0 < app->perform_interaction_trigger_source()) {
+        (*message_)[strings::msg_params][strings::trigger_source] =
+            app->perform_interaction_trigger_source();
+        // copy stored from on vr command choice
+        (*message_)[strings::msg_params][strings::choice_id] =
+            app->perform_interaction_choice();
+      } else {
+        (*message_)[strings::msg_params][strings::trigger_source] = 0;
+      }
+
+      //reset
+      app->set_perform_interaction_choice(-1);
+      app->set_perform_interaction_trigger_source(-1);
+    }
   }
 
   // prepare SmartObject for mobile factory

@@ -2,6 +2,7 @@ package com.ford.syncV4.android.constants;
 
 import java.util.ArrayList;
 
+import com.ford.syncV4.android.module.GenericRequest;
 import com.ford.syncV4.proxy.constants.Names;
 
 public class AcceptedRPC {
@@ -49,6 +50,8 @@ public class AcceptedRPC {
 		acceptedRPC.add("ClearMediaClockTimer");
 		acceptedRPC.add("PauseMediaClockTimer");
 		acceptedRPC.add("ResumeMediaClockTimer");
+
+        acceptedRPC.add(GenericRequest.NAME);
 	}
 	
 	public String getFunctionName(int i) {

@@ -87,8 +87,12 @@ void OnVRCommandNotification::Run() {
    * and PerformInterActionResponse to mobile
    */
   if (app->is_perform_interaction_active()) {
+
     app->set_perform_interaction_choice(
         (*message_)[strings::msg_params][strings::cmd_id].asInt());
+    const int trigger_source_vr = 1;
+    app->set_perform_interaction_trigger_source(trigger_source_vr);
+
     const PerformChoiceSetMap& choice_set_map =
       app->GetPerformInteractionChoiceSetMap();
 

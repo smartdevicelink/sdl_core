@@ -178,6 +178,7 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     performinteraction_choice_set_map_(),
     is_perform_interaction_active_(false),
     perform_interaction_choice_(-1),
+    perform_interaction_trigger_(-1),
     is_reset_global_properties_active_(false) {
 }
 
@@ -441,6 +442,11 @@ void DynamicApplicationDataImpl::set_perform_interaction_active(bool active) {
 
 void DynamicApplicationDataImpl::set_perform_interaction_choice(int choice) {
   perform_interaction_choice_ = choice;
+}
+
+void DynamicApplicationDataImpl::set_perform_interaction_trigger_source(
+    const int& source) {
+  perform_interaction_trigger_ = source;
 }
 
 void DynamicApplicationDataImpl::set_reset_global_properties_active(
