@@ -72,20 +72,21 @@ bool BluetoothSocketConnection::establish(ConnectError** error) {
          sizeof(bdaddr_t));
   remoteSocketAddress.rc_channel = rfcomm_channel;
 
-  const int rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
-  if (-1 == rfcomm_socket) {
-    LOG4CXX_ERROR_WITH_ERRNO(
-        logger_,
-        "Failed to create RFCOMM socket for device " << device_handle());
-    *error = new ConnectError();
-    LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")")
-    return false;
-  }
+  const int rfcomm_socket;
 
   int attempts = 4;
   int connect_status = 0;
   LOG4CXX_INFO(logger_, "start rfcomm connect attempts");
   do {
+    rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+    if (-1 == rfcomm_socket) {
+      LOG4CXX_ERROR_WITH_ERRNO(
+          logger_,
+          "Failed to create RFCOMM socket for device " << device_handle());
+      *error = new ConnectError();
+      LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")")
+      return false;
+    }
     connect_status = ::connect(rfcomm_socket,
                                (struct sockaddr*) &remoteSocketAddress,
                                sizeof(remoteSocketAddress));
@@ -96,6 +97,9 @@ bool BluetoothSocketConnection::establish(ConnectError** error) {
     LOG4CXX_INFO(logger_, "rfcomm connect errno " << errno);
     if (errno != 111 && errno != 104) {
       break;
+    }
+    if (errno) {
+      close(rfcomm_socket);
     }
     sleep(2);
   } while (--attempts > 0);
