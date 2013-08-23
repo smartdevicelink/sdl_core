@@ -74,11 +74,19 @@ void VIGetVehicleDataResponse::Run() {
       result[strings::params][strings::protocol_version] =
         (*message_)[strings::params][strings::protocol_version];
     }
-  }
-  result[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::GetVehicleDataID;
 
-  SendResponseToMobile(result_so);
+    result[strings::params][strings::function_id] =
+       mobile_apis::FunctionID::GetVehicleDataID;
+
+    SendResponseToMobile(result_so);
+  } else {
+    (*message_)[strings::params][strings::function_id] =
+        mobile_apis::FunctionID::GetVehicleDataID;
+    SendResponseToMobile(message_);
+  }
+
+
+
 }
 
 }  // namespace commands
