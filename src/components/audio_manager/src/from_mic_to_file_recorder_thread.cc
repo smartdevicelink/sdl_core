@@ -37,14 +37,14 @@ namespace audio_manager {
 log4cxx::LoggerPtr FromMicToFileRecorderThread::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("FromMicToFileRecorderThread"));
 
-GMainLoop* FromMicToFileRecorderThread::loop;
+GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 
 FromMicToFileRecorderThread::FromMicToFileRecorderThread()
   : threads::ThreadDelegate(),
     argc_(5),
     oKey_("-o"),
     tKey_("-t"),
-    sleepThread_(NULL){
+    sleepThread_(NULL) {
   LOG4CXX_TRACE_ENTER(logger_);
   stopFlagMutex_.init();
 }
@@ -205,6 +205,7 @@ void FromMicToFileRecorderThread::threadMain() {
   gst_object_unref(GST_OBJECT (pipeline));
   g_main_loop_unref(loop);
 
+  loop = NULL;
 }
 
 FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(GstTimeout timeout)
@@ -229,16 +230,19 @@ void FromMicToFileRecorderThread::exitThreadMain() {
 
   if(NULL != loop) {
     if(g_main_loop_is_running(loop)) {
+      LOG4CXX_TRACE(logger_, "Quit loop\n");
       g_main_loop_quit(loop);
     }
   }
 
   if(NULL != sleepThread_) {
+    LOG4CXX_TRACE(logger_, "Stop sleep thread\n");
     sleepThread_->stop();
     delete sleepThread_;
     sleepThread_ = NULL;
   }
 
+  LOG4CXX_TRACE(logger_, "Set should be stopped flag\n");
   stopFlagMutex_.lock();
   shouldBeStoped_ = true;
   stopFlagMutex_.unlock();

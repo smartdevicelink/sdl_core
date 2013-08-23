@@ -65,22 +65,11 @@ void PerformInteractionResponse::Run() {
   const unsigned int correlation_id =
     (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
-
-  if (NULL == msg_chain) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  smart_objects::SmartObject data =
-    msg_chain->data();
-
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
-    if (hmi_apis::Common_Result::SUCCESS == code ||
-        hmi_apis::Common_Result::ABORTED == code) {
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      // hmi_apis::Common_Result::ABORTED == code
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
       // TODO(DK): Some logic

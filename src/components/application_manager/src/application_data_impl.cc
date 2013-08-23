@@ -177,9 +177,9 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     choice_set_map_(),
     performinteraction_choice_set_map_(),
     is_perform_interaction_active_(false),
-    perform_interaction_choice_(-1),
-    perform_interaction_trigger_(-1),
-    is_reset_global_properties_active_(false) {
+    perform_interaction_ui_corrid_(0),
+    is_reset_global_properties_active_(false),
+    perform_interaction_mode_(-1) {
 }
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
@@ -427,7 +427,7 @@ smart_objects::SmartObject*
 DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
   unsigned int choice_set_id) const {
   PerformChoiceSetMap::const_iterator it =
-      performinteraction_choice_set_map_.find(choice_set_id);
+    performinteraction_choice_set_map_.find(choice_set_id);
 
   if (it != performinteraction_choice_set_map_.end()) {
     return it->second;
@@ -436,22 +436,23 @@ DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
   return NULL;
 }
 
-void DynamicApplicationDataImpl::set_perform_interaction_active(bool active) {
+void DynamicApplicationDataImpl::set_perform_interaction_active(
+  unsigned int active) {
   is_perform_interaction_active_ = active;
 }
 
-void DynamicApplicationDataImpl::set_perform_interaction_choice(int choice) {
-  perform_interaction_choice_ = choice;
-}
-
-void DynamicApplicationDataImpl::set_perform_interaction_trigger_source(
-    const int& source) {
-  perform_interaction_trigger_ = source;
+void DynamicApplicationDataImpl::set_perform_interaction_ui_corrid(
+  unsigned int corr_id) {
+  perform_interaction_ui_corrid_ = corr_id;
 }
 
 void DynamicApplicationDataImpl::set_reset_global_properties_active(
-    bool active) {
+  bool active) {
   is_reset_global_properties_active_ = active;
 }
 
-}  //
+void DynamicApplicationDataImpl::set_perform_interaction_mode(int mode) {
+  perform_interaction_mode_ = mode;
+}
+
+}  // namespace application_manager

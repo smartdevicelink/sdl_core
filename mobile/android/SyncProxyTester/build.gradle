@@ -12,34 +12,19 @@ android {
     buildToolsVersion rootProject.buildToolsVersion
 
     sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-            resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
-            res.srcDirs = ['res']
-            assets.srcDirs = ['assets']
-        }
-
         instrumentTest {
-
             java.srcDirs = ['instrumentTest/java']
-
         }
     }
 
-/*    productFlavors {
+    productFlavors {
         mainFlavor {
-            packageName "com.ford.syncV4.android.mainfalvor"
-
         }
 
-        additionalFlavor {
-            packageName "com.ford.syncV4.android.additionalflavor"
-
+        sptAliceFlavor {
+            packageName "com.ford.syncV4.SPTAlice"
         }
-    }*/
+    }
 }
 
 task saveBuildInfo {
@@ -86,5 +71,7 @@ task saveBuildInfo {
 }
 
 gradle.projectsEvaluated {
-    packageDebug.dependsOn(saveBuildInfo)
+    [packageMainFlavorDebug, packageSptAliceFlavorDebug].each {
+        it.dependsOn(saveBuildInfo)
+    }
 }

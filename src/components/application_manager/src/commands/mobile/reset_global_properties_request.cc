@@ -228,7 +228,9 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpItems(Application* const app) {
       return false;
     }
     // use only first
-    vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
+    vr_help_items[index][strings::position] = index;
+    vr_help_items[index++][strings::text] = (*command_it->second)[strings::vr_commands][0];
+
   }
 
   app->set_vr_help(vr_help_items);
