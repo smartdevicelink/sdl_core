@@ -650,12 +650,12 @@ void TransportManagerImpl::eventListenerThread(void) {
 
             LOG4CXX_INFO(logger_, "Callback called")
           }
-          if (0 == dev_list.size()) {
-            LOG4CXX_INFO(logger_, "No device found event raised")
-            raiseEvent(&TransportManagerListener::OnNoDeviceFound);
-          }
-          raiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_list_);
           if (da_scanned == device_adapters_.size()) {
+            raiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_list_);
+            if (0 == device_list_.size()) {
+              LOG4CXX_INFO(logger_, "No device found event raised")
+              raiseEvent(&TransportManagerListener::OnNoDeviceFound);
+            }
             raiseEvent(&TransportManagerListener::OnScanDevicesFinished);
             search_in_progress_ = false;
           }
