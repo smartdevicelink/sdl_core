@@ -108,6 +108,13 @@ class PerformInteractionRequest : public CommandRequestImpl {
      */
     void SendUIShowVRHelpRequest(Application* const app);
 
+    /**
+      * @brief Creates and Sends Perform interaction to UI.
+      */
+    void CreateUIPerformInteraction(
+      const smart_objects::SmartObject& msg_params,
+      Application* const app);
+
     /*
      * @brief Checks if incoming choice set doesn't has similar menu names.
      *

@@ -159,7 +159,7 @@ class DynamicApplicationDataImpl : public virtual Application {
      * @param choice_set SmartObject that represents choice set
      */
     void AddPerformInteractionChoiceSet(unsigned int choice_set_id,
-                                const smart_objects::SmartObject& choice_set);
+                                        const smart_objects::SmartObject& choice_set);
 
     /*
      * @brief Deletes entirely perform interaction choice set map
@@ -205,14 +205,14 @@ class DynamicApplicationDataImpl : public virtual Application {
      *
      * @param active Current state of the perform interaction
      */
-    void set_perform_interaction_active(bool active);
+    void set_perform_interaction_active(unsigned int active);
 
     /*
      * @brief Retrieves perform interaction state
      *
      * @return TRUE if perform interaction active, otherwise FALSE
      */
-    inline bool is_perform_interaction_active() const;
+    inline unsigned int is_perform_interaction_active() const;
 
     /*
      * @brief Sets the choice that was selected in
@@ -220,7 +220,7 @@ class DynamicApplicationDataImpl : public virtual Application {
      *
      * @param choice Choice that was selected
      */
-    void set_perform_interaction_choice(int choice);
+    void set_perform_interaction_ui_corrid(unsigned int corr_id);
 
     /*
      * @brief Retrieve the choice that was selected in
@@ -228,8 +228,10 @@ class DynamicApplicationDataImpl : public virtual Application {
      *
      * @return Choice that was selected in response to PerformInteraction
      */
-    inline int perform_interaction_choice() const;
+    inline unsigned int perform_interaction_ui_corrid() const;
 
+    void set_perform_interaction_mode(int mode);
+    inline int perform_interaction_mode() const;
     /*
      * @brief Sets the trigger source that was selected in
      * response to PerformInteraction
@@ -273,9 +275,9 @@ class DynamicApplicationDataImpl : public virtual Application {
     SubMenuMap                   sub_menu_;
     ChoiceSetMap                 choice_set_map_;
     PerformChoiceSetMap          performinteraction_choice_set_map_;
-    bool                         is_perform_interaction_active_;
-    int                          perform_interaction_choice_;
-    int                          perform_interaction_trigger_;
+    int                          perform_interaction_mode_;
+    unsigned int                 is_perform_interaction_active_;
+    unsigned int                 perform_interaction_ui_corrid_;
     bool                         is_reset_global_properties_active_;
 };
 
@@ -291,12 +293,12 @@ const ChoiceSetMap& DynamicApplicationDataImpl::choice_set_map() const {
   return choice_set_map_;
 }
 
-bool DynamicApplicationDataImpl::is_perform_interaction_active() const {
+unsigned int DynamicApplicationDataImpl::is_perform_interaction_active() const {
   return is_perform_interaction_active_;
 }
 
-int DynamicApplicationDataImpl::perform_interaction_choice() const {
-  return perform_interaction_choice_;
+unsigned int DynamicApplicationDataImpl::perform_interaction_ui_corrid() const {
+  return perform_interaction_ui_corrid_;
 }
 
 int DynamicApplicationDataImpl::perform_interaction_trigger_source() const {
@@ -308,8 +310,12 @@ bool DynamicApplicationDataImpl::is_reset_global_properties_active() const {
 }
 
 const PerformChoiceSetMap&
-    DynamicApplicationDataImpl::GetPerformInteractionChoiceSetMap() const {
+DynamicApplicationDataImpl::GetPerformInteractionChoiceSetMap() const {
   return performinteraction_choice_set_map_;
+}
+
+inline int DynamicApplicationDataImpl::perform_interaction_mode() const {
+  return perform_interaction_mode_;
 }
 
 }  //  namespace application_manager

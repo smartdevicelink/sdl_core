@@ -51,7 +51,7 @@ void UIPerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "UIPerformInteractionResponse::Run");
 
   const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
   MessageChaining* msg_chain =
     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
@@ -81,52 +81,37 @@ void UIPerformInteractionResponse::Run() {
 
   if (app->is_perform_interaction_active()) {
     const PerformChoiceSetMap& choice_set_map =
-        app->GetPerformInteractionChoiceSetMap();
+      app->GetPerformInteractionChoiceSetMap();
 
-    PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-    for (; choice_set_map.end() != it; ++it) {
+    if (mobile_apis::InteractionMode::MANUAL_ONLY !=
+        app->perform_interaction_mode()) {
+      PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
+      for (; choice_set_map.end() != it; ++it) {
+        const smart_objects::SmartObject& choice_set =
+          (*it->second).getElement(strings::choice_set);
 
-      const smart_objects::SmartObject& choice_set =
-        (*it->second).getElement(strings::choice_set);
+        for (size_t j = 0; j < choice_set.length(); ++j) {
+          smart_objects::SmartObject msg_params =
+            smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-      for (size_t j = 0; j < choice_set.length(); ++j) {
-
-        smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
-        msg_params[strings::app_id] = app->app_id();
-        msg_params[strings::cmd_id] =
+          msg_params[strings::app_id] = app->app_id();
+          msg_params[strings::cmd_id] =
             choice_set.getElement(j).getElement(strings::choice_id);
 
-        CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+          CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+        }
       }
     }
     app->DeletePerformInteractionChoiceSetMap();
-    app->set_perform_interaction_active(false);
+    app->set_perform_interaction_active(0);
 
-    // during perform interaction HMI sends response aborted. We changed it
     if (hmi_apis::Common_Result::ABORTED ==
         (*message_)[strings::params][hmi_response::code].asInt()) {
-      (*message_)[strings::params][hmi_response::code] =
-          hmi_apis::Common_Result::SUCCESS;
-    }
-
-    if (hmi_apis::Common_Result::SUCCESS ==
-        (*message_)[strings::params][hmi_response::code].asInt()) {
-      if (0 < app->perform_interaction_trigger_source()) {
-        (*message_)[strings::msg_params][strings::trigger_source] =
-            app->perform_interaction_trigger_source();
-        // copy stored from on vr command choice
-        (*message_)[strings::msg_params][strings::choice_id] =
-            app->perform_interaction_choice();
-      } else {
-        (*message_)[strings::msg_params][strings::trigger_source] = 0;
-      }
-
-      //reset
-      app->set_perform_interaction_choice(-1);
-      app->set_perform_interaction_trigger_source(-1);
     }
   }
+
+  (*message_)[strings::msg_params][strings::trigger_source] =
+    mobile_apis::TriggerSource::TS_MENU;
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
