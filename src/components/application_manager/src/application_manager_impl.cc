@@ -760,9 +760,11 @@ void ApplicationManagerImpl::StopAudioPassThruThread() {
     audioManager_->stopMicrophoneRecording();
   }
 
-  perform_audio_thread_->stop();
-  delete perform_audio_thread_;
-  perform_audio_thread_ = NULL;
+  if (NULL != perform_audio_thread_) {
+    perform_audio_thread_->stop();
+    delete perform_audio_thread_;
+    perform_audio_thread_ = NULL;
+  }
 }
 
 std::string ApplicationManagerImpl::GetDeviceName(

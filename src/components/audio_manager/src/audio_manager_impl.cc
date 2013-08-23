@@ -196,6 +196,7 @@ void AudioManagerImpl::stopMicrophoneRecording() {
   if(NULL != recorderThread_) {
     recorderThread_->stop();
     delete recorderThread_;
+    recorderThread_ = NULL;
   }
 }
 
