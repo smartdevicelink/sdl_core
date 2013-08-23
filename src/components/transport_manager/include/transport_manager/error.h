@@ -1,6 +1,6 @@
 /**
  * \file error.h
- * \brief Transport manager error types definition.
+ * \brief Error classes header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -39,12 +39,40 @@
 
 namespace transport_manager {
 
+/**
+ * @brief Class that hold information about error.
+ */
 class BaseError {
  public:
+  /**
+   * @brief Constructor.
+   */
   BaseError() {}
+
+  /**
+   * @brief Constructor.
+   *
+   * @param desc Description of error.
+   */
   explicit BaseError(const std::string& desc) : description_(desc) {}
+
+  /**
+   * @brief Constructor.
+   *
+   * @param other Error class.
+   */
   BaseError(const BaseError& other) : description_(other.description_) {}
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~BaseError() {}
+
+  /**
+   * @brief Return description of error.
+   *
+   * @return string with description of error.
+   */
   virtual const std::string& text() const {
     return description_;
   }
@@ -53,30 +81,64 @@ class BaseError {
   std::string description_;
 };
 
+/**
+ * @brief Error that originates during device search.
+ */
 class SearchDeviceError : public BaseError {
 };
 
+/**
+ * @brief Error that originates during connection.
+ */
 class ConnectError : public BaseError {
 };
 
+/**
+ * @brief Error that originates during disconnection.
+ */
 class DisconnectError : public BaseError {
 };
 
+/**
+ * @brief Error that originates during device disconnection.
+ */
 class DisconnectDeviceError : public BaseError {
 };
 
+/**
+ * @brief Error that originates during data receive..
+ */
 class DataReceiveError : public BaseError {
 };
 
+/**
+ * @brief Error that originates during data send.
+ */
 class DataSendError : public BaseError {
  public:
+  /**
+   * @brief Constructor.
+   */
   DataSendError() : BaseError() {}
+
+  /**
+   * @brief Constructor.
+   *
+   * @param Error description.
+   */
   explicit DataSendError(const std::string &desc) : BaseError(desc) {}
 };
 
+/**
+ * @brief Error that originates during data sending timeout.
+ */
 class DataSendTimeoutError : public DataSendError {
 };
 
+
+/**
+ * @brief Error that originates during communication.
+ */
 class CommunicationError : public BaseError {
 };
 

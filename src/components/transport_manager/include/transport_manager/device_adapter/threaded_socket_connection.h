@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_SOCKET_COMMUNICATION
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_SOCKET_COMMUNICATION
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_THREADED_SOCKET_CONNECTION_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_THREADED_SOCKET_CONNECTION_
 
 #include <poll.h>
 
@@ -49,37 +49,85 @@ namespace device_adapter {
 
 class DeviceAdapterController;
 
+/**
+ * @brief Class responsible for communication over sockets.
+ */
 class ThreadedSocketConnection : public Connection {
  public:
+
+  /**
+   * @brief Send data frame.
+   *
+   * @param Message Smart pointer to the raw message.
+   *
+   * @return Error Information about possible reason of sending data failure.
+   */
   DeviceAdapter::Error sendData(RawMessageSptr message);
+
+  /**
+   * @brief Disconnect the current connection.
+   *
+   * @return Error Information about possible reason of disconnect failure.
+   */
   DeviceAdapter::Error disconnect();
 
+  /**
+   * @brief Start thread creation.
+   *
+   * @return Information about possible reason of thread creation error.
+   */
   DeviceAdapter::Error start();
 
+  /**
+   * @brief Set variable that hold socket No.
+   */
   void set_socket(int socket) {
     socket_ = socket;
   }
  protected:
+
+  /**
+   * @brief Constructor.
+   *
+   * @param device_uid Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param controller Pointer to the device adapter controller.
+   */
   ThreadedSocketConnection(const DeviceUID& device_uid,
                            const ApplicationHandle& app_handle,
                            DeviceAdapterController* controller);
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~ThreadedSocketConnection();
+
 
   virtual bool establish(ConnectError** error) = 0;
 
+  /**
+   * @brief Return pointer to the device adapter controller.
+   */
   DeviceAdapterController* getController() {
     return controller_;
   }
 
+  /**
+   * @brief Return device unique identifier.
+   */
   DeviceUID device_handle() const {
     return device_uid_;
   }
 
+  /**
+   * @brief Return handle of application.
+   */
   ApplicationHandle application_handle() const {
     return app_handle_;
   }
 
  private:
+
   int read_fd_;
   int write_fd_;
   void thread();

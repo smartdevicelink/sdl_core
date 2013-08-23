@@ -37,17 +37,15 @@
 
 #include "transport_manager/device_adapter/device_adapter.h"
 
-/**
- * @brief Transport manager namespace.
- */
+
 namespace transport_manager {
 
-/**
- * @brief Device adapter namespace, part of transport manager namespace.
- */
+
 namespace device_adapter {
 
-
+/**
+ * @brief Abstract class for listener of client connection.
+ */
 class ClientConnectionListener {
  public:
   /**
@@ -65,8 +63,8 @@ class ClientConnectionListener {
   /**
    * @brief Check initialization.
    *
-   * @return true if initialized.
-   * @return false if not initialized.
+   * @return True if initialized.
+   * @return False if not initialized.
    */
   virtual bool isInitialised() const = 0;
 
@@ -81,7 +79,7 @@ class ClientConnectionListener {
   virtual DeviceAdapter::Error stopListening() = 0;
 
   /**
-   * @brief Destructor
+   * @brief Destructor.
    */
   virtual ~ClientConnectionListener() {
   }

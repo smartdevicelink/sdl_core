@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_H
 
 #include <string>
 #include <vector>
@@ -63,7 +63,7 @@ class DeviceAdapter {
  public:
 
   /**
-   * @brief Available types of errors.
+   * @enum Available types of errors.
    */
   enum Error {
     OK,
@@ -112,14 +112,14 @@ class DeviceAdapter {
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
    *
-   * @param listener pointer to the device adapter listener.
+   * @param listener Pointer to the device adapter listener.
    */
   virtual void addListener(DeviceAdapterListener* listener) = 0;
 
   /**
    * @brief Remove listener from the container(list) of device adapter listeners.
    *
-   * @param listener pointer to the device adapter listener.
+   * @param listener Pointer to the device adapter listener.
    */
   virtual void removeListener(DeviceAdapterListener* listener) = 0;
 
@@ -135,7 +135,7 @@ class DeviceAdapter {
    *
    * List of new devices will be supplied in onDeviceListUpdated callback.
    *
-   * @return error information about possible reason of searching devices failure
+   * @return Error information about possible reason of searching devices failure.
    **/
   virtual Error searchDevices() = 0;
 
@@ -152,7 +152,7 @@ class DeviceAdapter {
    * @param device_handle Handle of device to connect to.
    * @param app_handle Handle of application to connect to.
    *
-   * @return error information about possible reason of connection to the device failure
+   * @return Error information about possible reason of connection to the device failure.
    **/
   virtual Error connect(const DeviceUID& device_handle,
                         const ApplicationHandle& app_handle) = 0;
@@ -181,10 +181,10 @@ class DeviceAdapter {
   /**
    * @brief Disconnect from specified session.
    *
-   * @param devcie_handle device unique identifier.
-   * @param app_handle handle of application.
+   * @param device_handle Handle of device to disconnect from.
+   * @param app_handle Handle of application.
    *
-   * @return Error information about possible reason of disconnecting failure.
+   * @return Error information about possible reason of disconnection from the device failure.
    **/
   virtual Error disconnect(const DeviceUID& device_handle,
                            const ApplicationHandle& app_handle) = 0;
@@ -194,18 +194,18 @@ class DeviceAdapter {
    *
    * @param device_handle Device handle to disconnect.
    *
-   * @return information abour possible reason of disconnecting drom device failure
+   * @return Error information about possible reason of disconnecting from device failure
    **/
   virtual Error disconnectDevice(const DeviceUID& device_handle) = 0;
 
   /**
    * @brief Send frame.
    *
-   * @param device_handle device unique identifier.
-   * @param app_handle handle of application.
-   * @param data smart pointer to the raw message.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param data Smart pointer to the raw message.
    *
-   * @return Error information about possible reason of sending data failure
+   * @return Error information about possible reason of sending data failure.
    **/
   virtual Error sendData(const DeviceUID& device_handle,
                          const ApplicationHandle& app_handle,
@@ -221,9 +221,9 @@ class DeviceAdapter {
   /**
    * @brief Get container(vector) of application unique identifiers that available at specified device.
    *
-   * @param device_handle device unique identifier.
+   * @param device_handle Device unique identifier.
    *
-   * @return container(vector) that holds application unique identifiers.
+   * @return Container(vector) that holds application unique identifiers.
    */
   virtual ApplicationList getApplicationList(
       const DeviceUID& device_handle) const = 0;

@@ -1,6 +1,6 @@
 /*
  * \file timer.h
- * \brief Timer class
+ * \brief Timer class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -42,14 +42,51 @@ namespace transport_manager {
 
 typedef void (*Callback)(void* param);
 
+/**
+ * @brief Class in charge of timers.
+ */
 class Timer {
  public:
+
+  /**
+   * @brief Constructor.
+   */
   Timer();
+
+  /**
+   * @brief Constructor.
+   *
+   * @param milliseconds value of timer.
+   * @param func Pointer to function that will be launched when timer runs out.
+   * @param params Parameters for Callback function.
+   * @param single_shot If true - timer call function once.
+   * if false - timer call function every time timer runs out.
+   */
   Timer(unsigned long milliseconds, Callback func, void *params, bool single_shot);
+
+  /**
+   * @brief Constructor.
+   */
   Timer(const Timer &other);
+
+  /**
+   * @brief Destructor.
+   */
   ~Timer();
+
+  /**
+   * @brief Overloaded operator "=";
+   */
   Timer& operator = (const Timer &other);
+
+  /**
+   * @brief Start timer.
+   */
   void start();
+
+  /**
+   * @brief Stop timer.
+   */
   void stop();
 
  private:

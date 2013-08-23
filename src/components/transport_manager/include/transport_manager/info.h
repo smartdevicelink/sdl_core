@@ -1,6 +1,6 @@
 /*
  * \file info.h
- * \brief Info class, DeviceInfo class, AdapterInfo definitions
+ * \brief Information classes header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_INFO_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_INFO_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_INFO_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_INFO_H_
 
 #include <string>
 #include "transport_manager/common.h"
@@ -45,65 +45,69 @@
 namespace transport_manager {
 
 /**
- * @brief Info class
+ * @brief Base information class.
  */
 class Info {
  protected:
 
   /**
-   * @brief Info class object name
+   * @brief Variable that hold name.
    */
   std::string name_;
 
  public:
 
   /**
-   * @brief Default constructor
+   * @brief Constructor.
    */
-  Info() {
-  }
+  Info() {}
 
   /**
    * @brief Constructor
    *
-   * @param name Info class object name
+   * @param name Info class object name.
    */
   explicit Info(std::string name)
       : name_(name) {
   }
 
   /**
-   * @brief Returns name_
+   * @brief Return string with name.
    */
-  std::string name() const {
+  std::string name() const{
     return name_;
   }
 
   /**
-   * @brief Destructor
+   * @brief Destructor.
    */
-  virtual ~Info() {
-  }
+  virtual ~Info() {}
 };
 
 /**
- * @brief derived from Info class, contains information about device
+ * @brief Hold information about device.
  */
 class DeviceInfo : public Info {
  protected:
+
   /**
-   * @brief string object that holds mac address
+   * @brief Variable that hold MAC adress of device.
    */
   std::string mac_address_;
 
   /**
-   * @brief variable that holds handle of device
+   * @brief Variable that hold handle of device.
    */
   DeviceHandle device_handle_;
 
  public:
+
   /**
-   * @brief Constructor
+   * @brief Constructor.
+   *
+   * @param device_handle Handle of device.
+   * @param mac_adress MAC adress of device.
+   * @param name Name of device.
    */
   DeviceInfo(DeviceHandle device_handle, std::string mac_address,
              std::string name)
@@ -113,29 +117,27 @@ class DeviceInfo : public Info {
   }
 
   /**
-   * @brief Returns mac_address
+   * @brief Return mac_adress.
    */
   std::string mac_address() const {
     return mac_address_;
   }
 
   /**
-   * @brief Returns device_handle
+   * @brief Return device_handle field.
    */
   DeviceHandle device_handle() const {
     return device_handle_;
   }
 
   /**
-   * @brief friend bool operator ==
+   * @brief Overloaded operator "==".
    */
   friend bool operator ==(const DeviceInfo &first, const DeviceInfo &second);
 };
 
 /**
- * @brief assigns fields of one DeviceInfo class to another
- *
- * @param DeviceInfo class, DeviceInfo class
+ * @brief Assign fields of one DeviceInfo class to another.
  */
 inline bool operator ==(const DeviceInfo &first, const DeviceInfo &second) {
   return first.name_ == second.name_

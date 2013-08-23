@@ -1,6 +1,6 @@
 /**
  * \file device.h
- * \brief Device and DeviceScanner
+ * \brief Device class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTE_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTE_DEVICE_H_
 
 #include <string>
 
@@ -50,7 +50,8 @@ class Device {
   /**
    * @brief Constructor.
    *
-   * @param Name User-friendly device name.
+   * @param name User-friendly device name.
+   * @param unique_device_id device unique identifier.
    **/
   Device(const std::string& name, const DeviceUID& unique_device_id)
     : name_(name),
@@ -66,7 +67,7 @@ class Device {
    * This method checks whether two SDevice structures
    * refer to the same device.
    *
-   * @param OtherDevice Device to compare with.
+   * @param other_Ddvice Device to compare with.
    *
    * @return true if devices are equal, false otherwise.
    **/
@@ -78,6 +79,9 @@ class Device {
     return unique_device_id_;
   }
 
+  /**
+   * @brief Return name of device.
+   */
   const std::string& name() const {
     return name_;
   }

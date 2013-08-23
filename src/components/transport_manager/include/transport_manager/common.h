@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON_H
 
 #include <set>
 #include <vector>
@@ -50,30 +50,34 @@ namespace transport_manager {
 /**
  * @brief Shared pointer for RawMessage class
  **/
+
+/**
+ * @brief Type definition for variable that hold shared pointer to ther raw message.
+ */
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 
 /**
- * @brief Type definition for variable that holds external representation of device handle
+ * @brief Type definition for variable that hold handle of device.
  */
 typedef unsigned int DeviceHandle;
 
 /**
- * @brief Type definition for variable that holds external representation of connection unique identifier
+ * @brief Type definition for variable that hold connection unique identifier.
  */
 typedef unsigned int ConnectionUID;
 
 /**
- * @brief Type definition for variable that holds external representation of device unique identifier
+ * @brief Type definition for variable that hold device unique identifier.
  */
 typedef std::string DeviceUID;
 
 /**
- * @brief Type definition for variable that holds external representation of application handle
+ * @brief Type definition for variable that hold handle of application.
  */
 typedef int ApplicationHandle;
 
 /**
- * @brief Type definition for vector that contains ApplicationHandle variables
+ * @brief Type definition for vector that contain ApplicationHandle variables.
  */
 typedef std::vector<ApplicationHandle> ApplicationList;
 
