@@ -181,6 +181,7 @@ bool OnVRCommandNotification::PerformInteractionHandling(
     CreateHMIRequest(
       hmi_apis::FunctionID::UI_ClosePopUp,
       smart_objects::SmartObject(smart_objects::SmartType_Map));
+    app->set_perform_interaction_mode(-1);
   }
 
   return choice_id_chosen;

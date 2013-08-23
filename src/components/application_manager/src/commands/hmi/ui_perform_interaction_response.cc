@@ -102,6 +102,7 @@ void UIPerformInteractionResponse::Run() {
         }
       }
     }
+    app->set_perform_interaction_mode(-1);
     app->DeletePerformInteractionChoiceSetMap();
     app->set_perform_interaction_active(0);
 

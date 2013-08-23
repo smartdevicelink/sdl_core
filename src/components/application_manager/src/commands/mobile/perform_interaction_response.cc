@@ -68,8 +68,8 @@ void PerformInteractionResponse::Run() {
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
-    if (hmi_apis::Common_Result::SUCCESS == code ||
-        hmi_apis::Common_Result::ABORTED == code) {
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      // hmi_apis::Common_Result::ABORTED == code
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
       // TODO(DK): Some logic

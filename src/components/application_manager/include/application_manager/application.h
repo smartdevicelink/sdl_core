@@ -280,25 +280,19 @@ class DynamicApplicationData {
      */
     virtual unsigned int perform_interaction_ui_corrid() const = 0;
 
+    /*
+         * @brief Sets the mode for perform interaction: UI/VR/BOTH
+         *
+         * @param mode Mode that was selected (MENU; VR; BOTH)
+         */
     virtual void set_perform_interaction_mode(int mode) = 0;
+
+    /*
+     * @brief Retrieve the mode that was PerformInteraction sent in
+     *
+     * @return mode of PerformInteraction
+     */
     virtual inline int perform_interaction_mode() const = 0;
-
-    /*
-     * @brief Sets the trigger source that was selected in
-     * response to PerformInteraction
-     *
-     * @param trigger source that was selected (0-MENU; 1-VR)
-     */
-    virtual void set_perform_interaction_trigger_source(const int& source) = 0;
-
-    /*
-     * @brief Retrieve the trigger source that was selected in
-     * response to PerformInteraction
-     *
-     * @return trigger source that was selected in
-     *  response to PerformInteraction
-     */
-    virtual int perform_interaction_trigger_source() const = 0;
 
     /*
      * @brief Sets reset global properties state

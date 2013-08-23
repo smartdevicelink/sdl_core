@@ -229,24 +229,19 @@ class DynamicApplicationDataImpl : public virtual Application {
      * @return Choice that was selected in response to PerformInteraction
      */
     inline unsigned int perform_interaction_ui_corrid() const;
-
+    /*
+             * @brief Sets the mode for perform interaction: UI/VR/BOTH
+             *
+             * @param mode Mode that was selected (MENU; VR; BOTH)
+             */
     void set_perform_interaction_mode(int mode);
-    inline int perform_interaction_mode() const;
-    /*
-     * @brief Sets the trigger source that was selected in
-     * response to PerformInteraction
-     *
-     * @param choice Choice that was selected (0-MENU; 1-VR)
-     */
-    void set_perform_interaction_trigger_source(const int& source);
 
     /*
-     * @brief Retrieve the trigger source that was selected in
-     * response to PerformInteraction
-     *
-     * @return Choice that was selected in response to PerformInteraction
-     */
-    inline int perform_interaction_trigger_source() const;
+    * @brief Retrieve the mode that was PerformInteraction sent in
+    *
+    * @return mode of PerformInteraction
+    */
+    inline int perform_interaction_mode() const;
 
     /*
      * @brief Sets reset global properties state
@@ -299,10 +294,6 @@ unsigned int DynamicApplicationDataImpl::is_perform_interaction_active() const {
 
 unsigned int DynamicApplicationDataImpl::perform_interaction_ui_corrid() const {
   return perform_interaction_ui_corrid_;
-}
-
-int DynamicApplicationDataImpl::perform_interaction_trigger_source() const {
-  return perform_interaction_trigger_;
 }
 
 bool DynamicApplicationDataImpl::is_reset_global_properties_active() const {
