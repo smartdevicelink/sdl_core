@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H
 
 #include <queue>
 #include <map>
@@ -77,13 +77,13 @@ struct TransportManagerAttr {
 };
 
 /**
- * @brief Interface of transport manager.
+ * @brief Implementation of transport manager.
  */
 class TransportManagerImpl : public TransportManager {
  public:
 
   /**
-   * @struct Hold connection parameters.
+   * @brief Hold connection parameters.
    */
   struct Connection {
     ConnectionUID id;
@@ -113,7 +113,7 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Connect to all applications discovered on device.
    *
-   * @param DeviceHandle Handle of device to connect to.
+   * @param device_id Handle of device to connect to.
    *
    * @return Code error.
    **/
@@ -122,7 +122,7 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Disconnect from all applications connected on device.
    *
-   * @param DeviceHandle Handle of device to disconnect from.
+   * @param device_id Handle of device to disconnect from.
    *
    * @return Code error.
    **/
@@ -136,9 +136,9 @@ class TransportManagerImpl : public TransportManager {
   static void disconnectFailedRoutine(void* p);
 
   /**
-   * @brief Disconnect from applications connected on device by connection id.
+   * @brief Disconnect from applications connected on device by connection unique identifier.
    *
-   * @param ConnectionUID Connection unique identifier.
+   * @param connection Connection unique identifier.
    *
    * @return Code error.
    **/
@@ -169,7 +169,7 @@ class TransportManagerImpl : public TransportManager {
   virtual int receiveEventFromDevice(const DeviceAdapterEvent &event);
 
   /**
-   * @brief Post listener in the container of transport manager listeners.
+   * @brief Post listener to the container of transport manager listeners.
    *
    * @param listener Pointer to the transport manager listener.
    *
@@ -214,7 +214,7 @@ class TransportManagerImpl : public TransportManager {
   virtual int removeDevice(const DeviceHandle &device);
 
   /**
-   * @brief turns on or off visibility of SDL to mobile devices
+   * @brief Turns on or off visibility of SDL to mobile devices
    * when visibility is ON (on_off = true) mobile devices are able to connect
    * otherwise ((on_off = false)) SDL is not visible from outside
    *
@@ -229,6 +229,11 @@ class TransportManagerImpl : public TransportManager {
    */
   const std::vector<DeviceInfo>& getDeviceList() const;
 
+  /**
+   * @brief Establish protocom handler.
+   *
+   * @param ph Pointer to the handler of protocol.
+   */
   virtual void set_protocol_handler(protocol_handler::ProtocolHandler *ph);//YK: temp solution until B1.0 release
 
   /**

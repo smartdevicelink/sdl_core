@@ -46,7 +46,6 @@
 namespace transport_manager {
 /**
  * @brief Interface of transport manager.
- * @interface TransportManager
  **/
 class TransportManager {
  public:
@@ -58,120 +57,105 @@ class TransportManager {
   /**
    * @brief Start scanning for new devices.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_device_management
+   * @return Code error.
    **/
   virtual int searchDevices(void) = 0;
 
   /**
    * @brief Connect to all applications discovered on device.
    *
-   * @param DeviceHandle Handle of device to connect to.
+   * @param device_id Handle of device to connect to.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int connectDevice(const DeviceHandle &device_id) = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.
    *
-   * @param DeviceHandle Handle of device to disconnect from.
+   * @param device_id Handle of device to disconnect from.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int disconnectDevice(const DeviceHandle &device_id) = 0;
 
   /**
-   * @brief Disconnect from applications connected on device by connection id.
+   * @brief Disconnect from applications connected on device by connection unique identifier.
    *
-   * @param ConnectionUID connection id.
+   * @param connection Connection unique identifier.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int disconnect(const ConnectionUID &connection) = 0;
 
   /**
-   * @brief post new mesage into TM's queue
+   * @brief Post new message in queue for massages destined to device.
    *
-   * @param new message container
+   * @param message Smart pointer to the raw massage.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int sendMessageToDevice(const RawMessageSptr message) = 0;
 
   /**
-   * @brief receive event from device
+   * @brief Post event in the event queue.
    *
-   * @param new event
+   * @param event Current event information.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int receiveEventFromDevice(const DeviceAdapterEvent &event) = 0;
 
   /**
-   * @brief add new device adapter
+   * @brief Add device adapter to the container of device adapters.
    *
-   * @param device adapter
+   * @param device_adapter Smart pointer to the device adapter.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int addDeviceAdapter(device_adapter::DeviceAdapterSptr device_adapter) = 0;
 
   /**
-   * @brief register event listener that would be called when something happened in TM
+   * @brief Post listener to the container of transport manager listeners.
    *
-   * @param event listener
+   * @param listener Pointer to the transport manager listener.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int addEventListener(TransportManagerListener *listener) = 0;
 
   /**
-   * @brief unregister event listener
+   * @brief Delete listener from the container of transport manager listeners.
    *
-   * @param event listener
+   * @param listener Pointer to the transport manager listener.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int removeEventListener(TransportManagerListener *listener) = 0;
 
   /**
-   * @brief remove device from internal storages
+   * @brief Remove device from the container that hold devices.
    *
-   * @param event device id
+   * @param device Handle of device.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int removeDevice(const DeviceHandle &device_handle) = 0;
 
-  /*
-   * turns on or off visibility of SDL to mobile devices
+  /**
+   * @brief Turns on or off visibility of SDL to mobile devices
    * when visibility is ON (on_off = true) mobile devices are able to connect
    * otherwise ((on_off = false)) SDL is not visible from outside
    *
-   * @return code error
+   * @return Code error.
    */
   virtual int Visibility(const bool &on_off) const = 0;
 
+  /**
+   * @brief Establish protocom handler.
+   *
+   * @param ph Pointer to the handler of protocol.
+   */
   virtual void set_protocol_handler(protocol_handler::ProtocolHandler *ph) = 0;//YK: temp solution until B1.0 release
 
 };
