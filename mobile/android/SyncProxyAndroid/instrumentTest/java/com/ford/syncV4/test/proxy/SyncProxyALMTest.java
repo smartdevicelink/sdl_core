@@ -41,25 +41,30 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
         syncMsgVersion.setMinorVersion(2);
-        TCPTransportConfig conf  = mock(TCPTransportConfig.class);
+        TCPTransportConfig conf = mock(TCPTransportConfig.class);
         when(conf.getTransportType()).thenReturn(TransportType.TCP);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
+        SyncProxyALM proxyALM = getSyncProxyALM(syncMsgVersion, conf, listenerALM);
+        return proxyALM;
+    }
+
+    private SyncProxyALM getSyncProxyALM(final SyncMsgVersion syncMsgVersion, final TCPTransportConfig conf, final IProxyListenerALM listenerALM) throws SyncException {
         return new SyncProxyALM(listenerALM,
-							/*sync proxy configuration resources*/null,
-							/*enable advanced lifecycle management true,*/
+                                /*sync proxy configuration resources*/null,
+                                /*enable advanced lifecycle management true,*/
                 "appName",
-							/*ngn media app*/null,
-							/*vr synonyms*/null,
-							/*is media app*/true,
+                                /*ngn media app*/null,
+                                /*vr synonyms*/null,
+                                /*is media app*/true,
                 syncMsgVersion,
-							/*language desired*/Language.EN_US,
-							/*HMI Display Language Desired*/Language.EN_US,
-							/*App ID*/"8675308",
-							/*autoActivateID*/null,
-							/*callbackToUIThre1ad*/ false,
-							/*preRegister*/ false,
+                                /*language desired*/Language.EN_US,
+                                /*HMI Display Language Desired*/Language.EN_US,
+                                /*App ID*/"8675308",
+                                /*autoActivateID*/null,
+                                /*callbackToUIThre1ad*/ false,
+                                /*preRegister*/ false,
                 2,
-                conf){
+                conf) {
 
 
             @Override
@@ -71,7 +76,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
 
                 // Setup SyncConnection
-                synchronized(CONNECTION_REFERENCE_LOCK) {
+                synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (_syncConnection != null) {
                         _syncConnection.closeConnection(_rpcSessionID);
                         _syncConnection = null;
@@ -79,7 +84,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                     _syncConnection = mock(SyncConnection.class);
                     when(_syncConnection.getIsConnected()).thenReturn(true);
                 }
-                synchronized(CONNECTION_REFERENCE_LOCK) {
+                synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (_syncConnection != null) {
                         _syncConnection.startTransport();
                     }
@@ -92,24 +97,24 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
         syncMsgVersion.setMinorVersion(2);
-        TCPTransportConfig conf  = mock(TCPTransportConfig.class);
+        TCPTransportConfig conf = mock(TCPTransportConfig.class);
         when(conf.getTransportType()).thenReturn(TransportType.TCP);
         IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
         SyncProxyALM syncProxy = new SyncProxyALM(listenerALM,
-							/*sync proxy configuration resources*/null,
+                            /*sync proxy configuration resources*/null,
 							/*enable advanced lifecycle management true,*/
-                            "appName",
+                "appName",
 							/*ngn media app*/null,
 							/*vr synonyms*/null,
 							/*is media app*/true,
-                            syncMsgVersion,
+                syncMsgVersion,
 							/*language desired*/Language.EN_US,
 							/*HMI Display Language Desired*/Language.EN_US,
 							/*App ID*/"8675308",
 							/*autoActivateID*/null,
-							/*callbackToUIThre1ad*/ false,
+							/*callbackToUIThread*/ false,
 							/*preRegister*/ false,
-                            2,
+                2,
                 conf);
         assertNotNull("Sync Proxy should not be null", syncProxy);
     }
@@ -119,8 +124,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         try {
             boolean result = sut.sendVideoFrame(testRTP);
             assertTrue("Failed to queue message", result);
-        }catch (SyncException e){
-            assertNull("Should not get here",e);
+        } catch (SyncException e) {
+            assertNull("Should not get here", e);
         }
     }
 
@@ -131,5 +136,130 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         assertEquals(sut.getMobileNavSessionID(), message.getSessionID());
         assertEquals(MessageType.VIDEO, message.getMessageType());
         assertEquals(SessionType.Mobile_Nav, message.getSessionType());
+    }
+
+    public void testOnMobileNavSessionStarted() throws Exception {
+        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+        syncMsgVersion.setMajorVersion(2);
+        syncMsgVersion.setMinorVersion(2);
+        TCPTransportConfig conf = mock(TCPTransportConfig.class);
+        when(conf.getTransportType()).thenReturn(TransportType.TCP);
+        final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
+
+        SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
+                                /*sync proxy configuration resources*/null,
+                                /*enable advanced lifecycle management true,*/
+                "appName",
+                                /*ngn media app*/null,
+                                /*vr synonyms*/null,
+                                /*is media app*/true,
+                syncMsgVersion,
+                                /*language desired*/Language.EN_US,
+                                /*HMI Display Language Desired*/Language.EN_US,
+                                /*App ID*/"8675308",
+                                /*autoActivateID*/null,
+                                /*callbackToUIThre1ad*/ false,
+                                /*preRegister*/ false,
+                2,
+                conf) {
+
+
+            @Override
+            protected void initializeProxy() throws SyncException {
+                // Reset all of the flags and state variables
+                _haveReceivedFirstNonNoneHMILevel = false;
+                _haveReceivedFirstFocusLevel = false;
+                _haveReceivedFirstFocusLevelFull = false;
+                _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+
+                // Setup SyncConnection
+                synchronized (CONNECTION_REFERENCE_LOCK) {
+                    if (_syncConnection != null) {
+                        _syncConnection.closeConnection(_rpcSessionID);
+                        _syncConnection = null;
+                    }
+                    _syncConnection = mock(SyncConnection.class);
+                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                }
+                synchronized (CONNECTION_REFERENCE_LOCK) {
+                    if (_syncConnection != null) {
+                        _syncConnection.startTransport();
+                    }
+                }
+            }
+
+            @Override
+            protected void startMobileNavSession(byte sessionID, String correlationID) {
+                super.startMobileNavSession(sessionID, correlationID);
+                assertEquals("Session ID should be equal", sessionID, (byte) 48);
+            }
+        };
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionType.Mobile_Nav, (byte) 48, (byte) 2, "");
+    }
+
+    public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
+        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+        syncMsgVersion.setMajorVersion(2);
+        syncMsgVersion.setMinorVersion(2);
+        TCPTransportConfig conf = mock(TCPTransportConfig.class);
+        when(conf.getTransportType()).thenReturn(TransportType.TCP);
+        final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
+                SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
+                                /*sync proxy configuration resources*/null,
+                                /*enable advanced lifecycle management true,*/
+                "appName",
+                                /*ngn media app*/null,
+                                /*vr synonyms*/null,
+                                /*is media app*/true,
+                syncMsgVersion,
+                                /*language desired*/Language.EN_US,
+                                /*HMI Display Language Desired*/Language.EN_US,
+                                /*App ID*/"8675308",
+                                /*autoActivateID*/null,
+                                /*callbackToUIThre1ad*/ false,
+                                /*preRegister*/ false,
+                2,
+                conf) {
+
+
+            @Override
+            protected void initializeProxy() throws SyncException {
+                // Reset all of the flags and state variables
+                _haveReceivedFirstNonNoneHMILevel = false;
+                _haveReceivedFirstFocusLevel = false;
+                _haveReceivedFirstFocusLevelFull = false;
+                _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+
+                // Setup SyncConnection
+                synchronized (CONNECTION_REFERENCE_LOCK) {
+                    if (_syncConnection != null) {
+                        _syncConnection.closeConnection(_rpcSessionID);
+                        _syncConnection = null;
+                    }
+                    _syncConnection = mock(SyncConnection.class);
+                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                }
+                synchronized (CONNECTION_REFERENCE_LOCK) {
+                    if (_syncConnection != null) {
+                        _syncConnection.startTransport();
+                    }
+                }
+            }
+
+            @Override
+            protected void handleMobileNavMessage(ProtocolMessage message) {
+                super.handleMobileNavMessage(message);
+                assertEquals(message.getSessionType(), SessionType.Mobile_Nav);
+                assertEquals(message.getVersion(), (byte) 2);
+                assertTrue(message.getSessionID() == (byte) 48);
+            }
+        };
+
+        ProtocolMessage message = new ProtocolMessage();
+        message.setVersion((byte) 2);
+        message.setSessionID((byte) 48);
+        message.setSessionType(SessionType.Mobile_Nav);
+        proxyALM.dispatchIncomingMessage(message);
+
     }
 }

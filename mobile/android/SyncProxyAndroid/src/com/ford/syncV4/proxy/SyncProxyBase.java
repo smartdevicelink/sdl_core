@@ -213,7 +213,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Device Info for logging
     private TraceDeviceInfo _traceDeviceInterrogator = null;
     // Declare Queuing Threads
-    private ProxyMessageDispatcher<ProtocolMessage> _incomingProxyMessageDispatcher;
+    protected ProxyMessageDispatcher<ProtocolMessage> _incomingProxyMessageDispatcher;
     private ProxyMessageDispatcher<ProtocolMessage> _outgoingProxyMessageDispatcher;
     private ProxyMessageDispatcher<InternalProxyMessage> _internalProxyMessageDispatcher;
     // Flag indicating if callbacks should be called from UIThread
@@ -655,6 +655,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         DebugTool.disableDebugTool();
     }
 
+    public ProxyMessageDispatcher<ProtocolMessage> getIncomingProxyMessageDispatcher() {
+        return _incomingProxyMessageDispatcher;
+    }
+
+    public SyncInterfaceBroker getInterfaceBroker() {
+        return _interfaceBroker;
+    }
+
     public byte getMobileNavSessionID() {
         return _mobileNavSessionID;
     }
@@ -1043,7 +1051,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * ********** Functions used by the Message Dispatching Queues ***************
      */
-    protected void dispatchIncomingMessage(ProtocolMessage message) {
+    public void dispatchIncomingMessage(ProtocolMessage message) {
         try {
             // Dispatching logic
             if (message.getSessionType().equals(SessionType.RPC)) {
@@ -1088,13 +1096,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     passErrorToProxyListener("Error handing incoming protocol message.", excp);
                 } // end-catch
             } else {
-                // Handle other protocol message types here
+                handleMobileNavMessage(message);
             }
         } catch (final Exception e) {
             // Pass error to application through listener
             DebugTool.logError("Error handing proxy event.", e);
             passErrorToProxyListener("Error handing incoming protocol message.", e);
         }
+    }
+
+    protected void handleMobileNavMessage(ProtocolMessage message){
+        // TODO handle incoming mobile nav sessions
     }
 
     public byte getWiProVersion() {
@@ -2336,7 +2348,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
 	/*public void sendRPCRequest(RPCMessage request) throws SyncException {
-		sendRPCRequest(request);
+        sendRPCRequest(request);
 	}*/
 
     private void startRPCProtocolSession(byte sessionID, String correlationID) {
@@ -2367,6 +2379,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             InternalProxyMessage message = new InternalProxyMessage(Names.OnProxyOpened);
             queueInternalMessage(message);
         }
+    }
+
+    protected void startMobileNavSession(byte sessionID, String correlationID) {
+        // TODO yet to implement
     }
 
     // Queue internal callback message
@@ -3138,7 +3154,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     // Private Class to Interface with SyncConnection
-    private class SyncInterfaceBroker implements ISyncConnectionListener {
+    public class SyncInterfaceBroker implements ISyncConnectionListener {
 
         @Override
         public void onTransportDisconnected(String info) {
@@ -3190,10 +3206,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (sessionType.eq(SessionType.RPC)) {
                 startRPCProtocolSession(sessionID, correlationID);
             } else if (_wiproVersion == 2) {
-                //If version 2 then don't need to specify a Session Type
-                startRPCProtocolSession(sessionID, correlationID);
-            } else {
-                // Handle other protocol session types here
+                if (sessionType.equals(SessionType.Mobile_Nav)) {
+                    startMobileNavSession(sessionID, correlationID);
+                } else {
+                    //If version 2 then don't need to specify a Session Type
+                    startRPCProtocolSession(sessionID, correlationID);
+                }
             }
         }
 
