@@ -2847,7 +2847,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                 /*
-								 * the number of items to send is determined as max of turn items
+                                 * the number of items to send is determined as max of turn items
 								 * and icon items. only when the both fields are empty, we
 								 * don't send anything.
 								 */
@@ -3714,31 +3714,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void startVideoSession(View v) {
-        toggleStartStopVideoSessionButtons();
+    public void sendVideoData(View v) {
         try {
             ProxyService.getInstance().getProxyInstance().sendVideoFrame(new byte[10]);
         } catch (Exception e) {
             _msgAdapter.logMessage("Error sending message: " + e,
                     Log.ERROR, e);
-        }
-        finally {
-        }
-    }
-
-    public void stopVideoSession(View v) {
-        toggleStartStopVideoSessionButtons();
-    }
-
-    private void toggleStartStopVideoSessionButtons() {
-        Button startSessionButton = (Button) this.findViewById(R.id.btnStartVideoSession);
-        Button stopSessionButton = (Button) this.findViewById(R.id.btnStopVideoSession);
-        if (startSessionButton.isEnabled()) {
-            startSessionButton.setEnabled(false);
-            stopSessionButton.setEnabled(true);
-        } else {
-            startSessionButton.setEnabled(true);
-            stopSessionButton.setEnabled(false);
+            Toast.makeText(this, "unable to send video data",Toast.LENGTH_SHORT).show();
+        } finally {
         }
     }
 

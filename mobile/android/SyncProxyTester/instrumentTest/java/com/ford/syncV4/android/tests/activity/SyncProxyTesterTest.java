@@ -26,57 +26,19 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
 
     // Preconditions
 
-    public void testStartVideoSessionButtonInflated() {
-        Button startSessionButton = (Button) sut.findViewById(R.id.btnStartVideoSession);
-        assertNotNull("Button should be inflated", startSessionButton);
+    public void testSendVideoDataButtonInflated() {
+        Button button = (Button) sut.findViewById(R.id.btnSendVideoData);
+        assertNotNull("Button should be inflated", button);
     }
 
-    public void testStartVideoSessionButtonEnabled() {
-        Button startSessionButton = (Button) sut.findViewById(R.id.btnStartVideoSession);
-        assertTrue("startSessionButton should be enabled", startSessionButton.isEnabled());
+    public void testSendVideoDataButtonEnabled() {
+        Button button = (Button) sut.findViewById(R.id.btnSendVideoData);
+        assertTrue("btnSendVideoData should be enabled", button.isEnabled());
     }
 
     @UiThreadTest
-    public void testStartVideoSessionOnClickListenerSet() throws Exception {
-        Button startSessionButton = (Button) sut.findViewById(R.id.btnStartVideoSession);
+    public void testSendVideoDataOnClickListenerSet() throws Exception {
+        Button startSessionButton = (Button) sut.findViewById(R.id.btnSendVideoData);
         assertTrue("On click listener should be set", startSessionButton.performClick());
     }
-
-    public void testStopVideoSessionButtonInflated() {
-        Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
-        assertNotNull("Button should be inflated", stopSessionButton);
-    }
-
-    public void testStopVideoSessionButtonEnabled() {
-        Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
-        assertFalse("stopSessionButton should be disabled", stopSessionButton.isEnabled());
-    }
-
-    @UiThreadTest
-    public void testStopVideoSessionOnClickListenerSet() throws Exception {
-        Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
-        assertTrue("On click listener should be set", stopSessionButton.performClick());
-    }
-
-    // Logic
-    @UiThreadTest
-    public void testStartVideoSessionButtonClickEnablesStopButton() throws Exception {
-        Button startSessionButton = (Button) sut.findViewById(R.id.btnStartVideoSession);
-        Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
-        startSessionButton.performClick();
-        assertTrue("stopSessionButton should be enabled", stopSessionButton.isEnabled());
-        assertFalse("startSessionButton should be disabled", startSessionButton.isEnabled());
-    }
-
-    // Logic
-    @UiThreadTest
-    public void testStopVideoSessionButtonClickEnablesStartButton() throws Exception {
-        Button startSessionButton = (Button) sut.findViewById(R.id.btnStartVideoSession);
-        Button stopSessionButton = (Button) sut.findViewById(R.id.btnStopVideoSession);
-        startSessionButton.performClick();
-        stopSessionButton.performClick();
-        assertFalse("stopSessionButton should be disabled", stopSessionButton.isEnabled());
-        assertTrue("startSessionButton should be enabled", startSessionButton.isEnabled());
-    }
-
 }

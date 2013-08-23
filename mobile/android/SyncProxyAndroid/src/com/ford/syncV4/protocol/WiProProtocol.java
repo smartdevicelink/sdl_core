@@ -352,7 +352,7 @@ public class WiProProtocol extends AbstractProtocol {
                 Object messageLock = _messageLocks.get(header.getSessionID());
                 if (messageLock == null) {
                     messageLock = new Object();
-                    _messageLocks.put(header.getSessionID(), messageLock);
+                    _messageLocks.put(header.getSessionID(), messageLock); // here is where ack for session should be stored
                 }
                 //hashID = BitConverter.intFromByteArray(data, 0);
                 handleProtocolSessionStarted(header.getSessionType(), header.getSessionID(), _version, "");
