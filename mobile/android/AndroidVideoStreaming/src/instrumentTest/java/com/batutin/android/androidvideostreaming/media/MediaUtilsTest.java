@@ -1,12 +1,12 @@
 package com.batutin.android.androidvideostreaming.media;
 
 import android.media.CamcorderProfile;
-import android.test.AndroidTestCase;
+import android.test.InstrumentationTestCase;
 
 /**
  * Created by Andrew Batutin on 8/9/13.
  */
-public class MediaUtilsTest extends AndroidTestCase {
+public class MediaUtilsTest extends InstrumentationTestCase {
 
     private static CamcorderProfile profile;
     static {
@@ -22,5 +22,11 @@ public class MediaUtilsTest extends AndroidTestCase {
     protected static final int VIDEO_FRAME_RATE = profile.videoFrameRate;
 
     public MediaUtilsTest() {
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
     }
 }

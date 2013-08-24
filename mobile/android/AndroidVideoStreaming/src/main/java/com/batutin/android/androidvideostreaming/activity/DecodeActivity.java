@@ -14,6 +14,7 @@ import com.batutin.android.androidvideostreaming.R;
 import com.batutin.android.androidvideostreaming.media.CamcorderProfileUtils;
 import com.batutin.android.androidvideostreaming.media.VideoAvcCoder;
 import com.batutin.android.androidvideostreaming.colorspace.ColorSpaceUtils;
+import com.batutin.android.androidvideostreaming.media.VideoAvcCoderListener;
 import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.IOException;
@@ -107,7 +108,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     public void endStream(View v) {
-        mPlayer.videoAvcCoder.shouldStop();
+        mPlayer.videoAvcCoder.stop();
     }
 
     private byte[] createTestByteArray() {
@@ -156,7 +157,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
                     pipedOutputStream.flush();
                 }
                 pipedOutputStream.close();
-                mPlayer.videoAvcCoder.shouldStop();
+                mPlayer.videoAvcCoder.stop();
             } catch (Exception e) {
                 ALog.e(e.getMessage());
             }
@@ -175,7 +176,32 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
                     defaultExceptionHandler(thread, ex);
                 }
             });
-            videoAvcCoder = new VideoAvcCoder(surface, pipedReader);
+            videoAvcCoder = new VideoAvcCoder(surface, pipedReader, CamcorderProfile.QUALITY_LOW, new VideoAvcCoderListener() {
+                @Override
+                public void coderStarted(VideoAvcCoder listener) {
+
+                }
+
+                @Override
+                public void errorOnCoderStart(VideoAvcCoder listener, String errorDescription) {
+
+                }
+
+                @Override
+                public void coderShouldStop(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void coderStopped(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void errorOnCoderStop(VideoAvcCoder videoAvcCoder, String errorMessage) {
+
+                }
+            });
         }
 
         @Override

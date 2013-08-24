@@ -77,6 +77,9 @@ public class ALog {
     }
 
     private static final String getMessage(String s, Object... args) {
+        if (s == null){
+            s= "";
+        }
         s = String.format(s, args);
         LogContext c = getContext();
         String msg = c.simpleClassName + "." + c.methodName + "@"

@@ -8,31 +8,57 @@ import android.view.Surface;
 import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.IOException;
-import java.io.PipedInputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 public class VideoAvcCoder {
 
-
-    private final PresentationTimeCalc presentationTimeCalc;
-    private PipedInputStream reader;
+    private VideoAvcCoderListener videoAvcCoderListener;
+    private PresentationTimeCalc presentationTimeCalc;
+    private InputStream reader;
     private boolean stop = false;
     private MediaEncoder mediaEncoder;
     private MediaDecoder mediaDecoder;
     private Surface surface;
 
-    public VideoAvcCoder(Surface surface, PipedInputStream reader) throws IllegalStateException {
+    private VideoAvcCoder() {
+    }
+
+    public VideoAvcCoder(Surface surface, InputStream reader, int quality, VideoAvcCoderListener videoAvcCoderListener) {
+        initCoder(surface, reader, quality, videoAvcCoderListener);
+    }
+
+    private void initCoder(Surface surface, InputStream reader, int quality, VideoAvcCoderListener videoAvcCoderListener) {
+        this.videoAvcCoderListener = checkListenerIsNull(videoAvcCoderListener);
         this.surface = surface;
         this.reader = reader;
-        MediaFormat mediaFormat = createEncoderParameters();
+        MediaFormat mediaFormat = createEncoderParameters(quality);
         mediaDecoder = new MediaDecoder();
         mediaEncoder = new MediaEncoder();
         mediaEncoder.configureMediaEncoder(mediaFormat);
         presentationTimeCalc = new PresentationTimeCalc(MediaEncoder.FRAME_RATE);
-        start();
     }
 
-    public PipedInputStream getReader() {
+    public static VideoAvcCoder createLowQualityVideoAvcCoder(Surface surface, InputStream reader, VideoAvcCoderListener videoAvcCoderListener) {
+        return new VideoAvcCoder(surface, reader, CamcorderProfile.QUALITY_LOW, videoAvcCoderListener);
+    }
+
+    public static VideoAvcCoder createHighQualityVideoAvcCoder(Surface surface, InputStream reader, VideoAvcCoderListener videoAvcCoderListener) {
+        return new VideoAvcCoder(surface, reader, CamcorderProfile.QUALITY_HIGH, videoAvcCoderListener);
+    }
+
+    public VideoAvcCoderListener getVideoAvcCoderListener() {
+        return videoAvcCoderListener;
+    }
+
+    protected VideoAvcCoderListener checkListenerIsNull(VideoAvcCoderListener videoAvcCoderListener) throws IllegalArgumentException {
+        if (videoAvcCoderListener == null) {
+            throw new IllegalArgumentException("VideoAvcCoderListener should not be null");
+        }
+        return videoAvcCoderListener;
+    }
+
+    public InputStream getReader() {
         return reader;
     }
 
@@ -44,40 +70,47 @@ public class VideoAvcCoder {
         return mediaDecoder;
     }
 
-    private MediaFormat createEncoderParameters() {
-        CamcorderProfile camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
+    protected MediaFormat createEncoderParameters(int quality) {
+        CamcorderProfile camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(quality);
         int colorFormat = ColorFormatUtils.selectFirstVideoAvcColorFormat();
         MediaFormat mediaFormat = MediaFormatUtils.createVideoAvcEncoderMediaFormat(camcorderProfile, colorFormat, MediaEncoder.FRAME_RATE);
         return mediaFormat;
     }
 
-    public void start() throws IllegalStateException {
+    public synchronized void start() {
         try {
             mediaEncoder.start();
+            videoAvcCoderListener.coderStarted(this);
         } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
+            videoAvcCoderListener.errorOnCoderStart(this, exp.getMessage());
         }
     }
 
-    public synchronized void shouldStop() {
+    public synchronized void stop() {
         this.stop = true;
+        videoAvcCoderListener.coderShouldStop(this);
     }
 
-    @Override
-    public String toString() {
-        String message = " " + mediaDecoder.toString() + " " + mediaEncoder.toString();
-        return super.toString() + message;
+    public synchronized void forceStop() {
+        stopCoding();
     }
 
-    public synchronized void stop() throws IllegalStateException {
+    private void stopCoding() {
         try {
             reader.close();
             mediaEncoder.stop();
             mediaDecoder.stop();
+            videoAvcCoderListener.coderStopped(this);
         } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
-        } catch (IOException e) {
-            ALog.e(e.getMessage());
+            videoAvcCoderListener.errorOnCoderStop(this, "Something wrong with coder " + exp.getMessage());
+        } catch (IOException exp) {
+            videoAvcCoderListener.errorOnCoderStop(this, "Something wrong with coder stream " + exp.getMessage());
+            ALog.e(exp.getMessage());
+        }catch (NullPointerException exp){
+            videoAvcCoderListener.errorOnCoderStop(this, "some element is null " + exp.getMessage());
+            ALog.e(exp.getMessage());
         }
     }
 
@@ -223,7 +256,7 @@ public class VideoAvcCoder {
         }
         ALog.i("decoded " + checkIndex + " frames at "
                 + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) + "x" + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) + ": raw=" + rawSize + ", enc=" + encodedSize);
-        stop();
+        stopCoding();
     }
 
     private long matchBufferInfo(MediaCodec.BufferInfo info, long encodedSize, ByteBuffer encodedData) {
@@ -243,5 +276,11 @@ public class VideoAvcCoder {
         MediaFormat format = MediaFormatUtils.createVideoAvcDecoderMediaFormat(mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH), mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT), csd0);
         mediaDecoder.configureMediaDecoder(format, surface);
         mediaDecoder.start();
+    }
+
+    @Override
+    public String toString() {
+        String message = " " + mediaDecoder.toString() + " " + mediaEncoder.toString();
+        return super.toString() + message;
     }
 }
