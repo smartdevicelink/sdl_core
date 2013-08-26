@@ -76,17 +76,13 @@ public class MediaEncoder extends AbstractMediaCoder implements MediaCoderState 
         ALog.d("End encoder configure");
     }
 
-    public byte[] getDataToEncode(InputStream reader) {
+    public byte[] getDataToEncode(InputStream reader) throws IOException {
         ByteArrayOutputStream bb = new ByteArrayOutputStream();
         int res = 0;
         do {
-            try {
-                res = reader.read();
-                if (res != -1) {
-                    bb.write(res);
-                }
-            } catch (IOException e) {
-                ALog.e(e.getMessage());
+            res = reader.read();
+            if (res != -1) {
+                bb.write(res);
             }
         }
         while (res != -1 && bb.size() < frameSize());
@@ -106,7 +102,7 @@ public class MediaEncoder extends AbstractMediaCoder implements MediaCoderState 
         return getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2;
     }
 
-    public void enqueueFrame(int inputBufIndex, long presentationTimeUs, InputStream reader) {
+    public void enqueueFrame(int inputBufIndex, long presentationTimeUs, InputStream reader) throws IOException {
         ByteBuffer encoderInputBuffer = getEncoder().getInputBuffers()[inputBufIndex];
         encoderInputBuffer.clear();
         byte[] dataToEncode = getDataToEncode(reader);

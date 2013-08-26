@@ -81,6 +81,7 @@ public class VideoAvcCoder {
         try {
             mediaEncoder.start();
             videoAvcCoderListener.coderStarted(this);
+            ALog.i("VideoAvcCoder started");
         } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
             videoAvcCoderListener.errorOnCoderStart(this, exp.getMessage());
@@ -90,6 +91,7 @@ public class VideoAvcCoder {
     public synchronized void stop() {
         this.stop = true;
         videoAvcCoderListener.coderShouldStop(this);
+        ALog.i("VideoAvcCoder should stop");
     }
 
     public synchronized void forceStop() {
@@ -102,6 +104,7 @@ public class VideoAvcCoder {
             mediaEncoder.stop();
             mediaDecoder.stop();
             videoAvcCoderListener.coderStopped(this);
+            ALog.i("VideoAvcCoder stopped");
         } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
             videoAvcCoderListener.errorOnCoderStop(this, "Something wrong with coder " + exp.getMessage());
@@ -158,7 +161,14 @@ public class VideoAvcCoder {
                         ALog.i("sent input EOS (with zero-length frame)");
                     } else {
 
-                        mediaEncoder.enqueueFrame(inputBufIndex, presentationTimeUs, reader);
+                        try {
+                            mediaEncoder.enqueueFrame(inputBufIndex, presentationTimeUs, reader);
+                        } catch (IOException e) {
+                            mediaEncoder.enqueueEndOfStreamFrame(inputBufIndex, presentationTimeUs);
+                            inputDone = true;
+                            ALog.e(e.getMessage());
+                            ALog.i("Stopping coding cause of reader exception");
+                        }
                         ALog.v("submitted frame " + generateIndex + " to enc");
                     }
                     generateIndex++;
