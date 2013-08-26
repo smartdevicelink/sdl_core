@@ -7,7 +7,7 @@ import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -76,13 +76,17 @@ public class MediaEncoder extends AbstractMediaCoder implements MediaCoderState 
         ALog.d("End encoder configure");
     }
 
-    public byte[] getDataToEncode(InputStream reader) throws IOException {
+    public byte[] getDataToEncode(PipedInputStream reader) {
         ByteArrayOutputStream bb = new ByteArrayOutputStream();
         int res = 0;
         do {
-            res = reader.read();
-            if (res != -1) {
-                bb.write(res);
+            try {
+                res = reader.read();
+                if (res != -1) {
+                    bb.write(res);
+                }
+            } catch (IOException e) {
+                ALog.e(e.getMessage());
             }
         }
         while (res != -1 && bb.size() < frameSize());
@@ -102,12 +106,13 @@ public class MediaEncoder extends AbstractMediaCoder implements MediaCoderState 
         return getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2;
     }
 
-    public void enqueueFrame(int inputBufIndex, long presentationTimeUs, InputStream reader) throws IOException {
+    public byte[] enqueueFrame(int inputBufIndex, long presentationTimeUs, PipedInputStream reader) {
         ByteBuffer encoderInputBuffer = getEncoder().getInputBuffers()[inputBufIndex];
         encoderInputBuffer.clear();
         byte[] dataToEncode = getDataToEncode(reader);
         encoderInputBuffer.put(dataToEncode, 0, dataToEncode.length);
         getEncoder().queueInputBuffer(inputBufIndex, 0, frameSize(), presentationTimeUs, 0);
+        return dataToEncode;
     }
 
     // Send an empty frame with the end-of-stream flag set.  If we set EOS

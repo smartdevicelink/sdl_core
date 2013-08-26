@@ -8,57 +8,32 @@ import android.view.Surface;
 import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
 
 public class VideoAvcCoder {
 
-    private VideoAvcCoderListener videoAvcCoderListener;
-    private PresentationTimeCalc presentationTimeCalc;
-    private InputStream reader;
+    private VideoAvcCoderStateListener stateListener;
+    private VideoAvcCoderDataStreamListener streamListener;
+    private final PresentationTimeCalc presentationTimeCalc;
+    private PipedInputStream reader;
     private boolean stop = false;
     private MediaEncoder mediaEncoder;
     private MediaDecoder mediaDecoder;
     private Surface surface;
 
-    private VideoAvcCoder() {
-    }
-
-    public VideoAvcCoder(Surface surface, InputStream reader, int quality, VideoAvcCoderListener videoAvcCoderListener) {
-        initCoder(surface, reader, quality, videoAvcCoderListener);
-    }
-
-    private void initCoder(Surface surface, InputStream reader, int quality, VideoAvcCoderListener videoAvcCoderListener) {
-        this.videoAvcCoderListener = checkListenerIsNull(videoAvcCoderListener);
+    public VideoAvcCoder(Surface surface, PipedInputStream reader) throws IllegalStateException {
         this.surface = surface;
         this.reader = reader;
-        MediaFormat mediaFormat = createEncoderParameters(quality);
+        MediaFormat mediaFormat = createEncoderParameters();
         mediaDecoder = new MediaDecoder();
         mediaEncoder = new MediaEncoder();
         mediaEncoder.configureMediaEncoder(mediaFormat);
         presentationTimeCalc = new PresentationTimeCalc(MediaEncoder.FRAME_RATE);
+        start();
     }
 
-    public static VideoAvcCoder createLowQualityVideoAvcCoder(Surface surface, InputStream reader, VideoAvcCoderListener videoAvcCoderListener) {
-        return new VideoAvcCoder(surface, reader, CamcorderProfile.QUALITY_LOW, videoAvcCoderListener);
-    }
-
-    public static VideoAvcCoder createHighQualityVideoAvcCoder(Surface surface, InputStream reader, VideoAvcCoderListener videoAvcCoderListener) {
-        return new VideoAvcCoder(surface, reader, CamcorderProfile.QUALITY_HIGH, videoAvcCoderListener);
-    }
-
-    public VideoAvcCoderListener getVideoAvcCoderListener() {
-        return videoAvcCoderListener;
-    }
-
-    protected VideoAvcCoderListener checkListenerIsNull(VideoAvcCoderListener videoAvcCoderListener) throws IllegalArgumentException {
-        if (videoAvcCoderListener == null) {
-            throw new IllegalArgumentException("VideoAvcCoderListener should not be null");
-        }
-        return videoAvcCoderListener;
-    }
-
-    public InputStream getReader() {
+    public PipedInputStream getReader() {
         return reader;
     }
 
@@ -70,56 +45,69 @@ public class VideoAvcCoder {
         return mediaDecoder;
     }
 
-    protected MediaFormat createEncoderParameters(int quality) {
-        CamcorderProfile camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(quality);
+    private MediaFormat createEncoderParameters() {
+        CamcorderProfile camcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
         int colorFormat = ColorFormatUtils.selectFirstVideoAvcColorFormat();
         MediaFormat mediaFormat = MediaFormatUtils.createVideoAvcEncoderMediaFormat(camcorderProfile, colorFormat, MediaEncoder.FRAME_RATE);
         return mediaFormat;
     }
 
-    public synchronized void start() {
+    public void start() throws IllegalStateException {
+        if (stateListener != null){
+            stateListener.videoAvcCoderShouldStart(this);
+        }
         try {
             mediaEncoder.start();
-            videoAvcCoderListener.coderStarted(this);
-            ALog.i("VideoAvcCoder started");
         } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
-            videoAvcCoderListener.errorOnCoderStart(this, exp.getMessage());
+        }
+        if (stateListener != null){
+            stateListener.videoAvcCoderStarted(this);
         }
     }
 
-    public synchronized void stop() {
-        this.stop = true;
-        videoAvcCoderListener.coderShouldStop(this);
-        ALog.i("VideoAvcCoder should stop");
-    }
-
-    public synchronized void forceStop() {
-        stopCoding();
-    }
-
-    private void stopCoding() {
+    public synchronized void stop() throws IllegalStateException {
         try {
             reader.close();
             mediaEncoder.stop();
             mediaDecoder.stop();
-            videoAvcCoderListener.coderStopped(this);
-            ALog.i("VideoAvcCoder stopped");
         } catch (IllegalStateException exp) {
             ALog.e(exp.getMessage());
-            videoAvcCoderListener.errorOnCoderStop(this, "Something wrong with coder " + exp.getMessage());
-        } catch (IOException exp) {
-            videoAvcCoderListener.errorOnCoderStop(this, "Something wrong with coder stream " + exp.getMessage());
-            ALog.e(exp.getMessage());
-        }catch (NullPointerException exp){
-            videoAvcCoderListener.errorOnCoderStop(this, "some element is null " + exp.getMessage());
-            ALog.e(exp.getMessage());
+        } catch (IOException e) {
+            ALog.e(e.getMessage());
         }
+        if (stateListener != null){
+            stateListener.videoAvcCoderStopped(this);
+        }
+        if (streamListener != null){
+            streamListener.dataDecodingStopped(this);
+        }
+
+        if (streamListener != null){
+            streamListener.dataEncodingStopped(this);
+        }
+    }
+
+    public synchronized void shouldStop() {
+        if (stateListener != null){
+            stateListener.videoAvcCoderShouldStop(this);
+        }
+        this.stop = true;
+    }
+
+    @Override
+    public String toString() {
+        String message = " " + mediaDecoder.toString() + " " + mediaEncoder.toString();
+        return super.toString() + message;
     }
 
     public void doEncodeDecodeVideoFromBuffer() {
 
         final int TIMEOUT_USEC = 10000;
+        if (streamListener != null){
+            streamListener.dataEncodingShouldStart(this);
+        }
+
         ByteBuffer[] encoderInputBuffers = mediaEncoder.getEncoder().getInputBuffers();
         ByteBuffer[] encoderOutputBuffers = mediaEncoder.getEncoder().getOutputBuffers();
         ByteBuffer[] decoderInputBuffers = null;
@@ -140,6 +128,9 @@ public class VideoAvcCoder {
         boolean inputDone = false;
         boolean encoderDone = false;
         boolean outputDone = false;
+        if (streamListener != null){
+            streamListener.dataEncodingStarted(this);
+        }
         while (!outputDone) {
             ALog.v("loop");
 
@@ -155,19 +146,16 @@ public class VideoAvcCoder {
                 if (inputBufIndex >= 0) {
                     long presentationTimeUs = presentationTimeCalc.computePresentationTime(generateIndex);
                     if (stop == true) {
-
+                        if (streamListener != null){
+                            streamListener.dataEncodingShouldStop(this);
+                        }
                         mediaEncoder.enqueueEndOfStreamFrame(inputBufIndex, presentationTimeUs);
                         inputDone = true;
                         ALog.i("sent input EOS (with zero-length frame)");
                     } else {
-
-                        try {
-                            mediaEncoder.enqueueFrame(inputBufIndex, presentationTimeUs, reader);
-                        } catch (IOException e) {
-                            mediaEncoder.enqueueEndOfStreamFrame(inputBufIndex, presentationTimeUs);
-                            inputDone = true;
-                            ALog.e(e.getMessage());
-                            ALog.i("Stopping coding cause of reader exception");
+                        byte[] frame = mediaEncoder.enqueueFrame(inputBufIndex, presentationTimeUs, reader);
+                        if (streamListener != null){
+                            streamListener.frameShouldBeEncoded(this, frame);
                         }
                         ALog.v("submitted frame " + generateIndex + " to enc");
                     }
@@ -210,9 +198,21 @@ public class VideoAvcCoder {
                         // Codec config info.  Only expected on first packet.  One way to
                         // handle this is to manually stuff the data into the MediaFormat
                         // and pass that to configure().  We do that here to exercise the API.
-                        startDecoder(encodedData);
+                        if (streamListener != null){
+                            streamListener.settingsDataReceived(this, encodedData);
+                        }
+                        if (streamListener != null){
+                            streamListener.dataDecodingShouldStart(this);
+                        }
+                        startDecoderWithCodecInfo(encodedData);
                         ALog.i("decoder configured (" + info.size + " bytes) and started");
+                        if (streamListener != null){
+                            streamListener.dataDecodingStarted(this);
+                        }
                     } else {
+                        if (streamListener != null){
+                            streamListener.frameWasEncoded(this, encodedData);
+                        }
                         // Get a decoder input buffer, blocking until it's available.
                         mediaDecoder.queueEncodedData(info, encodedData, this);
                         encoderDone = isEncoderDone(info);
@@ -255,6 +255,9 @@ public class VideoAvcCoder {
                     if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                         ALog.i("output EOS");
                         outputDone = true;
+                        if (streamListener != null){
+                            streamListener.dataDecodingShouldStop(this);
+                        }
                     }
                     // As soon as we call releaseOutputBuffer, the buffer will be forwarded
                     // to SurfaceTexture to convert to a texture.  The API doesn't guarantee
@@ -266,7 +269,7 @@ public class VideoAvcCoder {
         }
         ALog.i("decoded " + checkIndex + " frames at "
                 + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) + "x" + mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) + ": raw=" + rawSize + ", enc=" + encodedSize);
-        stopCoding();
+        stop();
     }
 
     private long matchBufferInfo(MediaCodec.BufferInfo info, long encodedSize, ByteBuffer encodedData) {
@@ -282,15 +285,9 @@ public class VideoAvcCoder {
         return encoderDone;
     }
 
-    private void startDecoder(ByteBuffer csd0) {
+    private void startDecoderWithCodecInfo(ByteBuffer csd0) {
         MediaFormat format = MediaFormatUtils.createVideoAvcDecoderMediaFormat(mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_WIDTH), mediaEncoder.getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT), csd0);
         mediaDecoder.configureMediaDecoder(format, surface);
         mediaDecoder.start();
-    }
-
-    @Override
-    public String toString() {
-        String message = " " + mediaDecoder.toString() + " " + mediaEncoder.toString();
-        return super.toString() + message;
     }
 }
