@@ -245,6 +245,9 @@ public class VideoAvcCoder {
                         }
                         // Get a decoder input buffer, blocking until it's available.
                         mediaDecoder.queueEncodedData(info, encodedData, this);
+                        if (streamListener != null) {
+                            streamListener.frameShouldBeDecoded(this, encodedData);
+                        }
                         encoderDone = isEncoderDone(info);
                         ALog.v("passed " + info.size + " bytes to decoder"
                                 + (encoderDone ? " (EOS)" : ""));

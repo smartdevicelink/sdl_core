@@ -25,9 +25,7 @@ public interface VideoAvcCoderDataStreamListener {
 
     public void dataDecodingStarted(VideoAvcCoder videoAvcCoder);
 
-    public void frameShouldBeDecoded(VideoAvcCoder videoAvcCoder, byte[] frame);
-
-    public void frameWasDecoded(VideoAvcCoder videoAvcCoder, byte[] decodedFrame);
+    public void frameShouldBeDecoded(VideoAvcCoder videoAvcCoder, ByteBuffer frame);
 
     public void dataDecodingShouldStop(VideoAvcCoder videoAvcCoder);
 
