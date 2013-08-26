@@ -11,9 +11,9 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.batutin.android.androidvideostreaming.R;
+import com.batutin.android.androidvideostreaming.colorspace.ColorSpaceUtils;
 import com.batutin.android.androidvideostreaming.media.CamcorderProfileUtils;
 import com.batutin.android.androidvideostreaming.media.VideoAvcCoder;
-import com.batutin.android.androidvideostreaming.colorspace.ColorSpaceUtils;
 import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.IOException;
@@ -32,12 +32,6 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         super.onCreate(savedInstanceState);
         configureLogger();
         mCamcorderProfile = CamcorderProfileUtils.getFirstCameraCamcorderProfile(CamcorderProfile.QUALITY_LOW);
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-                defaultExceptionHandler(paramThread, paramThrowable);
-            }
-        });
         setContentView(R.layout.decode_activity);
         SurfaceView sv = (SurfaceView) findViewById(R.id.surfaceView);
         sv.getHolder().addCallback(this);
@@ -81,28 +75,43 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
     private void configureVideoCoding(SurfaceHolder holder) {
         PipedInputStream pipedReader = new PipedInputStream();
         PipedOutputStream pipedWriter = new PipedOutputStream();
-        if (mBitmapGenerator == null) {
+
             mBitmapGenerator = new BitmapGeneratorThread(pipedWriter);
-        }
-        if (mPlayer == null) {
+
+
             mPlayer = new PlayerThread(holder.getSurface(), pipedReader);
-        }
+
 
         try {
             pipedWriter.connect(pipedReader);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        mBitmapGenerator.start();
-        mPlayer.start();
+        try {
+            ALog.i(mBitmapGenerator.getState().name());
+            if (mBitmapGenerator.getState().equals(Thread.State.NEW)){
+                mBitmapGenerator.start();
+            }
+            ALog.i(mPlayer.getState().name());
+            if (mPlayer.getState().equals(Thread.State.NEW)){
+                mPlayer.start();
+            }
+        } catch (IllegalThreadStateException e) {
+            ALog.e(e.getMessage());
+        }
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        ALog.d("surfaceDestroyed" + mPlayer.toString());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         if (mPlayer != null) {
             endStream(null);
-            ALog.d("surfaceDestroyed" + mPlayer.toString());
+            ALog.d("onPause" + mPlayer.toString());
         }
     }
 
@@ -126,14 +135,6 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
         private final PipedOutputStream pipedOutputStream;
         private boolean stop = false;
 
-        public synchronized void shouldStop() {
-            this.stop = true;
-        }
-
-        public synchronized PipedOutputStream getPipedOutputStream() {
-            return pipedOutputStream;
-        }
-
         public BitmapGeneratorThread(PipedOutputStream pipedOutputStream) {
 
             this.pipedOutputStream = pipedOutputStream;
@@ -144,6 +145,14 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
                     defaultExceptionHandler(thread, ex);
                 }
             });
+        }
+
+        public synchronized void shouldStop() {
+            this.stop = true;
+        }
+
+        public synchronized PipedOutputStream getPipedOutputStream() {
+            return pipedOutputStream;
         }
 
         @Override
