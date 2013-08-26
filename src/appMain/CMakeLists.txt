@@ -18,6 +18,7 @@ set(LIBRARIES
   pthread
   rt
   avahi-client
+  avahi-common
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
