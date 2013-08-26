@@ -49,6 +49,10 @@ FStateView {
                 FActViewShow{ view: "AuxPCA"}
                 FActViewHide{}
             }
+            FGrdCondition{ condition: dataPool.currSource==="SDL_Music"
+                FActViewShow{ view: "SDL_MusicPCA"}
+                FActViewHide{}
+            }
         },
         FTrgEvent { event: closeNormalScreens
             FActViewHide{}

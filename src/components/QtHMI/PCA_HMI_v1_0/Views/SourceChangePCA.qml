@@ -34,8 +34,8 @@ FStateView {
             FMenuElement { id: sourceBt; menuText: "BT Audio";   }
             FMenuElement { id: sourceIpod; menuText: "iPod";   }
             FMenuElement { id: sourceUSB; menuText: "USB";   }
-            FMenuElement { id: sourceLineIn; menuText: "Line In";}
-            FMenuElement { id: sourceExtra; menuText: "Dummy 1";  isVisible: false}
+            FMenuElement { id: sourceLineIn; menuText: "Line In";}            
+            FMenuElement { id: sourceSDL; menuText: "SDL Music";}
         }
 
         FViewUseCaseSimple { condition: sv.isInEntry
@@ -77,6 +77,10 @@ FStateView {
         },
         FTrgMenuElement { menuElement: sourceLineIn
             FActScriptCall { onScript: dataPool.currSource = "LineIn" }
+            FActViewShow { view: "RadioEventHandlingPCA" }
+        },
+        FTrgMenuElement { menuElement: sourceSDL
+            FActScriptCall { onScript: dataPool.currSource = "SDL_Music" }
             FActViewShow { view: "RadioEventHandlingPCA" }
         },
         FTrgTouchArea { touchArea:l.close; touchAction: TA.Out
