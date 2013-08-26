@@ -152,12 +152,17 @@ void AlertRequest::SendSpeakRequest(int app_id) {
 }
 
 void AlertRequest::SendPlayToneNotification(int app_id) {
+  LOG4CXX_INFO(logger_, "AlertRequest::SendPlayToneNotification");
+
   // check playtone parameter
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
+      smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
       CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_PlayTone,
-                            smart_objects::SmartObject());
+                            msg_params);
     }
   }
 }
