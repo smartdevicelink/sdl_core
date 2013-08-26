@@ -7,7 +7,7 @@ import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PipedInputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -76,7 +76,7 @@ public class MediaEncoder extends AbstractMediaCoder implements MediaCoderState 
         ALog.d("End encoder configure");
     }
 
-    public byte[] getDataToEncode(PipedInputStream reader) {
+    public byte[] getDataToEncode(InputStream reader) {
         ByteArrayOutputStream bb = new ByteArrayOutputStream();
         int res = 0;
         do {
@@ -106,7 +106,7 @@ public class MediaEncoder extends AbstractMediaCoder implements MediaCoderState 
         return getMediaFormat().getInteger(MediaFormat.KEY_WIDTH) * getMediaFormat().getInteger(MediaFormat.KEY_HEIGHT) * 3 / 2;
     }
 
-    public byte[] enqueueFrame(int inputBufIndex, long presentationTimeUs, PipedInputStream reader) {
+    public byte[] enqueueFrame(int inputBufIndex, long presentationTimeUs, InputStream reader) {
         ByteBuffer encoderInputBuffer = getEncoder().getInputBuffers()[inputBufIndex];
         encoderInputBuffer.clear();
         byte[] dataToEncode = getDataToEncode(reader);

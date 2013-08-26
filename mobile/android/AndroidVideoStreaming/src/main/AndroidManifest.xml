@@ -29,8 +29,7 @@
 
         <activity
             android:name="com.batutin.android.androidvideostreaming.activity.DecodeActivity"
-            android:label="DecodeActivity"
-            android:screenOrientation="landscape">
+            android:label="DecodeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -182,7 +182,8 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
                     defaultExceptionHandler(thread, ex);
                 }
             });
-            videoAvcCoder = new VideoAvcCoder(surface, pipedReader);
+            videoAvcCoder = VideoAvcCoder.createLowQualityVideoAvcCoder(surface, pipedReader);
+            videoAvcCoder.start();
         }
 
         @Override
