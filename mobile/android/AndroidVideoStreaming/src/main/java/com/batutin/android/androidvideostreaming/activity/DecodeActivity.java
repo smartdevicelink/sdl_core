@@ -14,11 +14,13 @@ import com.batutin.android.androidvideostreaming.R;
 import com.batutin.android.androidvideostreaming.colorspace.ColorSpaceUtils;
 import com.batutin.android.androidvideostreaming.media.CamcorderProfileUtils;
 import com.batutin.android.androidvideostreaming.media.VideoAvcCoder;
+import com.batutin.android.androidvideostreaming.media.VideoAvcCoderDataStreamListener;
 import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.nio.ByteBuffer;
 
 public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
 
@@ -183,6 +185,67 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback {
                 }
             });
             videoAvcCoder = VideoAvcCoder.createLowQualityVideoAvcCoder(surface, pipedReader);
+            videoAvcCoder.setStreamListener(new VideoAvcCoderDataStreamListener() {
+                @Override
+                public void dataEncodingShouldStart(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void dataEncodingStarted(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void frameShouldBeEncoded(VideoAvcCoder videoAvcCoder, byte[] frame) {
+
+                }
+
+                @Override
+                public void settingsDataReceived(VideoAvcCoder videoAvcCoder, ByteBuffer settingsData) {
+                    ALog.d(settingsData.toString());
+                }
+
+                @Override
+                public void frameWasEncoded(VideoAvcCoder videoAvcCoder, ByteBuffer encodedFrame) {
+                    ALog.d(encodedFrame.toString());
+                }
+
+                @Override
+                public void dataEncodingShouldStop(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void dataEncodingStopped(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void dataDecodingShouldStart(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void dataDecodingStarted(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void frameShouldBeDecoded(VideoAvcCoder videoAvcCoder, ByteBuffer frame) {
+
+                }
+
+                @Override
+                public void dataDecodingShouldStop(VideoAvcCoder videoAvcCoder) {
+
+                }
+
+                @Override
+                public void dataDecodingStopped(VideoAvcCoder videoAvcCoder) {
+
+                }
+            });
             videoAvcCoder.start();
         }
 
