@@ -1,0 +1,1 @@
+qmlscene\qmlscene.exe -platform windows:fontengine=freetype PCA_HMI_v1_0\PCA_HMI_v1_0.qml 
