@@ -574,10 +574,22 @@ FFW.UI = FFW.RPCObserver
                     JSONMessage.result.sliderPosition = sliderPosition;
                 }
             } else {
-                this.sendError(resultCode,
-                    sliderRequestID,
-                    "UI.Slider",
-                    'Slider request aborted.');
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": sliderRequestID,
+                    "error": {
+                        "code": resultCode, // type (enum) from SDL protocol
+                        "message": 'Slider request aborted.',
+                        "data":{
+                            "method": 'UI.Slider'
+                        }
+                    }
+                };
+
+                if (sliderPosition) {
+                    JSONMessage.error.data.sliderPosition = sliderPosition;
+                }
             }
 
             this.client.send(JSONMessage);

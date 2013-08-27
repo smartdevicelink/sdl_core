@@ -65,9 +65,13 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
      * Extend deactivate method send SUCCESS response on deactivate with current
      * slider value
      */
-    deactivate: function() {
+    deactivate: function(ABORTED) {
         this._super();
-        FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["SUCCESS"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+        if (ABORTED === true) {
+            FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["SUCCESS"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+        } else {
+            FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["ABORTED"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+        }
     },
 
     adjustControl: Em.ContainerView.extend( {

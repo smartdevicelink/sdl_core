@@ -350,7 +350,7 @@ SDL.SDLAppModel = Em.Object
             setTimeout(function() {
 
                 if (SDL.SliderView.active) {
-                    SDL.SliderView.deactivate();
+                    SDL.SliderView.deactivate(true);
                 }
             }, message.params.timeout);
 
