@@ -192,6 +192,7 @@ const char scroll_message_body[] = "scrollableMessageBody";
 const char data_result[] = "dataResult";
 const char dtc_list[] = "dtcList";
 const char interaction_mode[] = "interactionMode";
+const char slider_position[] = "sliderPosition";
 }  // namespace strings
 
 namespace mobile_notification {
