@@ -39,7 +39,6 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol_handler/message_from_mobile_app_handler.h"
 #include "protocol_handler/messages_to_mobile_app_handler.h"
-
 #include "utils/macro.h"
 
 namespace protocol_handler {
@@ -53,7 +52,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     session_observer_(0),
     transport_manager_(transport_manager),
     handle_messages_from_mobile_app_(NULL),
-    handle_messages_to_mobile_app_(NULL) {
+    handle_messages_to_mobile_app_(NULL),
+    kPeriodForNaviAck(5) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   handle_messages_from_mobile_app_ = new threads::Thread(
@@ -84,7 +84,6 @@ ProtocolHandlerImpl::~ProtocolHandlerImpl() {
 }
 
 void ProtocolHandlerImpl::set_protocol_observer(ProtocolObserver* observer) {
-  //LOG4CXX_TRACE_METHOD(logger_, __PRETTY_FUNCTION__);
   if (!observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
     return;
@@ -103,7 +102,7 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   unsigned int session_id,
   unsigned char service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -121,7 +120,7 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
 }
 
 void ProtocolHandlerImpl::SendStartSessionAck(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   unsigned char session_id,
   unsigned char protocol_version,
   unsigned int hash_code,
@@ -147,7 +146,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 }
 
 void ProtocolHandlerImpl::SendStartSessionNAck(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   unsigned char service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -166,7 +165,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
 }
 
 void ProtocolHandlerImpl::SendMessageToMobileApp(
-  const transport_manager::RawMessageSptr& message) {
+  const RawMessagePtr& message) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!message) {
     LOG4CXX_ERROR(logger_,
@@ -178,7 +177,8 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
-unsigned int ProtocolHandlerImpl::GetPacketSize(unsigned int data_size, unsigned char* first_bytes) {
+unsigned int ProtocolHandlerImpl::GetPacketSize(
+  unsigned int data_size, unsigned char* first_bytes) {
   DCHECK(first_bytes);
   unsigned char offset = sizeof(uint32_t);
   if (data_size < 2 * offset) {
@@ -212,7 +212,7 @@ unsigned int ProtocolHandlerImpl::GetPacketSize(unsigned int data_size, unsigned
 }
 
 void ProtocolHandlerImpl::OnTMMessageReceived(
-  const transport_manager::RawMessageSptr message) {
+  const RawMessagePtr message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if (message.valid()) {
@@ -243,14 +243,14 @@ void ProtocolHandlerImpl::OnTMMessageSend() {
 
 void ProtocolHandlerImpl::OnTMMessageSendFailed(
   const transport_manager::DataSendError& error,
-  const transport_manager::RawMessageSptr& message)  {
+  const RawMessagePtr& message)  {
   // TODO(PV): implement
   LOG4CXX_ERROR(logger_, "Sending message " <<
                 message-> data() << " failed.");
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendFrame(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   const ProtocolPacket& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!packet.packet()) {
@@ -276,11 +276,11 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(
                                  &connection_uid,
                                  &session_id);
 
-  transport_manager::RawMessageSptr message_to_send(new RawMessage(
-        connection_uid,
-        original_message->protocol_version(),
-        packet.packet(),
-        packet.packet_size()));
+  RawMessagePtr message_to_send(new RawMessage(
+                                  connection_uid,
+                                  original_message->protocol_version(),
+                                  packet.packet(),
+                                  packet.packet_size()));
 
   LOG4CXX_INFO(logger_, "Message to send with connection id "
                << connection_uid);
@@ -298,7 +298,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   const unsigned char session_id, unsigned int protocol_version,
   const unsigned char service_type, const unsigned int data_size,
   const unsigned char* data, const bool compress) {
@@ -318,7 +318,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   const unsigned char session_id, unsigned int protocol_version,
   const unsigned char service_type, const unsigned int data_size,
   const unsigned char* data, const bool compress,
@@ -406,7 +406,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -443,6 +443,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
         packet->data(),
         packet->data_size());
 
+      if (SERVICE_TYPE_NAVI == packet->service_type()) {
+        HandleStreamingMessage(original_message, connection_key, raw_message);
+      }
+
       if (protocol_observer_) {
         protocol_observer_->OnMessageReceived(raw_message);
       }
@@ -466,7 +470,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -548,7 +552,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
-  const transport_manager::RawMessageSptr& original_message,
+  const RawMessagePtr& original_message,
   const ProtocolPacket* packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -622,6 +626,58 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
 
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
+}
+
+RESULT_CODE ProtocolHandlerImpl::HandleStreamingMessage(
+  const RawMessagePtr& original_message,
+  int connection_key,
+  const RawMessagePtr& recieved_msg) {
+  LOG4CXX_INFO(logger_, "Handling map streaming message");
+
+  int messsages_for_session = message_over_navi_session_.count(
+                                connection_key);
+  ++messsages_for_session;
+  if (kPeriodForNaviAck == messsages_for_session) {
+    message_over_navi_session_.erase(connection_key);
+    SendMobileNaviAck(original_message, connection_key);
+  } else {
+    message_over_navi_session_.insert(std::pair<int, RawMessagePtr>(
+                                        connection_key, recieved_msg));
+  }
+  return RESULT_OK;
+}
+
+RESULT_CODE ProtocolHandlerImpl::SendMobileNaviAck(
+  const RawMessagePtr& original_message,
+  int connection_key) {
+  LOG4CXX_INFO(logger_, "SendMobileNaviAck for session " << connection_key);
+
+  /*int messsages_for_session = message_over_navi_session_.count(
+                                connection_key);
+
+  if (0 >= messsages_for_session) {
+    LOG4CXX_ERROR(
+      logger_, "No map streaming frames received for session id "
+      << connection_key);
+    return RESULT_FAIL;
+  }*/
+
+  ProtocolPacket packet(PROTOCOL_VERSION_2,
+                        COMPRESS_OFF,
+                        FRAME_TYPE_CONTROL,
+                        SERVICE_TYPE_NAVI,
+                        FRAME_DATA_MOBILE_NAVE_ACK,
+                        connection_key,
+                        0,
+                        kPeriodForNaviAck);
+
+  RESULT_CODE send_result = SendFrame(original_message, packet);
+  if (RESULT_OK == send_result) {
+    LOG4CXX_INFO(logger_, "MobileNaviAck sent successfully.");
+  } else {
+    LOG4CXX_ERROR(logger_, "MobileNaviAck failed to be sent.");
+  }
+  return send_result;
 }
 
 }  // namespace protocol_handler

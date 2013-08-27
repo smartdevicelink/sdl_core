@@ -35,11 +35,11 @@
 
 namespace protocol_handler {
 log4cxx::LoggerPtr MessagesToMobileAppHandler::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ProtocolHandler"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ProtocolHandler"));
 
 MessagesToMobileAppHandler::MessagesToMobileAppHandler(
-    ProtocolHandlerImpl* handler)
-    : handler_(handler) {
+  ProtocolHandlerImpl* handler)
+  : handler_(handler) {
   CHECK(handler_);
 }
 
@@ -50,13 +50,13 @@ void MessagesToMobileAppHandler::threadMain() {
   // TODO(PV): check if continue running condition.
   while (1) {
     while (!handler_->messages_to_mobile_app_.empty()) {
-      const transport_manager::RawMessageSptr& message = handler_->messages_to_mobile_app_
-                                      .pop();
+      const RawMessagePtr& message = handler_->messages_to_mobile_app_
+                                     .pop();
       LOG4CXX_INFO_EXT(
-          logger_,
-          "Message to mobile app: connection " << message->connection_key()
-            << "; dataSize: " << message->data_size()
-            << " ; protocolVersion " << message->protocol_version());
+        logger_,
+        "Message to mobile app: connection " << message->connection_key()
+        << "; dataSize: " << message->data_size()
+        << " ; protocolVersion " << message->protocol_version());
 
       unsigned int maxDataSize = 0;
       if (PROTOCOL_VERSION_1 == message->protocol_version()) {
@@ -85,13 +85,13 @@ void MessagesToMobileAppHandler::threadMain() {
                                false);
         if (result != RESULT_OK) {
           LOG4CXX_ERROR(
-              logger_, "ProtocolHandler failed to send single frame message.");
+            logger_, "ProtocolHandler failed to send single frame message.");
         }
       } else {
         LOG4CXX_INFO_EXT(
-            logger_,
-            "Message will be sent in multiple frames; max size is "
-              << maxDataSize);
+          logger_,
+          "Message will be sent in multiple frames; max size is "
+          << maxDataSize);
 
         RESULT_CODE result = handler_->SendMultiFrameMessage(
                                message, sessionID, message->protocol_version(),
@@ -100,7 +100,7 @@ void MessagesToMobileAppHandler::threadMain() {
                                maxDataSize);
         if (result != RESULT_OK) {
           LOG4CXX_ERROR(
-              logger_, "ProtocolHandler failed to send multiframe messages.");
+            logger_, "ProtocolHandler failed to send multiframe messages.");
         }
       }
     }
