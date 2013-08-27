@@ -4,8 +4,8 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.widget.Button;
 
-import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
+import com.ford.syncV4.android.R;
 
 /**
  * Created by Andrew Batutin on 7/30/13.
@@ -26,19 +26,19 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
 
     // Preconditions
 
-    public void testSendVideoDataButtonInflated() {
-        Button button = (Button) sut.findViewById(R.id.btnSendVideoData);
+    public void testShowVideoPreviewButtonInflated() {
+        Button button = (Button) sut.findViewById(R.id.btnShowVideoPreview);
         assertNotNull("Button should be inflated", button);
     }
 
-    public void testSendVideoDataButtonEnabled() {
-        Button button = (Button) sut.findViewById(R.id.btnSendVideoData);
-        assertTrue("btnSendVideoData should be enabled", button.isEnabled());
+    public void testShowVideoPreviewButtonEnabled() {
+        Button button = (Button) sut.findViewById(R.id.btnShowVideoPreview);
+        assertTrue("btnShowVideoPreview should be enabled", button.isEnabled());
     }
 
     @UiThreadTest
-    public void testSendVideoDataOnClickListenerSet() throws Exception {
-        Button startSessionButton = (Button) sut.findViewById(R.id.btnSendVideoData);
+    public void testShowVideoPreviewOnClickListenerSet() throws Exception {
+        Button startSessionButton = (Button) sut.findViewById(R.id.btnShowVideoPreview);
         assertTrue("On click listener should be set", startSessionButton.performClick());
     }
 }
