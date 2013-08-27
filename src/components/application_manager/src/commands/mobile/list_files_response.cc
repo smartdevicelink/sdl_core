@@ -62,7 +62,7 @@ void ListFilesResponse::Run() {
     if (!file_system::DirectoryExists(application->name())) {
       (*message_)[strings::msg_params][strings::success] = false;
       (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::GENERIC_ERROR;
+        mobile_apis::Result::SUCCESS;
     } else {
       const std::string full_directory_path =
         file_system::FullPath(application->name());
@@ -78,7 +78,7 @@ void ListFilesResponse::Run() {
       } else {
         (*message_)[strings::msg_params][strings::success] = false;
         (*message_)[strings::msg_params][strings::result_code] =
-          mobile_apis::Result::GENERIC_ERROR;
+          mobile_apis::Result::SUCCESS;
       }
     }
   }
