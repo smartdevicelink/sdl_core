@@ -2,8 +2,8 @@ package com.batutin.android.androidvideostreaming.videopreview;
 
 import android.view.Surface;
 
-import com.batutin.android.androidvideostreaming.activity.DecodeActivity;
 import com.batutin.android.androidvideostreaming.media.VideoAvcCoder;
+import com.batutin.android.androidvideostreaming.media.VideoAvcCoderDataStreamListener;
 import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.PipedInputStream;
@@ -13,15 +13,23 @@ import java.io.PipedInputStream;
  */
 public class PlayerThread extends VideoPreviewThread {
 
-    public VideoAvcCoder videoAvcCoder;
-    private DecodeActivity decodeActivity;
+    private VideoAvcCoder videoAvcCoder;
+    private VideoAvcCoderDataStreamListener dataStreamListener;
 
-    public PlayerThread(DecodeActivity decodeActivity, Surface surface, PipedInputStream pipedReader) {
+    public PlayerThread(VideoAvcCoderDataStreamListener dataStreamListener, Surface surface, PipedInputStream pipedReader) {
         super();
-        this.decodeActivity = decodeActivity;
+        this.dataStreamListener = dataStreamListener;
         videoAvcCoder = VideoAvcCoder.createLowQualityVideoAvcCoder(surface, pipedReader);
-        videoAvcCoder.setStreamListener(decodeActivity);
+        videoAvcCoder.setStreamListener(dataStreamListener);
         videoAvcCoder.start();
+    }
+
+    public VideoAvcCoderDataStreamListener getDataStreamListener() {
+        return dataStreamListener;
+    }
+
+    public VideoAvcCoder getVideoAvcCoder() {
+        return videoAvcCoder;
     }
 
     @Override

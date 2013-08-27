@@ -1,6 +1,5 @@
 package com.batutin.android.androidvideostreaming.videopreview;
 
-import com.batutin.android.androidvideostreaming.activity.DecodeActivity;
 import com.batutin.android.androidvideostreaming.utils.ALog;
 
 import java.io.OutputStream;
@@ -10,33 +9,36 @@ import java.io.OutputStream;
  */
 public class BitmapGeneratorThread extends VideoPreviewThread {
 
-    private final OutputStream pipedOutputStream;
-    private DecodeActivity decodeActivity;
+    private PlayerThreadState threadState;
+    private FrameDataSource dataSource;
+    private OutputStream outputStream;
+
     private boolean stop = false;
 
-    public BitmapGeneratorThread(DecodeActivity decodeActivity, OutputStream pipedOutputStream) {
+    public BitmapGeneratorThread(OutputStream outputStream, PlayerThreadState threadState, FrameDataSource dataSource) {
         super();
-        this.decodeActivity = decodeActivity;
-        this.pipedOutputStream = pipedOutputStream;
+        this.threadState = threadState;
+        this.dataSource = dataSource;
+        this.outputStream = outputStream;
     }
 
     public synchronized void shouldStop() {
         this.stop = true;
     }
 
-    public synchronized OutputStream getPipedOutputStream() {
-        return pipedOutputStream;
+    public synchronized OutputStream getOutputStream() {
+        return outputStream;
     }
 
     @Override
     public void run() {
         try {
             while (!stop) {
-                pipedOutputStream.write(decodeActivity.createTestByteArray());
-                pipedOutputStream.flush();
+                outputStream.write(dataSource.createVideoFrame());
+                outputStream.flush();
             }
-            pipedOutputStream.close();
-            decodeActivity.getPlayer().videoAvcCoder.shouldStop();
+            outputStream.close();
+            threadState.threadShouldStop(this);
         } catch (Exception e) {
             ALog.e(e.getMessage());
         }

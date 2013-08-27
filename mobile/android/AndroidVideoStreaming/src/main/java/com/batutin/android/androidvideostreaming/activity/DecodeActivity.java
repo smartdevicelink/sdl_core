@@ -16,14 +16,17 @@ import com.batutin.android.androidvideostreaming.media.VideoAvcCoder;
 import com.batutin.android.androidvideostreaming.media.VideoAvcCoderDataStreamListener;
 import com.batutin.android.androidvideostreaming.utils.ALog;
 import com.batutin.android.androidvideostreaming.videopreview.BitmapGeneratorThread;
+import com.batutin.android.androidvideostreaming.videopreview.FrameDataSource;
 import com.batutin.android.androidvideostreaming.videopreview.PlayerThread;
+import com.batutin.android.androidvideostreaming.videopreview.PlayerThreadState;
+import com.batutin.android.androidvideostreaming.videopreview.VideoPreviewThread;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 
-public class DecodeActivity extends Activity implements SurfaceHolder.Callback, VideoAvcCoderDataStreamListener {
+public class DecodeActivity extends Activity implements SurfaceHolder.Callback, VideoAvcCoderDataStreamListener, PlayerThreadState, FrameDataSource {
 
 
     private PlayerThread mPlayer;
@@ -70,7 +73,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback, 
     private void configureVideoCoding(SurfaceHolder holder) {
         PipedInputStream pipedReader = new PipedInputStream();
         PipedOutputStream pipedWriter = new PipedOutputStream();
-        mBitmapGenerator = new BitmapGeneratorThread(this, pipedWriter);
+        mBitmapGenerator = new BitmapGeneratorThread(pipedWriter, this, this);
         mPlayer = new PlayerThread(this, holder.getSurface(), pipedReader);
         try {
             pipedWriter.connect(pipedReader);
@@ -107,7 +110,7 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback, 
 
     public void endStream(View v) {
         mBitmapGenerator.shouldStop();
-        mPlayer.videoAvcCoder.shouldStop();
+        mPlayer.getVideoAvcCoder().shouldStop();
 
     }
 
@@ -179,5 +182,15 @@ public class DecodeActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void dataDecodingStopped(VideoAvcCoder videoAvcCoder) {
 
+    }
+
+    @Override
+    public void threadShouldStop(VideoPreviewThread thread) {
+        mPlayer.getVideoAvcCoder().shouldStop();
+    }
+
+    @Override
+    public byte[] createVideoFrame() {
+        return createTestByteArray();
     }
 }
