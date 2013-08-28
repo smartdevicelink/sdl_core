@@ -297,7 +297,7 @@ DeviceVector DnssdServiceBrowser::PrepareDeviceVector() const {
                                                    service_record.host_name);
     }
     if (devices[service_record.addr] != 0) {
-      devices[service_record.addr]->addDiscoveredApplication(
+      devices[service_record.addr]->AddDiscoveredApplication(
           service_record.port);
     }
   }

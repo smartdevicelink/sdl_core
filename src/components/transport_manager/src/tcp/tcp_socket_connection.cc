@@ -78,7 +78,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   TcpDevice* tcp_device = static_cast<TcpDevice*>(device.get());
 
   int port;
-  if (-1 == (port = tcp_device->getApplicationPort(application_handle()))) {
+  if (-1 == (port = tcp_device->GetApplicationPort(application_handle()))) {
     LOG4CXX_ERROR(
         logger_,
         "Application port for " << application_handle() << " not found");
@@ -96,7 +96,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   struct sockaddr_in addr;
   memset((char*) &addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = tcp_device->getAddress();
+  addr.sin_addr.s_addr = tcp_device->GetAddress();
   addr.sin_port = port;
 
   if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {

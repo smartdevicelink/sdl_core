@@ -68,10 +68,10 @@ static in_addr_t iface_address = GetIfaceAddress();
 MATCHER_P(HasService, service_port, ""){
 for(DeviceVector::const_iterator it = arg.begin(); it != arg.end(); ++it) {
   TcpDevice* tcp_device = dynamic_cast<TcpDevice*>(it->get());
-  if(tcp_device && tcp_device->getAddress() == iface_address) {
+  if(tcp_device && tcp_device->GetAddress() == iface_address) {
     ApplicationList app_list = tcp_device->GetApplicationList();
     for(ApplicationList::const_iterator it = app_list.begin(); it != app_list.end(); ++it) {
-      if(tcp_device->getApplicationPort(*it) == service_port) {
+      if(tcp_device->GetApplicationPort(*it) == service_port) {
         return true;
       }
     }

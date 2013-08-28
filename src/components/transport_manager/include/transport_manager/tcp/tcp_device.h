@@ -87,21 +87,21 @@ class TcpDevice : public Device {
    *
    * @param socket Value of socket.
    */
-  ApplicationHandle addIncomingApplication(const int socket);
+  ApplicationHandle AddIncomingApplication(const int socket);
 
   /**
    * @brief Add application that was discovered before.
    *
    * @param Port No.
    */
-  ApplicationHandle addDiscoveredApplication(const int port);
+  ApplicationHandle AddDiscoveredApplication(const int port);
 
   /**
    * @brief Remove application from the container of applications.
    *
    * @param app_handle Handle of application.
    */
-  void removeApplication(const ApplicationHandle app_handle);
+  void RemoveApplication(const ApplicationHandle app_handle);
 
   /**
    * @brief Return application's socket value.
@@ -110,7 +110,7 @@ class TcpDevice : public Device {
    *
    * @return Application's socket value.
    */
-  int getApplicationSocket(const ApplicationHandle app_handle) const;
+  int GetApplicationSocket(const ApplicationHandle app_handle) const;
 
   /**
    * @brief Return application's port No.
@@ -119,14 +119,14 @@ class TcpDevice : public Device {
    *
    * @return Application's port No.
    */
-  int getApplicationPort(const ApplicationHandle app_handle) const;
+  int GetApplicationPort(const ApplicationHandle app_handle) const;
 
   /**
    * @brief Return address.
    *
    * @return Address.
    */
-  in_addr_t getAddress() const {
+  in_addr_t GetAddress() const {
     return in_addr_;
   }
 

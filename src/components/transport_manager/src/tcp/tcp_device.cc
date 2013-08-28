@@ -61,7 +61,7 @@ ApplicationList TcpDevice::GetApplicationList() const {
   return app_list;
 }
 
-ApplicationHandle TcpDevice::addIncomingApplication(const int socket) {
+ApplicationHandle TcpDevice::AddIncomingApplication(const int socket) {
   Application app;
   app.incoming = true;
   app.socket = socket;
@@ -72,7 +72,7 @@ ApplicationHandle TcpDevice::addIncomingApplication(const int socket) {
   return app_handle;
 }
 
-ApplicationHandle TcpDevice::addDiscoveredApplication(const int port) {
+ApplicationHandle TcpDevice::AddDiscoveredApplication(const int port) {
   Application app;
   app.incoming = false;
   app.port = port;
@@ -84,7 +84,7 @@ ApplicationHandle TcpDevice::addDiscoveredApplication(const int port) {
 }
 
 
-void TcpDevice::removeApplication(const ApplicationHandle app_handle) {
+void TcpDevice::RemoveApplication(const ApplicationHandle app_handle) {
   pthread_mutex_lock(&applications_mutex_);
   applications_.erase(app_handle);
   pthread_mutex_unlock(&applications_mutex_);
@@ -94,14 +94,14 @@ TcpDevice::~TcpDevice() {
   pthread_mutex_destroy(&applications_mutex_);
 }
 
-int TcpDevice::getApplicationSocket(const ApplicationHandle app_handle) const {
+int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {
   std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(app_handle);
   if(applications_.end() == it) return -1;
   if(! it->second.incoming) return -1;
   return it->second.socket;
 }
 
-int TcpDevice::getApplicationPort(const ApplicationHandle app_handle) const {
+int TcpDevice::GetApplicationPort(const ApplicationHandle app_handle) const {
   std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(app_handle);
   if(applications_.end() == it) return -1;
   if(it->second.incoming) return -1;

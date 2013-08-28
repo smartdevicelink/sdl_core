@@ -126,7 +126,7 @@ void TcpClientListener::thread() {
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
     DeviceSptr device = controller_->AddDevice(tcp_device);
     tcp_device = static_cast<TcpDevice*>(device.get());
-    const ApplicationHandle app_handle = tcp_device->addIncomingApplication(
+    const ApplicationHandle app_handle = tcp_device->AddIncomingApplication(
         connection_fd);
 
     TcpSocketConnection* connection(
