@@ -59,7 +59,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int searchDevices(void) = 0;
+  virtual int SearchDevices(void) = 0;
 
   /**
    * @brief Connect to all applications discovered on device.

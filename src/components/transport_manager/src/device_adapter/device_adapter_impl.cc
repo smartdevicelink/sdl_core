@@ -108,7 +108,7 @@ DeviceAdapter::Error DeviceAdapterImpl::init() {
   return error;
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::searchDevices() {
+DeviceAdapter::Error DeviceAdapterImpl::SearchDevices() {
   LOG4CXX_INFO(logger_, "enter");
   if (device_scanner_ == nullptr) {
     LOG4CXX_INFO(logger_, "not supported");

@@ -29,7 +29,7 @@ TEST(TcpAdapterBasicTest, NotInitialised) {
   DeviceAdapter* device_adapter =
       static_cast<DeviceAdapter*>(new TcpDeviceAdapter);
 
-  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->searchDevices());
+  EXPECT_EQ(DeviceAdapter::BAD_STATE, device_adapter->SearchDevices());
   EXPECT_EQ(DeviceAdapter::OK,
             device_adapter->connect(DeviceUID("xxx"), 2));
   EXPECT_EQ(DeviceAdapter::BAD_STATE,

@@ -365,7 +365,7 @@ int TransportManagerImpl::removeDeviceAdapter(
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::searchDevices(void) {
+int TransportManagerImpl::SearchDevices(void) {
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized")
     return E_TM_IS_NOT_INITIALIZED;
@@ -382,7 +382,7 @@ int TransportManagerImpl::searchDevices(void) {
   for (std::vector<DeviceAdapterSptr>::iterator it = device_adapters_.begin();
        it != device_adapters_.end(); ++it) {
     LOG4CXX_INFO(logger_, "Iterating over transport adapters");
-    int scanResult = (*it)->searchDevices();
+    int scanResult = (*it)->SearchDevices();
     if (scanResult != device_adapter::DeviceAdapter::OK) {
       ++da_scanned;
       LOG4CXX_ERROR(
@@ -403,7 +403,7 @@ int TransportManagerImpl::searchDevices(void) {
       return scanResult;
     }
   }
-  LOG4CXX_INFO(logger_, "searchDevices() function is complete")
+  LOG4CXX_INFO(logger_, "SearchDevices() function is complete")
   return E_SUCCESS;
 }
 

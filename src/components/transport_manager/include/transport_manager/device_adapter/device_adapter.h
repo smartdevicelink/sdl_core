@@ -137,7 +137,7 @@ class DeviceAdapter {
    *
    * @return Error information about possible reason of searching devices failure.
    **/
-  virtual Error searchDevices() = 0;
+  virtual Error SearchDevices() = 0;
 
   /**
    * @brief Notify that server connection factory is available.

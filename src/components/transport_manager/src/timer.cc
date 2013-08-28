@@ -86,7 +86,7 @@ Timer& Timer::operator = (const Timer &other)
 }
 
 void Timer::start() {
-  pthread_create(&thread_, nullptr, &threadRoutine, this);
+  pthread_create(&thread_, nullptr, &ThreadRoutine, this);
 }
 
 void Timer::stop() {
@@ -95,7 +95,7 @@ void Timer::stop() {
   pthread_mutex_unlock(&mutex_);
 }
 
-void* Timer::threadRoutine(void* p) {
+void* Timer::ThreadRoutine(void* p) {
   Timer *t = static_cast<Timer*>(p);
   timespec time;
   time.tv_nsec = t->milliseconds_ * 1000000;

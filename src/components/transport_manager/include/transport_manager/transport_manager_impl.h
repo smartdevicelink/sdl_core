@@ -108,7 +108,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int searchDevices(void);
+  virtual int SearchDevices(void);
 
   /**
    * @brief Connect to all applications discovered on device.

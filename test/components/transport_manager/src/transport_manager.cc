@@ -192,7 +192,7 @@ TEST_F(TransportManagerTest, ScanDeviceFailed) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
 
   mock_adapter->get_device_scanner()->fail_further_search();
-  tm->searchDevices();
+  tm->SearchDevices();
   EXPECT_TRUE(waitCond(1));
   mock_adapter->get_device_scanner()->reset();
 }
@@ -203,7 +203,7 @@ TEST_F(TransportManagerTest, ScanDeviceNoFound) {
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(0);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
 
-  tm->searchDevices();
+  tm->SearchDevices();
   EXPECT_TRUE(waitCond(1));
   mock_adapter->get_device_scanner()->reset();
 }
@@ -215,7 +215,7 @@ TEST_F(TransportManagerTest, ScanDeviceDone) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
 
   mock_adapter->get_device_scanner()->addDevice("TestDevice", "MA:CA:DR:ES:S");
-  tm->searchDevices();
+  tm->SearchDevices();
   EXPECT_TRUE(waitCond(1));
   mock_adapter->get_device_scanner()->reset();
 }
@@ -227,7 +227,7 @@ TEST_F(TransportManagerTest, ScanManyDeviceDone) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
   mock_adapter->get_device_scanner()->addDevice("TestDevice1", "MA:CA:DR:ES:S1");
   mock_adapter->get_device_scanner()->addDevice("TestDevice2", "MA:CA:DR:ES:S2");
-  tm->searchDevices();
+  tm->SearchDevices();
   EXPECT_TRUE(waitCond(1));
   mock_adapter->get_device_scanner()->reset();
 }
@@ -241,7 +241,7 @@ TEST_F(TransportManagerTest, ConnectDisconnectSendReciveDone) {
   MyTransportListener *myListener = new MyTransportListener(this);
   mock_adapter->get_device_scanner()->addDevice(kInfo.name(), kInfo.mac_address());
   tm->addEventListener(myListener);
-  tm->searchDevices();
+  tm->SearchDevices();
   EXPECT_TRUE(waitCond(10));
 
   EXPECT_CALL(*tm_listener, OnConnectionFailed(_, _)).Times(0);

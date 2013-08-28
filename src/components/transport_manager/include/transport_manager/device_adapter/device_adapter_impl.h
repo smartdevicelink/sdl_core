@@ -115,7 +115,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
    *
    * @return Error information about possible reason of search devices failure.
    **/
-  virtual DeviceAdapter::Error searchDevices();
+  virtual DeviceAdapter::Error SearchDevices();
 
   /**
    * @brief Connect to the specified application discovered on device.

@@ -487,7 +487,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
     return;
   }
   //device_list_during_search_.clear();
-  transport_manager_->searchDevices();
+  transport_manager_->SearchDevices();
 }
 
 void ConnectionHandlerImpl::ConnectToDevice(

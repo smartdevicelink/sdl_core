@@ -52,7 +52,7 @@ namespace transport_manager {
  **/
 
 /**
- * @brief Type definition for variable that hold shared pointer to ther raw message.
+ * @brief Type definition for variable that hold shared pointer to raw message.
  */
 typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 
