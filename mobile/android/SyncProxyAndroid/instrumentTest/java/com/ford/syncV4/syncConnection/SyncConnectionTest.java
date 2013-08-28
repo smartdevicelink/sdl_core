@@ -8,6 +8,7 @@ import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.SyncTransport;
+import com.ford.syncV4.util.BitConverter;
 
 import java.util.Arrays;
 
@@ -78,7 +79,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     }
 
     public void testCloseMobileNavSessionShouldSendAppropriateBytes() throws Exception {
-        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(SessionType.Mobile_Nav, SESSION_ID, 0x00, VERSION);
+        byte[] data = BitConverter.intToByteArray(0xCDEF1234);
+        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(SessionType.Mobile_Nav, SESSION_ID, 0, VERSION, data.length);
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), mock(BaseTransportConfig.class)){
 
             @Override

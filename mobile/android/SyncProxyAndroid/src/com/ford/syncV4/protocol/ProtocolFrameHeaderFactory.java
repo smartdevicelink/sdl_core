@@ -21,17 +21,6 @@ public class ProtocolFrameHeaderFactory {
         return msg;
     }
 
-    public static ProtocolFrameHeader createEndSession(SessionType serviceType, byte sessionID, int messageID, byte version) {
-        ProtocolFrameHeader msg = new ProtocolFrameHeader();
-        msg.setVersion(version);
-        msg.setFrameType(FrameType.Control);
-        msg.setSessionType(serviceType);
-        msg.setSessionID(sessionID);
-        msg.setFrameData(FrameDataControlFrameType.EndSession.value());
-        msg.setMessageID(messageID);
-        return msg;
-    }
-
     public static ProtocolFrameHeader createStartSession(SessionType serviceType, int messageID, byte version) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);

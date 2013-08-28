@@ -2,8 +2,6 @@ package com.ford.syncV4.protocol;
 
 import android.test.AndroidTestCase;
 
-import com.ford.syncV4.protocol.ProtocolFrameHeader;
-import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.SessionType;
@@ -41,7 +39,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
     }
 
     public void testMobileNavEndSessionFrameCreation() throws Exception {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2, 0);
         assertEquals(header.getSessionType(), SessionType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Control);
         assertEquals(header.getFrameData(), FrameDataControlFrameType.EndSession.getValue());

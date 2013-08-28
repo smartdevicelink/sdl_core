@@ -87,22 +87,10 @@ public class WiProProtocol extends AbstractProtocol {
         SessionType sessionType = protocolMsg.getSessionType();
         byte sessionID = protocolMsg.getSessionID();
 
-        byte[] data = null;
-        if (_version == 2) {
-            if (protocolMsg.getBulkData() != null) {
-                data = new byte[12 + protocolMsg.getJsonSize() + protocolMsg.getBulkData().length];
-                sessionType = SessionType.Bulk_Data;
-            } else data = new byte[12 + protocolMsg.getJsonSize()];
-            BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
-            binFrameHeader = ProtocolFrameHeaderFactory.createBinaryFrameHeader(protocolMsg.getRPCType(), protocolMsg.getFunctionID(), protocolMsg.getCorrID(), protocolMsg.getJsonSize());
-            System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, data, 0, 12);
-            System.arraycopy(protocolMsg.getData(), 0, data, 12, protocolMsg.getJsonSize());
-            if (protocolMsg.getBulkData() != null) {
-                System.arraycopy(protocolMsg.getBulkData(), 0, data, 12 + protocolMsg.getJsonSize(), protocolMsg.getBulkData().length);
-            }
-        } else {
-            data = protocolMsg.getData();
-        }
+        ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(protocolMsg, _version).generate();
+        byte[] data = protocolMessageConverter.getData();
+        sessionType = protocolMessageConverter.getSessionType();
+
 
         // Get the message lock for this protocol session
         Object messageLock = _messageLocks.get(sessionID);
