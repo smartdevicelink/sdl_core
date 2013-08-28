@@ -168,6 +168,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected SyncConnection _syncConnection;
     // RPC Session ID
     protected byte _rpcSessionID = 0;
+    // Mobile Nav Session ID
+    protected byte _mobileNavSessionID = 100;
     // SyncProxy Advanced Lifecycle Management
     protected Boolean _advancedLifecycleManagementEnabled = false;
     /**
@@ -203,17 +205,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected byte _wiproVersion = 1;
     // Interface broker
     protected SyncInterfaceBroker _interfaceBroker = null;
+    // Declare Queuing Threads
+    protected ProxyMessageDispatcher<ProtocolMessage> _incomingProxyMessageDispatcher;
     private proxyListenerType _proxyListener = null;
     // Heartbeat members
     private ProxyHeartBeat _proxyHeartBeat = null;
     private boolean _heartBeatEnabled = false;
     private long _interfaceIdleTimeLimit = 3000; // 3 seconds
     private long _heartbeatResponsePastDueTimeLimit = 2000; // 2 seconds
-    private byte _mobileNavSessionID = 100;
     // Device Info for logging
     private TraceDeviceInfo _traceDeviceInterrogator = null;
-    // Declare Queuing Threads
-    protected ProxyMessageDispatcher<ProtocolMessage> _incomingProxyMessageDispatcher;
     private ProxyMessageDispatcher<ProtocolMessage> _outgoingProxyMessageDispatcher;
     private ProxyMessageDispatcher<InternalProxyMessage> _internalProxyMessageDispatcher;
     // Flag indicating if callbacks should be called from UIThread
@@ -1105,7 +1106,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void handleMobileNavMessage(ProtocolMessage message){
+    protected void handleMobileNavMessage(ProtocolMessage message) {
         Log.i(TAG, "Mobile Nav Session message received" + message.toString());
         // TODO handle incoming mobile nav sessions
     }
@@ -2384,6 +2385,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void startMobileNavSession(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
+        _mobileNavSessionID = sessionID;
         // TODO yet to implement startMobileNavSession
     }
 
@@ -2439,6 +2441,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         ProtocolMessage pm = new ProtocolMessage();
         pm.setData(rtpPacket);
         pm.setSessionID(_mobileNavSessionID);
+        pm.setVersion(getWiProVersion());
         pm.setMessageType(MessageType.VIDEO);
         pm.setSessionType(SessionType.Mobile_Nav);
         return pm;

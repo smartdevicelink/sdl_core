@@ -108,12 +108,24 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         }
     }
 
+    public void testVideoFrameShouldGetRightSessionIDAfterOnProtocolSessionStarted() throws Exception {
+        final byte[] testRTP = new byte[10];
+        sut.getInterfaceBroker().onProtocolSessionStarted(SessionType.Mobile_Nav, (byte) 23, (byte) 2, "");
+        ProtocolMessage result = sut.createMobileNavSessionProtocolMessage(testRTP);
+        assertTrue(Arrays.equals(testRTP, result.getData()));
+        assertEquals(sut.getMobileNavSessionID(), result.getSessionID());
+        assertEquals(MessageType.VIDEO, result.getMessageType());
+        assertEquals(sut.getWiProVersion(), result.getVersion());
+        assertEquals(SessionType.Mobile_Nav, result.getSessionType());
+    }
+
     public void testMobileNavProtocolMessageCreation() throws Exception {
         final byte[] testRTP = new byte[10];
         ProtocolMessage message = sut.createMobileNavSessionProtocolMessage(testRTP);
         assertTrue(Arrays.equals(testRTP, message.getData()));
         assertEquals(sut.getMobileNavSessionID(), message.getSessionID());
         assertEquals(MessageType.VIDEO, message.getMessageType());
+        assertEquals(sut.getWiProVersion(), message.getVersion());
         assertEquals(SessionType.Mobile_Nav, message.getSessionType());
     }
 
@@ -170,7 +182,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             protected void startMobileNavSession(byte sessionID, String correlationID) {
                 super.startMobileNavSession(sessionID, correlationID);
-                assertEquals("Session ID should be equal", sessionID, (byte) 48);
+                assertEquals("Session ID should be equal", _mobileNavSessionID, (byte) 48);
             }
         };
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionType.Mobile_Nav, (byte) 48, (byte) 2, "");
@@ -183,7 +195,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
         when(conf.getTransportType()).thenReturn(TransportType.TCP);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
-                SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
+        SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
                                 /*sync proxy configuration resources*/null,
                                 /*enable advanced lifecycle management true,*/
                 "appName",
@@ -233,7 +245,6 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 assertTrue(message.getSessionID() == (byte) 48);
             }
         };
-
         ProtocolMessage message = new ProtocolMessage();
         message.setVersion((byte) 2);
         message.setSessionID((byte) 48);
