@@ -86,7 +86,7 @@ class DeviceAdapterImpl : public DeviceAdapter, public DeviceAdapterController {
 
  public:
   /**
-   * @brief Run device adapter.
+   * @brief Initiate device adapter.
    *
    * Called from transport manager to start device adapter.
    *
