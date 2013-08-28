@@ -144,7 +144,8 @@ class DynamicApplicationData {
                             const smart_objects::SmartObject& command) = 0;
 
     /*
-     * @brief Deletes all commands from the application menu with the specified command id
+     * @brief Deletes all commands from the application
+     * menu with the specified command id
      */
     virtual void RemoveCommand(unsigned int cmd_id) = 0;
 
@@ -168,7 +169,7 @@ class DynamicApplicationData {
      * @brief Finds menu with the specified id
      */
     virtual smart_objects::SmartObject*  FindSubMenu(
-        unsigned int menu_id) const = 0;
+      unsigned int menu_id) const = 0;
 
     /*
      * @brief Returns true if sub menu with such name already exist
@@ -254,14 +255,44 @@ class DynamicApplicationData {
      *
      * @param active Current state of the perform interaction
      */
-    virtual void set_perform_interaction_active(bool active) = 0;
+    virtual void set_perform_interaction_active(unsigned int active) = 0;
 
     /*
      * @brief Retrieves perform interaction state
      *
      * @return TRUE if perform interaction active, otherwise FALSE
      */
-    virtual bool is_perform_interaction_active() const = 0;
+    virtual unsigned int is_perform_interaction_active() const = 0;
+
+    /*
+     * @brief Sets the choice that was selected in
+     * response to PerformInteraction
+     *
+     * @param choice Choice that was selected
+     */
+    virtual void set_perform_interaction_ui_corrid(unsigned int choice) = 0;
+
+    /*
+     * @brief Retrieve the choice that was selected in
+     * response to PerformInteraction
+     *
+     * @return Choice that was selected in response to PerformInteraction
+     */
+    virtual unsigned int perform_interaction_ui_corrid() const = 0;
+
+    /*
+         * @brief Sets the mode for perform interaction: UI/VR/BOTH
+         *
+         * @param mode Mode that was selected (MENU; VR; BOTH)
+         */
+    virtual void set_perform_interaction_mode(int mode) = 0;
+
+    /*
+     * @brief Retrieve the mode that was PerformInteraction sent in
+     *
+     * @return mode of PerformInteraction
+     */
+    virtual inline int perform_interaction_mode() const = 0;
 
     /*
      * @brief Sets reset global properties state

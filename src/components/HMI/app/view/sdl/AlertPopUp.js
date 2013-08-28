@@ -116,11 +116,11 @@ SDL.AlertPopUp = Em.ContainerView.create({
     /**
      * Deactivate PopUp
      */
-    deactivate: function(ABORTED) {
+    deactivate: function() {
         this.set('active', false);
         clearTimeout(this.timer);
 
-        SDL.SDLController.alertResponse(ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
+        SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
 
         SDL.SDLController.onSystemContextChange();
     },
@@ -172,13 +172,14 @@ SDL.AlertPopUp = Em.ContainerView.create({
             }
 
             for(var i = 0; i < params.length; i++){
-                this.get('softbuttons.buttons.childViews').pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
+                this.get('softbuttons.buttons.childViews')
+                    .pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
                     systemAction: params[i].systemAction,
                     groupName: "AlertPopUp",
                     classNameBindings: ['isHighlighted:isHighlighted'],
                     isHighlighted: params[i].isHighlighted ? true : false,
                     softButtonID: params[i].softButtonID,
-                    icon: params[i].image,
+                    icon: params[i].image ? params[i].image.value : "",
                     text: params[i].text,
                     classNames: 'list-item softButton ' + softButtonsClass,
                     elementId: 'softButton' + i,

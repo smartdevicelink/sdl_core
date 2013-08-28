@@ -63,9 +63,13 @@ void ShowRequest::Run() {
     return;
   }
 
-  if (!MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app)) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                          verification_result);
+    SendResponse(false, verification_result);
     return;
   }
 
@@ -76,53 +80,61 @@ void ShowRequest::Run() {
   msg_params[hmi_request::show_strings] =
     smart_objects::SmartObject(smart_objects::SmartType_Array);
 
+  int index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
-    msg_params[hmi_request::show_strings][0][hmi_request::field_name] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
       TextFieldName::MAIN_FILED1;
-    msg_params[hmi_request::show_strings][0][hmi_request::field_text] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::main_field_1];
+    ++index;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
-    msg_params[hmi_request::show_strings][1][hmi_request::field_name] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
       TextFieldName::MAIN_FILED2;
-    msg_params[hmi_request::show_strings][1][hmi_request::field_text] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::main_field_2];
+    ++index;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
-    msg_params[hmi_request::show_strings][2][hmi_request::field_name] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
       TextFieldName::MAIN_FILED3;
-    msg_params[hmi_request::show_strings][2][hmi_request::field_text] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::main_field_3];
+    ++index;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
-    msg_params[hmi_request::show_strings][3][hmi_request::field_name] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
       TextFieldName::MAIN_FILED4;
-    msg_params[hmi_request::show_strings][3][hmi_request::field_text] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::main_field_4];
+    ++index;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
-    msg_params[hmi_request::show_strings][4][hmi_request::field_name] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
       TextFieldName::MEDIA_CLOCK;
-    msg_params[hmi_request::show_strings][4][hmi_request::field_text] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::media_clock];
+    ++index;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
-    msg_params[hmi_request::show_strings][5][hmi_request::field_name] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
       TextFieldName::MEDIA_TRACK;
-    msg_params[hmi_request::show_strings][5][hmi_request::field_text] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::media_track];
+    ++index;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
-    msg_params[hmi_request::show_strings][6][hmi_request::field_name] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
       TextFieldName::STATUS_BAR;
-    msg_params[hmi_request::show_strings][6][hmi_request::field_text] =
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::status_bar];
+    ++index;
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::alignment)) {

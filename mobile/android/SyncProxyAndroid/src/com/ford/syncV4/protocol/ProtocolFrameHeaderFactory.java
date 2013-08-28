@@ -7,6 +7,7 @@ import com.ford.syncV4.protocol.enums.SessionType;
 
 public class ProtocolFrameHeaderFactory {
 
+
     public static ProtocolFrameHeader createMobileNavStartSession(int messageID, byte sessionID, byte version) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);
@@ -20,6 +21,17 @@ public class ProtocolFrameHeaderFactory {
         return msg;
     }
 
+    public static ProtocolFrameHeader createEndSession(SessionType serviceType, byte sessionID, int messageID, byte version) {
+        ProtocolFrameHeader msg = new ProtocolFrameHeader();
+        msg.setVersion(version);
+        msg.setFrameType(FrameType.Control);
+        msg.setSessionType(serviceType);
+        msg.setSessionID(sessionID);
+        msg.setFrameData(FrameDataControlFrameType.EndSession.value());
+        msg.setMessageID(messageID);
+        return msg;
+    }
+
     public static ProtocolFrameHeader createStartSession(SessionType serviceType, int messageID, byte version) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);
@@ -27,6 +39,7 @@ public class ProtocolFrameHeaderFactory {
         msg.setSessionType(serviceType);
         msg.setFrameData(FrameDataControlFrameType.StartSession.value());
         msg.setMessageID(messageID);
+
         return msg;
     }
 
@@ -38,6 +51,7 @@ public class ProtocolFrameHeaderFactory {
         msg.setSessionID(sessionID);
         msg.setFrameData(FrameDataControlFrameType.StartSessionACK.value());
         msg.setMessageID(messageID);
+
         return msg;
     }
 
@@ -49,10 +63,14 @@ public class ProtocolFrameHeaderFactory {
         msg.setSessionID(sessionID);
         msg.setFrameData(FrameDataControlFrameType.StartSessionNACK.value());
         msg.setMessageID(messageID);
+
         return msg;
     }
 
-    public static ProtocolFrameHeader createEndSession(SessionType serviceType, byte sessionID, int messageID, byte version) {
+    public static ProtocolFrameHeader createEndSession(SessionType serviceType,
+                                                       byte sessionID, int messageID,
+                                                       byte version,
+                                                       int dataLength) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);
         msg.setFrameType(FrameType.Control);
@@ -60,6 +78,8 @@ public class ProtocolFrameHeaderFactory {
         msg.setSessionID(sessionID);
         msg.setFrameData(FrameDataControlFrameType.EndSession.value());
         msg.setMessageID(messageID);
+        msg.setDataSize(dataLength);
+
         return msg;
     }
 
@@ -128,4 +148,5 @@ public class ProtocolFrameHeaderFactory {
 
         return msg;
     }
+
 }

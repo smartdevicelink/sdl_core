@@ -83,7 +83,7 @@ SDL.RPCController = Em.Object
                  */
                 UpdateDeviceList: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -92,7 +92,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.deviceList) {
+                    if (params.deviceList == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -126,7 +126,7 @@ SDL.RPCController = Em.Object
                  */
                 AllowDeviceToConnect: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -135,7 +135,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.device) {
+                    if (params.device == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -160,7 +160,7 @@ SDL.RPCController = Em.Object
                  */
                 UpdateAppList: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -169,7 +169,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.applications) {
+                    if (params.applications == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -233,7 +233,7 @@ SDL.RPCController = Em.Object
                  */
                 AllowApp: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -242,7 +242,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.app) {
+                    if (params.app == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -308,7 +308,7 @@ SDL.RPCController = Em.Object
                  */
                 SetGlobalProperties: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -317,7 +317,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -381,7 +381,7 @@ SDL.RPCController = Em.Object
                  */
                 Speak: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -390,7 +390,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.ttsChunks) {
+                    if (params.ttsChunks == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -408,7 +408,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -442,7 +442,7 @@ SDL.RPCController = Em.Object
                  */
                 ChangeRegistration: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -451,7 +451,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.language) {
+                    if (params.language == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -469,7 +469,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -503,7 +503,7 @@ SDL.RPCController = Em.Object
                  */
                 OnLanguageChange: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -512,7 +512,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.language) {
+                    if (params.language == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -571,7 +571,7 @@ SDL.RPCController = Em.Object
                  */
                 ShowConstantTBT: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -581,7 +581,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -599,7 +600,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.navigationTexts) {
+                    if (params.navigationTexts == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -617,7 +618,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.turnIcon) {
+                    if (params.turnIcon == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -635,7 +636,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.distanceToManeuver) {
+                    if (params.distanceToManeuver == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -653,7 +654,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.distanceToManeuverScale) {
+                    if (params.distanceToManeuverScale == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -671,7 +672,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -705,7 +706,7 @@ SDL.RPCController = Em.Object
                  */
                 UpdateTurnList: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -715,7 +716,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -724,20 +726,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if ("turnList" in params) {
-                        for ( var btn in params.turnList) {
-                            if ("turnIcon" in params.turnList[btn]
-                                && params.turnList[btn].turnIcon.imageType !== "DYNAMIC") {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-
-                                return this.resultStruct;
-                            }
-                        }
-                    }
-                    if (!params.turnList) {
+                    if (params.turnList == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -754,6 +743,22 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
+                    }
+                    if ("turnList" in params) {
+
+                        for ( var i = 0; i < params.turnList.length; i++) {
+                            if (params.turnList[i].image
+                                && params.turnList[i].image.imageType !== "DYNAMIC") {
+
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
+
+                                return this.resultStruct;
+                                e;
+                            }
+                        }
                     }
 
                     this.resultStruct = {
@@ -773,7 +778,8 @@ SDL.RPCController = Em.Object
 
                     if (params) {
                         if ("softButtons" in params) {
-                            if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                            if (SDL.RPCController
+                                .checkImagesArray(params.softButtons)) {
                                 this.resultStruct = {
                                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                     "resultMessage": "Unsupported image type!"
@@ -825,7 +831,7 @@ SDL.RPCController = Em.Object
                  */
                 Alert: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -835,7 +841,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -844,7 +851,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (!params.alertStrings) {
+                    if (params.alertStrings == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -862,7 +869,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.duration) {
+                    if (params.duration == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -880,7 +887,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -914,7 +921,7 @@ SDL.RPCController = Em.Object
                  */
                 ShowNotification: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -931,7 +938,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.text) {
+                    if (params.text == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -949,7 +956,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.timeout) {
+                    if (params.timeout == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -977,7 +984,7 @@ SDL.RPCController = Em.Object
                  */
                 Show: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -987,7 +994,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -1005,7 +1013,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.showStrings) {
+                    if (params.showStrings == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1023,7 +1031,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1057,7 +1065,7 @@ SDL.RPCController = Em.Object
                  */
                 AddCommand: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1093,7 +1101,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1127,7 +1135,7 @@ SDL.RPCController = Em.Object
                  */
                 DeleteCommand: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1136,7 +1144,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.cmdID) {
+                    if (params.cmdID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1154,7 +1162,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1188,7 +1196,7 @@ SDL.RPCController = Em.Object
                  */
                 AddSubMenu: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1224,7 +1232,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1258,7 +1266,7 @@ SDL.RPCController = Em.Object
                  */
                 DeleteSubMenu: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1285,7 +1293,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1330,107 +1338,108 @@ SDL.RPCController = Em.Object
                  */
                 PerformInteraction: function(params) {
 
-                    if (!params) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'params' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (!params.initialText) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'initialText' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.initialText != 'object') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'initialText'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (!params.choiceSet) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'interactionChoiceSetIDList' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.choiceSet.length < 0) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'interactionChoiceSetIDList'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if ("choiseSet" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.choiseSet)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
-                    }
-                    if ("vrHelp" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
-                    }
-                    if (!params.timeout) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'timeout' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.timeout != 'number') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'timeout'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (!params.appID) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'appID' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.appID != 'number') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'appID'!"
-                        };
-
-                        return this.resultStruct;
-                    }
+//                    if (params == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'params' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (params.initialText == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'initialText' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (typeof params.initialText != 'object') {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Wrong type of parameter 'initialText'!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (params.choiceSet == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'interactionChoiceSetIDList' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (typeof params.choiceSet.length < 0) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Wrong type of parameter 'interactionChoiceSetIDList'!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if ("choiseSet" in params) {
+//                        if (SDL.RPCController
+//                            .checkImagesArray(params.choiseSet)) {
+//                            this.resultStruct = {
+//                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                                "resultMessage": "Unsupported image type!"
+//                            };
+//
+//                            return this.resultStruct;
+//                        }
+//                    }
+//                    if ("vrHelp" in params) {
+//                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
+//                            this.resultStruct = {
+//                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                                "resultMessage": "Unsupported image type!"
+//                            };
+//
+//                            return this.resultStruct;
+//                        }
+//                    }
+//                    if (params.timeout == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'timeout' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (typeof params.timeout != 'number') {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Wrong type of parameter 'timeout'!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (params.appID == null) {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Parameter 'appID' does not exists!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
+//                    if (typeof params.appID != 'number') {
+//
+//                        this.resultStruct = {
+//                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+//                            "resultMessage": "Wrong type of parameter 'appID'!"
+//                        };
+//
+//                        return this.resultStruct;
+//                    }
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
@@ -1447,7 +1456,7 @@ SDL.RPCController = Em.Object
                  */
                 SetMediaClockTimer: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1456,7 +1465,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.updateMode) {
+                    if (params.updateMode == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1474,7 +1483,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1508,7 +1517,7 @@ SDL.RPCController = Em.Object
                  */
                 SetGlobalProperties: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1527,7 +1536,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1576,7 +1585,7 @@ SDL.RPCController = Em.Object
                  */
                 ChangeRegistration: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1585,7 +1594,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.language) {
+                    if (params.language == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1603,7 +1612,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1667,7 +1676,7 @@ SDL.RPCController = Em.Object
                  */
                 SetAppIcon: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1676,7 +1685,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.syncFileName) {
+                    if (params.syncFileName == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1685,7 +1694,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (typeof params.syncFileName != 'string') {
+                    if (typeof params.syncFileName != 'object') {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1703,7 +1712,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1737,7 +1746,7 @@ SDL.RPCController = Em.Object
                  */
                 Slider: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1746,7 +1755,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.numTicks) {
+                    if (params.numTicks == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1764,7 +1773,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.position) {
+                    if (params.position == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1782,7 +1791,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.sliderHeader) {
+                    if (params.sliderHeader == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1818,7 +1827,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1852,7 +1861,7 @@ SDL.RPCController = Em.Object
                  */
                 ScrollableMessage: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1862,7 +1871,8 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("softButtons" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.softButtons)) {
+                        if (SDL.RPCController
+                            .checkImagesArray(params.softButtons)) {
                             this.resultStruct = {
                                 "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                                 "resultMessage": "Unsupported image type!"
@@ -1871,7 +1881,7 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (!params.messageText) {
+                    if (params.messageText == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1907,7 +1917,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1941,7 +1951,7 @@ SDL.RPCController = Em.Object
                  */
                 PerformAudioPassThru: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1950,7 +1960,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.audioPassThruDisplayTexts) {
+                    if (params.audioPassThruDisplayTexts == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2015,35 +2025,29 @@ SDL.RPCController = Em.Object
                  */
                 ShowVrHelp: function(params) {
 
-                    if (!params) {
+                    if (params) {
+                        if ("vrHelp" in params) {
+                            if (SDL.RPCController
+                                .checkImagesArray(params.vrHelp)) {
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Unsupported image type!"
+                                };
 
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'params' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if ("vrHelp" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
+                                return this.resultStruct;
+                            }
                         }
-                    }
-                    if ("appID" in params) {
+                        if ("appID" in params) {
 
-                        if (typeof params.appID != 'number') {
+                            if (typeof params.appID != 'number') {
 
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Wrong type of parameter 'appID'!"
-                            };
+                                this.resultStruct = {
+                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                                    "resultMessage": "Wrong type of parameter 'appID'!"
+                                };
 
-                            return this.resultStruct;
+                                return this.resultStruct;
+                            }
                         }
                     }
 
@@ -2102,7 +2106,7 @@ SDL.RPCController = Em.Object
                  */
                 ReadDID: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2129,7 +2133,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.didLocation) {
+                    if (params.didLocation == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2147,7 +2151,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2181,7 +2185,7 @@ SDL.RPCController = Em.Object
                  */
                 GetDTCs: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2208,7 +2212,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2242,7 +2246,7 @@ SDL.RPCController = Em.Object
                  */
                 GetVehicleData: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2251,7 +2255,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2340,7 +2344,7 @@ SDL.RPCController = Em.Object
                  */
                 AddCommand: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2367,7 +2371,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.vrCommands) {
+                    if (params.vrCommands == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2412,7 +2416,7 @@ SDL.RPCController = Em.Object
                  */
                 DeleteCommand: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2421,7 +2425,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.cmdID) {
+                    if (params.cmdID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2439,7 +2443,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2473,7 +2477,7 @@ SDL.RPCController = Em.Object
                  */
                 ChangeRegistration: function(params) {
 
-                    if (!params) {
+                    if (params == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2482,7 +2486,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.language) {
+                    if (params.language == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2500,7 +2504,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (!params.appID) {
+                    if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],

@@ -40,7 +40,8 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     classNameBindings:
         [
-            'SDL.SDLModel.VRActive:active'
+            'SDL.SDLModel.VRActive:active',
+            'SDL.SDLModel.VRHelpListActivated:move'
         ],
 
     childViews:
@@ -122,6 +123,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
     }.observes('SDL.TransitionIterator.ready'),
 
     onActivate: function() {
+        SDL.SDLController.VRMove();
     	SDL.SDLController.onSystemContextChange();
     	if (this.VRActive) {
     		FFW.VR.Started();

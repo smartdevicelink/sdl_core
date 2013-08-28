@@ -51,6 +51,16 @@
 	color: gold;
 }
 
+.softButton .ico{
+	width: 50px;
+	height: auto;
+	float: left;
+}
+
+.softButton .rightTextButton{
+	left: 0;
+}
+
 .sdl-window .back-button {
 	top: 80px;
 	left: 5px;
@@ -158,6 +168,10 @@
 	margin-left: 0px !important;
 	left: 50px;
 	position: absolute;
+}
+
+#VRPopUp.move{
+	left: 800px;
 }
 
 #VRPopUp span,#info_apps_deviceList_list .list-content span,#sdl_view_container .list-content span,#sdl_options .list-content span

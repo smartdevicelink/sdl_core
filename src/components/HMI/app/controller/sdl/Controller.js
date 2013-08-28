@@ -88,6 +88,7 @@ SDL.SDLController = Em.Object
                 }
             }
         },
+
         /**
          * Notify SDLCore that HMI is ready and all components are registered
          * 
@@ -100,6 +101,21 @@ SDL.SDLController = Em.Object
             }
             FFW.BasicCommunication.onReady();
         }.observes('SDL.SDLModel.registeredComponents.@each.state'),
+
+        /**
+         * Move VR list to right side when VRHelpList was activated
+         * 
+         * @type {String}
+         */
+        VRMove: function() {
+
+            if (SDL.VRHelpListView.active || SDL.InteractionChoicesView.active) {
+                SDL.SDLModel.set('VRHelpListActivated', true);
+            } else {
+                SDL.SDLModel.set('VRHelpListActivated', false);
+            }
+        },
+
         /**
          * Default action for SoftButtons: closes window, popUp or clears
          * applications screen
@@ -110,7 +126,7 @@ SDL.SDLController = Em.Object
 
             switch (element.groupName) {
             case "AlertPopUp": {
-                SDL.AlertPopUp.deactivate(true);
+                SDL.AlertPopUp.deactivate();
                 break;
             }
             case "ScrollableMessage": {
@@ -173,7 +189,7 @@ SDL.SDLController = Em.Object
         closePopUp: function() {
 
             if (SDL.AlertPopUp.active) {
-                SDL.AlertPopUp.deactivate(true);
+                SDL.AlertPopUp.deactivate();
             }
             if (SDL.AudioPassThruPopUp.active) {
                 SDL.AudioPassThruPopUp.deactivate();
@@ -181,7 +197,7 @@ SDL.SDLController = Em.Object
                     .performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
             }
             if (SDL.InteractionChoicesView.active) {
-                SDL.InteractionChoicesView.deactivate(true);
+                SDL.InteractionChoicesView.deactivate("ABORTED");
             }
             if (SDL.ScrollableMessage.active) {
                 SDL.ScrollableMessage.deactivate(true);
@@ -189,7 +205,19 @@ SDL.SDLController = Em.Object
             if (SDL.SliderView.active) {
                 SDL.SliderView.deactivate(true);
             }
+            if (SDL.VRHelpListView.active) {
+                SDL.VRHelpListView.deactivate();
+            }
         },
+
+        /**
+         * Method to close InteractionChoices view
+         */
+        InteractionChoicesDeactivate: function() {
+
+            SDL.InteractionChoicesView.deactivate("ABORTED");
+        },
+
         /**
          * Method to close AlertMeneuverPopUp view
          */

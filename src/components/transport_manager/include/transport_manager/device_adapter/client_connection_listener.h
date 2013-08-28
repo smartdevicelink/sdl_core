@@ -1,6 +1,6 @@
 /**
  * \file client_connection_listener.h
- * \brief
+ * \brief Client connection listener header.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,21 +32,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CLIENT_CONNECTION_LISTENER_H_
-#define CLIENT_CONNECTION_LISTENER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CLIENT_CONNECTION_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CLIENT_CONNECTION_LISTENER_H_
 
 #include "transport_manager/device_adapter/device_adapter.h"
 
+
 namespace transport_manager {
+
+
 namespace device_adapter {
 
+/**
+ * @brief Abstract class for listener of client connection.
+ */
 class ClientConnectionListener {
  public:
+  /**
+   * @brief Run client connection listener.
+   *
+   * @return Error information about possible reason of starting client listener failure.
+   */
   virtual DeviceAdapter::Error init() = 0;
+
+  /**
+   * @brief Stop client connection listener.
+   */
   virtual void terminate() = 0;
+
+  /**
+   * @brief Check initialization.
+   *
+   * @return True if initialized.
+   * @return False if not initialized.
+   */
   virtual bool isInitialised() const = 0;
+
+  /**
+   * @brief Start to listen for connection from client.
+   */
   virtual DeviceAdapter::Error startListening() = 0;
+
+  /**
+   * @brief Stop to listen for connection from client.
+   */
   virtual DeviceAdapter::Error stopListening() = 0;
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~ClientConnectionListener() {
   }
 };

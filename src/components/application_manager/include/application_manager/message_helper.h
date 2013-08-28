@@ -201,6 +201,7 @@ class MessageHelper {
       unsigned int app_id);
     static void SendAddSubMenuRequestToHMI(const Application* app);
     static void RemoveAppDataFromHMI(Application* const app);
+    static void SendOnAppUnregNotificationToHMI(Application* const app);
     static void SendDeleteCommandRequestToHMI(Application* const app);
     static void SendDeleteSubMenuRequestToHMI(Application* const app);
     static void ResetGlobalproperties(Application* const app);
@@ -219,11 +220,10 @@ class MessageHelper {
      *
      * @param app current application
      *
-     * @return true if image file present or there are no "Image" structure in
-     *         request. false if image file doesn't exist
+     * @return verification result
      *
      */
-    static bool VerifyImageFiles(smart_objects::SmartObject& message,
+    static  mobile_apis::Result::eType VerifyImageFiles(smart_objects::SmartObject& message,
                                  const Application* app);
 
     static bool PrintSmartObject(smart_objects::SmartObject& object);

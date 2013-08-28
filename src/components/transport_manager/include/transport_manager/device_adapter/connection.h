@@ -1,6 +1,6 @@
 /**
  * \file connection.h
- * \brief
+ * \brief Connection class header.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONNECTION_H_
-#define CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CONNECTION_H_
 
 #include "utils/shared_ptr.h"
 #include "transport_manager/device_adapter/device_adapter.h"
@@ -41,6 +41,7 @@
 using utils::SharedPtr;
 
 namespace transport_manager {
+
 namespace device_adapter {
 
 /**
@@ -48,19 +49,33 @@ namespace device_adapter {
  **/
 class Connection {
  public:
+  /**
+   * @brief Constructor.
+   */
   Connection() {}
   /**
    * @brief Destructor.
-   *
-   * Clears map of frames to send.
    **/
   virtual ~Connection() {}
 
+  /**
+   * @brief Send data frame.
+   *
+   * @param Message Smart pointer to the raw message.
+   *
+   * @return Error Information about possible reason of sending data failure.
+   */
   virtual DeviceAdapter::Error sendData(RawMessageSptr message) = 0;
 
+  /**
+   * @brief Disconnect the current connection.
+   */
   virtual DeviceAdapter::Error disconnect() = 0;
 };
 
+/**
+ * @typedef Type definition of smart pointer to the Connection class.
+ */
 typedef utils::SharedPtr<Connection> ConnectionSptr;
 
 }  // namespace device_adapter

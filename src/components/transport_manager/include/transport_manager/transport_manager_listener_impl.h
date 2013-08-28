@@ -1,6 +1,6 @@
 /**
  * \file transport_manager_listener.h
- * \brief interface for TransportManagerListener header file.
+ * \brief Implementation of TransportManagerListener class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,43 +33,141 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL_H
 
 #include "transport_manager/info.h"
 #include "transport_manager/transport_manager_listener.h"
+#include "transport_manager/transport_manager_impl.h"
 
 namespace transport_manager {
 
+/**
+ * @brief Implementation class for transport manager listener.
+ */
 class TransportManagerListenerImpl : public TransportManagerListener {
+  const TransportManagerImpl *transport_manager_;
  public:
+
+  /**
+   * @Destructor.
+   */
   virtual ~TransportManagerListenerImpl(){};
 
-  virtual void OnDeviceFound(const DeviceInfo& device_info) {}
-  virtual void OnNoDeviceFound() {}
-  virtual void OnScanDevicesFinished() {
-  }
-  virtual void OnScanDevicesFailed(const SearchDeviceError& error) {
-  }
+  /**
+   * @brief Reaction to the event, when the list of devices is updated.
+   *
+   * @param Container that holds information about devices.
+   */
+  virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) {}
+
+  /**
+   * @brief Reaction to the event, when the device is found.
+   *
+   * @param device_info Variable that hold information about device.
+   */
+  virtual void OnDeviceFound(const DeviceInfo& device_info) { }
+
+  /**
+   * @brief Reaction to the event, when no device is found.
+   */
+  virtual void OnNoDeviceFound() { }
+
+  /**
+   * @brief Reaction to the event, when scanning of devices is finished.
+   */
+  virtual void OnScanDevicesFinished() { }
+
+  /**
+   * @brief Reaction to the event, when scanning of devices is failed.
+   *
+   * @param error Error information about possible reason of scanning of devices failure.
+   */
+  virtual void OnScanDevicesFailed(const SearchDeviceError& error) { }
+
+  /**
+   * @brief Reaction to the event, when connection is established.
+   *
+   * @param devcie_info Variable that hold information about device.
+   * @param connection_id connection unique identifier.
+   */
   virtual void OnConnectionEstablished(const DeviceInfo &device_info,
                                        const ConnectionUID &connection_id) {}
+
+  /**
+   * @brief Reaction to the event, when connection to the device is failed.
+   *
+   * @param device_info Variable that hold information about device.
+   * @param error Error information about possible reason of connect failure.
+   */
   virtual void OnConnectionFailed(const DeviceInfo &device_info,
                                   const ConnectError& error) {}
+
+  /**
+   * @brief Reaction to the event, when connection is closed.
+   *
+   * @param connection_id Connection unique identifier.
+   */
   virtual void OnConnectionClosed(ConnectionUID connection_id) {
   }
+
+  /**
+   * @brief Reaction to the event, when connection close is failed.
+   *
+   * @param connection_id Connection unique identifier.
+   * @param error Error information about possible reason of failure.
+   */
   virtual void OnConnectionClosedFailure(ConnectionUID connection_id,
                                          const DisconnectError& error) {
   }
+
+  /**
+   * @brief Reaction to the event, when connection with the device is lost.
+   *
+   * @param device Handle of device.
+   * @param error Error information about possible reason of lost connection.
+   */
   virtual void OnDeviceConnectionLost(const DeviceHandle& device,
-                                      const DisconnectDeviceError& error){}
+                                      const DisconnectDeviceError& error){  }
+
+  /**
+   * @brief Reaction to the event, when disconnect is failed.
+   *
+   * @param device Handle of device.
+   * @param error Error information about possible reason of disconnect failure.
+   */
   virtual void OnDisconnectFailed(const DeviceHandle& device,
                                   const DisconnectDeviceError& error) {}
+
+  /**
+   * @brief Reaction to the event, when transport manager received a massage.
+   *
+   * @param message Smart pointer to the raw massage.
+   * @param connection_id Connection unique identifier.
+   */
   virtual void OnTMMessageReceived(const RawMessageSptr message) {}
+
+  /**
+   * @brief Reaction to the event, when receiving of massage for transport manager is failed.
+   *
+   * @param connection_id connection unique identifier.
+   * @param error Error information about possible reason of failure.
+   */
   virtual void OnTMMessageReceiveFailed(ConnectionUID connection_id,
                                         const DataReceiveError& error){}
 
+  /**
+   * @brief Reaction to the event, when transport manager sent a massage.
+   */
   virtual void OnTMMessageSend() {
   }
+
+  /**
+   * @brief Reaction to the event, when sending of massage by transport manager is failed.
+   *
+   * @param error Error information about possible reason of failure.
+   * @param message Smart pointer to the raw massage.
+   */
   virtual void OnTMMessageSendFailed(const DataSendError& error,
                                      const RawMessageSptr message) {
   }

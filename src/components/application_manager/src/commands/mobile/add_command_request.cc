@@ -64,9 +64,13 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  if (!MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app)) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                      verification_result);
+    SendResponse(false, verification_result);
     return;
   }
 
@@ -133,13 +137,6 @@ void AddCommandRequest::Run() {
                                              [strings::value].length())) {
       msg_params[strings::cmd_icon] =
          (*message_)[strings::msg_params][strings::cmd_icon];
-
-       std::string file_path = file_system::FullPath(app->name());
-       file_path += "/";
-       file_path += (*message_)[strings::msg_params][strings::cmd_icon]
-           [strings::value].asString();
-
-       msg_params[strings::cmd_icon][strings::value] = file_path;
     }
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true,

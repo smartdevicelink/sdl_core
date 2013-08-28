@@ -116,7 +116,7 @@ void TcpClientListener::thread() {
 
     int yes = 1;
     int keepidle = 3;  // 3 seconds to disconnection detecting
-    int keepcnt = 1;
+    int keepcnt = 5;
     int keepintvl = 1;
     setsockopt(connection_fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));

@@ -77,7 +77,17 @@ void ChangeRegistrationRequest::Run() {
   }
 
   // we should specify amount of required responses in the 1st request
-  const unsigned int chaining_counter = 2;
+  unsigned int chaining_counter = 0;
+  if (app->ui_language() !=
+      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
+   ++chaining_counter;
+  }
+
+  if (app->language() !=
+       (*message_)[strings::msg_params][strings::language].asInt()) {
+    ++chaining_counter;
+  }
+
   bool has_actually_changed = false;
   if (app->ui_language() !=
       (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {

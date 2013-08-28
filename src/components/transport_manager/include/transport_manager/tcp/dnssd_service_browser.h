@@ -1,6 +1,6 @@
 /**
- * \file dnssd_service_broser.h
- * \brief DnssdServiceBroser class header file.
+ * \file dnssd_service_browser.h
+ * \brief DnssdServiceBrowser class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DNSSD_SERVICE_BROWSER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DNSSD_SERVICE_BROWSER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_DNSSD_SERVICE_BROWSER
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_DNSSD_SERVICE_BROWSER
 
 #include <string>
 #include <vector>
@@ -64,8 +64,16 @@ struct DnssdServiceRecord {
 
 #define DNSSD_DEFAULT_SERVICE_TYPE "_ford-sdlapp._tcp"
 
+/**
+ * @brief DNS service discovery class.
+ */
 class DnssdServiceBrowser : public DeviceScanner {
  public:
+  /**
+   * @brief Constructor.
+   *
+   * @param controller Pointer to the device adapter controller.
+   */
   DnssdServiceBrowser(class DeviceAdapterController* controller);
   virtual ~DnssdServiceBrowser();
  protected:

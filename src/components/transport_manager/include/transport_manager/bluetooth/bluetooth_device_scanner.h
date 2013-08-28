@@ -1,6 +1,6 @@
 /**
  * \file bluetooth_device_scanner.h
- * \brief BluetoothAdapter class header file.
+ * \brief BluetoothDeviceScanner class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BLUETOOTH_DEVICE_SCANNER_H_
-#define BLUETOOTH_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -50,15 +50,53 @@ namespace device_adapter {
 
 class DeviceAdapterController;
 
+/**
+ * @brief Scan for devices using bluetooth.
+ */
 class BluetoothDeviceScanner : public DeviceScanner {
  public:
+
+  /**
+   * @brief Constructor.
+   */
   BluetoothDeviceScanner(DeviceAdapterController* controller);
+
+  /**
+   * @brief Destructor.
+   */
   ~BluetoothDeviceScanner();
+
+  /**
+   * @brief Main thread initialization.
+   */
   void thread();
  protected:
+
+  /**
+   * @brief Start device scanner.
+   *
+   * @return Error information about reason of initialization failure.
+   */
   virtual DeviceAdapter::Error init();
+
+  /**
+   * @brief
+   */
   virtual void terminate();
+
+  /**
+   * @brief
+   *
+   * @return Error information about reason of scan failure.
+   */
   virtual DeviceAdapter::Error scan();
+
+  /**
+   * @brief Check device scanner for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
   virtual bool isInitialised() const;
  private:
 

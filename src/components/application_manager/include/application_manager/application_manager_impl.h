@@ -43,6 +43,7 @@
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
+#include "audio_manager/audio_manager_impl.h"
 
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
@@ -57,12 +58,11 @@
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 
-#include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
-#include "audio_manager/audio_manager_impl.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -127,6 +127,13 @@ class ApplicationManagerImpl : public ApplicationManager
     const std::set<connection_handler::Device>& device_list();
 
     /////////////////////////////////////////////////////
+
+    /**
+     * @brief Checks if all HMI capabilities received
+     *
+     * @return TRUE if all information received, otherwise FALSE
+     */
+    bool IsHMICapabilitiesInitialized();
 
     Application* RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>&
@@ -434,6 +441,9 @@ class ApplicationManagerImpl : public ApplicationManager
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
+
+    bool RemoveMobileRequestFromMessageChain(
+      unsigned int mobile_correlation_id, unsigned int connection_key);
 
     /**
      * @brief Map of connection keys and associated applications

@@ -59,13 +59,12 @@ void MockDevice::stop() {
       it != applications_.end();
       ++it) {
     it->stop();
-  }}
+  }
+}
 
 bool MockDevice::isSameAs(const Device* other) const {
   return unique_device_id() == other->unique_device_id();
 }
-
-
 
 ApplicationList MockDevice::getApplicationList() const {
   ApplicationList rc(applications_.size());

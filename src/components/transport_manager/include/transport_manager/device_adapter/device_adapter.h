@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_DEVICE_ADAPTER_DEVICE_ADAPTER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_H
 
 #include <string>
 #include <vector>
@@ -50,11 +50,21 @@ class DeviceAdapterListener;
 typedef std::string DeviceType;
 typedef int ApplicationHandle;
 typedef std::vector<ApplicationHandle> ApplicationList;
+/**
+ * @brief Type definition of container(vector) that holds device unique identifiers.
+ */
 typedef std::vector<DeviceUID> DeviceList;
+/**
+ * @brief Type definition for container(list) that holds pointers to device adapter listeners
+ */
 typedef std::list<DeviceAdapterListener *> DeviceAdapterListenerList;
 
 class DeviceAdapter {
  public:
+
+  /**
+   * @enum Available types of errors.
+   */
   enum Error {
     OK,
     FAIL,
@@ -65,56 +75,200 @@ class DeviceAdapter {
   };
 
  public:
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~DeviceAdapter() {
   }
 
+  /**
+   * @brief
+   */
   virtual DeviceType getDeviceType() const = 0;
 
   /* TODO
    virtual Error LoadState(DeviceAdapterState* state) = 0;
    virtual void SaveState(DeviceAdapterState* state) = 0;
    */
+
+  /**
+   * @brief Check initialization.
+   *
+   * @return true if initialized.
+   * @return false if not initialized.
+   */
   virtual bool isInitialised() const = 0;
 
+  /**
+   * @brief Run device adapter.
+   *
+   * Called from transport manager to start device adapter.
+   *
+   * @return Error information about possible reason of starting client listener failure.
+   **/
   virtual Error init() = 0;
 
+  /**
+   * @brief Add listener to the container(list) of device adapter listeners.
+   *
+   * @param listener Pointer to the device adapter listener.
+   */
   virtual void addListener(DeviceAdapterListener* listener) = 0;
+
+  /**
+   * @brief Remove listener from the container(list) of device adapter listeners.
+   *
+   * @param listener Pointer to the device adapter listener.
+   */
   virtual void removeListener(DeviceAdapterListener* listener) = 0;
+
+  /**
+   * @brief Notify that device scanner is available.
+   *
+   * @return true - available, false - not available.
+   */
   virtual bool isSearchDevicesSupported() const = 0;
+
+  /**
+   * @brief Start scanning for new devices.
+   *
+   * List of new devices will be supplied in onDeviceListUpdated callback.
+   *
+   * @return Error information about possible reason of searching devices failure.
+   **/
   virtual Error searchDevices() = 0;
 
+  /**
+   * @brief Notify that server connection factory is available.
+   *
+   * @return true - available, false - not available.
+   */
   virtual bool isServerOriginatedConnectSupported() const = 0;
+
+  /**
+   * @brief Connect to the specified application discovered on device.
+   *
+   * @param device_handle Handle of device to connect to.
+   * @param app_handle Handle of application to connect to.
+   *
+   * @return Error information about possible reason of connection to the device failure.
+   **/
   virtual Error connect(const DeviceUID& device_handle,
                         const ApplicationHandle& app_handle) = 0;
 
+  /**
+   * @brief Notify that listener of client connection is available.
+   *
+   * @return true - available, false - not available.
+   */
   virtual bool isClientOriginatedConnectSupported() const = 0;
+
+  /**
+   * @brief Start client listener.
+   *
+   * @return Error information about possible reason of starting client listener failure.
+   */
   virtual Error startClientListening() = 0;
+
+  /**
+   * @brief Stop client listener.
+   *
+   * @return Error information about possible reason of stopping client listener failure.
+   */
   virtual Error stopClientListening() = 0;
 
+  /**
+   * @brief Disconnect from specified session.
+   *
+   * @param device_handle Handle of device to disconnect from.
+   * @param app_handle Handle of application.
+   *
+   * @return Error information about possible reason of disconnection from the device failure.
+   **/
   virtual Error disconnect(const DeviceUID& device_handle,
                            const ApplicationHandle& app_handle) = 0;
+
+  /**
+   * @brief Disconnect from all sessions on specified device.
+   *
+   * @param device_handle Device handle to disconnect.
+   *
+   * @return Error information about possible reason of disconnecting from device failure
+   **/
   virtual Error disconnectDevice(const DeviceUID& device_handle) = 0;
 
+  /**
+   * @brief Send frame.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param data Smart pointer to the raw message.
+   *
+   * @return Error information about possible reason of sending data failure.
+   **/
   virtual Error sendData(const DeviceUID& device_handle,
                          const ApplicationHandle& app_handle,
                          const RawMessageSptr data) = 0;
 
+  /**
+   * @brief Create container(vector) of device unique identifiers.
+   *
+   * @return container(vector) of device unique identifiers.
+   */
   virtual DeviceList getDeviceList() const = 0;
+
+  /**
+   * @brief Get container(vector) of application unique identifiers that available at specified device.
+   *
+   * @param device_handle Device unique identifier.
+   *
+   * @return Container(vector) that holds application unique identifiers.
+   */
   virtual ApplicationList getApplicationList(
       const DeviceUID& device_handle) const = 0;
+
+  /**
+   * @brief Return name of device.
+   *
+   * @param device_id device unique identifier.
+   *
+   * @return string.
+   */
   virtual std::string DeviceName(const DeviceUID &device_id) const = 0;
 };
 
+/**
+ * @brief Type definition of shared pointer to the device adapter.
+ */
 typedef utils::SharedPtr<DeviceAdapter> DeviceAdapterSptr;
 
+/**
+ * @brief Overloaded operator "<".
+ *
+ * @param a smart pointer to device adapter.
+ * @param b smart pointer to device adapter.
+ */
 inline bool operator < (const DeviceAdapterSptr a, const DeviceAdapterSptr b) {
   return a.get() < b.get();
 }
 
+/**
+ * @brief Overloaded operator "==".
+ *
+ * @param a smart pointer to device adapter.
+ * @param b pointer to smart pointer to device adapter.
+ */
 inline bool operator == (const DeviceAdapterSptr a, const DeviceAdapter *b) {
   return a.get() == b;
 }
 
+/**
+ * @brief Overloaded operator "==".
+ *
+ * @param a pointer to smart pointer to device adapter.
+ * @param b smart pointer to device adapter.
+ */
 inline bool operator == (const DeviceAdapter *a, const DeviceAdapterSptr b) {
   return a == b.get();
 }

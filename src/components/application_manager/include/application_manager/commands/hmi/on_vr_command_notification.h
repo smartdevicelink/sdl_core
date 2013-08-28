@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VR_COMMAND_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -43,26 +44,28 @@ namespace commands {
  * @brief OnVRCommandNotification command class
  **/
 class OnVRCommandNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnVRCommandNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnVRCommandNotification(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief OnVRCommandNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnVRCommandNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnVRCommandNotification class destructor
-   **/
-  virtual ~OnVRCommandNotification();
+    /**
+     * @brief OnVRCommandNotification class destructor
+     **/
+    virtual ~OnVRCommandNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnVRCommandNotification);
+  private:
+    bool PerformInteractionHandling(Application* const app);
+
+    DISALLOW_COPY_AND_ASSIGN(OnVRCommandNotification);
 };
 
 }  // namespace commands

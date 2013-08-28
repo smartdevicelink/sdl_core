@@ -95,11 +95,27 @@ SDL.InfoNonMedia = Em.ContainerView
                     ],
 
                     field1: SDL.Label.extend( {
-                        contentBinding: 'controller.model.appInfo.field1'
+                        contentBinding: 'controller.model.appInfo.field1',
+                        attributeBindings: ["style"],
+                        style: function(){
+                            if (SDL.SDLAppController.model) {
+                                return SDL.SDLAppController.model.appInfo.alignment;
+                            } else {
+                                return null;
+                            }
+                        }.property("SDL.SDLAppController.model.appInfo.alignment")
                     }),
 
                     field2: SDL.Label.extend( {
-                        contentBinding: 'controller.model.appInfo.field2'
+                        contentBinding: 'controller.model.appInfo.field2',
+                        attributeBindings: ["style"],
+                        style: function(){
+                            if (SDL.SDLAppController.model) {
+                                return SDL.SDLAppController.model.appInfo.alignment;
+                            } else {
+                                return null;
+                            }
+                        }.property("SDL.SDLAppController.model.appInfo.alignment")
                     }),
 
                     field3: SDL.Label.extend( {

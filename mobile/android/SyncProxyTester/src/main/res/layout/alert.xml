@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemRoot"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:minWidth="300px"
+    android:orientation="vertical"
+    android:paddingLeft="20dip"
+    android:paddingRight="20dip" >
+
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:textStyle="bold"
+		android:text="To Speak">
+	</TextView>
+	<EditText android:text="Text to Speak" android:id="@+id/txtSpeak"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:visibility="visible" android:freezesText="true">
+	</EditText>
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="1"
+		android:textStyle="bold" android:text="Line 1">
+	</TextView>
+	<EditText android:text="Alert Line 1" android:id="@+id/txtAlertField1"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:visibility="visible" android:freezesText="true">
+	</EditText>
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="1"
+		android:textStyle="bold" android:text="Line 2">
+	</TextView>
+	<EditText android:text="Alert Line 2" android:id="@+id/txtAlertField2"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:visibility="visible" android:freezesText="true">
+	</EditText>
+	<TextView android:id="@+id/alert_line3" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="1"
+		android:textStyle="bold" android:text="Line 3">
+	</TextView>
+	<EditText android:text="Alert Line 3" android:id="@+id/txtAlertField3"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:visibility="visible" android:freezesText="true">
+	</EditText>
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent" android:layout_height="wrap_content" android:gravity="bottom">
+		<LinearLayout android:orientation="vertical"
+			android:layout_width="wrap_content" android:layout_height="wrap_content">
+			<TextView android:layout_width="fill_parent"
+				android:layout_height="wrap_content" android:layout_weight="1"
+				android:textStyle="bold" android:text="Duration">
+			</TextView>
+			<EditText android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/txtDuration"
+				android:text="5000">
+			</EditText>
+		</LinearLayout>
+		<CheckBox android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:id="@+id/chkPlayTone"
+		    android:text="Play Tone?" android:checked="true">
+		</CheckBox>
+
+	</LinearLayout>
+
+	<LinearLayout
+	    android:id="@+id/alert_softButtonsLayout"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content" >
+
+	    <CheckBox
+	        android:id="@+id/chkIncludeSBs"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:checked="false"
+	        android:text="Include" />
+
+	    <Button
+	        android:id="@+id/alert_btnSoftButtons"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Soft Buttons" />
+
+	</LinearLayout>
+
+</LinearLayout>

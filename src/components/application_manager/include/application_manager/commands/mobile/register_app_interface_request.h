@@ -35,6 +35,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "utils/synchronisation_primitives.h"
+#include "utils/timer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -51,15 +53,17 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
     /**
      * \brief RegisterAppInterfaceRequest class constructor
      **/
-    explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message)
-      : CommandRequestImpl(message) {
-    }
+    explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message);
 
     /**
-     * \brief RegisterAppInterfaceRequest class destructor
+     * @brief RegisterAppInterfaceRequest class destructor
      **/
-    virtual ~RegisterAppInterfaceRequest() {
-    }
+    virtual ~RegisterAppInterfaceRequest();
+
+    /**
+     * @brief Init required by command resources
+     **/
+    virtual bool Init();
 
     /**
      * @brief Execute command
@@ -77,6 +81,9 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       const Application& application_impl);
 
   private:
+    sync_primitives::SynchronisationPrimitives synchronisation_;
+    sync_primitives::Timer*                    timer_;
+
     DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };
 

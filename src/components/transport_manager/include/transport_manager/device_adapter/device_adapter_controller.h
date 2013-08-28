@@ -1,6 +1,6 @@
 /**
  * \file device_adapter_controller.h
- * \brief
+ * \brief Device adapter controller header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,14 +32,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DEVICE_ADAPTER_CONTROLLER_H_
-#define DEVICE_ADAPTER_CONTROLLER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_CONTROLLER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_CONTROLLER_H_
 
 #include "transport_manager/device_adapter/device.h"
 #include "transport_manager/device_adapter/connection.h"
 
 namespace transport_manager {
+
 namespace device_adapter {
+
 
 class DeviceAdapterController {
  public:
@@ -47,35 +49,134 @@ class DeviceAdapterController {
   virtual ~DeviceAdapterController() {
   }
 
+  /**
+   * @brief Add device to the container(map), if container doesn't hold it yet.
+   *
+   * @param device smart pointer to the device.
+   *
+   * @return Smart pointer to the device.
+   */
   virtual DeviceSptr addDevice(DeviceSptr device) = 0;
+
+  /**
+   * @brief ????
+   */
   virtual void searchDeviceDone(const DeviceVector& devices) = 0;
+
+  /**
+   * @brief ????
+   */
   virtual void searchDeviceFailed(const SearchDeviceError& error) = 0;
+
+  /**
+   * @brief Find device in the internal container(map).
+   *
+   * @param device_handle Device unique identifier.
+   *
+   * @return Smart pointer to the device.
+   */
   virtual DeviceSptr findDevice(const DeviceUID& device_handle) const = 0;
 
+  /**
+   * @brief Create connection and fill its parameters.
+   *
+   * @param connection  Smart pointer to the connection.
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
   virtual void connectionCreated(ConnectionSptr connection,
                                  const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle) = 0;
+
+  /**
+   * @brief Make state of specified connection - ESTABLISHED and launch onConnectDone event in device adapter listener.
+   *
+   * @param devcie_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
   virtual void connectDone(const DeviceUID& device_handle,
                            const ApplicationHandle& app_handle) = 0;
+
+  /**
+   * @brief Delete connection from the container of connections and launch onConnectFailed event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
   virtual void connectFailed(const DeviceUID& device_handle,
                              const ApplicationHandle& app_handle,
                              const ConnectError& error) = 0;
+
+  /**
+   * @brief Make state of specified connection - FINILIZING.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
   virtual void connectionFinished(const DeviceUID& device_handle,
                                   const ApplicationHandle& app_handle) = 0;
+
+  /**
+   * @brief Set specified connection state to FINILIZING and launch onUnexpectedDisconnect event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param error Error class that contains details of this error situation.
+   */
   virtual void connectionAborted(const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle,
                                  const CommunicationError& error) = 0;
+
+  /**
+   * @brief Delete specified connection from the container(map) of connections and launch event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
   virtual void disconnectDone(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle) = 0;
+
+   /**
+   * @brief Launch onDataReceiveDone event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param message Smart pointer to the raw message.
+   */
   virtual void dataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
                                RawMessageSptr message) = 0;
+
+  /**
+   * @brief Launch onDataReceiveFailed event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param error Class that contains details of this error situation.
+   */
   virtual void dataReceiveFailed(const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle,
                                  const DataReceiveError&) = 0;
+
+  /**
+   * @brief Launch onDataSendDone event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param message Smart pointer to raw message.
+   */
   virtual void dataSendDone(const DeviceUID& device_handle,
                             const ApplicationHandle& app_handle,
                             RawMessageSptr message) = 0;
+
+  /**
+   * @brief Launch onDataSendFailed event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param message Smart pointer to raw message.
+   * @param error Class that contains details of this error situation.
+   */
   virtual void dataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
                               RawMessageSptr message, const DataSendError&) = 0;

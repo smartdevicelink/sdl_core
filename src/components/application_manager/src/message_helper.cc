@@ -248,18 +248,16 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
     return NULL;
   }
 
-  if (!devices.empty())  {
-    (*device_list_so)[strings::device_list] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    smart_objects::SmartObject& list_so =
-      (*device_list_so)[strings::device_list];
-    int index = 0;
-    for (connection_handler::DeviceList::const_iterator it = devices.begin();
-         devices.end() != it; ++it) {
-      list_so[index][strings::name] = it->second.user_friendly_name();
-      list_so[index][strings::id] = it->second.device_handle();
-      ++index;
-    }
+  (*device_list_so)[strings::device_list] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+  smart_objects::SmartObject& list_so =
+    (*device_list_so)[strings::device_list];
+  int index = 0;
+  for (connection_handler::DeviceList::const_iterator it = devices.begin();
+       devices.end() != it; ++it) {
+    list_so[index][strings::name] = it->second.user_friendly_name();
+    list_so[index][strings::id] = it->second.device_handle();
+    ++index;
   }
   return device_list_so;
 }
@@ -332,7 +330,6 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
 
   SendGlobalPropertiesToHMI(app);
   SendShowRequestToHMI(app);
-  SendShowConstantTBTRequestToHMI(app);
   SendAddCommandRequestToHMI(app);
 }
 
@@ -426,25 +423,30 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
   if (!app) {
     ui_msg_params[strings::vr_help_title] =
       profile::Profile::instance()->vr_help_title();
+
     smart_objects::SmartObject* vr_commands_array = CreateGeneralVrCommand();
     if (!vr_commands_array) {
       return;
     }
 
-    ui_msg_params[strings::vr_help] = smart_objects::SmartObject(smart_objects::SmartType_Array);
+    ui_msg_params[strings::vr_help] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
     int help_size = vr_commands_array->length();
     for (int i = 0; i < help_size; ++i) {
       smart_objects::SmartObject item(smart_objects::SmartType_Map);
       item[strings::text] = (*vr_commands_array).getElement(i);
       item[strings::position] = i;
+
       ui_msg_params[strings::vr_help][i++] = item;
     }
+
     const std::set<Application*>& apps =
       ApplicationManagerImpl::instance()->applications();
+
     int i = help_size;
-    for (std::set<Application*>::const_iterator it = apps.begin();
-         apps.end() != it;
-         ++it) {
+    std::set<Application*>::const_iterator it = apps.begin();
+    for (; apps.end() != it; ++it) {
       if ((*it)->vr_synonyms()) {
         for (int j = 0; j < (*((*it)->vr_synonyms())).length(); ++j) {
           smart_objects::SmartObject item(smart_objects::SmartType_Map);
@@ -455,6 +457,7 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
       }
     }
   } else {
+    ui_msg_params[strings::app_id] = app->app_id();
     if (app->vr_help_title() || app->vr_help()) {
       if (app->vr_help_title()) {
         ui_msg_params[strings::vr_help_title] = (*app->vr_help_title());
@@ -462,9 +465,39 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
       if (app->vr_help()) {
         ui_msg_params[strings::vr_help] = (*app->vr_help());
       }
-      ui_msg_params[strings::app_id] = app->app_id();
     } else {
-      // TODO(PV): default params
+      ui_msg_params[strings::vr_help_title] =
+        profile::Profile::instance()->vr_help_title();
+
+      const std::set<Application*>& apps =
+        ApplicationManagerImpl::instance()->applications();
+
+      int index = 0;
+      std::set<Application*>::const_iterator it_app = apps.begin();
+      for (; apps.end() != it_app; ++it_app) {
+        if ((*it_app)->vr_synonyms()) {
+          for (int j = 0; j < (*((*it_app)->vr_synonyms())).length(); ++j) {
+            smart_objects::SmartObject item(smart_objects::SmartType_Map);
+            item[strings::text] = (*((*it_app)->vr_synonyms())).getElement(j);
+            item[strings::position] = index;
+            ui_msg_params[strings::vr_help][index++] = item;
+          }
+        }
+      }
+
+      // copy all app VR commands
+      const CommandsMap& commands = app->commands_map();
+      CommandsMap::const_iterator it = commands.begin();
+
+      for (; commands.end() != it; ++it) {
+        for (int i = 0; i < (*it->second)[strings::vr_commands].length(); ++i) {
+          smart_objects::SmartObject item(smart_objects::SmartType_Map);
+          item[strings::text] =
+            (*it->second)[strings::vr_commands][i].asString();
+          item[strings::position] = index;
+          ui_msg_params[strings::vr_help][index++] = item;
+        }
+      }
     }
   }
 
@@ -676,6 +709,26 @@ void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
   ResetGlobalproperties(app);
 }
 
+void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app) {
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!notification) {
+    return;
+  }
+
+  smart_objects::SmartObject& message = *notification;
+
+  message[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+
+  message[strings::msg_params][strings::app_id] =
+    app->app_id();
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
+}
+
 void MessageHelper::SendDeleteCommandRequestToHMI(Application* const app) {
   if (!app) {
     return;
@@ -792,9 +845,9 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
   response_data[strings::params][strings::correlation_id] =
     correlation_id;
   response_data[strings::params][strings::protocol_type] =
-      commands::CommandImpl::mobile_protocol_type_;
+    commands::CommandImpl::mobile_protocol_type_;
   response_data[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
+    commands::CommandImpl::protocol_version_;
   response_data[strings::msg_params][strings::result_code] = result_code;
   response_data[strings::msg_params][strings::success] = false;
   response_data[strings::params][strings::connection_key] = connection_key;
@@ -859,12 +912,14 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
   SendGlobalPropertiesToHMI(app);
 }
 
-bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
-                                     const Application* app) {
+mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
+  smart_objects::SmartObject& message,
+  const Application* app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
     for (int i = 0; i < message.length(); i++) {
-      if (!VerifyImageFiles(message[i], app)) {
-        return false;
+      mobile_apis::Result::eType res = VerifyImageFiles(message[i], app);
+      if (mobile_apis::Result::SUCCESS != res) {
+        return res;
       }
     }
   } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map
@@ -879,13 +934,13 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
       std::string full_file_path = file_system::FullPath(relative_file_path);
 
       if (!file_system::FileExists(full_file_path)) {
-        return false; // first exit point
+        return mobile_apis::Result::INVALID_DATA; // first exit point
       }
 
       if (!ApplicationManagerImpl::instance()->VerifyImageType(
-          static_cast<mobile_apis::ImageType::eType>(
+            static_cast<mobile_apis::ImageType::eType>(
               message[strings::image_type].asInt()))) {
-        return false;  // second exit point
+        return mobile_apis::Result::UNSUPPORTED_RESOURCE;  // second exit point
       }
 
       message[strings::value] = full_file_path;
@@ -894,14 +949,15 @@ bool MessageHelper::VerifyImageFiles(smart_objects::SmartObject& message,
 
       for (std::set<std::string>::const_iterator key = keys.begin();
            key != keys.end(); key++) {
-        if (!VerifyImageFiles(message[*key], app)) {
-          return false;
+        mobile_apis::Result::eType res = VerifyImageFiles(message[*key], app);
+        if (mobile_apis::Result::SUCCESS != res) {
+          return res;
         }
       }
     }
   } // all other types shoudn't be processed
 
-  return true;
+  return mobile_apis::Result::SUCCESS;
 }
 
 // TODO(AK): change printf to logger

@@ -66,7 +66,7 @@ void AlertResponse::Run() {
     if (hmi_apis::Common_Result::SUCCESS == code) {
       SendResponse(true);
     } else {
-      SendResponse(true, mobile_apis::Result::IGNORED);
+      SendResponse(false);
     }
   }
 }

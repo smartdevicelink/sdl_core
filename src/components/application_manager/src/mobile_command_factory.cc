@@ -531,6 +531,8 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     default: {
       command.reset(new commands::GenericResponse(message));
+      (*message)[strings::params][strings::function_id] =
+        mobile_apis::FunctionID::GenericResponseID;
       break;
     }
   }

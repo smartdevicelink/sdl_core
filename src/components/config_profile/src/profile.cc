@@ -50,7 +50,8 @@ Profile::Profile()
   , server_port_(8087)
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
   , is_mixing_audio_supported_(false)
-  , max_cmd_id_(2000000000) {
+  , max_cmd_id_(2000000000)
+  , default_timeout_(10000) {
   UpdateValues();
 }
 
@@ -96,6 +97,10 @@ const std::vector<std::string>& Profile::vr_commands() const {
 
 const unsigned int Profile::max_cmd_id() const {
   return max_cmd_id_;
+}
+
+const unsigned int Profile::default_timeout() const {
+  return default_timeout_;
 }
 
 const std::string& Profile::vr_help_title() const {
@@ -172,6 +177,17 @@ void Profile::UpdateValues() {
       max_cmd_id_ = 20000000000;
     }
     LOG4CXX_INFO(logger_, "Set Maximum Command ID to " << max_cmd_id_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "DefaultTimeout", value))
+      && ('\0' != *value)) {
+    default_timeout_ = atoi(value);
+    if (default_timeout_ <= 0) {
+      default_timeout_ = 10000;
+    }
+    LOG4CXX_INFO(logger_, "Set Default timeout to " << default_timeout_);
   }
 
   help_promt_.clear();

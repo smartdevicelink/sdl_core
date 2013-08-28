@@ -46,6 +46,15 @@ namespace commands {
  **/
 class SetIconRequest : public CommandRequestImpl {
  public:
+
+  /**
+   * @brief Contains information about the type of image
+   */
+  typedef enum {
+    STATIC = 0,
+    DYNAMIC
+  } ImageType;
+
   /**
    * @brief SetIconRequest class constructor
    *

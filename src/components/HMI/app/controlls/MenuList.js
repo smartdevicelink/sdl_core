@@ -49,13 +49,15 @@ SDL.MenuList = Em.ContainerView
                     this.get('content.childViews').pushObject(SDL.Button
                         .create(SDL.PresetEventsCustom, {
                             text: buttons[i].text,
-                            icon: buttons[i].image,
+                            icon: buttons[i].image ? buttons[i].image.value : "",
+                            templateName: buttons[i].image ? 'rightText' : 'text',
                             groupName: "AlertPopUp",
                             classNameBindings: ['isHighlighted:isHighlighted'],
                             isHighlighted: buttons[i].isHighlighted ? true : false,
                             softButtonID: buttons[i].softButtonID,
                             systemAction: buttons[i].systemAction,
                             groupName: this.groupName,
+                            classNames: 'softButton',
                             appID: appID
                         }));
                 }

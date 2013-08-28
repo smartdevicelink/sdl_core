@@ -74,9 +74,13 @@ void AlertRequest::Run() {
     return;
   }
 
-  if (!MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app)) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                          verification_result);
+    SendResponse(false, verification_result);
     return;
   }
 
@@ -111,8 +115,10 @@ void AlertRequest::SendAlertRequest(int app_id) {
     (*message_)[strings::msg_params][strings::alert_text3];
 
   // softButtons
-  msg_params[hmi_request::soft_buttons] =
-    (*message_)[strings::msg_params][strings::soft_buttons];
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    msg_params[hmi_request::soft_buttons] =
+      (*message_)[strings::msg_params][strings::soft_buttons];
+  }
   // app_id
   msg_params[strings::app_id] = app_id;
 
@@ -146,12 +152,17 @@ void AlertRequest::SendSpeakRequest(int app_id) {
 }
 
 void AlertRequest::SendPlayToneNotification(int app_id) {
+  LOG4CXX_INFO(logger_, "AlertRequest::SendPlayToneNotification");
+
   // check playtone parameter
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
+      smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
       CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_PlayTone,
-                            smart_objects::SmartObject());
+                            msg_params);
     }
   }
 }

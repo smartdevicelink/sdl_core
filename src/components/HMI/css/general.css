@@ -125,10 +125,8 @@ div {
 	left: 500px;
 	width: 295px;
 	height: 100px;
-	background-color: black;
 	z-index: 1;
 	border-radius: 10PX;
-	border: #A6A6A6 solid 2px;
 	top: 8px;
 	-webkit-transition: opacity 1s ease-in-out;
 	display: none;
@@ -139,6 +137,9 @@ div {
 	height: 98px;
 	border: 1px solid black;
 	border-radius: 10px;
+	background-color: black;
+	border: #A6A6A6 solid 2px;
+	color: white;
 }
 
 #TTSPopUp .message {
@@ -236,6 +237,7 @@ div {
 #VRPopUp.active {
 	opacity: 1;
 	display: block;
+	transition: all 1s;
 }
 
 #VRPopUp .list {
@@ -758,6 +760,13 @@ div {
 	font-size: 20px;
 	line-height: 50px;
 	border-bottom: 1px solid #393939;
+}
+
+.list-item .ico{
+    height: 49px;
+}
+.list-item span{
+    position: absolute
 }
 
 /* List item background */

@@ -289,6 +289,13 @@ struct HMICapabilities {
     bool is_navi_cooperating_;
     bool is_ivi_cooperating_;
 
+    // to check if IsReady response for corresponding interface received
+    bool is_vr_ready_response_recieved_;
+    bool is_tts_ready_response_recieved_;
+    bool is_ui_ready_response_recieved_;
+    bool is_navi_ready_response_recieved_;
+    bool is_ivi_ready_response_recieved_;
+
     bool attenuated_supported_;
     smart_objects::SmartObject* ui_supported_languages_;
     smart_objects::SmartObject* tts_supported_languages_;

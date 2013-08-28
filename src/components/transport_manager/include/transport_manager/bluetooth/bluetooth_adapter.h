@@ -33,19 +33,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
 
 #include "transport_manager/device_adapter/device_adapter_impl.h"
 
 namespace transport_manager {
 namespace device_adapter {
 
+/**
+ * @brief Device adapter that use bluetooth transport.
+ */
 class BluetoothDeviceAdapter : public DeviceAdapterImpl {
  public:
+  /**
+   * @brief Constructor.
+   */
   BluetoothDeviceAdapter();
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~BluetoothDeviceAdapter();
  protected:
+
+  /**
+   * @brief Return type of device.
+   */
   virtual DeviceType getDeviceType() const;
 };
 

@@ -52,7 +52,7 @@ class MockDeviceScanner : public DeviceScanner {
  public:
   MockDeviceScanner(MockDeviceAdapter *adapter);
   void reset();
-  void addDevice(const std::string& name, const std::string& unique_id);
+  void addDevice(const std::string& name, const std::string& unique_id, bool start = true);
   void removeDevice(const std::string& name);
   void fail_further_search() { is_search_failed_ = true; }
 

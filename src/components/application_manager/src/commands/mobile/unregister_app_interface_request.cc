@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -44,8 +45,11 @@ void UnregisterAppInterfaceRequest::Run() {
   ApplicationManagerImpl* app_manager =
     ApplicationManagerImpl::instance();
 
-  if (!app_manager->application(
-        (*message_)[strings::params][strings::connection_key])) {
+  Application* application =
+    app_manager->application(
+      (*message_)[strings::params][strings::connection_key]);
+
+  if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
@@ -58,17 +62,7 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject& message = *notification;
-
-  message[strings::params][strings::function_id] =
-    hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
-
-  message[strings::params][strings::message_type] = MessageType::kNotification;
-
-  message[strings::msg_params][strings::app_id] =
-    (*message_)[strings::params][strings::connection_key];
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
+  MessageHelper::SendOnAppUnregNotificationToHMI(application);
 
   if (!app_manager->UnregisterApplication(
         (*message_)[strings::params][strings::connection_key])) {

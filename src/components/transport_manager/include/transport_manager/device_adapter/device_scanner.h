@@ -1,6 +1,6 @@
 /**
  * \file device_scanner.h
- * \brief Device and DeviceScanner
+ * \brief DeviceScanner class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DEVICE_SCANNER_H_
-#define DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_SCANNER_H_
 
 #include "transport_manager/device_adapter/device.h"
 #include "transport_manager/device_adapter/device_adapter.h"
@@ -41,12 +41,41 @@
 namespace transport_manager {
 namespace device_adapter {
 
+/**
+ * @brief Abstract class for device scanner.
+ */
 class DeviceScanner {
  public:
+  /**
+   * @brief Start device scanner.
+   *
+   * @return Error information about reason of initialization failure.
+   */
   virtual DeviceAdapter::Error init() = 0;
+
+  /**
+   * @brief
+   *
+   * @return Error information about reason of scan failure.
+   */
   virtual DeviceAdapter::Error scan() = 0;
+
+  /**
+   * @brief
+   */
   virtual void terminate() = 0;
+
+  /**
+   * @brief Check device scanner for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
   virtual bool isInitialised() const = 0;
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~DeviceScanner() {
   }
 };

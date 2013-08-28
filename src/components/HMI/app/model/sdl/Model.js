@@ -80,6 +80,13 @@ SDL.SDLModel = Em.Object
         phoneCall: false,
 
         /**
+         * Flag to be set true when VRHelpList are activated
+         * 
+         * @param {Boolean}
+         */
+        VRHelpListActivated: false,
+
+        /**
          * Default values for global properties
          */
         globalPropertiesDefault: {
@@ -335,11 +342,13 @@ SDL.SDLModel = Em.Object
         tbtTurnListUpdate: function(params) {
 
             SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
+            SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
             SDL.TBTTurnList.updateList(params.appID);
         },
 
         /**
          * Method to VRHelpList on UI with request parameters
+         * It opens VrHelpList PopUp with current list of readable VR commands
          * 
          * @param {Object}
          */
@@ -577,12 +586,17 @@ SDL.SDLModel = Em.Object
          */
         uiPerformInteraction: function(message, performInteractionRequestId) {
 
-            if (!SDL.InteractionChoicesView.active) {
-                SDL.SDLController.getApplicationModel(message.appID)
-                    .onPreformInteraction(message, performInteractionRequestId);
+            if (!message) {
+                SDL.SDLAppController.model.onPreformInteraction(message, performInteractionRequestId);
             } else {
-                SDL.SDLController.interactionChoiseCloseResponse('ABORTED',
-                    performInteractionRequestId);
+
+                if (!SDL.InteractionChoicesView.active) {
+                    SDL.SDLController.getApplicationModel(message.appID)
+                        .onPreformInteraction(message, performInteractionRequestId);
+                } else {
+                    SDL.SDLController.interactionChoiseCloseResponse(this.resultCode["ABORTED"],
+                        performInteractionRequestId);
+                }
             }
         },
 
@@ -598,7 +612,7 @@ SDL.SDLModel = Em.Object
                 SDL.SDLController.getApplicationModel(message.params.appID)
                     .onSlider(message);
             } else {
-                FFW.UI.sendSliderResult('ABORTED', message.id);
+                FFW.UI.sendSliderResult(this.resultCode["ABORTED"], message.id);
             }
         },
 
@@ -644,7 +658,7 @@ SDL.SDLModel = Em.Object
             var message = '';
             if (ttsChunks) {
                 for ( var i = 0; i < ttsChunks.length; i++) {
-                    message += ttsChunks[i].text + '\n';
+                    message += ttsChunks[i].text + ' ';
                 }
                 SDL.TTSPopUp.ActivateTTS(message);
             }
@@ -727,6 +741,8 @@ SDL.SDLModel = Em.Object
                     break;
                 }
                 }
+
+                SDL.TurnByTurnView.deactivate();
 
                 FFW.BasicCommunication.OnAppDeactivated(reason, appID);
             }

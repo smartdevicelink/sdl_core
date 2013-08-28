@@ -102,6 +102,7 @@ const char alert_text2[] = "alertText2";
 const char alert_text3[] = "alertText3";
 const char tts_chunks[] = "ttsChunks";
 const char initial_prompt[] = "initialPrompt";
+const char initial_text[] = "initialText";
 const char duration[] = "duration";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
@@ -216,6 +217,7 @@ const char show_strings[] = "showStrings";
 
 namespace hmi_response {
 const char code[] = "code";
+const char message[] = "message";
 const char method[] = "method";
 const char try_again_time[] = "tryAgainTime";
 const char custom_button_id[] = "customButtonID";

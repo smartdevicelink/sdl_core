@@ -40,6 +40,17 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             'backButton', 'captionText', 'listOfChoices'
         ],
 
+        backButton: SDL.Button.extend( {
+            classNames:
+                [
+                    'back-button'
+                ],
+            target: 'SDL.SDLController',
+            action: 'InteractionChoicesDeactivate',
+            icon: 'images/media/ico_back.png',
+            onDown: false
+        } ),
+
         listOfChoices: SDL.List.extend( {
             elementId: 'perform_interaction_view_list',
             itemsOnPage: 5,
@@ -60,15 +71,24 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
             clearTimeout(this.timer);
             this.set('active', false);
+            SDL.SDLController.VRMove();
 
-            if (ABORTED) {
+            switch (ABORTED) {
+            case "ABORTED": {
                 SDL.SDLController
                     .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["ABORTED"],
                         this.performInteractionRequestID);
-            } else {
+                break;
+            }
+            case "TIMED_OUT": {
                 SDL.SDLController
                     .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["TIMED_OUT"],
                         this.performInteractionRequestID);
+                break;
+            }
+            default: {
+                // default action
+            }
             }
         },
 
@@ -112,7 +132,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                             onDown: false,
                             target: 'SDL.SDLAppController',
                             performInteractionRequestID: performInteractionRequestID,
-                            templateName: 'text',
+                            templateName: data[i].image ? 'rightIcon' : 'text',
                             icon: data[i].image ? data[i].image.value : null
                         }
                     });
@@ -123,7 +143,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             clearTimeout(this.timer);
             this.timer = setTimeout(function() {
 
-                self.deactivate(false);
+                self.deactivate("TIMED_OUT");
             }, timeout);
         }
     });

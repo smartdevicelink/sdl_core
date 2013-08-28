@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical">
+	<TableLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		<TableRow android:id="@+id/LinearLayout01"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+		
+		</TableRow>
+		<TableRow android:id="@+id/LinearLayout03"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+		</TableRow>
+	</TableLayout>
+	<TableLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		<TableRow android:id="@+id/LinearLayout03"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+			<Button
+			    android:id="@+id/btnPlayPause"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="1"
+			    android:text="Play/Pause" ></Button>
+		</TableRow>
+		<TableRow android:id="@+id/LinearLayout04"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+			<Button android:layout_weight="1" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/btnSendMessage"
+				android:text="Send Message" android:enabled="true"></Button>
+		</TableRow>
+        <TableRow android:id="@+id/LinearLayout05"
+                  android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+            <Button android:layout_weight="1" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/btnShowVideoPreview"
+                    android:text="Video Action" android:enabled="true" android:onClick="videoAction"></Button>
+        </TableRow>
+
+    </TableLayout>
+	
+	<ScrollView android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:id="@+id/scrollConsole"
+		android:visibility="gone">
+	</ScrollView>
+
+	<ListView android:layout_height="fill_parent"
+		android:layout_width="fill_parent" android:id="@+id/messageList"
+		android:visibility="visible">
+	</ListView>
+	
+
+</LinearLayout>

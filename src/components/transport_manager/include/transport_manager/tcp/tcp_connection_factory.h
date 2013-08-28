@@ -1,6 +1,6 @@
 /**
  * \file tcp_connection_factory.h
- * \brief
+ * \brief TcpConnectionFactory class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CONNECTION_FACTORY_H_
 
 #include "transport_manager/device_adapter/server_connection_factory.h"
 #include "transport_manager/device_adapter/device_adapter_controller.h"
@@ -42,15 +42,52 @@
 namespace transport_manager {
 namespace device_adapter {
 
+/**
+ * @brief Create connections.
+ */
 class TcpConnectionFactory : public ServerConnectionFactory {
  public:
+
+  /**
+   * @brief Constructor.
+   *
+   * @param controller Pointer to the device adapter controller.
+   */
   TcpConnectionFactory(DeviceAdapterController* controller);
  protected:
+
+  /**
+   * @brief Start TCP connection factory.
+   */
   virtual DeviceAdapter::Error init();
+
+  /**
+   * @brief Constructor.
+   *
+   * @param device_uid device unique identifier.
+   * @param app_handle Handle of application.
+   *
+   * @return Error information about possible reason of failure.
+   */
   virtual DeviceAdapter::Error createConnection(const DeviceUID& device_uid,
                                                 const ApplicationHandle& app_handle);
+
+  /**
+   * @brief
+   */
   virtual void terminate();
+
+  /**
+   * @brief Check for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
   virtual bool isInitialised() const;
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~TcpConnectionFactory();
  private:
   DeviceAdapterController* controller_;

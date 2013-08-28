@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H
 
 #include <queue>
 #include <map>
@@ -53,8 +53,15 @@ using ::transport_manager::AdapterIterator;
 using ::transport_manager::device_adapter::DeviceAdapterSptr;
 using ::transport_manager::device_adapter::DeviceAdapterListener;
 
+/**
+ * namespace transport_manager
+ * @brief transport_manager namespace
+ */
 namespace transport_manager {
 
+/**
+ * @enum Transport manager states.
+ */
 enum {
   E_SUCCESS = 0,
   E_TM_IS_NOT_INITIALIZED,
@@ -66,15 +73,18 @@ enum {
 };
 
 struct TransportManagerAttr {
-  unsigned long disconnectTimeout; /* milliseconds */
+  unsigned long disconnectTimeout; /**> milliseconds */
 };
 
 /**
- * @brief Interface of transport manager.
- * @interface TransportManager
- **/
+ * @brief Implementation of transport manager.
+ */
 class TransportManagerImpl : public TransportManager {
  public:
+
+  /**
+   * @brief Hold connection parameters.
+   */
   struct Connection {
     ConnectionUID id;
     DeviceUID device;
@@ -87,161 +97,163 @@ class TransportManagerImpl : public TransportManager {
   virtual ~TransportManagerImpl(void);
 
   /**
-   * @brief initialize TM
+   * @brief Initialize transport manager.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    */
   int init(void);
 
   /**
    * @brief Start scanning for new devices.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_device_management
+   * @return Code error.
    **/
   virtual int searchDevices(void);
 
   /**
    * @brief Connect to all applications discovered on device.
    *
-   * @param DeviceHandle Handle of device to connect to.
+   * @param device_id Handle of device to connect to.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int connectDevice(const DeviceHandle &device_id);
 
   /**
    * @brief Disconnect from all applications connected on device.
    *
-   * @param DeviceHandle Handle of device to disconnect from.
+   * @param device_id Handle of device to disconnect from.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int disconnectDevice(const DeviceHandle &device_id);
 
+  /**
+   * @brief Routine after disconnect failed.
+   *
+   * @param Pointer to any type.
+   */
   static void disconnectFailedRoutine(void* p);
 
   /**
-   * @brief Disconnect from applications connected on device by connection id.
+   * @brief Disconnect from applications connected on device by connection unique identifier.
    *
-   * @param ConnectionUID connection id.
+   * @param connection Connection unique identifier.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int disconnect(const ConnectionUID &connection);
 
+  /**
+   * @brief Disconnect and clear all unreceived data.
+   *
+   * @param connection Connection unique identifier.
+   */
   virtual int disconnectForce(const ConnectionUID &connection);
   /**
-   * @brief post new mesage into TM's queue
+   * @brief Post new message in queue for massages destined to device.
    *
-   * @param new message container
+   * @param message Smart pointer to the raw massage.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   *
+   * @return Code error.
    **/
   virtual int sendMessageToDevice(const RawMessageSptr message);
 
   /**
-   * @brief receive event from device
+   * @brief Post event in the event queue.
    *
-   * @param new event
+   * @param event Current event information.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int receiveEventFromDevice(const DeviceAdapterEvent &event);
 
   /**
-   * @brief register event listener
+   * @brief Post listener to the container of transport manager listeners.
    *
-   * @param event listener
+   * @param listener Pointer to the transport manager listener.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int addEventListener(TransportManagerListener *listener);
 
   /**
-   * @brief unregister event listener
+   * @brief Delete listener from the container of transport manager listeners.
    *
-   * @param event listener
+   * @param listener Pointer to the transport manager listener.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int removeEventListener(TransportManagerListener *listener);
 
   /**
-   * @brief add new device adapter
+   * @brief Add device adapter to the container of device adapters.
    *
-   * @param device adapter
+   * @param device_adapter Smart pointer to the device adapter.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int addDeviceAdapter(device_adapter::DeviceAdapterSptr device_adapter);
 
+  /**
+   * @brief Remove device adapter from the container of device adapters.
+   *
+   * @param device_adapter Smart pointer to the device adapter.
+   *
+   * @return Code error.
+   */
   int removeDeviceAdapter(device_adapter::DeviceAdapterSptr device_adapter);
 
   /**
-   * @brief remove device from internal storages
+   * @brief Remove device from the container that hold devices.
    *
-   * @param event device id
+   * @param device Handle of device.
    *
-   * @return code error
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @return Code error.
    **/
   virtual int removeDevice(const DeviceHandle &device);
 
-  /*
-   * turns on or off visibility of SDL to mobile devices
+  /**
+   * @brief Turns on or off visibility of SDL to mobile devices
    * when visibility is ON (on_off = true) mobile devices are able to connect
    * otherwise ((on_off = false)) SDL is not visible from outside
    *
-   * @return code error
+   * @return Code error.
    */
   virtual int Visibility(const bool &on_off)const;
 
+  /**
+   * @brief Return Container that hold information about devices.
+   *
+   * @return Container that hold information about devices.
+   */
+  const std::vector<DeviceInfo>& getDeviceList() const;
 
+  /**
+   * @brief Establish protocom handler.
+   *
+   * @param ph Pointer to the handler of protocol.
+   */
   virtual void set_protocol_handler(protocol_handler::ProtocolHandler *ph);//YK: temp solution until B1.0 release
 
   /**
-   * @brief interface function to wake up adapter listener thread
+   * @brief Return container that hold connections.
    *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  pthread_cond_t *getDeviceListenerThreadWakeup(void);
-
+   * @return Container that hold connections.
+   */
   std::vector<Connection> getConnectionList();
 
   /**
-   * @brief default constructor
+   * @brief Constructor.
    *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @param config Information about transport manager state.
    **/
   explicit TransportManagerImpl(const TransportManagerAttr &config);
 
  protected:
+  /**
+   * @brief Information about transport manager state.
+   */
   TransportManagerAttr config_;
 
   template<class Proc, class ... Args>
@@ -253,18 +265,16 @@ class TransportManagerImpl : public TransportManager {
   }
 
   /**
-   * @brief post new mesage into TM's queue
+   * @brief Put massage in the container of massages.
    *
-   * @param new message container
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @param message Smart pointer to the raw massage.
    **/
   void postMessage(const RawMessageSptr message);
 
   /**
    * @brief update message in queue
    *
-   * @param
+   * @param message shared pointer to raw massage
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
@@ -272,45 +282,40 @@ class TransportManagerImpl : public TransportManager {
    * void updateMessage(const RawMessageSptr old_message, const RawMessageSptr new_message);*/
 
   /**
-   * @brief remove mesage from TM's queue
+   * @brief Remove message from the container of massages.
    *
-   * @param new message container
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @param message Smart pointer to the raw massage.
    **/
   void removeMessage(const RawMessageSptr message);
 
+  /**
+   * @brief Remove event from the container of events.
+   *
+   * @param event Event of device adapter.
+   */
   void removeEvent(const DeviceAdapterEvent &event);
 
   /**
-   * @brief post new event from device
+   * @brief Post event to the container of events.
    *
-   * @param new event
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @param event Event of device adapter.
    **/
   void postEvent(const DeviceAdapterEvent &event);
 
   /**
-   * @brief type for message queue
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @brief Type definition of container that holds smart pointer to the raw massages.
    **/
   typedef std::list<RawMessageSptr> MessageQueue;
 
   /**
-   * @brief type for message queue
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @brief Type definition of container that holds events of device adapters.
    **/
   typedef std::vector<DeviceAdapterEvent> EventQueue;
 
   /**
-   * @brief constructor used to create new TM with device adapter
+   * @brief Constructor.
    *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
+   * @param device_adapter_list container that holds smart pointer to the device adapters.
    **/
   explicit TransportManagerImpl(
       std::vector<device_adapter::DeviceAdapterSptr> device_adapter_list);
@@ -383,12 +388,12 @@ class TransportManagerImpl : public TransportManager {
   pthread_t messsage_queue_thread_;
 
   /**
-   * @brief conditional event thread
+   * @brief Conditional event thread
    **/
   pthread_t event_queue_thread_;
 
   /**
-   * @brief condition variable to wake up event
+   * @brief Condition variable to wake up event
    **/
   pthread_cond_t device_listener_thread_wakeup_;
 
@@ -397,8 +402,17 @@ class TransportManagerImpl : public TransportManager {
    **/
   mutable pthread_mutex_t event_queue_mutex_;
 
+  /**
+   * @brief Flag that TM is initialized
+   */
   bool is_initialized_;
  private:
+
+  std::vector<DeviceInfo> device_list_;
+
+  /**
+   * @brief Structure that contains conversion functions (Device ID -> Device Handle; Device Handle -> Device ID)
+   */
   struct Handle2GUIDConverter {
     typedef std::vector<DeviceUID> ConversionTable;
 
@@ -429,8 +443,15 @@ class TransportManagerImpl : public TransportManager {
 
     ConversionTable conversion_table_;
   };
+
+  /**
+   * @brief Converter variable (Device ID -> Device Handle; Device Handle -> Device ID)
+   */
   Handle2GUIDConverter converter_;
 
+  /**
+   * @brief Structure that contains internal connection parameters
+   */
   struct ConnectionInternal {
     DeviceAdapterSptr device_adapter;
     ConnectionUID id;
@@ -468,11 +489,11 @@ class TransportManagerImpl : public TransportManager {
                             const ApplicationHandle& application);
 
   protocol_handler::ProtocolHandler *protocol_handler_;//YK: temp solution until B1.0 release
-void addDataToContainer(ConnectionUID id, std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, unsigned char * data, unsigned int data_size);
-bool getFrameSize(unsigned char *data,  unsigned int data_size, unsigned int &frame_size);
-bool getFrame(std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, ConnectionUID id, unsigned int frame_size, unsigned char **frame);
+  void addDataToContainer(ConnectionUID id, std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, unsigned char * data, unsigned int data_size);
+  bool getFrameSize(unsigned char *data,  unsigned int data_size, unsigned int &frame_size);
+  bool getFrame(std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, ConnectionUID id, unsigned int frame_size, unsigned char **frame);
 
-friend bool DeviceAdapterListenerImpl::FindSharedPtr(const DeviceAdapter*, AdapterIterator&);
+  friend bool DeviceAdapterListenerImpl::FindSharedPtr(const DeviceAdapter*, AdapterIterator&);
 };//class ;
 
 }  // namespace transport_manager
