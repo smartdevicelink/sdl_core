@@ -37,7 +37,7 @@
 
             <Button android:layout_weight="1" android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:id="@+id/btnShowVideoPreview"
-                    android:text="Show Video Preview" android:enabled="true" android:onClick="showVideoPreview"></Button>
+                    android:text="Video Action" android:enabled="true" android:onClick="videoAction"></Button>
         </TableRow>
 
 	</TableLayout>	
