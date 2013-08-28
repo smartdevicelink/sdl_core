@@ -1,5 +1,5 @@
 /**
- * \file device_adapter_event.cc
+ * \file transport_adapter_event.cc
  * \brief
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,69 +33,69 @@
  */
 
 #include "transport_manager/error.h"
-#include "transport_manager/device_adapter/device_adapter_event.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
 
-DeviceAdapterEvent::DeviceAdapterEvent(int type, DeviceAdapterSptr device_adapter,
+TransportAdapterEvent::TransportAdapterEvent(int type, TransportAdapterSptr transport_adapter,
                                        const DeviceUID &device_handle,
                                        const ApplicationHandle& application_id,
                                        RawMessageSptr data, BaseError *error)
     : event_type_(type),
       application_id_(application_id),
-      device_adapter_(device_adapter),
+      transport_adapter_(transport_adapter),
       device_uid_(device_handle),
       event_data_(data) {
   set_error(error);
 }
 
-DeviceAdapterEvent::~DeviceAdapterEvent() {
+TransportAdapterEvent::~TransportAdapterEvent() {
 }
 
-void DeviceAdapterEvent::set_event_type(int type) {
+void TransportAdapterEvent::set_event_type(int type) {
   event_type_ = type;
 }
 
-void DeviceAdapterEvent::set_device_adapter(
-    device_adapter::DeviceAdapterSptr device_adapter) {
-  device_adapter_ = device_adapter;
+void TransportAdapterEvent::set_transport_adapter(
+    transport_adapter::TransportAdapterSptr transport_adapter) {
+  transport_adapter_ = transport_adapter;
 }
-void DeviceAdapterEvent::set_data(RawMessageSptr data) {
+void TransportAdapterEvent::set_data(RawMessageSptr data) {
   event_data_ = data;
 }
 
-void DeviceAdapterEvent::set_error(BaseError *error) {
+void TransportAdapterEvent::set_error(BaseError *error) {
   event_error_ = error;
 }
 
-int DeviceAdapterEvent::event_type(void) const {
+int TransportAdapterEvent::event_type(void) const {
   return event_type_;
 }
 
-ApplicationHandle DeviceAdapterEvent::application_id(void) const {
+ApplicationHandle TransportAdapterEvent::application_id(void) const {
   return application_id_;
 }
 
-DeviceAdapterSptr DeviceAdapterEvent::device_adapter(void) const {
-  return device_adapter_;
+TransportAdapterSptr TransportAdapterEvent::transport_adapter(void) const {
+  return transport_adapter_;
 }
 
-RawMessageSptr DeviceAdapterEvent::data(void) const {
+RawMessageSptr TransportAdapterEvent::data(void) const {
   return event_data_;
 }
 
-const DeviceUID &DeviceAdapterEvent::device_uid() const {
+const DeviceUID &TransportAdapterEvent::device_uid() const {
   return device_uid_;
 }
 
-BaseError *DeviceAdapterEvent::event_error(void) const {
+BaseError *TransportAdapterEvent::event_error(void) const {
   return event_error_;
 }
 
-bool DeviceAdapterEvent::operator ==(const DeviceAdapterEvent &other) {
+bool TransportAdapterEvent::operator ==(const TransportAdapterEvent &other) {
   if (this->event_type_ == other.event_type_
       && this->application_id_ == other.application_id_
-      && this->device_adapter_ == other.device_adapter_) {
+      && this->transport_adapter_ == other.transport_adapter_) {
 
     if (!this->event_data_.valid() && !other.event_data_.valid())
       return true;

@@ -36,7 +36,7 @@
 #include "transport_manager/tcp/tcp_device.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
     : Device(name, name),
@@ -109,5 +109,5 @@ int TcpDevice::GetApplicationPort(const ApplicationHandle app_handle) const {
 }
 
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager

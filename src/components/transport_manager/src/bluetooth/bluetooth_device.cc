@@ -45,7 +45,7 @@
 #include "transport_manager/bluetooth/bluetooth_device.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
                                        uint8_t* channel_out) {
@@ -100,6 +100,6 @@ ApplicationList BluetoothDevice::GetApplicationList() const {
   return result;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

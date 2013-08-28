@@ -1,6 +1,6 @@
 /**
- * \file connection.h
- * \brief Connection class header.
+ * \file server_connection_factory.h
+ * \brief Server connection factory class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,53 +32,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SERVER_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SERVER_CONNECTION_FACTORY_H_
 
-#include "utils/shared_ptr.h"
-#include "transport_manager/device_adapter/device_adapter.h"
-
-using utils::SharedPtr;
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
 namespace transport_manager {
-
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
- * @brief Application connection.
- **/
-class Connection {
+ * @brief Implement transport dependent connection that was originated by the user.
+ */
+class ServerConnectionFactory {
  public:
   /**
-   * @brief Constructor.
+   * @brief Start server connection factory.
+   *
+   * @return Information about possible reason of error during initialization.
    */
-  Connection() {}
+  virtual TransportAdapter::Error init() = 0;
+
+  /**
+   * @brief
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   *
+   * @return Information about posible reason of error.
+   */
+  virtual TransportAdapter::Error CreateConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
+
+  /**
+   * @brief
+   */
+  virtual void terminate() = 0;
+
+  /**
+   * @brief Check device scanner for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
+  virtual bool IsInitialised() const = 0;
+
   /**
    * @brief Destructor.
-   **/
-  virtual ~Connection() {}
-
-  /**
-   * @brief Send data frame.
-   *
-   * @param Message Smart pointer to the raw message.
-   *
-   * @return Error Information about possible reason of sending data failure.
    */
-  virtual DeviceAdapter::Error SendData(RawMessageSptr message) = 0;
-
-  /**
-   * @brief Disconnect the current connection.
-   */
-  virtual DeviceAdapter::Error Disconnect() = 0;
+  virtual ~ServerConnectionFactory() {
+  }
 };
 
-/**
- * @typedef Type definition of smart pointer to the Connection class.
- */
-typedef utils::SharedPtr<Connection> ConnectionSptr;
-
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* CONNECTION_H_ */
+#endif /* SERVER_CONNECTION_FACTORY_H_ */

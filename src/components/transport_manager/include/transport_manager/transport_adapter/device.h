@@ -40,7 +40,7 @@
 #include "transport_manager/common.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
  * @brief Internal class describing device.
@@ -101,7 +101,7 @@ class Device {
 typedef utils::SharedPtr<Device> DeviceSptr;
 typedef std::vector<DeviceSptr> DeviceVector;
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* DEVICE_H_ */

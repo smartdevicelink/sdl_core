@@ -36,12 +36,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 
-#include "transport_manager/device_adapter/client_connection_listener.h"
+#include "transport_manager/transport_adapter/client_connection_listener.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
 /**
  * @brief Listener of device adapter that use TCP transport.
@@ -55,7 +55,7 @@ class TcpClientListener : public ClientConnectionListener {
    * @param controller Pointer to the device adapter controller.
    * @param port Port No.
    */
-  TcpClientListener(DeviceAdapterController* controller, const uint16_t port);
+  TcpClientListener(TransportAdapterController* controller, const uint16_t port);
 
   /**
    * @brief Start TCP client listener thread.
@@ -73,7 +73,7 @@ class TcpClientListener : public ClientConnectionListener {
    *
    * @return Error information about possible reason of starting TCP listener listener failure.
    */
-  virtual DeviceAdapter::Error init();
+  virtual TransportAdapter::Error init();
 
   /**
    * @brief Stop TCP client listener.
@@ -93,15 +93,15 @@ class TcpClientListener : public ClientConnectionListener {
    *
    * @return Error information about possible reason of failure.
    */
-  virtual DeviceAdapter::Error StartListening();
+  virtual TransportAdapter::Error StartListening();
 
   /**
    * @brief Terminate TCP client listener thread.
    */
-  virtual DeviceAdapter::Error StopListening();
+  virtual TransportAdapter::Error StopListening();
  private:
   const uint16_t port_;
-  DeviceAdapterController* controller_;
+  TransportAdapterController* controller_;
   pthread_t thread_;
   int socket_;
   bool thread_started_;
@@ -109,7 +109,7 @@ class TcpClientListener : public ClientConnectionListener {
   bool thread_stop_requested_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* TCP_CLIENT_LISTENER_H_ */

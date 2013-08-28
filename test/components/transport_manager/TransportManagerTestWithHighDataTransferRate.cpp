@@ -49,7 +49,7 @@
 #include "TransportManager/ITransportManagerDataListener.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "../../../src/components/TransportManager/src/CTransportManager.hpp"
-#include "../../../src/components/TransportManager/src/IDeviceAdapter.hpp"
+#include "../../../src/components/TransportManager/src/ITransportAdapter.hpp"
 
 namespace test
 {
@@ -90,10 +90,10 @@ namespace test
                     pthread_mutex_t & mMutex;
                 };
 
-                class MockDeviceAdapter: public NsSmartDeviceLink::NsTransportManager::IDeviceAdapter
+                class MockTransportAdapter: public NsSmartDeviceLink::NsTransportManager::ITransportAdapter
                 {
                 public:
-                    MockDeviceAdapter(pthread_mutex_t & Mutex);
+                    MockTransportAdapter(pthread_mutex_t & Mutex);
                     virtual NsSmartDeviceLink::NsTransportManager::EDeviceType GetDeviceType(void) const;
 
                     MOCK_METHOD1(connectDevice, void (const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle));
@@ -114,13 +114,13 @@ namespace test
                 class TestTransportManager: public NsSmartDeviceLink::NsTransportManager::CTransportManager
                 {
                 public:
-                    TestTransportManager(test::components::TransportManager::HighDataTransferRate::MockDeviceAdapter * DeviceAdapter);
+                    TestTransportManager(test::components::TransportManager::HighDataTransferRate::MockTransportAdapter * TransportAdapter);
                     ~TestTransportManager(void);
                 protected:
-                    virtual void initializeDeviceAdapters(void);
+                    virtual void initializeTransportAdapters(void);
 
                 private:
-                    MockDeviceAdapter * mMockDeviceAdapter;
+                    MockTransportAdapter * mMockTransportAdapter;
                 };
 
                 std::string formatDataSize(const uint64_t DataSize);
@@ -159,7 +159,7 @@ void test::components::TransportManager::HighDataTransferRate::MockDeviceListene
     pthread_mutex_unlock(&mMutex);
 }
 
-test::components::TransportManager::HighDataTransferRate::MockDeviceAdapter::MockDeviceAdapter(pthread_mutex_t & Mutex):
+test::components::TransportManager::HighDataTransferRate::MockTransportAdapter::MockTransportAdapter(pthread_mutex_t & Mutex):
 mMockDeviceInfo(),
 mMockConnectionHandle(NsSmartDeviceLink::NsTransportManager::InvalidConnectionHandle),
 mMutex(Mutex)
@@ -168,19 +168,19 @@ mMutex(Mutex)
     mMockDeviceInfo.mDeviceType = NsSmartDeviceLink::NsTransportManager::DeviceBluetooth;
 }
 
-NsSmartDeviceLink::NsTransportManager::EDeviceType test::components::TransportManager::HighDataTransferRate::MockDeviceAdapter::GetDeviceType(void) const
+NsSmartDeviceLink::NsTransportManager::EDeviceType test::components::TransportManager::HighDataTransferRate::MockTransportAdapter::GetDeviceType(void) const
 {
     return mMockDeviceInfo.mDeviceType;
 }
 
-void test::components::TransportManager::HighDataTransferRate::MockDeviceAdapter::unlockMutexAfterSendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t, int UserData)
+void test::components::TransportManager::HighDataTransferRate::MockTransportAdapter::unlockMutexAfterSendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t, int UserData)
 {
     pthread_mutex_unlock(&mMutex);
 }
 
-test::components::TransportManager::HighDataTransferRate::TestTransportManager::TestTransportManager(test::components::TransportManager::HighDataTransferRate::MockDeviceAdapter * DeviceAdapter):
+test::components::TransportManager::HighDataTransferRate::TestTransportManager::TestTransportManager(test::components::TransportManager::HighDataTransferRate::MockTransportAdapter * TransportAdapter):
 CTransportManager(),
-mMockDeviceAdapter(DeviceAdapter)
+mMockTransportAdapter(TransportAdapter)
 {
 }
 
@@ -188,9 +188,9 @@ test::components::TransportManager::HighDataTransferRate::TestTransportManager::
 {
 }
 
-void test::components::TransportManager::HighDataTransferRate::TestTransportManager::initializeDeviceAdapters(void)
+void test::components::TransportManager::HighDataTransferRate::TestTransportManager::initializeTransportAdapters(void)
 {
-    addDeviceAdapter(mMockDeviceAdapter);
+    addTransportAdapter(mMockTransportAdapter);
 }
 
 MATCHER_P2(BuffersSame, buffer, size, "Matches two buffers contents")
@@ -259,12 +259,12 @@ TEST(TransportManager, HighDataTransferRate)
 
     pthread_mutex_init(&callbacksMutex, 0);
 
-    test::components::TransportManager::HighDataTransferRate::MockDeviceAdapter * mockDeviceAdapter = new test::components::TransportManager::HighDataTransferRate::MockDeviceAdapter(callbacksMutex);
+    test::components::TransportManager::HighDataTransferRate::MockTransportAdapter * mockTransportAdapter = new test::components::TransportManager::HighDataTransferRate::MockTransportAdapter(callbacksMutex);
     test::components::TransportManager::HighDataTransferRate::MockDataListener mockDataListener(callbacksMutex);
     test::components::TransportManager::HighDataTransferRate::MockDeviceListener mockDeviceListener(callbacksMutex);
-    test::components::TransportManager::HighDataTransferRate::TestTransportManager transportManager(mockDeviceAdapter);
+    test::components::TransportManager::HighDataTransferRate::TestTransportManager transportManager(mockTransportAdapter);
 
-    EXPECT_CALL(*mockDeviceAdapter, run()).Times(1);
+    EXPECT_CALL(*mockTransportAdapter, run()).Times(1);
 
     transportManager.run();
 
@@ -273,10 +273,10 @@ TEST(TransportManager, HighDataTransferRate)
 
     NsSmartDeviceLink::NsTransportManager::tDeviceList deviceList;
 
-    mockDeviceAdapter->mMockDeviceInfo.mDeviceHandle = 1;
-    mockDeviceAdapter->mMockDeviceInfo.mUniqueDeviceId = std::string("id");
-    mockDeviceAdapter->mMockDeviceInfo.mUserFriendlyName = std::string("Name");
-    deviceList.push_back(mockDeviceAdapter->mMockDeviceInfo);
+    mockTransportAdapter->mMockDeviceInfo.mDeviceHandle = 1;
+    mockTransportAdapter->mMockDeviceInfo.mUniqueDeviceId = std::string("id");
+    mockTransportAdapter->mMockDeviceInfo.mUserFriendlyName = std::string("Name");
+    deviceList.push_back(mockTransportAdapter->mMockDeviceInfo);
 
     EXPECT_CALL(mockDeviceListener, onDeviceListUpdated(::testing::_)).Times(0);
     EXPECT_CALL(mockDeviceListener, onApplicationConnected(::testing::_, ::testing::_)).Times(0);
@@ -285,7 +285,7 @@ TEST(TransportManager, HighDataTransferRate)
     EXPECT_CALL(mockDataListener, onFrameSendCompleted(::testing::_, ::testing::_, ::testing::_)).Times(0);
 
     NsSmartDeviceLink::NsTransportManager::tInternalDeviceList internalDeviceList;
-    internalDeviceList.push_back(NsSmartDeviceLink::NsTransportManager::SInternalDeviceInfo(mockDeviceAdapter->mMockDeviceInfo.mDeviceHandle, mockDeviceAdapter->mMockDeviceInfo.mUserFriendlyName, mockDeviceAdapter->mMockDeviceInfo.mUniqueDeviceId));
+    internalDeviceList.push_back(NsSmartDeviceLink::NsTransportManager::SInternalDeviceInfo(mockTransportAdapter->mMockDeviceInfo.mDeviceHandle, mockTransportAdapter->mMockDeviceInfo.mUserFriendlyName, mockTransportAdapter->mMockDeviceInfo.mUniqueDeviceId));
 
     TRY_LOCK_AND_FAIL_ON_TIMEOUT(callbacksMutex);
 
@@ -294,18 +294,18 @@ TEST(TransportManager, HighDataTransferRate)
         .WillOnce(::testing::Invoke(&mockDeviceListener, &test::components::TransportManager::HighDataTransferRate::MockDeviceListener::unlockMutexAfterDeviceListUpdate))
         .RetiresOnSaturation();
 
-    transportManager.onDeviceListUpdated(mockDeviceAdapter, internalDeviceList);
+    transportManager.onDeviceListUpdated(mockTransportAdapter, internalDeviceList);
 
-    mockDeviceAdapter->mMockConnectionHandle = 1;
+    mockTransportAdapter->mMockConnectionHandle = 1;
 
     TRY_LOCK_AND_FAIL_ON_TIMEOUT(callbacksMutex);
 
-    EXPECT_CALL(mockDeviceListener, onApplicationConnected(mockDeviceAdapter->mMockDeviceInfo, mockDeviceAdapter->mMockConnectionHandle))
+    EXPECT_CALL(mockDeviceListener, onApplicationConnected(mockTransportAdapter->mMockDeviceInfo, mockTransportAdapter->mMockConnectionHandle))
         .Times(1)
         .WillOnce(::testing::Invoke(&mockDeviceListener, &test::components::TransportManager::HighDataTransferRate::MockDeviceListener::unlockMutexAfterApplicationConnectedDisconnected))
         .RetiresOnSaturation();
 
-    transportManager.onApplicationConnected(mockDeviceAdapter, mockDeviceAdapter->mMockDeviceInfo, mockDeviceAdapter->mMockConnectionHandle);
+    transportManager.onApplicationConnected(mockTransportAdapter, mockTransportAdapter->mMockDeviceInfo, mockTransportAdapter->mMockConnectionHandle);
 
     static const uint32_t cMaxFramePayloadSize = 1048576u;
 
@@ -335,35 +335,35 @@ TEST(TransportManager, HighDataTransferRate)
 
         if (0 == rand() % 2)
         {
-            EXPECT_CALL(mockDataListener, onFrameReceived(mockDeviceAdapter->mMockConnectionHandle, ::testing::_, ::testing::_))
+            EXPECT_CALL(mockDataListener, onFrameReceived(mockTransportAdapter->mMockConnectionHandle, ::testing::_, ::testing::_))
                 .With(::testing::Args<1, 2>(BuffersSame(frameData, frameSize)))
                 .Times(1)
                 .WillOnce(::testing::Invoke(&mockDataListener, &test::components::TransportManager::HighDataTransferRate::MockDataListener::unlockMutexAfterFrameReceived))
                 .RetiresOnSaturation();
 
-            transportManager.onFrameReceived(mockDeviceAdapter, mockDeviceAdapter->mMockConnectionHandle, frameData, frameSize);
+            transportManager.onFrameReceived(mockTransportAdapter, mockTransportAdapter->mMockConnectionHandle, frameData, frameSize);
 
             bytesReceived += frameSize;
         }
         else
         {
             int userData = 1234;
-            EXPECT_CALL(*mockDeviceAdapter, sendFrame(mockDeviceAdapter->mMockConnectionHandle, ::testing::_, ::testing::_, userData))
+            EXPECT_CALL(*mockTransportAdapter, sendFrame(mockTransportAdapter->mMockConnectionHandle, ::testing::_, ::testing::_, userData))
                 .With(::testing::Args<1, 2>(BuffersSame(frameData, frameSize)))
                 .Times(1)
-                .WillOnce(::testing::Invoke(mockDeviceAdapter, &test::components::TransportManager::HighDataTransferRate::MockDeviceAdapter::unlockMutexAfterSendFrame))
+                .WillOnce(::testing::Invoke(mockTransportAdapter, &test::components::TransportManager::HighDataTransferRate::MockTransportAdapter::unlockMutexAfterSendFrame))
                 .RetiresOnSaturation();
 
-            transportManager.sendFrame(mockDeviceAdapter->mMockConnectionHandle, frameData, frameSize, userData);
+            transportManager.sendFrame(mockTransportAdapter->mMockConnectionHandle, frameData, frameSize, userData);
 
             TRY_LOCK_AND_FAIL_ON_TIMEOUT(callbacksMutex);
 
-            EXPECT_CALL(mockDataListener, onFrameSendCompleted(mockDeviceAdapter->mMockConnectionHandle, userData, NsSmartDeviceLink::NsTransportManager::SendStatusOK))
+            EXPECT_CALL(mockDataListener, onFrameSendCompleted(mockTransportAdapter->mMockConnectionHandle, userData, NsSmartDeviceLink::NsTransportManager::SendStatusOK))
                 .Times(1)
                 .WillOnce(::testing::Invoke(&mockDataListener, &test::components::TransportManager::HighDataTransferRate::MockDataListener::unlockMutexAfterFrameSendCompleted))
                 .RetiresOnSaturation();
 
-            transportManager.onFrameSendCompleted(mockDeviceAdapter, mockDeviceAdapter->mMockConnectionHandle, userData, NsSmartDeviceLink::NsTransportManager::SendStatusOK);
+            transportManager.onFrameSendCompleted(mockTransportAdapter, mockTransportAdapter->mMockConnectionHandle, userData, NsSmartDeviceLink::NsTransportManager::SendStatusOK);
 
             bytesSent += frameSize;
         }
@@ -376,12 +376,12 @@ TEST(TransportManager, HighDataTransferRate)
 
     TRY_LOCK_AND_FAIL_ON_TIMEOUT(callbacksMutex);
 
-    EXPECT_CALL(mockDeviceListener, onApplicationDisconnected(mockDeviceAdapter->mMockDeviceInfo, mockDeviceAdapter->mMockConnectionHandle))
+    EXPECT_CALL(mockDeviceListener, onApplicationDisconnected(mockTransportAdapter->mMockDeviceInfo, mockTransportAdapter->mMockConnectionHandle))
         .Times(1)
         .WillOnce(::testing::Invoke(&mockDeviceListener, &test::components::TransportManager::HighDataTransferRate::MockDeviceListener::unlockMutexAfterApplicationConnectedDisconnected))
         .RetiresOnSaturation();
 
-    transportManager.onApplicationDisconnected(mockDeviceAdapter, mockDeviceAdapter->mMockDeviceInfo, mockDeviceAdapter->mMockConnectionHandle);
+    transportManager.onApplicationDisconnected(mockTransportAdapter, mockTransportAdapter->mMockDeviceInfo, mockTransportAdapter->mMockConnectionHandle);
 
     sleep(1);
 

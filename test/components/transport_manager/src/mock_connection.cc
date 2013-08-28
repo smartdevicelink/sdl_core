@@ -41,9 +41,9 @@
 
 #include <algorithm>
 
-#include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_transport_adapter.h"
 
-using ::transport_manager::device_adapter::DeviceAdapterController;
+using ::transport_manager::transport_adapter::TransportAdapterController;
 
 namespace test {
 namespace components {
@@ -51,7 +51,7 @@ namespace transport_manager {
 
 MockConnection::MockConnection(const ::transport_manager::DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
-                               DeviceAdapterController* controller)
+                               TransportAdapterController* controller)
     : ThreadedSocketConnection(device_handle, app_handle, controller) {
 }
 

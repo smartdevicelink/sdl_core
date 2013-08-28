@@ -51,10 +51,10 @@
 
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 BluetoothDeviceScanner::BluetoothDeviceScanner(
-    DeviceAdapterController* controller)
+    TransportAdapterController* controller)
     : controller_(controller),
       thread_(),
       thread_started_(false),
@@ -333,7 +333,7 @@ bool BluetoothDeviceScanner::WaitForDeviceScanRequest() {
   return deviceScanRequested;
 }
 
-DeviceAdapter::Error BluetoothDeviceScanner::init() {
+TransportAdapter::Error BluetoothDeviceScanner::init() {
   LOG4CXX_TRACE_ENTER(logger_)
   const int thread_start_error = pthread_create(&thread_, 0,
                                                 &bluetoothDeviceScannerThread,
@@ -347,10 +347,10 @@ DeviceAdapter::Error BluetoothDeviceScanner::init() {
         logger_,
         "Bluetooth device scanner thread start failed, error code " << thread_start_error)
     LOG4CXX_TRACE_EXIT(logger_);
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
   LOG4CXX_TRACE_EXIT(logger_)
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 void BluetoothDeviceScanner::terminate() {
@@ -370,13 +370,13 @@ void BluetoothDeviceScanner::terminate() {
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-DeviceAdapter::Error BluetoothDeviceScanner::Scan() {
+TransportAdapter::Error BluetoothDeviceScanner::Scan() {
   LOG4CXX_TRACE_ENTER(logger_)
   if ((!thread_started_) && shutdown_requested_) {
     LOG4CXX_INFO(logger_, "bad state");
-    return DeviceAdapter::BAD_STATE;
+    return TransportAdapter::BAD_STATE;
   }
-  DeviceAdapter::Error ret = DeviceAdapter::OK;
+  TransportAdapter::Error ret = TransportAdapter::OK;
 
   pthread_mutex_lock(&device_scan_requested_mutex_);
 
@@ -386,7 +386,7 @@ DeviceAdapter::Error BluetoothDeviceScanner::Scan() {
     device_scan_requested_ = true;
     pthread_cond_signal(&device_scan_requested_cond_);
   } else {
-    ret = DeviceAdapter::BAD_STATE;
+    ret = TransportAdapter::BAD_STATE;
     LOG4CXX_INFO(logger_, "Device Scan is currently in progress")
   }
 
@@ -395,6 +395,6 @@ DeviceAdapter::Error BluetoothDeviceScanner::Scan() {
   return ret;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

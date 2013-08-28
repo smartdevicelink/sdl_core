@@ -1,5 +1,5 @@
 /*
- * \file mock_device_adapter.h
+ * \file mock_transport_adapter.h
  * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -36,10 +36,10 @@
 #ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
 #define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
 
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
-using ::transport_manager::device_adapter::DeviceAdapterImpl;
-using ::transport_manager::device_adapter::DeviceType;
+using ::transport_manager::transport_adapter::TransportAdapterImpl;
+using ::transport_manager::transport_adapter::DeviceType;
 
 namespace test {
 namespace components {
@@ -47,9 +47,9 @@ namespace transport_manager {
 
 class MockDeviceScanner;
 
-class MockDeviceAdapter : public DeviceAdapterImpl {
+class MockTransportAdapter : public TransportAdapterImpl {
  public:
-  MockDeviceAdapter();
+  MockTransportAdapter();
   MockDeviceScanner* get_device_scanner() const;
   DeviceType GetDeviceType() const { return "mock-adapter"; }
   void reset();

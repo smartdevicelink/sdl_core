@@ -1,5 +1,5 @@
 /**
- * \file device_adapter_controller.h
+ * \file transport_adapter_controller.h
  * \brief Device adapter controller header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -32,21 +32,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_CONTROLLER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_CONTROLLER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_CONTROLLER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_CONTROLLER_H_
 
-#include "transport_manager/device_adapter/device.h"
-#include "transport_manager/device_adapter/connection.h"
+#include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/transport_adapter/connection.h"
 
 namespace transport_manager {
 
-namespace device_adapter {
+namespace transport_adapter {
 
 
-class DeviceAdapterController {
+class TransportAdapterController {
  public:
 
-  virtual ~DeviceAdapterController() {
+  virtual ~TransportAdapterController() {
   }
 
   /**
@@ -186,7 +186,7 @@ class DeviceAdapterController {
                               RawMessageSptr message, const DataSendError&) = 0;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* DEVICE_ADAPTER_CONTROLLER_H_ */
+#endif /* transport_adapter_CONTROLLER_H_ */

@@ -44,12 +44,12 @@
 #include <avahi-common/error.h>
 #include <avahi-common/thread-watch.h>
 
-#include "transport_manager/device_adapter/device_scanner.h"
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
 namespace transport_manager {
 
-namespace device_adapter {
+namespace transport_adapter {
 
 struct DnssdServiceRecord {
   AvahiIfIndex interface;
@@ -74,15 +74,15 @@ class DnssdServiceBrowser : public DeviceScanner {
    *
    * @param controller Pointer to the device adapter controller.
    */
-  DnssdServiceBrowser(class DeviceAdapterController* controller);
+  DnssdServiceBrowser(class TransportAdapterController* controller);
   virtual ~DnssdServiceBrowser();
  protected:
-  virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error Scan();
+  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Scan();
   virtual void terminate();
   virtual bool IsInitialised() const;
  private:
-  DeviceAdapter::Error CreateAvahiClientAndBrowser();
+  TransportAdapter::Error CreateAvahiClientAndBrowser();
   void AddService(AvahiIfIndex interface, AvahiProtocol protocol,
                   const char *name, const char *type, const char *domain);
   void RemoveService(AvahiIfIndex interface, AvahiProtocol protocol,
@@ -114,7 +114,7 @@ class DnssdServiceBrowser : public DeviceScanner {
       const AvahiAddress* avahi_address, uint16_t port, AvahiStringList* txt,
       AvahiLookupResultFlags flags, void *data);
 
-  DeviceAdapterController* controller_;
+  TransportAdapterController* controller_;
 
   AvahiServiceBrowser* avahi_service_browser_;
   AvahiThreadedPoll* avahi_threaded_poll_;

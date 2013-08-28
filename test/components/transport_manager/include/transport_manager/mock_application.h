@@ -42,7 +42,7 @@
 
 #include <transport_manager/common.h>
 #include <transport_manager/transport_manager.h>
-#include <transport_manager/device_adapter/device_adapter_impl.h>
+#include <transport_manager/transport_adapter/transport_adapter_impl.h>
 #include <transport_manager/transport_manager_impl.h>
 #include <transport_manager/mock_device_scanner.h>
 

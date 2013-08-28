@@ -43,12 +43,12 @@
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
 
-#include "transport_manager/device_adapter/threaded_socket_connection.h"
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
 /**
  * @brief Class responsible for communication over bluetooth sockets.
@@ -65,7 +65,7 @@ class BluetoothSocketConnection : public ThreadedSocketConnection {
    */
   BluetoothSocketConnection(const DeviceUID& device_uid,
                             const ApplicationHandle& app_handle,
-                            DeviceAdapterController* controller);
+                            TransportAdapterController* controller);
 
   /**
    * @brief Destructor.
@@ -84,7 +84,7 @@ class BluetoothSocketConnection : public ThreadedSocketConnection {
   virtual bool Establish(ConnectError** error);
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* BLUETOOTH_SOCKET_CONNECTION_H_ */

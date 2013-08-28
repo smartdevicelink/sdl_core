@@ -1,6 +1,6 @@
 /**
  * \file tcp_adapter.cpp
- * \brief TcpDeviceAdapter class source file.
+ * \brief TcpTransportAdapter class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 #include "transport_manager/tcp/tcp_device.h"
 
@@ -42,11 +42,11 @@
 #include <errno.h>
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
                                          const ApplicationHandle& app_handle,
-                                         DeviceAdapterController* controller)
+                                         TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
@@ -59,7 +59,7 @@ bool TcpSocketConnection::Establish(ConnectError** error) {
 
 TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,
-    DeviceAdapterController* controller)
+    TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
@@ -110,6 +110,6 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   return true;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

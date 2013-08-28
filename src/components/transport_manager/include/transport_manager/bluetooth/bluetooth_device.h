@@ -47,10 +47,10 @@
 #include <map>
 
 #include "transport_manager/common.h"
-#include "transport_manager/device_adapter/device.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
  * @brief Type definition for vector that holds uint8_t variables.
@@ -130,7 +130,7 @@ class BluetoothDevice : public Device {
   ApplicationHandle next_application_handle_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_DEVICE_H_

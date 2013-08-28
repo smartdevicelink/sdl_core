@@ -38,9 +38,9 @@
 #include "protocol_handler/protocol_handler.h"//YK: temp solution until B1.0 release
 #include "transport_manager/common.h"
 #include "transport_manager/info.h"
-#include "transport_manager/device_adapter/device_adapter.h"
-#include "transport_manager/device_adapter/device_adapter_event.h"
-#include "transport_manager/device_adapter/device_adapter_listener.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_manager_listener.h"
 
 namespace transport_manager {
@@ -86,7 +86,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int Disconnect(const ConnectionUID &connection) = 0;
+  virtual int Disconnect(const ConnectionUID &connection_id) = 0;
 
   /**
    * @brief Post new message in queue for massages destined to device.
@@ -104,16 +104,16 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ReceiveEventFromDevice(const DeviceAdapterEvent &event) = 0;
+  virtual int ReceiveEventFromDevice(const TransportAdapterEvent &event) = 0;
 
   /**
    * @brief Add device adapter to the container of device adapters.
    *
-   * @param device_adapter Smart pointer to the device adapter.
+   * @param transport_adapter Smart pointer to the device adapter.
    *
    * @return Code error.
    **/
-  virtual int AddDeviceAdapter(device_adapter::DeviceAdapterSptr device_adapter) = 0;
+  virtual int AddTransportAdapter(transport_adapter::TransportAdapterSptr transport_adapter) = 0;
 
   /**
    * @brief Post listener to the container of transport manager listeners.

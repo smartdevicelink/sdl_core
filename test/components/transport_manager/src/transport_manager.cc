@@ -44,7 +44,7 @@
 #include "transport_manager/transport_manager_impl.h"
 
 #include "transport_manager/raw_message_matcher.h"
-#include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_transport_adapter.h"
 #include "transport_manager/mock_device.h"
 #include "transport_manager/mock_transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_impl.h"
@@ -86,13 +86,13 @@ class TransportManagerTest : public ::testing::Test {
 
  protected:
   static TransportManagerImpl *tm;
-  static MockDeviceAdapter *mock_adapter;
+  static MockTransportAdapter *mock_adapter;
   static MockTransportManagerListener *tm_listener;
 
   static void SetUpTestCase() {
     pthread_mutex_init(&test_mutex, NULL);
     pthread_cond_init(&test_cond, NULL);
-    mock_adapter = new MockDeviceAdapter();
+    mock_adapter = new MockTransportAdapter();
     mock_adapter->init();
     TransportManagerAttr cfg {0};
 
@@ -103,7 +103,7 @@ class TransportManagerTest : public ::testing::Test {
 
     tm_listener = new MockTransportManagerListener();
     tm->AddEventListener(tm_listener);
-    tm->AddDeviceAdapter(mock_adapter);
+    tm->AddTransportAdapter(mock_adapter);
     tm->init();
   }
 
@@ -182,7 +182,7 @@ class MyTransportListener : public ::transport_manager::TransportManagerListener
 pthread_mutex_t TransportManagerTest::test_mutex;
 pthread_cond_t TransportManagerTest::test_cond;
 
-MockDeviceAdapter *TransportManagerTest::mock_adapter = nullptr;
+MockTransportAdapter *TransportManagerTest::mock_adapter = nullptr;
 MockTransportManagerListener *TransportManagerTest::tm_listener = nullptr;
 
 TEST_F(TransportManagerTest, ScanDeviceFailed) {

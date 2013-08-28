@@ -36,7 +36,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
-#include "transport_manager/device_adapter/device.h"
+#include "transport_manager/transport_adapter/device.h"
 
 #include <map>
 #include <memory.h>
@@ -49,7 +49,7 @@
 #include <sys/socket.h>
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
  * @brief Information about device that use TCP transport.
@@ -143,7 +143,7 @@ class TcpDevice : public Device {
   ApplicationHandle last_handle_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* TCP_DEVICE_H_ */

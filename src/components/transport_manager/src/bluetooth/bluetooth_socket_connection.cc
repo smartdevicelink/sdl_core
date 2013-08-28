@@ -38,14 +38,14 @@
 #include <unistd.h>
 
 #include "transport_manager/bluetooth/bluetooth_device.h"
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 BluetoothSocketConnection::BluetoothSocketConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,
-    DeviceAdapterController* controller)
+    TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
@@ -121,6 +121,6 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
   return true;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

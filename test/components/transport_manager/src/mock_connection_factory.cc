@@ -40,25 +40,25 @@
 #include <algorithm>
 
 #include "transport_manager/mock_device.h"
-#include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_transport_adapter.h"
 
-using ::transport_manager::device_adapter::DeviceSptr;
+using ::transport_manager::transport_adapter::DeviceSptr;
 using ::transport_manager::ConnectError;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-MockConnectionFactory::MockConnectionFactory(MockDeviceAdapter *controller)
+MockConnectionFactory::MockConnectionFactory(MockTransportAdapter *controller)
     : controller_(controller) {}
 
-DeviceAdapter::Error MockConnectionFactory::CreateConnection(
+TransportAdapter::Error MockConnectionFactory::CreateConnection(
     const ::transport_manager::DeviceUID& device_handle,
     const ApplicationHandle& app_handle) {
 
   MockConnection *conn = new MockConnection(device_handle, app_handle, controller_);
   conn->start();
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 }  // namespace transport_manager

@@ -1,6 +1,6 @@
 /**
  * \file tcp_adapter.h
- * \brief TcpDeviceAdapter class header file.
+ * \brief TcpTransportAdapter class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -36,25 +36,25 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H
 
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
  * @brief Device adapter that use TCP transport.
  */
-class TcpDeviceAdapter : public DeviceAdapterImpl {
+class TcpTransportAdapter : public TransportAdapterImpl {
  public:
   /**
    * @brief Constructor.
    */
-  TcpDeviceAdapter();
+  TcpTransportAdapter();
 
   /**
    * @brief Destructor.
    */
-  virtual ~TcpDeviceAdapter();
+  virtual ~TcpTransportAdapter();
 
   /**
    * @brief Default port.
@@ -70,7 +70,7 @@ class TcpDeviceAdapter : public DeviceAdapterImpl {
   virtual DeviceType GetDeviceType() const;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER

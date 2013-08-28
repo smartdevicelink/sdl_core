@@ -1,5 +1,5 @@
 /**
- * \file device_adapter_socket_communication.cc
+ * \file transport_adapter_socket_communication.cc
  * \brief Implementation of classes responsible for communication over sockets
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -39,15 +39,15 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include "transport_manager/device_adapter/threaded_socket_connection.h"
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 ThreadedSocketConnection::ThreadedSocketConnection(
     const DeviceUID& device_id, const ApplicationHandle& app_handle,
-    DeviceAdapterController* controller)
+    TransportAdapterController* controller)
     : read_fd_(-1), write_fd_(-1), controller_(controller),
       frames_to_send_(),
       frames_to_send_mutex_(),
@@ -91,7 +91,7 @@ void* startThreadedSocketConnection(void* v) {
   return 0;
 }
 
-DeviceAdapter::Error ThreadedSocketConnection::start() {
+TransportAdapter::Error ThreadedSocketConnection::start() {
   LOG4CXX_TRACE_ENTER(logger_)
   int fds[2];
   const int pipe_ret = pipe(fds);
@@ -102,24 +102,24 @@ DeviceAdapter::Error ThreadedSocketConnection::start() {
   } else {
     LOG4CXX_INFO(logger_, "pipe creation failed (#" << pthread_self() << ")")
     LOG4CXX_TRACE_EXIT(logger_)
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
   const int fcntl_ret = fcntl(read_fd_, F_SETFL,
                               fcntl(read_fd_, F_GETFL) | O_NONBLOCK);
   if (0 != fcntl_ret) {
     LOG4CXX_INFO(logger_, "fcntl failed (#" << pthread_self() << ")")
     LOG4CXX_TRACE_EXIT(logger_)
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   if (0 == pthread_create(&thread_, 0, &startThreadedSocketConnection, this)) {
     LOG4CXX_INFO(logger_, "thread created (#" << pthread_self() << ")")
     LOG4CXX_TRACE_EXIT(logger_)
-    return DeviceAdapter::OK;
+    return TransportAdapter::OK;
   } else {
     LOG4CXX_INFO(logger_, "thread creation failed (#" << pthread_self() << ")")
     LOG4CXX_TRACE_EXIT(logger_)
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 }
 
@@ -138,27 +138,27 @@ void ThreadedSocketConnection::finalize() {
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-DeviceAdapter::Error ThreadedSocketConnection::notify() const {
+TransportAdapter::Error ThreadedSocketConnection::notify() const {
   LOG4CXX_TRACE_ENTER(logger_)
   if (-1 == write_fd_) {
     LOG4CXX_ERROR_WITH_ERRNO(
             logger_, "Failed to wake up connection thread for connection " << this)
     LOG4CXX_INFO(logger_, "exit");
-    return DeviceAdapter::BAD_STATE;
+    return TransportAdapter::BAD_STATE;
   }
   uint8_t c = 0;
   if (1 == write(write_fd_, &c, 1)) {
     LOG4CXX_INFO(logger_, "exit");
-    return DeviceAdapter::OK;
+    return TransportAdapter::OK;
   } else {
     LOG4CXX_ERROR_WITH_ERRNO(
             logger_, "Failed to wake up connection thread for connection " << this)
     LOG4CXX_TRACE_EXIT(logger_)
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 }
 
-DeviceAdapter::Error ThreadedSocketConnection::SendData(
+TransportAdapter::Error ThreadedSocketConnection::SendData(
     RawMessageSptr message) {
   LOG4CXX_TRACE_ENTER(logger_)
   pthread_mutex_lock(&frames_to_send_mutex_);
@@ -168,7 +168,7 @@ DeviceAdapter::Error ThreadedSocketConnection::SendData(
   return notify();
 }
 
-DeviceAdapter::Error ThreadedSocketConnection::Disconnect() {
+TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
   LOG4CXX_TRACE_ENTER(logger_)
   terminate_flag_ = true;
   LOG4CXX_TRACE_EXIT(logger_)

@@ -1,5 +1,5 @@
 /*
- * \file mock_device_adapter_listener.h
+ * \file mock_transport_adapter_listener.h
  * \brief 
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -40,12 +40,12 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/info.h"
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_manager_listener.h"
 
 using ::transport_manager::ApplicationList;
 using ::transport_manager::ApplicationHandle;
-using ::transport_manager::device_adapter::DeviceAdapter;
+using ::transport_manager::transport_adapter::TransportAdapter;
 using ::transport_manager::SearchDeviceError;
 using ::transport_manager::ConnectionUID;
 using ::transport_manager::ConnectError;

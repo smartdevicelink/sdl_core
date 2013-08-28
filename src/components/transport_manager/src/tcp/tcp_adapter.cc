@@ -1,6 +1,6 @@
 /**
  * \file tcp_adapter.cpp
- * \brief TcpDeviceAdapter class source file.
+ * \brief TcpTransportAdapter class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -43,20 +43,20 @@
 #include "transport_manager/tcp/dnssd_service_browser.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-TcpDeviceAdapter::TcpDeviceAdapter()
-    : DeviceAdapterImpl(new DnssdServiceBrowser(this), new TcpConnectionFactory(this),
+TcpTransportAdapter::TcpTransportAdapter()
+    : TransportAdapterImpl(new DnssdServiceBrowser(this), new TcpConnectionFactory(this),
                         new TcpClientListener(this, default_port)) {
 }
 
-TcpDeviceAdapter::~TcpDeviceAdapter() {
+TcpTransportAdapter::~TcpTransportAdapter() {
 }
 
-DeviceType TcpDeviceAdapter::GetDeviceType() const {
+DeviceType TcpTransportAdapter::GetDeviceType() const {
   return "sdl-tcp";
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

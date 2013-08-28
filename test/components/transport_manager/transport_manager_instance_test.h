@@ -90,10 +90,10 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //     * @brief Class that represents custom device adapter that will send known data
 //     *        and check it's methods calls
 //     **/
-//    class MockDeviceAdapter : public IDeviceAdapter
+//    class MockTransportAdapter : public ITransportAdapter
 //    {
 //    public:
-//        MockDeviceAdapter(IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator)
+//        MockTransportAdapter(ITransportAdapterListener & Listener, IHandleGenerator & HandleGenerator)
 //        : mListener(Listener)
 //        , mHandleGenerator(HandleGenerator)
 //        , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest")))
@@ -206,7 +206,7 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //        }
 //
 //    protected:
-//        IDeviceAdapterListener & mListener;
+//        ITransportAdapterListener & mListener;
 //        IHandleGenerator & mHandleGenerator;
 //        Logger mLogger;
 //    };
@@ -286,44 +286,44 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //
 //        }
 //
-//        virtual void initializeDeviceAdapters()
+//        virtual void initializeTransportAdapters()
 //        {
 //            // Preparing custom device adapter
-//            mpDeviceAdapter = new MockDeviceAdapter(*this, *this);
+//            mpTransportAdapter = new MockTransportAdapter(*this, *this);
 //
-//            EXPECT_CALL(*mpDeviceAdapter, run()).Times(1);
-//            EXPECT_CALL(*mpDeviceAdapter, scanForNewDevices())
+//            EXPECT_CALL(*mpTransportAdapter, run()).Times(1);
+//            EXPECT_CALL(*mpTransportAdapter, scanForNewDevices())
 //                .Times(1)
-//                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doScanForNewDevices))
+//                .WillOnce(Invoke(mpTransportAdapter, &MockTransportAdapter::doScanForNewDevices))
 //            ;
 //
-//            EXPECT_CALL(*mpDeviceAdapter, ConnectDevice(Data::DeviceHandle))
+//            EXPECT_CALL(*mpTransportAdapter, ConnectDevice(Data::DeviceHandle))
 //                .Times(1)
-//                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doConnectDevice))
+//                .WillOnce(Invoke(mpTransportAdapter, &MockTransportAdapter::doConnectDevice))
 //            ;
 //
-//            EXPECT_CALL(*mpDeviceAdapter, sendFrame(Data::ConnectionHandle, _, 512, Data::UserData))
+//            EXPECT_CALL(*mpTransportAdapter, sendFrame(Data::ConnectionHandle, _, 512, Data::UserData))
 //                .Times(1)
-//                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doSendFrame))
+//                .WillOnce(Invoke(mpTransportAdapter, &MockTransportAdapter::doSendFrame))
 //            ;
 //
-//            EXPECT_CALL(*mpDeviceAdapter, DisconnectDevice(Data::DeviceHandle))
+//            EXPECT_CALL(*mpTransportAdapter, DisconnectDevice(Data::DeviceHandle))
 //                .Times(1)
-//                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doDisconnectDevice))
+//                .WillOnce(Invoke(mpTransportAdapter, &MockTransportAdapter::doDisconnectDevice))
 //            ;
 //
-//            AddDeviceAdapter(mpDeviceAdapter);
+//            AddTransportAdapter(mpTransportAdapter);
 //            LOG4CPLUS_INFO_EXT(mLogger, "Device adapters initialized");
 //        }
 //
 //    protected:
-//        MockDeviceAdapter *mpDeviceAdapter;
+//        MockTransportAdapter *mpTransportAdapter;
 //        Logger mLogger;
 //    };
 //
 //    // ----------------------- TESTS ----------------------- //
 //
-//    TEST(test_TestWithCorrectDeviceAdapter, CorrectDeviceAdapterBehavior)
+//    TEST(test_TestWithCorrectTransportAdapter, CorrectTransportAdapterBehavior)
 //    {
 //        Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest"));
 //

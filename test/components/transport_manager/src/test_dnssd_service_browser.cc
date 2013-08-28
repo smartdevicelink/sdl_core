@@ -5,14 +5,14 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/dnssd_service_browser.h"
 #include "transport_manager/tcp/tcp_device.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class MockDeviceAdapterController : public DeviceAdapterController {
+class MockTransportAdapterController : public TransportAdapterController {
  public:
   MOCK_METHOD1(AddDevice,
       DeviceSptr(DeviceSptr device));
@@ -81,7 +81,7 @@ return false;
 }
 
 TEST(DnssdServiceBrowser, Basic) {
-  MockDeviceAdapterController controller;
+  MockTransportAdapterController controller;
 
   EXPECT_CALL(controller, SearchDeviceDone(HasService(4444)));
 

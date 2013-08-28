@@ -36,34 +36,34 @@
 #ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_
 #define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_
 
-#include "transport_manager/device_adapter/device_scanner.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
 
-using ::transport_manager::device_adapter::DeviceAdapter;
-using ::transport_manager::device_adapter::DeviceScanner;
-using ::transport_manager::device_adapter::DeviceVector;
+using ::transport_manager::transport_adapter::TransportAdapter;
+using ::transport_manager::transport_adapter::DeviceScanner;
+using ::transport_manager::transport_adapter::DeviceVector;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter;
+class MockTransportAdapter;
 
 class MockDeviceScanner : public DeviceScanner {
  public:
-  MockDeviceScanner(MockDeviceAdapter *adapter);
+  MockDeviceScanner(MockTransportAdapter *adapter);
   void reset();
   void AddDevice(const std::string& name, const std::string& unique_id, bool start = true);
   void RemoveDevice(const std::string& name);
   void fail_further_search() { is_search_failed_ = true; }
 
  protected:
-  DeviceAdapter::Error init();
-  DeviceAdapter::Error Scan();
+  TransportAdapter::Error init();
+  TransportAdapter::Error Scan();
   void terminate();
   bool IsInitialised() const;
 
  private:
-  MockDeviceAdapter *controller_;
+  MockTransportAdapter *controller_;
   DeviceVector devices_;
   bool is_initialized_;
   bool is_search_failed_;

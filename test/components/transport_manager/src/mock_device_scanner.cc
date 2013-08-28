@@ -34,7 +34,7 @@
  */
 
 #include "transport_manager/mock_device_scanner.h"
-#include "transport_manager/mock_device_adapter.h"
+#include "transport_manager/mock_transport_adapter.h"
 #include "transport_manager/mock_device.h"
 
 using ::transport_manager::SearchDeviceError;
@@ -43,24 +43,24 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
-MockDeviceScanner::MockDeviceScanner(MockDeviceAdapter *controller)
+MockDeviceScanner::MockDeviceScanner(MockTransportAdapter *controller)
     : controller_(controller),
       is_initialized_(false),
       is_search_failed_(false) {
 }
 
-DeviceAdapter::Error MockDeviceScanner::init() {
+TransportAdapter::Error MockDeviceScanner::init() {
   is_initialized_ = true;
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error MockDeviceScanner::Scan() {
+TransportAdapter::Error MockDeviceScanner::Scan() {
   if (is_search_failed_) {
     controller_->SearchDeviceFailed(SearchDeviceError());
   } else {
     controller_->SearchDeviceDone(devices_);
   }
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 void MockDeviceScanner::terminate() {

@@ -1,13 +1,13 @@
 #include <algorithm>
 #include <map>
 
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/dnssd_service_browser.h"
 
 namespace transport_manager {
 
-namespace device_adapter {
+namespace transport_adapter {
 
 bool operator==(const DnssdServiceRecord& a, const DnssdServiceRecord& b) {
   return a.name == b.name && a.type == b.type && a.interface == b.interface
@@ -29,7 +29,7 @@ bool DnssdServiceBrowser::IsInitialised() const {
   return initialised_;
 }
 
-DnssdServiceBrowser::DnssdServiceBrowser(DeviceAdapterController* controller)
+DnssdServiceBrowser::DnssdServiceBrowser(TransportAdapterController* controller)
     : controller_(controller),
       avahi_service_browser_(0),
       avahi_threaded_poll_(0),
@@ -184,7 +184,7 @@ void AvahiServiceResolverCallback(AvahiServiceResolver* avahi_service_resolver,
   avahi_service_resolver_free(avahi_service_resolver);
 }
 
-DeviceAdapter::Error DnssdServiceBrowser::CreateAvahiClientAndBrowser() {
+TransportAdapter::Error DnssdServiceBrowser::CreateAvahiClientAndBrowser() {
   if (0 != avahi_service_browser_)
     avahi_service_browser_free(avahi_service_browser_);
   if (0 != avahi_client_)
@@ -198,7 +198,7 @@ DeviceAdapter::Error DnssdServiceBrowser::CreateAvahiClientAndBrowser() {
     LOG4CXX_ERROR(
         logger_,
         "Failed to create AvahiClient: " << avahi_strerror(avahi_error));
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   pthread_mutex_lock(&mutex_);
@@ -210,31 +210,31 @@ DeviceAdapter::Error DnssdServiceBrowser::CreateAvahiClientAndBrowser() {
       AVAHI_PROTO_INET, DNSSD_DEFAULT_SERVICE_TYPE, NULL, /* use default domain */
       static_cast<AvahiLookupFlags>(0), AvahiServiceBrowserCallback, this);
 
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error DnssdServiceBrowser::init() {
+TransportAdapter::Error DnssdServiceBrowser::init() {
   avahi_threaded_poll_ = avahi_threaded_poll_new();
   if (0 == avahi_threaded_poll_) {
     LOG4CXX_ERROR(logger_, "Failed to create AvahiThreadedPoll");
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
-  const DeviceAdapter::Error err = CreateAvahiClientAndBrowser();
-  if (err != DeviceAdapter::OK) {
+  const TransportAdapter::Error err = CreateAvahiClientAndBrowser();
+  if (err != TransportAdapter::OK) {
     return err;
   }
 
   const int poll_start_status = avahi_threaded_poll_start(avahi_threaded_poll_);
   if (poll_start_status != 0) {
     LOG4CXX_ERROR(logger_, "Failed to start AvahiThreadedPoll");
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error DnssdServiceBrowser::Scan() {
+TransportAdapter::Error DnssdServiceBrowser::Scan() {
   pthread_mutex_lock(&mutex_);
   if (0 == services_to_be_resolved_) {
     DeviceVector device_vector = PrepareDeviceVector();
@@ -243,7 +243,7 @@ DeviceAdapter::Error DnssdServiceBrowser::Scan() {
     ++scan_requests_;
   }
   pthread_mutex_unlock(&mutex_);
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 void DnssdServiceBrowser::AddService(AvahiIfIndex interface,

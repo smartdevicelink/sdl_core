@@ -1,6 +1,6 @@
 /**
- * \file device_scanner.h
- * \brief DeviceScanner class header file.
+ * \file connection.h
+ * \brief Connection class header.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,55 +32,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_SCANNER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CONNECTION_H_
 
-#include "transport_manager/device_adapter/device.h"
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "utils/shared_ptr.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+
+using utils::SharedPtr;
 
 namespace transport_manager {
-namespace device_adapter {
+
+namespace transport_adapter {
 
 /**
- * @brief Abstract class for device scanner.
- */
-class DeviceScanner {
+ * @brief Application connection.
+ **/
+class Connection {
  public:
   /**
-   * @brief Start device scanner.
-   *
-   * @return Error information about reason of initialization failure.
+   * @brief Constructor.
    */
-  virtual DeviceAdapter::Error init() = 0;
-
-  /**
-   * @brief
-   *
-   * @return Error information about reason of Scan failure.
-   */
-  virtual DeviceAdapter::Error Scan() = 0;
-
-  /**
-   * @brief
-   */
-  virtual void terminate() = 0;
-
-  /**
-   * @brief Check device scanner for initialization.
-   *
-   * @return true - initialized.
-   * false - not initialized.
-   */
-  virtual bool IsInitialised() const = 0;
-
+  Connection() {}
   /**
    * @brief Destructor.
+   **/
+  virtual ~Connection() {}
+
+  /**
+   * @brief Send data frame.
+   *
+   * @param Message Smart pointer to the raw message.
+   *
+   * @return Error Information about possible reason of sending data failure.
    */
-  virtual ~DeviceScanner() {
-  }
+  virtual TransportAdapter::Error SendData(RawMessageSptr message) = 0;
+
+  /**
+   * @brief Disconnect the current connection.
+   */
+  virtual TransportAdapter::Error Disconnect() = 0;
 };
 
-}  // namespace device_adapter
+/**
+ * @typedef Type definition of smart pointer to the Connection class.
+ */
+typedef utils::SharedPtr<Connection> ConnectionSptr;
+
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* DEVICE_SCANNER_H_ */
+#endif /* CONNECTION_H_ */

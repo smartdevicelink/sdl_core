@@ -1,7 +1,6 @@
-/*
- * \file mock_device_adapter.cc
- * \brief
- *
+/**
+ * \file client_connection_listener.h
+ * \brief Client connection listener header.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,28 +32,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/mock_connection.h"
-#include "transport_manager/mock_device.h"
-#include "transport_manager/mock_device_adapter.h"
-#include "transport_manager/mock_device_scanner.h"
-#include "transport_manager/mock_connection_factory.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CLIENT_CONNECTION_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CLIENT_CONNECTION_LISTENER_H_
 
-namespace test {
-namespace components {
+#include "transport_manager/transport_adapter/transport_adapter.h"
+
+
 namespace transport_manager {
 
-MockDeviceAdapter::MockDeviceAdapter()
-    : DeviceAdapterImpl(new MockDeviceScanner(this),
-                        new MockConnectionFactory(this), nullptr) {}
 
-void MockDeviceAdapter::reset() {
-  get_device_scanner()->reset();
-}
+namespace transport_adapter {
 
-MockDeviceScanner* MockDeviceAdapter::get_device_scanner() const {
-  return static_cast<MockDeviceScanner*>(device_scanner_);
-}
+/**
+ * @brief Abstract class for listener of client connection.
+ */
+class ClientConnectionListener {
+ public:
+  /**
+   * @brief Run client connection listener.
+   *
+   * @return Error information about possible reason of starting client listener failure.
+   */
+  virtual TransportAdapter::Error init() = 0;
 
+  /**
+   * @brief Stop client connection listener.
+   */
+  virtual void terminate() = 0;
+
+  /**
+   * @brief Check initialization.
+   *
+   * @return True if initialized.
+   * @return False if not initialized.
+   */
+  virtual bool IsInitialised() const = 0;
+
+  /**
+   * @brief Start to listen for connection from client.
+   */
+  virtual TransportAdapter::Error StartListening() = 0;
+
+  /**
+   * @brief Stop to listen for connection from client.
+   */
+  virtual TransportAdapter::Error StopListening() = 0;
+
+  /**
+   * @brief Destructor.
+   */
+  virtual ~ClientConnectionListener() {
+  }
+};
+
+}  // namespace transport_adapter
 }  // namespace transport_manager
-}  // namespace components
-}  // namespace test
+
+#endif /* CLIENT_CONNECTION_LISTENER_H_ */

@@ -1,6 +1,6 @@
 /**
- * \file device_adapter_impl.cpp
- * \brief Class DeviceAdapterImpl.
+ * \file transport_adapter_impl.cpp
+ * \brief Class TransportAdapterImpl.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,20 +32,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/device_adapter/device_adapter_impl.h"
-#include "transport_manager/device_adapter/device_adapter_listener.h"
-#include "transport_manager/device_adapter/device_scanner.h"
-#include "transport_manager/device_adapter/server_connection_factory.h"
-#include "transport_manager/device_adapter/client_connection_listener.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_listener.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
+#include "transport_manager/transport_adapter/server_connection_factory.h"
+#include "transport_manager/transport_adapter/client_connection_listener.h"
 
 namespace transport_manager {
 
-namespace device_adapter {
+namespace transport_adapter {
 
 log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("TransportManager"));
 
-DeviceAdapterImpl::DeviceAdapterImpl(
+TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,
     ServerConnectionFactory* server_connection_factory,
     ClientConnectionListener* client_connection_listener)
@@ -62,7 +62,7 @@ DeviceAdapterImpl::DeviceAdapterImpl(
   pthread_mutex_init(&connections_mutex_, 0);
 }
 
-DeviceAdapterImpl::~DeviceAdapterImpl() {
+TransportAdapterImpl::~TransportAdapterImpl() {
   if (device_scanner_) {
     device_scanner_->terminate();
     delete device_scanner_;
@@ -92,7 +92,7 @@ DeviceAdapterImpl::~DeviceAdapterImpl() {
   pthread_mutex_destroy(&devices_mutex_);
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::init() {
+TransportAdapter::Error TransportAdapterImpl::init() {
   LOG4CXX_INFO(logger_, "Initializing device adapter");
 
   Error error = OK;
@@ -108,7 +108,7 @@ DeviceAdapter::Error DeviceAdapterImpl::init() {
   return error;
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::SearchDevices() {
+TransportAdapter::Error TransportAdapterImpl::SearchDevices() {
   LOG4CXX_INFO(logger_, "enter");
   if (device_scanner_ == nullptr) {
     LOG4CXX_INFO(logger_, "not supported");
@@ -121,9 +121,9 @@ DeviceAdapter::Error DeviceAdapterImpl::SearchDevices() {
   return device_scanner_->Scan();
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::connect(
+TransportAdapter::Error TransportAdapterImpl::connect(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
-  LOG4CXX_INFO(logger_, "enter DeviceAdapter::Error DeviceAdapterImpl::connect");
+  LOG4CXX_INFO(logger_, "enter TransportAdapter::Error TransportAdapterImpl::connect");
   if (server_connection_factory_ == 0) {
     LOG4CXX_ERROR(logger_, "feature is NOT_SUPPORTED");
     return NOT_SUPPORTED;
@@ -136,7 +136,7 @@ DeviceAdapter::Error DeviceAdapterImpl::connect(
   return server_connection_factory_->CreateConnection(device_id, app_handle);
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::Disconnect(
+TransportAdapter::Error TransportAdapterImpl::Disconnect(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   if (!initialised_)
     return BAD_STATE;
@@ -148,7 +148,7 @@ DeviceAdapter::Error DeviceAdapterImpl::Disconnect(
   }
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::DisconnectDevice(
+TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
     const DeviceUID& device_id) {
   if (!initialised_)
     return BAD_STATE;
@@ -171,7 +171,7 @@ DeviceAdapter::Error DeviceAdapterImpl::DisconnectDevice(
   return OK;
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::SendData(
+TransportAdapter::Error TransportAdapterImpl::SendData(
     const DeviceUID& device_id, const ApplicationHandle& app_handle,
     const RawMessageSptr data) {
   if (!initialised_)
@@ -186,7 +186,7 @@ DeviceAdapter::Error DeviceAdapterImpl::SendData(
   }
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::StartClientListening() {
+TransportAdapter::Error TransportAdapterImpl::StartClientListening() {
   if (client_connection_listener_ == 0)
     return NOT_SUPPORTED;
   if (!client_connection_listener_->IsInitialised())
@@ -194,7 +194,7 @@ DeviceAdapter::Error DeviceAdapterImpl::StartClientListening() {
   return client_connection_listener_->StartListening();
 }
 
-DeviceAdapter::Error DeviceAdapterImpl::StopClientListening() {
+TransportAdapter::Error TransportAdapterImpl::StopClientListening() {
   if (client_connection_listener_ == 0)
     return NOT_SUPPORTED;
   if (!client_connection_listener_->IsInitialised())
@@ -202,7 +202,7 @@ DeviceAdapter::Error DeviceAdapterImpl::StopClientListening() {
   return client_connection_listener_->StopListening();
 }
 
-DeviceList DeviceAdapterImpl::GetDeviceList() const {
+DeviceList TransportAdapterImpl::GetDeviceList() const {
   DeviceList devices;
   pthread_mutex_lock(&devices_mutex_);
   for (DeviceMap::const_iterator it = devices_.begin(); it != devices_.end();
@@ -213,7 +213,7 @@ DeviceList DeviceAdapterImpl::GetDeviceList() const {
   return devices;
 }
 
-DeviceSptr DeviceAdapterImpl::AddDevice(DeviceSptr device) {
+DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
   DeviceSptr existing_device;
   bool same_device_found = false;
   pthread_mutex_lock(&devices_mutex_);
@@ -235,7 +235,7 @@ DeviceSptr DeviceAdapterImpl::AddDevice(DeviceSptr device) {
     return device;
 }
 
-void DeviceAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
+void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
   DeviceMap new_devices;
   for (DeviceVector::const_iterator it = devices.begin(); it != devices.end();
       ++it) {
@@ -285,30 +285,30 @@ void DeviceAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
   devices_ = new_devices;
   pthread_mutex_unlock(&devices_mutex_);
 
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnSearchDeviceDone(this);
 }
 
-void DeviceAdapterImpl::SearchDeviceFailed(const SearchDeviceError& error) {
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+void TransportAdapterImpl::SearchDeviceFailed(const SearchDeviceError& error) {
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnSearchDeviceFailed(this, error);
 }
 
-bool DeviceAdapterImpl::IsSearchDevicesSupported() const {
+bool TransportAdapterImpl::IsSearchDevicesSupported() const {
   return device_scanner_ != 0;
 }
 
-bool DeviceAdapterImpl::IsServerOriginatedConnectSupported() const {
+bool TransportAdapterImpl::IsServerOriginatedConnectSupported() const {
   return server_connection_factory_ != 0;
 }
 
-bool DeviceAdapterImpl::IsClientOriginatedConnectSupported() const {
+bool TransportAdapterImpl::IsClientOriginatedConnectSupported() const {
   return client_connection_listener_ != 0;
 }
 
-void DeviceAdapterImpl::ConnectionCreated(ConnectionSptr connection,
+void TransportAdapterImpl::ConnectionCreated(ConnectionSptr connection,
                                           const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle) {
   pthread_mutex_lock(&connections_mutex_);
@@ -320,7 +320,7 @@ void DeviceAdapterImpl::ConnectionCreated(ConnectionSptr connection,
   pthread_mutex_unlock(&connections_mutex_);
 }
 
-void DeviceAdapterImpl::DisconnectDone(const DeviceUID& device_id,
+void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
                                        const ApplicationHandle& app_handle) {
   bool device_disconnected = true;
   pthread_mutex_lock(&connections_mutex_);
@@ -333,62 +333,62 @@ void DeviceAdapterImpl::DisconnectDone(const DeviceUID& device_id,
     }
   }
   pthread_mutex_unlock(&connections_mutex_);
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it) {
-    DeviceAdapterListener* listener = *it;
+    TransportAdapterListener* listener = *it;
     listener->OnDisconnectDone(this, device_id, app_handle);
     if (device_disconnected)
       listener->OnDisconnectDeviceDone(this, device_id);
   }
 }
 
-void DeviceAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
+void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
                                         const ApplicationHandle& app_handle,
                                         RawMessageSptr message) {
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnDataReceiveDone(this, device_id, app_handle, message);
 }
 
-void DeviceAdapterImpl::DataReceiveFailed(const DeviceUID& device_id,
+void TransportAdapterImpl::DataReceiveFailed(const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle,
                                           const DataReceiveError& error) {
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnDataReceiveFailed(this, device_id, app_handle, error);
 }
 
-void DeviceAdapterImpl::DataSendDone(const DeviceUID& device_id,
+void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
                                      const ApplicationHandle& app_handle,
                                      RawMessageSptr message) {
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnDataSendDone(this, device_id, app_handle, message);
 }
 
-void DeviceAdapterImpl::DataSendFailed(const DeviceUID& device_id,
+void TransportAdapterImpl::DataSendFailed(const DeviceUID& device_id,
                                        const ApplicationHandle& app_handle,
                                        RawMessageSptr message,
                                        const DataSendError& error) {
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnDataSendFailed(this, device_id, app_handle, message, error);
 }
 
-DeviceSptr DeviceAdapterImpl::FindDevice(const DeviceUID& device_id) const {
+DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   DeviceSptr ret;
   pthread_mutex_lock(&devices_mutex_);
-  LOG4CXX_INFO(logger_, "DeviceSptr DeviceAdapterImpl::FindDevice(const DeviceUID& device_id) enter");
+  LOG4CXX_INFO(logger_, "DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) enter");
   DeviceMap::const_iterator it = devices_.find(device_id);
   LOG4CXX_INFO(logger_, "devices_.size() = " << devices_.size());
   if (it != devices_.end())
     ret = it->second;
   pthread_mutex_unlock(&devices_mutex_);
-  LOG4CXX_INFO(logger_, "DeviceSptr DeviceAdapterImpl::FindDevice(const DeviceUID& device_id) exit");
+  LOG4CXX_INFO(logger_, "DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) exit");
   return ret;
 }
 
-void DeviceAdapterImpl::ConnectDone(const DeviceUID& device_id,
+void TransportAdapterImpl::ConnectDone(const DeviceUID& device_id,
                                     const ApplicationHandle& app_handle) {
   pthread_mutex_lock(&connections_mutex_);
   ConnectionMap::iterator it = connections_.find(
@@ -399,30 +399,30 @@ void DeviceAdapterImpl::ConnectDone(const DeviceUID& device_id,
   }
   pthread_mutex_unlock(&connections_mutex_);
 
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnConnectDone(this, device_id, app_handle);
 }
 
-void DeviceAdapterImpl::ConnectFailed(const DeviceUID& device_id,
+void TransportAdapterImpl::ConnectFailed(const DeviceUID& device_id,
                                       const ApplicationHandle& app_handle,
                                       const ConnectError& error) {
   pthread_mutex_lock(&connections_mutex_);
   connections_.erase(std::make_pair(device_id, app_handle));
   pthread_mutex_unlock(&connections_mutex_);
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnConnectFailed(this, device_id, app_handle, error);
 }
 
-void DeviceAdapterImpl::AddListener(DeviceAdapterListener* listener) {
+void TransportAdapterImpl::AddListener(TransportAdapterListener* listener) {
   listeners_.push_back(listener);
 }
 
-ApplicationList DeviceAdapterImpl::GetApplicationList(
+ApplicationList TransportAdapterImpl::GetApplicationList(
     const DeviceUID& device_id) const {
   LOG4CXX_INFO(logger_,
-               "ApplicationList DeviceAdapterImpl::GetApplicationList enter");
+               "ApplicationList TransportAdapterImpl::GetApplicationList enter");
   DeviceSptr device = FindDevice(device_id);
   if (device.valid()) {
     LOG4CXX_INFO(logger_, "device is valid");
@@ -433,7 +433,7 @@ ApplicationList DeviceAdapterImpl::GetApplicationList(
   return ApplicationList();
 }
 
-void DeviceAdapterImpl::ConnectionFinished(
+void TransportAdapterImpl::ConnectionFinished(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   pthread_mutex_lock(&connections_mutex_);
   ConnectionMap::iterator it = connections_.find(
@@ -445,16 +445,16 @@ void DeviceAdapterImpl::ConnectionFinished(
   pthread_mutex_unlock(&connections_mutex_);
 }
 
-void DeviceAdapterImpl::ConnectionAborted(const DeviceUID& device_id,
+void TransportAdapterImpl::ConnectionAborted(const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle,
                                           const CommunicationError& error) {
   ConnectionFinished(device_id, app_handle);
-  for (DeviceAdapterListenerList::iterator it = listeners_.begin();
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it)
     (*it)->OnUnexpectedDisconnect(this, device_id, app_handle, error);
 }
 
-bool DeviceAdapterImpl::IsInitialised() const {
+bool TransportAdapterImpl::IsInitialised() const {
   if (!initialised_)
     return false;
   if (device_scanner_ && !device_scanner_->IsInitialised())
@@ -468,7 +468,7 @@ bool DeviceAdapterImpl::IsInitialised() const {
   return true;
 }
 
-std::string DeviceAdapterImpl::DeviceName(const DeviceUID &device_id) const {
+std::string TransportAdapterImpl::DeviceName(const DeviceUID &device_id) const {
   DeviceSptr device = FindDevice(device_id);
   if (device.valid()) {
     return device->name();
@@ -477,11 +477,11 @@ std::string DeviceAdapterImpl::DeviceName(const DeviceUID &device_id) const {
   }
 }
 
-void DeviceAdapterImpl::RemoveListener(DeviceAdapterListener* listener) {
+void TransportAdapterImpl::RemoveListener(TransportAdapterListener* listener) {
   listeners_.remove(listener);
 }
 
-ConnectionSptr DeviceAdapterImpl::FindEstablishedConnection(
+ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   ConnectionSptr connection;
   pthread_mutex_lock(&connections_mutex_);
@@ -496,6 +496,6 @@ ConnectionSptr DeviceAdapterImpl::FindEstablishedConnection(
   return connection;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 
 }  // namespace transport_manager
