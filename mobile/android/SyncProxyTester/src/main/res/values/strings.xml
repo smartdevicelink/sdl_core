@@ -81,7 +81,6 @@
     <string name="selectprotocol_ipAddressDefault">10.10.0.1</string>
     <string name="selectprotocol_tcpPort">Port:</string>
     <string name="selectprotocol_tcpPortDefault">12345</string>
-    <string name="selectprotocol_autoReconnect">Auto reconnect</string>
     <string name="selectprotocol_extraOptions">Extra Options</string>
     <string name="selectprotocol_autoSetAppIcon">Set app icon after registration</string>
     <string name="createinteractionchoiceset_choiceVRSynonym">VR Synonyms (comma-separated)</string>
