@@ -49,7 +49,7 @@ DeviceAdapter::Error BluetoothConnectionFactory::init() {
   return DeviceAdapter::OK;
 }
 
-DeviceAdapter::Error BluetoothConnectionFactory::createConnection(
+DeviceAdapter::Error BluetoothConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOG4CXX_INFO(logger_, "enter");
   BluetoothSocketConnection* connection(
@@ -66,7 +66,7 @@ DeviceAdapter::Error BluetoothConnectionFactory::createConnection(
 void BluetoothConnectionFactory::terminate() {
 }
 
-bool BluetoothConnectionFactory::isInitialised() const {
+bool BluetoothConnectionFactory::IsInitialised() const {
   return true;
 }
 

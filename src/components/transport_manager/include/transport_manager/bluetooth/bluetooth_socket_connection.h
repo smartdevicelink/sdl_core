@@ -81,7 +81,7 @@ class BluetoothSocketConnection : public ThreadedSocketConnection {
    * @return True - connection established.
    * false - connection not established.
    */
-  virtual bool establish(ConnectError** error);
+  virtual bool Establish(ConnectError** error);
 };
 
 }  // namespace device_adapter

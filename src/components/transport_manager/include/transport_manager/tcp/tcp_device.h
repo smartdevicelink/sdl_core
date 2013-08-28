@@ -73,14 +73,14 @@ class TcpDevice : public Device {
    *
    * @return True if devices are equal, false otherwise.
    **/
-  virtual bool isSameAs(const Device* other) const;
+  virtual bool IsSameAs(const Device* other) const;
 
   /**
    * @brief Update list of applications available on device.
    *
    * @return Container with list of applications.
    */
-  virtual ApplicationList getApplicationList() const;
+  virtual ApplicationList GetApplicationList() const;
 
   /**
    * @brief Add an application to the container of applications.

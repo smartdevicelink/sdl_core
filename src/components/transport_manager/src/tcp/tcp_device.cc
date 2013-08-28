@@ -45,12 +45,12 @@ TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
   pthread_mutex_init(&applications_mutex_, 0);
 }
 
-bool TcpDevice::isSameAs(const Device* other) const {
+bool TcpDevice::IsSameAs(const Device* other) const {
   const TcpDevice* other_tcp_device = static_cast<const TcpDevice*>(other);
   return other_tcp_device->in_addr_ == in_addr_;
 }
 
-ApplicationList TcpDevice::getApplicationList() const {
+ApplicationList TcpDevice::GetApplicationList() const {
   pthread_mutex_lock(&applications_mutex_);
   ApplicationList app_list;
   for (std::map<ApplicationHandle, Application>::const_iterator it =

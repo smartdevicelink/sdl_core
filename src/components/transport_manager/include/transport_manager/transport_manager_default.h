@@ -1,6 +1,6 @@
 /*
  * \file transport_manager_default.h
- * \brief Transport manager default class.
+ * \brief Transport manager default class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -46,7 +46,7 @@ using transport_manager::device_adapter::TcpDeviceAdapter;
 namespace transport_manager {
 
 /**
- * @brief Default realisation of transport_manager_impl class.
+ * @brief Default realization of transport_manager_impl class.
  */
 class TransportManagerDefault : public TransportManagerImpl {
 

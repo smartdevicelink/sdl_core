@@ -51,8 +51,8 @@ class RequestWatchdog : public Watchdog {
   public:
     static Watchdog* instance();
 
-    virtual void addListener(WatchdogSubscriber* subscriber);
-    virtual void removeListener(WatchdogSubscriber* subscriber);
+    virtual void AddListener(WatchdogSubscriber* subscriber);
+    virtual void RemoveListener(WatchdogSubscriber* subscriber);
     virtual void removeAllListeners();
 
     virtual void addRequest(RequestInfo requestInfo);

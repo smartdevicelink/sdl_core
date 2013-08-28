@@ -78,9 +78,9 @@ class DnssdServiceBrowser : public DeviceScanner {
   virtual ~DnssdServiceBrowser();
  protected:
   virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error scan();
+  virtual DeviceAdapter::Error Scan();
   virtual void terminate();
-  virtual bool isInitialised() const;
+  virtual bool IsInitialised() const;
  private:
   DeviceAdapter::Error CreateAvahiClientAndBrowser();
   void AddService(AvahiIfIndex interface, AvahiProtocol protocol,

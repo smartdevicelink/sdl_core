@@ -56,9 +56,9 @@ class DeviceScanner {
   /**
    * @brief
    *
-   * @return Error information about reason of scan failure.
+   * @return Error information about reason of Scan failure.
    */
-  virtual DeviceAdapter::Error scan() = 0;
+  virtual DeviceAdapter::Error Scan() = 0;
 
   /**
    * @brief
@@ -71,7 +71,7 @@ class DeviceScanner {
    * @return true - initialized.
    * false - not initialized.
    */
-  virtual bool isInitialised() const = 0;
+  virtual bool IsInitialised() const = 0;
 
   /**
    * @brief Destructor.

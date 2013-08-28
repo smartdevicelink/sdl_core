@@ -74,7 +74,7 @@ namespace test
                 class MockDeviceAdapter: public NsSmartDeviceLink::NsTransportManager::IDeviceAdapter
                 {
                 public:
-                    virtual NsSmartDeviceLink::NsTransportManager::EDeviceType getDeviceType(void) const;
+                    virtual NsSmartDeviceLink::NsTransportManager::EDeviceType GetDeviceType(void) const;
 
                     MOCK_METHOD1(connectDevice, void (const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle));
                     MOCK_METHOD1(disconnectDevice, void (const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle));
@@ -99,7 +99,7 @@ namespace test
     }
 }
 
-NsSmartDeviceLink::NsTransportManager::EDeviceType test::components::TransportManger::IncorrectDeviceAdapterTest::MockDeviceAdapter::getDeviceType(void) const
+NsSmartDeviceLink::NsTransportManager::EDeviceType test::components::TransportManger::IncorrectDeviceAdapterTest::MockDeviceAdapter::GetDeviceType(void) const
 {
     return NsSmartDeviceLink::NsTransportManager::DeviceBluetooth;
 }

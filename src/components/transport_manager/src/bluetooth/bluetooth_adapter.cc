@@ -57,7 +57,7 @@ BluetoothDeviceAdapter::BluetoothDeviceAdapter()
                         new BluetoothConnectionFactory(this), 0) {
 }
 
-DeviceType BluetoothDeviceAdapter::getDeviceType() const {
+DeviceType BluetoothDeviceAdapter::GetDeviceType() const {
   return "sdl-bluetooth";
 }
 

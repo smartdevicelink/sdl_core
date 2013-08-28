@@ -53,7 +53,7 @@ TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
 TcpSocketConnection::~TcpSocketConnection() {
 }
 
-bool TcpSocketConnection::establish(ConnectError** error) {
+bool TcpSocketConnection::Establish(ConnectError** error) {
   return true;
 }
 
@@ -66,8 +66,8 @@ TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
 TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
 }
 
-bool TcpServerOiginatedSocketConnection::establish(ConnectError** error) {
-  DeviceSptr device = getController()->findDevice(device_handle());
+bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
+  DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
     LOG4CXX_ERROR(
         logger_,

@@ -127,11 +127,11 @@ void ThreadedSocketConnection::finalize() {
   LOG4CXX_TRACE_ENTER(logger_)
   if (unexpected_disconnect_) {
     LOG4CXX_INFO(logger_, "unexpected_disconnect (#" << pthread_self() << ")")
-    controller_->connectionAborted(device_handle(), application_handle(),
+    controller_->ConnectionAborted(device_handle(), application_handle(),
                                    CommunicationError());
   } else {
     LOG4CXX_INFO(logger_, "not unexpected_disconnect (#" << pthread_self() << ")")
-    controller_->connectionFinished(device_handle(), application_handle());
+    controller_->ConnectionFinished(device_handle(), application_handle());
   }
   close(socket_);
   LOG4CXX_INFO(logger_, "Connection finalized");
@@ -158,7 +158,7 @@ DeviceAdapter::Error ThreadedSocketConnection::notify() const {
   }
 }
 
-DeviceAdapter::Error ThreadedSocketConnection::sendData(
+DeviceAdapter::Error ThreadedSocketConnection::SendData(
     RawMessageSptr message) {
   LOG4CXX_TRACE_ENTER(logger_)
   pthread_mutex_lock(&frames_to_send_mutex_);
@@ -168,7 +168,7 @@ DeviceAdapter::Error ThreadedSocketConnection::sendData(
   return notify();
 }
 
-DeviceAdapter::Error ThreadedSocketConnection::disconnect() {
+DeviceAdapter::Error ThreadedSocketConnection::Disconnect() {
   LOG4CXX_TRACE_ENTER(logger_)
   terminate_flag_ = true;
   LOG4CXX_TRACE_EXIT(logger_)
@@ -177,11 +177,11 @@ DeviceAdapter::Error ThreadedSocketConnection::disconnect() {
 
 void ThreadedSocketConnection::thread() {
   LOG4CXX_TRACE_ENTER(logger_)
-  controller_->connectionCreated(this, device_uid_, app_handle_);
+  controller_->ConnectionCreated(this, device_uid_, app_handle_);
   ConnectError* connect_error = nullptr;
-  if (establish(&connect_error)) {
+  if (Establish(&connect_error)) {
     LOG4CXX_INFO(logger_, "Connection established (#" << pthread_self() << ")")
-    controller_->connectDone(device_handle(), application_handle());
+    controller_->ConnectDone(device_handle(), application_handle());
     while (!terminate_flag_) {
       transmit();
     }
@@ -191,13 +191,13 @@ void ThreadedSocketConnection::thread() {
       LOG4CXX_INFO(logger_, "removing message (#" << pthread_self() << ")")
       RawMessageSptr message = frames_to_send_.front();
       frames_to_send_.pop();
-      controller_->dataSendFailed(device_handle(), application_handle(),
+      controller_->DataSendFailed(device_handle(), application_handle(),
                                   message, DataSendError());
     }
-    controller_->disconnectDone(device_handle(), application_handle());
+    controller_->DisconnectDone(device_handle(), application_handle());
   } else {
-    LOG4CXX_INFO(logger_, "Connection establish failed (#" << pthread_self() << ")")
-    controller_->connectFailed(device_handle(), application_handle(),
+    LOG4CXX_INFO(logger_, "Connection Establish failed (#" << pthread_self() << ")")
+    controller_->ConnectFailed(device_handle(), application_handle(),
                                *connect_error);
     delete connect_error;
   }
@@ -296,7 +296,7 @@ bool ThreadedSocketConnection::receive() {
 
       RawMessageSptr frame(
           new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
-      controller_->dataReceiveDone(device_handle(), application_handle(),
+      controller_->DataReceiveDone(device_handle(), application_handle(),
                                      frame);
     } else if (bytes_read < 0) {
       if (EAGAIN != errno && EWOULDBLOCK != errno) {
@@ -337,14 +337,14 @@ bool ThreadedSocketConnection::send() {
       if (offset == frame->data_size()) {
         frames_to_send.pop();
         offset = 0;
-        controller_->dataSendDone(device_handle(), application_handle(), frame);
+        controller_->DataSendDone(device_handle(), application_handle(), frame);
       }
     } else {
       LOG4CXX_INFO(logger_, "bytes_sent < 0" << pthread_self() << ")")
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "Send failed for connection " << this);
       frames_to_send.pop();
       offset = 0;
-      controller_->dataSendFailed(device_handle(), application_handle(), frame,
+      controller_->DataSendFailed(device_handle(), application_handle(), frame,
                                   DataSendError());
     }
   }

@@ -53,10 +53,10 @@ class MockConnectionFactory : public ServerConnectionFactory {
  public:
   MockConnectionFactory(MockDeviceAdapter *adapter);
   DeviceAdapter::Error init() { return DeviceAdapter::OK; }
-  DeviceAdapter::Error createConnection(const ::transport_manager::DeviceUID& device_handle,
+  DeviceAdapter::Error CreateConnection(const ::transport_manager::DeviceUID& device_handle,
                                           const ApplicationHandle& app_handle);
   void terminate() {}
-  bool isInitialised() const { return true; }
+  bool IsInitialised() const { return true; }
 
  private:
   MockDeviceAdapter *controller_;

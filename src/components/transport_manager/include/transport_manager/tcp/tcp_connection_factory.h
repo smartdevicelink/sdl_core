@@ -69,7 +69,7 @@ class TcpConnectionFactory : public ServerConnectionFactory {
    *
    * @return Error information about possible reason of failure.
    */
-  virtual DeviceAdapter::Error createConnection(const DeviceUID& device_uid,
+  virtual DeviceAdapter::Error CreateConnection(const DeviceUID& device_uid,
                                                 const ApplicationHandle& app_handle);
 
   /**
@@ -83,7 +83,7 @@ class TcpConnectionFactory : public ServerConnectionFactory {
    * @return true - initialized.
    * false - not initialized.
    */
-  virtual bool isInitialised() const;
+  virtual bool IsInitialised() const;
 
   /**
    * @brief Destructor.

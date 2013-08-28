@@ -156,10 +156,10 @@ void RequestWatchdogSubscriber::onTimeoutExpired(request_watchdog::RequestInfo r
       new RequestWatchdogSubscriber();
 
   request_watchdog::RequestWatchdog::
-    instance()->addListener(subscriber_one);
+    instance()->AddListener(subscriber_one);
 
   request_watchdog::RequestWatchdog::
-      instance()->addListener(subscriber_two);
+      instance()->AddListener(subscriber_two);
 
   usleep(10000000);
 

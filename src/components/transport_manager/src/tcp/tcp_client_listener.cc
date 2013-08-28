@@ -78,10 +78,10 @@ DeviceAdapter::Error TcpClientListener::init() {
 
 void TcpClientListener::terminate() {
   shutdown_requested_ = true;
-  stopListening();
+  StopListening();
 }
 
-bool TcpClientListener::isInitialised() const {
+bool TcpClientListener::IsInitialised() const {
   return true;
 }
 
@@ -124,7 +124,7 @@ void TcpClientListener::thread() {
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
 
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
-    DeviceSptr device = controller_->addDevice(tcp_device);
+    DeviceSptr device = controller_->AddDevice(tcp_device);
     tcp_device = static_cast<TcpDevice*>(device.get());
     const ApplicationHandle app_handle = tcp_device->addIncomingApplication(
         connection_fd);
@@ -142,7 +142,7 @@ void TcpClientListener::thread() {
   LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
 }
 
-DeviceAdapter::Error TcpClientListener::startListening() {
+DeviceAdapter::Error TcpClientListener::StartListening() {
   if (thread_started_)
     return DeviceAdapter::BAD_STATE;
 
@@ -187,7 +187,7 @@ DeviceAdapter::Error TcpClientListener::startListening() {
   return DeviceAdapter::OK;
 }
 
-DeviceAdapter::Error TcpClientListener::stopListening() {
+DeviceAdapter::Error TcpClientListener::StopListening() {
   if (!thread_started_)
     return DeviceAdapter::BAD_STATE;
 

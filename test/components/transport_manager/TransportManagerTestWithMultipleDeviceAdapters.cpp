@@ -90,7 +90,7 @@ namespace test
                 {
                 public:
                     MockDeviceAdapter(pthread_mutex_t & Mutex);
-                    virtual NsSmartDeviceLink::NsTransportManager::EDeviceType getDeviceType(void) const;
+                    virtual NsSmartDeviceLink::NsTransportManager::EDeviceType GetDeviceType(void) const;
 
                     MOCK_METHOD1(connectDevice, void (const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle));
                     MOCK_METHOD1(disconnectDevice, void (const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle));
@@ -176,7 +176,7 @@ mMutex(Mutex)
     mMockDeviceInfo.mDeviceType = NsSmartDeviceLink::NsTransportManager::DeviceBluetooth;
 }
 
-NsSmartDeviceLink::NsTransportManager::EDeviceType test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter::getDeviceType(void) const
+NsSmartDeviceLink::NsTransportManager::EDeviceType test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter::GetDeviceType(void) const
 {
     return mMockDeviceInfo.mDeviceType;
 }

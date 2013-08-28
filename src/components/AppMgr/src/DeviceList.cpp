@@ -64,7 +64,7 @@ namespace NsAppManager
      * \brief get device list
      * \return device list
      */
-    const connection_handler::DeviceList &DeviceList::getDeviceList() const
+    const connection_handler::DeviceList &DeviceList::GetDeviceList() const
     {
         return mDeviceList;
     }

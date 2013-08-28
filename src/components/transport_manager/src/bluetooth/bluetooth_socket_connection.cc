@@ -52,15 +52,15 @@ BluetoothSocketConnection::BluetoothSocketConnection(
 BluetoothSocketConnection::~BluetoothSocketConnection() {
 }
 
-bool BluetoothSocketConnection::establish(ConnectError** error) {
+bool BluetoothSocketConnection::Establish(ConnectError** error) {
   LOG4CXX_INFO(logger_, "enter (#" << pthread_self() << ")")
-  DeviceSptr device = getController()->findDevice(device_handle());
+  DeviceSptr device = controller()->FindDevice(device_handle());
 
   BluetoothDevice* bluetooth_device =
       static_cast<BluetoothDevice*>(device.get());
 
   uint8_t rfcomm_channel;
-  if (!bluetooth_device->getRfcommChannel(application_handle(),
+  if (!bluetooth_device->GetRfcommChannel(application_handle(),
                                           &rfcomm_channel)) {
     LOG4CXX_ERROR(logger_,
                   "Application " << application_handle() << " not found");
@@ -110,7 +110,7 @@ bool BluetoothSocketConnection::establish(ConnectError** error) {
   if (0 != connect_status) {
     LOG4CXX_ERROR_WITH_ERRNO(
         logger_,
-        "Failed to connect to remote device " << BluetoothDevice::getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
+        "Failed to connect to remote device " << BluetoothDevice::GetUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
     *error = new ConnectError();
     LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")")
     return false;

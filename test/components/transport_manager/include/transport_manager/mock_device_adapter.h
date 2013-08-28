@@ -51,7 +51,7 @@ class MockDeviceAdapter : public DeviceAdapterImpl {
  public:
   MockDeviceAdapter();
   MockDeviceScanner* get_device_scanner() const;
-  DeviceType getDeviceType() const { return "mock-adapter"; }
+  DeviceType GetDeviceType() const { return "mock-adapter"; }
   void reset();
 };
 

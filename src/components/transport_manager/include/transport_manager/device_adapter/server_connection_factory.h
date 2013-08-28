@@ -60,7 +60,7 @@ class ServerConnectionFactory {
    *
    * @return Information about posible reason of error.
    */
-  virtual DeviceAdapter::Error createConnection(
+  virtual DeviceAdapter::Error CreateConnection(
       const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
 
   /**
@@ -74,7 +74,7 @@ class ServerConnectionFactory {
    * @return true - initialized.
    * false - not initialized.
    */
-  virtual bool isInitialised() const = 0;
+  virtual bool IsInitialised() const = 0;
 
   /**
    * @brief Destructor.

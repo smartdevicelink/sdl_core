@@ -94,7 +94,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    *
    * @param device_adapter Pointer to the device adapter.
    */
-  virtual void onSearchDeviceDone(const DeviceAdapter* device_adapter);
+  virtual void OnSearchDeviceDone(const DeviceAdapter* device_adapter);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create search device error,
@@ -103,7 +103,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param device_adapter Pointer to the device adapter.
    * @param error Error class with information about possible reason of search device failure.
    */
-  virtual void onSearchDeviceFailed(const DeviceAdapter* device_adapter,
+  virtual void OnSearchDeviceFailed(const DeviceAdapter* device_adapter,
                                     const SearchDeviceError& error);
 
   /**
@@ -114,7 +114,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param device_handle Device unique identifier.
    * @param app_id Handle of application.
    */
-  virtual void onConnectDone(const DeviceAdapter* device_adapter,
+  virtual void OnConnectDone(const DeviceAdapter* device_adapter,
                              const DeviceUID& device_handle,
                              const ApplicationHandle& app_id);
 
@@ -127,7 +127,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param app_id Handle of application.
    * @param error Error class with information about possible reason of connect failure.
    */
-  virtual void onConnectFailed(const DeviceAdapter* device_adapter,
+  virtual void OnConnectFailed(const DeviceAdapter* device_adapter,
                                const DeviceUID& device,
                                const ApplicationHandle& app_id,
                                const ConnectError& error);
@@ -139,7 +139,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void onConnectRequested(const DeviceAdapter* device_adapter,
+  virtual void OnConnectRequested(const DeviceAdapter* device_adapter,
                                   const DeviceUID& device_handle,
                                   const ApplicationHandle& app_handle);
 
@@ -150,9 +150,9 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param device_adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
-   * @param error Error class with information about possible reason of unexpected disconnect.
+   * @param error Error class with information about possible reason of unexpected Disconnect.
    */
-  virtual void onUnexpectedDisconnect(const DeviceAdapter* device_adapter,
+  virtual void OnUnexpectedDisconnect(const DeviceAdapter* device_adapter,
                                       const DeviceUID& device,
                                       const ApplicationHandle& app_id,
                                       const CommunicationError& error);
@@ -165,20 +165,20 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param devcie_id Device unique identifier.
    * @param app_id Handle of application.
    */
-  virtual void onDisconnectDone(const DeviceAdapter* device_adapter,
+  virtual void OnDisconnectDone(const DeviceAdapter* device_adapter,
                                 const DeviceUID& device_id,
                                 const ApplicationHandle& app_id);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create disconnect error,
+   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create Disconnect error,
    * launch event ON_DISCONNECT_FAIL in transport manager.
    *
    * @param device_adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
-   * @param error Error class with information about possible reason of disconnect failure.
+   * @param error Error class with information about possible reason of Disconnect failure.
    */
-  virtual void onDisconnectFailed(const DeviceAdapter* device_adapter,
+  virtual void OnDisconnectFailed(const DeviceAdapter* device_adapter,
                                   const DeviceUID& device,
                                   const ApplicationHandle& app_id,
                                   const DisconnectError& error);
@@ -189,7 +189,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param device_adapter Pointer to the device adapter.
    * @param devic Device unique identifier.
    */
-  virtual void onDisconnectDeviceDone(
+  virtual void OnDisconnectDeviceDone(
       const device_adapter::DeviceAdapter* device_adapter,
       const DeviceUID& devic);
 
@@ -198,9 +198,9 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    *
    * @param device_adapter Pointer to the device adapter.
    * @param device Device unique identifier.
-   * @param error Error class with information about possible reason of disconnect from device failure.
+   * @param error Error class with information about possible reason of Disconnect from device failure.
    */
-  virtual void onDisconnectDeviceFailed(
+  virtual void OnDisconnectDeviceFailed(
       const device_adapter::DeviceAdapter* device_adapter,
       const DeviceUID& device, const DisconnectDeviceError& error);
 
@@ -213,7 +213,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param app_id Handle of application.
    * @param data_container Smart pointer to the raw message.
    */
-  virtual void onDataReceiveDone(
+  virtual void OnDataReceiveDone(
       const device_adapter::DeviceAdapter* device_adapter,
       const DeviceUID& device,
       const ApplicationHandle& app_id, const RawMessageSptr data_container);
@@ -227,7 +227,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param app_id Handle of application.
    * @param error Error class with information about possible reason of data receive failure.
    */
-  virtual void onDataReceiveFailed(
+  virtual void OnDataReceiveFailed(
       const device_adapter::DeviceAdapter* device_adapter,
       const DeviceUID& device,
       const ApplicationHandle& app_id, const DataReceiveError& error);
@@ -241,7 +241,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param app_id Handle of application.
    * @param data_container Smart pointer to the raw message.
    */
-  virtual void onDataSendDone(const DeviceAdapter* device_adapter,
+  virtual void OnDataSendDone(const DeviceAdapter* device_adapter,
                               const DeviceUID& device,
                               const ApplicationHandle& app_id,
                               const RawMessageSptr data_container);
@@ -250,7 +250,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create data send error,
    * launch event ON_SEND_FAIL in transport manager.
    */
-  virtual void onDataSendFailed(const DeviceAdapter* device_adapter,
+  virtual void OnDataSendFailed(const DeviceAdapter* device_adapter,
                                 const DeviceUID& device,
                                 const ApplicationHandle& app_id,
                                 const RawMessageSptr data_container,
@@ -264,7 +264,7 @@ class DeviceAdapterListenerImpl : public device_adapter::DeviceAdapterListener {
    * @param device Device unique identifier.
    * @param app_id Handle of application.
    */
-  virtual void onCommunicationError(
+  virtual void OnCommunicationError(
       const device_adapter::DeviceAdapter* device_adapter,
       const DeviceUID& device,
       const ApplicationHandle& app_id);

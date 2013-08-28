@@ -68,7 +68,7 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
    * @param device_uid Device unique identifier.
    * @param ap_handle Handle of application.
    */
-  virtual DeviceAdapter::Error createConnection(const DeviceUID& device_uid,
+  virtual DeviceAdapter::Error CreateConnection(const DeviceUID& device_uid,
                                                 const ApplicationHandle& app_handle);
 
   /**
@@ -82,7 +82,7 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
    * @return true - initialized.
    * false - not initialized.
    */
-  virtual bool isInitialised() const;
+  virtual bool IsInitialised() const;
 
   /**
    * @brief Destructor.

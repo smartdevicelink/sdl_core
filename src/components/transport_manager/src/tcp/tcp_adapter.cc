@@ -53,7 +53,7 @@ TcpDeviceAdapter::TcpDeviceAdapter()
 TcpDeviceAdapter::~TcpDeviceAdapter() {
 }
 
-DeviceType TcpDeviceAdapter::getDeviceType() const {
+DeviceType TcpDeviceAdapter::GetDeviceType() const {
   return "sdl-tcp";
 }
 

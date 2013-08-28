@@ -48,7 +48,7 @@ DeviceAdapter::Error TcpConnectionFactory::init() {
   return DeviceAdapter::OK;
 }
 
-DeviceAdapter::Error TcpConnectionFactory::createConnection(
+DeviceAdapter::Error TcpConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   TcpServerOiginatedSocketConnection* connection(
       new TcpServerOiginatedSocketConnection(device_uid, app_handle,
@@ -62,7 +62,7 @@ DeviceAdapter::Error TcpConnectionFactory::createConnection(
 void TcpConnectionFactory::terminate() {
 }
 
-bool TcpConnectionFactory::isInitialised() const {
+bool TcpConnectionFactory::IsInitialised() const {
   return true;
 }
 

@@ -144,7 +144,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   }
 
   if (watchdog_) {
-    watchdog_->removeListener(this);
+    watchdog_->RemoveListener(this);
 
     // TODO(AK): Is it correct?
     delete watchdog_;
@@ -970,7 +970,7 @@ void ApplicationManagerImpl::set_watchdog(
   DCHECK(watchdog);
   watchdog_ = watchdog;
 
-  watchdog_->addListener(this);
+  watchdog_->AddListener(this);
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
@@ -1339,7 +1339,7 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
   if (!watchdog_) {
     watchdog_ = request_watchdog::RequestWatchdog::instance();
     DCHECK(watchdog_);
-    watchdog_->addListener(this);
+    watchdog_->AddListener(this);
   }
   unsigned int default_timeout =
     profile::Profile::instance()->default_timeout();

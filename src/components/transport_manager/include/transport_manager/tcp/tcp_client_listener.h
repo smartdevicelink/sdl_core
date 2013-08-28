@@ -86,19 +86,19 @@ class TcpClientListener : public ClientConnectionListener {
    * @return True if initialized.
    * @return False if not initialized.
    */
-  virtual bool isInitialised() const;
+  virtual bool IsInitialised() const;
 
   /**
    * @brief
    *
    * @return Error information about possible reason of failure.
    */
-  virtual DeviceAdapter::Error startListening();
+  virtual DeviceAdapter::Error StartListening();
 
   /**
    * @brief Terminate TCP client listener thread.
    */
-  virtual DeviceAdapter::Error stopListening();
+  virtual DeviceAdapter::Error StopListening();
  private:
   const uint16_t port_;
   DeviceAdapterController* controller_;

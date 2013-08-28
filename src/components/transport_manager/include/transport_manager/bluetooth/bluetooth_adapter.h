@@ -60,7 +60,7 @@ class BluetoothDeviceAdapter : public DeviceAdapterImpl {
   /**
    * @brief Return type of device.
    */
-  virtual DeviceType getDeviceType() const;
+  virtual DeviceType GetDeviceType() const;
 };
 
 }  // namespace device_adapter

@@ -60,7 +60,7 @@ class MockConnection : public ThreadedSocketConnection{
   MockConnection(const ::transport_manager::DeviceUID& device_handle,
                  const ApplicationHandle& app_handle,
                  DeviceAdapterController* adapter);
-  bool establish(ConnectError **error);
+  bool Establish(ConnectError **error);
 };
 
 }  // namespace transport_manager

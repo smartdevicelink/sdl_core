@@ -57,8 +57,8 @@ namespace protocol_handler_test {
 //
 //	void run(void) {}
 //    void scanForNewDevices(void) {}
-//    void connectDevice(const tDeviceHandle DeviceHandle) {}
-//    void disconnectDevice(const tDeviceHandle DeviceHandle) {}
+//    void ConnectDevice(const tDeviceHandle DeviceHandle) {}
+//    void DisconnectDevice(const tDeviceHandle DeviceHandle) {}
 //    void addDataListener(ITransportManagerDataListener * Listener) {}
 //    void removeDataListener(ITransportManagerDataListener * Listener) {}
 //    void addDeviceListener(ITransportManagerDeviceListener * Listener) {}

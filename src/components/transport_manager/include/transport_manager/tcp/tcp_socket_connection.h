@@ -75,7 +75,7 @@ class TcpSocketConnection : public ThreadedSocketConnection {
   /**
    * @brief
    */
-  virtual bool establish(ConnectError** error);
+  virtual bool Establish(ConnectError** error);
 };
 
 /**
@@ -104,7 +104,7 @@ class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
   /**
    * @brief
    */
-  virtual bool establish(ConnectError** error);
+  virtual bool Establish(ConnectError** error);
 };
 
 }  // namespace device_adapter

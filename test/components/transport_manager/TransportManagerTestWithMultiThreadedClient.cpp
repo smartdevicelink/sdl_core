@@ -96,7 +96,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         {
         }
 
-        virtual EDeviceType getDeviceType(void ) const
+        virtual EDeviceType GetDeviceType(void ) const
         {
             return DeviceBluetooth;
         }

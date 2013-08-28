@@ -67,7 +67,7 @@ class TcpDeviceAdapter : public DeviceAdapterImpl {
    *
    * @return String with device type.
    */
-  virtual DeviceType getDeviceType() const;
+  virtual DeviceType GetDeviceType() const;
 };
 
 }  // namespace device_adapter

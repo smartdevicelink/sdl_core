@@ -68,16 +68,16 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int connectDevice(const DeviceHandle &device_id) = 0;
+  virtual int ConnectDevice(const DeviceHandle &device_id) = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.
    *
-   * @param device_id Handle of device to disconnect from.
+   * @param device_id Handle of device to Disconnect from.
    *
    * @return Code error.
    **/
-  virtual int disconnectDevice(const DeviceHandle &device_id) = 0;
+  virtual int DisconnectDevice(const DeviceHandle &device_id) = 0;
 
   /**
    * @brief Disconnect from applications connected on device by connection unique identifier.
@@ -86,7 +86,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int disconnect(const ConnectionUID &connection) = 0;
+  virtual int Disconnect(const ConnectionUID &connection) = 0;
 
   /**
    * @brief Post new message in queue for massages destined to device.
@@ -95,7 +95,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int sendMessageToDevice(const RawMessageSptr message) = 0;
+  virtual int SendMessageToDevice(const RawMessageSptr message) = 0;
 
   /**
    * @brief Post event in the event queue.
@@ -104,7 +104,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int receiveEventFromDevice(const DeviceAdapterEvent &event) = 0;
+  virtual int ReceiveEventFromDevice(const DeviceAdapterEvent &event) = 0;
 
   /**
    * @brief Add device adapter to the container of device adapters.
@@ -113,7 +113,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int addDeviceAdapter(device_adapter::DeviceAdapterSptr device_adapter) = 0;
+  virtual int AddDeviceAdapter(device_adapter::DeviceAdapterSptr device_adapter) = 0;
 
   /**
    * @brief Post listener to the container of transport manager listeners.
@@ -122,7 +122,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int addEventListener(TransportManagerListener *listener) = 0;
+  virtual int AddEventListener(TransportManagerListener *listener) = 0;
 
   /**
    * @brief Delete listener from the container of transport manager listeners.
@@ -131,7 +131,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int removeEventListener(TransportManagerListener *listener) = 0;
+  virtual int RemoveEventListener(TransportManagerListener *listener) = 0;
 
   /**
    * @brief Remove device from the container that hold devices.
@@ -140,7 +140,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int removeDevice(const DeviceHandle &device_handle) = 0;
+  virtual int RemoveDevice(const DeviceHandle &device_handle) = 0;
 
   /**
    * @brief Turns on or off visibility of SDL to mobile devices
@@ -156,7 +156,7 @@ class TransportManager {
    *
    * @param ph Pointer to the handler of protocol.
    */
-  virtual void set_protocol_handler(protocol_handler::ProtocolHandler *ph) = 0;//YK: temp solution until B1.0 release
+  virtual void SetProtocolHandler(protocol_handler::ProtocolHandler *ph) = 0;//YK: temp solution until B1.0 release
 
 };
 }

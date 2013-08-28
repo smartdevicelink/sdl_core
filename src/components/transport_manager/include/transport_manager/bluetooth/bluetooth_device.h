@@ -73,7 +73,7 @@ class BluetoothDevice : public Device {
    *
    * @return string with device unique identifier.
    */
-  static std::string getUniqueDeviceId(const bdaddr_t& device_address);
+  static std::string GetUniqueDeviceId(const bdaddr_t& device_address);
 
   /**
    * @brief Constructor.
@@ -95,9 +95,9 @@ class BluetoothDevice : public Device {
    *
    * @return true if devices are equal, false otherwise.
    **/
-  virtual bool isSameAs(const Device* other) const;
+  virtual bool IsSameAs(const Device* other) const;
 
-  bool getRfcommChannel(const ApplicationHandle app_handle,
+  bool GetRfcommChannel(const ApplicationHandle app_handle,
                         uint8_t* channel_out);
 
   /**
@@ -105,7 +105,7 @@ class BluetoothDevice : public Device {
    *
    * @return Container with list of applications.
    */
-  virtual ApplicationList getApplicationList() const;
+  virtual ApplicationList GetApplicationList() const;
 
   /**
    * @brief Return device bluetooth address.

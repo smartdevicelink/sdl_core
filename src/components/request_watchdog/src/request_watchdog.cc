@@ -76,7 +76,7 @@ RequestWatchdog::~RequestWatchdog() {
   queueDispatcherThread.join();
 }
 
-void RequestWatchdog::addListener(WatchdogSubscriber* subscriber) {
+void RequestWatchdog::AddListener(WatchdogSubscriber* subscriber) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   subscribersListMutex_.lock();
@@ -89,7 +89,7 @@ void RequestWatchdog::addListener(WatchdogSubscriber* subscriber) {
   subscribersListMutex_.unlock();
 }
 
-void RequestWatchdog::removeListener(WatchdogSubscriber* subscriber) {
+void RequestWatchdog::RemoveListener(WatchdogSubscriber* subscriber) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   subscribersListMutex_.lock();

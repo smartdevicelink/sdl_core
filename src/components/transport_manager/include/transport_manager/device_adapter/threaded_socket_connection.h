@@ -62,14 +62,14 @@ class ThreadedSocketConnection : public Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  DeviceAdapter::Error sendData(RawMessageSptr message);
+  DeviceAdapter::Error SendData(RawMessageSptr message);
 
   /**
    * @brief Disconnect the current connection.
    *
-   * @return Error Information about possible reason of disconnect failure.
+   * @return Error Information about possible reason of Disconnect failure.
    */
-  DeviceAdapter::Error disconnect();
+  DeviceAdapter::Error Disconnect();
 
   /**
    * @brief Start thread creation.
@@ -103,12 +103,12 @@ class ThreadedSocketConnection : public Connection {
   virtual ~ThreadedSocketConnection();
 
 
-  virtual bool establish(ConnectError** error) = 0;
+  virtual bool Establish(ConnectError** error) = 0;
 
   /**
    * @brief Return pointer to the device adapter controller.
    */
-  DeviceAdapterController* getController() {
+  DeviceAdapterController* controller() {
     return controller_;
   }
 

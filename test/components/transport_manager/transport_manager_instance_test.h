@@ -46,7 +46,7 @@
         - TM client receives single frame with onFrameReceived callback
         - TM client calls sendFrame with some frame data and user data
         - TM client receives onFrameSendCompleted
-        - TM client calls disconnectDevice
+        - TM client calls DisconnectDevice
         - TM client receives onApplicationDisconnected
  */
 #include <stddef.h>
@@ -100,12 +100,12 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //        {
 //        }
 //
-//        virtual EDeviceType getDeviceType(void ) const
+//        virtual EDeviceType GetDeviceType(void ) const
 //        {
 //            return DeviceBluetooth;
 //        }
-//        MOCK_METHOD1(connectDevice, void (const tDeviceHandle DeviceHandle));
-//        MOCK_METHOD1(disconnectDevice, void (const tDeviceHandle DeviceHandle));
+//        MOCK_METHOD1(ConnectDevice, void (const tDeviceHandle DeviceHandle));
+//        MOCK_METHOD1(DisconnectDevice, void (const tDeviceHandle DeviceHandle));
 //        MOCK_METHOD0(run, void());
 //        MOCK_METHOD0(scanForNewDevices, void());
 //        MOCK_METHOD4(sendFrame, void(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, int UserData));
@@ -239,7 +239,7 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //            tDeviceList::const_iterator device;
 //            for(device = mDeviceList.begin(); device != mDeviceList.end(); ++device)
 //            {
-//                mTransportManager.connectDevice(device->mDeviceHandle);
+//                mTransportManager.ConnectDevice(device->mDeviceHandle);
 //            }
 //        }
 //
@@ -258,7 +258,7 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //            tDeviceList::const_iterator device;
 //            for(device = mDeviceList.begin(); device != mDeviceList.end(); ++device)
 //            {
-//                mTransportManager.disconnectDevice(device->mDeviceHandle);
+//                mTransportManager.DisconnectDevice(device->mDeviceHandle);
 //            }
 //        }
 //
@@ -297,7 +297,7 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doScanForNewDevices))
 //            ;
 //
-//            EXPECT_CALL(*mpDeviceAdapter, connectDevice(Data::DeviceHandle))
+//            EXPECT_CALL(*mpDeviceAdapter, ConnectDevice(Data::DeviceHandle))
 //                .Times(1)
 //                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doConnectDevice))
 //            ;
@@ -307,12 +307,12 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doSendFrame))
 //            ;
 //
-//            EXPECT_CALL(*mpDeviceAdapter, disconnectDevice(Data::DeviceHandle))
+//            EXPECT_CALL(*mpDeviceAdapter, DisconnectDevice(Data::DeviceHandle))
 //                .Times(1)
 //                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doDisconnectDevice))
 //            ;
 //
-//            addDeviceAdapter(mpDeviceAdapter);
+//            AddDeviceAdapter(mpDeviceAdapter);
 //            LOG4CPLUS_INFO_EXT(mLogger, "Device adapters initialized");
 //        }
 //

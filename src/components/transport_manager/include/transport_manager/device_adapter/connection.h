@@ -65,12 +65,12 @@ class Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  virtual DeviceAdapter::Error sendData(RawMessageSptr message) = 0;
+  virtual DeviceAdapter::Error SendData(RawMessageSptr message) = 0;
 
   /**
    * @brief Disconnect the current connection.
    */
-  virtual DeviceAdapter::Error disconnect() = 0;
+  virtual DeviceAdapter::Error Disconnect() = 0;
 };
 
 /**

@@ -131,10 +131,10 @@ class TransportManagerListenerImpl : public TransportManagerListener {
                                       const DisconnectDeviceError& error){  }
 
   /**
-   * @brief Reaction to the event, when disconnect is failed.
+   * @brief Reaction to the event, when Disconnect is failed.
    *
    * @param device Handle of device.
-   * @param error Error information about possible reason of disconnect failure.
+   * @param error Error information about possible reason of Disconnect failure.
    */
   virtual void OnDisconnectFailed(const DeviceHandle& device,
                                   const DisconnectDeviceError& error) {}

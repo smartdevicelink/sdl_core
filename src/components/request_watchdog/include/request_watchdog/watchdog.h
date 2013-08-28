@@ -43,8 +43,8 @@ namespace request_watchdog {
 
 class Watchdog {
   public:
-    virtual void addListener(WatchdogSubscriber* subscriber) = 0;
-    virtual void removeListener(WatchdogSubscriber* listener) = 0;
+    virtual void AddListener(WatchdogSubscriber* subscriber) = 0;
+    virtual void RemoveListener(WatchdogSubscriber* listener) = 0;
     virtual void removeAllListeners() = 0;
 
     virtual void addRequest(RequestInfo requestInfo) = 0;

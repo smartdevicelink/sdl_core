@@ -70,8 +70,8 @@ class MockDevice : public ::transport_manager::device_adapter::Device {
   const ApplicationHandle addApplication();
   void start();
   void stop();
-  bool isSameAs(const Device* other) const;
-  ApplicationList getApplicationList() const;
+  bool IsSameAs(const Device* other) const;
+  ApplicationList GetApplicationList() const;
   bool operator == (const MockDevice &other);
 };
 

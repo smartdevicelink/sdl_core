@@ -47,7 +47,7 @@
 namespace transport_manager {
 namespace device_adapter {
 
-bool BluetoothDevice::getRfcommChannel(const ApplicationHandle app_handle,
+bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
                                        uint8_t* channel_out) {
   RfcommChannels::const_iterator it = rfcomm_channels_.find(app_handle);
   if (it != rfcomm_channels_.end()) {
@@ -58,7 +58,7 @@ bool BluetoothDevice::getRfcommChannel(const ApplicationHandle app_handle,
   }
 }
 
-std::string BluetoothDevice::getUniqueDeviceId(const bdaddr_t& device_address) {
+std::string BluetoothDevice::GetUniqueDeviceId(const bdaddr_t& device_address) {
   char device_address_string[32];
   ba2str(&device_address, device_address_string);
   return std::string("BT-") + device_address_string;
@@ -66,7 +66,7 @@ std::string BluetoothDevice::getUniqueDeviceId(const bdaddr_t& device_address) {
 
 BluetoothDevice::BluetoothDevice(const bdaddr_t& address, const char* name,
                                  const RfcommChannelVector& rfcomm_channels)
-    : Device(name, getUniqueDeviceId(address)),
+    : Device(name, GetUniqueDeviceId(address)),
       address_(address),
       next_application_handle_(1) {
   for (RfcommChannelVector::const_iterator it = rfcomm_channels.begin();
@@ -75,7 +75,7 @@ BluetoothDevice::BluetoothDevice(const bdaddr_t& address, const char* name,
   }
 }
 
-bool BluetoothDevice::isSameAs(const Device* other) const {
+bool BluetoothDevice::IsSameAs(const Device* other) const {
   bool result = false;
 
   const BluetoothDevice* other_bluetooth_device =
@@ -92,7 +92,7 @@ bool BluetoothDevice::isSameAs(const Device* other) const {
   return result;
 }
 
-ApplicationList BluetoothDevice::getApplicationList() const {
+ApplicationList BluetoothDevice::GetApplicationList() const {
   ApplicationList result;
   for (RfcommChannels::const_iterator it = rfcomm_channels_.begin();
       it != rfcomm_channels_.end(); ++it)

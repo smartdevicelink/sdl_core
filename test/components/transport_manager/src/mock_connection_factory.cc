@@ -52,7 +52,7 @@ namespace transport_manager {
 MockConnectionFactory::MockConnectionFactory(MockDeviceAdapter *controller)
     : controller_(controller) {}
 
-DeviceAdapter::Error MockConnectionFactory::createConnection(
+DeviceAdapter::Error MockConnectionFactory::CreateConnection(
     const ::transport_manager::DeviceUID& device_handle,
     const ApplicationHandle& app_handle) {
 

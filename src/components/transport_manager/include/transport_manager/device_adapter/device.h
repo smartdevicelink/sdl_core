@@ -71,9 +71,9 @@ class Device {
    *
    * @return true if devices are equal, false otherwise.
    **/
-  virtual bool isSameAs(const Device* other_device) const = 0;
+  virtual bool IsSameAs(const Device* other_device) const = 0;
 
-  virtual ApplicationList getApplicationList() const = 0;
+  virtual ApplicationList GetApplicationList() const = 0;
 
   const DeviceUID& unique_device_id() const {
     return unique_device_id_;

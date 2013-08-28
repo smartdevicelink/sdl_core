@@ -85,7 +85,7 @@ class DeviceAdapterEvent {
    *
    * @param id Connection unique identifier.
    */
-  void set_connection_uid(ConnectionUID id);
+  void SetConnectionUid(ConnectionUID id);
 
   /**
    * @brief Set device adapter field.
@@ -113,7 +113,7 @@ class DeviceAdapterEvent {
    *
    * @param device_handle Device unique identifier.
    */
-  void set_device_handle(const DeviceUID &device_handle);
+  void SetDeviceHandle(const DeviceUID &device_handle);
 
   /**
    * @brief Return device unique identifier value.

@@ -85,7 +85,7 @@ class DeviceAdapter {
   /**
    * @brief
    */
-  virtual DeviceType getDeviceType() const = 0;
+  virtual DeviceType GetDeviceType() const = 0;
 
   /* TODO
    virtual Error LoadState(DeviceAdapterState* state) = 0;
@@ -98,7 +98,7 @@ class DeviceAdapter {
    * @return true if initialized.
    * @return false if not initialized.
    */
-  virtual bool isInitialised() const = 0;
+  virtual bool IsInitialised() const = 0;
 
   /**
    * @brief Run device adapter.
@@ -114,21 +114,21 @@ class DeviceAdapter {
    *
    * @param listener Pointer to the device adapter listener.
    */
-  virtual void addListener(DeviceAdapterListener* listener) = 0;
+  virtual void AddListener(DeviceAdapterListener* listener) = 0;
 
   /**
    * @brief Remove listener from the container(list) of device adapter listeners.
    *
    * @param listener Pointer to the device adapter listener.
    */
-  virtual void removeListener(DeviceAdapterListener* listener) = 0;
+  virtual void RemoveListener(DeviceAdapterListener* listener) = 0;
 
   /**
    * @brief Notify that device scanner is available.
    *
    * @return true - available, false - not available.
    */
-  virtual bool isSearchDevicesSupported() const = 0;
+  virtual bool IsSearchDevicesSupported() const = 0;
 
   /**
    * @brief Start scanning for new devices.
@@ -144,7 +144,7 @@ class DeviceAdapter {
    *
    * @return true - available, false - not available.
    */
-  virtual bool isServerOriginatedConnectSupported() const = 0;
+  virtual bool IsServerOriginatedConnectSupported() const = 0;
 
   /**
    * @brief Connect to the specified application discovered on device.
@@ -162,41 +162,41 @@ class DeviceAdapter {
    *
    * @return true - available, false - not available.
    */
-  virtual bool isClientOriginatedConnectSupported() const = 0;
+  virtual bool IsClientOriginatedConnectSupported() const = 0;
 
   /**
    * @brief Start client listener.
    *
    * @return Error information about possible reason of starting client listener failure.
    */
-  virtual Error startClientListening() = 0;
+  virtual Error StartClientListening() = 0;
 
   /**
    * @brief Stop client listener.
    *
    * @return Error information about possible reason of stopping client listener failure.
    */
-  virtual Error stopClientListening() = 0;
+  virtual Error StopClientListening() = 0;
 
   /**
    * @brief Disconnect from specified session.
    *
-   * @param device_handle Handle of device to disconnect from.
+   * @param device_handle Handle of device to Disconnect from.
    * @param app_handle Handle of application.
    *
    * @return Error information about possible reason of disconnection from the device failure.
    **/
-  virtual Error disconnect(const DeviceUID& device_handle,
+  virtual Error Disconnect(const DeviceUID& device_handle,
                            const ApplicationHandle& app_handle) = 0;
 
   /**
    * @brief Disconnect from all sessions on specified device.
    *
-   * @param device_handle Device handle to disconnect.
+   * @param device_handle Device handle to Disconnect.
    *
    * @return Error information about possible reason of disconnecting from device failure
    **/
-  virtual Error disconnectDevice(const DeviceUID& device_handle) = 0;
+  virtual Error DisconnectDevice(const DeviceUID& device_handle) = 0;
 
   /**
    * @brief Send frame.
@@ -207,7 +207,7 @@ class DeviceAdapter {
    *
    * @return Error information about possible reason of sending data failure.
    **/
-  virtual Error sendData(const DeviceUID& device_handle,
+  virtual Error SendData(const DeviceUID& device_handle,
                          const ApplicationHandle& app_handle,
                          const RawMessageSptr data) = 0;
 
@@ -216,7 +216,7 @@ class DeviceAdapter {
    *
    * @return container(vector) of device unique identifiers.
    */
-  virtual DeviceList getDeviceList() const = 0;
+  virtual DeviceList GetDeviceList() const = 0;
 
   /**
    * @brief Get container(vector) of application unique identifiers that available at specified device.
@@ -225,7 +225,7 @@ class DeviceAdapter {
    *
    * @return Container(vector) that holds application unique identifiers.
    */
-  virtual ApplicationList getApplicationList(
+  virtual ApplicationList GetApplicationList(
       const DeviceUID& device_handle) const = 0;
 
   /**

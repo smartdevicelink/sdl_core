@@ -87,9 +87,9 @@ class BluetoothDeviceScanner : public DeviceScanner {
   /**
    * @brief
    *
-   * @return Error information about reason of scan failure.
+   * @return Error information about reason of Scan failure.
    */
-  virtual DeviceAdapter::Error scan();
+  virtual DeviceAdapter::Error Scan();
 
   /**
    * @brief Check device scanner for initialization.
@@ -97,13 +97,13 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * @return true - initialized.
    * false - not initialized.
    */
-  virtual bool isInitialised() const;
+  virtual bool IsInitialised() const;
  private:
 
   typedef std::vector<uint8_t> RfcommChannelVector;
 
-  bool waitForDeviceScanRequest();
-  RfcommChannelVector discoverSmartDeviceLinkRfcommChannels(
+  bool WaitForDeviceScanRequest();
+  RfcommChannelVector DiscoverSmartDeviceLinkRFCOMMChannels(
       const bdaddr_t& device_address);
   SearchDeviceError* doInquiry(DeviceVector* discovered_devices);
 

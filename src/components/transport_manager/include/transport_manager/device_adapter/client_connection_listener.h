@@ -66,17 +66,17 @@ class ClientConnectionListener {
    * @return True if initialized.
    * @return False if not initialized.
    */
-  virtual bool isInitialised() const = 0;
+  virtual bool IsInitialised() const = 0;
 
   /**
    * @brief Start to listen for connection from client.
    */
-  virtual DeviceAdapter::Error startListening() = 0;
+  virtual DeviceAdapter::Error StartListening() = 0;
 
   /**
    * @brief Stop to listen for connection from client.
    */
-  virtual DeviceAdapter::Error stopListening() = 0;
+  virtual DeviceAdapter::Error StopListening() = 0;
 
   /**
    * @brief Destructor.

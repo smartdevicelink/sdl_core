@@ -54,11 +54,11 @@ DeviceAdapter::Error MockDeviceScanner::init() {
   return DeviceAdapter::OK;
 }
 
-DeviceAdapter::Error MockDeviceScanner::scan() {
+DeviceAdapter::Error MockDeviceScanner::Scan() {
   if (is_search_failed_) {
-    controller_->searchDeviceFailed(SearchDeviceError());
+    controller_->SearchDeviceFailed(SearchDeviceError());
   } else {
-    controller_->searchDeviceDone(devices_);
+    controller_->SearchDeviceDone(devices_);
   }
   return DeviceAdapter::OK;
 }
@@ -74,11 +74,11 @@ void MockDeviceScanner::reset() {
   devices_.clear();
 }
 
-bool MockDeviceScanner::isInitialised() const {
+bool MockDeviceScanner::IsInitialised() const {
   return is_initialized_;
 }
 
-void MockDeviceScanner::addDevice(const std::string& name,
+void MockDeviceScanner::AddDevice(const std::string& name,
                                   const std::string& unique_id, bool start) {
   MockDevice* dev = new MockDevice(name, unique_id, controller_);
   dev->addApplication();
@@ -88,7 +88,7 @@ void MockDeviceScanner::addDevice(const std::string& name,
   devices_.push_back(dev);
 }
 
-void MockDeviceScanner::removeDevice(const std::string& name) {
+void MockDeviceScanner::RemoveDevice(const std::string& name) {
   for (DeviceVector::iterator t = devices_.begin(); t != devices_.end(); ++t) {
     if ((*t)->name() == name) {
       devices_.erase(t);

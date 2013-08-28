@@ -25,7 +25,7 @@ void DnssdServiceBrowser::terminate() {
     avahi_threaded_poll_free(avahi_threaded_poll_);
 }
 
-bool DnssdServiceBrowser::isInitialised() const {
+bool DnssdServiceBrowser::IsInitialised() const {
   return initialised_;
 }
 
@@ -148,7 +148,7 @@ void DnssdServiceBrowser::ServiceResolveFinished() {
 }
 
 void DnssdServiceBrowser::OnSearchDone(const DeviceVector& device_vector) {
-  controller_->searchDeviceDone(device_vector);
+  controller_->SearchDeviceDone(device_vector);
 }
 
 void AvahiServiceResolverCallback(AvahiServiceResolver* avahi_service_resolver,
@@ -234,7 +234,7 @@ DeviceAdapter::Error DnssdServiceBrowser::init() {
   return DeviceAdapter::OK;
 }
 
-DeviceAdapter::Error DnssdServiceBrowser::scan() {
+DeviceAdapter::Error DnssdServiceBrowser::Scan() {
   pthread_mutex_lock(&mutex_);
   if (0 == services_to_be_resolved_) {
     DeviceVector device_vector = PrepareDeviceVector();

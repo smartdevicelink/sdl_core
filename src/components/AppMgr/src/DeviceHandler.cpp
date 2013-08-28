@@ -57,7 +57,7 @@ namespace NsAppManager
      * \param sessionKey session/connection key
      * \param device device handler
      */
-    void DeviceHandler::addDevice(const int &sessionKey, const connection_handler::DeviceHandle &device)
+    void DeviceHandler::AddDevice(const int &sessionKey, const connection_handler::DeviceHandle &device)
     {
         LOG4CXX_INFO_EXT(logger_, "Adding a device " << device << " with a session " << sessionKey );
         mDeviceMapping.insert(DeviceMapItem(sessionKey, device));

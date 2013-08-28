@@ -49,16 +49,16 @@ int TransportManagerDefault::init() {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-  addDeviceAdapter(bluetooth_da_);
-  addDeviceAdapter(tcp_da_);
+  AddDeviceAdapter(bluetooth_da_);
+  AddDeviceAdapter(tcp_da_);
 
   return E_SUCCESS;
 }
 
 TransportManagerDefault::~TransportManagerDefault() {
   if (is_initialized_) {
-    removeDeviceAdapter(bluetooth_da_);
-    removeDeviceAdapter(tcp_da_);
+    RemoveDeviceAdapter(bluetooth_da_);
+    RemoveDeviceAdapter(tcp_da_);
   }
 }
 

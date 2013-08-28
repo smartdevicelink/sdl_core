@@ -55,7 +55,7 @@ MockConnection::MockConnection(const ::transport_manager::DeviceUID& device_hand
     : ThreadedSocketConnection(device_handle, app_handle, controller) {
 }
 
-bool MockConnection::establish(ConnectError **error) {
+bool MockConnection::Establish(ConnectError **error) {
   int peer_sock = socket(AF_UNIX, SOCK_STREAM, 0);
   sockaddr_un my_addr;
   memset(&my_addr, 0, sizeof(my_addr));
