@@ -7,6 +7,37 @@ buildscript {
     }
 }
 
-ext.compileSdkVersion = 18
-ext.buildToolsVersion = "18.1.1"
+int[] sdksAvailable() {
+    def sdks = new ByteArrayOutputStream()
+    exec {
+        commandLine 'android', 'list'
+        standardOutput = sdks
+    }
+    sdks = sdks
+            // get the output
+            .toString()
+            // split to strings
+            .split('\n')
+            // leave only strings with API levels
+            .findAll { it ==~ /\s*API level:.*/ }
+            // extract the API levels
+            .collect { (it =~ /\s*API level:\s*(\d+).*/)[0][1].toInteger() }
+            // sort from highest to lowest
+            .sort({ a, b -> b <=> a })
+    sdks
+}
 
+int highestSdkAvailable(int defaultSdk) {
+    def sdks = sdksAvailable()
+    def highestSdk = sdks[0]
+    if (highestSdk != null) {
+        println "Using highest found SDK " + highestSdk
+        highestSdk
+    } else {
+        println "No installed SDKs found. Using default SDK " + defaultSdk
+        defaultSdk
+    }
+}
+
+ext.compileSdkVersion = highestSdkAvailable(18)
+ext.buildToolsVersion="18.1.1"
