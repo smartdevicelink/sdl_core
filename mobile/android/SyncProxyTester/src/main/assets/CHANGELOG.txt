@@ -1,3 +1,6 @@
+[CW35]
+* Revert "Fix SyncProxyTester freezing when trying to send a message after WiFi is connected and then turned off."
+
 [CW34]
 * Fix: RegisterAppInterface response with DUPLICATE_NAME shouldn't show up multiple times on WiFi.
 * Fix sending GenericRequest message from XML tests.

@@ -9,8 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * General comments:
@@ -186,7 +184,7 @@ public class TCPTransport extends SyncTransport {
      * @param message Message that describes disconnect reason
      * @param exception Some of the possible exceptions that was the reason of disconnecting
      */
-    private synchronized void disconnect(String message, final Exception exception) {
+    private synchronized void disconnect(String message, Exception exception) {
 
         if(getCurrentState() == TCPTransportState.DISCONNECTING) {
             logInfo("TCPTransport: disconnecting already in progress");
@@ -224,12 +222,7 @@ public class TCPTransport extends SyncTransport {
             // that there was a transport error.
             logInfo("Disconnect is incorrect. Handling it as error");
             final String finalDisconnectMsg = disconnectMsg;
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    handleTransportError(finalDisconnectMsg, exception);
-                }
-            }, 0);
+            handleTransportError(finalDisconnectMsg, exception);
         }
     }
 
