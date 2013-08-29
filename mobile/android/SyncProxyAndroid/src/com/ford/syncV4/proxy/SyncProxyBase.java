@@ -1283,23 +1283,27 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			scheduleInitializeProxy();
 			notifyProxyClosed("Sync Proxy Cycled", new SyncException("Sync Proxy Cycled", SyncExceptionCause.SYNC_PROXY_CYCLED));
 		} catch (SyncException e) {
-			switch(e.getSyncExceptionCause()) {
-			case BLUETOOTH_DISABLED:
-				notifyProxyClosed("Bluetooth is disabled. Bluetooth must be enabled to connect to SYNC. Reattempt a connection once Bluetooth is enabled.", 
-						new SyncException("Bluetooth is disabled. Bluetooth must be enabled to connect to SYNC. Reattempt a connection once Bluetooth is enabled.", SyncExceptionCause.BLUETOOTH_DISABLED));
-				break;
-			case BLUETOOTH_ADAPTER_NULL:
-				notifyProxyClosed("Cannot locate a Bluetooth adapater. A SYNC connection is impossible on this device until a Bluetooth adapter is added.", 
-						new SyncException("Cannot locate a Bluetooth adapater. A SYNC connection is impossible on this device until a Bluetooth adapter is added.", SyncExceptionCause.HEARTBEAT_PAST_DUE));
-				break;
-			default :
-				notifyProxyClosed("Cycling the proxy failed.", e);
-				break;
-			}
-		} catch (Exception e) { 
+            handleSyncException(e);
+        } catch (Exception e) {
 			notifyProxyClosed("Cycling the proxy failed.", e);
 		}
 	}
+
+    private void handleSyncException(SyncException e) {
+        switch(e.getSyncExceptionCause()) {
+        case BLUETOOTH_DISABLED:
+            notifyProxyClosed("Bluetooth is disabled. Bluetooth must be enabled to connect to SYNC. Reattempt a connection once Bluetooth is enabled.",
+                    new SyncException("Bluetooth is disabled. Bluetooth must be enabled to connect to SYNC. Reattempt a connection once Bluetooth is enabled.", SyncExceptionCause.BLUETOOTH_DISABLED));
+            break;
+        case BLUETOOTH_ADAPTER_NULL:
+            notifyProxyClosed("Cannot locate a Bluetooth adapater. A SYNC connection is impossible on this device until a Bluetooth adapter is added.",
+                    new SyncException("Cannot locate a Bluetooth adapater. A SYNC connection is impossible on this device until a Bluetooth adapter is added.", SyncExceptionCause.HEARTBEAT_PAST_DUE));
+            break;
+        default :
+            notifyProxyClosed("Cycling the proxy failed.", e);
+            break;
+        }
+    }
 
     private void scheduleInitializeProxy() {
         Log.d(TAG, "Scheduling proxy initialization");
@@ -1317,8 +1321,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     setCurrentReconnectTimerTask(null);
                     initializeProxy();
                 } catch (SyncException e) {
-                    e.printStackTrace();
-                    notifyProxyClosed("Proxy initialization failed", e);
+                    Log.e(TAG, "Cycling the proxy failed.", e);
+                    handleSyncException(e);
+                } catch (Exception e) {
+                    notifyProxyClosed("Cycling the proxy failed.", e);
                 }
             }
         };
