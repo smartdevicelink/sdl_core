@@ -1,4 +1,5 @@
 [CW35]
+* SoftButtons can be sent without SystemAction parameter.
 * SyncProxyAndroid SDK: Fix creating more and more TCP transports after disconnects.
 - SyncProxyAndroid SDK: TCPTransport: Remove the autoReconnect feature, as it's handled by the protocol.
 * Revert "Fix SyncProxyTester freezing when trying to send a message after WiFi is connected and then turned off."
