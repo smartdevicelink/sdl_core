@@ -251,10 +251,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				int tcpPort = settings.getInt(
 						Const.Transport.PREFS_KEY_TRANSPORT_PORT,
 						Const.Transport.PREFS_DEFAULT_TRANSPORT_PORT);
-				boolean autoReconnect = settings
-						.getBoolean(
-								Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
-								Const.Transport.PREFS_DEFAULT_TRANSPORT_RECONNECT_DEFAULT);
 
                 SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
                 syncMsgVersion.setMajorVersion(2);
@@ -291,7 +287,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 							/*callbackToUIThre1ad*/ false,
 							/*preRegister*/ false,
 							versionNumber,
-							new TCPTransportConfig(tcpPort, ipAddress, autoReconnect));
+							new TCPTransportConfig(tcpPort, ipAddress));
 				}
 			} catch (SyncException e) {
 				e.printStackTrace();

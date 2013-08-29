@@ -9,8 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * General comments:
@@ -46,16 +44,6 @@ public class TCPTransport extends SyncTransport {
      * Size of the read buffer.
      */
     private static final int READ_BUFFER_SIZE = 4096;
-
-    /**
-     * Delay between reconnect attempts
-     */
-    private static final int RECONNECT_DELAY = 5000;
-
-    /**
-     * Count of the reconnect retries
-     */
-    private static final int RECONNECT_RETRY_COUNT = 30;
 
     /**
      * Instance of TCP transport configuration
@@ -183,7 +171,7 @@ public class TCPTransport extends SyncTransport {
         if(currentState == TCPTransportState.CONNECTED) {
             logInfo("TCPTransport: disconnect request accepted.");
             synchronized (this) {
-                disconnect(null, null, true);
+                disconnect(null, null);
             }
         } else {
             logInfo("TCPTransport: disconnect request rejected. Transport is not connected");
@@ -195,10 +183,8 @@ public class TCPTransport extends SyncTransport {
      *
      * @param message Message that describes disconnect reason
      * @param exception Some of the possible exceptions that was the reason of disconnecting
-     * @param stopThread True if not only disconnection must be done but also thread that handles connection must be
-     *                   also stopped so no reconnect attempts will be made
      */
-    private synchronized void disconnect(String message, final Exception exception, boolean stopThread) {
+    private synchronized void disconnect(String message, Exception exception) {
 
         if(getCurrentState() == TCPTransportState.DISCONNECTING) {
             logInfo("TCPTransport: disconnecting already in progress");
@@ -213,7 +199,7 @@ public class TCPTransport extends SyncTransport {
         }
 
         try {
-            if(mThread != null && stopThread) {
+            if(mThread != null) {
                 mThread.halt();
                 mThread.interrupt();
             }
@@ -236,12 +222,7 @@ public class TCPTransport extends SyncTransport {
             // that there was a transport error.
             logInfo("Disconnect is incorrect. Handling it as error");
             final String finalDisconnectMsg = disconnectMsg;
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    handleTransportError(finalDisconnectMsg, exception);
-                }
-            }, 0);
+            handleTransportError(finalDisconnectMsg, exception);
         }
     }
 
@@ -308,19 +289,15 @@ public class TCPTransport extends SyncTransport {
         }
 
         /**
-         * Tries to connect to the applink core. Behavior depends autoReconnect configuration param:
-         *      a) If autoReconnect is false, then only one connect try will be performed.
-         *      b) If autoReconnect is true, then in case of connection error continuous reconnect will be performed
-         *          after short delay until connection will be established or retry count will be reached
+         * Tries to connect to the applink core. Only one connect try will be performed.
          *
          * @return true if connection established and false otherwise
          */
         private boolean connect() {
-            boolean bConnected;
-            int remainingRetry = RECONNECT_RETRY_COUNT;
+            boolean bConnected = false;
 
             synchronized (TCPTransport.this) {
-                do {
+                if (!isHalted) {
                     try {
 
                         if ((null != mSocket) && (!mSocket.isClosed())) {
@@ -343,16 +320,9 @@ public class TCPTransport extends SyncTransport {
                     if(bConnected){
                         logInfo("TCPTransport.connect: Socket connected");
                     }else{
-                        if(mConfig.getAutoReconnect()){
-                            remainingRetry--;
-                            logInfo(String.format("TCPTransport.connect: Socket not connected. AutoReconnect is ON. retryCount is: %d. Waiting for reconnect delay: %d"
-                                    , remainingRetry, RECONNECT_DELAY));
-                            waitFor(RECONNECT_DELAY);
-                        } else {
-                            logInfo("TCPTransport.connect: Socket not connected. AutoReconnect is OFF");
-                        }
+                        logInfo("TCPTransport.connect: Socket not connected");
                     }
-                } while ((!bConnected) && (mConfig.getAutoReconnect()) && (remainingRetry > 0) && (!isHalted));
+                }
 
                 return bConnected;
             }
@@ -372,7 +342,7 @@ public class TCPTransport extends SyncTransport {
                         logInfo("TCPTransport.run: Connection failed, but thread already halted");
                     } else {
                         disconnect("Failed to connect to Sync", new SyncException("Failed to connect to Sync"
-                                , SyncExceptionCause.SYNC_CONNECTION_FAILED), true);
+                                , SyncExceptionCause.SYNC_CONNECTION_FAILED));
                     }
                     break;
                 }
@@ -428,7 +398,7 @@ public class TCPTransport extends SyncTransport {
                 logInfo("TCPTransport.run: TCP disconnect received, but thread already halted");
             } else {
                 logInfo("TCPTransport.run: TCP disconnect received");
-                disconnect("TCPTransport.run: End of stream reached", null, false);
+                disconnect("TCPTransport.run: End of stream reached", null);
             }
         }
 
@@ -441,7 +411,7 @@ public class TCPTransport extends SyncTransport {
             } else {
                 logInfo("TCPTransport.run: Exception during reading data");
                 disconnect("Failed to read data from Sync", new SyncException("Failed to read data from Sync"
-                        , SyncExceptionCause.SYNC_CONNECTION_FAILED), false);
+                        , SyncExceptionCause.SYNC_CONNECTION_FAILED));
             }
         }
     }
@@ -462,23 +432,6 @@ public class TCPTransport extends SyncTransport {
     private synchronized void setCurrentState(TCPTransportState currentState) {
         logInfo(String.format("Current state changed to: %s", currentState));
         this.mCurrentState = currentState;
-    }
-
-    /**
-     * Implementation of waiting required delay that cannot be interrupted
-     * @param timeMs Time in milliseconds of required delay
-     */
-    private void waitFor(long timeMs) {
-        long endTime = System.currentTimeMillis() +timeMs;
-        while (System.currentTimeMillis() < endTime) {
-            synchronized (this) {
-                try {
-                    wait(endTime - System.currentTimeMillis());
-                } catch (Exception e) {
-                    // Nothing To Do, simple wait
-                }
-            }
-        }
     }
 
     /**
