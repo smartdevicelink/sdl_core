@@ -42,9 +42,9 @@ namespace application_manager {
 namespace commands {
 
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
-    const MessageSharedPtr& message)
- : CommandRequestImpl(message),
- timer_(NULL) {
+  const MessageSharedPtr& message)
+  : CommandRequestImpl(message),
+    timer_(NULL) {
 }
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {
@@ -67,7 +67,7 @@ bool RegisterAppInterfaceRequest::Init() {
 
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run "
-      << (*message_)[strings::params][strings::connection_key].asInt());
+               << (*message_)[strings::params][strings::connection_key].asInt());
 
   // wait till all HMI capabilities initialized
   while (!ApplicationManagerImpl::instance()->IsHMICapabilitiesInitialized()) {
@@ -75,12 +75,12 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   Application* application_impl =
-      ApplicationManagerImpl::instance()->RegisterApplication(message_);
+    ApplicationManagerImpl::instance()->RegisterApplication(message_);
 
   if (!application_impl) {
     LOG4CXX_ERROR_EXT(logger_, "Application " <<
-      ((*message_)[strings::msg_params][strings::app_name].asString()) <<
-      "  hasn't been registered!");
+                      ((*message_)[strings::msg_params][strings::app_name].asString()) <<
+                      "  hasn't been registered!");
   } else {
     application_impl->set_mobile_app_id(
       (*message_)[strings::msg_params][strings::app_id]);
@@ -120,7 +120,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   const Application& application_impl) {
   mobile_apis::Result::eType result =  mobile_apis::Result::SUCCESS;
   smart_objects::SmartObject* params =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if (!params) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
@@ -148,17 +148,36 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                      << application_impl.name());
     LOG4CXX_ERROR_EXT(
       logger_, "vr " << (*message_)[strings::msg_params]
-          [strings::language_desired].asInt() << " - " <<
-          app_manager->active_vr_language() << "ui " << (*message_)
-          [strings::msg_params][strings::hmi_display_language_desired].asInt()
-          << " - " << app_manager->active_ui_language());
+      [strings::language_desired].asInt() << " - " <<
+      app_manager->active_vr_language() << "ui " << (*message_)
+      [strings::msg_params][strings::hmi_display_language_desired].asInt()
+      << " - " << app_manager->active_ui_language());
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
   if (app_manager->display_capabilities()) {
     response_params[hmi_response::display_capabilities] =
-      *app_manager->display_capabilities();
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& display_caps =
+      response_params[hmi_response::display_capabilities];
+
+    display_caps[hmi_response::display_type] =
+      app_manager->display_capabilities()->getElement(
+        hmi_response::display_type);
+    display_caps[hmi_response::text_fields] =
+      app_manager->display_capabilities()->getElement(
+        hmi_response::text_fields);
+    display_caps[hmi_response::media_clock_formats] =
+      app_manager->display_capabilities()->getElement(
+        hmi_response::media_clock_formats);
+    if (app_manager->display_capabilities()->getElement(
+          hmi_response::image_capabilities).length() > 0) {
+      display_caps[hmi_response::graphic_supported] = true;
+    } else {
+      display_caps[hmi_response::graphic_supported] = false;
+    }
   }
+
   if (app_manager->button_capabilities()) {
     response_params[hmi_response::button_capabilities] =
       *app_manager->button_capabilities();
