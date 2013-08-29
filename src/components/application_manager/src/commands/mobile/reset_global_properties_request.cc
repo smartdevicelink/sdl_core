@@ -112,13 +112,19 @@ void ResetGlobalPropertiesRequest::Run() {
     ++chaining_counter;
   }
 
-  if (vr_help_title || vr_help_items ) {
+  if (vr_help_title || vr_help_items) {
 
     smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::vr_help_title] = (*app->vr_help_title());
-    msg_params[strings::vr_help] = (*app->vr_help());
+    if (vr_help_title) {
+      msg_params[strings::vr_help_title] = (*app->vr_help_title());
+    }
+
+    if (vr_help_items) {
+      msg_params[strings::vr_help] = (*app->vr_help());
+    }
+
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
@@ -130,8 +136,14 @@ void ResetGlobalPropertiesRequest::Run() {
     smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::help_prompt] = (*app->help_promt());
-    msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    if (helpt_promt) {
+      msg_params[strings::help_prompt] = (*app->help_promt());
+    }
+
+    if (timeout_promt) {
+      msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    }
+
     msg_params[strings::app_id] = app->app_id();
 
     // check if only tts request should be sent
