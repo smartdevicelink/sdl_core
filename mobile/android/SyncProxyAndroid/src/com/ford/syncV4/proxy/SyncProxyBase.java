@@ -5,6 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import org.apache.http.HttpResponse;
@@ -170,6 +172,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 								OUTGOING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
 								INTERNAL_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
 								APP_INTERFACE_REGISTERED_LOCK = new Object();
+
+    /**
+     * Delay between proxy disconnect (e.g., transport error) and another proxy
+     * reconnect attempt.
+     */
+    private static final int PROXY_RECONNECT_DELAY = 5000;
 		
 	// Heartbeat members
 	private ProxyHeartBeat _proxyHeartBeat = null;
@@ -248,7 +256,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	
 	// Interface broker
 	private SyncInterfaceBroker _interfaceBroker = null;
-	
+
+    /**
+     * Timer that is used to schedule proxy reconnect tasks.
+     */
+    private Timer _reconnectTimer = null;
+    /**
+     * Currently scheduled proxy reconnect task, if any.
+     */
+    private TimerTask _currentReconnectTimerTask = null;
+    /**
+     * Lock to access the _currentReconnectTimerTask member.
+     */
+    private static final Object RECONNECT_TIMER_TASK_LOCK = new Object();
+
 	// Private Class to Interface with SyncConnection
 	private class SyncInterfaceBroker implements ISyncConnectionListener {
 		
@@ -1184,7 +1205,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					}
 				}
 			}
-			
+
 			// Clean up SYNC Connection
 			synchronized(CONNECTION_REFERENCE_LOCK) {
 				if (_syncConnection != null) {
@@ -1220,7 +1241,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		try{
 			// Clean the proxy
 			cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT);
-		
+
+            clearReconnectTimer();
+
 			// Close IncomingProxyMessageDispatcher thread
 			synchronized(INCOMING_MESSAGE_QUEUE_THREAD_LOCK) {
 				if (_incomingProxyMessageDispatcher != null) {
@@ -1257,7 +1280,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {		
 		try{
 			cleanProxy(disconnectedReason);
-			initializeProxy();	
+			scheduleInitializeProxy();
 			notifyProxyClosed("Sync Proxy Cycled", new SyncException("Sync Proxy Cycled", SyncExceptionCause.SYNC_PROXY_CYCLED));
 		} catch (SyncException e) {
 			switch(e.getSyncExceptionCause()) {
@@ -1277,6 +1300,33 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			notifyProxyClosed("Cycling the proxy failed.", e);
 		}
 	}
+
+    private void scheduleInitializeProxy() {
+        Log.d(TAG, "Scheduling proxy initialization");
+
+        if (getCurrentReconnectTimerTask() != null) {
+            Log.d(TAG, "Current reconnect task is already scheduled, canceling it first");
+            clearCurrentReconnectTimerTask();
+        }
+
+        TimerTask reconnectTask = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    Log.d(TAG, "Reconnect task is running, clearing reference");
+                    setCurrentReconnectTimerTask(null);
+                    initializeProxy();
+                } catch (SyncException e) {
+                    e.printStackTrace();
+                    notifyProxyClosed("Proxy initialization failed", e);
+                }
+            }
+        };
+        setCurrentReconnectTimerTask(reconnectTask);
+
+        Timer timer = getReconnectTimer();
+        timer.schedule(reconnectTask, PROXY_RECONNECT_DELAY);
+    }
 
 	
 	
@@ -3320,5 +3370,54 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	public IJsonRPCMarshaller getJsonRPCMarshaller() {
 		return this._jsonRPCMarshaller;
 	}
-	
+
+    private TimerTask getCurrentReconnectTimerTask() {
+        TimerTask task;
+        synchronized (RECONNECT_TIMER_TASK_LOCK) {
+            task = _currentReconnectTimerTask;
+        }
+        return task;
+    }
+
+    private void setCurrentReconnectTimerTask(
+            TimerTask currentReconnectTimerTask) {
+        synchronized (RECONNECT_TIMER_TASK_LOCK) {
+            _currentReconnectTimerTask = currentReconnectTimerTask;
+        }
+    }
+
+    private boolean clearCurrentReconnectTimerTask() {
+        TimerTask task = getCurrentReconnectTimerTask();
+        if (task != null) {
+            Log.d(TAG, "Clearing reconnect timer task");
+            boolean success = task.cancel();
+            setCurrentReconnectTimerTask(null);
+            if (!success) {
+                Log.i(TAG, "Can't cancel scheduled reconnect task");
+            }
+            return success;
+        }
+
+        return true;
+    }
+
+    private Timer getReconnectTimer() {
+        if (_reconnectTimer == null) {
+            Log.d(TAG, "Reconnect timer is null, creating a new one");
+            _reconnectTimer = new Timer("ReconnectTimer", true);
+        }
+
+        return _reconnectTimer;
+    }
+
+    private void clearReconnectTimer() {
+        if (_reconnectTimer != null) {
+            Log.d(TAG, "Clearing reconnect timer");
+            _reconnectTimer.cancel();
+            _reconnectTimer = null;
+        } else {
+            Log.d(TAG, "Reconnect timer is already null");
+        }
+    }
+
 } // end-class
