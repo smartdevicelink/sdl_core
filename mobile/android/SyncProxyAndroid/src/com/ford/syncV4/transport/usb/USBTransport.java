@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.trace.SyncTrace;
@@ -17,6 +16,7 @@ import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.DebugTool;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -34,7 +34,6 @@ import java.io.OutputStream;
  * the other side will NOT be notified and unblocked from reading data until
  * some data is sent again or the USB is physically disconnected.
  *
- * TODO: use DebugTool logger
  * TODO: use State pattern
  * TODO: use handleTransportError()
  */
@@ -67,6 +66,14 @@ public class USBTransport extends SyncTransport {
      * same as in accessory_filter.xml to work properly.
      */
     private final static String ACCESSORY_MANUFACTURER = "Nexus-Computing GmbH";
+    /**
+     * Prefix string to indicate debug output.
+     */
+    private static final String DEBUG_PREFIX = "DEBUG: ";
+    /**
+     * String to prefix exception output.
+     */
+    private static final String EXCEPTION_STRING = " Exception String: ";
     /**
      * Broadcast receiver that receives different USB-related intents: USB
      * accessory connected, disconnected, and permission granted.
@@ -410,7 +417,7 @@ public class USBTransport extends SyncTransport {
      * @param s string to log
      */
     private void logW(String s) {
-        Log.w(TAG, s);
+        DebugTool.logWarning(s);
     }
 
     /**
@@ -420,7 +427,12 @@ public class USBTransport extends SyncTransport {
      * @param tr throwable to log
      */
     private void logW(String s, Throwable tr) {
-        Log.w(TAG, s, tr);
+        StringBuilder res = new StringBuilder(s);
+        if (tr != null) {
+            res.append(EXCEPTION_STRING);
+            res.append(tr.toString());
+        }
+        logW(res.toString());
     }
 
     /**
@@ -429,7 +441,7 @@ public class USBTransport extends SyncTransport {
      * @param s string to log
      */
     private void logI(String s) {
-        Log.i(TAG, s);
+        DebugTool.logInfo(s);
     }
 
     /**
@@ -438,7 +450,8 @@ public class USBTransport extends SyncTransport {
      * @param s string to log
      */
     private void logD(String s) {
-        Log.d(TAG, s);
+        // DebugTool doesn't support DEBUG level, so we use INFO instead
+        DebugTool.logInfo(DEBUG_PREFIX + s);
     }
 
     /**
@@ -501,13 +514,13 @@ public class USBTransport extends SyncTransport {
          */
         @Override
         public void run() {
-            Log.d(TAG, "USB reader started!");
+            logD("USB reader started!");
 
             if (connect()) {
                 readFromTransport();
             }
 
-            Log.d(TAG, "USB reader finished!");
+            logD("USB reader finished!");
         }
 
         /**
@@ -517,7 +530,7 @@ public class USBTransport extends SyncTransport {
          */
         private boolean connect() {
             if (isInterrupted()) {
-                Log.i(TAG, "Thread is interrupted, not connecting");
+                logI("Thread is interrupted, not connecting");
                 return false;
             }
 
@@ -530,7 +543,7 @@ public class USBTransport extends SyncTransport {
                         final ParcelFileDescriptor parcelFD =
                                 getUsbManager().openAccessory(mAccessory);
                         if (parcelFD == null) {
-                            Log.w(TAG, "Can't open accessory, disconnecting!");
+                            logW("Can't open accessory, disconnecting!");
                             disconnect();
                             return false;
                         }
@@ -539,7 +552,7 @@ public class USBTransport extends SyncTransport {
                         mOutputStream = new FileOutputStream(fd);
                     }
 
-                    Log.i(TAG, "Accessory opened!");
+                    logI("Accessory opened!");
                     synchronized (USBTransport.this) {
                         SyncTrace.logTransportEvent(TAG + ": accessory opened",
                                 SyncTrace.getUSBAccessoryInfo(mAccessory),
@@ -554,7 +567,7 @@ public class USBTransport extends SyncTransport {
                     break;
 
                 default:
-                    Log.w(TAG, "connect() called from state " + state +
+                    logW("connect() called from state " + state +
                             ", will not try to connect");
                     return false;
             }
@@ -577,32 +590,30 @@ public class USBTransport extends SyncTransport {
                     bytesRead = mInputStream.read(buffer);
                     if (bytesRead == -1) {
                         if (isInterrupted()) {
-                            Log.i(TAG,
-                                    "EOF reached, and thread is interrupted");
+                            logI("EOF reached, and thread is interrupted");
                         } else {
-                            Log.i(TAG, "EOF reached, disconnecting!");
+                            logI("EOF reached, disconnecting!");
                             disconnect();
                         }
                         return;
                     }
                 } catch (IOException e) {
                     if (isInterrupted()) {
-                        Log.w(TAG, "Can't read data, and thread is interrupted",
-                                e);
+                        logW("Can't read data, and thread is interrupted", e);
                     } else {
-                        Log.w(TAG, "Can't read data, disconnecting!", e);
+                        logW("Can't read data, disconnecting!", e);
                         disconnect();
                     }
                     return;
                 }
 
-                Log.d(TAG, "Read " + bytesRead + " bytes");
+                logD("Read " + bytesRead + " bytes");
                 SyncTrace.logTransportEvent(TAG + ": read bytes", null,
                         InterfaceActivityDirection.Receive, buffer, bytesRead,
                         SYNC_LIB_TRACE_KEY);
 
                 if (isInterrupted()) {
-                    Log.i(TAG, "Read some data, but thread is interrupted");
+                    logI("Read some data, but thread is interrupted");
                     return;
                 }
 
@@ -612,6 +623,29 @@ public class USBTransport extends SyncTransport {
                     }
                 }
             }
+        }
+
+        // Log functions
+
+        private void logD(String s) {
+            DebugTool.logInfo(DEBUG_PREFIX + s);
+        }
+
+        private void logI(String s) {
+            DebugTool.logInfo(s);
+        }
+
+        private void logW(String s) {
+            DebugTool.logWarning(s);
+        }
+
+        private void logW(String s, Throwable tr) {
+            StringBuilder res = new StringBuilder(s);
+            if (tr != null) {
+                res.append(EXCEPTION_STRING);
+                res.append(tr.toString());
+            }
+            logW(res.toString());
         }
     }
 }

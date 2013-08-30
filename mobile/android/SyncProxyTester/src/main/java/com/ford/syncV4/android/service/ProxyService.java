@@ -231,6 +231,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 
 	public void startProxy() {
+        SyncProxyALM.enableDebugTool();
+
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("ProxyService.startProxy()", true);
 		else Log.i(TAG, "ProxyService.startProxy()");
