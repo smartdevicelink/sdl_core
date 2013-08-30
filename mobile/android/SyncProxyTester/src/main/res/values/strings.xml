@@ -149,5 +149,7 @@
     <string name="getdtcs_dtcMaskDefault">42</string>
     <string name="setdisplaylayout_displayLayout">Display Layout</string>
     <string name="setdisplaylayout_displayLayoutDefault">ONSCREEN_PRESETS</string>
+    <string name="title_activity_mobile_nav_preview">MobileNavPreviewActivity</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

@@ -1,10 +1,9 @@
-package com.ford.syncV4.android.tests.activity;
+package com.ford.syncV4.android.activity;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.widget.Button;
 
-import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.R;
 
 /**

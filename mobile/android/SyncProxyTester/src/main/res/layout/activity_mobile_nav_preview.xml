@@ -1,0 +1,44 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context=".MobileNavPreviewActivity">
+
+
+    <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:id="@+id/mobileNavCheckBox"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:checked="false"
+            android:hint="Turn On Mobile Session"/>
+
+    <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Turn On Video Streaming"
+            android:id="@+id/videoStreamingCheckBox"
+            android:checked="false"
+            android:layout_below="@+id/mobileNavCheckBox"
+            android:layout_alignParentLeft="true"/>
+
+    <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentLeft="true"
+            android:id="@+id/relativeLayout"
+            android:layout_below="@+id/videoStreamingCheckBox">
+
+        <SurfaceView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/videoSurfaceView"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"/>
+
+    </RelativeLayout>
+
+
+</RelativeLayout>
