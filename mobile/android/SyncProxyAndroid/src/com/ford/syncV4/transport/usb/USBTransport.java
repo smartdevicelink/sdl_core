@@ -486,21 +486,26 @@ public class USBTransport extends SyncTransport {
         private final String TAG = USBTransportReader.class.getSimpleName();
 
         /**
+         * Checks if the thread has been interrupted.
+         *
+         * @return true if the thread has been interrupted
+         */
+        private boolean isInterrupted() {
+            return Thread.interrupted();
+        }
+
+        /**
          * Entry function that is called when the task is started. It attempts
          * to connect to the accessory, then starts a read loop until
          * interrupted.
-         *
-         * TODO: add isInterrupted checks
          */
         @Override
         public void run() {
             Log.d(TAG, "USB reader started!");
 
-            if (!connect()) {
-                return;
+            if (connect()) {
+                readFromTransport();
             }
-
-            readFromTransport();
 
             Log.d(TAG, "USB reader finished!");
         }
@@ -511,6 +516,11 @@ public class USBTransport extends SyncTransport {
          * @return true if connected successfully
          */
         private boolean connect() {
+            if (isInterrupted()) {
+                Log.i(TAG, "Thread is interrupted, not connecting");
+                return false;
+            }
+
             final State state = getState();
             switch (state) {
                 case LISTENING:
@@ -562,17 +572,27 @@ public class USBTransport extends SyncTransport {
             int bytesRead;
 
             // read loop
-            while (true) {
+            while (!isInterrupted()) {
                 try {
                     bytesRead = mInputStream.read(buffer);
                     if (bytesRead == -1) {
-                        Log.i(TAG, "EOF reached, disconnecting!");
-                        disconnect();
+                        if (isInterrupted()) {
+                            Log.i(TAG,
+                                    "EOF reached, and thread is interrupted");
+                        } else {
+                            Log.i(TAG, "EOF reached, disconnecting!");
+                            disconnect();
+                        }
                         return;
                     }
                 } catch (IOException e) {
-                    Log.w(TAG, "Can't read data, disconnecting!", e);
-                    disconnect();
+                    if (isInterrupted()) {
+                        Log.w(TAG, "Can't read data, and thread is interrupted",
+                                e);
+                    } else {
+                        Log.w(TAG, "Can't read data, disconnecting!", e);
+                        disconnect();
+                    }
                     return;
                 }
 
@@ -580,6 +600,11 @@ public class USBTransport extends SyncTransport {
                 SyncTrace.logTransportEvent(TAG + ": read bytes", null,
                         InterfaceActivityDirection.Receive, buffer, bytesRead,
                         SYNC_LIB_TRACE_KEY);
+
+                if (isInterrupted()) {
+                    Log.i(TAG, "Read some data, but thread is interrupted");
+                    return;
+                }
 
                 if (bytesRead > 0) {
                     synchronized (USBTransport.this) {
