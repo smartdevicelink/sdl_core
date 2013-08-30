@@ -282,7 +282,11 @@ public class USBTransport extends SyncTransport {
         }
 
         logD("Unregistering receiver");
-        getContext().unregisterReceiver(mUSBReceiver);
+        try {
+            getContext().unregisterReceiver(mUSBReceiver);
+        } catch (IllegalArgumentException e) {
+            logW("Receiver was already unregistered", e);
+        }
 
         // TODO: use proper message
         handleTransportDisconnected("");
