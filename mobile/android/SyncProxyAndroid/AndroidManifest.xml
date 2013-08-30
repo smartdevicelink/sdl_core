@@ -7,9 +7,5 @@
     <!-- Required to use the USB Accessory mode -->
     <uses-feature android:name="android.hardware.usb.accessory"/>
 
-    <application android:debuggable="true">
-
-        <activity android:name=".transport.usb.USBAccessoryAttachmentActivity"/>
-
-    </application>
+    <application android:debuggable="true"/>
 </manifest>
