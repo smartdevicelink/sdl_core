@@ -13,12 +13,12 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:checked="false"
-            android:hint="Turn On Mobile Session"/>
+            android:hint="@string/mobile_navi_hint"/>
 
     <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Turn On Video Streaming"
+            android:hint="@string/video_streaming_hint"
             android:id="@+id/videoStreamingCheckBox"
             android:checked="false"
             android:onClick="onVideoStreamingCheckBoxAction"

@@ -2,6 +2,7 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -51,5 +52,23 @@ public class MobileNavPreviewActivityTest extends ActivityInstrumentationTestCas
     public void testMobileNavSessionCheckBoxOnClickListenerSet() throws Exception {
         Button button = (Button) sut.findViewById(R.id.mobileNavCheckBox);
         assertTrue("On click listener should be set", button.performClick());
+    }
+
+    public void testSutImplementsSurfaceHolderCallback() throws Exception {
+        try {
+            SurfaceHolder.Callback callback = sut;
+        }catch (ClassCastException e){
+            assertNull("Should not get here", e);
+        }
+    }
+
+    public void testVideoCheckBoxInitialStateDisabled() throws Exception {
+        assertEquals("video checkbox should be DISABLED", VideoStreamingCheckBoxState.DISABLED, sut.checkBoxState.getState());
+    }
+
+    @UiThreadTest
+    public void testOnSurfaceCreatedVideoCheckBoxStateIsOff() throws Exception {
+        sut.surfaceCreated(null);
+        assertEquals("video checkbox should be OFF", VideoStreamingCheckBoxState.OFF, sut.checkBoxState.getState());
     }
 }

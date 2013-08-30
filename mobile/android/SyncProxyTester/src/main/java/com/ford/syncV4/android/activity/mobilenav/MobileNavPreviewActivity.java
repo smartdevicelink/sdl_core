@@ -3,18 +3,27 @@ package com.ford.syncV4.android.activity.mobilenav;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.SurfaceHolder;
 import android.view.View;
+import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
 
-public class MobileNavPreviewActivity extends Activity {
+public class MobileNavPreviewActivity extends Activity implements SurfaceHolder.Callback {
+
+    VideoCheckBoxState checkBoxState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mobile_nav_preview);
+        initiateVideoCheckBox();
     }
 
+    private void initiateVideoCheckBox() {
+        checkBoxState = new VideoCheckBoxState((CheckBox) findViewById(R.id.videoStreamingCheckBox));
+        checkBoxState.setStateDisabled();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -28,5 +37,20 @@ public class MobileNavPreviewActivity extends Activity {
     }
 
     public void onMobileNaviCheckBoxAction(View v){
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        checkBoxState.setStateOff();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+
     }
 }
