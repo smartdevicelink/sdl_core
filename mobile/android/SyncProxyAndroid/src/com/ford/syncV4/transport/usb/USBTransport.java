@@ -30,11 +30,9 @@ import java.io.OutputStream;
  *
  * A note about USB Accessory protocol. If the device is already in the USB
  * accessory mode, any side (computer or Android) can open connection even if
- * the other side is not connected. The transport thus can't notify of
- * successful connection at that point yet. To workaround that, the transport
- * sends an initial request (one byte currently) and waits for a reply (one
- * byte as well). Then it notifies of a successful connection. It's not part of
- * the official SDL protocol specification at the moment.
+ * the other side is not connected. Conversely, if one side simply disconnects,
+ * the other side will NOT be notified and unblocked from reading data until
+ * some data is sent again or the USB is physically disconnected.
  *
  * TODO: use DebugTool logger
  * TODO: use State pattern
@@ -382,7 +380,6 @@ public class USBTransport extends SyncTransport {
             case LISTENING:
                 synchronized (this) {
                     logI("Opening accessory " + accessory);
-                    setState(State.CONNECTING);
                     mAccessory = accessory;
 
                     mReaderThread = new Thread(new USBTransportReader());
@@ -465,13 +462,7 @@ public class USBTransport extends SyncTransport {
         LISTENING,
 
         /**
-         * USB accessory attached; permission granted; initial request sent;
-         * waiting for reply to make sure the USB accessory is live there.
-         */
-        CONNECTING,
-
-        /**
-         * Reply received; data IO in progress.
+         * USB accessory attached; permission granted; data IO in progress.
          */
         CONNECTED
     }
@@ -485,7 +476,6 @@ public class USBTransport extends SyncTransport {
      * synchronized (USBTransport.this) { … }
      */
     private class USBTransportReader implements Runnable {
-        public static final char INITIAL_BYTE = '?';
         /**
          * String tag for logging inside the task.
          */
@@ -493,9 +483,8 @@ public class USBTransport extends SyncTransport {
 
         /**
          * Entry function that is called when the task is started. It attempts
-         * to connect to the accessory, sends an initial request (to make sure
-         * there is someone on the other side), waits for a reply, and starts
-         * a read loop until interrupted.
+         * to connect to the accessory, then starts a read loop until
+         * interrupted.
          *
          * TODO: add isInterrupted checks
          */
@@ -508,68 +497,52 @@ public class USBTransport extends SyncTransport {
             }
 
             readFromTransport();
+
+            Log.d(TAG, "USB reader finished!");
         }
 
         /**
-         * Attemps to open connection to USB accessory, and perform a handshake
-         * (described in the comment to the USBTransport class).
+         * Attemps to open connection to USB accessory.
          *
          * @return true if connected successfully
          */
         private boolean connect() {
-            FileDescriptor fd;
-            synchronized (USBTransport.this) {
-                final ParcelFileDescriptor parcelFD =
-                        getUsbManager().openAccessory(mAccessory);
-                if (parcelFD == null) {
-                    Log.w(TAG, "Can't open accessory, disconnecting!");
-                    disconnect();
+            final State state = getState();
+            switch (state) {
+                case LISTENING:
+
+                    FileDescriptor fd;
+                    synchronized (USBTransport.this) {
+                        final ParcelFileDescriptor parcelFD =
+                                getUsbManager().openAccessory(mAccessory);
+                        if (parcelFD == null) {
+                            Log.w(TAG, "Can't open accessory, disconnecting!");
+                            disconnect();
+                            return false;
+                        }
+                        fd = parcelFD.getFileDescriptor();
+                        mInputStream = new FileInputStream(fd);
+                        mOutputStream = new FileOutputStream(fd);
+                    }
+
+                    Log.i(TAG, "Accessory opened!");
+                    synchronized (USBTransport.this) {
+                        SyncTrace.logTransportEvent(TAG + ": accessory opened",
+                                SyncTrace.getUSBAccessoryInfo(mAccessory),
+                                InterfaceActivityDirection.None, null, 0,
+                                SYNC_LIB_TRACE_KEY);
+                    }
+
+                    synchronized (USBTransport.this) {
+                        setState(State.CONNECTED);
+                        handleTransportConnected();
+                    }
+                    break;
+
+                default:
+                    Log.w(TAG, "connect() called from state " + state +
+                            ", will not try to connect");
                     return false;
-                }
-                fd = parcelFD.getFileDescriptor();
-                mInputStream = new FileInputStream(fd);
-                mOutputStream = new FileOutputStream(fd);
-            }
-
-            Log.i(TAG, "Accessory opened!");
-            synchronized (USBTransport.this) {
-                SyncTrace.logTransportEvent(TAG + ": accessory opened",
-                        SyncTrace.getUSBAccessoryInfo(mAccessory),
-                        InterfaceActivityDirection.None, null, 0,
-                        SYNC_LIB_TRACE_KEY);
-            }
-
-            // sending initial request "Is there anybody out there?"
-            try {
-                mOutputStream.write(new byte[]{ INITIAL_BYTE });
-                Log.d(TAG, "Initial request sent, waiting for a reply");
-            } catch (IOException e) {
-                Log.w(TAG, "Can't send initial request, disconnecting!", e);
-                disconnect();
-                return false;
-            }
-
-            // waiting for a one-byte reply
-            byte reply;
-            try {
-                int intReply = mInputStream.read();
-                if (intReply == -1) {
-                    Log.w(TAG, "Can't read initial response, EOF reached" +
-                            ", disconnecting!");
-                    disconnect();
-                    return false;
-                }
-                reply = (byte) intReply;
-            } catch (IOException e) {
-                Log.w(TAG, "Can't read initial response, disconnecting!", e);
-                disconnect();
-                return false;
-            }
-            Log.d(TAG, "Received reply: " + reply);
-
-            synchronized (USBTransport.this) {
-                setState(State.CONNECTED);
-                handleTransportConnected();
             }
 
             return true;
