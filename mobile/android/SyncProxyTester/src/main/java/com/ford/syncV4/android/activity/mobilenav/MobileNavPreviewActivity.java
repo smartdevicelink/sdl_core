@@ -1,8 +1,9 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
 import android.view.Menu;
+import android.view.View;
 
 import com.ford.syncV4.android.R;
 
@@ -21,5 +22,11 @@ public class MobileNavPreviewActivity extends Activity {
         getMenuInflater().inflate(R.menu.mobile_nav_preview, menu);
         return true;
     }
-    
+
+
+    public void onVideoStreamingCheckBoxAction(View v){
+    }
+
+    public void onMobileNaviCheckBoxAction(View v){
+    }
 }

@@ -8,7 +8,7 @@
     <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
+            android:onClick="onMobileNaviCheckBoxAction"
             android:id="@+id/mobileNavCheckBox"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
@@ -21,6 +21,7 @@
             android:hint="Turn On Video Streaming"
             android:id="@+id/videoStreamingCheckBox"
             android:checked="false"
+            android:onClick="onVideoStreamingCheckBoxAction"
             android:layout_below="@+id/mobileNavCheckBox"
             android:layout_alignParentLeft="true"/>
 

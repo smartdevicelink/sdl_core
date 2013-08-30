@@ -1,7 +1,9 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.UiThreadTest;
 import android.view.SurfaceView;
+import android.widget.Button;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
@@ -37,5 +39,17 @@ public class MobileNavPreviewActivityTest extends ActivityInstrumentationTestCas
     public void testMobileNavSessionCheckBoxInflated() throws Exception {
         CheckBox view = (CheckBox) sut.findViewById(R.id.mobileNavCheckBox);
         assertNotNull("mobileNavCheckBox should be inflated", view);
+    }
+
+    @UiThreadTest
+    public void testVideoSteamingCheckBoxOnClickListenerSet() throws Exception {
+        Button button = (Button) sut.findViewById(R.id.videoStreamingCheckBox);
+        assertTrue("On click listener should be set", button.performClick());
+    }
+
+    @UiThreadTest
+    public void testMobileNavSessionCheckBoxOnClickListenerSet() throws Exception {
+        Button button = (Button) sut.findViewById(R.id.mobileNavCheckBox);
+        assertTrue("On click listener should be set", button.performClick());
     }
 }
