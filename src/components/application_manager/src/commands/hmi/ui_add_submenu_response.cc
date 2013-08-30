@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 UIAddSubmenuResponse::UIAddSubmenuResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UIAddSubmenuResponse::~UIAddSubmenuResponse() {
@@ -73,10 +73,10 @@ void UIAddSubmenuResponse::Run() {
 
   msg_chain->set_ui_response_result(code);
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  const int connection_key = msg_chain->connection_key();
+
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(connection_key);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

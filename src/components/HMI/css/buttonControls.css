@@ -5,23 +5,11 @@
  * @filesource	css/buttonControls.css
  * @version		2.0
  */
-
 #buttonControls.buttonControls {
 	width: 270px;
 	height: 200px;
 	top: 0px;
 	left: 790px;
-}
-
-#protocolVersion.protocolVersion {
-	width: 302px;
-	height: 20px;
-	top: 450px;
-	left: 810px;
-}
-
-#protocolVersion .protocolVersionLabel{
-	left: 20px;
 }
 
 #driverDistractionControl.driverDistractionControl {
@@ -31,11 +19,11 @@
 	left: 810px;
 }
 
-#driverDistractionControl .driverDistractionControlLabel{
+#driverDistractionControl .driverDistractionControlLabel {
 	left: 20px;
 }
 
-#infoTable.infoTable{
+#infoTable.infoTable {
 	width: 375px;
 	height: 96px;
 	top: 308px;
@@ -45,14 +33,16 @@
 	border: 1px solid gray;
 	overflow: hidden;
 }
-#infoTable .sdlGPLabel{
+
+#infoTable .sdlGPLabel {
 	width: 157px;
 	border-right: 1px solid #14100F;
 	height: 96px;
 	position: relative;
 	float: left;
 }
-#infoTable .sdlGPData{
+
+#infoTable .sdlGPData {
 	position: relative;
 	display: block;
 	overflow: hidden;
@@ -60,103 +50,122 @@
 	width: 203px;
 	height: 18px;
 }
-#buttonControls .ContainerControlls{
+
+#buttonControls .ContainerControlls {
 	left: 34px;
-	background: url(../images/home/controlButtons/backGroundControllButtons.png) no-repeat;
+	background:
+		url(../images/home/controlButtons/backGroundControllButtons.png)
+		no-repeat;
 	width: 200px;
 	height: 200px;
 }
-#buttonControls .UpBtn{
+
+#buttonControls .UpBtn {
 	background: url(../images/home/controlButtons/UpButton.png) no-repeat;
 	background-position: -32px 0;
 	width: 137px;
 	height: 64px;
 	left: 32px;
-	-webkit-transition: 0.2s ;
+	-webkit-transition: 0.2s;
 }
-#TUNEUP.pressed{
-	background: url(../images/home/controlButtons/UpButton_pressed.png) !important;
+
+#TUNEUP.pressed {
+	background: url(../images/home/controlButtons/UpButton_pressed.png)
+		!important;
 	background-position: -32px 0 !important;
 	width: 137px !important;
 	height: 69px !important;
 	left: 32px !important;
 }
-#buttonControls .DownBtn{
+
+#buttonControls .DownBtn {
 	background: url(../images/home/controlButtons/DownButton.png) no-repeat;
 	background-position: -32px -132px;
 	width: 137px;
 	height: 65px;
 	top: 132px;
 	left: 32px;
-	-webkit-transition: 0.2s ;
+	-webkit-transition: 0.2s;
 }
-#TUNEDOWN.pressed{
-	background: url(../images/home/controlButtons/DownButton_pressed.png) no-repeat;
+
+#TUNEDOWN.pressed {
+	background: url(../images/home/controlButtons/DownButton_pressed.png)
+		no-repeat;
 	background-position: -32px -132px !important;
 	width: 137px !important;
 	height: 65px !important;
 	top: 132px !important;
 	left: 32px !important;
 }
-#buttonControls .LeftBtn{
+
+#buttonControls .LeftBtn {
 	background: url(../images/home/controlButtons/LeftButton.png) no-repeat;
 	width: 63px;
 	height: 138px;
 	background-position: -3px -31px;
 	left: 3px;
 	top: 31px;
-	-webkit-transition: 0.2s ;
+	-webkit-transition: 0.2s;
 }
-#SEEKLEFT.pressed{
-	background: url(../images/home/controlButtons/LeftButton_pressed.png) no-repeat;
+
+#SEEKLEFT.pressed {
+	background: url(../images/home/controlButtons/LeftButton_pressed.png)
+		no-repeat;
 	width: 63px !important;
 	height: 138px !important;
 	background-position: -3px -31px !important;
 	left: 3px !important;
 	top: 31px !important;
 }
-#buttonControls .RightBtn{
+
+#buttonControls .RightBtn {
 	background: url(../images/home/controlButtons/RightButton.png) no-repeat;
 	background-position: -131px -31px;
 	width: 68px;
 	height: 139px;
 	left: 131px;
 	top: 31px;
-	-webkit-transition: 0.2s ;
+	-webkit-transition: 0.2s;
 }
-#SEEKRIGHT.pressed{
-	background: url(../images/home/controlButtons/RightButton_pressed.png) no-repeat;
+
+#SEEKRIGHT.pressed {
+	background: url(../images/home/controlButtons/RightButton_pressed.png)
+		no-repeat;
 	background-position: -131px -31px !important;
 	width: 68px !important;
 	height: 139px !important;
 	left: 131px !important;
 	top: 31px !important;
 }
-#buttonControls .OkBtn{
+
+#buttonControls .OkBtn {
 	background: url(../images/home/controlButtons/OkButton.png) no-repeat;
 	background-position: -55px -55px;
 	width: 89px;
 	height: 90px;
 	left: 55px;
 	top: 55px;
-	-webkit-transition: 0.2s ;
+	-webkit-transition: 0.2s;
 }
-#OK.pressed{
-	background: url(../images/home/controlButtons/OkButton_pressed.png) no-repeat;
+
+#OK.pressed {
+	background: url(../images/home/controlButtons/OkButton_pressed.png)
+		no-repeat;
 	background-position: -55px -55px !important;
 	width: 89px !important;
 	height: 90px !important;
 	left: 55px !important;
 	top: 55px !important;
 }
-#app_controlButtons .sendData{
+
+#app_controlButtons .sendData {
 	top: 252px !important;
 	left: 1049px !important;
 	width: 80px !important;
 	font-size: 16px !important;
-	
 }
-#app_controlButtons .btnNotPressed{
+
+#app_controlButtons .btnNotPressed {
 	width: 40px;
 	height: 40px;
 	left: 0px;
@@ -175,9 +184,9 @@
 	margin-left: 10px;
 	margin-top: 10px;
 }
-}
 
-#app_controlButtons .languageSelect{
+}
+#app_controlButtons .languageSelect {
 	position: absolute;
 	width: 150px;
 	height: 30px;
@@ -185,62 +194,74 @@
 	background: #393939;
 }
 
-#app_controlButtons .languageSelect option{
+#app_controlButtons .languageSelect option {
 	background: #393939;
 }
-#UILanguages.languageSelect{
+
+#UILanguages.languageSelect {
 	top: 110px;
 	left: 1028px;
 }
-#TTSVRLanguages.languageSelect{
+
+#TTSVRLanguages.languageSelect {
 	top: 170px;
 	left: 1028px;
 }
 
-#app_controlButtons .UILanguagesLabel{
+#app_controlButtons .UILanguagesLabel {
 	top: 91px;
 	left: 1028px;
 	width: 150px;
 }
-#app_controlButtons .TTSVRLanguagesLabel{
+
+#app_controlButtons .TTSVRLanguagesLabel {
 	top: 151px;
 	left: 1028px;
 	width: 160px;
 }
-#app_controlButtons .appUILanguagesLabel{
+
+#app_controlButtons .appUILanguagesLabel {
 	top: 91px;
 	left: 1195px;
 	width: 250px;
 }
-#app_controlButtons .appTTSVRLanguagesLabel{
+
+#app_controlButtons .appTTSVRLanguagesLabel {
 	top: 151px;
 	left: 1195px;
 	width: 250px;
-}#app_controlButtons .appUILang{
+}
+
+#app_controlButtons .appUILang {
 	top: 117px;
 	left: 1195px;
 	width: 150px;
 }
-#app_controlButtons .appTTSVRLang{
+
+#app_controlButtons .appTTSVRLang {
 	top: 176px;
 	left: 1195px;
 	width: 150px;
 }
-#app_controlButtons .sendDataCheckBox{
+
+#app_controlButtons .sendDataCheckBox {
 	left: 1158px;
 	position: absolute;
 	top: 275px;
 }
-#app_controlButtons .sendDataLabel{
+
+#app_controlButtons .sendDataLabel {
 	top: 275px;
 	left: 1180px;
 	width: 160px;
 }
-#buttonControls .btnNotPressed.pressed{
+
+#buttonControls .btnNotPressed.pressed {
 	box-shadow: inset 5px 5px 10px black, inset -3px -3px 10px #383737;
 	line-height: 45px;
 }
-#app_controlButtons .languageSelect{
+
+#app_controlButtons .languageSelect {
 	position: absolute;
 	width: 150px;
 	height: 30px;
@@ -248,24 +269,27 @@
 	background: #393939;
 }
 
-#app_controlButtons .languageSelect option{
+#app_controlButtons .languageSelect option {
 	background: #393939;
 }
-#UILanguages.languageSelect{
+
+#UILanguages.languageSelect {
 	top: 110px;
 	left: 1028px;
 }
-#TTSVRLanguages.languageSelect{
+
+#TTSVRLanguages.languageSelect {
 	top: 170px;
 	left: 1028px;
 }
 
-#app_controlButtons .UILanguagesLabel{
+#app_controlButtons .UILanguagesLabel {
 	top: 91px;
 	left: 1028px;
 	width: 150px;
 }
-#app_controlButtons .TTSVRLanguagesLabel{
+
+#app_controlButtons .TTSVRLanguagesLabel {
 	top: 151px;
 	left: 1028px;
 	width: 160px;

@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -62,50 +61,57 @@ SDL.List = Em.ContainerView.extend( {
      * }.property('items.@each.type'),
      */
     listCount: function() {
+
         // console.log(this.get('this.list.childViews.length'));
-        return this.get( 'this.list.childViews.length' );
-    }.property( 'this.list.childViews.length' ),
+        return this.get('this.list.childViews.length');
+    }.property('this.list.childViews.length'),
 
     /** Pages count */
     pageCount: function() {
-        return Math.ceil( this.get( 'listCount' ) / this.get( 'columnsNumber' ) / this.get( 'itemsOnPage' ) );
-    }.property( 'listCount', 'itemsOnPage' ),
+
+        return Math.ceil(this.get('listCount') / this.get('columnsNumber')
+            / this.get('itemsOnPage'));
+    }.property('listCount', 'itemsOnPage'),
 
     listHeight: function() {
+
         return this.itemsOnPage * this.itemheight;
-    }.property( 'itemsOnPage' ),
+    }.property('itemsOnPage'),
 
     /** Action of element "sb-top" which show previous list page */
     sbUp: function() {
-        if( this.get( 'currentPage' ) > 0 ){
-            this.set( 'currentPage', this.get( 'currentPage' ) - 1 );
+
+        if (this.get('currentPage') > 0) {
+            this.set('currentPage', this.get('currentPage') - 1);
         }
     },
 
     /** Action of element "sb-bottom" which show previous list page */
     sbDown: function() {
-        if( this.get( 'currentPage' ) < this.get( 'pageCount' ) - 1 ){
-            this.set( 'currentPage', this.get( 'currentPage' ) + 1 );
+
+        if (this.get('currentPage') < this.get('pageCount') - 1) {
+            this.set('currentPage', this.get('currentPage') + 1);
         }
     },
 
     /** Scroll content according to current page */
     onCurrentPageChange: function() {
-        this.set( 'listScrollingAttributes', 'margin-top: ' + ( this.get( 'currentPage' ) * this.itemsOnPage * ( -50 ) ) + 'px' );
-    }.observes( 'currentPage' ),
+
+        this.set('listScrollingAttributes', 'margin-top: '
+            + (this.get('currentPage') * this.itemsOnPage * (-50)) + 'px');
+    }.observes('currentPage'),
 
     /** Method for delete certain item from list */
-    deleteItem: function( id ) {
-        this.items.splice( id, 1 );
+    deleteItem: function(id) {
+
+        this.items.splice(id, 1);
         this.list.refresh();
     },
 
     /** List components */
-    childViews:
-        [
-            'list',
-            'scrollbar'
-        ],
+    childViews: [
+        'list', 'scrollbar'
+    ],
 
     /** List view */
     list: Em.ContainerView.extend( {
@@ -114,19 +120,20 @@ SDL.List = Em.ContainerView.extend( {
 
         listStyleBinding: 'parentView.listScrollingAttributes',
 
-        attributeBindings:
-            [
-                'listStyle:style'
-            ],
+        attributeBindings: [
+            'listStyle:style'
+        ],
 
         refresh: function() {
+
             this.rerender();
-        }.observes( '_parentView.items.@each.type' ),
+        }.observes('_parentView.items.@each.type'),
 
         afterRender: function() {
+
             var items = this._parentView.items, element, i, key, binding;
 
-            for( i = 0; i < items.length; i++ ){
+            for (i = 0; i < items.length; i++) {
 
                 element = items[i].type.create( {
                     // element id
@@ -135,34 +142,36 @@ SDL.List = Em.ContainerView.extend( {
                     // list item css class
                     classNames: 'list-item',
 
-                    classNameBindings:
-                        [
-                            'this.voiceOver'
-                        ],
+                    classNameBindings: [
+                        'this.voiceOver'
+                    ],
 
                     // Dynamic property set
                     init: function() {
-                        for( key in items[i].params ){
-                            if( key.match( 'Binding' ) != null ){
-                                binding = Ember.Binding.from( items[i].params[key] ).to( key.replace( 'Binding', '' ) );
-                                binding.connect( this );
+
+                        for (key in items[i].params) {
+                            if (key.match('Binding') != null) {
+                                binding = Ember.Binding
+                                    .from(items[i].params[key]).to(key
+                                        .replace('Binding', ''));
+                                binding.connect(this);
                                 // Set one way binding
                                 binding.oneWay();
-                            }else{
-                                this.set( key, items[i].params[key] );
+                            } else {
+                                this.set(key, items[i].params[key]);
                             }
                         }
                         this._super();
                         // synchronize bindings
                         Ember.run.sync();
                     }
-                } )
+                })
 
                 // Push element to list
-                this.get( 'childViews' ).pushObject( element );
+                this.get('childViews').pushObject(element);
             }
         }
-    } ),
+    }),
 
     /** Scrollbar view */
     scrollbar: SDL.ScrollBar.extend( {
@@ -170,5 +179,5 @@ SDL.List = Em.ContainerView.extend( {
         pageCountBinding: 'parentView.pageCount',
         listHeightBinding: 'parentView.listHeight',
         scrollBarIsDisabledBinding: 'parentView.disableScrollbar'
-    } )
-} );
+    })
+});

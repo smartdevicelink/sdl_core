@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 UISetMediaClockTimerResponse::UISetMediaClockTimerResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 UISetMediaClockTimerResponse::~UISetMediaClockTimerResponse() {
@@ -71,9 +71,8 @@ void UISetMediaClockTimerResponse::Run() {
   msg_chain->set_ui_response_result(code);
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  Application* app = ApplicationManagerImpl::instance()->
+                     application(app_id);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =

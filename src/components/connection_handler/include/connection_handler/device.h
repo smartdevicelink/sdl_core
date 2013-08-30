@@ -51,51 +51,59 @@ namespace connection_handler {
 /**
  * \brief Type for DeviceHandle
  */
-typedef int DeviceHandle;
+typedef unsigned int DeviceHandle;
+typedef std::vector<int > AppList;
 
 /**
  * \class Device
  * \brief Connection class
  */
 class Device {
- public:
-  /**
-   * \brief Class constructor
-   */
-  Device(DeviceHandle device_handle, std::string user_friendly_name);
+  public:
+    /**
+     * \brief Class constructor
+     */
+    Device(DeviceHandle device_handle,
+           const std::string& user_friendly_name,
+           const std::string& mac_address = "");
 
-  /**
-   * \brief Destructor
-   */
-  ~Device();
+    /**
+     * \brief Destructor
+     */
+    ~Device();
 
-  /**
-   * \brief Returns device handle
-   * \return DeviceHandle
-   */
-  DeviceHandle device_handle() const;
+    /**
+     * \brief Returns device handle
+     * \return DeviceHandle
+     */
+    DeviceHandle device_handle() const;
 
-  /**
-   * \brief Returns user frendly device name
-   * \return UserFriendlyName
-   */
-  std::string user_friendly_name() const;
+    /**
+     * \brief Returns user frendly device name
+     * \return UserFriendlyName
+     */
+    std::string user_friendly_name() const;
 
- private:
-  /**
-   * \brief Uniq device handle.
-   */
-  DeviceHandle device_handle_;
+  private:
+    /**
+     * \brief Uniq device handle.
+     */
+    DeviceHandle device_handle_;
 
-  /**
-   * \brief User-friendly device name.
-   */
-  std::string user_friendly_name_;
+    /**
+     * \brief User-friendly device name.
+     */
+    std::string user_friendly_name_;
 
-  /**
-   * \brief For logging.
-   */
-  static log4cxx::LoggerPtr logger_;
+    /**
+     * \brief Mac address of device if available
+     */
+    std::string mac_address_;
+
+    /**
+     * \brief For logging.
+     */
+    static log4cxx::LoggerPtr logger_;
 };
 
 /**

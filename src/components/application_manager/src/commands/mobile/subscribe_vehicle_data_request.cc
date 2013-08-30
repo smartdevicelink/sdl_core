@@ -54,9 +54,8 @@ SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {
 void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->application(
-          (*message_)[str::params][str::connection_key]));
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[str::params][str::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -93,12 +92,15 @@ void SubscribeVehicleDataRequest::Run() {
     }
   }
 
-  if (subscribed_items == items_to_subscribe) {
-    SendResponse(false, mobile_apis::Result::SUCCESS,
-                 "Subscribed on all VehicleData", &response_params);
+  if (0 == items_to_subscribe) {
+    SendResponse(false, mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE,
+                 "Provided VehicleData is empty", &response_params);
+  } else if (subscribed_items == items_to_subscribe) {
+    SendResponse(true, mobile_apis::Result::SUCCESS,
+                 "Subscribed on provided VehicleData", &response_params);
   } else if (0 == subscribed_items) {
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "Already subscribed on all VehicleData", &response_params);
+    SendResponse(false, mobile_apis::Result::IGNORED,
+                "Already subscribed on provided VehicleData", &response_params);
   } else if (subscribed_items < items_to_subscribe) {
     SendResponse(false, mobile_apis::Result::WARNINGS,
                  "Already subscribed on some VehicleData", &response_params);

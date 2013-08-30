@@ -75,12 +75,13 @@ class CommandImpl : public Command {
      **/
     virtual void Run();
 
-  protected:
-    MessageSharedPtr message_;
-
+    // members
     static const int hmi_protocol_type_;
     static const int mobile_protocol_type_;
     static const int protocol_version_;
+
+  protected:
+    MessageSharedPtr message_;
 };
 
 }  // namespace commands

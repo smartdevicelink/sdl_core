@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 SetMediaClockRequest::SetMediaClockRequest(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 SetMediaClockRequest::~SetMediaClockRequest() {
@@ -52,9 +52,9 @@ SetMediaClockRequest::~SetMediaClockRequest() {
 void SetMediaClockRequest::Run() {
   LOG4CXX_INFO(logger_, "SetMediaClockRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::app_id]));
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+      .asUInt();
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -62,14 +62,39 @@ void SetMediaClockRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  // copy entirely msg
-  msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::app_id] = app->app_id();
+  if (!app->is_media_application()) {
+    LOG4CXX_ERROR(logger_, "Application is not media application");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
+  }
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer,
-                   msg_params, true);
+  if (isDataValid()) {
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    // copy entirely msg
+    msg_params = (*message_)[strings::msg_params];
+    msg_params[strings::app_id] = app->app_id();
+
+    CreateHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer, msg_params,
+                     true);
+  } else {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+  }
+
+}
+
+bool SetMediaClockRequest::isDataValid() {
+  if (!(*message_)[strings::msg_params].keyExists(strings::start_time)
+      && ((*message_)[strings::msg_params][strings::update_mode]
+          == mobile_apis::UpdateMode::COUNTUP
+          || (*message_)[strings::msg_params][strings::update_mode]
+              == mobile_apis::UpdateMode::COUNTDOWN)) {
+    LOG4CXX_INFO(logger_, "Data is invalid");
+    return false;
+  } else {
+    LOG4CXX_INFO(logger_, "Data is valid");
+    return true;
+  }
 }
 
 }  // namespace commands

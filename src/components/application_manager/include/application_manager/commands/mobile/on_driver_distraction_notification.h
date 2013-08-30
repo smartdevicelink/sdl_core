@@ -41,6 +41,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace mobile {
+
 /**
  * @brief OnDriverDistractionNotification class
  **/
@@ -66,6 +68,8 @@ class OnDriverDistractionNotification : public CommandNotificationImpl {
  private:
   DISALLOW_COPY_AND_ASSIGN(OnDriverDistractionNotification);
 };
+
+}  // namespace mobile
 
 }  // namespace commands
 }  // namespace application_manager

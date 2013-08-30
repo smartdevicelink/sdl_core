@@ -76,10 +76,11 @@ namespace utils  {
 
     std::vector<std::string> list;
     list = file_system::ListFiles("./Test directory");
-
+    
     ASSERT_FALSE(list.empty());
-    ASSERT_EQ("test file 2", list[0]);
-    ASSERT_EQ("test file", list[1]);
+    std::sort(list.begin(), list.end());
+    ASSERT_EQ("test file", list[0]);
+    ASSERT_EQ("test file 2", list[1]);
 
     // Delete file
     ASSERT_TRUE(file_system::FileExists("./Test directory/test file 2"));

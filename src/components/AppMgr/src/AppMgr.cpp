@@ -173,7 +173,7 @@ namespace NsAppManager
      */
     void AppMgr::OnSessionStartedCallback(connection_handler::DeviceHandle deviceHandle, int sessionKey, int firstSessionKey)
     {
-        AppMgrCore::getInstance().addDevice(deviceHandle, sessionKey, firstSessionKey);
+        AppMgrCore::getInstance().AddDevice(deviceHandle, sessionKey, firstSessionKey);
     }
 
     /**

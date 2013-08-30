@@ -50,17 +50,17 @@ OnCommandNotification::~OnCommandNotification() {
 void OnCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnCommandNotification::Run");
 
-  ApplicationImpl* app =
-    static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-        application((*message_)[strings::msg_params][strings::app_id].asInt()));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     return;
   }
 
-  const unsigned int cmd_id = static_cast<unsigned int>(
-      (*message_)[strings::msg_params][strings::cmd_id].asInt());
+  const unsigned int cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
   if (!app->FindCommand(cmd_id)) {
     LOG4CXX_ERROR_EXT(logger_,
@@ -68,44 +68,9 @@ void OnCommandNotification::Run() {
     return;
   }
 
-  SendOnMenuCommand(app);
-}
+  (*message_)[strings::params][strings::connection_key] =
+      app->app_id();
 
-void OnCommandNotification::SendOnMenuCommand(const ApplicationImpl* app) {
-  smart_objects::SmartObject* on_menu_cmd =
-    new smart_objects::SmartObject();
-
-  if (!on_menu_cmd) {
-    LOG4CXX_ERROR_EXT(logger_, "OnCommandNotification NULL pointer");
-    return;
-  }
-
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "OnCommandNotification NULL pointer");
-    return;
-  }
-
-  const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
-
-  (*on_menu_cmd)[strings::params][strings::message_type] =
-    MessageType::kNotification;
-
-  (*on_menu_cmd)[strings::msg_params][strings::app_id] =
-    app->app_id();
-
-  (*on_menu_cmd)[strings::msg_params][strings::cmd_id] =
-    (*message_)[strings::msg_params][strings::cmd_id];
-
-  (*on_menu_cmd)[strings::msg_params][strings::success] = true;
-  (*on_menu_cmd)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::SUCCESS;
-
-  // msg trigger_source param is set in HMI notification
-
-  message_.reset(on_menu_cmd);
   SendNotification();
 }
 

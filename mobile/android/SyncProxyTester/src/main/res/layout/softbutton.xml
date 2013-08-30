@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/softbutton_root"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:minWidth="400dp"
+            android:orientation="vertical">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="6"
+                    android:orientation="vertical">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/softbutton_type"
+                        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+                <Spinner
+                        android:id="@+id/softbutton_type"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="4"
+                    android:orientation="vertical">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/softbutton_id"
+                        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+                <EditText
+                        android:id="@+id/softbutton_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="5"
+                        android:inputType="number"
+                        android:maxLength="5"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/softbutton_text"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <EditText
+                android:id="@+id/softbutton_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textCapSentences"
+                android:maxLength="500">
+
+            <requestFocus/>
+        </EditText>
+
+        <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/softbutton_image"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <EditText
+                    android:id="@+id/softbutton_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="6"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:maxLength="500"/>
+
+            <Spinner
+                    android:id="@+id/softbutton_imageType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="4"/>
+
+        </LinearLayout>
+
+        <CheckBox
+                android:id="@+id/softbutton_isHighlighted"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/softbutton_isHighlighted"/>
+
+        <CheckBox
+                android:id="@+id/softbutton_useSystemAction"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/softbutton_useSystemAction"/>
+
+        <Spinner
+                android:id="@+id/softbutton_systemAction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <Button
+                    android:id="@+id/softbutton_ok"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@android:string/ok"/>
+
+            <Button
+                    android:id="@+id/softbutton_cancel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@android:string/cancel"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

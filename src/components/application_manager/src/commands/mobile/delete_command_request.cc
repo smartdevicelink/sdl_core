@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 DeleteCommandRequest::DeleteCommandRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 DeleteCommandRequest::~DeleteCommandRequest() {
@@ -51,50 +51,58 @@ DeleteCommandRequest::~DeleteCommandRequest() {
 void DeleteCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteCommandRequest::Run");
 
-  ApplicationImpl* application =
-        static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-            application((*message_)[strings::params][strings::connection_key]));
+  Application* application =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
+
   smart_objects::SmartObject* command = application->
         FindCommand((*message_)[strings::msg_params][strings::cmd_id].asInt());
 
   if (!command) {
-      SendResponse(false, mobile_apis::Result::INVALID_ID);
-      LOG4CXX_ERROR(logger_, "Invalid ID");
-      return;
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
+    LOG4CXX_ERROR(logger_, "Invalid ID");
+    return;
   }
 
-  if ((*command)[strings::msg_params].keyExists(strings::menu_params)) {
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-      smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::cmd_id] =
+      (*message_)[strings::msg_params][strings::cmd_id];
+  msg_params[strings::app_id] = application->app_id();
 
-      msg_params[strings::cmd_id] =
-          (*message_)[strings::msg_params][strings::cmd_id];
-      msg_params[strings::app_id] = application->app_id();
 
-      CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand,
-                       msg_params, true);
-    }
+  // we should specify amount of required responses in the 1st request
+  unsigned int chaining_counter = 0;
+  if ((*command).keyExists(strings::menu_params)) {
+    ++chaining_counter;
+  }
 
-    // check vr params
-    if ((*command)[strings::msg_params].keyExists(strings::vr_commands)) {
+  if ((*command).keyExists(strings::vr_commands)) {
+    ++chaining_counter;
+  }
 
-      smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-      msg_params[strings::cmd_id] =
-          (*message_)[strings::msg_params][strings::cmd_id];
-      msg_params[strings::app_id] = application->app_id();
-
+  if ((*command).keyExists(strings::menu_params)) {
+    CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand,
+                     msg_params, true, chaining_counter);
+  }
+  // check vr params
+  if ((*command).keyExists(strings::vr_commands)) {
+    // check if only vr
+    if (1 == chaining_counter) {
+      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params, true
+                       , chaining_counter);
+    } else {
       CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand,
                        msg_params, true);
     }
+  }
 }
 
 }  // namespace commands

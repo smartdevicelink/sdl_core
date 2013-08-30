@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 
+#include "interfaces/MOBILE_API.h"
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
@@ -46,6 +48,21 @@ namespace application_manager {
 struct HMICapabilities {
     HMICapabilities();
     virtual ~HMICapabilities();
+
+    virtual bool is_vr_cooperating() const;
+    virtual void set_is_vr_cooperating(bool value);
+
+    virtual bool is_tts_cooperating() const;
+    virtual void set_is_tts_cooperating(bool value);
+
+    virtual bool is_ui_cooperating() const;
+    virtual void set_is_ui_cooperating(bool value);
+
+    virtual bool is_navi_cooperating() const;
+    virtual void set_is_navi_cooperating(bool value);
+
+    virtual bool is_ivi_cooperating() const;
+    virtual void set_is_ivi_cooperating(bool value);
 
     /*
      * @brief Retrieves if mixing audio is supported by HMI
@@ -125,6 +142,14 @@ struct HMICapabilities {
     display_capabilities() const {
       return display_capabilities_;
     }
+
+    /*
+     * @brief Checks is image type(Static/Dynamic) requested by
+     * Mobile Device is supported on current HMI.
+     * @param image_type recieved type of image from Enum.
+     * @return Bool true if supported
+     */
+    bool VerifyImageType(int image_type);
 
     /*
      * @brief Sets supported display capabilities
@@ -227,7 +252,7 @@ struct HMICapabilities {
      * @return Currently supported audio_pass_thru capabilities
      */
     inline const smart_objects::SmartObject*
-        audio_pass_thru_capabilities() const {
+    audio_pass_thru_capabilities() const {
       return audio_pass_thru_capabilities_;
     }
 
@@ -237,7 +262,7 @@ struct HMICapabilities {
      * @param soft_button_capabilities supported Button's capabilities
      */
     void set_button_capabilities(
-        const smart_objects::SmartObject& button_capabilities);
+      const smart_objects::SmartObject& button_capabilities);
 
     /*
      * @brief Retrieves information about the preset bank capabilities
@@ -254,9 +279,22 @@ struct HMICapabilities {
      * @param soft_button_capabilities supported preset bank capabilities
      */
     void set_preset_bank_capabilities(
-        const smart_objects::SmartObject& preset_bank_capabilities);
+      const smart_objects::SmartObject& preset_bank_capabilities);
 
   protected:
+    bool is_vr_cooperating_;
+    bool is_tts_cooperating_;
+    bool is_ui_cooperating_;
+    bool is_navi_cooperating_;
+    bool is_ivi_cooperating_;
+
+    // to check if IsReady response for corresponding interface received
+    bool is_vr_ready_response_recieved_;
+    bool is_tts_ready_response_recieved_;
+    bool is_ui_ready_response_recieved_;
+    bool is_navi_ready_response_recieved_;
+    bool is_ivi_ready_response_recieved_;
+
     bool attenuated_supported_;
     smart_objects::SmartObject* ui_supported_languages_;
     smart_objects::SmartObject* tts_supported_languages_;

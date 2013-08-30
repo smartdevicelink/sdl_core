@@ -45,9 +45,13 @@ Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
   , policies_file_name_("policy_table.json")
   , server_address_("127.0.0.1")
+  , help_promt_()
+  , time_out_promt_()
   , server_port_(8087)
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
-  , is_mixing_audio_supported_(false) {
+  , is_mixing_audio_supported_(false)
+  , max_cmd_id_(2000000000)
+  , default_timeout_(10000) {
   UpdateValues();
 }
 
@@ -77,6 +81,30 @@ const std::string& Profile::policies_file_name() const {
 
 const std::string& Profile::server_address() const {
   return server_address_;
+}
+
+const std::vector<std::string>& Profile::help_promt() const {
+  return help_promt_;
+}
+
+const std::vector<std::string>& Profile::time_out_promt() const {
+  return time_out_promt_;
+}
+
+const std::vector<std::string>& Profile::vr_commands() const {
+  return vr_commands_;
+}
+
+const unsigned int Profile::max_cmd_id() const {
+  return max_cmd_id_;
+}
+
+const unsigned int Profile::default_timeout() const {
+  return default_timeout_;
+}
+
+const std::string& Profile::vr_help_title() const {
+  return vr_help_title_;
 }
 
 const uint16_t& Profile::server_port() const {
@@ -138,6 +166,79 @@ void Profile::UpdateValues() {
       is_mixing_audio_supported_ = true;
     }
     LOG4CXX_INFO(logger_, "Set MixingAudioSupported to " << value);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "MaxCmdID", value))
+      && ('\0' != *value)) {
+    max_cmd_id_ = atoi(value);
+    if (max_cmd_id_ < 0) {
+      max_cmd_id_ = 20000000000;
+    }
+    LOG4CXX_INFO(logger_, "Set Maximum Command ID to " << max_cmd_id_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "DefaultTimeout", value))
+      && ('\0' != *value)) {
+    default_timeout_ = atoi(value);
+    if (default_timeout_ <= 0) {
+      default_timeout_ = 10000;
+    }
+    LOG4CXX_INFO(logger_, "Set Default timeout to " << default_timeout_);
+  }
+
+  help_promt_.clear();
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "GLOBAL PROPERTIES", "HelpPromt", value))
+      && ('\0' != *value)) {
+    char* str = NULL;
+    str = strtok(value, ",");
+    while (str != NULL) {
+      LOG4CXX_INFO(logger_, "Add HelpPromt string" << str);
+      help_promt_.push_back(std::string(str));
+      str = strtok(NULL, ",");
+    }
+  }
+
+  time_out_promt_.clear();
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "GLOBAL PROPERTIES", "TimeOutPromt", value))
+      && ('\0' != *value)) {
+    char* str = NULL;
+    str = strtok(value, ",");
+    while (str != NULL) {
+      LOG4CXX_INFO(logger_, "Add TimeOutPromt string" << str);
+      time_out_promt_.push_back(std::string(str));
+      str = strtok(NULL, ",");
+    }
+  }
+
+  vr_help_title_ = "";
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "GLOBAL PROPERTIES", "HelpTitle", value))
+      && ('\0' != *value)) {
+    vr_help_title_ = value;
+    LOG4CXX_INFO(logger_, "Add HelpTitle string" << vr_help_title_);
+  }
+
+  vr_commands_.clear();
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "VR COMMANDS", "HelpCommand", value))
+      && ('\0' != *value)) {
+    char* str = NULL;
+    str = strtok(value, ",");
+    while (str != NULL) {
+      LOG4CXX_INFO(logger_, "Add vr command string" << str);
+      vr_commands_.push_back(std::string(str));
+      str = strtok(NULL, ",");
+    }
   }
 }
 

@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -44,31 +45,31 @@ void UnregisterAppInterfaceRequest::Run() {
   ApplicationManagerImpl* app_manager =
     ApplicationManagerImpl::instance();
 
-  if (!app_manager->application(
-      (*message_)[strings::params][strings::connection_key])) {
+  Application* application =
+    app_manager->application(
+      (*message_)[strings::params][strings::connection_key]);
+
+  if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!notification) {
+    LOG4CXX_ERROR(logger_, "Not enough memory.");
+    return;
+  }
+
+  MessageHelper::SendOnAppUnregNotificationToHMI(application);
+
   if (!app_manager->UnregisterApplication(
-      (*message_)[strings::msg_params][strings::app_id])) {
+        (*message_)[strings::params][strings::connection_key])) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     LOG4CXX_ERROR(logger_, "Generic error");
     return;
   }
-
-  smart_objects::SmartObject message;
-
-  message[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
-
-  message[strings::params][strings::message_type] = MessageType::kNotification;
-
-  message[strings::params][strings::app_id] =
-      (*message_)[strings::params][strings::connection_key];
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }

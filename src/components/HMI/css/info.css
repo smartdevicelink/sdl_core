@@ -1,12 +1,13 @@
 #status_info {
-	top:0px;
-	right:0px;
-	text-align:right;
-	font-size:21px;
-	width:324px;
-	height:48px;
-	cursor:pointer;
-	background:url(../images/common/nav-status-bg.png) no-repeat; z-index:1;
+	top: 0px;
+	right: 0px;
+	text-align: right;
+	font-size: 21px;
+	width: 324px;
+	height: 48px;
+	cursor: pointer;
+	background: url(../images/common/nav-status-bg.png) no-repeat;
+	z-index: 1;
 }
 
 #status_info_label {
@@ -18,7 +19,6 @@
 	padding-right: 11px;
 }
 
-
 #info_view {
 	width: 800px;
 	height: 480px;
@@ -28,13 +28,14 @@
 	background: url(../images/nav/bg.png) no-repeat;
 }
 
-#info_leftMenu{
+#info_leftMenu {
 	background: #333;
 	width: 150px;
 	height: 300px;
 	top: 90px;
 }
-#info_leftMenu .menu-item.info_active{
+
+#info_leftMenu .menu-item.info_active {
 	background: url("../images/info/menu_active.png") repeat-x;
 }
 
@@ -46,7 +47,7 @@
 	cursor: pointer;
 }
 
-#info_leftMenu .menu-item span{
+#info_leftMenu .menu-item span {
 	position: absolute;
 	left: 50px;
 	width: 100px;
@@ -57,7 +58,7 @@
 	overflow: hidden;
 }
 
-#info_leftMenu .ico{
+#info_leftMenu .ico {
 	height: 50px;
 	width: 50px;
 }
@@ -66,25 +67,88 @@
 	background: url("../images/settings/menu_active.png") repeat-x;
 }
 
-#info_right_menu {left: 183px; top: 6px;}
-#info_sync_services {font-size: 32px; width: 280px;}
-#info_traff {font-size: 20px; width: 410px; top: 36px;}
-#info_traffic_report {width: 300px; top: 85px; font-size: 20px; color: #a6a6a6;}
-#info_traffic_pts {width: 400px; top: 120px; font-size: 20px; color: #65cdd9;}
-#info_traffic_hear {width: 355px; top: 192px; font-size: 20px; color: #a6a6a6;}
-#info_connect {width: 300px; top: 241px;  font-size: 20px; left: 15px;}
-#info_log {width: 500px; top: 285px; font-size: 20px;}
-#info_left_menu {top: 6px;}
-#info_left_menu div {font-size: 20px;left: 49px; }
+#info_right_menu {
+	left: 183px;
+	top: 6px;
+}
 
-#info_left_services {top: 17px;}
-#info_left_travel_link {top: 66px; width: 200px;}
-#info_left_alerts {top: 118px;}
-#info_left_calendar {top: 166px;}
-#info_left_apps {top: 216px;}
+#info_sync_services {
+	font-size: 32px;
+	width: 280px;
+}
+
+#info_traff {
+	font-size: 20px;
+	width: 410px;
+	top: 36px;
+}
+
+#info_traffic_report {
+	width: 300px;
+	top: 85px;
+	font-size: 20px;
+	color: #a6a6a6;
+}
+
+#info_traffic_pts {
+	width: 400px;
+	top: 120px;
+	font-size: 20px;
+	color: #65cdd9;
+}
+
+#info_traffic_hear {
+	width: 355px;
+	top: 192px;
+	font-size: 20px;
+	color: #a6a6a6;
+}
+
+#info_connect {
+	width: 300px;
+	top: 241px;
+	font-size: 20px;
+	left: 15px;
+}
+
+#info_log {
+	width: 500px;
+	top: 285px;
+	font-size: 20px;
+}
+
+#info_left_menu {
+	top: 6px;
+}
+
+#info_left_menu div {
+	font-size: 20px;
+	left: 49px;
+}
+
+#info_left_services {
+	top: 17px;
+}
+
+#info_left_travel_link {
+	top: 66px;
+	width: 200px;
+}
+
+#info_left_alerts {
+	top: 118px;
+}
+
+#info_left_calendar {
+	top: 166px;
+}
+
+#info_left_apps {
+	top: 216px;
+}
 
 /******************* For Info.Services *******************/
-#info_services_view{
+#info_services_view {
 	top: 48px;
 	left: 153px;
 	background: url(../images/info/info_services_bg.png) no-repeat 0px 39px;
@@ -92,7 +156,7 @@
 	width: 647px;
 }
 
-#info_services_view .inner-content{
+#info_services_view .inner-content {
 	left: 30px;
 	top: 49px;
 }
@@ -113,8 +177,8 @@
 	margin-left: 22px;
 }
 
-#info_travelLink .inner-content{
-	top: 71px;	
+#info_travelLink .inner-content {
+	top: 71px;
 }
 
 #info_travelLink .block-header-title {
@@ -126,7 +190,7 @@
 	width: 308px;
 	border-radius: 2px;
 	max-height: 248px;
-	border:1px solid #393939;
+	border: 1px solid #393939;
 }
 
 #info_travelLink .list .list-item:last-of-type {
@@ -138,10 +202,10 @@
 	position: relative;
 	float: left;
 	width: 100%;
-	border:none;
+	border: none;
 }
 
-#info_travelLink_listLeft{
+#info_travelLink_listLeft {
 	left: 12px;
 	top: 92px;
 }
@@ -153,21 +217,21 @@
 	width: 310px;
 }
 
-#info_travelLink_listLeft .list-item span,
-#info_travelLink_listRight .list-item span{
+#info_travelLink_listLeft .list-item span,#info_travelLink_listRight .list-item span
+	{
 	margin-left: 44px;
 }
 
-#info_travelLink.fr #info_travelLink_listLeft .list-item span,
-#info_travelLink.fr #info_travelLink_listRight .list-item span{
+#info_travelLink.fr #info_travelLink_listLeft .list-item span,#info_travelLink.fr #info_travelLink_listRight .list-item span
+	{
 	margin-left: 22px;
 }
 
-#info_travelLink_listRight_item0 span{
+#info_travelLink_listRight_item0 span {
 	margin-left: 0px !important;
 }
 
-#info_travelLink_listRight_item0{
+#info_travelLink_listRight_item0 {
 	text-align: center;
 }
 
@@ -176,12 +240,7 @@
 }
 
 /******************* For Info.Alerts menu *****************/
-
-
-
-
-
-/******************* For Info.Calendar menu ***************/
+	/******************* For Info.Calendar menu ***************/
 #info_calendar {
 	left: 153px;
 	top: 48px;
@@ -192,7 +251,7 @@
 	background-position: 4px 38px;
 }
 
-#info_calendar .inner-wrapper{
+#info_calendar .inner-wrapper {
 	left: 99px;
 	top: 99px;
 }
@@ -206,7 +265,8 @@
 }
 
 #info_calendar .c-btn.active {
-	background: #3b3b3b url(../images/common/btn-28h-gray-active.png) repeat-x 0 5px !important;
+	background: #3b3b3b url(../images/common/btn-28h-gray-active.png)
+		repeat-x 0 5px !important;
 }
 
 #info_calendar .date {
@@ -244,21 +304,27 @@
 #info_calendar .day-1 {
 	left: -86px;
 }
+
 #info_calendar .day-2 {
 	left: 3px;
 }
+
 #info_calendar .day-3 {
 	left: 93px;
 }
+
 #info_calendar .day-4 {
 	left: 183px;
 }
+
 #info_calendar .day-5 {
 	left: 272px;
 }
+
 #info_calendar .day-6 {
 	left: 363px;
 }
+
 #info_calendar .day-7 {
 	left: 453px;
 }
@@ -267,18 +333,22 @@
 	left: -88px;
 	top: 40px;
 }
+
 #info_calendar .btn-8 {
 	left: -88px;
 	top: 75px;
 }
+
 #info_calendar .btn-15 {
 	left: -87px;
 	top: 108px;
 }
+
 #info_calendar .btn-22 {
 	left: -88px;
 	top: 141px;
 }
+
 #info_calendar .btn-29 {
 	left: -88px;
 	top: 174px;
@@ -288,14 +358,17 @@
 	left: 452px;
 	top: 40px;
 }
+
 #info_calendar .btn-14 {
 	left: 452px;
 	top: 75px;
 }
+
 #info_calendar .btn-21 {
 	left: 452px;
 	top: 108px;
 }
+
 #info_calendar .btn-28 {
 	left: 452px;
 	top: 141px;
@@ -305,14 +378,17 @@
 	left: 362px;
 	top: 40px;
 }
+
 #info_calendar .btn-13 {
 	left: 362px;
 	top: 75px;
 }
+
 #info_calendar .btn-20 {
 	left: 362px;
 	top: 108px;
 }
+
 #info_calendar .btn-27 {
 	left: 362px;
 	top: 141px;
@@ -322,14 +398,17 @@
 	left: 272px;
 	top: 40px;
 }
+
 #info_calendar .btn-12 {
 	left: 272px;
 	top: 75px;
 }
+
 #info_calendar .btn-19 {
 	left: 272px;
 	top: 108px;
 }
+
 #info_calendar .btn-26 {
 	left: 272px;
 	top: 141px;
@@ -339,14 +418,17 @@
 	left: 182px;
 	top: 40px;
 }
+
 #info_calendar .btn-11 {
 	left: 182px;
 	top: 75px;
 }
+
 #info_calendar .btn-18 {
 	left: 182px;
 	top: 108px;
 }
+
 #info_calendar .btn-25 {
 	left: 182px;
 	top: 141px;
@@ -356,18 +438,22 @@
 	left: 92px;
 	top: 40px;
 }
+
 #info_calendar .btn-10 {
 	left: 92px;
 	top: 75px;
 }
+
 #info_calendar .btn-17 {
 	left: 92px;
 	top: 108px;
 }
+
 #info_calendar .btn-24 {
 	left: 92px;
 	top: 141px;
 }
+
 #info_calendar .btn-31 {
 	left: 92px;
 	top: 174px;
@@ -377,31 +463,34 @@
 	left: 2px;
 	top: 40px;
 }
+
 #info_calendar .btn-9 {
 	left: 2px;
 	top: 75px;
 }
+
 #info_calendar .btn-16 {
 	left: 2px;
 	top: 108px;
 }
+
 #info_calendar .btn-23 {
 	left: 2px;
 	top: 141px;
 }
+
 #info_calendar .btn-30 {
 	left: 2px;
 	top: 174px;
 }
 
 /******************* For Info.DeviceList *******************/
-#info_view .info_apps_deviceList_view{
+#info_view .info_apps_deviceList_view {
 	background: black;
 	width: 800px;
 	height: 480px;
 	z-index: 201;
 }
-
 
 #info_apps_deviceList_view .backButton {
 	top: 80px;
@@ -417,7 +506,7 @@
 	margin-left: 8px;
 }
 
-#info_apps_deviceList_view .list{
+#info_apps_deviceList_view .list {
 	position: absolute;
 	width: 629px;
 	height: 251px;
@@ -426,13 +515,15 @@
 	top: 154px;
 }
 
-#info_apps_deviceList_view .list-content{
+#info_apps_deviceList_view .list-content {
 	width: 578px;
 	border: none;
 }
-#info_apps_deviceList_view .list-item{
+
+#info_apps_deviceList_view .list-item {
 	border: 1px solid #393939 !important;
 }
+
 /******************* For Info.Apps menu*******************/
 #info_apps {
 	position: absolute;
@@ -444,25 +535,25 @@
 	z-index: 1001;
 }
 
-#info_apps .backButton{
+#info_apps .backButton {
 	top: 59px;
 }
-	
-#info_apps .block-header-title{
+
+#info_apps .block-header-title {
 	top: 67px;
 	left: 73px;
 }
 
-#info_apps_pushToTalk_buttton{
+#info_apps_pushToTalk_buttton {
 	top: 80px;
 	right: 5px;
 	height: 48px;
-	width:  48px;
+	width: 48px;
 	border: 1px solid #4bffff;
 	border-radius: 2px;
 }
 
-#info_apps_list{
+#info_apps_list {
 	top: 70px;
 	left: 13px;
 }
@@ -480,17 +571,17 @@
 	height: 251px;
 }
 
-#info_apps_list .list-item .ico{
+#info_apps_list .list-item .ico {
 	width: 50px;
 	height: 50px;
 	position: absolute;
 }
 
-#info_apps_list .list-item span{
+#info_apps_list .list-item span {
 	margin-left: 50px;
 }
 
-#info_apps_list .list-item{
+#info_apps_list .list-item {
 	height: 48px !important;
 	border: 1px solid #393939;
 }
@@ -512,47 +603,47 @@
 	left: 10px;
 }
 
-#info_apps .vehicleHealthReport{
+#info_apps .vehicleHealthReport {
 	top: 70px;
 }
 
-#info_apps .Asist911{
+#info_apps .Asist911 {
 	top: 122px;
 }
 
-#info_apps .installButton{
+#info_apps .installButton {
 	top: 174px;
 }
 
-#info_apps .findNewApps{
+#info_apps .findNewApps {
 	top: 226px;
 }
 
-#info_apps .findNewApps img{
+#info_apps .findNewApps img {
 	margin: 9px;
 	width: 32px;
 }
 
-#info_apps .getDeviceList{
+#info_apps .getDeviceList {
 	top: 278px;
 }
 
-#info_apps .getDeviceList img{
+#info_apps .getDeviceList img {
 	width: 38px;
 	margin: 6px;
 }
 
-#info_apps .list{
+#info_apps .list {
 	float: right;
 	margin-right: 41px;
 	width: 330px
 }
 
-#info_apps_install_Button span{
+#info_apps_install_Button span {
 	position: absolute;
 }
 
-#info_apps.fr #info_apps_install_Button span{
+#info_apps.fr #info_apps_install_Button span {
 	position: absolute;
 	line-height: 20px;
 	width: 170px;
@@ -572,7 +663,7 @@
 	top: 71px;
 }
 
-#info_apps_install_Button{
+#info_apps_install_Button {
 	border: 1px solid #393939;
 	border-radius: 2px;
 	top: 269px;

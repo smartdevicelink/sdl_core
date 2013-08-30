@@ -49,8 +49,7 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 void OnSystemContextNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSystemContextNotification::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->active_application());
+  Application* app = ApplicationManagerImpl::instance()->active_application();
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
@@ -59,29 +58,32 @@ void OnSystemContextNotification::Run() {
 
   mobile_api::SystemContext::eType system_context =
     static_cast<mobile_api::SystemContext::eType>((*message_)
-    [strings::msg_params][hmi_notification::system_context].asInt());
+        [strings::msg_params][hmi_notification::system_context].asInt());
 
   if ((mobile_api::SystemContext::SYSCTXT_VRSESSION != system_context) &&
       (true == ApplicationManagerImpl::instance()->vr_session_started()) &&
       app->is_media_application()) {
-       app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
-       ApplicationManagerImpl::instance()->set_vr_session_started(false);
+    app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
+    ApplicationManagerImpl::instance()->set_vr_session_started(false);
   } else if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) &&
-         (false == ApplicationManagerImpl::instance()->vr_session_started()) &&
-      app->is_media_application()) {
-      if (true == ApplicationManagerImpl::instance()->attenuated_supported()) {
-        app->set_audio_streaming_state(
-            mobile_api::AudioStreamingState::ATTENUATED);
-      } else {
-        app->set_audio_streaming_state(
-            mobile_api::AudioStreamingState::NOT_AUDIBLE);
-      }
-      ApplicationManagerImpl::instance()->set_vr_session_started(true);
-  }
-
-  if (mobile_api::SystemContext::SYSCTXT_ALERT == system_context) {
-    // TODO(DK): Find initiator of alert.
-    system_context = mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED;
+             (!ApplicationManagerImpl::instance()->vr_session_started()) &&
+             app->is_media_application()) {
+    if (true == ApplicationManagerImpl::instance()->attenuated_supported()) {
+      app->set_audio_streaming_state(
+          mobile_api::AudioStreamingState::ATTENUATED);
+    } else {
+      app->set_audio_streaming_state(
+          mobile_api::AudioStreamingState::NOT_AUDIBLE);
+    }
+    ApplicationManagerImpl::instance()->set_vr_session_started(true);
+  } else if (mobile_api::SystemContext::SYSCTXT_ALERT == system_context) {
+    app->set_audio_streaming_state(
+        mobile_api::AudioStreamingState::NOT_AUDIBLE);
+  } else if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context) {
+    app->set_audio_streaming_state(
+        mobile_api::AudioStreamingState::AUDIBLE);
+  } else {
+    // TODO(DK): check system context MENU HMI_OBSCURED
   }
 
   if (system_context != app->system_context()) {
@@ -97,7 +99,7 @@ void OnSystemContextNotification::Run() {
   }
 }
 
-void OnSystemContextNotification::NotifyMobileApp(ApplicationImpl* const app) {
+void OnSystemContextNotification::NotifyMobileApp(Application* const app) {
   MessageHelper::SendHMIStatusNotification(*app);
 }
 

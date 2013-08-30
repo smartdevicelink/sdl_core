@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 SliderRequest::SliderRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+  : CommandRequestImpl(message) {
 }
 
 SliderRequest::~SliderRequest() {
@@ -51,20 +51,42 @@ SliderRequest::~SliderRequest() {
 void SliderRequest::Run() {
   LOG4CXX_INFO(logger_, "SliderRequest::Run");
 
-  ApplicationImpl* application_impl = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::connection_key]));
+  Application* application_impl =
+    application_manager::ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == application_impl) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
+  if ((*message_)[strings::msg_params][strings::num_ticks].asInt() <
+      (*message_)[strings::msg_params][strings::position].asInt()) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::slider_footer)) {
+    if (1 < (*message_)[strings::msg_params][strings::slider_footer].length()) {
+      if ((*message_)[strings::msg_params][strings::num_ticks].asInt() !=
+            (*message_)[strings::msg_params][strings::slider_footer].length()) {
+          LOG4CXX_ERROR(logger_, "INVALID_DATA");
+          SendResponse(false, mobile_apis::Result::INVALID_DATA);
+          return;
+      }
+    }
+  }
+
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application_impl->app_id();
+
+  if (!(*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    msg_params[strings::timeout] = 10000;
+  }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_Slider, msg_params, true);
 }

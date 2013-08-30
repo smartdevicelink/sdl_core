@@ -116,11 +116,11 @@ SDL.AlertPopUp = Em.ContainerView.create({
     /**
      * Deactivate PopUp
      */
-    deactivate: function(ABORTED) {
+    deactivate: function() {
         this.set('active', false);
         clearTimeout(this.timer);
 
-        SDL.SDLController.alertResponse(ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
+        SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
 
         SDL.SDLController.onSystemContextChange();
     },
@@ -146,7 +146,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
      * @desc Function creates Soft Buttons on AlertPoUp
      * @param {Object} params
      */
-    addSoftButtons: function(params, appId) {
+    addSoftButtons: function(params, appID) {
 
         var count = this.get('softbuttons.buttons.childViews').length - 1;
         for(var i = count; i >= 0; i--){
@@ -172,16 +172,19 @@ SDL.AlertPopUp = Em.ContainerView.create({
             }
 
             for(var i = 0; i < params.length; i++){
-                this.get('softbuttons.buttons.childViews').pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
+                this.get('softbuttons.buttons.childViews')
+                    .pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
                     systemAction: params[i].systemAction,
                     groupName: "AlertPopUp",
+                    classNameBindings: ['isHighlighted:isHighlighted'],
+                    isHighlighted: params[i].isHighlighted ? true : false,
                     softButtonID: params[i].softButtonID,
-                    icon: params[i].image,
+                    icon: params[i].image ? params[i].image.value : "",
                     text: params[i].text,
                     classNames: 'list-item softButton ' + softButtonsClass,
                     elementId: 'softButton' + i,
                     templateName: params[i].image ? 'rightIcon' : 'text',
-                    appId: appId
+                    appID: appID
                 }));
             }
         }
@@ -193,23 +196,23 @@ SDL.AlertPopUp = Em.ContainerView.create({
         this.set('alertRequestId', alertRequestId);
 
         if (message.softButtons) {
-            this.addSoftButtons(message.softButtons, message.appId);
+            this.addSoftButtons(message.softButtons, message.appID);
         }
 
-        this.set('appName', SDL.SDLController.getApplicationModel(message.appId).appName);
+        this.set('appName', SDL.SDLController.getApplicationModel(message.appID).appName);
 
-        for (var i = 0; i < params.alertStrings.length; i++) {
-            switch (params.alertStrings[i]) {
+        for (var i = 0; i < message.alertStrings.length; i++) {
+            switch (message.alertStrings[i].fieldName) {
                 case 'alertText1': {
-                    this.appInfo.set('content1', params.alertStrings[i].fieldText);
+                    this.set('content1', message.alertStrings[i].fieldText);
                     break;
                 }
                 case 'alertText2': {
-                    this.appInfo.set('content2', params.alertStrings[i].fieldText);
+                    this.set('content2', message.alertStrings[i].fieldText);
                     break;
                 }
                 case 'alertText3': {
-                    this.appInfo.set('content3', params.alertStrings[i].fieldText);
+                    this.set('content3', message.alertStrings[i].fieldText);
                     break;
                 }
             }

@@ -101,7 +101,7 @@ void MobileMessageHandlerImpl::setProtocolHandler(
   protocol_handler_ = protocolHandler;
 }
 
-void MobileMessageHandlerImpl::onMessageReceived(
+void MobileMessageHandlerImpl::OnMessageReceived(
     const protocol_handler::RawMessage* message) {
   LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl onMessageReceived()");
   DCHECK(message);
@@ -319,7 +319,7 @@ MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
 
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.")
-    return NULL;
+    //return NULL;
   }
 
   const uint MAX_HEADER_SIZE = 12;

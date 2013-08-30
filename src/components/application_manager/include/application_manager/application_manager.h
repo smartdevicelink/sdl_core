@@ -50,9 +50,6 @@ class ApplicationManager {
   public:
     virtual ~ApplicationManager() {}
 
-    virtual Application* application(int app_id) = 0;
-    virtual const std::set<Application*>& applications() const = 0;
-    virtual Application* active_application() const = 0;
     virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;
     virtual void set_mobile_message_handler(

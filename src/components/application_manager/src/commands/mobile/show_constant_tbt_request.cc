@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 ShowConstantTBTRequest::ShowConstantTBTRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 ShowConstantTBTRequest::~ShowConstantTBTRequest() {
@@ -52,9 +52,9 @@ ShowConstantTBTRequest::~ShowConstantTBTRequest() {
 void ShowConstantTBTRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -62,37 +62,66 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  app->set_tbt_show_command((*message_)[strings::msg_params]);
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                          verification_result);
+    SendResponse(false, verification_result);
+    return;
+  }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
-  msg_params[hmi_request::navi_texts] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  msg_params[strings::app_id] = app->app_id();
 
+  msg_params[hmi_request::navi_texts] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  int index = 0;
   if (msg_params.keyExists(strings::navigation_text_1)) {
     // erase useless parametr
     msg_params.erase(strings::navigation_text_1);
-    msg_params[hmi_request::navi_texts][0][hmi_request::field_name] =
-        TextFieldName::NAVI_TEXT1;
-    msg_params[hmi_request::navi_texts][0][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::navigation_text_1];
-
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+      TextFieldName::NAVI_TEXT1;
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::navigation_text_1];
   }
 
   if (msg_params.keyExists(strings::navigation_text_2)) {
     // erase useless param
     msg_params.erase(strings::navigation_text_2);
-    msg_params[hmi_request::navi_texts][1][hmi_request::field_name] =
-        TextFieldName::NAVI_TEXT2;
-    msg_params[hmi_request::navi_texts][1][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::navigation_text_2];
-
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+      TextFieldName::NAVI_TEXT2;
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::navigation_text_2];
   }
 
+
+  if (msg_params.keyExists(strings::eta)) {
+    // erase useless param
+    msg_params.erase(strings::eta);
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+      TextFieldName::ETA;
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::eta];
+  }
+
+  if (msg_params.keyExists(strings::total_distance)) {
+    // erase useless param
+    msg_params.erase(strings::total_distance);
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+      TextFieldName::TOTAL_DISTANCE;
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::total_distance];
+  }
+
+  app->set_tbt_show_command(msg_params);
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT,
-                   msg_params, true);
+                   msg_params, true, 1);
 }
 
 }  // namespace commands

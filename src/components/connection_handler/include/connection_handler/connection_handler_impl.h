@@ -43,10 +43,8 @@
 #include <string>
 
 #include "utils/logger.h"
-
-#include "TransportManager/ITransportManagerDeviceListener.hpp"
-#include "TransportManager/SDeviceInfo.hpp"
-
+#include "utils/macro.h"
+#include "transport_manager/transport_manager_listener_impl.h"
 #include "protocol_handler/session_observer.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -64,7 +62,7 @@ namespace connection_handler {
  * \brief SmartDeviceLink connection_handler main class
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
-  public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener,
+  public transport_manager::TransportManagerListener,
   public protocol_handler::SessionObserver, public DevicesDiscoveryStarter {
   public:
     /**
@@ -85,81 +83,100 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void set_connection_handler_observer(
       ConnectionHandlerObserver* observer);
 
+    virtual void OnDeviceListUpdated(const std::vector<transport_manager::DeviceInfo>&);
+
     /**
      * \brief Available devices list updated.
      *
      * Called when device scanning initiated with scanForNewDevices
-     * is completed.
+     * is completed or devices connected via background procedures.
      *
      * \param DeviceList New list of available devices.
      **/
-    virtual void onDeviceListUpdated(
-      const NsSmartDeviceLink::NsTransportManager::tDeviceList& DeviceList);
+    virtual void OnDeviceFound(const transport_manager::DeviceInfo& device_info);
+    virtual void OnNoDeviceFound();
+
+    virtual void OnScanDevicesFinished();
+    virtual void OnScanDevicesFailed(
+      const transport_manager::SearchDeviceError& error);
 
     /**
-     * \brief Application connected.
+     * \brief Notifies about established connection.
      *
-     * \param ConnectedDevice DeviceInfo of connected device.
-     * \param Connection Connection handle.
+     * \param connection_id ID of new connection.
      **/
-    virtual void onApplicationConnected(
-      const NsSmartDeviceLink::NsTransportManager::SDeviceInfo& ConnectedDevice,
-      const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
+    virtual void OnConnectionEstablished(const transport_manager::DeviceInfo& device_info,
+                                         const transport_manager::ConnectionUID& connection_id);
+    virtual void OnConnectionFailed(const transport_manager::DeviceInfo& device_info,
+                                    const transport_manager::ConnectError& error);
+    virtual void OnConnectionClosed(
+      transport_manager::ConnectionUID connection_id);
+    virtual void OnConnectionClosedFailure(
+      transport_manager::ConnectionUID connection_id,
+      const transport_manager::DisconnectError& error);
+
+    virtual void OnDeviceConnectionLost(
+      const connection_handler::DeviceHandle& device,
+      const transport_manager::DisconnectDeviceError& error);
+    virtual void OnTMMessageReceived(const transport_manager::RawMessageSptr message);
+    virtual void OnTMMessageReceiveFailed(transport_manager::ConnectionUID connection_id,
+                                          const transport_manager::DataReceiveError& error);
+    virtual void OnTMMessageSendFailed(const transport_manager::DataSendError& error,
+                                       const transport_manager::RawMessageSptr message);
+    virtual void OnTMMessageSend();
 
     /**
-     * \brief Application disconnected.
-     *
-     * \param DisconnectedDevice DeviceInfo of disconnected device.
-     * \param Connection Connection handle.
-     **/
-    virtual void onApplicationDisconnected(
-      const NsSmartDeviceLink::NsTransportManager::SDeviceInfo& DisconnectedDevice,
-      const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
+     * \brief Informs about failure during DisconnectDevice procedure of TM
+     * \param device Information about disconnected device
+     * \param error Information about possible reason of loosing connection
+     */
+    virtual void OnDisconnectFailed(
+      const connection_handler::DeviceHandle& device,
+      const transport_manager::DisconnectDeviceError& error);
 
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
-     * \param connectionHandle Connection identifier whithin which session has to be started.
+     * \param connection_handle Connection identifier whithin which session has to be started.
      * \return int Id (number) of new session if successful otherwise -1.
      */
-    virtual int onSessionStartedCallback(
-      NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle);
+    virtual unsigned int OnSessionStartedCallback(
+      transport_manager::ConnectionUID connection_handle);
 
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates session ending.
-     * \param connectionHandle Connection identifier whithin which session exists
+     * \param connection_handle Connection identifier whithin which session exists
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
      * \return int -1 if operation fails session key otherwise
      */
-    virtual int onSessionEndedCallback(
-      NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-      unsigned char sessionId, unsigned int hashCode);
+    virtual unsigned int OnSessionEndedCallback(
+      transport_manager::ConnectionUID connection_handle,
+      unsigned char session_id, unsigned int hashCode);
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)
      * from given connection identifier
      * whithin which session exists and session number.
-     * \param  connectionHandle Connection identifier whithin which session exists
+     * \param  connection_handle Connection identifier whithin which session exists
      * \param sessionId Identifier of the session
      * \return int Unique key for session
      */
-    virtual int keyFromPair(
-      NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
-      unsigned char sessionId);
+    virtual unsigned int KeyFromPair(
+      transport_manager::ConnectionUID connection_handle,
+      unsigned char session_id);
 
     /**
      * \brief Returns connection identifier and session number from given session key
      * \param key Unique key used by other components as session identifier
-     * \param connectionHandle Returned: Connection identifier whithin which session exists
+     * \param connection_handle Returned: Connection identifier whithin which session exists
      * \param sessionId Returned: Number of session
      */
-    virtual void pairFromKey(
-      int key,
-      NsSmartDeviceLink::NsTransportManager::tConnectionHandle& connectionHandle,
-      unsigned char& sessionId);
+    virtual void PairFromKey(unsigned int key,
+                             transport_manager::ConnectionUID* connection_handle,
+                             unsigned char* session_id);
 
     /**
      * \brief information about given Connection Key.
@@ -169,9 +186,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param device_id Returned: DeviceID
      * \return int -1 in case of error or 0 in case of success
      */
-    virtual int GetDataOnSessionKey(int key, int& app_id,
-                                    std::list<int>& sessions_list,
-                                    int& device_id);
+    virtual int GetDataOnSessionKey(unsigned int key, unsigned int* app_id,
+                                    std::list<int>* sessions_list,
+                                    unsigned int* device_id);
 
     /**
      * \brief information about given Connection Key.
@@ -181,15 +198,16 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param device_id Returned: DeviceID
      * \return int -1 in case of error or 0 in case of success
      */
-    virtual int GetDataOnDeviceID(int device_id, std::string& device_name,
-                                  std::list<int>& applications_list);
+    virtual int GetDataOnDeviceID(connection_handler::DeviceHandle device_handle,
+                                  std::string* device_name,
+                                  std::list<unsigned int>* applications_list);
 
     /**
      * \brief Sets pointer to TransportManager.
      * \param transportManager Pointer to TransportManager object.
      **/
     virtual void set_transport_manager(
-      NsSmartDeviceLink::NsTransportManager::ITransportManager* transportManager);
+      transport_manager::TransportManager* transportManager);
 
     /**
      * \brief Method which should start devices discoveryng
@@ -211,18 +229,13 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     ConnectionHandlerImpl();
 
     /**
-     * \brief Copy constructor
-     */
-    ConnectionHandlerImpl(const ConnectionHandlerImpl&);
-
-    /**
      * \brief Checks does device exist in list from TransportManager
      * \param DeviceHandle Handle of device for checking.
      * \param DeviceHandle Handle of device for checking.
      * \return True if device exists.
      */
     bool DoesDeviceExistInTMList(
-      const NsSmartDeviceLink::NsTransportManager::tDeviceList& device_list,
+      const std::vector<transport_manager::DeviceInfo>& device_list,
       const connection_handler::DeviceHandle device_handle);
 
     /**
@@ -230,7 +243,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param DeviceHandle Handle of device for checking.
      */
     void AddDeviceInDeviceListIfNotExist(
-      const NsSmartDeviceLink::NsTransportManager::SDeviceInfo device_info);
+      const transport_manager::DeviceInfo& device);
 
     /**
      * \brief Disconnect application.
@@ -248,7 +261,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Pointer to TransportManager
      */
-    NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager_;
+    transport_manager::TransportManager* transport_manager_;
 
     /**
      * \brief List of devices
@@ -263,7 +276,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      *\brief For logging.
      */
-    static log4cxx::LoggerPtr logger_;
+    static log4cxx::LoggerPtr logger_; DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */
 

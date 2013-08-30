@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -34,331 +33,343 @@
  *
  */
 
-FFW.UI = FFW.RPCObserver.create( {
+FFW.UI = FFW.RPCObserver
+    .create( {
 
-    /**
-     * If true then UI is present and ready to communicate with SDL.
-     *
-     * @type {Boolean}
-     */
-    isReady: false,
+        /**
+         * If true then UI is present and ready to communicate with SDL.
+         *
+         * @type {Boolean}
+         */
+        isReady: false,
 
-    /**
-     * access to basic RPC functionality
-     */
-    client: FFW.RPCClient.create( {
-        componentName: "UI"
-    } ),
+        /**
+         * access to basic RPC functionality
+         */
+        client: FFW.RPCClient.create( {
+            componentName: "UI"
+        }),
 
-    // temp var for debug
-    appId: 1,
+        // temp var for debug
+        appID: 1,
 
-    onVRChoiseSubscribeRequestId: -1,
-    onShowNotificationSubscribeRequestId: -1,
-    
-    onVRChoiseUnsubscribeRequestId: -1,
-    onShowNotificationUnsubscribeRequestId: -1,
+        onShowNotificationSubscribeRequestID: -1,
 
-    // const
-    onVRChoiseNotification: "VR.OnChoise",
-    onShowNotificationNotification: "UI.ShowNotification",
+        onShowNotificationUnsubscribeRequestID: -1,
 
-    /**
-     * ids for requests AudioPassThru
-     */
-    performAudioPassThruRequestId: -1,
-    endAudioPassThruRequestId: -1,
+        // const
+        onShowNotificationNotification: "UI.ShowNotification",
 
-    /**
-     * connect to RPC bus
-     */
-    connect: function() {
-        this.client.connect( this, 400 );
-    },
+        /**
+         * ids for requests AudioPassThru
+         */
+        performAudioPassThruRequestID: -1,
+        endAudioPassThruRequestID: -1,
 
-    /**
-     * disconnect from RPC bus
-     */
-    disconnect: function() {
-        this.client.disconnect();
-    },
+        /**
+         * connect to RPC bus
+         */
+        connect: function() {
 
-    /**
-     * Client is registered - we can send request starting from this point of
-     * time
-     */
-    onRPCRegistered: function() {
-        Em.Logger.log( "FFW.UI.onRPCRegistered" );
-        this._super();
+            this.client.connect(this, 400); // Magic number is unique identifier
+            // for component
+        },
 
-        // subscribe to notifications
-        this.onVRChoiseSubscribeRequestId = this.client.subscribeToNotification( this.onVRChoiseNotification );
-        this.onShowNotificationSubscribeRequestId = this.client.subscribeToNotification( this.onShowNotificationNotification );
-    },
+        /**
+         * disconnect from RPC bus
+         */
+        disconnect: function() {
 
-    /**
-     * Client is unregistered - no more requests
-     */
-    onRPCUnregistered: function() {
-        Em.Logger.log( "FFW.UI.onRPCUnregistered" );
-        this._super();
+            this.client.disconnect();
+        },
 
-        // unsubscribe from notifications
-        this.onVRChoiseUnsubscribeRequestId = this.client.unsubscribeFromNotification( this.onVRChoiseNotification );
-        this.onShowNotificationUnsubscribeRequestId = this.client.unsubscribeFromNotification( this.onShowNotificationNotification );
-    },
+        /**
+         * Client is registered - we can send request starting from this point
+         * of time
+         */
+        onRPCRegistered: function() {
 
-    /**
-     * Client disconnected.
-     */
-    onRPCDisconnected: function() {
+            Em.Logger.log("FFW.UI.onRPCRegistered");
+            this._super();
 
-    },
+            // subscribe to notifications
+            this.onShowNotificationSubscribeRequestID = this.client
+                .subscribeToNotification(this.onShowNotificationNotification);
+        },
 
-    /**
-     * when result is received from RPC component this function is called It is
-     * the propriate place to check results of request execution Please use
-     * previously store reuqestID to determine to which request repsonse belongs
-     * to
-     */
-    onRPCResult: function( response ) {
-        Em.Logger.log( "FFW.UI.onRPCResult" );
-        this._super();
-    },
+        /**
+         * Client is unregistered - no more requests
+         */
+        onRPCUnregistered: function() {
 
-    /**
-     * handle RPC erros here
-     */
-    onRPCError: function( error ) {
-        Em.Logger.log( "FFW.UI.onRPCError" );
-        this._super();
-    },
+            Em.Logger.log("FFW.UI.onRPCUnregistered");
+            this._super();
 
-    /**
-     * handle RPC notifications here
-     */
-    onRPCNotification: function( notification ) {
-        Em.Logger.log( "FFW.UI.onRPCNotification" );
-        this._super();
+            // unsubscribe from notifications
+            this.onShowNotificationUnsubscribeRequestID = this.client
+                .unsubscribeFromNotification(this.onShowNotificationNotification);
+        },
 
-        if( notification.method == this.onVRChoiseNotification ){
-            this.interactionResponse( SDL.SDLModel.resultCode["SUCCESS"], notification.params.choiceId );
-        }
-        
-        if( notification.method == this.onShowNotificationNotification ){
-            // to do
-        }
-    },
+        /**
+         * Client disconnected.
+         */
+        onRPCDisconnected: function() {
 
-    /**
-     * handle RPC requests here
-     */
-    onRPCRequest: function( request ) {
-        Em.Logger.log( "FFW.UI.onRPCRequest" );
-        this._super();
+        },
 
-        var resultCode = null;
+        /**
+         * when result is received from RPC component this function is called It
+         * is the propriate place to check results of request execution Please
+         * use previously store reuqestID to determine to which request repsonse
+         * belongs to
+         */
+        onRPCResult: function(response) {
 
-        switch( request.method ){
-            case "UI.Show": {
+            Em.Logger.log("FFW.UI.onRPCResult");
+            this._super();
+        },
 
-                SDL.TurnByTurnView.deactivate();
-                SDL.SDLController.getApplicationModel( request.params.appId ).onSDLUIShow( request.params );
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+        /**
+         * handle RPC erros here
+         */
+        onRPCError: function(error) {
 
-                break;
+            Em.Logger.log("FFW.UI.onRPCError");
+            this._super();
+        },
+
+        /**
+         * handle RPC notifications here
+         */
+        onRPCNotification: function(notification) {
+
+            Em.Logger.log("FFW.UI.onRPCNotification");
+            this._super();
+
+            if (notification.method == this.onShowNotificationNotification) {
+                // to do
             }
-            case "UI.Alert": {
+        },
 
-                SDL.SDLModel.onUIAlert( request.params, request.id );
+        /**
+         * handle RPC requests here
+         */
+        onRPCRequest: function(request) {
 
-                break;
-            }
-            case "UI.SetGlobalProperties": {
+            Em.Logger.log("FFW.UI.onRPCRequest");
 
-                SDL.SDLModel.setProperties( request.params );
+            if (this.validationCheck(request)) {
 
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                switch (request.method) {
+                case "UI.Alert": {
 
-                break;
-            }
-            case "UI.ResetGlobalProperties": {
+                    SDL.SDLModel.onUIAlert(request.params, request.id);
 
-                // reset all requested properties
-                SDL.SDLModel.resetProperties( request.params );
+                    break;
+                }
+                case "UI.Show": {
 
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    SDL.TurnByTurnView.deactivate();
+                    SDL.SDLController.getApplicationModel(request.params.appID)
+                        .onSDLUIShow(request.params);
+                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
-                break;
-            }
-            case "UI.AddCommand": {
+                    break;
+                }
+                case "UI.SetGlobalProperties": {
 
-                SDL.SDLController.getApplicationModel( request.params.appId ).addCommand( request.params );
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
-                break;
-            }
-            case "UI.DeleteCommand": {
+                    break;
+                }
+                case "UI.ResetGlobalProperties": {
 
-                SDL.SDLController.getApplicationModel( request.params.appId ).deleteCommand( request.params.cmdId );
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
-                break;
-            }
-            case "UI.AddSubMenu": {
+                    break;
+                }
+                case "UI.AddCommand": {
 
-                SDL.SDLController.getApplicationModel( request.params.appId ).addSubMenu( request.params );
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    SDL.SDLController.getApplicationModel(request.params.appID)
+                        .addCommand(request);
 
-                break;
-            }
-            case "UI.DeleteSubMenu": {
+                    break;
+                }
+                case "UI.DeleteCommand": {
 
-                var resultCode = SDL.SDLController.getApplicationModel( request.params.appId ).deleteSubMenu( request.params.menuID );
-                this.sendUIResult( resultCode, request.id, request.method );
+                    SDL.SDLController.getApplicationModel(request.params.appID)
+                        .deleteCommand(request.params.cmdID);
+                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
-                break;
-            }
-            case "UI.CreateInteractionChoiceSet": {
+                    break;
+                }
+                case "UI.AddSubMenu": {
 
-                SDL.SDLController.getApplicationModel( request.params.appId ).onCreateInteraction( request.params );
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    SDL.SDLController.getApplicationModel(request.params.appID)
+                        .addSubMenu(request);
 
-                break;
-            }
-            case "UI.DeleteInteractionChoiceSet": {
+                    break;
+                }
+                case "UI.DeleteSubMenu": {
 
-                SDL.SDLController.getApplicationModel( request.params.appId ).onDeleteInteraction( request.params );
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    var resultCode = SDL.SDLController
+                        .getApplicationModel(request.params.appID)
+                        .deleteSubMenu(request.params.menuID);
+                    this.sendUIResult(resultCode, request.id, request.method);
 
-                break;
-            }
-            case "UI.PerformInteraction": {
+                    break;
+                }
+                case "UI.PerformInteraction": {
 
-                SDL.SDLModel.uiPerformInteraction( request.params, request.id );
+                    SDL.SDLModel.uiPerformInteraction(request.params,
+                        request.id);
 
-                break;
-            }
-            case "UI.SetMediaClockTimer": {
+                    break;
+                }
+                case "UI.SetMediaClockTimer": {
 
-                var resultCode = SDL.SDLController.getApplicationModel( request.params.appId ).sdlSetMediaClockTimer( request.params );
-                this.sendUIResult( resultCode, request.id, request.method );
+                    var resultCode = SDL.SDLController
+                        .getApplicationModel(request.params.appID)
+                        .sdlSetMediaClockTimer(request.params);
+                    if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+                        this.sendUIResult(resultCode,
+                            request.id,
+                            request.method);
+                    } else {
+                        this
+                            .sendError(resultCode,
+                                request.id,
+                                request.method,
+                                'Request is ignored, because the intended result is already in effect.');
+                    }
 
-                break;
-            }
-            case "UI.Slider": {
+                    break;
+                }
+                case "UI.Slider": {
 
-                SDL.SDLModel.uiSlider( request );
+                    SDL.SDLModel.uiSlider(request);
 
-                break;
-            }
-            case "UI.ScrollableMessage": {
+                    break;
+                }
+                case "UI.ScrollableMessage": {
 
-                SDL.SDLModel.onSDLScrolableMessage( request.params, request.id );
+                    SDL.SDLModel.onSDLScrolableMessage(request, request.id);
 
-                break;
-            }
-            case "UI.ChangeRegistration": {
+                    break;
+                }
+                case "UI.ChangeRegistration": {
 
-                SDL.SDLModel.changeRegistrationUI( request.params.language );
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
+                    SDL.SDLModel.changeRegistrationUI(request.params.language);
+                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
-                break;
-            }
-            case "UI.SetAppIcon": {
+                    break;
+                }
+                case "UI.SetAppIcon": {
 
-                    SDL.SDLModel.onSDLSetAppIcon( request.params, request.id, request.method );
+                    SDL.SDLModel.onSDLSetAppIcon(request.params,
+                        request.id,
+                        request.method);
 
-                break;
-            }
-            case "UI.PerformAudioPassThru": {
+                    break;
+                }
+                case "UI.PerformAudioPassThru": {
 
-                this.performAudioPassThruRequestId = request.id;
-                SDL.SDLModel.UIPerformAudioPassThru( request.params );
+                    this.performAudioPassThruRequestID = request.id;
+                    SDL.SDLModel.UIPerformAudioPassThru(request.params);
 
-                break;
-            }
-            case "UI.EndAudioPassThru": {
+                    break;
+                }
+                case "UI.EndAudioPassThru": {
 
-                    this.endAudioPassThruRequestId = request.id;
+                    this.endAudioPassThruRequestID = request.id;
 
                     SDL.SDLModel.UIEndAudioPassThru();
 
-                break;
-            }
-            case "UI.GetSupportedLanguages": {
+                    break;
+                }
+                case "UI.GetSupportedLanguages": {
+
+                    Em.Logger.log("FFW." + request.method + "Response");
 
                     var JSONMessage = {
                         "id": request.id,
                         "jsonrpc": "2.0",
                         "result": {
-                            "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
+                            "code": SDL.SDLModel.resultCode["SUCCESS"], // type
+                            // (enum)
+                            // from
+                            // SDL
                             "method": "UI.GetSupportedLanguages",
                             "languages": SDL.SDLModel.sdlLanguagesList
                         }
                     };
-                    this.client.send( JSONMessage );
+                    this.client.send(JSONMessage);
 
-                break;
-            }
-            case "UI.GetLanguage": {
+                    break;
+                }
+                case "UI.GetLanguage": {
+
+                    Em.Logger.log("FFW." + request.method + "Response");
 
                     var JSONMessage = {
                         "jsonrpc": "2.0",
                         "id": request.id,
                         "result": {
-                            "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-                                                        // protocol
-                            "method": "UI.GetLanguageResponse",
+                            "code": SDL.SDLModel.resultCode["SUCCESS"], // type
+                            // (enum)
+                            // from
+                            // SDL
+                            "method": "UI.GetLanguage",
                             "language": SDL.SDLModel.hmiUILanguage
                         }
                     };
-                    this.client.send( JSONMessage );
+                    this.client.send(JSONMessage);
 
-                break;
-            }
-            case "UI.DialNumber": {
-
-                SDL.SDLModel.dialNumber( request.params );
-
-                this.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method );
-
-                break;
-            }
-            case "UI.GetCapabilities": {
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "displayCapabilities": {
-                            "displayType": "GEN2_8_DMA",
-                            "textFields":[
-                                "mainField1",
-                                "mainField2",
-                                "mainField1",
-                                "mainField2",
-                                "statusBar",
-                                "mediaClock",
-                                "mediaTrack",
-                                "alertText1",
-                                "alertText2",
-                                "alertText3",
-                                "scrollableMessageBody",
-                                "initialInteractionText",
-                                "navigationText1",
-                                "navigationText2",
-                                "ETA",
-                                "totalDistance",
-                                "navigationText",
-                                "audioPassThruDisplayText1",
-                                "audioPassThruDisplayText2",
-                                "sliderHeader",
-                                "sliderFooter",
-                                "notificationText"
-                            ],
-                            "mediaClockFormats":
-                                [
+                    break;
+                }
+                case "UI.GetCapabilities": {
+                    // send repsonse
+                    var JSONMessage = {
+                        "jsonrpc": "2.0",
+                        "id": request.id,
+                        "result": {
+                            "displayCapabilities": {
+                                "displayType": "GEN2_8_DMA",
+                                "textFields": [
+                                    "mainField1",
+                                    "mainField2",
+                                    "mainField1",
+                                    "mainField2",
+                                    "statusBar",
+                                    "mediaClock",
+                                    "mediaTrack",
+                                    "alertText1",
+                                    "alertText2",
+                                    "alertText3",
+                                    "scrollableMessageBody",
+                                    "initialInteractionText",
+                                    "navigationText1",
+                                    "navigationText2",
+                                    "ETA",
+                                    "totalDistance",
+                                    "navigationText",
+                                    "audioPassThruDisplayText1",
+                                    "audioPassThruDisplayText2",
+                                    "sliderHeader",
+                                    "sliderFooter",
+                                    "notificationText"
+                                ],
+                                "mediaClockFormats": [
                                     "CLOCK1",
                                     "CLOCK2",
                                     "CLOCK3",
@@ -367,15 +378,14 @@ FFW.UI = FFW.RPCObserver.create( {
                                     "CLOCKTEXT3",
                                     "CLOCKTEXT4"
                                 ],
-                            "graphicSupported": true
-                        },
-                        "hmiZoneCapabilities":
-                            [
-                                "FRONT",
-                                "BACK"
+                                "imageCapabilities": [
+                                    "DYNAMIC"
+                                ]
+                            },
+                            "hmiZoneCapabilities": [
+                                "FRONT"
                             ],
-                        "softButtonCapabilities":
-                            [
+                            "softButtonCapabilities": [
                                 {
                                     "shortPressAvailable": true,
                                     "longPressAvailable": true,
@@ -383,292 +393,348 @@ FFW.UI = FFW.RPCObserver.create( {
                                     "imageSupported": true
                                 }
                             ],
-                        "code": SDL.SDLModel.resultCode["SUCCESS"],
-                        "method": "UI.GetCapabilities"
-                    }
-                };
+                            "code": SDL.SDLModel.resultCode["SUCCESS"],
+                            "method": "UI.GetCapabilities"
+                        }
+                    };
 
-                this.client.send( JSONMessage );
+                    this.client.send(JSONMessage);
 
-                break;
+                    break;
+                }
+                case "UI.IsReady": {
+
+                    // send repsonse
+                    var JSONMessage = {
+                        "jsonrpc": "2.0",
+                        "id": request.id,
+                        "result": {
+                            "available": this.get('isReady'),
+                            "code": SDL.SDLModel.resultCode["SUCCESS"],
+                            "method": "UI.IsReady"
+                        }
+                    };
+
+                    this.client.send(JSONMessage);
+
+                    break;
+                }
+                case "UI.ClosePopUp": {
+
+                    SDL.SDLController.closePopUp();
+
+                    // send repsonse
+                    var JSONMessage = {
+                        "jsonrpc": "2.0",
+                        "id": request.id,
+                        "result": {
+                            "code": SDL.SDLModel.resultCode["SUCCESS"],
+                            "method": "UI.ClosePopUp"
+                        }
+                    };
+
+                    this.client.send(JSONMessage);
+
+                    break;
+                }
+                case "UI.ShowVrHelp": {
+
+                    SDL.SDLModel.ShowVrHelp(request.params);
+
+                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+
+                    break;
+                }
+                default: {
+                    // statements_def
+                    break;
+                }
+                }
             }
-            case "UI.IsReady": {
+        },
+
+        /**
+         * Send error response from onRPCRequest
+         *
+         * @param {Number}
+         *            resultCode
+         * @param {Number}
+         *            id
+         * @param {String}
+         *            method
+         */
+        sendError: function(resultCode, id, method, message) {
+
+            Em.Logger.log("FFW." + method + "Response");
+
+            if (resultCode !== 0) {
 
                 // send repsonse
                 var JSONMessage = {
                     "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "available": this.get('isReady'),
-                        "code": SDL.SDLModel.resultCode["SUCCESS"],
-                        "method" : "UI.IsReady"
+                    "id": id,
+                    "error": {
+                        "code": resultCode, // type (enum) from SDL protocol
+                        "message": message,
+                        "data": {
+                            "method": method
+                        }
                     }
                 };
-
-                this.client.send( JSONMessage );
-
-                break;
+                this.client.send(JSONMessage);
             }
-            case "UI.ClosePopUp": {
+        },
+
+        /**
+         * send response from onRPCRequest
+         *
+         * @param {Number}
+         *            resultCode
+         * @param {Number}
+         *            id
+         * @param {String}
+         *            method
+         */
+        sendUIResult: function(resultCode, id, method) {
+
+            Em.Logger.log("FFW." + method + "Response");
+
+            if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
 
                 // send repsonse
                 var JSONMessage = {
                     "jsonrpc": "2.0",
-                    "id": request.id,
+                    "id": id,
                     "result": {
-                        "code": SDL.SDLModel.resultCode["SUCCESS"],
-                        "method" : "UI.ClosePopUp"
-                    }
-                };
-
-                this.client.send( JSONMessage );
-
-                break;
-            }
-            default: {
-                // statements_def
-                break;
-            }
-        }
-    },
-
-    /**
-     * Send error response from onRPCRequest
-     * @param {Number} resultCode
-     * @param {Number} id
-     * @param {String} method
-     */
-    sendUIError: function( resultCode, id, method, message ) {
-
-        Em.Logger.log( "FFW.UI." + method + "Response" );
-
-        if( resultCode ){
-
-            // send repsonse
-            var JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": id,
-                "error": {
-                    "code": resultCode, // type (enum) from SDL protocol
-                    "message": message,
-                    "data":{
+                        "code": resultCode, // type (enum) from SDL protocol
                         "method": method
                     }
+                };
+                this.client.send(JSONMessage);
+            }
+        },
+
+        /**
+         * send response from onRPCRequest
+         *
+         * @param {Number}
+         *            resultCode
+         * @param {Number}
+         *            id
+         */
+        alertResponse: function(resultCode, id) {
+
+            Em.Logger.log("FFW.UI.AlertResponse");
+
+            if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "result": {
+                        "code": resultCode, // type (enum) from SDL protocol
+                        "method": 'UI.Alert'
+                    }
+                };
+                this.client.send(JSONMessage);
+            } else {
+                this.sendError(resultCode,
+                    id,
+                    "UI.Alert",
+                    'Alert request aborted.');
+            }
+        },
+
+        /**
+         * send response from onRPCRequest
+         *
+         * @param {Number}
+         *            resultCode
+         * @param {Number}
+         *            sliderRequestID
+         * @param {Number}
+         *            sliderPosition
+         */
+        sendSliderResult: function(resultCode, sliderRequestID, sliderPosition) {
+
+            if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": sliderRequestID,
+                    "result": {
+                        "code": resultCode, // type (enum) from SDL protocol
+                        "method": 'UI.Slider'
+                    }
+                };
+
+                if (sliderPosition) {
+                    JSONMessage.result.sliderPosition = sliderPosition;
+                }
+            } else {
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": sliderRequestID,
+                    "error": {
+                        "code": resultCode, // type (enum) from SDL protocol
+                        "message": 'Slider request aborted.',
+                        "data":{
+                            "method": 'UI.Slider'
+                        }
+                    }
+                };
+
+                if (sliderPosition) {
+                    JSONMessage.error.data.sliderPosition = sliderPosition;
+                }
+            }
+
+            this.client.send(JSONMessage);
+        },
+
+        /**
+         * send notification when command was triggered
+         *
+         * @param {Number}
+         *            commandID
+         * @param {Number}
+         *            appID
+         */
+        onCommand: function(commandID, appID) {
+
+            Em.Logger.log("FFW.UI.onCommand");
+
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "UI.OnCommand",
+                "params": {
+                    "cmdID": commandID,
+                    "appID": appID
                 }
             };
-            this.client.send( JSONMessage );
-        }
-    },
+            this.client.send(JSONMessage);
+        },
 
-    /**
-     * send response from onRPCRequest
-     * @param {Number} resultCode
-     * @param {Number} id
-     * @param {String} method
-     */
-    sendUIResult: function( resultCode, id, method ) {
+        /**
+         * send notification when command was triggered
+         *
+         * @param {Number}
+         *            softButtonID
+         * @param {Number}
+         *            appID
+         */
+        onCommandSoftButton: function(softButtonID, appID) {
 
-        Em.Logger.log( "FFW." + method + "Response" );
+            Em.Logger.log("FFW.UI.onCommand");
 
-        if( resultCode === SDL.SDLModel.resultCode["SUCCESS"] ){
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "UI.OnCommand",
+                "params": {
+                    "commandID": softButtonID,
+                    "appID": appID
+                }
+            };
+            this.client.send(JSONMessage);
+        },
+
+        /**
+         * send notification when command was triggered
+         *
+         * @param {Number}
+         *            resultCode
+         * @param {Number}
+         *            performInteractionRequestID
+         * @param {Number}
+         *            commandID
+         */
+        interactionResponse: function(resultCode, performInteractionRequestID,
+            commandID) {
+
+            Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": id,
+                "id": performInteractionRequestID,
                 "result": {
-                    "code": resultCode, // type (enum) from SDL protocol
-                    "method": method
+                    "code": resultCode,
+                    "method": "UI.PerformInteraction"
                 }
             };
-            this.client.send( JSONMessage );
-        }
-    },
 
-    /**
-     * send response from onRPCRequest     
-     * @param {Number} resultCode
-     * @param {Number} id
-     */
-    alertResponse: function( resultCode, id ) {
+            if (commandID) {
+                JSONMessage.result.choiceID = commandID;
+            }
 
-        Em.Logger.log( "FFW.UI.AlertResponse" );
+            this.client.send(JSONMessage);
+        },
 
-        if( resultCode ){
+        /**
+         * send notification when DriverDistraction PopUp is visible
+         *
+         * @param {String}
+         *            driverDistractionState
+         */
+        onDriverDistraction: function(driverDistractionState) {
+
+            Em.Logger.log("FFW.UI.DriverDistraction");
 
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": id,
-                "result": {
-                    "code": resultCode, // type (enum) from SDL protocol
-                    "method": 'UI.Alert'
+                "method": "UI.OnDriverDistraction",
+                "params": {
+                    "state": driverDistractionState
                 }
             };
-            this.client.send( JSONMessage );
-        }
-    },
+            this.client.send(JSONMessage);
+        },
 
-    /**
-     * send response from onRPCRequest
-     * @param {Number} resultCode
-     * @param {Number} sliderRequestId
-     * @param {Number} sliderPosition
-     */
-    sendSliderResult: function( resultCode, sliderRequestId, sliderPosition ) {
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "id": sliderRequestId,
-            "result": {
-                "code": resultCode, // type (enum) from SDL protocol
-                "method": "UI.SliderResponse"
-            }
-        };
+        /**
+         * Notifies if system context is changed
+         *
+         * @param {String}
+         *            systemContextValue
+         */
+        OnSystemContext: function(systemContextValue) {
 
-        if( sliderPosition ){
-            JSONMessage.result.sliderPosition = sliderPosition;
-        }
+            Em.Logger.log("FFW.UI.OnSystemContext");
 
-        this.client.send( JSONMessage );
-    },
-
-    /**
-     * send notification when command was triggered
-     * @param {Number} commandId
-     * @param {Number} appId
-     */
-    onCommand: function( commandId, appId ) {
-        Em.Logger.log( "FFW.UI.onCommand" );
-
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnCommand",
-            "params": {
-                "cmdID": commandId,
-                "appId": appId
-            }
-        };
-        this.client.send( JSONMessage );
-    },
-
-    /**
-     * send notification when command was triggered
-     * @param {Number} softButtonID
-     * @param {Number} appId
-     */
-    onCommandSoftButton: function( softButtonID, appId ) {
-        Em.Logger.log( "FFW.UI.onCommand" );
-
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnCommand",
-            "params": {
-                "commandId": softButtonID,
-                "appId": appId
-            }
-        };
-        this.client.send( JSONMessage );
-    },
-
-    /**
-     * send notification when command was triggered
-     * @param {Number} resultCode
-     * @param {Number} performInteractionRequestId
-     * @param {Number} commandId
-     */
-    interactionResponse: function( resultCode, performInteractionRequestId, commandId ) {
-        Em.Logger.log( "FFW.UI.PerformInteractionResponse" );
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "id": performInteractionRequestId,
-            "result": {
-                "code": resultCode,
-                "method": "UI.PerformInteractionResponse"
-            }
-        };
-
-        if( commandId ){
-            JSONMessage.result.choiceID = commandId;
-        }
-
-        this.client.send( JSONMessage );
-    },
-
-    /**
-     * send notification when DriverDistraction PopUp is visible
-     * @param {String} driverDistractionState
-     */
-    onDriverDistraction: function( driverDistractionState ) {
-        Em.Logger.log( "FFW.UI.DriverDistraction" );
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnDriverDistraction",
-            "params": {
-                "state": driverDistractionState
-            }
-        };
-        this.client.send( JSONMessage );
-    },
-
-    /**
-     * Notifies if system context is changed
-     * @param {String} systemContextValue
-     */
-    OnSystemContext: function( systemContextValue ) {
-        Em.Logger.log( "FFW.UI.OnSystemContext" );
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnSystemContext",
-            "params": {
-                "systemContext": systemContextValue
-            }
-        };
-        this.client.send( JSONMessage );
-    },
-
-    /**
-     * Notifies if device was choosed
-     * @param {String} deviceName
-     * @param {Number} appId
-     */
-    OnDeviceChosen: function(deviceName, appId) {
-        Em.Logger.log( "FFW.UI.OnDeviceChosen" );
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnDeviceChosen",
-            "params": {
-                "deviceInfo": {
-                    "name": deviceName,
-                    "id": appId
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "UI.OnSystemContext",
+                "params": {
+                    "systemContext": systemContextValue
                 }
-            }
-        };
-        this.client.send( JSONMessage );
-    },
+            };
+            this.client.send(JSONMessage);
+        },
 
-    /**
-     * Notifies if sdl UI components language was changed
-     * @param {String} lang
-     */
-    OnLanguageChange: function( lang ) {
-        Em.Logger.log( "FFW.UI.OnLanguageChange" );
+        /**
+         * Notifies if sdl UI components language was changed
+         *
+         * @param {String}
+         *            lang
+         */
+        OnLanguageChange: function(lang) {
 
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "UI.OnLanguageChange",
-            "params": {
-                "hmiDisplayLanguage": lang
-            }
-        };
-        this.client.send( JSONMessage );
-    }
-} )
+            Em.Logger.log("FFW.UI.OnLanguageChange");
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "UI.OnLanguageChange",
+                "params": {
+                    "language": lang
+                }
+            };
+            this.client.send(JSONMessage);
+        }
+    })

@@ -107,6 +107,13 @@ class MessageChaining {
   int counter() const;
 
   /**
+   * @brief Sets counter
+   *
+   * @param counter Param indicates how many responses expected
+   */
+  void set_counter(const unsigned int& counter);
+
+  /**
    * @brief Sets SmartObject data
    *
    * @return reference to SmartObject data

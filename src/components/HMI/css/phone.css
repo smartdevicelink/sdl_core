@@ -5,13 +5,12 @@
  * @filesource	css/phone.css
  * @version		2.0
  */
-
 #phone {
 	width: 800px;
 	height: 480px;
 	background: url(../images/phone/bg.png) no-repeat;
 	background-position: top;
-}/*
+}  /*
 
 
  Backgrpund for active toogleButton
@@ -28,33 +27,82 @@
 }
 
  LEFT MENU 
-*/#phone_menu{position:absolute;top:90px;left:0px;width:150px;height:300px;background: #333;}
-	.ls_border {z-index:201;position:absolute;top:-3px;left:0px;width:153px;height:306px;}
-	.ls-items{position:relative;width:150px;height:300px;}
-	.ls-item{
-		z-index:201;
-		position:relative;
-		width:150px;
-	}
-	/*.ls-item > .bg{z-index:201;position:absolute;top:0px;left:0px;width:150px;height:50px;}
-	*/.ls-item > .ico{z-index:299;position:absolute;left:10px;width:30px;height:30px;top:10px;}/*
+*/
+#phone_menu {
+	position: absolute;
+	top: 90px;
+	left: 0px;
+	width: 150px;
+	height: 300px;
+	background: #333;
+}
+
+.ls_border {
+	z-index: 201;
+	position: absolute;
+	top: -3px;
+	left: 0px;
+	width: 153px;
+	height: 306px;
+}
+
+.ls-items {
+	position: relative;
+	width: 150px;
+	height: 300px;
+}
+
+.ls-item {
+	z-index: 201;
+	position: relative;
+	width: 150px;
+}
+
+/*.ls-item > .bg{z-index:201;position:absolute;top:0px;left:0px;width:150px;height:50px;}
+	*/
+.ls-item>.ico {
+	z-index: 299;
+	position: absolute;
+	left: 10px;
+	width: 30px;
+	height: 30px;
+	top: 10px;
+}  /*
 	.ls-item > .ico.more {left:50px;}
-	*/.ls-item span {z-index:298;position:absolute;left:50px;width:100px;height:50px;font-size:18px;line-height:50px;white-space:nowrap;overflow:hidden;}
-	/*.ls-item > .led{z-index:299;position:absolute;top:0px;right:8px;width:24px;height:50px;}
+	*/
+.ls-item span {
+	z-index: 298;
+	position: absolute;
+	left: 50px;
+	width: 100px;
+	height: 50px;
+	font-size: 18px;
+	line-height: 50px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+/*.ls-item > .led{z-index:299;position:absolute;top:0px;right:8px;width:24px;height:50px;}
 	.ls-item.empty{background:#333333;}
 	.firts_item{-webkit-border-top-right-radius:3px;border-top-right-radius:3px;}
 	.last_item{-webkit-border-bottom-right-radius:3px;border-bottom-right-radius:3px;}
-	*/.lsp1_p{background:url("../images/phone/menu_bg.png") repeat-x bottom;}
-	.phone_active {
-		background:url("../images/phone/menu_active.png") repeat-x bottom !important;
-		border-top: 1px solid #3e3115;
-		border-bottom: 1px solid #4a3a17
-	}
+	*/
+.lsp1_p {
+	background: url("../images/phone/menu_bg.png") repeat-x bottom;
+}
+
+.phone_active {
+	background: url("../images/phone/menu_active.png") repeat-x bottom
+		!important;
+	border-top: 1px solid #3e3115;
+	border-bottom: 1px solid #4a3a17
+}
+
 #phone_menu .ls-item {
-	height:48px;
-		border-bottom: 1px solid #656565;
-		border-top: 1px solid #393939;
-}/*
+	height: 48px;
+	border-bottom: 1px solid #656565;
+	border-top: 1px solid #393939;
+}  /*
 	.navigation {width:26px;height:25px;background:url("../images/phone/ico_navigation.png") no-repeat;left:60px;top:10px;}
 
 #phone_menu.hide {
@@ -71,7 +119,8 @@
 	background: url(../images/phone/phone_button_bg_active.png) repeat-x;
 }
  PHONE STATUS BAR 
-*/#status_phone {
+*/
+#status_phone {
 	top: 0px;
 	left: 0px;
 	font-size: 21px;
@@ -90,7 +139,7 @@
 
 #status_phone_label span {
 	padding-left: 11px;
-}/*
+}  /*
 
 #status_phone_call {
 	position: absolute;
@@ -257,7 +306,8 @@
 	margin-top: -3px;
 }
 
-*/#phone_dialpad_number {
+*/
+#phone_dialpad_number {
 	width: 283px;
 	height: 30px;
 	position: absolute;
@@ -283,7 +333,7 @@
 	font-size: 26px;
 	text-align: center;
 	line-height: 32px;
-}/*
+}  /*
 
 
 #phone_dialpad_keypad .words {
@@ -293,7 +343,8 @@
 	color: #999;
 }
 
-*/#phone_dialpad_keypad .left {
+*/
+#phone_dialpad_keypad .left {
 	left: 0px;
 	width: 93px;
 	height: 49px;
@@ -320,17 +371,19 @@
 	border-top: 1px solid #393939;
 }
 
-#phone_dialpad_keypad_key4, #phone_dialpad_keypad_key5, #phone_dialpad_keypad_key6 {
-	top:50px;
+#phone_dialpad_keypad_key4,#phone_dialpad_keypad_key5,#phone_dialpad_keypad_key6
+	{
+	top: 50px;
 }
 
-#phone_dialpad_keypad_key7, #phone_dialpad_keypad_key8, #phone_dialpad_keypad_key9 {
-	top:100px;
+#phone_dialpad_keypad_key7,#phone_dialpad_keypad_key8,#phone_dialpad_keypad_key9
+	{
+	top: 100px;
 }
 
-
-#phone_dialpad_keypad_key0, #phone_dialpad_keypad_keyDiez, #phone_dialpad_keypad_keyStar {
-	top:150px;
+#phone_dialpad_keypad_key0,#phone_dialpad_keypad_keyDiez,#phone_dialpad_keypad_keyStar
+	{
+	top: 150px;
 	border-bottom: 1px solid #393939;
 }
 
@@ -345,13 +398,14 @@
 }
 
 #phone_dialpad_keypad_keyStar {
-	-webkit-border-bottom-left-radius:3px;
-	border-bottom-left-radius:3px;
+	-webkit-border-bottom-left-radius: 3px;
+	border-bottom-left-radius: 3px;
 }
+
 #phone_dialpad_keypad_keyDiez {
-	-webkit-border-bottom-right-radius:3px;
-	border-bottom-right-radius:3px;
-}/*
+	-webkit-border-bottom-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+}  /*
 
 
  Dialpad controls 
@@ -422,8 +476,9 @@
 	cursor: pointer;
 }
 
-*/#phone_dialpad_deleteButton {
-	opacity:0;
+*/
+#phone_dialpad_deleteButton {
+	opacity: 0;
 	cursor: pointer;
 	width: 93px;
 	height: 49px;
@@ -439,7 +494,6 @@
 	left: 34px;
 	top: 15px;
 }
-
 
 #phone_dialpad_dialButton {
 	cursor: pointer;
@@ -467,7 +521,6 @@
 	top: 11px;
 }
 
-
 #phone_dialpad_endButton {
 	cursor: pointer;
 	border: 1px solid #393939;
@@ -492,7 +545,7 @@
 	position: absolute;
 	right: 9px;
 	top: 16px;
-}/*
+} /*
 
 #phone_dialpad_contactImage {
 	opacity: 0;

@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -36,22 +35,19 @@ SDL.StatusPhoneView = Em.ContainerView.extend( {
 
     elementId: 'status_phone',
 
-    classNames:
-        [
-            'status_bar'
-        ],
+    classNames: [
+        'status_bar'
+    ],
 
     /** Bind class for visual representation */
-    classNameBindings:
-        [
-            'SDL.States.phone.active:selected'
-        ],
+    classNameBindings: [
+        'SDL.States.phone.active:selected'
+    ],
 
     /** Climate components */
-    childViews:
-        [
-            'statusHome',
-        ],
+    childViews: [
+        'statusHome',
+    ],
 
     /** Label for Home screen */
     statusHome: SDL.Label.extend( {
@@ -60,12 +56,13 @@ SDL.StatusPhoneView = Em.ContainerView.extend( {
         classNames: 'visible',
 
         content: 'Phone'
-    } ),
+    }),
 
     /**
      * Select phone state should be called when user press phone statusbar
      */
-    actionUp: function( event ) {
-        SDL.States.goToStates( 'phone.dialpad' );
+    actionUp: function(event) {
+
+        SDL.States.goToStates('phone.dialpad');
     }
-} );
+});

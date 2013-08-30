@@ -112,9 +112,9 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
         elementId: 'AudioPassThruPopUpButtonRetry',
         classNames: 'buttonRetry softButton',
         text: 'Retry',
-        responseResult: 'RETRY',
+        responseResult: SDL.SDLModel.resultCode['RETRY'],
         actionUp: function() {
-            SDL.SDLController.callPerformAudioPassThruPopUpResponse( this );
+            SDL.SDLController.callPerformAudioPassThruPopUpErrorResponse( this );
         }
     } ),
 
@@ -122,7 +122,7 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
         elementId: 'AudioPassThruPopUpButtonDone',
         classNames: 'buttonDone softButton',
         text: 'Done',
-        responseResult: 'SUCCESS',
+        responseResult: SDL.SDLModel.resultCode['SUCCESS'],
         actionUp: function() {
             SDL.SDLController.callPerformAudioPassThruPopUpResponse( this );
         }
@@ -132,9 +132,9 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
         elementId: 'AudioPassThruPopUpButtonCancel',
         classNames: 'buttonCancel softButton',
         text: 'Cancel',
-        responseResult: 'ABORTED',
+        responseResult: SDL.SDLModel.resultCode['ABORTED'],
         actionUp: function() {
-            SDL.SDLController.callPerformAudioPassThruPopUpResponse( this );
+            SDL.SDLController.callPerformAudioPassThruPopUpErrorResponse( this );
         }
     } ),
 
@@ -148,27 +148,24 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
 
             var self = this, data = SDL.SDLModel.AudioPassThruData;
 
-            this.set( 'appName', SDL.SDLController.getApplicationModel( data.appId ).appName );
+            this.set( 'appName', SDL.SDLController.getApplicationModel( data.appID ).appName );
 
             for (var i = 0; i < data.audioPassThruDisplayTexts.length; i++) {
-                switch (data.audioPassThruDisplayTexts[i]) {
+                switch (data.audioPassThruDisplayTexts[i].fieldName) {
                     case 'audioPassThruDisplayText1': {
-                        this.appInfo.set('content1', data.audioPassThruDisplayTexts[i].fieldText);
+                        this.set('content1', data.audioPassThruDisplayTexts[i].fieldText);
                         break;
                     }
                     case 'audioPassThruDisplayText2': {
-                        this.appInfo.set('content2', data.audioPassThruDisplayTexts[i].fieldText);
+                        this.set('content2', data.audioPassThruDisplayTexts[i].fieldText);
                         break;
                     }
                 }
             }
-            
-            this.set( 'content1', data.audioPassThruDisplayText1 );
-            this.set( 'content2', data.audioPassThruDisplayText2 );
 
             clearTimeout( this.timer );
             this.timer = setTimeout( function() {
-                SDL.SDLController.performAudioPassThruResponse( "SUCCESS" );
+                SDL.SDLController.performAudioPassThruResponse( SDL.SDLModel.resultCode["SUCCESS"] );
             }, data.maxDuration );
         }else{
             if( this.timer ){

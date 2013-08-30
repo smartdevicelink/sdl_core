@@ -1,17 +1,16 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
- *
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -34,15 +33,13 @@
 
 SDL.DeviceListView = Em.ContainerView.create( {
 
-    classNames:
-        [
-            'info_apps_deviceList_view'
-        ],
+    classNames: [
+        'info_apps_deviceList_view'
+    ],
 
-    classNameBindings:
-        [
-            'SDL.States.info.devicelist.active:active_state:inactive_state'
-        ],
+    classNameBindings: [
+        'SDL.States.info.devicelist.active:active_state:inactive_state'
+    ],
 
     /**
      * View Id
@@ -52,26 +49,21 @@ SDL.DeviceListView = Em.ContainerView.create( {
     /**
      * View Components
      */
-    childViews:
-        [
-            'backButton',
-            'listOfDevices',
-            'deviceListLabel'
-        ],
+    childViews: [
+        'backButton', 'listOfDevices', 'deviceListLabel'
+    ],
 
     /**
      * Button to return to previous view
      */
     backButton: SDL.Button.extend( {
-        classNames:
-            [
-                'backButton',
-                'button'
-            ],
+        classNames: [
+            'backButton', 'button'
+        ],
         action: 'turnChangeDeviceViewBack',
         target: 'SDL.SDLController',
         icon: 'images/media/ico_back.png'
-    } ),
+    }),
 
     /**
      * Label in title
@@ -83,27 +75,31 @@ SDL.DeviceListView = Em.ContainerView.create( {
         classNames: 'deviceListLabel',
 
         content: 'Change Devices'
-    } ),
+    }),
 
     /**
      * Function calls when notification from RPC comes and creates buttons to
      * choose devices
      */
-    ShowDeviceList: function( params ) {
+    ShowDeviceList: function(params) {
+
+        this.clearDeviceList();
 
         var i, len = params.deviceList.length;
-        for( i = 0; i < len; i++ ){
-            this.get( 'listOfDevices.list.childViews' ).pushObject( SDL.Button.create( {
-                deviceName: params.deviceList[i].name,
-                icon: params.deviceList[i].icon,
-                text: params.deviceList[i].name,
-                classNames: 'ffw-button notpressed list-item',
-                templateName: params.deviceList[i].icon ? 'rightIcon' : 'text',
-                action: 'onDeviceChoosed',
-                target: 'SDL.SDLController',
-                onDown: false,
-                id: params.deviceList[i].id
-            } ) );
+        for (i = 0; i < len; i++) {
+            this.get('listOfDevices.list.childViews').pushObject(SDL.Button
+                .create( {
+                    deviceName: params.deviceList[i].name,
+                    icon: params.deviceList[i].icon,
+                    text: params.deviceList[i].name,
+                    classNames: 'ffw-button notpressed list-item',
+                    templateName: params.deviceList[i].icon ? 'rightIcon'
+                        : 'text',
+                    action: 'onDeviceChoosed',
+                    target: 'SDL.SDLController',
+                    onDown: false,
+                    id: params.deviceList[i].id
+                }));
         }
     },
 
@@ -112,7 +108,8 @@ SDL.DeviceListView = Em.ContainerView.create( {
      * all old data about devices
      */
     clearDeviceList: function() {
-        this.get( 'listOfDevices.list' ).removeAllChildren();
+
+        this.get('listOfDevices.list').removeAllChildren();
         this.listOfDevices.rerender();
     },
 
@@ -127,5 +124,5 @@ SDL.DeviceListView = Em.ContainerView.create( {
 
         /** Items array */
         items: []
-    } )
-} );
+    })
+});

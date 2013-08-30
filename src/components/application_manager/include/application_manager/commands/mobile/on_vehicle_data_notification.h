@@ -39,7 +39,7 @@
 
 namespace application_manager {
 
-class ApplicationImpl;
+class Application;
 
 namespace commands {
 
@@ -48,33 +48,33 @@ namespace commands {
  * to mobile device that some button was pressed on HMI.
  **/
 class OnVehicleDataNotification : public CommandNotificationImpl {
- public:
-  /**
-   * @brief OnVehicleDataNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnVehicleDataNotification(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief OnVehicleDataNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnVehicleDataNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnVehicleDataNotification class destructor
-   **/
-  virtual ~OnVehicleDataNotification();
+    /**
+     * @brief OnVehicleDataNotification class destructor
+     **/
+    virtual ~OnVehicleDataNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  /*
-   * @brief Sends vehicle data notification to mobile device
-   *
-   * @param app Application to receive notification
-   */
-  void SendVehicleData(const ApplicationImpl* app);
+  private:
+    /*
+     * @brief Sends vehicle data notification to mobile device
+     *
+     * @param app Application to receive notification
+     */
+    void SendVehicleData(const Application* app);
 
-  DISALLOW_COPY_AND_ASSIGN(OnVehicleDataNotification);
+    DISALLOW_COPY_AND_ASSIGN(OnVehicleDataNotification);
 };
 
 }  // namespace commands

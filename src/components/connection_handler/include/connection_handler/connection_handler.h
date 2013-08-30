@@ -36,8 +36,7 @@
 #ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
 #define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
 
-#include "TransportManager/ITransportManagerDeviceListener.hpp"
-#include "TransportManager/SDeviceInfo.hpp"
+#include "transport_manager/transport_manager_listener.h"
 #include "protocol_handler/session_observer.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -67,7 +66,7 @@ class ConnectionHandler {
      * \param transportManager Pointer to TransportManager object.
      **/
     virtual void set_transport_manager(
-      NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager) = 0;
+      transport_manager::TransportManager* transport_manager) = 0;
 
     virtual void StartTransportManager() = 0;
 

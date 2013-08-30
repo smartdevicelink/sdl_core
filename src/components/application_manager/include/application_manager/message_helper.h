@@ -35,9 +35,10 @@
 
 #include <map>
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
+
 
 namespace application_manager {
 
@@ -123,16 +124,7 @@ class MessageHelper {
      *
      **/
     static void SendHMIStatusNotification(
-      const ApplicationImpl& application_impl);
-
-    /**
-     * @brief Sends OnDeviceListUpdated notification to HMI
-     *
-     *@param device_list Device list
-     *
-     **/
-    static void SendDeviceListUpdatedNotificationToHMI(
-      const std::set<connection_handler::Device>& devices);
+      const Application& application_impl);
 
     /**
      * @brief Sends OnAppRegistered notification to HMI
@@ -141,7 +133,18 @@ class MessageHelper {
      *
      **/
     static void SendOnAppRegisteredNotificationToHMI(
-      const ApplicationImpl& application_impl);
+      const Application& application_impl);
+
+    /**
+     * @brief Sendss Vr Command 'Help'
+     */
+    static void SendHelpVrCommand();
+
+    /**
+     * @brief Send Vr Synonyms of application name to HMI
+     * so that app can be activated via VR.
+     */
+    static void SendVrCommandsOnRegisterAppToHMI(Application* app);
 
     /**
      * @brief Sends OnAppInterfaceUnregistered notification to mobile
@@ -162,6 +165,12 @@ class MessageHelper {
      */
     static const VehicleData& vehicle_data();
 
+    static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
+      mobile_apis::FunctionID::eType function_id,
+      mobile_apis::Result::eType result,
+      unsigned int correlation_id,
+      unsigned int connection_key);
+
     /*
      * @brief Prepare GetDeviceListResponse
      *
@@ -172,7 +181,60 @@ class MessageHelper {
     static smart_objects::SmartObject* CreateDeviceListSO(
       const connection_handler::DeviceList& devices);
 
+    static smart_objects::SmartObject* CreateModuleInfoSO(
+      unsigned int function_id);
+
+    static smart_objects::SmartObject* CreateSetAppIcon(
+      const std::string& path_to_icon, unsigned int app_id);
+
+    static void SendAppDataToHMI(const Application* app);
+    static void SendGlobalPropertiesToHMI(const Application* app);
+
+    static void SendShowVrHelpToHMI(const Application* app);
+
+    static void SendShowRequestToHMI(const Application* app);
+    static void SendShowConstantTBTRequestToHMI(const Application* app);
+    static void SendAddCommandRequestToHMI(const Application* app);
+    static void SendAddVRCommandToHMI(
+      unsigned int cmd_id,
+      const smart_objects::SmartObject& vr_commands,
+      unsigned int app_id);
+    static void SendAddSubMenuRequestToHMI(const Application* app);
+    static void RemoveAppDataFromHMI(Application* const app);
+    static void SendOnAppUnregNotificationToHMI(Application* const app);
+    static void SendDeleteCommandRequestToHMI(Application* const app);
+    static void SendDeleteSubMenuRequestToHMI(Application* const app);
+    static void ResetGlobalproperties(Application* const app);
+
+    static smart_objects::SmartObject* CreateNegativeResponse(
+      unsigned int connection_key,
+      int function_id,
+      unsigned int correlation_id,
+      int result_code);
+
+    /*
+     * @brief Finds "Image" structure in request and verify image file presence
+     *                      in Core.
+     *
+     * @param message SmartObject with request
+     *
+     * @param app current application
+     *
+     * @return verification result
+     *
+     */
+    static  mobile_apis::Result::eType VerifyImageFiles(smart_objects::SmartObject& message,
+                                 const Application* app);
+
+    static bool PrintSmartObject(smart_objects::SmartObject& object);
+
+    template<typename From, typename To>
+    static To ConvertEnumAPINoCheck(const From& input) {
+      return static_cast<To>(input);
+    }
+
   private:
+    static smart_objects::SmartObject* CreateGeneralVrCommand() ;
     MessageHelper();
 
     static const VehicleData      vehicle_data_;

@@ -1,0 +1,225 @@
+[CW35]
+* SoftButtons can be sent without SystemAction parameter.
+* SyncProxyAndroid SDK: Fix creating more and more TCP transports after disconnects.
+- SyncProxyAndroid SDK: TCPTransport: Remove the autoReconnect feature, as it's handled by the protocol.
+* Revert "Fix SyncProxyTester freezing when trying to send a message after WiFi is connected and then turned off."
+
+[CW34]
+* Fix: RegisterAppInterface response with DUPLICATE_NAME shouldn't show up multiple times on WiFi.
+* Fix sending GenericRequest message from XML tests.
+* Fix SyncProxyTester freezing when trying to send a message after WiFi is connected and then turned off.
+* Fix Exit context menu item: it sends EndSession message before exiting.
+* PerformInteraction, Show, SetGlobalProperties, Soft Buttons dialogs: use image filenames with extensions by default.
+* SyncProxyAndroid SDK: EndSession message includes hash ID that was received with StartSessionACK.
+* Fix a crash when trying to send SyncPData request from XML test.
+
+[CW33]
+* Use SyncMsgVersion 2.2.
++ The user can send UnregisterAppInterface message from GUI.
+* SyncProxyAndroid SDK: fix two bugs with sending huge RPC requests.
+
+[CW32]
++ Add Float tag parsing to XML tests parser.
+* Remove the persistent top-level submenu with id = 0.
+* SyncProxyAndroid SDK: temporarily turn on verbose logging of BTTransport events.
+* SyncProxyAndroid SDK: update result code values.
+
+[CW31]
+* SyncProxyAndroid SDK: fix a crash on sending GenericRequest message.
+* SyncProxyAndroid SDK: cherry-pick Ford's changes: add SyncPData function.
++ Add the SetDisplayLayout dialog.
+- SyncProxyAndroid SDK: remove DialNumber function.
+* SyncProxyAndroid SDK: update FunctionID values. NB: The SDLCore must use the same values to be compatible!
+* SyncProxyAndroid SDK: add incoming JSON message check.
+* SyncProxyAndroid SDK: log when protocol version is set, and each marshalled request.
+* SyncProxyTester always uses protocol version 2.
+* SyncProxyAndroid SDK: VehicleData parameters are sent as booleans (based on Ford's changes).
+* SyncProxyAndroid SDK: cherry-pick Ford's changes: update GetVehicleDataResponse class.
+* SyncProxyAndroid SDK: fix a bug when negative function ID corrupted the binary RPC header.
+* Fix a crash with EncodedSyncPData message (replaced the Base64 codec).
+
+[CW30]
+* GetDTCs dialog and message: add dtcMask and remove encrypted parameter.
++ PerformAudioPassThru dialog and message: add muteAudio parameter.
+* ImageType value is DYNAMIC by default.
+* SetGlobalProperties, AddCommand, CreateInteractionChoiceSet, PerformInteraction dialogs: allow to set multiple VR commands/synonyms parameters as comma-separated strings.
+* Update VehicleData and Language values.
+* ButtonSubscriptions dialog: add ButtonName.CUSTOM_NAME value.
++ AddSubMenu dialog: add subMenuID and position parameters.
++ AddCommand dialog: add commandID and position parameters.
++ Show dialog: add graphic's image type parameter.
+* AddCommand dialog: the user can omit sending parentID parameter.
++ Add the EncodedSyncPData dialog.
+
+[CW28]
+* Cherry-pick Ford's changes: generate test error report with actual and expected responses.
+
+[CW25]
++ ModuleTest can run tests from directory.
+* Rename MakeMeFeelGood request => GenericRequest.
+
+[CW24]
++ ModuleTest: add the ability to set custom JSON messages for requests in XML test.
++ ModuleTest: add invalidJSON attribute to request tags to produce invalid JSON sent to the core.
+* Fix: ModuleTest: allow to test the responses to Register/UnregisterAppInterface requests.
+
+[CW20]
++ The user can now send brand new MakeMeFeelGood request. Used to test that the response is GenericResponse.
++ ShowConstantTBT dialog (v2): add turn icon parameter.
+- SetMediaClockTimer dialog (v1): remove CLEAR update mode.
+* Speak dialog: set all TTS Chunks' types to TEXT by default.
+
+[CW17]
+* Alert dialog (v1): hide Line 3 and Soft Buttons fields.
+* AddCommand dialog (v1): hide icon-related fields.
++ XML testing: <test> and request tags now support the 'pause' attribute, which inserts a delay after completing the test or sending the request, respectively. Its value is the delay in milliseconds. If the attribute is missing, no delay is inserted.
+
+[CW16]
++ CreateInteractionChoiceSet dialog: add support for Image fields.
+* PutFile dialog: don't allow to send files larger than 4 MB.
+* SyncProxyAndroid SDK: prevent crashing of the application when trying to send a request with large bulk data.
+
+[CW15]
+* Fix (protocol v1): don't send initialization requests when switching to already registered app from another screen (on HMI).
+* Fix an incorrect app name when the phone is using Russian locale.
+
+[CW14]
++ Add an option to the startup screen: "Set app icon after registration".
+* PerformInteraction dialog: allow to select multiple choice set IDs.
+* Show dialog: add extra fields.
++ Allow to send test requests when the app is not registered.
++ Add GUI for PerformInteraction message.
+
+[CW12]
+* UpdateTurnList dialog: change the way how Turn items are parsed from the GUI.
++ Add an option to disable screen locking while doing XML tests. It can be toggled in the options menu, "Lock screen while testing" item. The change will NOT affect currently running tests, if any.
+* Fix: remove all the commands that were added to the submenu when it's deleted.
++ ModuleTest: the user can now specify the source data for a PutFile request as a filename (with path starting at "/sdcard/") or a Base64-encoded string (starting with "base64:").
+* Fix crash when integer fields are empty in the following dialogs: Alert, PerformAudioPassThru, ReadDID, GetDTCs, ShowConstantTBT, Slider, and SetGlobalProperties.
+
+[CW11]
++ (Experimental) ModuleTest: allow to test the responses to Register/UnregisterAppInterface requests. The SyncProxyAndroid SDK had to be patched to let the responses propagate to the SyncProxyTester app.
+
+[CW10]
+* ModuleTest: increase the delay between sending consecutive requests to 1 sec.
++ Display the requests sent by the app on connection in the log.
+* SetGlobalProperties dialog: allow to send helpPrompt and timeoutPrompt as arrays.
+* Fix CreateInteractionChoiceSet, SetGlobalProperties, and Speak layouts.
+
+[CW9]
+* Fix: don't send a Show request on OnHMIStatus after an Alert response.
+* ModuleTest: add a delay between sending consecutive requests.
+* Ford Commit: XML scripter update, AudioPassThru without JSON, Policies Tester update, other minor bug fixes.
+
+[CW8]
+* Cut the number of debug logs during the test XML parsing process.
+* Fix empty <Vector> tags parsing in test XML.
+* Make the console log scrolling smoother.
+* Don't remove interaction choice set from the choiceSets list until a successful DeleteChoiceSetResponse has come.
+* Don't show null in the log if the responses' info is null.
+* AddCommand message: set an existing icon by default.
+
+[CW7]
+* Fix displaying the success flag, info, and result code of the messages in the log.
+* Fix displaying long messages in the log on narrow screens.
+* Don't drop the connection to the core when pressing the Back button. Now, to disconnect use the Exit options menu item.
++ Show message's correlation ID in the Raw JSON popup.
+* Update the turn list icons.
+* SyncProxyAndroid SDK: when serializing a JSON RPCMessage, serialize hashtable as RPCStruct. Fix for the XML Test feature in SyncProxyTester.
+- Revert: "SyncProxyAndroid SDK: Interim fix: revert the change of protocol v2 JSON messages (the "parameters" key) until the AppLinkCore has changed the parser."
+* Fix a crash when trying to open Speak dialog.
+* SyncProxyAndroid SDK: Interim fix: revert the change of protocol v2 JSON messages (the "parameters" key) until the AppLinkCore has changed the parser.
+- SyncProxyAndroid SDK: remove MP3 and WAV values from the AudioType enum (affects AudioPassThru).
+* Don't add/remove submenu from SubMenu list until a successful AddSubMenuResponse/DeleteSubMenuResponse has come.
+* Ford Commit:
+  1) Update module test functionality and example xml script. Place xml script on root of sdcard to deploy.
+  2) AudioCaptureQuality has been renamed to BitsPerSample (effects PerformAudioPassThru)
+  3) AudioType enum - WAV and MP3 have been removed from (effects PerformAudioPassThru)
+  4) Incorrect AppLink Protocol 2 JSON message. Current code includes a "parameters" key that shouldn't be there. Ex. current: {"parameters":{…}} should be {…} This effects all AppLink Protocol 2 messages and is particularly harmful to OnAudioPassThru notification because it will ONLY have binary data and no JSON anymore.
+* Policies test: show errors as toasts, instead of adding to the console.
+
+[CW6]
+* ButtonSubscriptions dialog: exclude ButtonName.CUSTOM_NAME value.
+* AlertManeuver message: always send soft buttons even if an empty array.
+
+[CW5]
+* Reduce the app icon size for faster transfer (on Android 2.*).
++ Upload turn left, right, and forward icons after app registration for UpdateTurnList.
+* UpdateTurnList dialog: fix the number of soft buttons sent by default, allow to specify image for each turn.
+* Don't set app icon for protocol version v1.
+* ShowConstantTBT and UpdateTurnList messages: always send soft buttons even if an empty array.
+* Properly display subscribed buttons after first HMI status notification.
+* ResetGlobalProperties dialog for v1 protocol: hide and don't send VR help title and VR help item properties.
+* AlertManeuver message: an array of TTS Chunks can be sent now.
++ Play the realtime audio coming with OnAudioPassThru notifications.
+* SyncProxyAndroid SDK: fix getting bulk data from incoming messages.
+
+[CW4]
+* Fix a glitch when the app fails to connect over WiFi.
+* Put more popular options menu items first.
+* SetGlobalProperties dialog for v1 protocol: hide and don't send VR help title and VR help item parameters.
+* Fix a crash when sending DialNumber or UpdateTurnList messages.
+* Show dialog in non-media app: hide and don't send Media Track and Media Clock parameters.
++ Set app icon after app registration (on first OnHMIStatus notification).
+* ShowConstantTBT dialog: allow to customize soft buttons.
++ Create DialNumber and UpdateTurnList dialogs.
+* Amend AlertManeuver dialog: remove Maneuver complete checkbox and add customizable Soft Buttons.
+* Unify SubscribeVehicleData and UnsubscribeVehicleData dialogs.
++ Alert, Show, ScrollableMessage dialogs: automatically check the Include Soft Buttons checkbox when the user has explicitly set the soft buttons.
+* Fix: don't save the edited list of soft buttons when clicked Cancel in the SoftButtons List activity.
+* Auto increment soft button id when creating a new one.
+
+[CW3]
+* Fix the inability to add 6+ soft buttons on devices with small screens.
++ Add TCP transport support (over WiFi).
+* SyncProxyAndroid SDK: fix receiving multiframe messages.
+* Fix a crash when clicking a request/response after relaunching the main activity.
+* Alert, Show, ScrollableMessage dialogs fix: send the soft buttons if the user checked the Include checkbox without pushing the Soft Buttons button.
+* Slider dialog: automatically update dynamic footer when enabled and the number of ticks changes.
++ Save the data from OnAudioPassThru notifications to the audiopassthru.bin file on SD card. The file is deleted if the result is not SUCCESS. Resend the request if the result is RETRY.
++ SyncProxyAndroid SDK: add RETRY value to the Result enum.
+* The subscribed vehicle data items now persist between launches of SubscribeVehicleData and UnsubscribeVehicleData dialogs. 
+* Fix: SubscribeVehicleData and UnsubscribeVehicleData now sends a list of selected items.
+
+[CW2]
+* SyncProxyAndroid SDK: fix PerformAudioPassThru's property name for audio capture quality.
+* Fix a crash when sending ReadDID or GetDTCs requests.
+* Display the source JSON for all requests (added for Speak, SubscribeButton, UnsubscribeButton, DeleteCommand, AddSubMenu, DeleteSubMenu, SetMediaClockTimer, CreateInteractionChoiceSet, DeleteInteractionChoiceSet, and PerformInteraction).
++ "Pick a Function" list: Sort the functions by most-popular usage. Functions that are used more frequently will appear closer to the top of the list. Add an options menu item to clear the usage stats.
++ Show dialog: allow to set custom presets (as a comma-separated string).
++ AddCommand dialog: allow to set icon.
+* SyncProxyAndroid SDK: fix getters and setters of AddCommand, ReadDID, GetDTCs, PutFile, Show, SubscribeVehicleData, UnsubscribeVehicleData requests.
++ Alert, ScrollableMessage, Show dialogs: allow to set soft buttons.
+* Set the current release version in the app's manifest to be displayed in system settings.
+
+[CW52]
++ Slider message: allow to specify dynamic footer.
++ ScrollableMessage dialog: the user can specify timeout.
++ Experimental: select protocol properties (protocol version, is media app, app name, desired language and HMI language) at app launch. The proxy service starts only when the app's activity launches.
+* Clear the lists of button subscriptions, vehicle data subscriptions, created submenus, commands, choice sets, and put files when SYNC is disconnected.
+* Don't allow to delete the top-level menu.
+* Stop the whole process when clicking the Exit options menu item.
+* Fix the crashes when sending SetGlobalProperties and ResetGlobalProperties commands.
+* Fix the list of commands available for protocol v1.
+* Fix: the user can set Alert command's ttsChunk parameter.
+* Fix: don't show choiceSetId in the app until a successful response has come.
+
+[R6.0.0]
+SyncProxyTester:
++ When the v1 protocol is active, the user can only send a command supported by version 1.
++ Add the possibility to set the parameters of SetGlobalProperties and ResetGlobalProperties commands with GUI.
+* Fix a rare crash when creating a command after resuming the app.
+* Fix sending CreateChoiceSet command by adding image values.
++ The user can specify position when creating Slider request.
++ Adding EncodedSyncPData support to SyncProxyTester (Ford's).
++ After toggling protocol version, the app needs to be restarted by the user.
++ When clicking the Exit options menu item, the app closes the activity and also stops the proxy service.
++ The user can specify VR synonyms for choice set's commands with the help of additional text fields.
++ Add extra logs for requests.
++ Persist the log messages in the UI during one app launch.
+* Fix: AddCommand dialog: correctly send the entered VR Synonym with the command.
++ Introduce changelog.
++ The app version, build info, and the changelog can be shown from options menu => "App version".
++ All the bugs and features that have been around since the beginning.
++ CreateChoiceSet dialog: the user can create a choice set with 1..3 choices with the help of checkboxes.
++ Show current protocol version in the options menu: "Toggle Protocol Ver. (cur 2)".

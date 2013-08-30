@@ -9,18 +9,24 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.trace.DiagLevel;
 import com.ford.syncV4.trace.SyncTrace;
+import com.ford.syncV4.trace.enums.DetailLevel;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
+import com.ford.syncV4.trace.enums.Mod;
 import com.ford.syncV4.util.DebugTool;
 
 /**
  * Bluetooth Transport Implementation. This transport advertises its existence to SYNC by publishing an SDP record and waiting for an incoming connection from SYNC. Connection is verified by checking for the SYNC UUID. For more detailed information please refer to the <a href="#bluetoothTransport">Bluetooth Transport Guide</a>.
  *
  */
-public class BTTransport extends SyncTransport {	
+public class BTTransport extends SyncTransport {
+    private static final String TAG = BTTransport.class.getSimpleName();
+
 	//936DA01F9ABD4D9D80C702AF85C822A8
 	private final static UUID SYNC_V4_MOBILE_APPLICATION_SVC_CLASS = new UUID(0x936DA01F9ABD4D9DL, 0x80C702AF85C822A8L);
 
@@ -40,57 +46,68 @@ public class BTTransport extends SyncTransport {
 	
 	public BTTransport(ITransportListener transportListener) {
 		super(transportListener);
+
+        // turn on verbose transport logging
+        DiagLevel.setLevel(Mod.tran, DetailLevel.VERBOSE);
+        DebugTool.enableDebugTool();
 	} // end-ctor
 	
-	public void openConnection () throws SyncException {    	
-		// Get the device's default Bluetooth Adapter
-		_adapter = BluetoothAdapter.getDefaultAdapter();
-		
-		// Test if Adapter exists
-		if (_adapter == null) {
-			throw new SyncException("No Bluetooth adapter found. Bluetooth adapter must exist to communicate with SYNC.", SyncExceptionCause.BLUETOOTH_ADAPTER_NULL);
-		}
-		
-		// Test if Bluetooth is enabled
-		try {
-			if (!_adapter.isEnabled()) {
-				throw new SyncException("Bluetooth adapter must be enabled to instantiate a SyncProxy object.", SyncExceptionCause.BLUETOOTH_DISABLED);
-			}
-		} catch (SecurityException e) {
-			throw new SyncException("Insufficient permissions to interact with the Bluetooth Adapter.", SyncExceptionCause.PERMISSION_DENIED);
-		}
-		
-		// Start BluetoothAdapterMonitor to ensure the Bluetooth Adapter continues to be enabled
-		_bluetoothAdapterMonitor = new BluetoothAdapterMonitor(_adapter);
-		
-		try {
-			_serverSocket = _adapter.listenUsingRfcommWithServiceRecord("SyncProxy", _listeningServiceUUID);
-		} catch (IOException ex) {
-			
-			// Test to determine if the bluetooth has been disabled since last check			
-			if (!_adapter.isEnabled()) {
-				throw new SyncException("Bluetooth adapter must be on to instantiate a SyncProxy object.", SyncExceptionCause.BLUETOOTH_DISABLED);
-			}
-			
-			throw new SyncException("Could not open connection to SYNC.", ex, SyncExceptionCause.SYNC_CONNECTION_FAILED);
-		} 
-		
-		// Test to ensure serverSocket is not null
-		if (_serverSocket == null) {
-			throw new SyncException("Could not open connection to SYNC.", SyncExceptionCause.SYNC_CONNECTION_FAILED);
-		}
-		
-		SyncTrace.logTransportEvent("BTTransport: listening for incoming connect to service ID " + _listeningServiceUUID, null, InterfaceActivityDirection.Receive, null, 0, SYNC_LIB_TRACE_KEY);
-		
-		// Setup transportReader thread
-		_transportReader = new TransportReaderThread();
-		_transportReader.setName("TransportReader");
-		_transportReader.setDaemon(true);
-		_transportReader.start();
-		
-		// Initialize the SiphonServer
-		SiphonServer.init();
-	} // end-method
+	public void openConnection () throws SyncException {
+        try {
+            // Get the device's default Bluetooth Adapter
+            _adapter = BluetoothAdapter.getDefaultAdapter();
+
+            // Test if Adapter exists
+            if (_adapter == null) {
+                throw new SyncException("No Bluetooth adapter found. Bluetooth adapter must exist to communicate with SYNC.", SyncExceptionCause.BLUETOOTH_ADAPTER_NULL);
+            }
+
+            // Test if Bluetooth is enabled
+            try {
+                if (!_adapter.isEnabled()) {
+                    throw new SyncException("Bluetooth adapter must be enabled to instantiate a SyncProxy object.", SyncExceptionCause.BLUETOOTH_DISABLED);
+                }
+            } catch (SecurityException e) {
+                throw new SyncException("Insufficient permissions to interact with the Bluetooth Adapter.", SyncExceptionCause.PERMISSION_DENIED);
+            }
+
+            // Start BluetoothAdapterMonitor to ensure the Bluetooth Adapter continues to be enabled
+            _bluetoothAdapterMonitor = new BluetoothAdapterMonitor(_adapter);
+
+            try {
+                _serverSocket = _adapter.listenUsingRfcommWithServiceRecord("SyncProxy", _listeningServiceUUID);
+            } catch (IOException ex) {
+
+                // Test to determine if the bluetooth has been disabled since last check
+                if (!_adapter.isEnabled()) {
+                    throw new SyncException("Bluetooth adapter must be on to instantiate a SyncProxy object.", SyncExceptionCause.BLUETOOTH_DISABLED);
+                }
+
+                throw new SyncException("Could not open connection to SYNC.", ex, SyncExceptionCause.SYNC_CONNECTION_FAILED);
+            }
+
+            // Test to ensure serverSocket is not null
+            if (_serverSocket == null) {
+                throw new SyncException("Could not open connection to SYNC.", SyncExceptionCause.SYNC_CONNECTION_FAILED);
+            }
+
+            SyncTrace.logTransportEvent("BTTransport: listening for incoming connect to service ID " + _listeningServiceUUID, null, InterfaceActivityDirection.Receive, null, 0, SYNC_LIB_TRACE_KEY);
+
+            // Setup transportReader thread
+            _transportReader = new TransportReaderThread();
+            _transportReader.setName("TransportReader");
+            _transportReader.setDaemon(true);
+            _transportReader.start();
+
+            // Initialize the SiphonServer
+            SiphonServer.init();
+        } catch (SyncException e) {
+            // Log
+            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    } // end-method
 
 	public void disconnect() {
 		disconnect(null, null);

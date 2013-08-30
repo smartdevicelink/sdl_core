@@ -48,7 +48,7 @@ UIAddCommandResponse::~UIAddCommandResponse() {
 }
 
 void UIAddCommandResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run");
+  LOG4CXX_INFO(logger_, "UIAddCommandResponse::Run");
 
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
@@ -73,7 +73,7 @@ void UIAddCommandResponse::Run() {
 
   msg_chain->set_ui_response_result(code);
 
-  if ( hmi_apis::Common_Result::SUCCESS != code) {
+  if (hmi_apis::Common_Result::SUCCESS != code) {
     data[strings::msg_params].erase(strings::menu_params);
   }
 

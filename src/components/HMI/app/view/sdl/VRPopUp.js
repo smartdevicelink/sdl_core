@@ -40,7 +40,8 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     classNameBindings:
         [
-            'VRActive:active'
+            'SDL.SDLModel.VRActive:active',
+            'SDL.SDLModel.VRHelpListActivated:move'
         ],
 
     childViews:
@@ -67,7 +68,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
         content: 'Speak the command'
     } ),
 
-    VRActive: false,
+    VRActiveBinding: 'SDL.SDLModel.VRActive',
 
     popUp: Em.View.extend( {
 
@@ -76,34 +77,14 @@ SDL.VRPopUp = Em.ContainerView.create( {
         classNames: 'popUp'
     } ),
 
-    AddActivateApp: function( appId, appName ) {
-
-        this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
-            action: 'onActivateSDLApp',
-            target: 'SDL.SDLController',
-            text: appName,
-            appName: appName,
-            appId: appId,
-            classNames: 'list-item',
-            templateName: 'text'
-        } ) );
-
-    },
-
-    DeleteActivateApp: function( appId ) {
-
-        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'activeAppId', appId ) );
-
-    },
-
-    AddCommand: function( commandId, vrCommands, appId ) {
+    AddCommand: function( commandID, vrCommands, appID ) {
 
         for( var j = 0; j < vrCommands.length; j++ ){
             this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
                 action: 'onVRCommand',
                 target: 'SDL.SDLAppController',
-                appId: appId,
-                commandId: commandId,
+                appID: appID,
+                commandID: commandID,
                 text: vrCommands[j],
                 classNames: 'list-item',
                 templateName: 'text'
@@ -112,55 +93,10 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     },
 
-    DeleteCommand: function( commandId ) {
+    DeleteCommand: function( commandID ) {
 
-        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'commandId', commandId ) );
+        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'commandID', commandID ) );
 
-    },
-
-    CreateInteractionChoise: function( params, performInteractionRequestId ) {
-
-        if( !params ){
-            return;
-        }
-
-        for( var i = 0; i < params.length; i++ ){
-            for( var j = 0; j < params[i].vrCommands.length; j++ ){
-                this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
-                    action: 'onChoiceInteraction',
-                    target: 'SDL.SDLAppController',
-                    choiceId: params[i].choiceID,
-                    btnType: 'interactionChoice',
-                    text: params[i].vrCommands[j],
-                    performInteractionRequestId: performInteractionRequestId,
-                    classNames: 'list-item',
-                    templateName: 'text'
-                } ) );
-            }
-        }
-    },
-
-    DeleteInteractionChoise: function() {
-
-        if( !SDL.InteractionChoicesView.active ){
-            this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'btnType', 'interactionChoice' ) );
-        }
-
-    }.observes( 'SDL.InteractionChoicesView.active' ),
-
-    activateVRPopUp: function() {
-        var self = this;
-
-        if( this.VRActive ){
-            this.set( 'VRActive', false );
-        }else{
-            // play audio alert
-            SDL.Audio.play( 'audio/say.wav' );
-
-            this.set( 'VRActive', true );
-        }
-
-        SDL.SDLController.onSystemContextChange();
     },
 
     /**
@@ -178,10 +114,23 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     // deactivate VR on change application state
     onStateChange: function() {
-        if( this.VRActive ){
-            this.set( 'VRActive', false );
-        }
-    }.observes( 'SDL.TransitionIterator.ready' ),
+        if (this.VRActive) {
+    		FFW.VR.Started();
+    		this.set( 'VRActive', false );
+    	} else {
+    		FFW.VR.Stopped();
+    	}
+    }.observes('SDL.TransitionIterator.ready'),
+
+    onActivate: function() {
+        SDL.SDLController.VRMove();
+    	SDL.SDLController.onSystemContextChange();
+    	if (this.VRActive) {
+    		FFW.VR.Started();
+    	} else {
+    		FFW.VR.Stopped();
+    	}
+    }.observes('this.VRActive'),
     
     /**
      * This event triggered when component is placed to

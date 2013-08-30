@@ -147,7 +147,7 @@ class Thread {
    * @return true if the thread has been started, and not yet stopped.
    */
   bool is_running() const {
-    return thread_id_ != 0;
+    return isThreadRunning_;
   }
 
   /**
@@ -201,6 +201,7 @@ class Thread {
   PlatformThreadHandle thread_handle_;
   PlatformThreadId thread_id_;
   ThreadOptions thread_options_;
+  bool isThreadRunning_;
 
   static log4cxx::LoggerPtr logger_;
 

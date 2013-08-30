@@ -295,7 +295,8 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<TestType::eType>());
 
       utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
-        NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(1000)
+        NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(0)
+            , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(1000)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string>());
 
       utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem =

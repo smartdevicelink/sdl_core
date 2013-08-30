@@ -181,21 +181,21 @@ namespace NsAppManager
          * \brief get device list
          * \return device list
          */
-        const connection_handler::DeviceList& getDeviceList() const;
+        const connection_handler::DeviceList& GetDeviceList() const;
 
         /**
          * \brief add a device to a mapping
          * \param sessionKey session/connection key
          * \param device device handler
          */
-        void addDevice( const connection_handler::DeviceHandle &device,
+        void AddDevice( const connection_handler::DeviceHandle &device,
             const int &sessionKey, int firstSessionKey );
 
         /**
          * \brief remove a device from a mapping
          * \param sessionKey session/connection key
          */
-        void removeDevice(const int &sessionKey, int firstSessionKey);
+        void RemoveDevice(const int &sessionKey, int firstSessionKey);
 
         bool getAudioPassThruFlag() const;
         void setAudioPassThruFlag(bool flag);

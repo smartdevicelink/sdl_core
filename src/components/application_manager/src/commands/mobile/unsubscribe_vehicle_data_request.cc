@@ -55,9 +55,9 @@ void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-                           ApplicationManagerImpl::instance()->
-                           application(app_id));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -93,11 +93,14 @@ void UnsubscribeVehicleDataRequest::Run() {
     }
   }
 
-  if (unsubscribed_items == items_to_unsubscribe) {
+  if (0 == items_to_unsubscribe) {
+    SendResponse(false, mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE,
+                 "Provided VehicleData is empty", &response_params);
+  } else if (unsubscribed_items == items_to_unsubscribe) {
     SendResponse(true, mobile_apis::Result::SUCCESS,
-                 "Unsubscribed on all VehicleData", &response_params);
+                 "Unsubscribed on provided VehicleData", &response_params);
   } else if (0 == unsubscribed_items) {
-    SendResponse(false, mobile_apis::Result::REJECTED,
+    SendResponse(false, mobile_apis::Result::IGNORED,
                  "Was not subscribed on any VehicleData", &response_params);
   } else if (unsubscribed_items < items_to_unsubscribe) {
     SendResponse(false, mobile_apis::Result::WARNINGS,

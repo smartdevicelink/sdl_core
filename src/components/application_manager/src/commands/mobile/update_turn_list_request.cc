@@ -34,16 +34,16 @@
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
 UpdateTurnListRequest::UpdateTurnListRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {
@@ -52,9 +52,9 @@ UpdateTurnListRequest::~UpdateTurnListRequest() {
 void UpdateTurnListRequest::Run() {
   LOG4CXX_INFO(logger_, "UpdateTurnListRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -62,30 +62,21 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
-  std::string file_path;
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
-  const size_t turn_list_size = (*message_)[strings::msg_params]
-                                           [strings::turn_list].length();
-
-  for (int i = 0; i < turn_list_size; ++i) {
-    file_path = app->name() + "/" +
-        (*message_)[strings::msg_params][strings::turn_list][i]
-                   [strings::turn_icon][strings::value].asString();
-    file_path = file_system::FullPath(file_path);
-
-    if (!file_system::FileExists(file_path)) {
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      LOG4CXX_ERROR(logger_, "File is not exists");
-      return;
-    }
-
-    (*message_)[strings::msg_params][strings::turn_list][i]
-               [strings::turn_icon][strings::value] = file_path;
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                          verification_result);
+    SendResponse(false, verification_result);
+    return;
   }
 
   smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
+
+  msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList,
                    msg_params, true);

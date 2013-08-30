@@ -40,8 +40,10 @@ namespace application_manager {
 
 namespace commands {
 
+namespace mobile {
+
 OnDriverDistractionNotification::OnDriverDistractionNotification(
-    const MessageSharedPtr& message): CommandNotificationImpl(message) {
+  const MessageSharedPtr& message): CommandNotificationImpl(message) {
 }
 
 OnDriverDistractionNotification::~OnDriverDistractionNotification() {
@@ -50,21 +52,20 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
 
-  (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
-
   const std::set<Application*>& applications =
-      ApplicationManagerImpl::instance()->applications();
+    ApplicationManagerImpl::instance()->applications();
 
   std::set<Application*>::iterator it = applications.begin();
   for (; applications.end() != it; ++it) {
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(*it);
+    Application* app = *it;
     if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = app->app_id();
       SendNotification();
     }
   }
 }
+
+}  // namespace mobile
 
 }  // namespace commands
 

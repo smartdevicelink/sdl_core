@@ -58,9 +58,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
-#include "TransportManager/ITransportManager.hpp"
-#include "TransportManager/ITransportManagerDeviceListener.hpp"
-
+#include "transport_manager/transport_manager.h"
+#include "transport_manager/transport_manager_default.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
 
@@ -265,8 +264,8 @@ int main(int argc, char** argv) {
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
-  NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager =
-    NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
+  ::transport_manager::TransportManager* transport_manager =
+    ::transport_manager::TransportManagerDefault::instance();
   DCHECK(transport_manager);
 
   protocol_handler::ProtocolHandlerImpl* protocol_handler =
@@ -289,8 +288,9 @@ int main(int argc, char** argv) {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler)
 
-  transport_manager->addDataListener(protocol_handler);
-  transport_manager->addDeviceListener(connection_handler);
+  transport_manager->SetProtocolHandler(protocol_handler);
+  transport_manager->AddEventListener(protocol_handler);
+  transport_manager->AddEventListener(connection_handler);
 
   mmh->setProtocolHandler(protocol_handler);
   hmi_handler->setMessageObserver(app_manager);

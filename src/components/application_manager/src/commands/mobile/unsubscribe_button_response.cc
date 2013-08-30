@@ -54,10 +54,12 @@ void UnsubscribeButtonResponse::Run() {
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   // check if response false
-  if ((*message_)[strings::msg_params][strings::success] == false) {
-    SendResponse(false);
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
   // TODO(DK): Some logic

@@ -53,18 +53,22 @@ public class ProtocolFrameHeader {
 	}
 	
 	protected byte[] assembleHeaderBytes() {
+		// important notice here: the '& 0xFF' expressions below added because
+		// if byte is negative, it corrupts more significant bits when cast to
+		// int
+
 		int header = 0;
-		header |= version;
+		header |= (version & 0x0F);
 		header <<= 1;
 		header |= (compressed ? 1 : 0);
 		header <<= 3;
-		header |= frameType.value();
+		header |= (frameType.value() & 0x07);
 		header <<= 8;
-		header |= sessionType.value();
+		header |= (sessionType.value() & 0xFF);
 		header <<= 8;
-		header |= frameData;
+		header |= (frameData & 0xFF);
 		header <<= 8;
-		header |= sessionID;
+		header |= (sessionID & 0xFF);
 		
 		if (version == 1) {
 			byte[] ret = new byte[8];

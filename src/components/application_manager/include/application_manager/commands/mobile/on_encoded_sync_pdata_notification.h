@@ -41,41 +41,41 @@ namespace application_manager {
 
 namespace commands {
 
-class ApplicationImpl;
+class Application;
 
 /**
  * @brief OnEncodedSyncPDataNotification class is used as callback including binary
  * data of any SyncP packets that SYNC needs to send back to the mobile device
  **/
 class OnEncodedSyncPDataNotification : public CommandResponseImpl {
- public:
-  /**
-   * @brief OnEncodedSyncPDataNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnEncodedSyncPDataNotification(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief OnEncodedSyncPDataNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnEncodedSyncPDataNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnEncodedSyncPDataNotification class destructor
-   **/
-  virtual ~OnEncodedSyncPDataNotification();
+    /**
+     * @brief OnEncodedSyncPDataNotification class destructor
+     **/
+    virtual ~OnEncodedSyncPDataNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  /*
-   * @brief Sends sync pdata notification to mobile device
-   *
-   * @param app Application to receive notification
-   */
-  void SendEncodedPData(const ApplicationImpl* app);
+  private:
+    /*
+     * @brief Sends sync pdata notification to mobile device
+     *
+     * @param app Application to receive notification
+     */
+    void SendEncodedPData(const Application* app);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnEncodedSyncPDataNotification);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnEncodedSyncPDataNotification);
 };
 
 }  // namespace commands

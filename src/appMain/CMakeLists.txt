@@ -17,10 +17,18 @@ set(LIBRARIES
   bluetooth
   pthread
   rt
+  avahi-client
+  avahi-common
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
+  AudioManager
 )
+
+# required to find 'glibconfig.h'
+find_package(PkgConfig)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+add_definitions(${GLIB2_CFLAGS})
 
 include_directories (
   ./
@@ -30,17 +38,22 @@ include_directories (
   ../components/application_manager/include
   ../components/formatters/include
   ../components/AppMgr/include
-  ../components/TransportManager/include
+  ../components/transport_manager/include
   ../components/config_profile/include
   ../components/utils/include/
   ../components/connection_handler/include/
   ../components/hmi_message_handler/include
   ../components/request_watchdog/include
   ../components/smart_objects/include/
+  ../components/audio_manager/include/
   ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/components/
+  /usr/lib/i386-linux-gnu/glib-2.0/include
+  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
 set (SOURCES

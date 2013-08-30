@@ -114,6 +114,8 @@ class SharedPtr {
      **/
     SharedPtr<ObjectType>& operator =(const SharedPtr<ObjectType>& Other);
 
+    bool operator ==(const SharedPtr<ObjectType>& Other) const;
+
     /**
      * @brief Assignment operator.
      *
@@ -148,6 +150,7 @@ class SharedPtr {
     explicit operator bool() const;
     void reset();
     void reset(ObjectType* other);
+    ObjectType* get() const;
 
     /**
      * @return true if mObject not NULL
@@ -222,6 +225,12 @@ utils::SharedPtr<ObjectType>::operator=(const SharedPtr<ObjectType>& Other) {
 }
 
 template<typename ObjectType>
+inline bool utils::SharedPtr<ObjectType>::operator ==(
+  const SharedPtr<ObjectType>& Other) const {
+  return (mObject == Other.mObject);
+}
+
+template<typename ObjectType>
 template<typename OtherObjectType>
 inline utils::SharedPtr<ObjectType>&
 utils::SharedPtr<ObjectType>::operator=(
@@ -279,6 +288,11 @@ inline void SharedPtr<ObjectType>::dropReference(void) {
       mReferenceCounter = 0;
     }
   }
+}
+
+template<typename ObjectType>
+ObjectType* SharedPtr<ObjectType>::get() const {
+  return mObject;
 }
 
 template<typename ObjectType>

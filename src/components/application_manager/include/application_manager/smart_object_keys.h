@@ -44,10 +44,12 @@ const char function_id[] = "function_id";
 const char protocol_version[] = "protocol_version";
 const char protocol_type[] = "protocol_type";
 const char connection_key[] = "connection_key";
+const char error[] = "error";
+const char error_msg[] = "message";
 
 const char msg_params[] = "msg_params";
 const char info[] = "info";
-const char app_id[] = "appId";
+const char app_id[] = "appID";
 const char cmd_icon[] = "cmdIcon";
 const char result_code[] = "resultCode";
 const char success[] = "success";
@@ -73,15 +75,20 @@ const char main_field_1[] = "mainField1";
 const char main_field_2[] = "mainField2";
 const char main_field_3[] = "mainField3";
 const char main_field_4[] = "mainField4";
+const char eta[]          = "eta";
+const char total_distance[] = "totalDistance";
 const char alignment[] = "alignment";
+const char graphic[] = "graphic";
 const char status_bar[] = "statusBar";
-const char media_clock[] = "media_clock";
-const char media_track[] = "media_track";
+const char media_clock[] = "mediaClock";
+const char media_track[] = "mediaTrack";
 const char properties[] = "properties";
 const char cmd_id[] = "cmdID";
 const char menu_params[] = "menuParams";
 const char vr_commands[] = "vrCommands";
 const char position[] = "position";
+const char num_ticks[] = "numTicks";
+const char slider_footer[] = "sliderFooter";
 const char menu_id[] = "menuID";
 const char menu_name[] = "menuName";
 const char interaction_choice_set_id[] = "interactionChoiceSetID";
@@ -94,9 +101,12 @@ const char alert_text1[] = "alertText1";
 const char alert_text2[] = "alertText2";
 const char alert_text3[] = "alertText3";
 const char tts_chunks[] = "ttsChunks";
+const char initial_prompt[] = "initialPrompt";
+const char initial_text[] = "initialText";
 const char duration[] = "duration";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
+const char custom_presets[] = "customPresets";
 const char audio_pass_display_text1[] = "audioPassThruDisplayText1";
 const char audio_pass_display_text2[] = "audioPassThruDisplayText2";
 const char max_duration[] = "maxDuration";
@@ -114,6 +124,8 @@ const char value[] = "value";
 const char hmi_display_language[] = "hmiDisplayLanguage";
 const char language[] = "language";
 const char data[] = "data";
+const char start_time[] = "startTime";
+const char update_mode[] = "updateMode";
 const char trigger_source[] = "triggerSource";
 const char hmi_level[] = "hmiLevel";
 const char audio_streaming_state[] = "audioStreamingState";
@@ -127,6 +139,8 @@ const char file_type[] = "fileType";
 const char persistent_file[] = "persistentFile";
 const char file_data[] = "fileData";
 const char space_available[] = "spaceAvailable";
+const char image_type[] = "imageType";
+const char image[] = "image";
 
 const char filenames[] = "filenames";
 
@@ -143,6 +157,8 @@ const char application[] = "application";
 const char icon[] = "icon";
 const char device_name[] = "deviceName";
 const char reason[] = "reason";
+const char available[] = "available";
+const char text[] = "text";
 
 // vehicle info
 const char gps[] = "gps";
@@ -173,6 +189,10 @@ const char my_key[] = "myKey";
 const char help_prompt[] = "helpPrompt";
 const char timeout_prompt[] = "timeoutPrompt";
 const char scroll_message_body[] = "scrollableMessageBody";
+const char data_result[] = "dataResult";
+const char dtc_list[] = "dtcList";
+const char interaction_mode[] = "interactionMode";
+const char slider_position[] = "sliderPosition";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -180,47 +200,56 @@ const char state[] = "state";
 }  // namespace mobile_notification
 
 namespace hmi_request {
-  const char parent_id[] = "parentID";
-  const char field_name[] = "fieldName";
-  const char field_text[] = "fieldText";
-  const char alert_strings[] = "alertStrings";
-  const char duration[] = "duration";
-  const char soft_buttons[] = "softButtons";
-  const char tts_chunks[] = "ttsChunks";
-  const char audio_pass_display_texts[] = "audioPassThruDisplayTexts";
-  const char max_duration[] = "maxDuration";
-  const char reason[] = "reason";
-  const char message_text[] = "messageText";
-  const char initial_text[] = "initialText";
-  const char navi_texts[] = "navigationTexts";
-  const char show_strings[] = "showStrings";
+const char parent_id[] = "parentID";
+const char field_name[] = "fieldName";
+const char field_text[] = "fieldText";
+const char alert_strings[] = "alertStrings";
+const char duration[] = "duration";
+const char soft_buttons[] = "softButtons";
+const char tts_chunks[] = "ttsChunks";
+const char audio_pass_display_texts[] = "audioPassThruDisplayTexts";
+const char max_duration[] = "maxDuration";
+const char reason[] = "reason";
+const char message_text[] = "messageText";
+const char initial_text[] = "initialText";
+const char navi_texts[] = "navigationTexts";
+const char show_strings[] = "showStrings";
 }  // namespace hmi_request
 
 namespace hmi_response {
-  const char code[] = "code";
-  const char method[] = "method";
-  const char try_again_time[] = "tryAgainTime";
-  const char custom_button_id[] = "customButtonID";
-  const char button_name[] = "name";
-  const char button_mode[] = "mode";
-  const char attenuated_supported[] = "attenuatedSupported";
-  const char languages[] = "languages";
-  const char language[] = "language";
-  const char display_capabilities[] = "displayCapabilities";
-  const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
-  const char soft_button_capabilities[] = "softButtonCapabilities";
-  const char button_capabilities[] = "buttonCapabilities";
-  const char preset_bank_capabilities[] = "presetBankCapabilities";
-  const char allowed[] = "allowed";
-  const char vehicle_type[] = "vehicleType";
-
+const char code[] = "code";
+const char message[] = "message";
+const char method[] = "method";
+const char try_again_time[] = "tryAgainTime";
+const char custom_button_id[] = "customButtonID";
+const char button_name[] = "name";
+const char button_mode[] = "mode";
+const char attenuated_supported[] = "attenuatedSupported";
+const char languages[] = "languages";
+const char language[] = "language";
+const char display_capabilities[] = "displayCapabilities";
+const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
+const char soft_button_capabilities[] = "softButtonCapabilities";
+const char button_capabilities[] = "buttonCapabilities";
+const char preset_bank_capabilities[] = "presetBankCapabilities";
+const char allowed[] = "allowed";
+const char vehicle_type[] = "vehicleType";
+const char did_result[] = "didResult";
+const char result_code[] = "resultCode";
+const char dtc[] = "dtc";
+const char ecu_header[] = "ecuHeader";
+const char image_capabilities[] = "imageCapabilities";
+const char display_type[] = "displayType";
+const char text_fields[] = "textFields";
+const char media_clock_formats[] = "mediaClockFormats";
+const char graphic_supported[] = "graphicSupported";
 }  // namespace hmi_response
 
 namespace hmi_notification {
-  const char prndl[] = "prndl";
-  const char file_name[] = "file_name";
-  const char system_context[] = "systemContext";
-  const char state[] = "state";
+const char prndl[] = "prndl";
+const char file_name[] = "file_name";
+const char system_context[] = "systemContext";
+const char state[] = "state";
 }  // namespace hmi_notification
 
 }  // namespace application_manager

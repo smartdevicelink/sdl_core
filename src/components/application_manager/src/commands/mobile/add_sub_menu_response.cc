@@ -34,14 +34,14 @@
 #include "application_manager/commands/mobile/add_sub_menu_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AddSubMenuResponse::AddSubMenuResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+AddSubMenuResponse::AddSubMenuResponse(const MessageSharedPtr& message)
+: CommandResponseImpl(message) {
 }
 
 AddSubMenuResponse::~AddSubMenuResponse() {
@@ -50,24 +50,24 @@ AddSubMenuResponse::~AddSubMenuResponse() {
 void AddSubMenuResponse::Run() {
   LOG4CXX_INFO(logger_, "AddSubMenuResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
-    LOG4CXX_ERROR(logger_, "Success = false");
-    SendResponse(false);
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const unsigned int correlation_id = (*message_)[strings::params]
-                                 [strings::correlation_id].asUInt();
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->
-      DecreaseMessageChain(correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-
-    SendResponse(true);
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      SendResponse(true);
+    } else {
+      // TODO(DK): Some logic
+      SendResponse(false);
+    }
   }
 }
 

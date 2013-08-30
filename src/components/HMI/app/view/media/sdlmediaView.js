@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -31,81 +30,70 @@
  * @filesource app/view/media/sdlView.js
  * @version 1.0
  */
-SDL.sdlView = Em.ContainerView.create( {
+SDL.sdlView = Em.ContainerView
+    .create( {
 
-    /**
-     * View Id
-     */
-    elementId: 'sdl_view_container',
+        /**
+         * View Id
+         */
+        elementId: 'sdl_view_container',
 
-    classNameBindings:
-        [
+        classNameBindings: [
             'SDL.States.media.sdlmedia.active:active_state:inactive_state'
         ],
 
-    /**
-     * View Components
-     */
-    childViews:
-        [
-            'innerMenu',
-            'controlls'
+        /**
+         * View Components
+         */
+        childViews: [
+            'innerMenu', 'controlls'
         ],
 
-    controlls: SDL.SDLMediaControlls,
+        controlls: SDL.SDLMediaControlls,
 
-    /**
-     * Deactivate View
-     */
-    deactivate: function() {
-        SDL.States.goToStates( 'info.apps' );
-    },
+        /**
+         * Deactivate View
+         */
+        deactivate: function() {
 
-    innerMenu: SDL.MenuList.extend( {
+            SDL.States.goToStates('info.apps');
+        },
 
-        refreshItems: function() {
-            if( SDL.SDLAppController.model.appId == SDL.SDLMediaController.currentAppId ){
-                this.addItems( SDL.SDLAppController.model.softButtons, SDL.SDLAppController.model.appId );
-            }
-        }.observes( 'SDL.SDLAppController.model.softButtons.@each' ),
+        innerMenu: SDL.MenuList
+            .extend( {
 
-        groupName: "MediaView",
+                refreshItems: function() {
 
-        content: Em.ContainerView.extend( {
+                    if (SDL.SDLAppController.model.appID == SDL.SDLMediaController.currentAppId) {
+                        this.addItems(SDL.SDLAppController.model.softButtons,
+                            SDL.SDLAppController.model.appID);
+                    }
+                }.observes('SDL.SDLAppController.model.softButtons.@each'),
 
-            classNames:
-                [
-                    'content'
-                ],
+                groupName: "MediaView",
 
-            attributeBindings:
-                [
-                    'parentView.contentPositon:style'
-                ],
+                content: Em.ContainerView.extend( {
 
-            childViews:
-                [
-                    'optionsButton'
-                ],
+                    classNames: [
+                        'content'
+                    ],
 
-            optionsButton: SDL.Button.extend( {
-                text: 'Options',
+                    attributeBindings: [
+                        'parentView.contentPositon:style'
+                    ],
 
-                templateName: 'arrow',
+                    childViews: [
+                        'optionsButton'
+                    ],
 
-                action: 'openCommandsList',
-                target: 'SDL.SDLAppController'
-            } )
-        } )
-    } )
+                    optionsButton: SDL.Button.extend( {
+                        text: 'Options',
 
-/** Calls SDL SystemContext switcher when turn On/Of SDL application */
-/*
- * onTurnOnSDLApp: function(systemContextValue){
- * if(SDL.States.media.sdl.active){
- * SDL.SDLMediaController.onSystemContextSwitcher(SDL.SDLMediaController.eSystemContext.application);
- * }else{
- * SDL.SDLMediaController.onSystemContextSwitcher(SDL.SDLMediaController.eSystemContext.main); }
- * }.observes('SDL.States.media.sdl.active')
- */
-} );
+                        templateName: 'arrow',
+
+                        action: 'openCommandsList',
+                        target: 'SDL.SDLAppController'
+                    })
+                })
+            })
+    });

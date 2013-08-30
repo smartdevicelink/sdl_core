@@ -37,6 +37,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -52,9 +53,8 @@ ShowRequest::~ShowRequest() {
 void ShowRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>
-      (application_manager::ApplicationManagerImpl::instance()->
-      application((*message_)[strings::msg_params][strings::connection_key]));
+  Application* app = application_manager::ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key].asInt());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
@@ -63,58 +63,104 @@ void ShowRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
-  msg_params = (*message_)[strings::msg_params];
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                          verification_result);
+    SendResponse(false, verification_result);
+    return;
+  }
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = app->app_id();
 
   msg_params[hmi_request::show_strings] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  if (msg_params.keyExists(strings::main_field_1)) {
-    // erase useless parametr
-    msg_params.erase(strings::main_field_1);
-    msg_params[hmi_request::show_strings][0][hmi_request::field_name] =
-        TextFieldName::MAIN_FILED1;
-    msg_params[hmi_request::show_strings][0][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::main_field_1];
-
+  int index = 0;
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
+      TextFieldName::MAIN_FILED1;
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::main_field_1];
+    ++index;
   }
 
-  if (msg_params.keyExists(strings::main_field_2)) {
-    // erase useless param
-    msg_params.erase(strings::main_field_2);
-    msg_params[hmi_request::show_strings][1][hmi_request::field_name] =
-        TextFieldName::MAIN_FILED2;
-    msg_params[hmi_request::show_strings][1][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::main_field_2];
-
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
+      TextFieldName::MAIN_FILED2;
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::main_field_2];
+    ++index;
   }
 
-  if (msg_params.keyExists(strings::main_field_3)) {
-    // erase useless param
-    msg_params.erase(strings::main_field_3);
-    msg_params[hmi_request::show_strings][2][hmi_request::field_name] =
-        TextFieldName::MAIN_FILED3;
-    msg_params[hmi_request::show_strings][2][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::main_field_3];
-
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
+      TextFieldName::MAIN_FILED3;
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::main_field_3];
+    ++index;
   }
 
-  if (msg_params.keyExists(strings::main_field_4)) {
-    // erase useless param
-    msg_params.erase(strings::main_field_4);
-    msg_params[hmi_request::show_strings][3][hmi_request::field_name] =
-        TextFieldName::MAIN_FILED4;
-    msg_params[hmi_request::show_strings][3][hmi_request::field_text] =
-       (*message_)[strings::msg_params][strings::main_field_4];
-
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
+      TextFieldName::MAIN_FILED4;
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::main_field_4];
+    ++index;
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true);
+  if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
+      TextFieldName::MEDIA_CLOCK;
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::media_clock];
+    ++index;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
+      TextFieldName::MEDIA_TRACK;
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::media_track];
+    ++index;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
+    msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
+      TextFieldName::STATUS_BAR;
+    msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::status_bar];
+    ++index;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::alignment)) {
+    msg_params[strings::alignment] =
+      (*message_)[strings::msg_params][strings::alignment];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
+    msg_params[strings::graphic] =
+      (*message_)[strings::msg_params][strings::graphic];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    msg_params[strings::soft_buttons] =
+      (*message_)[strings::msg_params][strings::soft_buttons];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
+    msg_params[strings::custom_presets] =
+      (*message_)[strings::msg_params][strings::custom_presets];
+  }
+
+  CreateHMIRequest(hmi_apis::FunctionID::UI_Show, msg_params, true, 1);
 
   MessageSharedPtr persistentData =
-      new smart_objects::SmartObject((*message_)[strings::msg_params]);
+    new smart_objects::SmartObject(msg_params);
   app->set_show_command(*persistentData);
 }
 

@@ -51,8 +51,7 @@ MessageChaining::~MessageChaining() {
 
 bool MessageChaining::operator==(const MessageChaining& other) const {
     return ((correlation_id_ == other.correlation_id_) &&
-            (connection_key_ == other.connection_key_) &&
-            (data_ == other.data_));
+            (connection_key_ == other.connection_key_));
 }
 
 const unsigned int MessageChaining::correlation_id() const {
@@ -73,6 +72,10 @@ void MessageChaining::DecrementCounter() {
 
 int MessageChaining::counter() const {
   return counter_;
+}
+
+void MessageChaining::set_counter(const unsigned int& counter) {
+  counter_ = counter;
 }
 
 void MessageChaining::set_data(const smart_objects::SmartObject& data) {

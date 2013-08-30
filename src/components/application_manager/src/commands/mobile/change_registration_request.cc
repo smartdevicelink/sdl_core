@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 ChangeRegistrationRequest::ChangeRegistrationRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message) {
 }
 
 ChangeRegistrationRequest::~ChangeRegistrationRequest() {
@@ -52,9 +52,9 @@ ChangeRegistrationRequest::~ChangeRegistrationRequest() {
 void ChangeRegistrationRequest::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -63,43 +63,53 @@ void ChangeRegistrationRequest::Run() {
   }
 
   const int hmi_language =
-      (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
+    (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
 
   const int language =
-      (*message_)[strings::msg_params][strings::language].asInt();
+    (*message_)[strings::msg_params][strings::language].asInt();
 
   if (false == IsLanguageSupportedByUI(hmi_language) ||
       false == IsLanguageSupportedByVR(language)     ||
       false == IsLanguageSupportedByTTS(language)) {
-
-    LOG4CXX_ERROR(logger_, "Language is not supported by any of modules");
+    LOG4CXX_ERROR(logger_, "Language is not supported");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
+  }
+
+  // we should specify amount of required responses in the 1st request
+  unsigned int chaining_counter = 0;
+  if (app->ui_language() !=
+      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
+   ++chaining_counter;
+  }
+
+  if (app->language() !=
+       (*message_)[strings::msg_params][strings::language].asInt()) {
+    ++chaining_counter;
   }
 
   bool has_actually_changed = false;
   if (app->ui_language() !=
-     (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
-
+      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()) {
     smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     msg_params[strings::language] =
-        (*message_)[strings::msg_params][strings::hmi_display_language];
+      (*message_)[strings::msg_params][strings::hmi_display_language];
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
-                     msg_params, true);
+                     msg_params, true, chaining_counter);
 
     has_actually_changed = true;
   }
 
   if (app->language() !=
-     (*message_)[strings::msg_params][strings::language].asInt()) {
-
+      (*message_)[strings::msg_params][strings::language].asInt()) {
     smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::language] =
-        (*message_)[strings::msg_params][strings::language];
+      (*message_)[strings::msg_params][strings::language];
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
@@ -108,16 +118,23 @@ void ChangeRegistrationRequest::Run() {
     has_actually_changed = true;
   }
 
-  if (!has_actually_changed) {
-    SendResponse(true, mobile_apis::Result::SUCCESS);
+  if (false == has_actually_changed) {
+    LOG4CXX_ERROR(logger_, "Current language is the same");
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Current language is the same");
+    return;
   }
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
-    const int& hmi_display_lang) {
-
+  const int& hmi_display_lang) {
   const smart_objects::SmartObject* ui_languages =
-      ApplicationManagerImpl::instance()->ui_supported_languages();
+    ApplicationManagerImpl::instance()->ui_supported_languages();
+
+  if (!ui_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
 
   bool is_language_supported = false;
   for (size_t i = 0; i < ui_languages->length(); ++i) {
@@ -129,16 +146,19 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 
   if (false == is_language_supported) {
     LOG4CXX_ERROR(logger_, "Language isn't supported by UI");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
-    const int& hmi_display_lang) {
-
+  const int& hmi_display_lang) {
   const smart_objects::SmartObject* vr_languages =
-      ApplicationManagerImpl::instance()->vr_supported_languages();
+    ApplicationManagerImpl::instance()->vr_supported_languages();
+
+  if (!vr_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
 
   bool is_language_supported = false;
   for (size_t i = 0; i < vr_languages->length(); ++i) {
@@ -150,16 +170,19 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 
   if (false == is_language_supported) {
     LOG4CXX_ERROR(logger_, "Language isn't supported by VR");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
-    const int& hmi_display_lang) {
-
+  const int& hmi_display_lang) {
   const smart_objects::SmartObject* tts_languages =
-      ApplicationManagerImpl::instance()->tts_supported_languages();
+    ApplicationManagerImpl::instance()->tts_supported_languages();
+
+  if (!tts_languages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return false;
+  }
 
   bool is_language_supported = false;
   for (size_t i = 0; i < tts_languages->length(); ++i) {
@@ -171,7 +194,6 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
 
   if (false == is_language_supported) {
     LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
   return is_language_supported;
 }

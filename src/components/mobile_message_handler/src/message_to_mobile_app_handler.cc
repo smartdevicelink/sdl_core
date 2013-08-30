@@ -63,7 +63,7 @@ void MessagesToMobileAppHandler::threadMain() {
         return;
       }
 
-      handler->protocol_handler_->sendMessageToMobileApp(rawMessage);
+      handler->protocol_handler_->SendMessageToMobileApp(rawMessage);
     }
     handler->messages_to_mobile_app_.wait();
   }

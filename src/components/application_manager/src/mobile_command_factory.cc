@@ -33,6 +33,8 @@
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/commands/mobile/add_command_response.h"
+#include "application_manager/commands/mobile/delete_command_request.h"
+#include "application_manager/commands/mobile/delete_command_response.h"
 #include "application_manager/commands/mobile/add_sub_menu_request.h"
 #include "application_manager/commands/mobile/add_sub_menu_response.h"
 #include "application_manager/commands/mobile/alert_request.h"
@@ -117,6 +119,9 @@
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_response.h"
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "application_manager/commands/mobile/update_turn_list_response.h"
+#include "application_manager/commands/mobile/sync_pdata_request.h"
+#include "application_manager/commands/mobile/sync_pdata_response.h"
+#include "application_manager/commands/mobile/on_sync_pdata_notification.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -175,6 +180,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::DeleteCommandID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::DeleteCommandResponse(message));
+      } else {
+        command.reset(new commands::DeleteCommandRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::AddSubMenuID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
@@ -209,6 +223,24 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::AlertResponse(message));
       } else {
         command.reset(new commands::AlertRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SpeakID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SpeakResponse(message));
+      } else {
+        command.reset(new commands::SpeakRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SliderID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SliderResponse(message));
+      } else {
+        command.reset(new commands::SliderRequest(message));
       }
       break;
     }
@@ -305,6 +337,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::ShowID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::ShowResponse(message));
+      } else {
+        command.reset(new commands::ShowRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::SubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == MessageType::kResponse) {
@@ -313,6 +354,28 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       } else {
         command.reset(
           new commands::SubscribeVehicleDataRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SyncPDataID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(
+          new commands::SyncPDataResponse(message));
+      } else {
+        command.reset(
+          new commands::SyncPDataRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::EncodedSyncPDataID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(
+          new commands::EncodedSyncPDataResponse(message));
+      } else {
+        command.reset(
+          new commands::EncodedSyncPDataRequest(message));
       }
       break;
     }
@@ -342,6 +405,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::GetVehicleDataResponse(message));
       } else {
         command.reset(new commands::GetVehicleDataRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::ScrollableMessageID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::ScrollableMessageResponse(message));
+      } else {
+        command.reset(new commands::ScrollabelMessageRequest(message));
       }
       break;
     }
@@ -399,12 +471,21 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SetMediaClockTimerID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SetMediaClockTimerResponse(message));
+      } else {
+        command.reset(new commands::SetMediaClockRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::OnButtonEventID: {
-      command.reset(new commands::OnButtonEventNotification(message));
+      command.reset(new commands::mobile::OnButtonEventNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnButtonPressID: {
-      command.reset(new commands::OnButtonPressNotification(message));
+      command.reset(new commands::mobile::OnButtonPressNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnAudioPassThruID: {
@@ -429,7 +510,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::OnDriverDistractionID: {
-      command.reset(new commands::OnDriverDistractionNotification(message));
+      command.reset(new commands::mobile::OnDriverDistractionNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnLanguageChangeID: {
@@ -444,8 +525,14 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       command.reset(new commands::OnHMIStatusNotification(message));
       break;
     }
+    case mobile_apis::FunctionID::OnSyncPDataID: {
+      command.reset(new commands::OnSyncPDataNotification(message));
+      break;
+    }
     default: {
       command.reset(new commands::GenericResponse(message));
+      (*message)[strings::params][strings::function_id] =
+        mobile_apis::FunctionID::GenericResponseID;
       break;
     }
   }

@@ -48,54 +48,57 @@
 namespace request_watchdog {
 
 class RequestWatchdog : public Watchdog {
- public:
-  static Watchdog* getRequestWatchdog();
+  public:
+    static Watchdog* instance();
 
-  virtual void addListener(WatchdogSubscriber* subscriber);
-  virtual void removeListener(WatchdogSubscriber* subscriber);
-  virtual void removeAllListeners();
+    virtual void AddListener(WatchdogSubscriber* subscriber);
+    virtual void RemoveListener(WatchdogSubscriber* subscriber);
+    virtual void removeAllListeners();
 
-  virtual void addRequest(RequestInfo requestInfo);
-  virtual void removeRequest(RequestInfo requestInfo);
-  virtual void removeAllRequests();
+    virtual void addRequest(RequestInfo requestInfo);
+    //virtual void removeRequest(RequestInfo requestInfo);
+    virtual void removeRequest(int connection_key,
+                               int correlation_id);
+    virtual void removeAllRequests();
 
-  virtual int getRegesteredRequestsNumber();
+    virtual int getRegesteredRequestsNumber();
 
-  ~RequestWatchdog();
+    ~RequestWatchdog();
 
- private:
-  RequestWatchdog();
+  private:
+    RequestWatchdog();
 
-  static const int DEFAULT_CYCLE_TIMEOUT = 250000;
-  static log4cxx::LoggerPtr logger_;
+    static const int DEFAULT_CYCLE_TIMEOUT = 250000;
+    static log4cxx::LoggerPtr logger_;
 
-  static RequestWatchdog* sInstance_;
-  static sync_primitives::SynchronisationPrimitives instanceMutex_;
 
-  static void notifySubscribers(RequestInfo requestInfo);
+    sync_primitives::SynchronisationPrimitives instanceMutex_;
 
-  void startDispatcherThreadIfNeeded();
-  void stopDispatcherThreadIfNeeded();
+    void notifySubscribers(RequestInfo requestInfo);
 
-  static std::list<WatchdogSubscriber*> subscribers_;
-  static sync_primitives::SynchronisationPrimitives subscribersListMutex_;
+    void startDispatcherThreadIfNeeded();
+    void stopDispatcherThreadIfNeeded();
 
-  static std::map<RequestInfo, struct timeval> requests_;
-  static sync_primitives::SynchronisationPrimitives requestsMapMutex_;
+    std::list<WatchdogSubscriber*> subscribers_;
+    sync_primitives::SynchronisationPrimitives subscribersListMutex_;
 
-  class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {
-   public:
-     QueueDispatcherThreadDelegate();
+    std::map<RequestInfo, struct timeval> requests_;
+    sync_primitives::SynchronisationPrimitives requestsMapMutex_;
+    friend class QueueDispatcherThreadDelegate;
 
-     void threadMain();
+    class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {
+      public:
+        QueueDispatcherThreadDelegate();
 
-   private:
-     DISALLOW_COPY_AND_ASSIGN(QueueDispatcherThreadDelegate);
-  };
+        void threadMain();
 
-  threads::Thread queueDispatcherThread;
+      private:
+        DISALLOW_COPY_AND_ASSIGN(QueueDispatcherThreadDelegate);
+    };
 
-  DISALLOW_COPY_AND_ASSIGN(RequestWatchdog);
+    threads::Thread queueDispatcherThread;
+
+    DISALLOW_COPY_AND_ASSIGN(RequestWatchdog);
 };
 
 }  //  namespace request_watchdog

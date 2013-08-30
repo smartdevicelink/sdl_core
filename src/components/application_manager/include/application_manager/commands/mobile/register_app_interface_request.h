@@ -35,11 +35,13 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "utils/synchronisation_primitives.h"
+#include "utils/timer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
 
-class ApplicationImpl;
+class Application;
 
 namespace commands {
 
@@ -47,37 +49,42 @@ namespace commands {
  * @brief Register app interface request  command class
  **/
 class RegisterAppInterfaceRequest : public CommandRequestImpl {
- public:
-  /**
-   * \brief RegisterAppInterfaceRequest class constructor
-   **/
-  explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message)
-      : CommandRequestImpl(message) {
-  }
+  public:
+    /**
+     * \brief RegisterAppInterfaceRequest class constructor
+     **/
+    explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message);
 
-  /**
-   * \brief RegisterAppInterfaceRequest class destructor
-   **/
-  virtual ~RegisterAppInterfaceRequest() {
-  }
+    /**
+     * @brief RegisterAppInterfaceRequest class destructor
+     **/
+    virtual ~RegisterAppInterfaceRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-  // virtual void cleanUp() = 0;
+    /**
+     * @brief Init required by command resources
+     **/
+    virtual bool Init();
 
-  /**
-    * @brief Sends RegisterAppInterface response to mobile
-    *
-    *@param application_impl application
-    *
-    **/
-  void SendRegisterAppInterfaceResponseToMobile(
-      const ApplicationImpl& application_impl);
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
+    // virtual void cleanUp() = 0;
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
+    /**
+      * @brief Sends RegisterAppInterface response to mobile
+      *
+      *@param application_impl application
+      *
+      **/
+    void SendRegisterAppInterfaceResponseToMobile(
+      const Application& application_impl);
+
+  private:
+    sync_primitives::SynchronisationPrimitives synchronisation_;
+    sync_primitives::Timer*                    timer_;
+
+    DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };
 
 }  // namespace commands

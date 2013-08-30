@@ -55,9 +55,8 @@ CommandSharedPtr CreateCommand(const MessageSharedPtr& message) {
 
   int app_id = message_data[strings::params][strings::connection_key];
 
-  ApplicationImpl* application =
-    static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-                                  application(app_id));
+  Application* application = ApplicationManagerImpl::instance()->
+                             application(app_id);
 
   if (!application) {
     return command;

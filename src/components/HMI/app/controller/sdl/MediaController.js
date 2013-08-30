@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -45,40 +44,42 @@ SDL.SDLMediaController = Em.Object.create( {
      * Return current Media application name used for application button
      */
     currentAppName: function() {
-        if( this.currentAppId ){
-            return SDL.SDLController.getApplicationModel( this.currentAppId ).appName;
-        }
-    }.property( 'this.currentAppId' ),
+
+        if (this.currentAppId) { return SDL.SDLController
+            .getApplicationModel(this.currentAppId).appName; }
+    }.property('this.currentAppId'),
 
     /**
      * Return current Media application icon used for application button
      */
     currentAppIcon: function() {
-        if( this.currentAppId ){
-            return SDL.SDLController.getApplicationModel( this.currentAppId ).appIcon;
-        }
-    }.property( 'this.currentAppId', 'SDL.SDLAppController.model.appIcon' ),
+
+        if (this.currentAppId) { return SDL.SDLController
+            .getApplicationModel(this.currentAppId).appIcon; }
+    }.property('this.currentAppId', 'SDL.SDLAppController.model.appIcon'),
 
     /** Call notification OnCommand on UIRPC */
-    onCommand: function( element ) {
-        FFW.UI.onCommand( element.commandId, element.appId );
+    onCommand: function(element) {
+
+        FFW.UI.onCommand(element.commandID, element.appID);
     },
 
     /** Call notification OnCommandSoftButton on UIRPC */
-    onCommandSoftButton: function( element ) {
-        FFW.UI.onCommandSoftButton( element.softButtonID, element.appId );
+    onCommandSoftButton: function(element) {
+
+        FFW.UI.onCommandSoftButton(element.softButtonID, element.appID);
     },
 
     /** Switching on Application */
-    activateApp: function( applicationModel ) {
+    activateApp: function(applicationModel) {
 
         // store active application id
-        this.set( 'currentAppId', applicationModel.appId );
+        this.set('currentAppId', applicationModel.appID);
 
         // set active model
-        SDL.SDLAppController.set( 'model', applicationModel );
+        SDL.SDLAppController.set('model', applicationModel);
 
-        // FFW.BasicCommunication.ActivateApp( applicationModel.appId );
+        // FFW.BasicCommunication.ActivateApp( applicationModel.appID );
 
         // SDL.MediaController.listDown();
 
@@ -91,28 +92,29 @@ SDL.SDLMediaController = Em.Object.create( {
      */
     restoreCurrentApp: function() {
 
-        if( SDL.SDLAppController.model.appId === this.currentAppId ){
-            FFW.BasicCommunication.ActivateApp( this.currentAppId );
+        if (SDL.SDLAppController.model.appID === this.currentAppId) {
+            FFW.BasicCommunication.OnAppActivated(this.currentAppId);
             return;
         }
-        this.activateApp( SDL.SDLController.getApplicationModel( this.currentAppId ) );
+        this.activateApp(SDL.SDLController
+            .getApplicationModel(this.currentAppId));
     },
 
     /** SDL perform interaction action from VR */
-    onVRPerformInteractionChoosed: function( element ) {
+    onVRPerformInteractionChoosed: function(element) {
 
-        if( SDL.States.media.sdl.sdlperforminteractionchoise.active ){
-            FFW.VR.onChoise( element.choiceID );
+        if (SDL.States.media.sdl.sdlperforminteractionchoise.active) {
+            FFW.VR.onChoise(element.choiceID);
             SDL.States.back();
         }
 
     },
 
     /** SDL perform interaction action */
-    onPerformInteractionChoosed: function( element ) {
+    onPerformInteractionChoosed: function(element) {
 
-        if( SDL.States.media.sdl.sdlperforminteractionchoise.active ){
-            FFW.UI.interactionResponse( "SUCCESS", element.choiceID );
+        if (SDL.States.media.sdl.sdlperforminteractionchoise.active) {
+            FFW.UI.interactionResponse("SUCCESS", element.choiceID);
             SDL.States.back();
         }
 
@@ -123,17 +125,19 @@ SDL.SDLMediaController = Em.Object.create( {
      * 
      * @param {Number}
      */
-    onDeleteApplication: function( appId ) {
-        if( this.currentAppId == appId ){
+    onDeleteApplication: function(appID) {
 
-            if( SDL.States.media.sdlmedia.active || SDL.SDLAppController.model.active ){
+        if (this.currentAppId == appID) {
 
-                SDL.States.goToStates( 'info.apps' );
+            if (SDL.States.media.sdlmedia.active
+                || SDL.SDLAppController.model.active) {
 
-                SDL.MediaController.set( 'activeState', 'media.player' );
+                SDL.States.goToStates('info.apps');
+
+                SDL.MediaController.set('activeState', 'media.player');
             }
 
-            this.set( 'currentAppId', 0 );
+            this.set('currentAppId', 0);
         }
     }
-} );
+});

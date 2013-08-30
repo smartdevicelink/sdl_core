@@ -50,13 +50,13 @@ PutFileRequest::~PutFileRequest() {
 void PutFileRequest::Run() {
   LOG4CXX_INFO(logger_, "PutFileRequest::Run");
 
-  ApplicationImpl* application =
-    static_cast<ApplicationImpl*>(ApplicationManagerImpl::instance()->
-        application((*message_)[strings::params][strings::connection_key]));
+  Application* application =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -72,8 +72,14 @@ void PutFileRequest::Run() {
       (*message_)[strings::msg_params][strings::persistent_file];
   }
 
+  if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
+    LOG4CXX_ERROR(logger_, "Binary data empty");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   const std::vector<unsigned char> file_data =
-      (*message_)[strings::msg_params][strings::binary_data].asBinary();
+    (*message_)[strings::params][strings::binary_data].asBinary();
   LOG4CXX_ERROR(logger_, "######## size " << file_data.size());
 
   if (free_space > file_data.size()) {
@@ -88,6 +94,7 @@ void PutFileRequest::Run() {
 
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
+      LOG4CXX_ERROR(logger_, "Unable to save file");
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {

@@ -35,6 +35,7 @@
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
@@ -43,8 +44,8 @@ namespace application_manager {
 
 namespace commands {
 
-AddCommandRequest::AddCommandRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
 }
 
 AddCommandRequest::~AddCommandRequest() {
@@ -53,13 +54,30 @@ AddCommandRequest::~AddCommandRequest() {
 void AddCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "AddCommandRequest::Run");
 
-  ApplicationImpl* app = static_cast<ApplicationImpl*>(
-      ApplicationManagerImpl::instance()->
-      application((*message_)[strings::params][strings::connection_key]));
+  Application* app =
+    ApplicationManagerImpl::instance()->
+    application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                      verification_result);
+    SendResponse(false, verification_result);
+    return;
+  }
+
+  if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id)))
+  {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -70,37 +88,138 @@ void AddCommandRequest::Run() {
     return;
   }
 
+  // we should specify amount of required responses in the 1st request
+  unsigned int chaining_counter = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
+    if (!CheckCommandName(app)) {
+      SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+      return;
+    }
+    if((*message_)[strings::msg_params][strings::menu_params]
+                                        .keyExists(hmi_request::parent_id)) {
+    	if (!CheckCommandParentId(app)) {
+    		SendResponse(false, mobile_apis::Result::INVALID_ID,
+                         "Parent ID doesn't exist");
+    		return;
+    	}
+    }
+    ++chaining_counter;
+  }
 
+  if (((*message_)[strings::msg_params].keyExists(strings::vr_commands)) &&
+      ((*message_)[strings::msg_params][strings::vr_commands].length() > 0)) {
+    if (!CheckCommandVRSynonym(app)) {
+      SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+      return;
+    }
+    ++chaining_counter;
+  }
+
+  if (!chaining_counter) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::menu_params] =
       (*message_)[strings::msg_params][strings::menu_params];
-    std::string file_path = file_system::FullPath(app->name());
-    file_path += "/";
-    file_path += (*message_)[strings::msg_params][strings::cmd_icon]
-        [strings::value].asString();
-    msg_params[strings::cmd_icon] = file_path;
 
     msg_params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true);
+    if (((*message_)[strings::msg_params]
+                   [strings::cmd_icon].keyExists(strings::value)) &&
+         (0 < (*message_)[strings::msg_params][strings::cmd_icon]
+                                             [strings::value].length())) {
+      msg_params[strings::cmd_icon] =
+         (*message_)[strings::msg_params][strings::cmd_icon];
+    }
+
+    CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true,
+                     chaining_counter);
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
-
     smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     msg_params[strings::cmd_id] =
-        (*message_)[strings::msg_params][strings::cmd_id];
+      (*message_)[strings::msg_params][strings::cmd_id];
     msg_params[strings::vr_commands] =
-       (*message_)[strings::msg_params][strings::vr_commands];
+      (*message_)[strings::msg_params][strings::vr_commands];
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, true);
   }
+}
+
+bool AddCommandRequest::CheckCommandName(const Application* app) {
+  if (NULL == app) {
+    return false;
+  }
+
+  const CommandsMap& commands = app->commands_map();
+  CommandsMap::const_iterator i = commands.begin();
+
+  for (; commands.end() != i; ++i) {
+    if ((*i->second)[strings::menu_params][strings::menu_name].asString() ==
+        (*message_)[strings::msg_params][strings::menu_params]
+                                         [strings::menu_name].asString()) {
+      LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandName received"
+                   " command name already exist");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool AddCommandRequest::CheckCommandVRSynonym(const Application* app) {
+  if (NULL == app) {
+    return false;
+  }
+
+  const CommandsMap& commands = app->commands_map();
+  CommandsMap::const_iterator it = commands.begin();
+
+  for (; commands.end() != it; ++it) {
+    for (size_t i = 0; i < (*it->second)[strings::vr_commands].length(); ++i) {
+      for (size_t j = 0; j < (*message_)[strings::msg_params]
+                                        [strings::vr_commands].length(); ++j) {
+          std::string vr_cmd_i = (*it->second)[strings::vr_commands]
+                                     [i].asString();
+          std::string vr_cmd_j = (*message_)[strings::msg_params]
+                                     [strings::vr_commands][j].asString();
+
+          if (0 == strcasecmp(vr_cmd_i.c_str(), vr_cmd_j.c_str())) {
+            LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandVRSynonym"
+                       " received command vr synonym already exist");
+            return false;
+          }
+      }
+    }
+  }
+  return true;
+}
+
+bool AddCommandRequest::CheckCommandParentId(const Application* app) {
+  if (NULL == app) {
+    return false;
+  }
+
+  const int parent_id = (*message_)[strings::msg_params][strings::menu_params]
+                                   [hmi_request::parent_id].asInt();
+  smart_objects::SmartObject* parent = app->FindSubMenu(parent_id);
+
+
+  if (!parent) {
+      LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandParentId received"
+                   " submenu doesn't exist");
+      return false;
+  }
+  return true;
 }
 
 }  // namespace commands

@@ -39,7 +39,7 @@
 
 namespace application_manager {
 
-class ApplicationImpl;
+class Application;
 
 namespace commands {
 
@@ -47,44 +47,95 @@ namespace commands {
  * @brief PerformInteractionRequest command class
  **/
 class PerformInteractionRequest : public CommandRequestImpl {
- public:
-  /**
-   * @brief PerformInteractionRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit PerformInteractionRequest(const MessageSharedPtr& message);
+  public:
 
-  /**
-   * @brief PerformInteractionRequest class destructor
-   **/
-  virtual ~PerformInteractionRequest();
+    /*
+     * @brief Typedef for InteractionMode
+     */
+    typedef enum {
+      MANUAL_ONLY              = 0,
+      VR_ONLY,
+      BOTH,
+      INVALID_ENUM
+    } InteractionMode;
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief PerformInteractionRequest class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit PerformInteractionRequest(const MessageSharedPtr& message);
 
- private:
-  /*
-   * @brief Sends VR AddCommand request to HMI
-   *
-   * @param app_id Application ID
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool SendVRAddCommandRequest(const ApplicationImpl* app);
+    /**
+     * @brief PerformInteractionRequest class destructor
+     **/
+    virtual ~PerformInteractionRequest();
 
-  /*
-   * @brief Sends UI PerformInteraction request to HMI
-   *
-   * @param app_id Application ID
-   *
-   * * @return TRUE on success, otherwise FALSE
-   */
-  bool SendUIPerformInteractionRequest(const ApplicationImpl* app);
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
+  private:
+    /*
+     * @brief Sends VR AddCommand request to HMI
+     *
+     * @param app_id Application ID
+     *
+     */
+    void SendVRAddCommandRequest(Application* const app);
+
+    /*
+     * @brief Sends UI PerformInteraction request to HMI
+     *
+     * @param app_id Application ID
+     *
+     */
+    void SendUIPerformInteractionRequest(Application* const app);
+
+    /*
+     * @brief Sends TTS Speak request to HMI
+     *
+     * @param app_id Application ID
+     */
+    void SendTTSSpeakRequest(Application* const app);
+
+
+    /*
+     * @brief Sends UI Show VR help request to HMI
+     *
+     * @param app_id Application ID
+     */
+    void SendUIShowVRHelpRequest(Application* const app);
+
+    /**
+      * @brief Creates and Sends Perform interaction to UI.
+      */
+    void CreateUIPerformInteraction(
+      const smart_objects::SmartObject& msg_params,
+      Application* const app);
+
+    /*
+     * @brief Checks if incoming choice set doesn't has similar menu names.
+     *
+     * @param app_id Application ID
+     *
+     * return Return TRUE if there are no similar menu names in choice set,
+     * otherwise FALSE
+     */
+    bool CheckChoiceSetMenuNames(Application* const app);
+
+    /*
+     * @brief Checks if incoming choice set doesn't has similar VR synonyms.
+     *
+     * @param app_id Application ID
+     *
+     * return Return TRUE if there are no similar VR synonyms in choice set,
+     * otherwise FALSE
+     */
+    bool CheckChoiceSetVRSynonyms(Application* const app);
+
+    DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 
 }  // namespace commands

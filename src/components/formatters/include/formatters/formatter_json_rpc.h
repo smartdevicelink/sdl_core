@@ -346,6 +346,8 @@ int FormatterJsonRpc::FromString(const std::string& str,
           method_container = root[kResult];
           method_container_found = true;
         } else if (true == root.isMember(kError)) {
+          out[strings::S_MSG_PARAMS]
+            = NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
           message_type_string = kErrorResponse;
           response_value = root[kError];
           response_value_found = true;
@@ -403,6 +405,8 @@ int FormatterJsonRpc::FromString(const std::string& str,
       } else {
         jsonValueToObj(root[kResult], out[strings::S_MSG_PARAMS]);
       }
+    } else if (true == is_error_response) {
+      jsonValueToObj(response_value[kData], out[strings::S_PARAMS][kData]);
     }
 
     if ((kResponse == message_type_string) ||

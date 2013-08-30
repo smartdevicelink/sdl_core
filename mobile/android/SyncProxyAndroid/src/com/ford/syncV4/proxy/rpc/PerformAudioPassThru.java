@@ -139,4 +139,15 @@ public class PerformAudioPassThru extends RPCRequest {
     	}
         return null;
     }
+
+    public void setMuteAudio(Boolean muteAudio) {
+        if (muteAudio != null) {
+            parameters.put(Names.muteAudio, muteAudio);
+        } else {
+            parameters.remove(Names.muteAudio);
+        }
+    }
+    public Boolean getMuteAudio() {
+        return (Boolean) parameters.get(Names.muteAudio);
+    }
 }

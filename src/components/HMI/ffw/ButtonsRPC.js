@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -38,19 +37,22 @@ FFW.Buttons = FFW.RPCObserver.create( {
      */
     client: FFW.RPCClient.create( {
         componentName: "Buttons"
-    } ),
+    }),
 
     /*
      * connect to RPC bus
      */
     connect: function() {
-        this.client.connect( this, 200 );
+
+        this.client.connect(this, 200); // Magic number is unique identifier for
+        // component
     },
 
     /*
      * disconnect from RPC bus
      */
     disconnect: function() {
+
         this.client.disconnect();
     },
 
@@ -59,7 +61,8 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * time
      */
     onRPCRegistered: function() {
-        Em.Logger.log( "FFW.Buttons.onRPCRegistered" );
+
+        Em.Logger.log("FFW.Buttons.onRPCRegistered");
         this._super();
     },
 
@@ -67,7 +70,8 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * Client is unregistered - no more requests
      */
     onRPCUnregistered: function() {
-        Em.Logger.log( "FFW.Buttons.onRPCUnregistered" );
+
+        Em.Logger.log("FFW.Buttons.onRPCUnregistered");
         this._super();
     },
 
@@ -84,134 +88,123 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * previously store reuqestID to determine to which request repsonse belongs
      * to
      */
-    onRPCResult: function( response ) {
-        Em.Logger.log( "FFW.Buttons.onRPCResult" );
+    onRPCResult: function(response) {
+
+        Em.Logger.log("FFW.Buttons.onRPCResult");
         this._super();
     },
 
     /*
      * handle RPC erros here
      */
-    onRPCError: function( error ) {
-        Em.Logger.log( "FFW.Buttons.onRPCError" );
+    onRPCError: function(error) {
+
+        Em.Logger.log("FFW.Buttons.onRPCError");
         this._super();
     },
 
     /*
      * handle RPC notifications here
      */
-    onRPCNotification: function( notification ) {
-        Em.Logger.log( "FFW.Buttons.onRPCNotification" );
+    onRPCNotification: function(notification) {
+
+        Em.Logger.log("FFW.Buttons.onRPCNotification");
         this._super();
     },
 
     /*
      * handle RPC requests here
      */
-    onRPCRequest: function( request ) {
-        Em.Logger.log( "FFW.Buttons.onRPCRequest" );
+    onRPCRequest: function(request) {
+
+        Em.Logger.log("FFW.Buttons.onRPCRequest");
         this._super();
 
-        if( request.method == "Buttons.GetCapabilities" ){
+        if (request.method == "Buttons.GetCapabilities") {
 
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
                 "id": request.id,
                 "result": {
-                    "capabilities":
-                        [
-                            {
-                                "name": "PRESET_0",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_1",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_2",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_3",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_4",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_5",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_6",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_7",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_8",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "PRESET_9",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "OK",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "SEEKLEFT",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "SEEKRIGHT",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "TUNEUP",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            },
-                            {
-                                "name": "TUNEDOWN",
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true
-                            }
-                        ],
+                    "capabilities": [
+                        {
+                            "name": "PRESET_0",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_1",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_2",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_3",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_4",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_5",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_6",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_7",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_8",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "PRESET_9",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "OK",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "SEEKLEFT",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "SEEKRIGHT",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "TUNEUP",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }, {
+                            "name": "TUNEDOWN",
+                            "shortPressAvailable": true,
+                            "longPressAvailable": true,
+                            "upDownAvailable": true
+                        }
+                    ],
                     "presetBankCapabilities": {
                         "onScreenPresetsAvailable": true
                     },
@@ -219,7 +212,39 @@ FFW.Buttons = FFW.RPCObserver.create( {
                     "method": "Buttons.GetCapabilities"
                 }
             };
-            this.client.send( JSONMessage );
+            this.client.send(JSONMessage);
+        }
+    },
+
+    /**
+     * Send error response from onRPCRequest
+     * 
+     * @param {Number}
+     *            resultCode
+     * @param {Number}
+     *            id
+     * @param {String}
+     *            method
+     */
+    sendError: function(resultCode, id, method, message) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if (resultCode) {
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "error": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "message": message,
+                    "data": {
+                        "method": method
+                    }
+                }
+            };
+            this.client.send(JSONMessage);
         }
     },
 
@@ -228,9 +253,9 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * when the RPC link is up or failed to connect and all the views are
      * rendered.
      */
-    buttonPressed: function( id, type ) {
+    buttonPressed: function(id, type) {
 
-        Em.Logger.log( "FFW.Buttons.buttonPressed " + type );
+        Em.Logger.log("FFW.Buttons.buttonPressed " + type);
 
         var JSONMessage = {
             "jsonrpc": "2.0",
@@ -241,7 +266,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
             }
         };
 
-        this.client.send( JSONMessage );
+        this.client.send(JSONMessage);
     },
 
     /*
@@ -249,9 +274,9 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * when the RPC link is up or failed to connect and all the views are
      * rendered.
      */
-    buttonEvent: function( id, type ) {
+    buttonEvent: function(id, type) {
 
-        Em.Logger.log( "FFW.Buttons.buttonEvent " + type );
+        Em.Logger.log("FFW.Buttons.buttonEvent " + type);
 
         var JSONMessage = {
             "jsonrpc": "2.0",
@@ -262,7 +287,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
             }
         };
 
-        this.client.send( JSONMessage );
+        this.client.send(JSONMessage);
 
     },
 
@@ -271,7 +296,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * when the RPC link is up or failed to connect and all the views are
      * rendered.
      */
-    buttonPressedCustom: function( name, type, softButtonID ) {
+    buttonPressedCustom: function(name, type, softButtonID) {
 
         // Em.Logger.log("FFW.Buttons.buttonPressedCustom " + type);
 
@@ -285,7 +310,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
             }
         };
 
-        this.client.send( JSONMessage );
+        this.client.send(JSONMessage);
     },
 
     /*
@@ -293,7 +318,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * when the RPC link is up or failed to connect and all the views are
      * rendered.
      */
-    buttonEventCustom: function( name, type, softButtonID ) {
+    buttonEventCustom: function(name, type, softButtonID) {
 
         // Em.Logger.log("FFW.Buttons.buttonEventCustom " + type);
 
@@ -307,7 +332,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
             }
         };
 
-        this.client.send( JSONMessage );
+        this.client.send(JSONMessage);
 
     }
-} )
+})

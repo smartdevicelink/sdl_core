@@ -45,6 +45,8 @@ public class BinaryFrameHeader {
 	
 	protected byte[] assembleHeaderBytes() {
 		int binHeader = _functionID;
+        // reset the 4 leftmost bits, for _rpcType
+        binHeader &= 0xFFFFFFFF >>> 4;
 		binHeader |= (_rpcType << 28);
 		
 		byte[] ret = new byte[12];

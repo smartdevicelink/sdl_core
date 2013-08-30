@@ -39,19 +39,27 @@
 #include <set>
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
-#include "hmi_message_handler/hmi_message_observer.h"
-#include "mobile_message_handler/mobile_message_observer.h"
-#include "connection_handler/connection_handler_observer.h"
+#include "application_manager/message_chaining.h"
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/policies_manager/policies_manager.h"
+#include "audio_manager/audio_manager_impl.h"
+
+#include "hmi_message_handler/hmi_message_observer.h"
+#include "mobile_message_handler/mobile_message_observer.h"
+
+#include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
+
 #include "request_watchdog/watchdog_subscriber.h"
-#include "interfaces/HMI_API.h"
 #include "formatters/CSmartFactory.hpp"
+
+#include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
-#include "utils/logger.h"
+
 #include "utils/macro.h"
+#include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
@@ -76,9 +84,25 @@ namespace application_manager {
 typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
 
 /**
-  *@brief Map of messages between mobile app and hmi
+  *@brief Map representing hmi request
+  *
+  *@param int hmi correlation ID
+  *@param MessageChainPtr Mobile request temporary data
 */
-typedef std::map<unsigned int, MessageChainPtr> MessageChains;
+typedef std::map<unsigned int, MessageChainPtr> HMIRequest;
+
+/**
+  *@brief Map representing mobile request and pending HMI requests
+  *
+  *@param int mobile correlation ID
+  *@param HMIRequest Sent HMI request
+*/
+typedef std::map<unsigned int, HMIRequest> MobileRequest;
+
+/**
+  *@brief Map of application ID and incoming mobile requests
+*/
+typedef std::map<unsigned int, MobileRequest> MessageChain;
 
 
 class ApplicationManagerImpl : public ApplicationManager
@@ -104,7 +128,16 @@ class ApplicationManagerImpl : public ApplicationManager
 
     /////////////////////////////////////////////////////
 
-    bool RegisterApplication(Application* application);
+    /**
+     * @brief Checks if all HMI capabilities received
+     *
+     * @return TRUE if all information received, otherwise FALSE
+     */
+    bool IsHMICapabilitiesInitialized();
+
+    Application* RegisterApplication(
+      const utils::SharedPtr<smart_objects::SmartObject>&
+      request_for_registration);
     /*
      * @brief Closes application by id
      *
@@ -157,9 +190,11 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return TRUE on success, otherwise FALSE
      */
-    bool AddMessageChain(unsigned int connection_key,
-      const unsigned int correlation_id, const unsigned int hmi_correlation_id,
-      const smart_objects::SmartObject* data = NULL);
+    MessageChaining* AddMessageChain(const unsigned int& connection_key,
+                                     const unsigned int& correlation_id,
+                                     const unsigned int& hmi_correlation_id,
+                                     MessageChaining* msg_chaining,
+                                     const smart_objects::SmartObject* data = NULL);
 
     /*
      * @brief Decrease chain after response from hmi was received
@@ -170,8 +205,8 @@ class ApplicationManagerImpl : public ApplicationManager
      *
      * @return true if there is no other pending responses
      */
-    bool DecreaseMessageChain(const unsigned int hmi_correlation_id,
-                              unsigned int mobile_correlation_id);
+    bool DecreaseMessageChain(const unsigned int& hmi_correlation_id,
+                              unsigned int& mobile_correlation_id);
 
     /*
      * @brief Retrieve MessageChaining object from chain for corresponding
@@ -182,7 +217,7 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return MessageChaining on success, otherwise NULL
      */
     MessageChaining* GetMessageChain(
-        const unsigned int hmi_correlation_id) const;
+      const unsigned int& hmi_correlation_id) const;
 
     /*
      * @brief Retrieves flag for audio pass thru request
@@ -313,6 +348,13 @@ class ApplicationManagerImpl : public ApplicationManager
      */
     void StopAudioPassThruThread();
 
+    std::string GetDeviceName(connection_handler::DeviceHandle handle);
+
+    virtual void set_is_vr_cooperating(bool value);
+    virtual void set_is_tts_cooperating(bool value);
+    virtual void set_is_ui_cooperating(bool value);
+    virtual void set_is_navi_cooperating(bool value);
+    virtual void set_is_ivi_cooperating(bool value);
     /////////////////////////////////////////////////////
 
     void set_hmi_message_handler(
@@ -400,15 +442,18 @@ class ApplicationManagerImpl : public ApplicationManager
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
 
+    bool RemoveMobileRequestFromMessageChain(
+      unsigned int mobile_correlation_id, unsigned int connection_key);
+
     /**
      * @brief Map of connection keys and associated applications
      */
-    std::map<int, Application*> applications_;
+    std::map<int, Application*>                   applications_;
     /**
      * @brief List of applications
      */
     std::set<Application*>                        application_list_;
-    MessageChains                                 message_chaining_;
+    MessageChain                                  message_chaining_;
     bool                                          audio_pass_thru_flag_;
     threads::Thread*                              perform_audio_thread_;
     bool                                          is_distracting_driver_;
@@ -419,11 +464,14 @@ class ApplicationManagerImpl : public ApplicationManager
     hmi_apis::Common_Language::eType              vr_language_;
     hmi_apis::Common_Language::eType              tts_language_;
     smart_objects::SmartObject*                   vehicle_type_;
+    audio_manager::AudioManager*                  audioManager_;
 
     hmi_message_handler::HMIMessageHandler*       hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler*        connection_handler_;
     request_watchdog::Watchdog*                   watchdog_;
+
+    policies_manager::PoliciesManager             policies_manager_;
 
     MessageQueue<utils::SharedPtr<Message>>       messages_from_mobile_;
     MessageQueue<utils::SharedPtr<Message>>       messages_to_mobile_;

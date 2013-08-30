@@ -61,8 +61,9 @@ namespace NsSmartDeviceLink
              *
              * @return Shared pointer to a new schema item.
              **/
-            static utils::SharedPtr<CStringSchemaItem> create(const TSchemaItemParameter<size_t> & MaxLength = TSchemaItemParameter<size_t>(),
-                                                        const TSchemaItemParameter<std::string> & DefaultValue = TSchemaItemParameter<std::string>());
+            static utils::SharedPtr<CStringSchemaItem> create(const TSchemaItemParameter<size_t> & MinLength = TSchemaItemParameter<size_t>(),
+                                                              const TSchemaItemParameter<size_t> & MaxLength = TSchemaItemParameter<size_t>(),
+                                                              const TSchemaItemParameter<std::string> & DefaultValue = TSchemaItemParameter<std::string>());
 
             /**
              * @brief Validate smart object.
@@ -100,7 +101,8 @@ namespace NsSmartDeviceLink
              * @param MaxLength Maximum allowed string length.
              * @param DefaultValue Default value.
              **/
-            CStringSchemaItem(const TSchemaItemParameter<size_t> & MaxLength,
+            CStringSchemaItem(const TSchemaItemParameter<size_t> & MinLength,
+                              const TSchemaItemParameter<size_t> & MaxLength,
                               const TSchemaItemParameter<std::string> & DefaultValue);
 
             /**
@@ -122,6 +124,11 @@ namespace NsSmartDeviceLink
              * @return Not implemented.
              **/
             CStringSchemaItem & operator =(const CStringSchemaItem & Other);
+
+            /**
+             * @brief Minimum allowed string length.
+             **/
+            const TSchemaItemParameter<size_t> mMinLength;
 
             /**
              * @brief Maximum allowed string length.

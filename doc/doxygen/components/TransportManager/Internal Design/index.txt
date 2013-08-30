@@ -3,7 +3,7 @@
 This chapter is focused on Transport Manager internal design and describes internal sub-components and use of multi-threading.
 
 Information regarding sub-components is described in following topics:
-    - \subpage components_transportmanager_internal_design_device_adapters "Device Adapters"
+    - \subpage components_transportmanager_internal_design_transport_adapters "Device Adapters"
     - \subpage components_transportmanager_internal_design_trasport_manager "Trasport Manager Implementation"
 
 Detailed description of sub-components interaction is described here:

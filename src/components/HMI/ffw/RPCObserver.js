@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -26,59 +25,87 @@
  */
 /**
  * @desc Observer of RPCClient
- * 
  */
 
-FFW.RPCObserver = Em.Object.extend( {
+FFW.RPCObserver = Em.Object
+    .extend( {
 
-    onRPCRegistered: function() {
-        // request necessary parameters from Backend
-        Em.Logger.log( "FFW.RPCObserver.Registered" );
-    },
+        onRPCRegistered: function() {
 
-    onRPCUnregistered: function() {
-        Em.Logger.log( "FFW.RPCObserver.onUnregistered" );
-    },
+            // request necessary parameters from Backend
+            SDL.SDLController
+                .registeredComponentStatus(this.client.componentName);
+        },
 
-    onRPCDisconnected: function() {
-        Em.Logger.log( "FFW.RPCObserver.onRPCDisconnected" );
-    },
+        onRPCUnregistered: function() {
 
-    /*
-     * when result is received from RPC component this function is called It is
-     * the propriate place to check results of reuqest execution Please use
-     * previously store reuqestID to determine to which request repsonse belongs
-     * to
-     */
-    onRPCResult: function( result ) {
-        // parse JSON string and set necessary properties
-    },
+            Em.Logger.log("FFW.RPCObserver.onUnregistered");
+        },
 
-    /*
-     */
-    onRPCError: function( error ) {
-        // parse JSON string and set necessary properties
-    },
+        onRPCDisconnected: function() {
 
-    /*
-     */
-    onRPCNotification: function( notification ) {
-        // parse JSON string and set necessary properties
-    },
+            Em.Logger.log("FFW.RPCObserver.onRPCDisconnected");
+        },
 
-    onRPCRequest: function( request ) {
-        if ( request && request.method ) {
-            var parsedMethod = request.method.split(/[.]/),
-                validateFunc,
-                result;
-            validateFunc = SDL.ValidateMessage[parsed[0]][parsed[1]];
-            result = validateFunc(request.params);
+        /*
+         * when result is received from RPC component this function is called It
+         * is the propriate place to check results of reuqest execution Please
+         * use previously store reuqestID to determine to which request repsonse
+         * belongs to
+         */
+        onRPCResult: function(result) {
 
-            if (result.resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
-                this.sendUIError( result.resultCode, request.id, request.method, result.resultMessage );
-                return;
+            // parse JSON string and set necessary properties
+        },
+
+        /*
+         */
+        onRPCError: function(error) {
+
+            // parse JSON string and set necessary properties
+        },
+
+        /*
+         */
+        onRPCNotification: function(notification) {
+
+            // parse JSON string and set necessary properties
+        },
+
+        onRPCRequest: function(request) {
+
+            // parse JSON string and send back necessary data
+        },
+
+        validationCheck: function(request) {
+
+            if (request && request.method) {
+                var parsedMethod = request.method.split(/[.]/), validateFunc, result;
+
+                if (SDL.RPCController[parsedMethod[0]][parsedMethod[1]]) {
+                    validateFunc = SDL.RPCController[parsedMethod[0]][parsedMethod[1]];
+                    result = validateFunc(request.params);
+
+                    if (result.resultCode != SDL.SDLModel.resultCode["SUCCESS"]) {
+                        this.sendError(result.resultCode,
+                            request.id,
+                            request.method,
+                            result.resultMessage);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                } else {
+                    this
+                        .sendError(SDL.SDLModel.resultCode["UNSUPPORTED_REQUEST"],
+                            request.id,
+                            request.method,
+                            'Unsupported incoming request! ' + parsedMethod[0]
+                                + '.' + parsedMethod[1]);
+                    Em.Logger.error('No method "' + parsedMethod[0] + '.'
+                        + parsedMethod[1] + '"');
+                    return false;
+                }
             }
         }
-        //parse JSON string and send back necessary data
-    }
-} )
+    });

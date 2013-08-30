@@ -32,10 +32,9 @@
  */
 
 #include "application_manager/commands/mobile/speak_response.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_conversion.h"
-#include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,26 +50,18 @@ SpeakResponse::~SpeakResponse() {
 void SpeakResponse::Run() {
   LOG4CXX_INFO(logger_, "SpeakResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
-    SendResponse(false);
-    LOG4CXX_ERROR(logger_, "Success = false");
-    return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id, mobile_correlation_id)) {
-
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-
-    const int code =
-        (*message_)[strings::params][hmi_response::code].asInt();
-    if (true == code) {
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
+    if (hmi_apis::Common_Result::SUCCESS == code) {
       SendResponse(true);
     } else {
       // TODO(VS): Some logic

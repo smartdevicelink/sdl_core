@@ -42,9 +42,7 @@ namespace application_manager {
 namespace commands {
 
 void GenericResponse::Run() {
-  NsSmartDeviceLink::NsSmartObjects::SmartObject response;
-
-  response[strings::params][strings::message_type] = MessageType::kResponse;
+  /*NsSmartDeviceLink::NsSmartObjects::SmartObject response;
 
   response[strings::params][strings::correlation_id] =
       (*message_)[strings::params][strings::correlation_id];
@@ -54,8 +52,12 @@ void GenericResponse::Run() {
       (*message_)[strings::params][strings::connection_key];
 
   response[strings::msg_params][strings::success] = false;
-  response[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::INVALID_DATA;
+  */
+
+  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
+  (*message_)[strings::msg_params][strings::success] = false;
+  (*message_)[strings::msg_params][strings::result_code] =
+    mobile_apis::Result::INVALID_DATA;
 
   SendResponse(false);
 }

@@ -33,219 +33,15 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 
-#include <string>
 #include <map>
 #include <set>
 #include <vector>
-#include "smart_objects/smart_object.h"
-
-#include "application_manager/message.h"
-#include "application_manager/application.h"
-#include "application_manager/commands/command.h"
-
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/application_data_impl.h"
+#include "connection_handler/device.h"
 
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
-
-class InitialApplicationData {
-  public:
-    InitialApplicationData();
-    ~InitialApplicationData();
-
-    const smart_objects::SmartObject* app_types() const;
-    const smart_objects::SmartObject* vr_synonyms() const;
-    const smart_objects::SmartObject* mobile_app_id() const;
-    const smart_objects::SmartObject* tts_name() const;
-    const smart_objects::SmartObject* ngn_media_screen_name() const;
-    const mobile_api::Language::eType& language() const;
-    const mobile_api::Language::eType& ui_language() const;
-    void set_app_types(const smart_objects::SmartObject& app_types);
-    void set_vr_synonyms(const smart_objects::SmartObject& vr_synonyms);
-    void set_mobile_app_id(const smart_objects::SmartObject& mobile_app_id);
-    void set_tts_name(const smart_objects::SmartObject& tts_name);
-    void set_ngn_media_screen_name(const smart_objects::SmartObject& ngn_name);
-    void set_language(const mobile_api::Language::eType& language);
-    void set_ui_language(const mobile_api::Language::eType& ui_language);
-
-  protected:
-    smart_objects::SmartObject* app_types_;
-    smart_objects::SmartObject* vr_synonyms_;
-    smart_objects::SmartObject* mobile_app_id_;
-    smart_objects::SmartObject* tts_name_;
-    smart_objects::SmartObject* ngn_media_screen_name_;
-    mobile_api::Language::eType  language_;
-    mobile_api::Language::eType  ui_language_;
-};
-
-/*
- * @brief Typedef for supported commands in application menu
- */
-typedef std::map<unsigned int, smart_objects::SmartObject*> CommandsMap;
-
-/*
- * @brief Typedef for supported sub menu in application menu
- */
-typedef std::map<unsigned int, smart_objects::SmartObject*> SubMenuMap;
-
-/*
- * @brief Typedef for interaction choice set
- */
-typedef std::map<unsigned int, smart_objects::SmartObject*> ChoiceSetMap;
-
-/*
- * @brief Typedef for interaction choice set VR commands
- */
-typedef std::map<unsigned int, smart_objects::SmartObject*> ChoiceSetVRCmdMap;
-
-class DynamicApplicationData {
-  public:
-    DynamicApplicationData();
-    ~DynamicApplicationData();
-    const smart_objects::SmartObject* help_promt() const;
-    const smart_objects::SmartObject* timeout_promt() const;
-    const smart_objects::SmartObject* vr_help_title() const;
-    const smart_objects::SmartObject* vr_help() const;
-    const mobile_api::TBTState::eType& tbt_state() const;
-    const smart_objects::SmartObject* show_command() const;
-    const smart_objects::SmartObject* tbt_show_command() const;
-
-    void set_help_prompt(const smart_objects::SmartObject& help_promt);
-    void set_timeout_prompt(const smart_objects::SmartObject& timeout_promt);
-    void set_vr_help_title(const smart_objects::SmartObject& vr_help_title);
-    void set_vr_help(const smart_objects::SmartObject& vr_help);
-    void set_tbt_state(const mobile_api::TBTState::eType& tbt_state);
-    void set_show_command(const smart_objects::SmartObject& show_command);
-    void set_tbt_show_command(const smart_objects::SmartObject& tbt_show);
-
-    /*
-     * @brief Adds a command to the in application menu
-     */
-    void AddCommand(unsigned int cmd_id,
-                    const smart_objects::SmartObject& command);
-
-    /*
-     * @brief Deletes all commands from the application menu with the specified command id
-     */
-    void RemoveCommand(unsigned int cmd_id);
-
-    /*
-     * @brief Finds command with the specified command id
-     */
-    smart_objects::SmartObject*  FindCommand(unsigned int cmd_id);
-
-    /*
-     * @brief Adds a menu to the application
-     */
-    void AddSubMenu(unsigned int menu_id,
-                    const smart_objects::SmartObject& menu);
-
-    /*
-     * @brief Deletes menu from the application menu
-     */
-    void RemoveSubMenu(unsigned int menu_id);
-
-    /*
-     * @brief Finds menu with the specified id
-     */
-    smart_objects::SmartObject*  FindSubMenu(unsigned int menu_id);
-
-    /*
-     * @brief Returns true if sub menu with such name already exist
-     */
-    bool IsSubMenuNameAlreadyExist(const std::string& name);
-
-    /*
-     * @brief Retrieve application commands
-     */
-    inline const CommandsMap& commands_map() const;
-
-    /*
-     * @brief Adds a interaction choice set to the application
-     *
-     * @param choice_set_id Unique ID used for this interaction choice set
-     * @param choice_set SmartObject that represent choice set
-     */
-    void AddChoiceSet(unsigned int choice_set_id,
-                      const smart_objects::SmartObject& choice_set);
-
-    /*
-     * @brief Deletes choice set from the application
-     *
-     * @param choice_set_id Unique ID of the interaction choice set
-     */
-    void RemoveChoiceSet(unsigned int choice_set_id);
-
-    /*
-     * @brief Finds choice set with the specified choice_set_id id
-     *
-     * @param choice_set_id Unique ID of the interaction choice set
-     */
-    smart_objects::SmartObject*  FindChoiceSet(unsigned int choice_set_id);
-
-    /*
-     * @brief Adds VR commands for choice set to the application
-     *
-     * @param choice_set_id Unique ID used for this interaction choice set
-     * @param choice_set SmartObject that represent VR commands
-     */
-    void AddChoiceSetVRCommands(unsigned int choice_set_id,
-                      const smart_objects::SmartObject& vr_commands);
-
-    /*
-     * @brief Deletes entirely ChoiceSet - VR commands map
-     *
-     * @param choice_set_id Unique ID of the interaction choice set
-     */
-    void DeleteChoiceSetVRCommands();
-
-    /*
-     * @brief Retrieves entirely ChoiceSet - VR commands map
-     *
-     * @return ChoiceSet - VR commands map
-     */
-    inline const ChoiceSetVRCmdMap& GetChoiceSetVRCommands();
-
-    /*
-     * @brief Retrieves VR commands for specified choice_set_id id
-     *
-     * @param choice_set_id Unique ID of the interaction choice set
-     *
-     * @return SmartObject for VR commands
-     */
-    smart_objects::SmartObject*  FindChoiceSetVRCommands(
-        unsigned int choice_set_id) const;
-
-    /*
-     * @brief Sets perform interaction state
-     *
-     * @param active Current state of the perform interaction
-     */
-    void set_perform_interaction_active(bool active);
-
-    /*
-     * @brief Retrieves perform interaction state
-     *
-     * @return TRUE if perform interaction active, otherwise FALSE
-     */
-    inline bool is_perform_interaction_active() const;
-
-  protected:
-    smart_objects::SmartObject* help_promt_;
-    smart_objects::SmartObject* timeout_promt_;
-    smart_objects::SmartObject* vr_help_title_;
-    smart_objects::SmartObject* vr_help_;
-    mobile_api::TBTState::eType  tbt_state_;
-    smart_objects::SmartObject* show_command_;
-    smart_objects::SmartObject* tbt_show_command_;
-
-    CommandsMap                  commands_;
-    SubMenuMap                   sub_menu_;
-    ChoiceSetMap                 choice_set_map_;
-    ChoiceSetVRCmdMap            choice_set_vr_commands_map_;
-    bool                         is_perform_interaction_active_;
-};
 
 struct AppFile {
   AppFile(const std::string& name, bool persistent)
@@ -255,33 +51,38 @@ struct AppFile {
   bool is_persistent;
 };
 
-class ApplicationImpl : public Application,
-  public InitialApplicationData,
-  public DynamicApplicationData {
+class ApplicationImpl : public virtual InitialApplicationDataImpl,
+  public virtual DynamicApplicationDataImpl {
   public:
-    explicit ApplicationImpl(int app_id);
+    explicit ApplicationImpl(unsigned int app_id);
     ~ApplicationImpl();
 
-    void ProcessMessage(smart_objects::SmartObject* message);
-    void ReportError(smart_objects::SmartObject* message,
-                     ErrorCode error_code);
+    /**
+     * @brief Returns message belonging to the application
+     * that is currently executed (i.e. on HMI).
+     * @return smart_objects::SmartObject * Active message
+     */
+    const smart_objects::SmartObject* active_message() const;
     void CloseActiveMessage();
     bool IsFullscreen() const;
+    bool MakeFullscreen();
     bool IsAudible() const;
-    bool HasbeenActivated() const;
+    void MakeNotAudible();
     bool SupportsNavigation() const;
     void AllowNavigation(bool allow);
+    inline bool app_allowed() const;
+    bool HasBeenActivated() const;
 
-    const smart_objects::SmartObject* active_message() const;
     const Version& version() const;
-    int app_id() const;
+    inline unsigned int app_id() const;
     const std::string& name() const;
     bool is_media_application() const;
     const mobile_api::HMILevel::eType& hmi_level() const;
     const mobile_api::SystemContext::eType& system_context() const;
-    inline const mobile_api::AudioStreamingState::eType& audio_streaming_state() const;
+    inline const mobile_api::AudioStreamingState::eType&
+    audio_streaming_state() const;
     const std::string& app_icon_path() const;
-    inline bool app_allowed() const;
+    connection_handler::DeviceHandle device() const;
 
     void set_version(const Version& version);
     void set_name(const std::string& name);
@@ -290,9 +91,10 @@ class ApplicationImpl : public Application,
     void set_system_context(
       const mobile_api::SystemContext::eType& system_context);
     void set_audio_streaming_state(
-          const mobile_api::AudioStreamingState::eType& state);
+      const mobile_api::AudioStreamingState::eType& state);
     bool set_app_icon_path(const std::string& file_name);
     void set_app_allowed(const bool& allowed);
+    void set_device(connection_handler::DeviceHandle device);
 
     bool AddFile(const std::string& file_name, bool is_persistent);
     bool DeleteFile(const std::string& file_name);
@@ -309,45 +111,40 @@ class ApplicationImpl : public Application,
     void CleanupFiles();
 
   private:
-    smart_objects::SmartObject*           active_message_;
+    smart_objects::SmartObject*            active_message_;
 
     Version                                version_;
-    int                                    app_id_;
+    unsigned int                           app_id_;
     std::string                            app_name_;
     bool                                   is_media_;
     bool                                   allowed_support_navigation_;
     bool                                   is_app_allowed_;
+    bool has_been_activated_;
 
     mobile_api::HMILevel::eType            hmi_level_;
     mobile_api::SystemContext::eType       system_context_;
     mobile_api::AudioStreamingState::eType audio_streaming_state_;
     std::string                            app_icon_path_;
+    connection_handler::DeviceHandle       device_;
 
     std::vector<AppFile>                   app_files_;
     std::set<unsigned int>                 subscribed_buttons_;
     std::set<unsigned int>                 subscribed_vehicle_info_;
 };
 
-const CommandsMap& DynamicApplicationData::commands_map() const {
-  return commands_;
-}
-
-bool DynamicApplicationData::is_perform_interaction_active() const {
-  return is_perform_interaction_active_;
-}
-
-const ChoiceSetVRCmdMap& DynamicApplicationData::GetChoiceSetVRCommands() {
-  return choice_set_vr_commands_map_;
+unsigned int ApplicationImpl::app_id() const {
+  return app_id_;
 }
 
 const mobile_api::AudioStreamingState::eType&
-    ApplicationImpl::audio_streaming_state() const {
+ApplicationImpl::audio_streaming_state() const {
   return audio_streaming_state_;
 }
 
 bool ApplicationImpl::app_allowed() const {
   return is_app_allowed_;
 }
+
 
 }  // namespace application_manager
 

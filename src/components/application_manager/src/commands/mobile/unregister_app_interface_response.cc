@@ -41,7 +41,7 @@ namespace commands  {
 void UnregisterAppInterfaceResponse::Run() {
   LOG4CXX_INFO(logger_, "UnregisterAppInterfaceResponse::Run");
 
-  SendResponse(true);
+  SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 
 }  // namespace commands

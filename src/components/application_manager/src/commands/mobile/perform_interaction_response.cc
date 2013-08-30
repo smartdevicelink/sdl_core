@@ -35,7 +35,9 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,26 +53,28 @@ PerformInteractionResponse::~PerformInteractionResponse() {
 void PerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionResponse::Run");
 
-  if ((*message_)[strings::params][strings::success] == false) {
-     SendResponse(false);
-     LOG4CXX_ERROR(logger_, "Success = false");
-     return;
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
   }
 
-  const unsigned int hmi_correlation_id = (*message_)[strings::params]
-                                [strings::correlation_id].asUInt();
+  const unsigned int correlation_id =
+    (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  const unsigned int mobile_correlation_id = 0;
-  if (ApplicationManagerImpl::instance()->
-       DecreaseMessageChain(hmi_correlation_id, mobile_correlation_id)) {
+  if (!IsPendingResponseExist()) {
+    const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-     (*message_)[strings::params][strings::success] = true;
-     (*message_)[strings::params][strings::result_code] =
-       mobile_apis::Result::SUCCESS;
-     SendResponse(true);
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      // hmi_apis::Common_Result::ABORTED == code
+      SendResponse(true, mobile_apis::Result::SUCCESS);
+    } else {
+      // TODO(DK): Some logic
+      SendResponse(false);
+    }
   }
 }
 
