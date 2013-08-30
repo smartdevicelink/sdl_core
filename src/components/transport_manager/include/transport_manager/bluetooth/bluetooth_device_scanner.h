@@ -1,6 +1,6 @@
 /**
  * \file bluetooth_device_scanner.h
- * \brief BluetoothAdapter class header file.
+ * \brief BluetoothDeviceScanner class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BLUETOOTH_DEVICE_SCANNER_H_
-#define BLUETOOTH_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -43,33 +43,71 @@
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
 
-#include "transport_manager/device_adapter/device_scanner.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
+/**
+ * @brief Scan for devices using bluetooth.
+ */
 class BluetoothDeviceScanner : public DeviceScanner {
  public:
-  BluetoothDeviceScanner(DeviceAdapterController* controller);
+
+  /**
+   * @brief Constructor.
+   */
+  BluetoothDeviceScanner(TransportAdapterController* controller);
+
+  /**
+   * @brief Destructor.
+   */
   ~BluetoothDeviceScanner();
+
+  /**
+   * @brief Main thread initialization.
+   */
   void thread();
  protected:
-  virtual DeviceAdapter::Error init();
+
+  /**
+   * @brief Start device scanner.
+   *
+   * @return Error information about reason of initialization failure.
+   */
+  virtual TransportAdapter::Error init();
+
+  /**
+   * @brief
+   */
   virtual void terminate();
-  virtual DeviceAdapter::Error scan();
-  virtual bool isInitialised() const;
+
+  /**
+   * @brief
+   *
+   * @return Error information about reason of Scan failure.
+   */
+  virtual TransportAdapter::Error Scan();
+
+  /**
+   * @brief Check device scanner for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
+  virtual bool IsInitialised() const;
  private:
 
   typedef std::vector<uint8_t> RfcommChannelVector;
 
-  bool waitForDeviceScanRequest();
-  RfcommChannelVector discoverSmartDeviceLinkRfcommChannels(
+  bool WaitForDeviceScanRequest();
+  RfcommChannelVector DiscoverSmartDeviceLinkRFCOMMChannels(
       const bdaddr_t& device_address);
   SearchDeviceError* doInquiry(DeviceVector* discovered_devices);
 
-  DeviceAdapterController* controller_;
+  TransportAdapterController* controller_;
   pthread_t thread_;
   bool thread_started_;
   bool shutdown_requested_;
@@ -84,7 +122,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   uuid_t smart_device_link_service_uuid_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* BLUETOOTH_DEVICE_SCANNER_H_ */

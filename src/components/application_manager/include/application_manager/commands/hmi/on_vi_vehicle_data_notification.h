@@ -45,26 +45,26 @@ namespace commands {
  * Sent by HMI for the periodic and non periodic vehicle data
  **/
 class OnVIVehicleDataNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnVIVehicleDataNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnVIVehicleDataNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnVIVehicleDataNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnVIVehicleDataNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnVIVehicleDataNotification class destructor
-     **/
-    virtual ~OnVIVehicleDataNotification();
+  /**
+   * @brief OnVIVehicleDataNotification class destructor
+   **/
+  virtual ~OnVIVehicleDataNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnVIVehicleDataNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnVIVehicleDataNotification);
 };
 
 }  // namespace commands

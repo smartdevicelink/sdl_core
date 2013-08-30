@@ -1,6 +1,6 @@
 /**
  * \file bluetooth_adapter.h
- * \brief BluetoothAdapter class header file.
+ * \brief BluetoothSocketConnection class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BLUETOOTH_SOCKET_CONNECTION_H_
-#define BLUETOOTH_SOCKET_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -43,24 +43,48 @@
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
 
-#include "transport_manager/device_adapter/threaded_socket_connection.h"
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
+/**
+ * @brief Class responsible for communication over bluetooth sockets.
+ */
 class BluetoothSocketConnection : public ThreadedSocketConnection {
  public:
+
+  /**
+   * @brief Constructor.
+   *
+   * @param device_uid Device unique identifier.
+   * @param app_handle Handle of device.
+   * @param controller Pointer to the device adapter controller.
+   */
   BluetoothSocketConnection(const DeviceUID& device_uid,
                             const ApplicationHandle& app_handle,
-                            DeviceAdapterController* controller);
+                            TransportAdapterController* controller);
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~BluetoothSocketConnection();
  protected:
-  virtual bool establish(ConnectError** error);
+
+  /**
+   * @brief Establish connection.
+   *
+   * @param error Connection error.
+   *
+   * @return True - connection established.
+   * false - connection not established.
+   */
+  virtual bool Establish(ConnectError** error);
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* BLUETOOTH_SOCKET_CONNECTION_H_ */

@@ -1,6 +1,6 @@
 /**
- * \file device.h
- * \brief Device class header file.
+ * \file connection.h
+ * \brief Connection class header.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,76 +32,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTE_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTE_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CONNECTION_H_
 
-#include <string>
+#include "utils/shared_ptr.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
-#include "transport_manager/common.h"
+using utils::SharedPtr;
 
 namespace transport_manager {
-namespace device_adapter {
+
+namespace transport_adapter {
 
 /**
- * @brief Internal class describing device.
+ * @brief Application connection.
  **/
-class Device {
+class Connection {
  public:
   /**
    * @brief Constructor.
-   *
-   * @param name User-friendly device name.
-   * @param unique_device_id device unique identifier.
-   **/
-  Device(const std::string& name, const DeviceUID& unique_device_id)
-    : name_(name),
-      unique_device_id_(unique_device_id) {}
+   */
+  Connection() {}
   /**
    * @brief Destructor.
    **/
-  virtual ~Device() {}
+  virtual ~Connection() {}
 
   /**
-   * @brief Compare devices.
+   * @brief Send data frame.
    *
-   * This method checks whether two SDevice structures
-   * refer to the same device.
+   * @param Message Smart pointer to the raw message.
    *
-   * @param other_Ddvice Device to compare with.
-   *
-   * @return true if devices are equal, false otherwise.
-   **/
-  virtual bool isSameAs(const Device* other_device) const = 0;
-
-  virtual ApplicationList getApplicationList() const = 0;
-
-  const DeviceUID& unique_device_id() const {
-    return unique_device_id_;
-  }
-
-  /**
-   * @brief Return name of device.
+   * @return Error Information about possible reason of sending data failure.
    */
-  const std::string& name() const {
-    return name_;
-  }
-
- private:
-  /**
-   * @brief Device user-friendly name.
-   **/
-  std::string name_;
+  virtual TransportAdapter::Error SendData(RawMessageSptr message) = 0;
 
   /**
-   * @brief Unique device identifier across all devices.
-   **/
-  DeviceUID unique_device_id_;
+   * @brief Disconnect the current connection.
+   */
+  virtual TransportAdapter::Error Disconnect() = 0;
 };
 
-typedef utils::SharedPtr<Device> DeviceSptr;
-typedef std::vector<DeviceSptr> DeviceVector;
+/**
+ * @typedef Type definition of smart pointer to the Connection class.
+ */
+typedef utils::SharedPtr<Connection> ConnectionSptr;
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* DEVICE_H_ */
+#endif /* CONNECTION_H_ */

@@ -887,8 +887,8 @@
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
-  <param name="graphicSupported" type="Boolean" mandatory="true">
-      <description>Must be true if the display's persistent screen supports referencing image.</description>
+  <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="true">
+      <description>List of supported image types (static/dynamic).</description>
     </param>
 </struct>
 

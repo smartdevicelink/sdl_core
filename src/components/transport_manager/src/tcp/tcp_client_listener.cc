@@ -47,14 +47,14 @@
 #include <netinet/tcp.h>
 
 
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-TcpClientListener::TcpClientListener(DeviceAdapterController* controller,
+TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port)
     : port_(port),
       controller_(controller),
@@ -72,16 +72,16 @@ void* tcpClientListenerThread(void* data) {
   return 0;
 }
 
-DeviceAdapter::Error TcpClientListener::init() {
-  return DeviceAdapter::OK;
+TransportAdapter::Error TcpClientListener::init() {
+  return TransportAdapter::OK;
 }
 
 void TcpClientListener::terminate() {
   shutdown_requested_ = true;
-  stopListening();
+  StopListening();
 }
 
-bool TcpClientListener::isInitialised() const {
+bool TcpClientListener::IsInitialised() const {
   return true;
 }
 
@@ -124,17 +124,17 @@ void TcpClientListener::thread() {
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
 
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
-    DeviceSptr device = controller_->addDevice(tcp_device);
+    DeviceSptr device = controller_->AddDevice(tcp_device);
     tcp_device = static_cast<TcpDevice*>(device.get());
-    const ApplicationHandle app_handle = tcp_device->addIncomingApplication(
+    const ApplicationHandle app_handle = tcp_device->AddIncomingApplication(
         connection_fd);
 
     TcpSocketConnection* connection(
         new TcpSocketConnection(device->unique_device_id(), app_handle,
                                 controller_));
     connection->set_socket(connection_fd);
-    const DeviceAdapter::Error error = connection->start();
-    if (error != DeviceAdapter::OK) {
+    const TransportAdapter::Error error = connection->start();
+    if (error != TransportAdapter::OK) {
       delete connection;
     }
   }
@@ -142,15 +142,15 @@ void TcpClientListener::thread() {
   LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
 }
 
-DeviceAdapter::Error TcpClientListener::startListening() {
+TransportAdapter::Error TcpClientListener::StartListening() {
   if (thread_started_)
-    return DeviceAdapter::BAD_STATE;
+    return TransportAdapter::BAD_STATE;
 
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
 
   if (-1 == socket_) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create socket");
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   sockaddr_in server_address;
@@ -164,12 +164,12 @@ DeviceAdapter::Error TcpClientListener::startListening() {
 
   if (0 != bind(socket_, (sockaddr*) &server_address, sizeof(server_address))) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "bind() failed");
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   if (0 != listen(socket_, 128)) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "listen() failed");
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   const int thread_start_error = pthread_create(&thread_, 0,
@@ -182,14 +182,14 @@ DeviceAdapter::Error TcpClientListener::startListening() {
         logger_,
         "Tcp client listener thread start failed, error code "
             << thread_start_error);
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error TcpClientListener::stopListening() {
+TransportAdapter::Error TcpClientListener::StopListening() {
   if (!thread_started_)
-    return DeviceAdapter::BAD_STATE;
+    return TransportAdapter::BAD_STATE;
 
   thread_stop_requested_ = true;
   shutdown(socket_, SHUT_RDWR);
@@ -199,8 +199,8 @@ DeviceAdapter::Error TcpClientListener::stopListening() {
   socket_ = -1;
   thread_started_ = false;
   thread_stop_requested_ = false;
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager

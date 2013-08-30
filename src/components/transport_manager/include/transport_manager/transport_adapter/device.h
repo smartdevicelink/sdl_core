@@ -1,6 +1,6 @@
 /**
- * \file client_connection_listener.h
- * \brief Client connection listener header.
+ * \file device.h
+ * \brief Device class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,60 +32,76 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CLIENT_CONNECTION_LISTENER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CLIENT_CONNECTION_LISTENER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTE_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTE_DEVICE_H_
 
-#include "transport_manager/device_adapter/device_adapter.h"
+#include <string>
 
+#include "transport_manager/common.h"
 
 namespace transport_manager {
-
-
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
- * @brief Abstract class for listener of client connection.
- */
-class ClientConnectionListener {
+ * @brief Internal class describing device.
+ **/
+class Device {
  public:
   /**
-   * @brief Run client connection listener.
+   * @brief Constructor.
    *
-   * @return Error information about possible reason of starting client listener failure.
-   */
-  virtual DeviceAdapter::Error init() = 0;
-
-  /**
-   * @brief Stop client connection listener.
-   */
-  virtual void terminate() = 0;
-
-  /**
-   * @brief Check initialization.
-   *
-   * @return True if initialized.
-   * @return False if not initialized.
-   */
-  virtual bool isInitialised() const = 0;
-
-  /**
-   * @brief Start to listen for connection from client.
-   */
-  virtual DeviceAdapter::Error startListening() = 0;
-
-  /**
-   * @brief Stop to listen for connection from client.
-   */
-  virtual DeviceAdapter::Error stopListening() = 0;
-
+   * @param name User-friendly device name.
+   * @param unique_device_id device unique identifier.
+   **/
+  Device(const std::string& name, const DeviceUID& unique_device_id)
+    : name_(name),
+      unique_device_id_(unique_device_id) {}
   /**
    * @brief Destructor.
-   */
-  virtual ~ClientConnectionListener() {
+   **/
+  virtual ~Device() {}
+
+  /**
+   * @brief Compare devices.
+   *
+   * This method checks whether two SDevice structures
+   * refer to the same device.
+   *
+   * @param other_Ddvice Device to compare with.
+   *
+   * @return true if devices are equal, false otherwise.
+   **/
+  virtual bool IsSameAs(const Device* other_device) const = 0;
+
+  virtual ApplicationList GetApplicationList() const = 0;
+
+  const DeviceUID& unique_device_id() const {
+    return unique_device_id_;
   }
+
+  /**
+   * @brief Return name of device.
+   */
+  const std::string& name() const {
+    return name_;
+  }
+
+ private:
+  /**
+   * @brief Device user-friendly name.
+   **/
+  std::string name_;
+
+  /**
+   * @brief Unique device identifier across all devices.
+   **/
+  DeviceUID unique_device_id_;
 };
 
-}  // namespace device_adapter
+typedef utils::SharedPtr<Device> DeviceSptr;
+typedef std::vector<DeviceSptr> DeviceVector;
+
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* CLIENT_CONNECTION_LISTENER_H_ */
+#endif /* DEVICE_H_ */

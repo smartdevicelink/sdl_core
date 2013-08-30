@@ -44,7 +44,7 @@
         - TM client receives single frame with onFrameReceived callback
         - TM client calls sendFrame with some frame data and user data
         - TM client receives onFrameSendCompleted
-        - TM client calls disconnectDevice
+        - TM client calls DisconnectDevice
         - TM client receives onApplicationDisconnected
  */
 #include "transport_manager_instance_test.h"

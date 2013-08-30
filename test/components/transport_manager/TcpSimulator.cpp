@@ -150,7 +150,7 @@ public:
     ~CTranspMgrTcpClient();
  
     /**
-     * @brief Tries to establish TCP connection to the Transport Manager
+     * @brief Tries to Establish TCP connection to the Transport Manager
      */
     void connect();
     
@@ -331,12 +331,12 @@ public:
       
       if (protocolVersion == 0x01) 
       {
-          sendData(phv1, sizeof(PacketHeaderV1));
+          SendData(phv1, sizeof(PacketHeaderV1));
           if (phv1) free(phv1);
       }
       else if (protocolVersion == 0x02)
       {
-          sendData(phv2, sizeof(PacketHeaderV2));
+          SendData(phv2, sizeof(PacketHeaderV2));
           if (phv2) free(phv2);
       }
 
@@ -351,12 +351,12 @@ public:
          
          if (protocolVersion == 0x01) 
          {
-            sendData(phv1, sizeof(PacketHeaderV1));
+            SendData(phv1, sizeof(PacketHeaderV1));
             if (phv1) free(phv1);
          }
          else if (protocolVersion == 0x02)
          {
-            sendData(phv2, sizeof(PacketHeaderV2));
+            SendData(phv2, sizeof(PacketHeaderV2));
             if (phv2) free(phv2);
          }
       }
@@ -402,7 +402,7 @@ public:
             void* packet2Send = 0;
             int32_t packet2SendLength = 0;
             packet2SendLength = generateSingleMessage(mPacketheaderV2, mPacketheaderV1, instr, packet2Send);
-            sendData(packet2Send, packet2SendLength);
+            SendData(packet2Send, packet2SendLength);
             if (packet2Send) free (packet2Send);
             
             printf("packet2SendLength = %d \n", packet2SendLength);
@@ -423,13 +423,13 @@ private:
      * 
      */
     // -------------------------------------------------------------------------
-    void sendData(const void *const data, const int length)
+    void SendData(const void *const data, const int length)
     // -------------------------------------------------------------------------
     {        
         if ((length > 0) && data != 0)
         {
             if (length >= 3) 
-                    printf("sendData. length = %d, [0]=0x%.2x, [1]=0x%02.2x, [2]==0x%2.2x\n", length, *((const char *const)data), *((const char *const)data+1), *((const char *const)data+2));
+                    printf("SendData. length = %d, [0]=0x%.2x, [1]=0x%02.2x, [2]==0x%2.2x\n", length, *((const char *const)data), *((const char *const)data+1), *((const char *const)data+2));
             if (mTCPClient.isConnected() == false)
             {
                 mTCPClient.connect();
@@ -438,7 +438,7 @@ private:
         }
         else 
         {
-            printf("\n CAppTester::sendData error: no data to send\n");
+            printf("\n CAppTester::SendData error: no data to send\n");
         }
     }
 

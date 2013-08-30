@@ -144,7 +144,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   }
 
   if (watchdog_) {
-    watchdog_->removeListener(this);
+    watchdog_->RemoveListener(this);
 
     // TODO(AK): Is it correct?
     delete watchdog_;
@@ -305,7 +305,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
           connection_key,
           mobile_apis::FunctionID::RegisterAppInterfaceID,
           message[strings::params][strings::correlation_id],
-          mobile_apis::Result::DUPLICATE_NAME));
+          mobile_apis::Result::APPLICATION_REGISTERED_ALREADY));
       ManageMobileCommand(response);
       return NULL;
     }
@@ -445,6 +445,9 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
       }
       if (application->HasBeenActivated()) {
         MessageHelper::SendAppDataToHMI(application);
+      } else {
+        MessageHelper::SendChangeRegistrationRequestToHMI(
+          application);
       }
       if (!application->MakeFullscreen()) {
         return false;
@@ -970,7 +973,7 @@ void ApplicationManagerImpl::set_watchdog(
   DCHECK(watchdog);
   watchdog_ = watchdog;
 
-  watchdog_->addListener(this);
+  watchdog_->AddListener(this);
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
@@ -1339,7 +1342,7 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
   if (!watchdog_) {
     watchdog_ = request_watchdog::RequestWatchdog::instance();
     DCHECK(watchdog_);
-    watchdog_->addListener(this);
+    watchdog_->AddListener(this);
   }
   unsigned int default_timeout =
     profile::Profile::instance()->default_timeout();

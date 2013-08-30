@@ -1,6 +1,6 @@
 /**
- * \file device_scanner.h
- * \brief DeviceScanner class header file.
+ * \file client_connection_listener.h
+ * \brief Client connection listener header.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,55 +32,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_SCANNER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CLIENT_CONNECTION_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CLIENT_CONNECTION_LISTENER_H_
 
-#include "transport_manager/device_adapter/device.h"
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+
 
 namespace transport_manager {
-namespace device_adapter {
+
+
+namespace transport_adapter {
 
 /**
- * @brief Abstract class for device scanner.
+ * @brief Abstract class for listener of client connection.
  */
-class DeviceScanner {
+class ClientConnectionListener {
  public:
   /**
-   * @brief Start device scanner.
+   * @brief Run client connection listener.
    *
-   * @return Error information about reason of initialization failure.
+   * @return Error information about possible reason of starting client listener failure.
    */
-  virtual DeviceAdapter::Error init() = 0;
+  virtual TransportAdapter::Error init() = 0;
 
   /**
-   * @brief
-   *
-   * @return Error information about reason of scan failure.
-   */
-  virtual DeviceAdapter::Error scan() = 0;
-
-  /**
-   * @brief
+   * @brief Stop client connection listener.
    */
   virtual void terminate() = 0;
 
   /**
-   * @brief Check device scanner for initialization.
+   * @brief Check initialization.
    *
-   * @return true - initialized.
-   * false - not initialized.
+   * @return True if initialized.
+   * @return False if not initialized.
    */
-  virtual bool isInitialised() const = 0;
+  virtual bool IsInitialised() const = 0;
+
+  /**
+   * @brief Start to listen for connection from client.
+   */
+  virtual TransportAdapter::Error StartListening() = 0;
+
+  /**
+   * @brief Stop to listen for connection from client.
+   */
+  virtual TransportAdapter::Error StopListening() = 0;
 
   /**
    * @brief Destructor.
    */
-  virtual ~DeviceScanner() {
+  virtual ~ClientConnectionListener() {
   }
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* DEVICE_SCANNER_H_ */
+#endif /* CLIENT_CONNECTION_LISTENER_H_ */

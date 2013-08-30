@@ -50,13 +50,20 @@ AlertManeuverRequest::~AlertManeuverRequest() {
 void AlertManeuverRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertManeuverRequest::Run");
 
+  if ((!(*message_)[strings::params].keyExists(strings::soft_buttons)) &&
+      (!(*message_)[strings::params].keyExists(strings::tts_chunks))) {
+    LOG4CXX_ERROR(logger_, "AlertManeuverRequest::Request without parameters!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   Application* app =
     ApplicationManagerImpl::instance()->
     application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
@@ -65,7 +72,7 @@ void AlertManeuverRequest::Run() {
 
   msg_params[hmi_request::soft_buttons] =
                 smart_objects::SmartObject(smart_objects::SmartType_Array);
-  if ((*message_)[strings::params].keyExists("softButtons")) {
+  if ((*message_)[strings::params].keyExists(strings::soft_buttons)) {
     msg_params[hmi_request::soft_buttons] =
       (*message_)[strings::params][strings::soft_buttons];
   }

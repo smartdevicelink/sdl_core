@@ -27,14 +27,14 @@ set (SOURCES
    ./src/mock_connection_factory.cc
    ./src/mock_application.cc
    ./src/mock_device.cc
-   ./src/mock_device_adapter.cc
+   ./src/mock_transport_adapter.cc
    ./src/mock_device_scanner.cc
    ./src/raw_message_matcher.cc
    ./src/transport_manager.cc
 )
 
 create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")
-create_test("test_TcpDeviceAdapter" "src/test_tcp_device_adapter.cc" "${LIBRARIES}")
+create_test("test_TcpTransportAdapter" "src/test_tcp_transport_adapter.cc" "${LIBRARIES}")
 
 add_executable("test_DnssdServiceDiscovery" "src/test_dnssd_service_browser.cc")
 target_link_libraries("test_DnssdServiceDiscovery" ${LIBRARIES})

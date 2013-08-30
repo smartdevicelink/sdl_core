@@ -51,10 +51,10 @@
 
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 BluetoothDeviceScanner::BluetoothDeviceScanner(
-    DeviceAdapterController* controller)
+    TransportAdapterController* controller)
     : controller_(controller),
       thread_(),
       thread_started_(false),
@@ -87,7 +87,7 @@ void* bluetoothDeviceScannerThread(void* data) {
   return 0;
 }
 
-bool BluetoothDeviceScanner::isInitialised() const {
+bool BluetoothDeviceScanner::IsInitialised() const {
   return thread_started_;
 }
 
@@ -128,7 +128,7 @@ SearchDeviceError* BluetoothDeviceScanner::doInquiry(
 
     for (int i = 0; i < number_of_devices; ++i) {
       RfcommChannelVector smart_device_link_rfcomm_channels =
-          discoverSmartDeviceLinkRfcommChannels(inquiry_info_list[i].bdaddr);
+          DiscoverSmartDeviceLinkRFCOMMChannels(inquiry_info_list[i].bdaddr);
 
       if (smart_device_link_rfcomm_channels.empty())
         continue;
@@ -141,7 +141,7 @@ SearchDeviceError* BluetoothDeviceScanner::doInquiry(
       if (hci_read_remote_name_ret != 0) {
         LOG4CXX_ERROR_WITH_ERRNO(logger_, "hci_read_remote_name failed");
         strncpy(deviceName,
-                BluetoothDevice::getUniqueDeviceId(inquiry_info_list[i].bdaddr).c_str(),
+                BluetoothDevice::GetUniqueDeviceId(inquiry_info_list[i].bdaddr).c_str(),
                 sizeof(deviceName) / sizeof(deviceName[0]));
       }
 
@@ -169,7 +169,7 @@ SearchDeviceError* BluetoothDeviceScanner::doInquiry(
   return 0;
 }
 
-BluetoothDeviceScanner::RfcommChannelVector BluetoothDeviceScanner::discoverSmartDeviceLinkRfcommChannels(
+BluetoothDeviceScanner::RfcommChannelVector BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
     const bdaddr_t& device_address) {
   LOG4CXX_TRACE_ENTER(logger_);
   RfcommChannelVector channels;
@@ -248,7 +248,7 @@ BluetoothDeviceScanner::RfcommChannelVector BluetoothDeviceScanner::discoverSmar
     LOG4CXX_ERROR(
         logger_,
         "Service discovery failed for " <<
-        BluetoothDevice::getUniqueDeviceId(device_address))
+        BluetoothDevice::GetUniqueDeviceId(device_address))
   }
 
   if (!channels.empty()) {
@@ -267,13 +267,13 @@ BluetoothDeviceScanner::RfcommChannelVector BluetoothDeviceScanner::discoverSmar
     LOG4CXX_INFO(
         logger_,
         "SmartDeviceLink service was discovered on device " <<
-        BluetoothDevice::getUniqueDeviceId(device_address) <<
+        BluetoothDevice::GetUniqueDeviceId(device_address) <<
         " at channel(s): " << rfcomm_channels_string.str().c_str())
   } else {
     LOG4CXX_INFO(
         logger_,
         "SmartDeviceLink service was not discovered on device " <<
-        BluetoothDevice::getUniqueDeviceId(device_address))
+        BluetoothDevice::GetUniqueDeviceId(device_address))
   }
   LOG4CXX_TRACE_EXIT(logger_)
   return channels;
@@ -284,7 +284,7 @@ void BluetoothDeviceScanner::thread() {
   LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized")
   ready_ = true;
   while (false == shutdown_requested_) {
-    bool device_scan_requested = waitForDeviceScanRequest();
+    bool device_scan_requested = WaitForDeviceScanRequest();
     if (device_scan_requested) {
       DeviceVector discovered_devices;
       SearchDeviceError* error = doInquiry(&discovered_devices);
@@ -299,9 +299,9 @@ void BluetoothDeviceScanner::thread() {
           LOG4CXX_INFO(logger_,
                        device->unique_device_id() << ", " << device->name());
         }
-        controller_->searchDeviceDone(discovered_devices);
+        controller_->SearchDeviceDone(discovered_devices);
       } else {
-        controller_->searchDeviceFailed(*error);
+        controller_->SearchDeviceFailed(*error);
       }
     }
     device_scan_requested_ = false;
@@ -311,7 +311,7 @@ void BluetoothDeviceScanner::thread() {
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-bool BluetoothDeviceScanner::waitForDeviceScanRequest() {
+bool BluetoothDeviceScanner::WaitForDeviceScanRequest() {
   LOG4CXX_TRACE_ENTER(logger_)
   bool deviceScanRequested = false;
 
@@ -333,7 +333,7 @@ bool BluetoothDeviceScanner::waitForDeviceScanRequest() {
   return deviceScanRequested;
 }
 
-DeviceAdapter::Error BluetoothDeviceScanner::init() {
+TransportAdapter::Error BluetoothDeviceScanner::init() {
   LOG4CXX_TRACE_ENTER(logger_)
   const int thread_start_error = pthread_create(&thread_, 0,
                                                 &bluetoothDeviceScannerThread,
@@ -347,10 +347,10 @@ DeviceAdapter::Error BluetoothDeviceScanner::init() {
         logger_,
         "Bluetooth device scanner thread start failed, error code " << thread_start_error)
     LOG4CXX_TRACE_EXIT(logger_);
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
   LOG4CXX_TRACE_EXIT(logger_)
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 void BluetoothDeviceScanner::terminate() {
@@ -370,24 +370,24 @@ void BluetoothDeviceScanner::terminate() {
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-DeviceAdapter::Error BluetoothDeviceScanner::scan() {
+TransportAdapter::Error BluetoothDeviceScanner::Scan() {
   LOG4CXX_TRACE_ENTER(logger_)
   if ((!thread_started_) && shutdown_requested_) {
     LOG4CXX_INFO(logger_, "bad state");
-    return DeviceAdapter::BAD_STATE;
+    return TransportAdapter::BAD_STATE;
   }
-  DeviceAdapter::Error ret = DeviceAdapter::OK;
+  TransportAdapter::Error ret = TransportAdapter::OK;
 
   pthread_mutex_lock(&device_scan_requested_mutex_);
 
   if (false == device_scan_requested_) {
-    LOG4CXX_INFO(logger_, "Requesting device scan");
+    LOG4CXX_INFO(logger_, "Requesting device Scan");
 
     device_scan_requested_ = true;
     pthread_cond_signal(&device_scan_requested_cond_);
   } else {
-    ret = DeviceAdapter::BAD_STATE;
-    LOG4CXX_INFO(logger_, "Device scan is currently in progress")
+    ret = TransportAdapter::BAD_STATE;
+    LOG4CXX_INFO(logger_, "Device Scan is currently in progress")
   }
 
   pthread_mutex_unlock(&device_scan_requested_mutex_);
@@ -395,6 +395,6 @@ DeviceAdapter::Error BluetoothDeviceScanner::scan() {
   return ret;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

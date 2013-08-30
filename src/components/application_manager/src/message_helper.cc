@@ -331,6 +331,7 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
   SendGlobalPropertiesToHMI(app);
   SendShowRequestToHMI(app);
   SendAddCommandRequestToHMI(app);
+  SendChangeRegistrationRequestToHMI(app);
 }
 
 void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
@@ -627,6 +628,80 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
                             (*i->second)[strings::vr_commands],
                             app->app_id());
     }
+  }
+}
+
+smart_objects::SmartObject* MessageHelper::CreateChangeRegistration(
+  int function_id, int language, unsigned int app_id) {
+  smart_objects::SmartObject* command = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!command) {
+    return NULL;
+  }
+  smart_objects::SmartObject& params = *command;
+
+  params[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  params[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  params[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+
+  params[strings::params][strings::function_id] =
+    function_id;
+
+  params[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::language] = language;
+  msg_params[strings::app_id] = app_id;
+
+  params[strings::msg_params] = msg_params;
+  return command;
+}
+
+void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      ApplicationManagerImpl::instance()->active_vr_language()
+      != app->language()) {
+    smart_objects::SmartObject* vr_command = CreateChangeRegistration(
+          hmi_apis::FunctionID::VR_ChangeRegistration,
+          app->language(),
+          app->app_id());
+
+    if (!vr_command) {
+      return;
+    }
+    ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
+  }
+
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      ApplicationManagerImpl::instance()->active_tts_language()
+      != app->language()) {
+    smart_objects::SmartObject* tts_command = CreateChangeRegistration(
+          hmi_apis::FunctionID::TTS_ChangeRegistration,
+          app->language(),
+          app->app_id());
+
+    if (!tts_command) {
+      return;
+    }
+    ApplicationManagerImpl::instance()->ManageHMICommand(tts_command);
+  }
+
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      ApplicationManagerImpl::instance()->active_ui_language() != app->ui_language()) {
+    smart_objects::SmartObject* ui_command = CreateChangeRegistration(
+          hmi_apis::FunctionID::UI_ChangeRegistration,
+          app->ui_language(),
+          app->app_id());
+
+    if (!ui_command) {
+      return;
+    }
+    ApplicationManagerImpl::instance()->ManageHMICommand(ui_command);
   }
 }
 

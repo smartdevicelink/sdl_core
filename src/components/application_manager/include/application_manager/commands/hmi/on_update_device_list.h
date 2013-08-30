@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnUpdateDeviceList command class
  **/
 class OnUpdateDeviceList : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnUpdateDeviceList class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnUpdateDeviceList(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnUpdateDeviceList class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnUpdateDeviceList(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnUpdateDeviceList class destructor
-     **/
-    virtual ~OnUpdateDeviceList();
+  /**
+   * @brief OnUpdateDeviceList class destructor
+   **/
+  virtual ~OnUpdateDeviceList();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnUpdateDeviceList);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnUpdateDeviceList);
 };
 
 }  // namespace commands

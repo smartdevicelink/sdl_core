@@ -113,11 +113,17 @@ public class SoftButtonsListActivity extends ListActivity {
 					break;
 				}
 				String line1 = b.toString();
-				String line2 = softButton.getSystemAction().name() + ", "
-						+ (softButton.getIsHighlighted() ? "" : "non-")
-						+ "highlighted, id=" + softButton.getSoftButtonID();
+                final SystemAction systemAction = softButton.getSystemAction();
+                final StringBuilder line2Builder = new StringBuilder();
+                if (systemAction != null) {
+                    line2Builder.append(systemAction.name());
+                    line2Builder.append(", ");
+                }
+                line2Builder.append(softButton.getIsHighlighted() ? "" : "non-");
+                line2Builder.append("highlighted, id=");
+                line2Builder.append(softButton.getSoftButtonID());
 				text1.setText(line1);
-				text2.setText(line2);
+				text2.setText(line2Builder.toString());
 
 				return item;
 			}

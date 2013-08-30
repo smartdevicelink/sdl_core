@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnFindApplications command class
  **/
 class OnFindApplications : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnFindApplications class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnFindApplications(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnFindApplications class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnFindApplications(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnFindApplications class destructor
-     **/
-    virtual ~OnFindApplications();
+  /**
+   * @brief OnFindApplications class destructor
+   **/
+  virtual ~OnFindApplications();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnFindApplications);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnFindApplications);
 };
 
 }  // namespace commands

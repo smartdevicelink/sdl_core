@@ -32,6 +32,7 @@
 
 #include "application_manager/hmi_capabilities.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
 
 namespace application_manager {
 
@@ -143,6 +144,24 @@ void HMICapabilities::set_vr_supported_languages(
     new smart_objects::SmartObject(supported_languages);
 }
 
+bool HMICapabilities::VerifyImageType(int image_type) {
+  if (!display_capabilities_) {
+    return false;
+  }
+
+  if (display_capabilities_->keyExists(hmi_response::image_capabilities)) {
+    const smart_objects::SmartObject& image_caps =
+      display_capabilities_->getElement(hmi_response::image_capabilities);
+    for (int i = 0; i < image_caps.length(); ++i) {
+      if (image_caps.getElement(i).asInt() == image_type) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 void HMICapabilities::set_display_capabilities(
   const smart_objects::SmartObject& display_capabilities) {
   if (display_capabilities_) {
@@ -213,10 +232,6 @@ void HMICapabilities::set_preset_bank_capabilities(
   }
   preset_bank_capabilities_ =
     new smart_objects::SmartObject(preset_bank_capabilities);
-}
-
-bool HMICapabilities::VerifyImageType(mobile_apis::ImageType::eType image_type) {
-  return image_type == mobile_apis::ImageType::DYNAMIC;
 }
 
 }  //  namespace application_manager

@@ -1,6 +1,6 @@
 /**
  * \file bluetooth_device.h
- * \brief BluetoothAdapter class header file.
+ * \brief BluetoothDevice class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -47,17 +47,33 @@
 #include <map>
 
 #include "transport_manager/common.h"
-#include "transport_manager/device_adapter/device.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
+/**
+ * @brief Type definition for vector that holds uint8_t variables.
+ */
 typedef std::vector<uint8_t> RfcommChannelVector;
+
+/**
+ * @brief Type definition for map that holds pair <Handle of application, RF value>.
+ */
 typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
+
+/**
+ * @brief Information about device that use bluetooth transport.
+ */
 class BluetoothDevice : public Device {
  public:
 
-  static std::string getUniqueDeviceId(const bdaddr_t& device_address);
+  /**
+   * @brief Return device unique identifier.
+   *
+   * @return string with device unique identifier.
+   */
+  static std::string GetUniqueDeviceId(const bdaddr_t& device_address);
 
   /**
    * @brief Constructor.
@@ -79,13 +95,23 @@ class BluetoothDevice : public Device {
    *
    * @return true if devices are equal, false otherwise.
    **/
-  virtual bool isSameAs(const Device* other) const;
+  virtual bool IsSameAs(const Device* other) const;
 
-  bool getRfcommChannel(const ApplicationHandle app_handle,
+  bool GetRfcommChannel(const ApplicationHandle app_handle,
                         uint8_t* channel_out);
 
-  virtual ApplicationList getApplicationList() const;
+  /**
+   * @brief Update list of applications available on device.
+   *
+   * @return Container with list of applications.
+   */
+  virtual ApplicationList GetApplicationList() const;
 
+  /**
+   * @brief Return device bluetooth address.
+   *
+   * @return Device bluetooth address.
+   */
   const bdaddr_t& address() const {
     return address_;
   }
@@ -104,7 +130,7 @@ class BluetoothDevice : public Device {
   ApplicationHandle next_application_handle_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_DEVICE_H_

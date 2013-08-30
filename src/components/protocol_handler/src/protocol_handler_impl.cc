@@ -286,7 +286,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(
                << connection_uid);
 
   if (transport_manager_) {
-    transport_manager_->sendMessageToDevice(message_to_send);
+    transport_manager_->SendMessageToDevice(message_to_send);
   } else {
     LOG4CXX_WARN(logger_, "No Transport Manager found.");
     LOG4CXX_TRACE_EXIT(logger_);

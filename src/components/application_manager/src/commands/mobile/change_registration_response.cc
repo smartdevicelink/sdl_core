@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include "application_manager/commands/mobile/change_registration_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -46,6 +47,21 @@ ChangeRegistrationResponse::ChangeRegistrationResponse(
 }
 
 ChangeRegistrationResponse::~ChangeRegistrationResponse() {
+}
+
+bool WasAnySuccess(const hmi_apis::Common_Result::eType ui,
+                   const hmi_apis::Common_Result::eType vr,
+                   const hmi_apis::Common_Result::eType tts) {
+  if (hmi_apis::Common_Result::SUCCESS == ui) {
+    return true;
+  }
+  if (hmi_apis::Common_Result::SUCCESS == vr) {
+    return true;
+  }
+  if (hmi_apis::Common_Result::SUCCESS == tts) {
+    return true;
+  }
+  return false;
 }
 
 void ChangeRegistrationResponse::Run() {
@@ -76,6 +92,8 @@ void ChangeRegistrationResponse::Run() {
     msg_chain->ui_response_result();
   const hmi_apis::Common_Result::eType result_vr =
     msg_chain->vr_response_result();
+  const hmi_apis::Common_Result::eType result_tts =
+    msg_chain->tts_response_result();
 
   // get stored SmartObject
   smart_objects::SmartObject data = msg_chain->data();
@@ -83,7 +101,7 @@ void ChangeRegistrationResponse::Run() {
 
   if (!IsPendingResponseExist()) {
     Application* application = ApplicationManagerImpl::instance()->
-      application(connection_key);
+                               application(connection_key);
 
     if (NULL == application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -91,26 +109,23 @@ void ChangeRegistrationResponse::Run() {
     }
 
     if (hmi_apis::Common_Result::SUCCESS == result_ui) {
-      application->set_language(static_cast<mobile_api::Language::eType>(
+      application->set_ui_language(
+        static_cast<mobile_api::Language::eType>(
           data[strings::msg_params][strings::language].asInt()));
     }
 
-    if (hmi_apis::Common_Result::SUCCESS == result_vr) {
-      application->set_ui_language(static_cast<mobile_api::Language::eType>(
+    if (hmi_apis::Common_Result::SUCCESS == result_vr ||
+        hmi_apis::Common_Result::SUCCESS == result_tts) {
+      application->set_language(
+        static_cast<mobile_api::Language::eType>(
           data[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
-    if (((hmi_apis::Common_Result::SUCCESS == result_ui)
-          && (hmi_apis::Common_Result::SUCCESS == result_vr))      ||
-          ((hmi_apis::Common_Result::SUCCESS == result_ui)
-          && (hmi_apis::Common_Result::INVALID_ENUM == result_vr)) ||
-          ((hmi_apis::Common_Result::INVALID_ENUM == result_ui)
-          && (hmi_apis::Common_Result::SUCCESS == result_vr))) {
-      SendResponse(true, mobile_apis::Result::SUCCESS);
-    } else {
-      SendResponse(false);
-      // TODO(VS): check ui and vr response code
-    }
+    int greates_result_code = std::max(std::max(result_ui, result_vr),
+                                       result_tts);
+
+    SendResponse(WasAnySuccess(result_ui, result_vr, result_tts),
+                 static_cast<mobile_apis::Result::eType>(greates_result_code));
   }
 }
 

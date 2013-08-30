@@ -66,7 +66,7 @@ namespace NsAppManager
          * \brief get device list
          * \return device list
          */
-        const connection_handler::DeviceList& getDeviceList() const;
+        const connection_handler::DeviceList& GetDeviceList() const;
 
         /**
          * \brief get count of items

@@ -41,13 +41,15 @@ namespace commands {
 
 
 class RequestToHMI : public CommandImpl {
-  public:
-    explicit RequestToHMI(const MessageSharedPtr& message);
-    virtual ~RequestToHMI();
-    virtual bool Init();
-    virtual bool CleanUp();
-    virtual void Run();
-    void SendRequest();
+ public:
+  explicit RequestToHMI(const MessageSharedPtr& message);
+  virtual ~RequestToHMI();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void SendRequest();
+ private:
+  DISALLOW_COPY_AND_ASSIGN(RequestToHMI);
 };
 
 }  // namespace commands

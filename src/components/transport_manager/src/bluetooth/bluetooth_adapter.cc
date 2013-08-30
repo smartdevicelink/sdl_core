@@ -47,20 +47,20 @@
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-BluetoothDeviceAdapter::~BluetoothDeviceAdapter() {
+BluetoothTransportAdapter::~BluetoothTransportAdapter() {
 }
 
-BluetoothDeviceAdapter::BluetoothDeviceAdapter()
-    : DeviceAdapterImpl(new BluetoothDeviceScanner(this),
+BluetoothTransportAdapter::BluetoothTransportAdapter()
+    : TransportAdapterImpl(new BluetoothDeviceScanner(this),
                         new BluetoothConnectionFactory(this), 0) {
 }
 
-DeviceType BluetoothDeviceAdapter::getDeviceType() const {
+DeviceType BluetoothTransportAdapter::GetDeviceType() const {
   return "sdl-bluetooth";
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

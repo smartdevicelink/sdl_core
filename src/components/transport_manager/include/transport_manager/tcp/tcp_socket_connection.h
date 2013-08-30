@@ -1,6 +1,6 @@
 /**
  * \file tcp_adapter.h
- * \brief TcpDeviceAdapter class header file.
+ * \brief TcpSocketConnection class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_SOCKET_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_SOCKET_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -42,34 +42,72 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include "transport_manager/device_adapter/threaded_socket_connection.h"
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
+/**
+ * @brief Class responsible for communication over TCP sockets.
+ */
 class TcpSocketConnection : public ThreadedSocketConnection {
  public:
+
+  /**
+   * @brief Constructor.
+   *
+   * @param device_uid Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param controller Pointer to the TCP device adapter controller.
+   */
   TcpSocketConnection(const DeviceUID& device_uid,
                       const ApplicationHandle& app_handle,
-                      DeviceAdapterController* controller);
+                      TransportAdapterController* controller);
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~TcpSocketConnection();
  protected:
-  virtual bool establish(ConnectError** error);
+
+  /**
+   * @brief
+   */
+  virtual bool Establish(ConnectError** error);
 };
 
+/**
+ * @brief Class responsible for communication over sockets that originated by server.
+ */
 class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
  public:
+
+  /**
+   * @brief Constructor.
+   *
+   * @param device_uid Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param controller Pointer to the device adapter controller.
+   */
   TcpServerOiginatedSocketConnection(const DeviceUID& device_uid,
                       const ApplicationHandle& app_handle,
-                      DeviceAdapterController* controller);
+                      TransportAdapterController* controller);
+
+  /**
+   * @brief Destructor.
+   */
   virtual ~TcpServerOiginatedSocketConnection();
  protected:
-  virtual bool establish(ConnectError** error);
+
+  /**
+   * @brief
+   */
+  virtual bool Establish(ConnectError** error);
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_SOCKET_CONNECTION_H_

@@ -1,5 +1,5 @@
 /*
- * \file mock_device_adapter.h
+ * \file mock_transport_adapter.cc
  * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -33,30 +33,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
-
-#include "transport_manager/device_adapter/device_adapter_impl.h"
-
-using ::transport_manager::device_adapter::DeviceAdapterImpl;
-using ::transport_manager::device_adapter::DeviceType;
+#include "transport_manager/mock_connection.h"
+#include "transport_manager/mock_device.h"
+#include "transport_manager/mock_transport_adapter.h"
+#include "transport_manager/mock_device_scanner.h"
+#include "transport_manager/mock_connection_factory.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceScanner;
+MockTransportAdapter::MockTransportAdapter()
+    : TransportAdapterImpl(new MockDeviceScanner(this),
+                        new MockConnectionFactory(this), nullptr) {}
 
-class MockDeviceAdapter : public DeviceAdapterImpl {
- public:
-  MockDeviceAdapter();
-  MockDeviceScanner* get_device_scanner() const;
-  DeviceType getDeviceType() const { return "mock-adapter"; }
-  void reset();
-};
+void MockTransportAdapter::reset() {
+  get_device_scanner()->reset();
+}
+
+MockDeviceScanner* MockTransportAdapter::get_device_scanner() const {
+  return static_cast<MockDeviceScanner*>(device_scanner_);
+}
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
-
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_ */

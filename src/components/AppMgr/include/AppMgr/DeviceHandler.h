@@ -69,13 +69,13 @@ namespace NsAppManager
          * \param sessionKey session/connection key
          * \param device device handler
          */
-        void addDevice( const int& sessionKey, const connection_handler::DeviceHandle& device );
+        void AddDevice( const int& sessionKey, const connection_handler::DeviceHandle& device );
 
         /**
          * \brief remove a device from a mapping
          * \param sessionKey session/connection key
          */
-        void removeDevice(const int& sessionKey);
+        void RemoveDevice(const int& sessionKey);
 
         /**
          * \brief remove an application from a mapping

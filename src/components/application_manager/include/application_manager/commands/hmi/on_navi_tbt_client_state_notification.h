@@ -44,26 +44,26 @@ namespace commands {
  * @brief OnNaviTBTClientStateNotification command class
  **/
 class OnNaviTBTClientStateNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnNaviTBTClientStateNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnNaviTBTClientStateNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnNaviTBTClientStateNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnNaviTBTClientStateNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnNaviTBTClientStateNotification class destructor
-     **/
-    virtual ~OnNaviTBTClientStateNotification();
+  /**
+   * @brief OnNaviTBTClientStateNotification class destructor
+   **/
+  virtual ~OnNaviTBTClientStateNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnNaviTBTClientStateNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnNaviTBTClientStateNotification);
 };
 
 }  // namespace commands

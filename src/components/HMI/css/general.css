@@ -762,6 +762,13 @@ div {
 	border-bottom: 1px solid #393939;
 }
 
+.list-item .ico{
+    height: 49px;
+}
+.list-item span{
+    position: absolute
+}
+
 /* List item background */
 .list-item.notpressed {
 	background-image: url(../images/list/list_item_bg.png);

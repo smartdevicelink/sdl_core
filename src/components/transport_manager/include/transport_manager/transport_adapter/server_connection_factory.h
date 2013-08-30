@@ -32,13 +32,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_SERVER_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_SERVER_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SERVER_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SERVER_CONNECTION_FACTORY_H_
 
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
  * @brief Implement transport dependent connection that was originated by the user.
@@ -50,7 +50,7 @@ class ServerConnectionFactory {
    *
    * @return Information about possible reason of error during initialization.
    */
-  virtual DeviceAdapter::Error init() = 0;
+  virtual TransportAdapter::Error init() = 0;
 
   /**
    * @brief
@@ -60,7 +60,7 @@ class ServerConnectionFactory {
    *
    * @return Information about posible reason of error.
    */
-  virtual DeviceAdapter::Error createConnection(
+  virtual TransportAdapter::Error CreateConnection(
       const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
 
   /**
@@ -74,7 +74,7 @@ class ServerConnectionFactory {
    * @return true - initialized.
    * false - not initialized.
    */
-  virtual bool isInitialised() const = 0;
+  virtual bool IsInitialised() const = 0;
 
   /**
    * @brief Destructor.
@@ -83,7 +83,7 @@ class ServerConnectionFactory {
   }
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* SERVER_CONNECTION_FACTORY_H_ */

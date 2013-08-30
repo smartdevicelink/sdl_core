@@ -1,6 +1,7 @@
-/**
- * \file connection.h
- * \brief Connection class header.
+/*
+ * \file mock_transport_adapter.h
+ * \brief
+ *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,53 +33,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_CONNECTION_H_
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_
 
-#include "utils/shared_ptr.h"
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
-using utils::SharedPtr;
+using ::transport_manager::transport_adapter::TransportAdapterImpl;
+using ::transport_manager::transport_adapter::DeviceType;
 
+namespace test {
+namespace components {
 namespace transport_manager {
 
-namespace device_adapter {
+class MockDeviceScanner;
 
-/**
- * @brief Application connection.
- **/
-class Connection {
+class MockTransportAdapter : public TransportAdapterImpl {
  public:
-  /**
-   * @brief Constructor.
-   */
-  Connection() {}
-  /**
-   * @brief Destructor.
-   **/
-  virtual ~Connection() {}
-
-  /**
-   * @brief Send data frame.
-   *
-   * @param Message Smart pointer to the raw message.
-   *
-   * @return Error Information about possible reason of sending data failure.
-   */
-  virtual DeviceAdapter::Error sendData(RawMessageSptr message) = 0;
-
-  /**
-   * @brief Disconnect the current connection.
-   */
-  virtual DeviceAdapter::Error disconnect() = 0;
+  MockTransportAdapter();
+  MockDeviceScanner* get_device_scanner() const;
+  DeviceType GetDeviceType() const { return "mock-adapter"; }
+  void reset();
 };
 
-/**
- * @typedef Type definition of smart pointer to the Connection class.
- */
-typedef utils::SharedPtr<Connection> ConnectionSptr;
-
-}  // namespace device_adapter
 }  // namespace transport_manager
+}  // namespace components
+}  // namespace test
 
-#endif /* CONNECTION_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICEADAPTER_H_ */

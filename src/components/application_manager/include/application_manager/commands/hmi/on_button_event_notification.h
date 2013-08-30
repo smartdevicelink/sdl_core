@@ -47,27 +47,26 @@ namespace hmi {
  * @brief OnButtonEventNotification command class
  **/
 class OnButtonEventNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnButtonEventNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnButtonEventNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnButtonEventNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnButtonEventNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnButtonEventNotification class destructor
-     **/
-    virtual ~OnButtonEventNotification();
+  /**
+   * @brief OnButtonEventNotification class destructor
+   **/
+  virtual ~OnButtonEventNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-
-    DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
 };
 
 } // namespace hmi

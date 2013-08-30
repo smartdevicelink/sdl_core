@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnStartDeviceDiscovery command class
  **/
 class OnStartDeviceDiscovery : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnStartDeviceDiscovery class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnStartDeviceDiscovery(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnStartDeviceDiscovery class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnStartDeviceDiscovery(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnStartDeviceDiscovery class destructor
-     **/
-    virtual ~OnStartDeviceDiscovery();
+  /**
+   * @brief OnStartDeviceDiscovery class destructor
+   **/
+  virtual ~OnStartDeviceDiscovery();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnStartDeviceDiscovery);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnStartDeviceDiscovery);
 };
 
 }  // namespace commands

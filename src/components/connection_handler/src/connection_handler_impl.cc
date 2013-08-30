@@ -186,7 +186,7 @@ void ConnectionHandlerImpl::AddDeviceInDeviceListIfNotExist(
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {
-  LOG4CXX_INFO(logger_, "scan devices finished successfully.");
+  LOG4CXX_INFO(logger_, "Scan devices finished successfully.");
   /*for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
        ++itr) {
     if (!DoesDeviceExistInTMList(device_list_during_search_, (*itr).first)) {
@@ -218,7 +218,7 @@ void ConnectionHandlerImpl::OnScanDevicesFinished() {
 
 void ConnectionHandlerImpl::OnScanDevicesFailed(
   const transport_manager::SearchDeviceError& error) {
-  LOG4CXX_ERROR(logger_, "Failed to scan devies.");
+  LOG4CXX_ERROR(logger_, "Failed to Scan devies.");
 }
 
 void ConnectionHandlerImpl::OnConnectionEstablished(
@@ -288,7 +288,7 @@ void ConnectionHandlerImpl::OnDisconnectFailed(
   const transport_manager::DeviceHandle& device,
   const transport_manager::DisconnectDeviceError& error) {
   // TODO(PV): implement
-  LOG4CXX_ERROR(logger_, "Trying to disconnect device failed.");
+  LOG4CXX_ERROR(logger_, "Trying to Disconnect device failed.");
 }
 
 void ConnectionHandlerImpl::RemoveConnection(
@@ -487,7 +487,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
     return;
   }
   //device_list_during_search_.clear();
-  transport_manager_->searchDevices();
+  transport_manager_->SearchDevices();
 }
 
 void ConnectionHandlerImpl::ConnectToDevice(
@@ -500,7 +500,7 @@ void ConnectionHandlerImpl::ConnectToDevice(
       "Connecting to device with handle " << device_handle);
     if (transport_manager_) {
       // TODO(PV): change this
-      transport_manager_->connectDevice(device_handle);
+      transport_manager_->ConnectDevice(device_handle);
     }
   } else {
     LOG4CXX_ERROR(

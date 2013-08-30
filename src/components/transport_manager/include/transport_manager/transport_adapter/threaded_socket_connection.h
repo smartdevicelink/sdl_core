@@ -1,5 +1,5 @@
 /**
- * \file device_adapter_socket_communication.h
+ * \file transport_adapter_socket_communication.h
  * \brief Header for classes responsible for communication over sockets.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -32,22 +32,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_THREADED_SOCKET_CONNECTION_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_THREADED_SOCKET_CONNECTION_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_THREADED_SOCKET_CONNECTION_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_THREADED_SOCKET_CONNECTION_
 
 #include <poll.h>
 
 #include <queue>
 
 #include "utils/logger.h"
-#include "transport_manager/device_adapter/connection.h"
+#include "transport_manager/transport_adapter/connection.h"
 
-using ::transport_manager::device_adapter::Connection;
+using ::transport_manager::transport_adapter::Connection;
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
 /**
  * @brief Class responsible for communication over sockets.
@@ -62,21 +62,21 @@ class ThreadedSocketConnection : public Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  DeviceAdapter::Error sendData(RawMessageSptr message);
+  TransportAdapter::Error SendData(RawMessageSptr message);
 
   /**
    * @brief Disconnect the current connection.
    *
-   * @return Error Information about possible reason of disconnect failure.
+   * @return Error Information about possible reason of Disconnect failure.
    */
-  DeviceAdapter::Error disconnect();
+  TransportAdapter::Error Disconnect();
 
   /**
    * @brief Start thread creation.
    *
    * @return Information about possible reason of thread creation error.
    */
-  DeviceAdapter::Error start();
+  TransportAdapter::Error start();
 
   /**
    * @brief Set variable that hold socket No.
@@ -95,7 +95,7 @@ class ThreadedSocketConnection : public Connection {
    */
   ThreadedSocketConnection(const DeviceUID& device_uid,
                            const ApplicationHandle& app_handle,
-                           DeviceAdapterController* controller);
+                           TransportAdapterController* controller);
 
   /**
    * @brief Destructor.
@@ -103,12 +103,12 @@ class ThreadedSocketConnection : public Connection {
   virtual ~ThreadedSocketConnection();
 
 
-  virtual bool establish(ConnectError** error) = 0;
+  virtual bool Establish(ConnectError** error) = 0;
 
   /**
    * @brief Return pointer to the device adapter controller.
    */
-  DeviceAdapterController* getController() {
+  TransportAdapterController* controller() {
     return controller_;
   }
 
@@ -133,14 +133,14 @@ class ThreadedSocketConnection : public Connection {
   void thread();
   void transmit();
   void finalize();
-  DeviceAdapter::Error notify() const;
+  TransportAdapter::Error notify() const;
   bool receive();
   bool send();
   void abort();
 
   friend void* startThreadedSocketConnection(void*);
 
-  DeviceAdapterController* controller_;
+  TransportAdapterController* controller_;
   /**
    * @brief Frames that must be sent to remote device.
    **/
@@ -159,7 +159,7 @@ class ThreadedSocketConnection : public Connection {
 
 extern log4cxx::LoggerPtr logger_;
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_SOCKET_COMMUNICATION
+#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SOCKET_COMMUNICATION

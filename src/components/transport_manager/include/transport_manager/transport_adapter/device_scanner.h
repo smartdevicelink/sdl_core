@@ -1,7 +1,6 @@
-/*
- * \file mock_device_adapter.cc
- * \brief
- *
+/**
+ * \file device_scanner.h
+ * \brief DeviceScanner class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,28 +32,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/mock_connection.h"
-#include "transport_manager/mock_device.h"
-#include "transport_manager/mock_device_adapter.h"
-#include "transport_manager/mock_device_scanner.h"
-#include "transport_manager/mock_connection_factory.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_DEVICE_SCANNER_H_
 
-namespace test {
-namespace components {
+#include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+
 namespace transport_manager {
+namespace transport_adapter {
 
-MockDeviceAdapter::MockDeviceAdapter()
-    : DeviceAdapterImpl(new MockDeviceScanner(this),
-                        new MockConnectionFactory(this), nullptr) {}
+/**
+ * @brief Abstract class for device scanner.
+ */
+class DeviceScanner {
+ public:
+  /**
+   * @brief Start device scanner.
+   *
+   * @return Error information about reason of initialization failure.
+   */
+  virtual TransportAdapter::Error init() = 0;
 
-void MockDeviceAdapter::reset() {
-  get_device_scanner()->reset();
-}
+  /**
+   * @brief
+   *
+   * @return Error information about reason of Scan failure.
+   */
+  virtual TransportAdapter::Error Scan() = 0;
 
-MockDeviceScanner* MockDeviceAdapter::get_device_scanner() const {
-  return static_cast<MockDeviceScanner*>(device_scanner_);
-}
+  /**
+   * @brief
+   */
+  virtual void terminate() = 0;
 
+  /**
+   * @brief Check device scanner for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
+  virtual bool IsInitialised() const = 0;
+
+  /**
+   * @brief Destructor.
+   */
+  virtual ~DeviceScanner() {
+  }
+};
+
+}  // namespace transport_adapter
 }  // namespace transport_manager
-}  // namespace components
-}  // namespace test
+
+#endif /* DEVICE_SCANNER_H_ */

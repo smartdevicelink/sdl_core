@@ -1,6 +1,6 @@
 /*
  * \file transport_manager_default.h
- * \brief Transport manager default class.
+ * \brief Transport manager default class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -40,13 +40,13 @@
 #include "transport_manager/bluetooth/bluetooth_adapter.h"
 #include "transport_manager/tcp/tcp_adapter.h"
 
-using transport_manager::device_adapter::BluetoothDeviceAdapter;
-using transport_manager::device_adapter::TcpDeviceAdapter;
+using transport_manager::transport_adapter::BluetoothTransportAdapter;
+using transport_manager::transport_adapter::TcpTransportAdapter;
 
 namespace transport_manager {
 
 /**
- * @brief Default realisation of transport_manager_impl class.
+ * @brief Default realization of transport_manager_impl class.
  */
 class TransportManagerDefault : public TransportManagerImpl {
 
@@ -62,8 +62,8 @@ class TransportManagerDefault : public TransportManagerImpl {
    */
   virtual ~TransportManagerDefault();
 
-  DeviceAdapterSptr bluetooth_da_;
-  DeviceAdapterSptr tcp_da_;
+  TransportAdapterSptr bluetooth_da_;
+  TransportAdapterSptr tcp_da_;
   explicit TransportManagerDefault(const TransportManagerAttr &config);
 
 public:

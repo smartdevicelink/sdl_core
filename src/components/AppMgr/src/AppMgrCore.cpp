@@ -7061,9 +7061,9 @@ namespace NsAppManager
      * \brief get device list
      * \return device list
      */
-    /*const connection_handler::DeviceList &AppMgrCore::getDeviceList() const
+    /*const connection_handler::DeviceList &AppMgrCore::GetDeviceList() const
     {
-        return mDeviceList.getDeviceList();
+        return mDeviceList.GetDeviceList();
     }*/
 
     /**
@@ -7071,10 +7071,10 @@ namespace NsAppManager
      * \param connectionKey session/connection key
      * \param device device handler
      */
-    void AppMgrCore::addDevice(const connection_handler::DeviceHandle &device,
+    void AppMgrCore::AddDevice(const connection_handler::DeviceHandle &device,
             const int &sessionKey, int firstSessionKey)
     {
-        //mDeviceHandler.addDevice(sessionKey, device);
+        //mDeviceHandler.AddDevice(sessionKey, device);
         LOG4CXX_INFO_EXT(logger_, "\n\t\t\t\tAdding session to device " <<
                 device << " with first session " << firstSessionKey
                 << " session: " << sessionKey);

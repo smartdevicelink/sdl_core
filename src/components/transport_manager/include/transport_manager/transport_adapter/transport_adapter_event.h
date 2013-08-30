@@ -1,6 +1,6 @@
 /**
- * \file device_adapter_event.h
- * \brief DeviceAdapterEvent class header file.
+ * \file transport_adapter_event.h
+ * \brief TransportAdapterEvent class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,37 +32,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_EVENT_H
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_DEVICE_ADAPTER_EVENT_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_EVENT_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_EVENT_H
 
 #include "transport_manager/common.h"
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
-using transport_manager::device_adapter::DeviceAdapterSptr;
+using transport_manager::transport_adapter::TransportAdapterSptr;
 
 namespace transport_manager {
 
-class DeviceAdapterEvent {
+class TransportAdapterEvent {
  public:
   /**
    * @brief Overloaded operator "==".
    *
    * @param Other reference to the event of device adapter.
    */
-  bool operator ==(const DeviceAdapterEvent &other);
+  bool operator ==(const TransportAdapterEvent &other);
 
   /**
    * @brief Constructor.
    *
    * @param type Event type.
-   * @param device_adapter Smart pointer to the device adapter.
+   * @param transport_adapter Smart pointer to the device adapter.
    * @param device_handle Handle of device.
    * @param application_id Handle of application.
    * @param data Smart pointer to the raw message.
    * @param error Error class that contains details of this error situation.
    */
-  DeviceAdapterEvent(int type,
-                     DeviceAdapterSptr device_adapter,
+  TransportAdapterEvent(int type,
+                     TransportAdapterSptr transport_adapter,
                      const DeviceUID &device_handle,
                      const ApplicationHandle& application_id,
                      RawMessageSptr data,
@@ -71,7 +71,7 @@ class DeviceAdapterEvent {
   /**
    * @brief Destructor.
    */
-  ~DeviceAdapterEvent();
+  ~TransportAdapterEvent();
 
   /**
    * @brief Set value that describe event type.
@@ -85,14 +85,14 @@ class DeviceAdapterEvent {
    *
    * @param id Connection unique identifier.
    */
-  void set_connection_uid(ConnectionUID id);
+  void SetConnectionUid(ConnectionUID id);
 
   /**
    * @brief Set device adapter field.
    *
-   * @param device_adapter Smart pointer to the device adapter.
+   * @param transport_adapter Smart pointer to the device adapter.
    */
-  void set_device_adapter(DeviceAdapterSptr device_adapter);
+  void set_transport_adapter(TransportAdapterSptr transport_adapter);
 
   /**
    * @brief Set pointer to the data.
@@ -113,7 +113,7 @@ class DeviceAdapterEvent {
    *
    * @param device_handle Device unique identifier.
    */
-  void set_device_handle(const DeviceUID &device_handle);
+  void SetDeviceHandle(const DeviceUID &device_handle);
 
   /**
    * @brief Return device unique identifier value.
@@ -141,7 +141,7 @@ class DeviceAdapterEvent {
    *
    * @return Smart pointer to the device adapter.
    */
-  DeviceAdapterSptr device_adapter(void) const;
+  TransportAdapterSptr transport_adapter(void) const;
 
   /**
    * @brief Return smart pointer to the raw message.
@@ -162,11 +162,11 @@ class DeviceAdapterEvent {
   DeviceUID device_uid_; /**< Device unique identifier. */
   int event_type_; /**< Value that describe event type. */
   ApplicationHandle application_id_; /**< Handle of application. */
-  DeviceAdapterSptr device_adapter_; /**< Smart pointer to the device adapter. */
+  TransportAdapterSptr transport_adapter_; /**< Smart pointer to the device adapter. */
   RawMessageSptr event_data_; /**< Smart pointer to the raw message. */
   BaseError *event_error_; /** Pointer to the class that contain details of error */
 };
 
 }  // namespace
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_DEVICE_ADAPTER_EVENT
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_EVENT
