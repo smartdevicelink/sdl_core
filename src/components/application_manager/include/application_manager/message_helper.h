@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 
 #include <map>
+#include <string>
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
@@ -195,6 +196,7 @@ class MessageHelper {
     static void SendShowRequestToHMI(const Application* app);
     static void SendShowConstantTBTRequestToHMI(const Application* app);
     static void SendAddCommandRequestToHMI(const Application* app);
+    static void SendChangeRegistrationRequestToHMI(const Application* app);
     static void SendAddVRCommandToHMI(
       unsigned int cmd_id,
       const smart_objects::SmartObject& vr_commands,
@@ -223,10 +225,12 @@ class MessageHelper {
      * @return verification result
      *
      */
-    static  mobile_apis::Result::eType VerifyImageFiles(smart_objects::SmartObject& message,
-                                 const Application* app);
+    static  mobile_apis::Result::eType VerifyImageFiles(
+      smart_objects::SmartObject& message,
+      const Application* app);
 
-    static bool PrintSmartObject(smart_objects::SmartObject& object);
+    static bool PrintSmartObject(
+      smart_objects::SmartObject& object);
 
     template<typename From, typename To>
     static To ConvertEnumAPINoCheck(const From& input) {
@@ -234,7 +238,9 @@ class MessageHelper {
     }
 
   private:
-    static smart_objects::SmartObject* CreateGeneralVrCommand() ;
+    static smart_objects::SmartObject* CreateChangeRegistration(
+      int function_id, int language, unsigned int app_id);
+    static smart_objects::SmartObject* CreateGeneralVrCommand();
     MessageHelper();
 
     static const VehicleData      vehicle_data_;

@@ -445,6 +445,9 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
       }
       if (application->HasBeenActivated()) {
         MessageHelper::SendAppDataToHMI(application);
+      } else {
+        MessageHelper::SendChangeRegistrationRequestToHMI(
+          application);
       }
       if (!application->MakeFullscreen()) {
         return false;
