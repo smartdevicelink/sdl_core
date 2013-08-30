@@ -44,28 +44,28 @@ namespace commands {
  * @brief OnVRCommandNotification command class
  **/
 class OnVRCommandNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnVRCommandNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnVRCommandNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnVRCommandNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnVRCommandNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnVRCommandNotification class destructor
-     **/
-    virtual ~OnVRCommandNotification();
+  /**
+   * @brief OnVRCommandNotification class destructor
+   **/
+  virtual ~OnVRCommandNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    bool PerformInteractionHandling(Application* const app);
+ private:
+  bool PerformInteractionHandling(Application* const app);
 
-    DISALLOW_COPY_AND_ASSIGN(OnVRCommandNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnVRCommandNotification);
 };
 
 }  // namespace commands

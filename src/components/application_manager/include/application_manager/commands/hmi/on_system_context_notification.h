@@ -45,34 +45,34 @@ namespace commands {
  * @brief OnSystemContextNotification command class
  **/
 class OnSystemContextNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnSystemContextNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnSystemContextNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnSystemContextNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnSystemContextNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnSystemContextNotification class destructor
-     **/
-    virtual ~OnSystemContextNotification();
+  /**
+   * @brief OnSystemContextNotification class destructor
+   **/
+  virtual ~OnSystemContextNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    /*
-     * @brief Sends OnHMIStatus notification to mobile about changes
-     * in its HNI status ie in system context/hmi level/audio streaming state
-     *
-     * @param app Mobile app to be notified about changes
-     */
-    void NotifyMobileApp(Application* const app);
+ private:
+  /*
+   * @brief Sends OnHMIStatus notification to mobile about changes
+   * in its HNI status ie in system context/hmi level/audio streaming state
+   *
+   * @param app Mobile app to be notified about changes
+   */
+  void NotifyMobileApp(Application* const app);
 
-    DISALLOW_COPY_AND_ASSIGN(OnSystemContextNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnSystemContextNotification);
 };
 
 }  // namespace commands

@@ -49,15 +49,17 @@ namespace commands {
 namespace NsSmartObj = NsSmartDeviceLink::NsSmartObjects;
 
 class NotificationFromHMI : public CommandImpl {
-  public:
-    explicit NotificationFromHMI(const MessageSharedPtr& message);
-    virtual ~NotificationFromHMI();
-    virtual bool Init();
-    virtual bool CleanUp();
-    virtual void Run();
-    void SendNotificationToMobile(const MessageSharedPtr& message);
-    void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+ public:
+  explicit NotificationFromHMI(const MessageSharedPtr& message);
+  virtual ~NotificationFromHMI();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void SendNotificationToMobile(const MessageSharedPtr& message);
+  void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                           const NsSmartObj::SmartObject& msg_params) const;
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NotificationFromHMI);
 };
 
 }  // namespace commands

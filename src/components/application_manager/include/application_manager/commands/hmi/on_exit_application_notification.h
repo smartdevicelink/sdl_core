@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnExitApplicationNotification command class
  **/
 class OnExitApplicationNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnExitApplicationNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnExitApplicationNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnExitApplicationNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnExitApplicationNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnExitApplicationNotification class destructor
-     **/
-    virtual ~OnExitApplicationNotification();
+  /**
+   * @brief OnExitApplicationNotification class destructor
+   **/
+  virtual ~OnExitApplicationNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnExitApplicationNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnExitApplicationNotification);
 };
 
 }  // namespace commands

@@ -40,13 +40,15 @@ namespace application_manager {
 namespace commands {
 
 class NotificationToHMI : public CommandImpl {
-  public:
-    explicit NotificationToHMI(const MessageSharedPtr& message);
-    virtual ~NotificationToHMI();
-    virtual bool Init();
-    virtual bool CleanUp();
-    virtual void Run();
-    void SendNotification();
+ public:
+  explicit NotificationToHMI(const MessageSharedPtr& message);
+  virtual ~NotificationToHMI();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void SendNotification();
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NotificationToHMI);
 };
 
 }  // namespace commands
