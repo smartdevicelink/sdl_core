@@ -71,4 +71,12 @@ public class MobileNavPreviewActivityTest extends ActivityInstrumentationTestCas
         sut.surfaceCreated(null);
         assertEquals("video checkbox should be OFF", VideoStreamingCheckBoxState.OFF, sut.checkBoxState.getState());
     }
+
+    @UiThreadTest
+    public void testOnVideoCheckBoxCheckedStateIsDisabled() throws Exception {
+        sut.surfaceCreated(null);
+        CheckBox checkBox = (CheckBox) sut.findViewById(R.id.videoStreamingCheckBox);
+        sut.onVideoStreamingCheckBoxAction(checkBox);
+        assertEquals("video checkbox should be DISABLED", VideoStreamingCheckBoxState.DISABLED, sut.checkBoxState.getState());
+    }
 }

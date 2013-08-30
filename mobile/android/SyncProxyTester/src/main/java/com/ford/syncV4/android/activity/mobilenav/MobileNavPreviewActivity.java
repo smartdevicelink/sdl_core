@@ -33,7 +33,12 @@ public class MobileNavPreviewActivity extends Activity implements SurfaceHolder.
     }
 
 
-    public void onVideoStreamingCheckBoxAction(View v){
+    public void onVideoStreamingCheckBoxAction(CheckBox checkBox){
+        changeCheckBoxState(checkBox);
+    }
+
+    private void changeCheckBoxState(CheckBox checkBox) {
+        checkBoxState.setStateDisabled();
     }
 
     public void onMobileNaviCheckBoxAction(View v){
