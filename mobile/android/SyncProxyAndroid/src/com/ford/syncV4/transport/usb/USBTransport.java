@@ -10,6 +10,7 @@ import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.ITransportListener;
@@ -212,8 +213,6 @@ public class USBTransport extends SyncTransport {
     /**
      * Opens a USB connection if not open yet.
      *
-     * TODO: throw SyncException on different errors
-     *
      * @throws SyncException
      */
     @Override
@@ -227,13 +226,20 @@ public class USBTransport extends SyncTransport {
                 }
 
                 logD("Registering receiver");
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(ACTION_USB_ACCESSORY_ATTACHED);
-                filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-                filter.addAction(ACTION_USB_PERMISSION);
-                getContext().registerReceiver(mUSBReceiver, filter);
+                try {
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(ACTION_USB_ACCESSORY_ATTACHED);
+                    filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+                    filter.addAction(ACTION_USB_PERMISSION);
+                    getContext().registerReceiver(mUSBReceiver, filter);
 
-                initializeAccessory();
+                    initializeAccessory();
+                } catch (Exception e) {
+                    String msg = "Couldn't start opening connection";
+                    logE(msg, e);
+                    throw new SyncException(msg, e,
+                            SyncExceptionCause.SYNC_CONNECTION_FAILED);
+                }
 
                 break;
 
@@ -409,6 +415,16 @@ public class USBTransport extends SyncTransport {
                 logW("openAccessory() called from state " + state +
                         "; doing nothing");
         }
+    }
+
+    /**
+     * Logs the string and the throwable with ERROR level.
+     *
+     * @param s  string to log
+     * @param tr throwable to log
+     */
+    private void logE(String s, Throwable tr) {
+        DebugTool.logError(s, tr);
     }
 
     /**
