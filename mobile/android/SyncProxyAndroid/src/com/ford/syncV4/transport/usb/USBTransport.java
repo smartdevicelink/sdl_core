@@ -198,9 +198,11 @@ public class USBTransport extends SyncTransport {
                                     SYNC_LIB_TRACE_KEY);
                         } catch (IOException e) {
                             logW("Failed to send bytes", e);
+                            // TODO: call handleTransportError()
                         }
                     } else {
                         logW("Can't send bytes when output stream is null");
+                        // TODO: call handleTransportError()
                     }
                 }
                 break;
@@ -584,9 +586,14 @@ public class USBTransport extends SyncTransport {
                         final ParcelFileDescriptor parcelFD =
                                 getUsbManager().openAccessory(mAccessory);
                         if (parcelFD == null) {
-                            logW("Can't open accessory, disconnecting!");
-                            // TODO: add params
-                            disconnect();
+                            if (isInterrupted()) {
+                                logW("Can't open accessory, and thread is interrupted");
+                            } else {
+                                logW("Can't open accessory, disconnecting!");
+                                String msg = "Failed to open USB accessory";
+                                disconnect(msg, new SyncException(msg,
+                                        SyncExceptionCause.SYNC_CONNECTION_FAILED));
+                            }
                             return false;
                         }
                         fd = parcelFD.getFileDescriptor();
@@ -635,8 +642,7 @@ public class USBTransport extends SyncTransport {
                             logI("EOF reached, and thread is interrupted");
                         } else {
                             logI("EOF reached, disconnecting!");
-                            // TODO: add params
-                            disconnect();
+                            disconnect("EOF reached", null);
                         }
                         return;
                     }
@@ -645,8 +651,7 @@ public class USBTransport extends SyncTransport {
                         logW("Can't read data, and thread is interrupted", e);
                     } else {
                         logW("Can't read data, disconnecting!", e);
-                        // TODO: add params
-                        disconnect();
+                        disconnect("Can't read data from USB", e);
                     }
                     return;
                 }
