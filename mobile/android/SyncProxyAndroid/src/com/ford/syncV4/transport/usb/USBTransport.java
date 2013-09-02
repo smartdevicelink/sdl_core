@@ -36,7 +36,6 @@ import java.io.OutputStream;
  * some data is sent again or the USB is physically disconnected.
  *
  * TODO: use State pattern
- * TODO: use handleTransportError()
  */
 public class USBTransport extends SyncTransport {
     /**
@@ -197,12 +196,15 @@ public class USBTransport extends SyncTransport {
                                     msgBytes, offset, length,
                                     SYNC_LIB_TRACE_KEY);
                         } catch (IOException e) {
-                            logW("Failed to send bytes", e);
-                            // TODO: call handleTransportError()
+                            final String msg = "Failed to send bytes over USB";
+                            logW(msg, e);
+                            handleTransportError(msg, e);
                         }
                     } else {
-                        logW("Can't send bytes when output stream is null");
-                        // TODO: call handleTransportError()
+                        final String msg =
+                                "Can't send bytes when output stream is null";
+                        logW(msg);
+                        handleTransportError(msg, null);
                     }
                 }
                 break;
