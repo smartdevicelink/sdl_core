@@ -94,6 +94,9 @@ public class USBTransport extends SyncTransport {
                 } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED
                         .equals(action)) {
                     logI("Accessory " + accessory + " detached");
+                    final String msg = "USB accessory has been detached";
+                    disconnect(msg, new SyncException(msg,
+                            SyncExceptionCause.SYNC_USB_DETACHED));
                 } else if (ACTION_USB_PERMISSION.equals(action)) {
                     logI("Permission granted for accessory " + accessory);
                     openAccessory(accessory);
@@ -255,54 +258,76 @@ public class USBTransport extends SyncTransport {
      */
     @Override
     public void disconnect() {
-        synchronized (this) {
-            logI("Disconnect from state " + getState());
-            setState(State.IDLE);
+        disconnect(null, null);
+    }
 
-            SyncTrace.logTransportEvent(TAG + ": disconnect", null,
-                    InterfaceActivityDirection.None, null, 0,
-                    SYNC_LIB_TRACE_KEY);
+    /**
+     * Closes the USB connection from inside the transport with some extra info.
+     *
+     * @param msg Disconnect reason message, if any
+     * @param ex  Disconnect exception, if any
+     */
+    private void disconnect(String msg, Exception ex) {
+        final State state = getState();
+        switch (state) {
+            case LISTENING:
+            case CONNECTED:
+                synchronized (this) {
+                    logI("Disconnect from state " + getState() + "; message: " +
+                            msg + "; exception: " + ex);
+                    setState(State.IDLE);
 
-            if (mReaderThread != null) {
-                logI("Interrupting USB reader");
-                mReaderThread.interrupt();
-                // don't join() now
-                mReaderThread = null;
-            } else {
-                logD("USB reader is null");
-            }
+                    SyncTrace.logTransportEvent(TAG + ": disconnect", null,
+                            InterfaceActivityDirection.None, null, 0,
+                            SYNC_LIB_TRACE_KEY);
 
-            if (mAccessory != null) {
-                if (mOutputStream != null) {
-                    try {
-                        mOutputStream.close();
-                    } catch (IOException e) {
-                        logW("Can't close output stream", e);
-                        mOutputStream = null;
+                    if (mReaderThread != null) {
+                        logI("Interrupting USB reader");
+                        mReaderThread.interrupt();
+                        // don't join() now
+                        mReaderThread = null;
+                    } else {
+                        logD("USB reader is null");
+                    }
+
+                    if (mAccessory != null) {
+                        if (mOutputStream != null) {
+                            try {
+                                mOutputStream.close();
+                            } catch (IOException e) {
+                                logW("Can't close output stream", e);
+                                mOutputStream = null;
+                            }
+                        }
+                        if (mInputStream != null) {
+                            try {
+                                mInputStream.close();
+                            } catch (IOException e) {
+                                logW("Can't close input stream", e);
+                                mInputStream = null;
+                            }
+                        }
+
+                        mAccessory = null;
                     }
                 }
-                if (mInputStream != null) {
-                    try {
-                        mInputStream.close();
-                    } catch (IOException e) {
-                        logW("Can't close input stream", e);
-                        mInputStream = null;
-                    }
+
+                logD("Unregistering receiver");
+                try {
+                    getContext().unregisterReceiver(mUSBReceiver);
+                } catch (IllegalArgumentException e) {
+                    logW("Receiver was already unregistered", e);
                 }
 
-                mAccessory = null;
-            }
-        }
+                // TODO: use proper message
+                handleTransportDisconnected("");
+                break;
 
-        logD("Unregistering receiver");
-        try {
-            getContext().unregisterReceiver(mUSBReceiver);
-        } catch (IllegalArgumentException e) {
-            logW("Receiver was already unregistered", e);
+            default:
+                logW("Disconnect called from state " + state +
+                        "; doing nothing");
+                break;
         }
-
-        // TODO: use proper message
-        handleTransportDisconnected("");
     }
 
     /**
@@ -560,6 +585,7 @@ public class USBTransport extends SyncTransport {
                                 getUsbManager().openAccessory(mAccessory);
                         if (parcelFD == null) {
                             logW("Can't open accessory, disconnecting!");
+                            // TODO: add params
                             disconnect();
                             return false;
                         }
@@ -609,6 +635,7 @@ public class USBTransport extends SyncTransport {
                             logI("EOF reached, and thread is interrupted");
                         } else {
                             logI("EOF reached, disconnecting!");
+                            // TODO: add params
                             disconnect();
                         }
                         return;
@@ -618,6 +645,7 @@ public class USBTransport extends SyncTransport {
                         logW("Can't read data, and thread is interrupted", e);
                     } else {
                         logW("Can't read data, disconnecting!", e);
+                        // TODO: add params
                         disconnect();
                     }
                     return;

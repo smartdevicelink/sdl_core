@@ -157,6 +157,9 @@ static int mainPhase() {
         printCharArray(buffer, transferred);
         int dataLength = transferred;
         
+        const int USEC_IN_MSEC = 1000;
+        usleep(10 * USEC_IN_MSEC);
+
         // writing data
         response = libusb_bulk_transfer(handle, OUT, buffer, dataLength, &transferred, 0);
         if (response < 0) {
