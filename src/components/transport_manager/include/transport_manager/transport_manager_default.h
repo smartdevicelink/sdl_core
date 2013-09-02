@@ -64,6 +64,7 @@ class TransportManagerDefault : public TransportManagerImpl {
 
   TransportAdapterSptr bluetooth_da_;
   TransportAdapterSptr tcp_da_;
+  TransportAdapterSptr usb_aoa_da_;
   explicit TransportManagerDefault(const TransportManagerAttr &config);
 
 public:

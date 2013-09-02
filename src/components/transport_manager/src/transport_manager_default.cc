@@ -37,10 +37,12 @@
 
 #include "transport_manager/bluetooth/bluetooth_adapter.h"
 #include "transport_manager/tcp/tcp_adapter.h"
+#include "transport_manager/usb/usb_aoa_adapter.h"
 
 
 using transport_manager::transport_adapter::BluetoothTransportAdapter;
 using transport_manager::transport_adapter::TcpTransportAdapter;
+using transport_manager::transport_adapter::UsbAoaAdapter;
 
 namespace transport_manager {
 
@@ -51,6 +53,7 @@ int TransportManagerDefault::init() {
 
   AddTransportAdapter(bluetooth_da_);
   AddTransportAdapter(tcp_da_);
+  AddTransportAdapter(usb_aoa_da_);
 
   return E_SUCCESS;
 }
@@ -59,6 +62,7 @@ TransportManagerDefault::~TransportManagerDefault() {
   if (is_initialized_) {
     RemoveTransportAdapter(bluetooth_da_);
     RemoveTransportAdapter(tcp_da_);
+    RemoveTransportAdapter(usb_aoa_da_);
   }
 }
 
@@ -68,7 +72,8 @@ TransportManagerDefault::TransportManagerDefault(
     const TransportManagerAttr& config)
     : TransportManagerImpl(config),
       bluetooth_da_(new BluetoothTransportAdapter()),
-      tcp_da_(new TcpTransportAdapter()) {}
+      tcp_da_(new TcpTransportAdapter()),
+      usb_aoa_da_(new UsbAoaAdapter()) {}
 
 TransportManagerDefault* TransportManagerDefault::instance() {
   static pthread_mutex_t tm_default_instance_mutex = PTHREAD_MUTEX_INITIALIZER;
