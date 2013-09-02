@@ -11,7 +11,11 @@ import com.ford.syncV4.android.R;
 
 public class MobileNavPreviewActivity extends Activity implements SurfaceHolder.Callback {
 
-    VideoCheckBoxState checkBoxState;
+    private VideoCheckBoxState checkBoxState;
+
+    public VideoCheckBoxState getCheckBoxState() {
+        return checkBoxState;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +36,15 @@ public class MobileNavPreviewActivity extends Activity implements SurfaceHolder.
         return true;
     }
 
-
-    public void onVideoStreamingCheckBoxAction(CheckBox checkBox){
-        changeCheckBoxState(checkBox);
+    public void onVideoStreamingCheckBoxAction(View checkBox) {
+        changeCheckBoxState((CheckBox) checkBox);
     }
 
     private void changeCheckBoxState(CheckBox checkBox) {
         checkBoxState.setStateDisabled();
     }
 
-    public void onMobileNaviCheckBoxAction(View v){
+    public void onMobileNaviCheckBoxAction(View v) {
     }
 
     @Override
