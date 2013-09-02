@@ -656,6 +656,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         DebugTool.disableDebugTool();
     }
 
+    public SyncConnection getSyncConnection() {
+        return _syncConnection;
+    }
+
     public ProxyMessageDispatcher<ProtocolMessage> getIncomingProxyMessageDispatcher() {
         return _incomingProxyMessageDispatcher;
     }

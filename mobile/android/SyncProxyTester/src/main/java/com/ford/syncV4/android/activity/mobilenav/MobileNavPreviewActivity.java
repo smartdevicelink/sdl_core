@@ -12,15 +12,16 @@ import com.ford.syncV4.android.R;
 public class MobileNavPreviewActivity extends Activity implements VideoDataListener {
 
     private static final String logTag = "MobileNavPreviewActivity";
-    private CheckBoxState checkBoxState;
+    private CheckBoxState videoCheckBoxState;
+    private CheckBoxState mobileNavSessionCheckBoxState;
     private MockVideoDataSource videoDataSource;
 
     public MockVideoDataSource getVideoDataSource() {
         return videoDataSource;
     }
 
-    public VideoCheckBoxState getCheckBoxState() {
-        return (VideoCheckBoxState) checkBoxState;
+    public VideoCheckBoxState getVideoCheckBoxState() {
+        return (VideoCheckBoxState) videoCheckBoxState;
     }
 
     @Override
@@ -35,15 +36,17 @@ public class MobileNavPreviewActivity extends Activity implements VideoDataListe
     protected void onPause() {
         super.onPause();
         Log.i(logTag, "activity paused");
-        if (videoDataSource != null){
-            checkBoxState.setStateDisabled();
+        if (videoDataSource != null) {
+            videoCheckBoxState.setStateDisabled();
             videoDataSource.stop();
         }
     }
 
     private void initiateVideoCheckBox() {
-        checkBoxState = new VideoCheckBoxState((CheckBox) findViewById(R.id.videoStreamingCheckBox));
-        checkBoxState.setStateOff();
+        videoCheckBoxState = new VideoCheckBoxState((CheckBox) findViewById(R.id.videoStreamingCheckBox));
+        videoCheckBoxState.setStateOff();
+        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState((CheckBox) findViewById(R.id.mobileNavCheckBox));
+        mobileNavSessionCheckBoxState.setStateOff();
     }
 
     @Override
@@ -54,26 +57,30 @@ public class MobileNavPreviewActivity extends Activity implements VideoDataListe
     }
 
     public void onVideoStreamingCheckBoxAction(View checkBox) {
-        changeCheckBoxState((CheckBox) checkBox);
+        changeVideoCheckBoxState((CheckBox) checkBox);
     }
 
-    private void changeCheckBoxState(CheckBox checkBox) {
-        if (checkBoxState.getState().equals(CheckBoxStateValue.OFF)) {
+    private void changeVideoCheckBoxState(CheckBox checkBox) {
+        if (videoCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             videoDataSource = new MockVideoDataSource(this);
-            checkBoxState.setStateDisabled();
+            videoCheckBoxState.setStateDisabled();
             videoDataSource.start();
-        } else if (checkBoxState.getState().equals(CheckBoxStateValue.ON)) {
-            checkBoxState.setStateDisabled();
+        } else if (videoCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
+            videoCheckBoxState.setStateDisabled();
             videoDataSource.stop();
         }
     }
 
     public void onMobileNaviCheckBoxAction(View v) {
+        changeMobileNaviCheckBoxState();
+    }
+
+    private void changeMobileNaviCheckBoxState() {
     }
 
     @Override
     public void onStreamingStart() {
-        checkBoxState.setStateOn();
+        videoCheckBoxState.setStateOn();
         Log.i(logTag, "video streaming started");
 
     }
@@ -85,7 +92,7 @@ public class MobileNavPreviewActivity extends Activity implements VideoDataListe
 
     @Override
     public void onStreamStop() {
-        checkBoxState.setStateOff();
+        videoCheckBoxState.setStateOff();
         Log.i(logTag, "video streaming stopped");
 
     }

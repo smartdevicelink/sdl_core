@@ -13,6 +13,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:checked="false"
+            android:enabled="false"
             android:hint="@string/mobile_navi_hint"/>
 
     <CheckBox

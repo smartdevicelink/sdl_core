@@ -47,14 +47,16 @@ public class MobileNavPreviewActivityTest extends ActivityInstrumentationTestCas
         assertTrue("On click listener should be set", button.performClick());
     }
 
+    @UiThreadTest
     public void testVideoCheckBoxInitialStateDisabled() throws Exception {
-        assertEquals("video checkbox should be DISABLED", CheckBoxStateValue.DISABLED, sut.getCheckBoxState().getState());
+        assertEquals("video checkbox should be OFF", CheckBoxStateValue.OFF, sut.getVideoCheckBoxState().getState());
     }
 
+    @UiThreadTest
     public void testMockVideoDataSourceCreatedOnClick() throws Exception {
-        assertTrue("state should be off",sut.getCheckBoxState().getState().equals(CheckBoxStateValue.OFF));
+        assertTrue("state should be off",sut.getVideoCheckBoxState().getState().equals(CheckBoxStateValue.OFF));
         sut.onVideoStreamingCheckBoxAction(null);
-        assertTrue("state should be disabled",sut.getCheckBoxState().getState().equals(CheckBoxStateValue.DISABLED));
+        assertTrue("state should be on",sut.getVideoCheckBoxState().getState().equals(CheckBoxStateValue.ON));
         assertNotNull("videoDataSource should be created",sut.getVideoDataSource());
     }
 }
