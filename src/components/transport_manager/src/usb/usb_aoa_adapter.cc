@@ -39,10 +39,10 @@
 #include "transport_manager/usb/libusb_handler.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 UsbAoaAdapter::UsbAoaAdapter()
-    : DeviceAdapterImpl(new UsbDeviceScanner(this),
+    : TransportAdapterImpl(new UsbDeviceScanner(this),
                         new UsbConnectionFactory(this), 0),
       is_initialised_(false),
       libusb_handler_(new LibusbHandler()) {
@@ -50,30 +50,30 @@ UsbAoaAdapter::UsbAoaAdapter()
 }
 
 UsbAoaAdapter::~UsbAoaAdapter() {
-  libusb_handler_->terminate();
+  libusb_handler_->Terminate();
 }
 
-DeviceType UsbAoaAdapter::getDeviceType() const {
+DeviceType UsbAoaAdapter::GetDeviceType() const {
   return "sdl-usb-aoa";
 }
 
-bool UsbAoaAdapter::isInitialised() const {
-  return is_initialised_ && DeviceAdapterImpl::isInitialised();
+bool UsbAoaAdapter::IsInitialised() const {
+  return is_initialised_ && TransportAdapterImpl::IsInitialised();
 }
 
-DeviceAdapter::Error UsbAoaAdapter::init() {
-  DeviceAdapter::Error error = libusb_handler_->init();
-  if (error != DeviceAdapter::OK) {
+TransportAdapter::Error UsbAoaAdapter::Init() {
+  TransportAdapter::Error error = libusb_handler_->Init();
+  if (error != TransportAdapter::OK) {
     return error;
   }
-  error = DeviceAdapterImpl::init();
-  if (error != DeviceAdapter::OK) {
+  error = TransportAdapterImpl::Init();
+  if (error != TransportAdapter::OK) {
     return error;
   }
   is_initialised_ = true;
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

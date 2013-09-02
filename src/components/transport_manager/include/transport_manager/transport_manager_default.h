@@ -55,7 +55,7 @@ class TransportManagerDefault : public TransportManagerImpl {
    *
    * @return Code error.
    */
-  virtual int init();
+  virtual int Init();
 
   /**
    * @brief Destructor.
@@ -73,7 +73,7 @@ public:
    *
    * @return Pointer to the object of TransportManagerDefault class.
    */
-  static TransportManagerDefault* instance();
+  static TransportManagerDefault* Instance();
 };
 }
 

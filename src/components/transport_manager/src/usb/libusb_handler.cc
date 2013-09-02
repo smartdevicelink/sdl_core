@@ -1,8 +1,8 @@
 #include "transport_manager/usb/libusb_handler.h"
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 LibusbHandler::LibusbHandler()
     : libusb_context_(0),
@@ -20,18 +20,18 @@ LibusbHandler::~LibusbHandler() {
   }
 }
 
-DeviceAdapter::Error LibusbHandler::init() {
+TransportAdapter::Error LibusbHandler::Init() {
   const int libusb_ret = libusb_init(&libusb_context_);
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_ERROR(logger_, "libusb_init failed: " << libusb_ret);
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   libusb_set_debug(libusb_context_, 3);
 
   if (!libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
     LOG4CXX_ERROR(logger_, "LIBUSB_CAP_HAS_HOTPLUG not supported");
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   const int thread_start_error = pthread_create(&thread_, 0,
@@ -43,10 +43,10 @@ DeviceAdapter::Error LibusbHandler::init() {
     LOG4CXX_ERROR(
         logger_,
         "USB device scanner thread start failed, error code " << thread_start_error);
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 void LibusbHandler::Thread() {
@@ -61,7 +61,7 @@ void LibusbHandler::Thread() {
   }
 }
 
-void LibusbHandler::terminate() {
+void LibusbHandler::Terminate() {
   shutdown_requested_ = true;
 }
 

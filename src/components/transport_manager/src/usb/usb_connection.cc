@@ -36,10 +36,10 @@
 #include <libusb-1.0/libusb.h>
 
 #include "transport_manager/usb/usb_connection.h"
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
@@ -185,9 +185,9 @@ void UsbConnection::OnOutTransfer(libusb_transfer *transfer) {
   pthread_mutex_unlock(&out_messages_mutex_);
 }
 
-DeviceAdapter::Error UsbConnection::sendData(RawMessageSptr message) {
+TransportAdapter::Error UsbConnection::SendData(RawMessageSptr message) {
   if (disconnecting_) {
-    return DeviceAdapter::BAD_STATE;
+    return TransportAdapter::BAD_STATE;
   }
   pthread_mutex_lock(&out_messages_mutex_);
   if (current_out_message_.valid()) {
@@ -200,10 +200,10 @@ DeviceAdapter::Error UsbConnection::sendData(RawMessageSptr message) {
     }
   }
   pthread_mutex_unlock(&out_messages_mutex_);
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error UsbConnection::disconnect() {
+TransportAdapter::Error UsbConnection::Disconnect() {
   pthread_mutex_lock(&out_messages_mutex_);
   disconnecting_ = true;
   if (out_transfer_) {
@@ -222,7 +222,7 @@ DeviceAdapter::Error UsbConnection::disconnect() {
   }
   CheckAllTransfersComplete();
   pthread_mutex_unlock(&out_messages_mutex_);
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 bool UsbConnection::Init() {
@@ -313,5 +313,5 @@ void UsbConnection::CheckAllTransfersComplete() {
   }
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager

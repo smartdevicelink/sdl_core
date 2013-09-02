@@ -33,15 +33,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_HANDLER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_HANDLER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_HANDLER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_HANDLER_H_
 
 #include <pthread.h>
 #include <libusb-1.0/libusb.h>
 
 namespace transport_manager {
 
-namespace device_adapter {
+namespace transport_adapter {
 
 class LibusbHandler {
  public:
@@ -51,8 +51,8 @@ class LibusbHandler {
     return libusb_context_;
   }
  protected:
-  DeviceAdapter::Error init();
-  void terminate();
+  TransportAdapter::Error Init();
+  void Terminate();
  private:
   void Thread();
   libusb_context* libusb_context_;

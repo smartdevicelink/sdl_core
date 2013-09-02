@@ -33,20 +33,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER_H_
 
 #include <list>
 
 #include <pthread.h>
 #include <libusb-1.0/libusb.h>
 
-#include "transport_manager/device_adapter/device_scanner.h"
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
 namespace transport_manager {
 
-namespace device_adapter {
+namespace transport_adapter {
 
 class AoaInitSequence;
 
@@ -66,10 +66,10 @@ class UsbDeviceScanner : public DeviceScanner, public UsingLibusbHandler {
   UsbDeviceScanner(class DeviceAdapterController* controller);
   virtual ~UsbDeviceScanner();
  protected:
-  virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error scan();
-  virtual void terminate();
-  virtual bool isInitialised() const;
+  virtual TransportAdapter::Error Init();
+  virtual TransportAdapter::Error Scan();
+  virtual void Terminate();
+  virtual bool IsInitialised() const;
   virtual void OnLibusbHandlerThread();
  private:
   void TurnIntoAccessoryMode(const libusb_device_descriptor& descriptor,

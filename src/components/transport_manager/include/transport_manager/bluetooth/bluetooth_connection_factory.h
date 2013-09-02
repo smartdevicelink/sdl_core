@@ -60,7 +60,7 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
   /**
    * @brief Start BT connection factory.
    */
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
 
   /**
    * @brief Create bluetooth socket connection.
@@ -74,7 +74,7 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
   /**
    * @brief
    */
-  virtual void terminate();
+  virtual void Terminate();
 
   /**
    * @brief Check for initialization.

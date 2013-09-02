@@ -152,12 +152,12 @@ public:
     /**
      * @brief Tries to Establish TCP connection to the Transport Manager
      */
-    void connect();
+    void Connect();
     
     /**
      * @brief Closes the socket (if it was opened before)
      */
-    void disconnect();
+    void Disconnect();
     
     /**
      *  @brief Sends data packet to the Transport Manager
@@ -203,7 +203,7 @@ CTranspMgrTcpClient::~CTranspMgrTcpClient()
 
 // ----------------------------------------------------------------------------
 
-void CTranspMgrTcpClient::connect()
+void CTranspMgrTcpClient::Connect()
 {    
     struct hostent *server;
     struct sockaddr_in serverAddr;
@@ -225,7 +225,7 @@ void CTranspMgrTcpClient::connect()
     bcopy((char*)server->h_addr, (char*)&serverAddr.sin_addr.s_addr, server->h_length);
     serverAddr.sin_port = htons(mPort);
     
-    if (::connect(mSocketFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0)
+    if (::Connect(mSocketFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0)
     {
         //throw new std::string("Error connecting\n");
         printf("\n WARNING: No TCP connection\n");
@@ -236,7 +236,7 @@ void CTranspMgrTcpClient::connect()
 
 // ----------------------------------------------------------------------------
 
-void CTranspMgrTcpClient::disconnect()
+void CTranspMgrTcpClient::Disconnect()
 {
     close(mSocketFd);
     
@@ -432,7 +432,7 @@ private:
                     printf("SendData. length = %d, [0]=0x%.2x, [1]=0x%02.2x, [2]==0x%2.2x\n", length, *((const char *const)data), *((const char *const)data+1), *((const char *const)data+2));
             if (mTCPClient.isConnected() == false)
             {
-                mTCPClient.connect();
+                mTCPClient.Connect();
             }
             mTCPClient.send(data, length);
         }
@@ -828,7 +828,7 @@ int main(int argc, char **argv)
         {
             pBuff = makePacket(config, /*out*/buffSize);
             
-            client.connect();
+            client.Connect();
 
             client.send(pBuff, buffSize);    
 
@@ -854,7 +854,7 @@ int main(int argc, char **argv)
     
         
 
-    client.disconnect();
+    client.Disconnect();
  
     return 0;
 }

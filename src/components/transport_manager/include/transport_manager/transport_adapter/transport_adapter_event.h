@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_EVENT_H
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_EVENT_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
 
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
@@ -85,7 +85,7 @@ class TransportAdapterEvent {
    *
    * @param id Connection unique identifier.
    */
-  void SetConnectionUid(ConnectionUID id);
+  void set_connection_uid(ConnectionUID id);
 
   /**
    * @brief Set device adapter field.
@@ -113,7 +113,7 @@ class TransportAdapterEvent {
    *
    * @param device_handle Device unique identifier.
    */
-  void SetDeviceHandle(const DeviceUID &device_handle);
+  void set_device_handle(const DeviceUID &device_handle);
 
   /**
    * @brief Return device unique identifier value.

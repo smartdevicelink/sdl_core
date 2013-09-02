@@ -265,7 +265,7 @@ int main(int argc, char** argv) {
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
   ::transport_manager::TransportManager* transport_manager =
-    ::transport_manager::TransportManagerDefault::instance();
+    ::transport_manager::TransportManagerDefault::Instance();
   DCHECK(transport_manager);
 
   protocol_handler::ProtocolHandlerImpl* protocol_handler =

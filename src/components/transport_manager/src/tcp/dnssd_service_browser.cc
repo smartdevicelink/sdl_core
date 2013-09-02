@@ -14,7 +14,7 @@ bool operator==(const DnssdServiceRecord& a, const DnssdServiceRecord& b) {
       && a.protocol == b.protocol && a.domain_name == b.domain_name;
 }
 
-void DnssdServiceBrowser::terminate() {
+void DnssdServiceBrowser::Terminate() {
   if (0 != avahi_threaded_poll_)
     avahi_threaded_poll_stop(avahi_threaded_poll_);
   if (0 != avahi_service_browser_)
@@ -213,7 +213,7 @@ TransportAdapter::Error DnssdServiceBrowser::CreateAvahiClientAndBrowser() {
   return TransportAdapter::OK;
 }
 
-TransportAdapter::Error DnssdServiceBrowser::init() {
+TransportAdapter::Error DnssdServiceBrowser::Init() {
   avahi_threaded_poll_ = avahi_threaded_poll_new();
   if (0 == avahi_threaded_poll_) {
     LOG4CXX_ERROR(logger_, "Failed to create AvahiThreadedPoll");

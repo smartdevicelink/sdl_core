@@ -79,7 +79,7 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
 
   int attempts = 4;
   int connect_status = 0;
-  LOG4CXX_INFO(logger_, "start rfcomm connect attempts");
+  LOG4CXX_INFO(logger_, "start rfcomm Connect attempts");
   do {
     rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if (-1 == rfcomm_socket) {
@@ -94,10 +94,10 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
                                (struct sockaddr*) &remoteSocketAddress,
                                sizeof(remoteSocketAddress));
     if (0 == connect_status) {
-      LOG4CXX_INFO(logger_, "rfcomm connect ok");
+      LOG4CXX_INFO(logger_, "rfcomm Connect ok");
       break;
     }
-    LOG4CXX_INFO(logger_, "rfcomm connect errno " << errno);
+    LOG4CXX_INFO(logger_, "rfcomm Connect errno " << errno);
     if (errno != 111 && errno != 104) {
       break;
     }
@@ -106,11 +106,11 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     }
     sleep(2);
   } while (--attempts > 0);
-  LOG4CXX_INFO(logger_, "rfcomm connect attempts finished");
+  LOG4CXX_INFO(logger_, "rfcomm Connect attempts finished");
   if (0 != connect_status) {
     LOG4CXX_ERROR_WITH_ERRNO(
         logger_,
-        "Failed to connect to remote device " << BluetoothDevice::GetUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
+        "Failed to Connect to remote device " << BluetoothDevice::GetUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
     *error = new ConnectError();
     LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")")
     return false;

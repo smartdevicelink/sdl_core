@@ -1,4 +1,4 @@
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/usb/usb_device_scanner.h"
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/usb/libusb_handler.h"
@@ -7,7 +7,7 @@
 #include <cstdlib>
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 class UsbControlTransferSequence {
  public:
@@ -373,13 +373,13 @@ void UsbDeviceScanner::OnLibusbHandlerThread() {
   }
 }
 
-DeviceAdapter::Error UsbDeviceScanner::init() {
+TransportAdapter::Error UsbDeviceScanner::Init() {
   int libusb_ret;
 
   libusb_context* libusb_context = GetLibusbHandler()->GetLibusbContext();
   if (libusb_context == 0) {
     LOG4CXX_ERROR(logger_, "Cannot get libusb_context");
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   libusb_ret = libusb_hotplug_register_callback(
@@ -391,7 +391,7 @@ DeviceAdapter::Error UsbDeviceScanner::init() {
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_ERROR(logger_,
                   "libusb_hotplug_register_callback failed: " << libusb_ret);
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
   libusb_ret = libusb_hotplug_register_callback(
@@ -403,13 +403,13 @@ DeviceAdapter::Error UsbDeviceScanner::init() {
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_ERROR(logger_,
                   "libusb_hotplug_register_callback failed: " << libusb_ret);
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error UsbDeviceScanner::scan() {
+TransportAdapter::Error UsbDeviceScanner::Scan() {
   DeviceVector device_vector;
   pthread_mutex_lock(&device_descriptions_mutex_);
   for (DeviceDescriptions::const_iterator it = device_descriptions_.begin();
@@ -426,10 +426,10 @@ DeviceAdapter::Error UsbDeviceScanner::scan() {
   pthread_mutex_unlock(&device_descriptions_mutex_);
 
   controller_->searchDeviceDone(device_vector);
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-void UsbDeviceScanner::terminate() {
+void UsbDeviceScanner::Terminate() {
   libusb_context* libusb_context = GetLibusbHandler()->GetLibusbContext();
   if (libusb_context != 0) {
     libusb_hotplug_deregister_callback(libusb_context,
@@ -438,7 +438,7 @@ void UsbDeviceScanner::terminate() {
   }
 }
 
-bool UsbDeviceScanner::isInitialised() const {
+bool UsbDeviceScanner::IsInitialised() const {
   return true;
 }
 

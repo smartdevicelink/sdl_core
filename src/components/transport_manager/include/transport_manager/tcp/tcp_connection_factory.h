@@ -59,7 +59,7 @@ class TcpConnectionFactory : public ServerConnectionFactory {
   /**
    * @brief Start TCP connection factory.
    */
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
 
   /**
    * @brief Constructor.
@@ -75,7 +75,7 @@ class TcpConnectionFactory : public ServerConnectionFactory {
   /**
    * @brief
    */
-  virtual void terminate();
+  virtual void Terminate();
 
   /**
    * @brief Check for initialization.

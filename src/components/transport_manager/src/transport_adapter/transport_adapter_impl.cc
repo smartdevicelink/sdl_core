@@ -64,15 +64,15 @@ TransportAdapterImpl::TransportAdapterImpl(
 
 TransportAdapterImpl::~TransportAdapterImpl() {
   if (device_scanner_) {
-    device_scanner_->terminate();
+    device_scanner_->Terminate();
     delete device_scanner_;
   }
   if (server_connection_factory_) {
-    server_connection_factory_->terminate();
+    server_connection_factory_->Terminate();
     delete server_connection_factory_;
   }
   if (client_connection_listener_) {
-    client_connection_listener_->terminate();
+    client_connection_listener_->Terminate();
     delete client_connection_listener_;
   }
 
@@ -92,17 +92,17 @@ TransportAdapterImpl::~TransportAdapterImpl() {
   pthread_mutex_destroy(&devices_mutex_);
 }
 
-TransportAdapter::Error TransportAdapterImpl::init() {
+TransportAdapter::Error TransportAdapterImpl::Init() {
   LOG4CXX_INFO(logger_, "Initializing device adapter");
 
   Error error = OK;
 
   if ((error == OK) && device_scanner_)
-    error = device_scanner_->init();
+    error = device_scanner_->Init();
   if ((error == OK) && server_connection_factory_)
-    error = server_connection_factory_->init();
+    error = server_connection_factory_->Init();
   if ((error == OK) && client_connection_listener_)
-    error = client_connection_listener_->init();
+    error = client_connection_listener_->Init();
 
   initialised_ = (error == OK);
   return error;
@@ -121,9 +121,9 @@ TransportAdapter::Error TransportAdapterImpl::SearchDevices() {
   return device_scanner_->Scan();
 }
 
-TransportAdapter::Error TransportAdapterImpl::connect(
+TransportAdapter::Error TransportAdapterImpl::Connect(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
-  LOG4CXX_INFO(logger_, "enter TransportAdapter::Error TransportAdapterImpl::connect");
+  LOG4CXX_INFO(logger_, "enter TransportAdapter::Error TransportAdapterImpl::Connect");
   if (server_connection_factory_ == 0) {
     LOG4CXX_ERROR(logger_, "feature is NOT_SUPPORTED");
     return NOT_SUPPORTED;

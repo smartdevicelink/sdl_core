@@ -73,12 +73,12 @@ class TcpClientListener : public ClientConnectionListener {
    *
    * @return Error information about possible reason of starting TCP listener listener failure.
    */
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
 
   /**
    * @brief Stop TCP client listener.
    */
-  virtual void terminate();
+  virtual void Terminate();
 
   /**
    * @brief Check initialization.

@@ -44,8 +44,8 @@ using transport_manager::transport_adapter::TcpTransportAdapter;
 
 namespace transport_manager {
 
-int TransportManagerDefault::init() {
-  if (E_SUCCESS != TransportManagerImpl::init()) {
+int TransportManagerDefault::Init() {
+  if (E_SUCCESS != TransportManagerImpl::Init()) {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
@@ -70,7 +70,7 @@ TransportManagerDefault::TransportManagerDefault(
       bluetooth_da_(new BluetoothTransportAdapter()),
       tcp_da_(new TcpTransportAdapter()) {}
 
-TransportManagerDefault* TransportManagerDefault::instance() {
+TransportManagerDefault* TransportManagerDefault::Instance() {
   static pthread_mutex_t tm_default_instance_mutex = PTHREAD_MUTEX_INITIALIZER;
   static TransportManagerDefault* tm_default_instance = nullptr;
 
@@ -78,7 +78,7 @@ TransportManagerDefault* TransportManagerDefault::instance() {
     pthread_mutex_lock(&tm_default_instance_mutex);
     if (tm_default_instance == nullptr) {
       tm_default_instance = new TransportManagerDefault(default_config_);
-      tm_default_instance->init();
+      tm_default_instance->Init();
     }
     pthread_mutex_unlock(&tm_default_instance_mutex);
   }

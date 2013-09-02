@@ -93,7 +93,7 @@ class TransportManagerTest : public ::testing::Test {
     pthread_mutex_init(&test_mutex, NULL);
     pthread_cond_init(&test_cond, NULL);
     mock_adapter = new MockTransportAdapter();
-    mock_adapter->init();
+    mock_adapter->Init();
     TransportManagerAttr cfg {0};
 
     tm = new TransportManagerImpl(cfg);
@@ -104,7 +104,7 @@ class TransportManagerTest : public ::testing::Test {
     tm_listener = new MockTransportManagerListener();
     tm->AddEventListener(tm_listener);
     tm->AddTransportAdapter(mock_adapter);
-    tm->init();
+    tm->Init();
   }
 
   static void TearDownTestCase() {

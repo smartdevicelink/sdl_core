@@ -1,6 +1,6 @@
 /**
  * \file usb_device.h
- * \brief
+ * \brief UsbDevice class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,13 +33,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE_H_
 
-#include "transport_manager/device_adapter/device.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 class UsbDevice : public Device {
  public:
@@ -57,7 +57,7 @@ class UsbDevice : public Device {
   virtual ~UsbDevice() {
   }
 
-  virtual bool isSameAs(const Device* other_device) const {
+  virtual bool IsSameAs(const Device* other_device) const {
     return unique_device_id() == other_device->unique_device_id();
   }
 
@@ -71,7 +71,7 @@ class UsbDevice : public Device {
   libusb_device* usb_device_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE

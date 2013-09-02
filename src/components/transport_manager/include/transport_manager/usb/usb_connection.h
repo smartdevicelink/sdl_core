@@ -1,6 +1,6 @@
 /**
  * \file usb_connection.h
- * \brief
+ * \brief UsbConnection class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -38,11 +38,11 @@
 
 #include <pthread.h>
 
-#include "transport_manager/device_adapter/device_adapter_controller.h"
-#include "transport_manager/device_adapter/connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/transport_adapter/connection.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 class UsbConnection : public Connection {
  public:
@@ -54,8 +54,8 @@ class UsbConnection : public Connection {
 
   virtual ~UsbConnection();
  protected:
-  virtual DeviceAdapter::Error sendData(RawMessageSptr message);
-  virtual DeviceAdapter::Error disconnect();
+  virtual TransportAdapter::Error SendData(RawMessageSptr message);
+  virtual TransportAdapter::Error Disconnect();
  private:
 
   friend void InTransferCallback(struct libusb_transfer*);
@@ -90,7 +90,7 @@ class UsbConnection : public Connection {
   bool waiting_out_transfer_cancel_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_H_

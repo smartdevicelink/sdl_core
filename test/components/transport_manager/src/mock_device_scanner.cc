@@ -49,7 +49,7 @@ MockDeviceScanner::MockDeviceScanner(MockTransportAdapter *controller)
       is_search_failed_(false) {
 }
 
-TransportAdapter::Error MockDeviceScanner::init() {
+TransportAdapter::Error MockDeviceScanner::Init() {
   is_initialized_ = true;
   return TransportAdapter::OK;
 }
@@ -63,7 +63,7 @@ TransportAdapter::Error MockDeviceScanner::Scan() {
   return TransportAdapter::OK;
 }
 
-void MockDeviceScanner::terminate() {
+void MockDeviceScanner::Terminate() {
 }
 
 void MockDeviceScanner::reset() {

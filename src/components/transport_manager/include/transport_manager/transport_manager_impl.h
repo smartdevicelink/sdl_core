@@ -1,6 +1,6 @@
 /**
  * \file transport_manager_impl.h
- * \brief Class transport_manager_implr header.
+ * \brief Class TransportManagerImpl header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 
 #include <queue>
 #include <map>
@@ -98,7 +98,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    */
-  int init(void);
+  int Init(void);
 
   /**
    * @brief Start scanning for new devices.
