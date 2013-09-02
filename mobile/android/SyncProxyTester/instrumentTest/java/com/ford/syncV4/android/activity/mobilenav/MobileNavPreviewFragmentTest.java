@@ -6,44 +6,45 @@ import android.widget.Button;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.SyncProxyTester;
 
 
 /**
  * Created by Andrew Batutin on 8/30/13.
  */
-public class MobileNavPreviewActivityTest extends ActivityInstrumentationTestCase2<MobileNavPreviewActivity> {
+public class MobileNavPreviewFragmentTest extends ActivityInstrumentationTestCase2<SyncProxyTester> {
 
-    private MobileNavPreviewActivity sut;
+    private MobileNavPreviewFragment sut;
 
-    public MobileNavPreviewActivityTest() {
-        super(MobileNavPreviewActivity.class);
+    public MobileNavPreviewFragmentTest() {
+        super(SyncProxyTester.class);
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        sut = this.getActivity();
+        sut = (MobileNavPreviewFragment) this.getActivity().getSupportFragmentManager().findFragmentById(R.layout.activity_mobile_nav_preview);
     }
 
     public void testVideoStreamingCheckBoxInflated() throws Exception {
-        CheckBox view = (CheckBox) sut.findViewById(R.id.videoStreamingCheckBox);
+        CheckBox view = (CheckBox) sut.getActivity().findViewById(R.id.videoStreamingCheckBox);
         assertNotNull("videoStreamingCheckBox should be inflated", view);
     }
 
     public void testMobileNavSessionCheckBoxInflated() throws Exception {
-        CheckBox view = (CheckBox) sut.findViewById(R.id.mobileNavCheckBox);
+        CheckBox view = (CheckBox) sut.getActivity().findViewById(R.id.mobileNavCheckBox);
         assertNotNull("mobileNavCheckBox should be inflated", view);
     }
 
     @UiThreadTest
     public void testVideoSteamingCheckBoxOnClickListenerSet() throws Exception {
-        Button button = (Button) sut.findViewById(R.id.videoStreamingCheckBox);
+        Button button = (Button) sut.getActivity().findViewById(R.id.videoStreamingCheckBox);
         assertTrue("On click listener should be set", button.performClick());
     }
 
     @UiThreadTest
     public void testMobileNavSessionCheckBoxOnClickListenerSet() throws Exception {
-        Button button = (Button) sut.findViewById(R.id.mobileNavCheckBox);
+        Button button = (Button) sut.getActivity().findViewById(R.id.mobileNavCheckBox);
         assertTrue("On click listener should be set", button.performClick());
     }
 

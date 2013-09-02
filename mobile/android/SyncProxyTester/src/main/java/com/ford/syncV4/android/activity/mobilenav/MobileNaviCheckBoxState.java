@@ -1,5 +1,6 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
+import android.content.Context;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
@@ -9,8 +10,8 @@ import com.ford.syncV4.android.R;
  */
 public class MobileNaviCheckBoxState extends CheckBoxState {
 
-    public MobileNaviCheckBoxState(CheckBox item) {
-        super(item);
+    public MobileNaviCheckBoxState(CheckBox item, Context context) {
+        super(item, context);
         hintString = getResources().getString(R.string.mobile_navi_hint);
         textString = getResources().getString(R.string.mobile_navi_check_box_on);
         setStateOff();

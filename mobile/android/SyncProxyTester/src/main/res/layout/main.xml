@@ -1,55 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:orientation="vertical">
-	<TableLayout android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-		<TableRow android:id="@+id/LinearLayout01"
-			android:layout_width="fill_parent" android:layout_height="wrap_content">
-		
-		</TableRow>
-		<TableRow android:id="@+id/LinearLayout03"
-			android:layout_width="fill_parent" android:layout_height="wrap_content">
-		</TableRow>
-	</TableLayout>
-	<TableLayout android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-		<TableRow android:id="@+id/LinearLayout03"
-			android:layout_width="fill_parent" android:layout_height="wrap_content">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
-			<Button
-			    android:id="@+id/btnPlayPause"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-			    android:layout_weight="1"
-			    android:text="Play/Pause" ></Button>
-		</TableRow>
-		<TableRow android:id="@+id/LinearLayout04"
-			android:layout_width="fill_parent" android:layout_height="wrap_content">
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
-			<Button android:layout_weight="1" android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:id="@+id/btnSendMessage"
-				android:text="Send Message" android:enabled="true"></Button>
-		</TableRow>
-        <TableRow android:id="@+id/LinearLayout05"
-                  android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <TableRow
+            android:id="@+id/LinearLayout01"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
 
-            <Button android:layout_weight="1" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/btnShowVideoPreview"
-                    android:text="Video Action" android:enabled="true" android:onClick="videoAction"></Button>
         </TableRow>
 
+        <TableRow
+            android:id="@+id/LinearLayout03"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"></TableRow>
     </TableLayout>
-	
-	<ScrollView android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:id="@+id/scrollConsole"
-		android:visibility="gone">
-	</ScrollView>
 
-	<ListView android:layout_height="fill_parent"
-		android:layout_width="fill_parent" android:id="@+id/messageList"
-		android:visibility="visible">
-	</ListView>
-	
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:id="@+id/LinearLayout03"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnPlayPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Play/Pause"></Button>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/LinearLayout04"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnSendMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="true"
+                android:text="Send Message"></Button>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/LinearLayout05"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <fragment
+                android:id="@+id/videoFragment"
+                android:name="com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/activity_mobile_nav_preview" />
+
+        </TableRow>
+
+
+    </TableLayout>
+
+    <ScrollView
+        android:id="@+id/scrollConsole"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone"></ScrollView>
+
+    <ListView
+        android:id="@+id/messageList"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="visible"></ListView>
+
 
 </LinearLayout>

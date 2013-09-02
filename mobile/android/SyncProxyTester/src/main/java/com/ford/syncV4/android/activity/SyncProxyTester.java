@@ -1,6 +1,5 @@
 package com.ford.syncV4.android.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
@@ -14,6 +13,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,7 +37,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewActivity;
+import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
@@ -145,7 +145,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-public class SyncProxyTester extends Activity implements OnClickListener {
+public class SyncProxyTester extends FragmentActivity implements OnClickListener {
     private static final String VERSION = "$Version:$";
     private static final String logTag = "SyncProxyTester";
     private static final String ButtonSubscriptions = "ButtonSubscriptions";
@@ -3713,25 +3713,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void videoAction(View v) {
-        launchVideoPreviewActivity();
-    }
-
-    private void launchVideoPreviewActivity() {
-
-        Intent intent = new Intent(this, MobileNavPreviewActivity.class);
-        startActivity(intent);
+    public void onMobileNaviCheckBoxAction(View v) {
 
     }
 
-    private void sendVideoData() {
-        try {
-            ProxyService.getInstance().getProxyInstance().sendVideoFrame(new byte[100]);
-        } catch (Exception e) {
-            _msgAdapter.logMessage("Error sending message: " + e,
-                    Log.ERROR, e);
-            Toast.makeText(this, "unable to send video data", Toast.LENGTH_SHORT).show();
-        }
+    public void onVideoStreamingCheckBoxAction(View checkBox) {
+        MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+        fr.onVideoStreamingCheckBoxAction(checkBox);
     }
 }
 

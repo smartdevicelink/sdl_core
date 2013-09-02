@@ -2,16 +2,18 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.Menu;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
 
-public class MobileNavPreviewActivity extends Activity implements VideoDataListener {
+public class MobileNavPreviewFragment extends Fragment implements VideoDataListener {
 
-    private static final String logTag = "MobileNavPreviewActivity";
+    private static final String logTag = "MobileNavPreviewFragment";
     private CheckBoxState videoCheckBoxState;
     private CheckBoxState mobileNavSessionCheckBoxState;
     private MockVideoDataSource videoDataSource;
@@ -25,15 +27,28 @@ public class MobileNavPreviewActivity extends Activity implements VideoDataListe
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Log.i(logTag, "activity created");
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_mobile_nav_preview);
-        initiateVideoCheckBox();
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        Log.i(logTag, "MobileNavPreviewFragment created");
+        View view = inflater.inflate(R.layout.activity_mobile_nav_preview,
+                container, true);
+        return view;
     }
 
     @Override
-    protected void onPause() {
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        Log.i(logTag, "activity attached to  MobileNavPreviewFragment");
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initiateVideoCheckBox(getActivity(), view);
+    }
+
+    @Override
+    public void onPause() {
         super.onPause();
         Log.i(logTag, "activity paused");
         if (videoDataSource != null) {
@@ -42,19 +57,14 @@ public class MobileNavPreviewActivity extends Activity implements VideoDataListe
         }
     }
 
-    private void initiateVideoCheckBox() {
-        videoCheckBoxState = new VideoCheckBoxState((CheckBox) findViewById(R.id.videoStreamingCheckBox));
+    private void initiateVideoCheckBox(Activity context, View view) {
+        CheckBox box = (CheckBox) view.findViewById(R.id.videoStreamingCheckBox);
+        videoCheckBoxState = new VideoCheckBoxState(box, context);
         videoCheckBoxState.setStateOff();
-        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState((CheckBox) findViewById(R.id.mobileNavCheckBox));
-        mobileNavSessionCheckBoxState.setStateOff();
+        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState((CheckBox)view.findViewById(R.id.mobileNavCheckBox), context);
+        mobileNavSessionCheckBoxState.setStateDisabled();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.mobile_nav_preview, menu);
-        return true;
-    }
 
     public void onVideoStreamingCheckBoxAction(View checkBox) {
         changeVideoCheckBoxState((CheckBox) checkBox);

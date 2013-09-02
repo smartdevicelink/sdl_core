@@ -1,5 +1,6 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.widget.CheckBox;
 
@@ -12,9 +13,11 @@ public class CheckBoxState {
     protected CheckBoxStateValue state;
     protected String hintString;
     protected String textString;
+    protected Context context;
 
-    public CheckBoxState(CheckBox item) {
+    public CheckBoxState(CheckBox item, Context context) {
         this.item = item;
+        this.context = context;
     }
 
     public CheckBoxStateValue getState() {
@@ -30,7 +33,7 @@ public class CheckBoxState {
     }
 
     protected Resources getResources() {
-        return item.getContext().getResources();
+        return context.getResources();
     }
 
     public void setStateDisabled() {

@@ -4,26 +4,24 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.activity.mobilenav.CheckBoxStateValue;
-import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewActivity;
-import com.ford.syncV4.android.activity.mobilenav.VideoCheckBoxState;
+import com.ford.syncV4.android.activity.SyncProxyTester;
 
 /**
  * Created by Andrew Batutin on 8/30/13.
  */
-public class VideoCheckBoxStateTest extends ActivityInstrumentationTestCase2<MobileNavPreviewActivity> {
+public class VideoCheckBoxStateTest extends ActivityInstrumentationTestCase2<SyncProxyTester> {
 
     private VideoCheckBoxState sut;
 
     public VideoCheckBoxStateTest() {
-        super(MobileNavPreviewActivity.class);
+        super(SyncProxyTester.class);
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         CheckBox box = new CheckBox(getActivity());
-        sut = new VideoCheckBoxState(box);
+        sut = new VideoCheckBoxState(box,  getActivity());
     }
 
     public void testInitialStateOff() throws Exception {
