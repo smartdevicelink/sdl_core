@@ -39,9 +39,76 @@
 #include <pthread.h>
 #include <libusb-1.0/libusb.h>
 
+#include "transport_manager/transport_adapter/transport_adapter.h"
+
 namespace transport_manager {
 
-namespace device_adapter {
+namespace transport_adapter {
+
+class LibusbListener;
+
+class UsbControlTransferSequence {
+ public:
+  void Start();
+  bool Finished() const;
+  libusb_device_handle* device_handle() const;
+  ~UsbControlTransferSequence();
+
+ protected:
+  class UsbControlTransfer;
+  class UsbControlInTransfer;
+  class UsbControlOutTransfer;
+
+  UsbControlTransferSequence(libusb_device_handle* device_handle);
+  void AddTransfer(UsbControlTransfer* transfer);
+
+ private:
+  friend void UsbTransferSequenceCallback(libusb_transfer *transfer);
+
+  void Finish();
+  void SubmitTransfer();
+  void Callback(libusb_transfer* transfer);
+
+  libusb_device_handle* device_handle_;
+  typedef std::list<UsbControlTransfer*> Transfers;
+  Transfers transfers_;
+  Transfers::iterator current_transfer_;
+  bool finished_;
+};
+
+class UsbControlTransferSequence::UsbControlTransfer {
+ public:
+  virtual ~UsbControlTransfer() {
+  }
+  virtual libusb_endpoint_direction Direction() const = 0;
+  virtual libusb_request_type RequestType() const = 0;
+  virtual uint8_t Request() const = 0;
+  virtual uint16_t Value() const = 0;
+  virtual uint16_t Index() const = 0;
+  virtual uint16_t Length() const = 0;
+};
+
+class UsbControlTransferSequence::UsbControlInTransfer :
+    public UsbControlTransfer {
+ public:
+  virtual ~UsbControlInTransfer() {
+  }
+  virtual libusb_endpoint_direction Direction() const {
+    return LIBUSB_ENDPOINT_IN;
+  }
+  virtual bool OnCompleted(unsigned char* data) const = 0;
+};
+
+class UsbControlTransferSequence::UsbControlOutTransfer :
+    public UsbControlTransfer {
+ public:
+  virtual ~UsbControlOutTransfer() {
+  }
+  virtual libusb_endpoint_direction Direction() const {
+    return LIBUSB_ENDPOINT_OUT;
+  }
+  virtual const char* Data() const = 0;
+};
 
 class LibusbHandler {
  public:
@@ -50,25 +117,38 @@ class LibusbHandler {
   libusb_context* GetLibusbContext() const {
     return libusb_context_;
   }
- protected:
-  DeviceAdapter::Error init();
-  void terminate();
+  void StartControlTransferSequence(
+      UsbControlTransferSequence* transfer_sequence);
+  TransportAdapter::Error Init();
  private:
+  void DeviceArrived(libusb_device* device);
+  void DeviceLeft(libusb_device* device);
   void Thread();
   libusb_context* libusb_context_;
+  libusb_hotplug_callback_handle arrived_callback_handle_;
+  libusb_hotplug_callback_handle left_callback_handle_;
   bool initialised_;
   bool shutdown_requested_;
   pthread_t thread_;
-  friend class UsingLibusbHandler;
-  std::list<UsingLibusbHandler*> using_this_list_;
+
+  typedef std::list<UsbControlTransferSequence*> UsbControlTransferSequences;
+  UsbControlTransferSequences usb_control_transfer_sequences_;
+
+  friend class LibusbListener;
+  std::list<LibusbListener*> libusb_listeners_;
+
   friend void* LibusbHandlerThread(void* data);
+  friend int ArrivedCallback(libusb_context *context, libusb_device *device,
+                             libusb_hotplug_event event, void *data);
+  friend int LeftCallback(libusb_context *context, libusb_device *device,
+                          libusb_hotplug_event event, void *data);
 };
 
 typedef utils::SharedPtr<LibusbHandler> LibusbHandlerSptr;
 
-class UsingLibusbHandler {
+class LibusbListener {
  public:
-  virtual ~UsingLibusbHandler() {
+  virtual ~LibusbListener() {
   }
 
   LibusbHandlerSptr GetLibusbHandler() {
@@ -77,10 +157,11 @@ class UsingLibusbHandler {
 
   void SetLibusbHandler(LibusbHandlerSptr libusb_handler) {
     libusb_handler_ = libusb_handler;
-    libusb_handler_->using_this_list_.push_back(this);
+    libusb_handler_->libusb_listeners_.push_back(this);
   }
 
-  virtual void OnLibusbHandlerThread() = 0;
+  virtual void OnDeviceArrived(libusb_device* device) = 0;
+  virtual void OnDeviceLeft(libusb_device* device) = 0;
  private:
   LibusbHandlerSptr libusb_handler_;
 };

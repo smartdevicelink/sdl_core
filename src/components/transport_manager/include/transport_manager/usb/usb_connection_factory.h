@@ -36,27 +36,27 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_FACTORY_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_FACTORY_H_
 
-#include "transport_manager/device_adapter/server_connection_factory.h"
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/server_connection_factory.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 class UsbConnectionFactory : public ServerConnectionFactory {
  public:
-  UsbConnectionFactory(DeviceAdapterController* controller);
+  UsbConnectionFactory(TransportAdapterController* controller);
  protected:
-  virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error createConnection(const DeviceUID& device_uid,
+  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
                                                 const ApplicationHandle& app_handle);
   virtual void terminate();
-  virtual bool isInitialised() const;
+  virtual bool IsInitialised() const;
   virtual ~UsbConnectionFactory();
  private:
-  DeviceAdapterController* controller_;
+  TransportAdapterController* controller_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_FACTORY_H_

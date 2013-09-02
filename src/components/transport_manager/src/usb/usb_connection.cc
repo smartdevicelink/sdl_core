@@ -36,14 +36,14 @@
 #include <libusb-1.0/libusb.h>
 
 #include "transport_manager/usb/usb_connection.h"
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
-                             DeviceAdapterController* controller,
+                             TransportAdapterController* controller,
                              libusb_device* device)
     : device_uid_(device_uid),
       app_handle_(app_handle),
@@ -105,14 +105,13 @@ bool UsbConnection::PostInTransfer() {
 
 void UsbConnection::OnInTransfer(libusb_transfer *transfer) {
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
-    fprintf(stderr, "in transfer ok %d\n", transfer->actual_length);
     RawMessageSptr data(
         new protocol_handler::RawMessage(0, 0, in_buffer_,
                                          transfer->actual_length));
-    controller_->dataReceiveDone(device_uid_, app_handle_, data);
+    controller_->DataReceiveDone(device_uid_, app_handle_, data);
   } else {
     LOG4CXX_ERROR(logger_, "USB transfer failed: " << transfer->status);
-    controller_->dataReceiveFailed(device_uid_, app_handle_,
+    controller_->DataReceiveFailed(device_uid_, app_handle_,
                                    DataReceiveError());
   }
   if (disconnecting_) {
@@ -122,7 +121,7 @@ void UsbConnection::OnInTransfer(libusb_transfer *transfer) {
     }
   } else {
     if (!PostInTransfer()) {
-      controller_->connectionAborted(device_uid_, app_handle_,
+      controller_->ConnectionAborted(device_uid_, app_handle_,
                                      CommunicationError());
     }
   }
@@ -153,7 +152,7 @@ bool UsbConnection::PostOutTransfer() {
     LOG4CXX_ERROR(
         logger_,
         "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
-    controller_->connectionAborted(device_uid_, app_handle_,
+    controller_->ConnectionAborted(device_uid_, app_handle_,
                                    CommunicationError());
     return false;
   }
@@ -164,15 +163,13 @@ void UsbConnection::OnOutTransfer(libusb_transfer *transfer) {
   pthread_mutex_lock(&out_messages_mutex_);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     bytes_sent_ += transfer->actual_length;
-    fprintf(stderr, "out transfer sent %d\n", transfer->actual_length);
     if (bytes_sent_ == current_out_message_->data_size()) {
-      controller_->dataSendDone(device_uid_, app_handle_, current_out_message_);
-      fprintf(stderr, "out transfer ok %d\n", current_out_message_->data_size());
+      controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
       PopOutMessage();
     }
   } else {
     LOG4CXX_ERROR(logger_, "USB transfer failed: " << transfer->status);
-    controller_->dataSendFailed(device_uid_, app_handle_, current_out_message_,
+    controller_->DataSendFailed(device_uid_, app_handle_, current_out_message_,
                                 DataSendError());
     PopOutMessage();
   }
@@ -185,9 +182,9 @@ void UsbConnection::OnOutTransfer(libusb_transfer *transfer) {
   pthread_mutex_unlock(&out_messages_mutex_);
 }
 
-DeviceAdapter::Error UsbConnection::sendData(RawMessageSptr message) {
+TransportAdapter::Error UsbConnection::SendData(RawMessageSptr message) {
   if (disconnecting_) {
-    return DeviceAdapter::BAD_STATE;
+    return TransportAdapter::BAD_STATE;
   }
   pthread_mutex_lock(&out_messages_mutex_);
   if (current_out_message_.valid()) {
@@ -195,15 +192,15 @@ DeviceAdapter::Error UsbConnection::sendData(RawMessageSptr message) {
   } else {
     current_out_message_ = message;
     if (!PostOutTransfer()) {
-      controller_->dataSendFailed(device_uid_, app_handle_, message,
+      controller_->DataSendFailed(device_uid_, app_handle_, message,
                                   DataSendError());
     }
   }
   pthread_mutex_unlock(&out_messages_mutex_);
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error UsbConnection::disconnect() {
+TransportAdapter::Error UsbConnection::Disconnect() {
   pthread_mutex_lock(&out_messages_mutex_);
   disconnecting_ = true;
   if (out_transfer_) {
@@ -218,11 +215,11 @@ DeviceAdapter::Error UsbConnection::disconnect() {
   }
   for (std::list<RawMessageSptr>::iterator it = out_messages_.begin();
       it != out_messages_.end(); it = out_messages_.erase(it)) {
-    controller_->dataSendFailed(device_uid_, app_handle_, *it, DataSendError());
+    controller_->DataSendFailed(device_uid_, app_handle_, *it, DataSendError());
   }
   CheckAllTransfersComplete();
   pthread_mutex_unlock(&out_messages_mutex_);
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 bool UsbConnection::Init() {
@@ -309,9 +306,9 @@ bool UsbConnection::FindEndpoints() {
 
 void UsbConnection::CheckAllTransfersComplete() {
   if (!(waiting_in_transfer_cancel_ || waiting_out_transfer_cancel_)) {
-    controller_->disconnectDone(device_uid_, app_handle_);
+    controller_->DisconnectDone(device_uid_, app_handle_);
   }
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager

@@ -36,26 +36,26 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER
 
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/usb/libusb_handler.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class UsbAoaAdapter : public DeviceAdapterImpl {
+class UsbAoaAdapter : public TransportAdapterImpl {
  public:
   UsbAoaAdapter();
   virtual ~UsbAoaAdapter();
  protected:
-  virtual DeviceType getDeviceType() const;
-  virtual bool isInitialised() const;
-  virtual DeviceAdapter::Error init();
+  virtual DeviceType GetDeviceType() const;
+  virtual bool IsInitialised() const;
+  virtual TransportAdapter::Error init();
  private:
   bool is_initialised_;
   LibusbHandlerSptr libusb_handler_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER

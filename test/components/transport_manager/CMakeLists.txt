@@ -9,6 +9,8 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/test/components/transport_manager/include/
 )
 
+LINK_DIRECTORIES(/usr/local/lib)
+
 set (LIBRARIES
     gtest
     gtest_main
@@ -20,6 +22,7 @@ set (LIBRARIES
     jsoncpp
     rt
     avahi-client
+    usb-1.0
 )
 
 set (SOURCES
@@ -33,8 +36,13 @@ set (SOURCES
    ./src/transport_manager.cc
 )
 
+set (TESTUSBSOURCES
+   ./src/test_usb.cc
+)
+
 create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")
 create_test("test_TcpTransportAdapter" "src/test_tcp_transport_adapter.cc" "${LIBRARIES}")
+create_test("test_usb" "${TESTUSBSOURCES}" "${LIBRARIES}")
 
 add_executable("test_DnssdServiceDiscovery" "src/test_dnssd_service_browser.cc")
 target_link_libraries("test_DnssdServiceDiscovery" ${LIBRARIES})

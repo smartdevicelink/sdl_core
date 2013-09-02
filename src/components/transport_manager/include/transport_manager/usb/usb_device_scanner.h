@@ -41,12 +41,12 @@
 #include <pthread.h>
 #include <libusb-1.0/libusb.h>
 
-#include "transport_manager/device_adapter/device_scanner.h"
-#include "transport_manager/device_adapter/device_adapter.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
+#include "transport_manager/usb/libusb_handler.h"
 
 namespace transport_manager {
 
-namespace device_adapter {
+namespace transport_adapter {
 
 class AoaInitSequence;
 
@@ -61,16 +61,17 @@ struct UsbDeviceDescription {
   std::string serial_number;
 };
 
-class UsbDeviceScanner : public DeviceScanner, public UsingLibusbHandler {
+class UsbDeviceScanner : public DeviceScanner, public LibusbListener {
  public:
-  UsbDeviceScanner(class DeviceAdapterController* controller);
+  UsbDeviceScanner(class TransportAdapterController* controller);
   virtual ~UsbDeviceScanner();
  protected:
-  virtual DeviceAdapter::Error init();
-  virtual DeviceAdapter::Error scan();
+  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Scan();
   virtual void terminate();
-  virtual bool isInitialised() const;
-  virtual void OnLibusbHandlerThread();
+  virtual bool IsInitialised() const;
+  virtual void OnDeviceArrived(libusb_device* device);
+  virtual void OnDeviceLeft(libusb_device* device);
  private:
   void TurnIntoAccessoryMode(const libusb_device_descriptor& descriptor,
                              libusb_device_handle* device_handle);
@@ -78,25 +79,11 @@ class UsbDeviceScanner : public DeviceScanner, public UsingLibusbHandler {
                             const libusb_device_descriptor& descriptor,
                             libusb_device_handle* device_handle);
 
-  void DeviceArrived(libusb_device* device);
-  void DeviceLeft(libusb_device* device);
-
-  DeviceAdapterController* controller_;
-  LibusbHandlerSptr libusb_handler_;
-  libusb_hotplug_callback_handle arrived_callback_handle_;
-  libusb_hotplug_callback_handle left_callback_handle_;
-
-  typedef std::list<AoaInitSequence*> AoaInitSequences;
-  AoaInitSequences aoa_init_sequences_;
+  TransportAdapterController* controller_;
 
   typedef std::list<UsbDeviceDescription> DeviceDescriptions;
   DeviceDescriptions device_descriptions_;
   pthread_mutex_t device_descriptions_mutex_;
-
-  friend int ArrivedCallback(libusb_context *context, libusb_device *device,
-                             libusb_hotplug_event event, void *data);
-  friend int LeftCallback(libusb_context *context, libusb_device *device,
-                          libusb_hotplug_event event, void *data);
 };
 
 }  // namespace

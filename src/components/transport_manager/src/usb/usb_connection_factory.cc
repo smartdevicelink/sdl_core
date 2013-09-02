@@ -38,25 +38,25 @@
 #include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/usb/usb_connection.h"
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-UsbConnectionFactory::UsbConnectionFactory(DeviceAdapterController* controller)
+UsbConnectionFactory::UsbConnectionFactory(TransportAdapterController* controller)
     : controller_(controller) {
 }
 
-DeviceAdapter::Error UsbConnectionFactory::init() {
-  return DeviceAdapter::OK;
+TransportAdapter::Error UsbConnectionFactory::init() {
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error UsbConnectionFactory::createConnection(
+TransportAdapter::Error UsbConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  DeviceSptr device = controller_->findDevice(device_uid);
+  DeviceSptr device = controller_->FindDevice(device_uid);
   if (!device.valid()) {
     LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
-    return DeviceAdapter::BAD_PARAM;
+    return TransportAdapter::BAD_PARAM;
   }
 
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
@@ -66,24 +66,24 @@ DeviceAdapter::Error UsbConnectionFactory::createConnection(
   ConnectionSptr connection(usb_connection);
 
   if (!usb_connection->Init()) {
-    return DeviceAdapter::FAIL;
+    return TransportAdapter::FAIL;
   }
 
-  controller_->connectionCreated(connection, device_uid, app_handle);
-  controller_->connectDone(device_uid, app_handle);
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
+  controller_->ConnectDone(device_uid, app_handle);
 
-  return DeviceAdapter::OK;
+  return TransportAdapter::OK;
 }
 
 void UsbConnectionFactory::terminate() {
 }
 
-bool UsbConnectionFactory::isInitialised() const {
+bool UsbConnectionFactory::IsInitialised() const {
   return true;
 }
 
 UsbConnectionFactory::~UsbConnectionFactory() {
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
