@@ -2,7 +2,8 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.test.InstrumentationTestCase;
 
-import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
 
@@ -20,13 +21,12 @@ public class MockVideoDataSourceTest extends InstrumentationTestCase {
     public void setUp() throws Exception {
         super.setUp();
         System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
-        sut = new MockVideoDataSource(mock(InputStream.class), mock(VideoDataListener.class));
+        sut = new MockVideoDataSource(mock(OutputStream.class), mock(VideoDataListener.class));
     }
 
     public void testSutImplementsRunnable() throws Exception {
         try {
             Runnable r = sut;
-            r.run();
             assertNotNull("should implement runnable", r);
         }catch (ClassCastException e){
             assertNull("Should not get here", e);
@@ -34,7 +34,7 @@ public class MockVideoDataSourceTest extends InstrumentationTestCase {
     }
 
     public void testSutWasCreatedWithListenerAndStream() throws Exception {
-        assertNotNull("should have input stream after init", sut.getInputStream());
+        assertNotNull("should have input stream after init", sut.getOutputStream());
         assertNotNull("should have a listener after init", sut.getDataListener());
     }
 
@@ -49,7 +49,7 @@ public class MockVideoDataSourceTest extends InstrumentationTestCase {
 
     public void testSutCreationWithNullListenerShouldThroughException() throws Exception {
         try {
-            MockVideoDataSource source = new MockVideoDataSource(mock(InputStream.class), null);
+            MockVideoDataSource source = new MockVideoDataSource(mock(OutputStream.class), null);
             assertNull("should not get here", source);
         }catch (IllegalArgumentException e){
             assertNotNull("should through exception", e);
@@ -82,7 +82,7 @@ public class MockVideoDataSourceTest extends InstrumentationTestCase {
 
     public void testVideoDataListenerOnStartCallbackIsCalledOnStart() throws Exception {
         final boolean[] callFlag = {false};
-        MockVideoDataSource dataSource = new MockVideoDataSource(mock(InputStream.class), new VideoDataListener() {
+        MockVideoDataSource dataSource = new MockVideoDataSource(mock(OutputStream.class), new VideoDataListener() {
             @Override
             public void onStreamingStart() {
                 callFlag[0] = true;
@@ -94,8 +94,72 @@ public class MockVideoDataSourceTest extends InstrumentationTestCase {
                 callFlag[0] = false;
                 assertEquals("should not get here",true, false);
             }
+
+            @Override
+            public void onStreamStop() {
+                callFlag[0] = false;
+                assertEquals("should not get here",true, false);
+            }
         });
         dataSource.start();
-        assertEquals("callback should be called", new boolean[]{true}, callFlag[0]);
+        assertEquals("callback should be called",true, callFlag[0]);
+    }
+
+    public void testMockDataCreation() throws Exception {
+        byte [] data = sut.createMockData();
+        assertTrue("arrays should be same" ,Arrays.equals(data, new byte[100]));
+    }
+
+    public void testOutputDataDispatchedToListener() throws Exception {
+        final boolean[] callFlag = {false};
+        MockVideoDataSource dataSource = new MockVideoDataSource(mock(OutputStream.class), new VideoDataListener() {
+            @Override
+            public void onStreamingStart() {
+            }
+
+            @Override
+            public void videoFrameReady(final byte[] videoFrame) {
+                callFlag[0] = true;
+                assertTrue("arrays should be same" ,Arrays.equals(videoFrame, new byte[100]));
+            }
+
+            @Override
+            public void onStreamStop() {
+
+            }
+        });
+        dataSource.dispatchDataToListener();
+        assertEquals("callback should be called", true, callFlag[0]);
+    }
+
+    public synchronized void testSutThreadInterruptedOnStop() throws Exception {
+        sut.start();
+        sut.stop();
+        assertEquals("thread should  be TERMINATED", Thread.State.TERMINATED, sut.getThread().getState());
+    }
+
+    public void testStopCallBackIsCalledOnStop() throws Exception {
+        final boolean[] callFlag = {false};
+        MockVideoDataSource dataSource = new MockVideoDataSource(mock(OutputStream.class), new VideoDataListener() {
+            @Override
+            public void onStreamingStart() {
+                callFlag[0] = false;
+                assertEquals("should not get here",true, false);
+            }
+
+            @Override
+            public void videoFrameReady(byte[] videoFrame) {
+                callFlag[0] = false;
+                assertEquals("should not get here",true, false);
+            }
+
+            @Override
+            public void onStreamStop() {
+                callFlag[0] = true;
+                assertEquals("should get here",true, true);
+            }
+        });
+        dataSource.stop();
+        assertEquals("callback should be called", true, callFlag[0]);
     }
 }
