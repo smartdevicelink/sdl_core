@@ -32,12 +32,6 @@
             android:id="@+id/relativeLayout"
             android:layout_below="@+id/videoStreamingCheckBox">
 
-        <SurfaceView
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:id="@+id/videoSurfaceView"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"/>
 
     </RelativeLayout>
 

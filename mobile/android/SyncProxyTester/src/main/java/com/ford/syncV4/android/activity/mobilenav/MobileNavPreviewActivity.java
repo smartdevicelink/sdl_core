@@ -2,31 +2,48 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
-import android.view.SurfaceHolder;
 import android.view.View;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
 
-public class MobileNavPreviewActivity extends Activity implements SurfaceHolder.Callback {
+public class MobileNavPreviewActivity extends Activity implements VideoDataListener {
 
-    private VideoCheckBoxState checkBoxState;
+    private static final String logTag = "MobileNavPreviewActivity";
+    private CheckBoxState checkBoxState;
+    private MockVideoDataSource videoDataSource;
+
+    public MockVideoDataSource getVideoDataSource() {
+        return videoDataSource;
+    }
 
     public VideoCheckBoxState getCheckBoxState() {
-        return checkBoxState;
+        return (VideoCheckBoxState) checkBoxState;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(logTag, "activity created");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mobile_nav_preview);
         initiateVideoCheckBox();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(logTag, "activity paused");
+        if (videoDataSource != null){
+            checkBoxState.setStateDisabled();
+            videoDataSource.stop();
+        }
+    }
+
     private void initiateVideoCheckBox() {
         checkBoxState = new VideoCheckBoxState((CheckBox) findViewById(R.id.videoStreamingCheckBox));
-        checkBoxState.setStateDisabled();
+        checkBoxState.setStateOff();
     }
 
     @Override
@@ -41,24 +58,35 @@ public class MobileNavPreviewActivity extends Activity implements SurfaceHolder.
     }
 
     private void changeCheckBoxState(CheckBox checkBox) {
-        checkBoxState.setStateDisabled();
+        if (checkBoxState.getState().equals(CheckBoxStateValue.OFF)) {
+            videoDataSource = new MockVideoDataSource(this);
+            checkBoxState.setStateDisabled();
+            videoDataSource.start();
+        } else if (checkBoxState.getState().equals(CheckBoxStateValue.ON)) {
+            checkBoxState.setStateDisabled();
+            videoDataSource.stop();
+        }
     }
 
     public void onMobileNaviCheckBoxAction(View v) {
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+    public void onStreamingStart() {
+        checkBoxState.setStateOn();
+        Log.i(logTag, "video streaming started");
+
+    }
+
+    @Override
+    public void videoFrameReady(byte[] videoFrame) {
+        Log.d(logTag, "video frame received" + videoFrame.toString());
+    }
+
+    @Override
+    public void onStreamStop() {
         checkBoxState.setStateOff();
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        Log.i(logTag, "video streaming stopped");
 
     }
 }

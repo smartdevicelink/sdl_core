@@ -2,8 +2,6 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.widget.Button;
 import android.widget.CheckBox;
 
@@ -25,11 +23,6 @@ public class MobileNavPreviewActivityTest extends ActivityInstrumentationTestCas
     protected void setUp() throws Exception {
         super.setUp();
         sut = this.getActivity();
-    }
-
-    public void testSurfaceViewInflated() throws Exception {
-        SurfaceView view = (SurfaceView) sut.findViewById(R.id.videoSurfaceView);
-        assertNotNull("SurfaceView should be inflated", view);
     }
 
     public void testVideoStreamingCheckBoxInflated() throws Exception {
@@ -54,29 +47,14 @@ public class MobileNavPreviewActivityTest extends ActivityInstrumentationTestCas
         assertTrue("On click listener should be set", button.performClick());
     }
 
-    public void testSutImplementsSurfaceHolderCallback() throws Exception {
-        try {
-            SurfaceHolder.Callback callback = sut;
-        }catch (ClassCastException e){
-            assertNull("Should not get here", e);
-        }
-    }
-
     public void testVideoCheckBoxInitialStateDisabled() throws Exception {
         assertEquals("video checkbox should be DISABLED", CheckBoxStateValue.DISABLED, sut.getCheckBoxState().getState());
     }
 
-    @UiThreadTest
-    public void testOnSurfaceCreatedVideoCheckBoxStateIsOff() throws Exception {
-        sut.surfaceCreated(null);
-        assertEquals("video checkbox should be OFF", CheckBoxStateValue.OFF, sut.getCheckBoxState().getState());
-    }
-
-    @UiThreadTest
-    public void testOnVideoCheckBoxCheckedStateIsDisabled() throws Exception {
-        sut.surfaceCreated(null);
-        CheckBox checkBox = (CheckBox) sut.findViewById(R.id.videoStreamingCheckBox);
-        sut.onVideoStreamingCheckBoxAction(checkBox);
-        assertEquals("video checkbox should be DISABLED", CheckBoxStateValue.DISABLED, sut.getCheckBoxState().getState());
+    public void testMockVideoDataSourceCreatedOnClick() throws Exception {
+        assertTrue("state should be off",sut.getCheckBoxState().getState().equals(CheckBoxStateValue.OFF));
+        sut.onVideoStreamingCheckBoxAction(null);
+        assertTrue("state should be disabled",sut.getCheckBoxState().getState().equals(CheckBoxStateValue.DISABLED));
+        assertNotNull("videoDataSource should be created",sut.getVideoDataSource());
     }
 }

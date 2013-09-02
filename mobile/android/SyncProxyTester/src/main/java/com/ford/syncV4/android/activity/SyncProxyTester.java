@@ -37,6 +37,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewActivity;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
@@ -3715,12 +3716,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	}
 
     public void videoAction(View v) {
+        launchVideoPreviewActivity();
+    }
+
+    private void launchVideoPreviewActivity() {
+        Intent intent = new Intent(this,MobileNavPreviewActivity.class);
+        startActivity(intent);
+    }
+
+    private void sendVideoData() {
         try {
             ProxyService.getInstance().getProxyInstance().sendVideoFrame(new byte[100]);
         } catch (Exception e) {
             _msgAdapter.logMessage("Error sending message: " + e,
                     Log.ERROR, e);
-            Toast.makeText(this, "unable to send video data",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "unable to send video data", Toast.LENGTH_SHORT).show();
         }
     }
 }
