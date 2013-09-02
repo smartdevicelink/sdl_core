@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ford.syncV4.android"
     android:versionCode="1"
-    android:versionName="1.1 (CW34)" >
+    android:versionName="1.1 (CW34)">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <!-- Required to pair Bluetooth devices -->
@@ -16,11 +16,11 @@
     <application
         android:debuggable="true"
         android:icon="@drawable/fiesta"
-        android:label="@string/tester_app_name" >
+        android:label="@string/tester_app_name">
         <activity
             android:name="com.ford.syncV4.android.activity.SyncProxyTester"
             android:label="@string/tester_app_name"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,10 +32,9 @@
             android:label="Locked"
             android:screenOrientation="portrait" />
 
-        <service android:name="com.ford.syncV4.android.service.ProxyService" >
-        </service>
+        <service android:name="com.ford.syncV4.android.service.ProxyService"></service>
 
-        <receiver android:name="com.ford.syncV4.android.receivers.SyncReceiver" >
+        <receiver android:name="com.ford.syncV4.android.receivers.SyncReceiver">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
@@ -47,26 +46,23 @@
         <activity
             android:name="com.ford.syncV4.android.activity.SoftButtonsListActivity"
             android:label="@string/title_activity_soft_buttons_list"
-            android:theme="@android:style/Theme.Dialog" >
-        </activity>
+            android:theme="@android:style/Theme.Dialog"></activity>
         <activity
             android:name="com.ford.syncV4.android.activity.SoftButtonEditActivity"
             android:label="@string/title_activity_soft_button_edit"
-            android:theme="@android:style/Theme.Dialog" >
-        </activity>
+            android:theme="@android:style/Theme.Dialog"></activity>
         <activity
             android:name="com.lamerman.FileDialog"
-            android:label="@string/app_name" >
-        </activity>
+            android:label="@string/app_name"></activity>
         <activity
             android:name=".activity.mobilenav.MobileNavPreviewActivity"
-            android:label="@string/title_activity_mobile_nav_preview" >
-        </activity>
+            android:label="@string/title_activity_mobile_nav_preview"></activity>
     </application>
 
-    <uses-sdk android:minSdkVersion="5" />
+    <uses-sdk
+        android:minSdkVersion="12"
+        android:targetSdkVersion="16" />
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
-    </uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 
 </manifest>
