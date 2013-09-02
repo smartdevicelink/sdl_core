@@ -296,7 +296,7 @@ int main(int argc, char** argv) {
   hmi_handler->setMessageObserver(app_manager);
 
   protocol_handler->set_session_observer(connection_handler);
-  protocol_handler->set_protocol_observer(mmh);
+  protocol_handler->AddProtocolObserver(mmh);
 
   connection_handler->set_transport_manager(transport_manager);
   connection_handler->set_connection_handler_observer(app_manager);

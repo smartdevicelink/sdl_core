@@ -36,7 +36,6 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 
 #include "utils/shared_ptr.h"
-#include "protocol_handler/raw_message.h"
 #include "transport_manager/common.h"
 
 /**
@@ -44,8 +43,9 @@
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
-
 typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
+class ProtocolObserver;
+
 /**
  * \class ProtocolHandler
  * \brief Interface for component parsing protocol header
@@ -53,6 +53,20 @@ typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
  */
 class ProtocolHandler {
   public:
+    /**
+     * \brief Adds pointer to higher layer handler for message exchange
+     * \param observer Pointer to object of the class implementing
+     * IProtocolObserver
+     */
+    virtual void AddProtocolObserver(ProtocolObserver* observer) = 0;
+
+    /**
+     * \brief Removes pointer to higher layer handler for message exchange
+     * \param observer Pointer to object of the class implementing
+     * IProtocolObserver.
+     */
+    virtual void RemoveProtocolObserver(ProtocolObserver* observer) = 0;
+
     /**
      * \brief Method for sending message to Mobile Application.
      * \param message RawMessage with params to be sent to Mobile App.
@@ -65,6 +79,7 @@ class ProtocolHandler {
      */
     virtual unsigned int GetPacketSize(
       unsigned int size, unsigned char* data) = 0;
+
   protected:
     /**
      * \brief Destructor
@@ -74,4 +89,4 @@ class ProtocolHandler {
 };
 }  //  namespace protocol_handler
 
-#endif // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
+#endif  //  SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER

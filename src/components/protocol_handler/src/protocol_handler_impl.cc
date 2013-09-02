@@ -48,7 +48,7 @@ log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ =
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
   transport_manager::TransportManager* transport_manager)
-  : protocol_observer_(0),
+  : protocol_observers_(),
     session_observer_(0),
     transport_manager_(transport_manager),
     handle_messages_from_mobile_app_(NULL),
@@ -78,18 +78,27 @@ ProtocolHandlerImpl::~ProtocolHandlerImpl() {
   delete handle_messages_to_mobile_app_;
   handle_messages_to_mobile_app_ = NULL;
 
-  protocol_observer_ = 0;
+  protocol_observers_.clear();
   session_observer_ = 0;
   transport_manager_ = 0;
 }
 
-void ProtocolHandlerImpl::set_protocol_observer(ProtocolObserver* observer) {
+void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver* observer) {
   if (!observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
     return;
   }
 
-  protocol_observer_ = observer;
+  protocol_observers_.insert(observer);
+}
+
+void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
+  if (!observer) {
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
+    return;
+  }
+
+  protocol_observers_.erase(observer);
 }
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
@@ -234,6 +243,14 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
   const transport_manager::DataReceiveError& error) {
   // TODO(PV): implement
   LOG4CXX_ERROR(logger_, "Received error on attemping to recieve message.")
+}
+
+void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
+  for (ProtocolObservers::iterator it = protocol_observers_.begin();
+       protocol_observers_.end() != it;
+       ++it) {
+    (*it)->OnMessageReceived(message);
+  }
 }
 
 void ProtocolHandlerImpl::OnTMMessageSend() {
@@ -446,11 +463,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
       if (SERVICE_TYPE_NAVI == packet->service_type()) {
         HandleStreamingMessage(original_message, connection_key, raw_message);
       }
-
-      if (protocol_observer_) {
-        protocol_observer_->OnMessageReceived(raw_message);
-      }
-
+      NotifySubscribers(raw_message);
       break;
     }
     case FRAME_TYPE_FIRST:
@@ -527,7 +540,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     if (packet->frame_data() == FRAME_DATA_LAST_FRAME) {
       LOG4CXX_INFO(logger_, "Last frame of multiframe message size "
                    << packet->data_size() << "; connection key " << key);
-      if (!protocol_observer_) {
+      if (!protocol_observers_.empty()) {
         LOG4CXX_ERROR(
           logger_,
           "Cannot handle multiframe message: no IProtocolObserver is set.");
@@ -541,7 +554,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
         key, completePacket->version(), completePacket->data(),
         completePacket->total_data_bytes());
 
-      protocol_observer_->OnMessageReceived(rawMessage);
+      NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
     }
@@ -633,6 +646,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleStreamingMessage(
   int connection_key,
   const RawMessagePtr& recieved_msg) {
   LOG4CXX_INFO(logger_, "Handling map streaming message");
+
+  recieved_msg->set_fully_binary(true);
 
   int messsages_for_session = message_over_navi_session_.count(
                                 connection_key);

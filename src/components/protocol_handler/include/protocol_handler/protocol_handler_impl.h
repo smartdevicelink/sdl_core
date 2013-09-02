@@ -37,15 +37,15 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 
 #include <map>
-
+#include <set>
 #include "utils/logger.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
-#include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/session_observer.h"
+#include "protocol_handler/protocol_observer.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_impl.h"
@@ -62,6 +62,7 @@ class MessagesFromMobileAppHandler;
 class MessagesToMobileAppHandler;
 
 typedef std::multimap<int, RawMessagePtr> MessagesOverNaviMap;
+typedef std::set<ProtocolObserver*> ProtocolObservers;
 
 using transport_manager::TransportManagerListenerImpl;
 
@@ -90,11 +91,18 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
     ~ProtocolHandlerImpl();
 
     /**
-     * \brief Sets pointer for higher layer handler for message exchange
+     * \brief Adds pointer to higher layer handler for message exchange
      * \param observer Pointer to object of the class implementing
      * IProtocolObserver
      */
-    void set_protocol_observer(ProtocolObserver* observer);
+    void AddProtocolObserver(ProtocolObserver* observer);
+
+    /**
+     * \brief Removes pointer to higher layer handler for message exchange
+     * \param observer Pointer to object of the class implementing
+     * IProtocolObserver.
+     */
+    void RemoveProtocolObserver(ProtocolObserver* observer);
 
     /**
      * \brief Sets pointer for Connection Handler layer for managing sessions
@@ -190,6 +198,13 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
     virtual void OnTMMessageSendFailed(
       const transport_manager::DataSendError& error,
       const RawMessagePtr& message);
+
+    /**
+     * @brief Notifies subscribers about message
+     * recieved from mobile device.
+     * @param message Message with already parsed header.
+     */
+    void NotifySubscribers(const RawMessagePtr& message);
 
     /**
      * \brief Sends message which size permits to send it in one frame.
@@ -306,7 +321,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      *\brief Pointer on instance of class implementing IProtocolObserver
      *\brief (JSON Handler)
      */
-    ProtocolObserver* protocol_observer_;
+    ProtocolObservers protocol_observers_;
 
     /**
      *\brief Pointer on instance of class implementing ISessionObserver

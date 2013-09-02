@@ -38,6 +38,7 @@
 #include <map>
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "protocol_handler/protocol_observer.h"
 #include "audio_manager/audio_manager.h"
 #include "audio_manager/from_mic_to_file_recorder_thread.h"
 #include "audio_manager/a2dp_source_player_thread.h"
@@ -48,43 +49,49 @@ namespace audio_manager {
 // specific implementations if there are several different audio source
 // types present.
 
-class AudioManagerImpl : AudioManager {
- public:
-  static AudioManager* getAudioManager();
+class AudioManagerImpl : AudioManager,
+    protocol_handler::ProtocolObserver {
+  public:
+    static AudioManager* getAudioManager();
 
-  virtual void addA2DPSource(const sockaddr& device);
-  virtual void removeA2DPSource(const sockaddr& device);
-  virtual void playA2DPSource(const sockaddr& device);
-  virtual void stopA2DPSource(const sockaddr& device);
+    virtual void addA2DPSource(const sockaddr& device);
+    virtual void removeA2DPSource(const sockaddr& device);
+    virtual void playA2DPSource(const sockaddr& device);
+    virtual void stopA2DPSource(const sockaddr& device);
 
-  virtual void addA2DPSource(const std::string& device);
-  virtual void removeA2DPSource(const std::string& device);
-  virtual void playA2DPSource(const std::string& device);
-  virtual void stopA2DPSource(const std::string& device);
+    virtual void addA2DPSource(const std::string& device);
+    virtual void removeA2DPSource(const std::string& device);
+    virtual void playA2DPSource(const std::string& device);
+    virtual void stopA2DPSource(const std::string& device);
 
-  virtual void startMicrophoneRecording(const std::string& outputFileName,
-                 mobile_apis::SamplingRate::eType type,
-                 int duration,
-                 mobile_apis::BitsPerSample::eType);
-  virtual void stopMicrophoneRecording();
+    virtual void startMicrophoneRecording(const std::string& outputFileName,
+                                          mobile_apis::SamplingRate::eType type,
+                                          int duration,
+                                          mobile_apis::BitsPerSample::eType);
+    virtual void stopMicrophoneRecording();
 
-  virtual ~AudioManagerImpl();
+    virtual void OnMessageReceived(
+      const protocol_handler::RawMessagePtr& message);
 
- protected:
-  AudioManagerImpl();
+    virtual ~AudioManagerImpl();
 
- private:
-  std::map<std::string, threads::Thread*> sources_;
-  threads::Thread* recorderThread_;
+  protected:
+    AudioManagerImpl();
 
-  const int MAC_ADDRESS_LENGTH_;
-  static AudioManagerImpl* sInstance_;
-  static log4cxx::LoggerPtr logger_;
-  static const std::string sA2DPSourcePrefix_;
+  private:
+    std::map<std::string, threads::Thread*> sources_;
+    threads::Thread* recorderThread_;
 
-  std::string sockAddr2SourceAddr(const sockaddr& device);
+    const int MAC_ADDRESS_LENGTH_;
+    static AudioManagerImpl* sInstance_;
+    static log4cxx::LoggerPtr logger_;
+    static const std::string sA2DPSourcePrefix_;
 
-  DISALLOW_COPY_AND_ASSIGN(AudioManagerImpl);
+    std::string sockAddr2SourceAddr(const sockaddr& device);
+
+    const std::string kH264FileName;
+
+    DISALLOW_COPY_AND_ASSIGN(AudioManagerImpl);
 };
 
 }  //  namespace audio_manager

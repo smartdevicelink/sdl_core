@@ -32,12 +32,14 @@
 
 #include <algorithm>
 #include <iterator>
+#include <vector>
 #include "audio_manager/audio_manager_impl.h"
+#include "utils/file_system.h"
 
 namespace audio_manager {
 
 log4cxx::LoggerPtr AudioManagerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("AudioManagerImpl"));
+      log4cxx::Logger::getLogger("AudioManagerImpl"));
 
 AudioManagerImpl* AudioManagerImpl::sInstance_ = 0;
 
@@ -53,7 +55,8 @@ AudioManager* AudioManagerImpl::getAudioManager() {
 
 AudioManagerImpl::AudioManagerImpl()
 // Six hex-pairs + five underscores + '\n'
-  : MAC_ADDRESS_LENGTH_(12 + 5 + 1) {
+  : MAC_ADDRESS_LENGTH_(12 + 5 + 1),
+    kH264FileName("h264file.data") {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
@@ -62,13 +65,13 @@ AudioManagerImpl::~AudioManagerImpl() {
 void AudioManagerImpl::addA2DPSource(const std::string& device) {
   if (sources_.find(device) == sources_.end()) {
     sources_.insert(std::pair<std::string, threads::Thread*>(
-        device, NULL));
+                      device, NULL));
   }
 }
 
 void AudioManagerImpl::removeA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(device);
+    sources_.find(device);
 
   if (it != sources_.end()) {
     // Source exists
@@ -83,7 +86,7 @@ void AudioManagerImpl::removeA2DPSource(const std::string& device) {
       }
       // Delete allocated thread
       LOG4CXX_DEBUG(logger_, "Delete allocated thread");
-      delete (*it).second;
+      delete(*it).second;
     }
 
     sources_.erase(it);
@@ -92,12 +95,12 @@ void AudioManagerImpl::removeA2DPSource(const std::string& device) {
 
 void AudioManagerImpl::playA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(device);
+    sources_.find(device);
 
   if (it != sources_.end()) {
     // Source exists - allocate thread for the source
     (*it).second = new threads::Thread((*it).first.c_str(),
-        new A2DPSourcePlayerThread((*it).first));
+                                       new A2DPSourcePlayerThread((*it).first));
 
     if (NULL != (*it).second) {
       // Thread was successfully allocated - start thread
@@ -108,7 +111,7 @@ void AudioManagerImpl::playA2DPSource(const std::string& device) {
 
 void AudioManagerImpl::stopA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(device);
+    sources_.find(device);
 
   if (it != sources_.end()) {
     // Source exists
@@ -168,23 +171,22 @@ void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
 }
 
 void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileName,
-                 mobile_apis::SamplingRate::eType type,
-                 int duration,
-                 mobile_apis::BitsPerSample::eType) {
+    mobile_apis::SamplingRate::eType type,
+    int duration,
+    mobile_apis::BitsPerSample::eType) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   FromMicToFileRecorderThread* recordThreadDelegate =
-      new FromMicToFileRecorderThread();
+    new FromMicToFileRecorderThread();
 
-  if(NULL != recordThreadDelegate)
-  {
+  if (NULL != recordThreadDelegate) {
     recordThreadDelegate->setOutputFileName(outputFileName);
     recordThreadDelegate->setRecordDuration(duration);
 
     recorderThread_ = new threads::Thread("MicrophoneRecorder"
-        , recordThreadDelegate);
+                                          , recordThreadDelegate);
 
-    if(NULL != recorderThread_) {
+    if (NULL != recorderThread_) {
       recorderThread_->start();
     }
   }
@@ -193,10 +195,29 @@ void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileNam
 void AudioManagerImpl::stopMicrophoneRecording() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if(NULL != recorderThread_) {
+  if (NULL != recorderThread_) {
     recorderThread_->stop();
     delete recorderThread_;
     recorderThread_ = NULL;
+  }
+}
+
+void AudioManagerImpl::OnMessageReceived(
+  const protocol_handler::RawMessagePtr& message) {
+  if (!message) {
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to message.");
+    NOTREACHED();
+    return;
+  }
+  if (message->is_fully_binary()) {
+    // the only type of message AudioManager is interested in.
+    std::vector<unsigned char> recieved_bin_data(
+      message->data(),
+      message->data() + message->data_size());
+
+    file_system::Write(kH264FileName,
+                       recieved_bin_data,
+                       std::ios_base::app);
   }
 }
 

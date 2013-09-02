@@ -4,6 +4,7 @@ include_directories (
   ../../../src/components/audio_manager/include
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src/components/utils/include/
+  ../../../src/components/protocol_handler/include/
   ../../../test/components/audio_manager/include
     /usr/lib/i386-linux-gnu/glib-2.0/include
     /usr/lib/x86_64-linux-gnu/glib-2.0/include/

@@ -9,6 +9,7 @@ add_definitions(${GLIB2_CFLAGS})
 include_directories (
   ./include
   ../utils/include/
+  ../protocol_handler/include/
   ../interfaces
   ../../thirdPartyLibs/logger/include/
   ../../thirdPartyLibs/MessageBroker/include/

@@ -37,7 +37,6 @@
 #include <dirent.h>
 #include <unistd.h>
 // TODO(VS): lint error: Streams are highly discouraged.
-#include <iostream>
 #include <fstream>
 #include <cstddef>
 #include <algorithm>
@@ -97,8 +96,9 @@ bool file_system::FileExists(const std::string& name) {
 }
 
 bool file_system::Write(
-  const std::string& file_name, const std::vector<unsigned char>& data) {
-  std::ofstream file(file_name.c_str(), std::ios_base::binary);
+  const std::string& file_name, const std::vector<unsigned char>& data,
+  std::ios_base::openmode mode) {
+  std::ofstream file(file_name.c_str(), std::ios_base::binary | mode);
   if (file.is_open()) {
     for (int i = 0; i < data.size(); ++i) {
       file << data[i];

@@ -36,108 +36,110 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include <iostream>
 
 namespace file_system {
-  /**
-   * @brief Get available disc space.
-   *
-   * @return free disc space.
-   */
-  uint64_t AvailableSpace();
+/**
+ * @brief Get available disc space.
+ *
+ * @return free disc space.
+ */
+uint64_t AvailableSpace();
 
-  /**
-    * @brief Creates directory
-    * @param name path to directory
-    * @return path to created directory.
-    */
-  std::string CreateDirectory(const std::string& name);
+/**
+  * @brief Creates directory
+  * @param name path to directory
+  * @return path to created directory.
+  */
+std::string CreateDirectory(const std::string& name);
 
-  /**
-    * @brief Checks the file to see whether the file is a directory
-    * @param name path to file
-    * @return returns true if file is directory.
-    */
-  bool IsDirectory(const std::string & name);
+/**
+  * @brief Checks the file to see whether the file is a directory
+  * @param name path to file
+  * @return returns true if file is directory.
+  */
+bool IsDirectory(const std::string& name);
 
-  /**
-    * @brief Is directory exist
-    * @param name path to directory
-    * @return returns true if directory is exists.
-    */
-  bool DirectoryExists(const std::string& name);
+/**
+  * @brief Is directory exist
+  * @param name path to directory
+  * @return returns true if directory is exists.
+  */
+bool DirectoryExists(const std::string& name);
 
-  /**
-    * @brief Is file exist
-    * @param name path to file
-    * @return returns true if file is exists.
-    */
-  bool FileExists(const std::string& name);
+/**
+  * @brief Is file exist
+  * @param name path to file
+  * @return returns true if file is exists.
+  */
+bool FileExists(const std::string& name);
 
-  /**
-    * @brief Writes to file
-    *
-    * @remark - create file if it doesn't exist
-    * @param name path to file
-    * @param data data to write
-    * @return returns true if the operation is successfully.
-    */
-  bool Write(const std::string& file_name,
-             const std::vector<unsigned char>& data); // TODO(VS): Add appen mode to write function
+/**
+  * @brief Writes to file
+  *
+  * @remark - create file if it doesn't exist
+  * @param name path to file
+  * @param data data to write
+  * @return returns true if the operation is successfully.
+  */
+bool Write(const std::string& file_name,
+           const std::vector<unsigned char>& data,
+           std::ios_base::openmode mode = std::ios_base::out);
 
-  /**
-    * @brief Returns full file path
-    *
-    * @param name file name
-    * @return returns full file path.
-    */
-  std::string FullPath(const std::string& name);
+/**
+  * @brief Returns full file path
+  *
+  * @param name file name
+  * @return returns full file path.
+  */
+std::string FullPath(const std::string& name);
 
-  /**
-    * @brief Removes file
-    *
-    * @param name path to file
-    * @return returns true if the file is successfully deleted.
-    */
-  bool DeleteFile(const std::string& name);
+/**
+  * @brief Removes file
+  *
+  * @param name path to file
+  * @return returns true if the file is successfully deleted.
+  */
+bool DeleteFile(const std::string& name);
 
-  /**
-   * @brief Removes directory.
-   *
-   * @param name path to directory.
-   * @param is_recursively true if you need delete directory recursively, otherwise false.
-   * @return returns true if the directory is successfully deleted.
-   */
-  bool RemoveDirectory(const std::string& directory_name,
-                        bool is_recursively = true);
+/**
+ * @brief Removes directory.
+ *
+ * @param name path to directory.
+ * @param is_recursively true if you need delete directory recursively, otherwise false.
+ * @return returns true if the directory is successfully deleted.
+ */
+bool RemoveDirectory(const std::string& directory_name,
+                     bool is_recursively = true);
 
-  /**
-    * @brief Check access rights
-    *
-    * @param name path to file.
-    * @param how Read/write attribute.
-    * @return returns true if file has the given mode.
-    */
-  bool IsAccessible(const std::string& name, int how);
+/**
+  * @brief Check access rights
+  *
+  * @param name path to file.
+  * @param how Read/write attribute.
+  * @return returns true if file has the given mode.
+  */
+bool IsAccessible(const std::string& name, int how);
 
-  /**
-    * @brief Lists all files in given directory
-    *
-    * @param name path to directory.
-    * @return returns list of files.
-    */
-  std::vector<std::string> ListFiles(const std::string& directory_name);
+/**
+  * @brief Lists all files in given directory
+  *
+  * @param name path to directory.
+  * @return returns list of files.
+  */
+std::vector<std::string> ListFiles(const std::string& directory_name);
 
-  /**
-    * @brief Reads from file
-    *
-    * @param name path to file
-    * @param result read data
-    * @return returns true if the operation is successfully.
-    */
-  bool ReadBinaryFile(const std::string& name,
-                        std::vector<unsigned char>& result);
+/**
+  * @brief Reads from file
+  *
+  * @param name path to file
+  * @param result read data
+  * @return returns true if the operation is successfully.
+  */
+bool ReadBinaryFile(const std::string& name,
+                    std::vector<unsigned char>& result);
 
-  bool ReadFile(const std::string& name, std::string& result);
+bool ReadFile(const std::string& name, std::string& result);
 
 }  // namespace file_system
 
