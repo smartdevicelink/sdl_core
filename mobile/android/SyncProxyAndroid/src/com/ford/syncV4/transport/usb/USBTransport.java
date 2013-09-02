@@ -323,8 +323,22 @@ public class USBTransport extends SyncTransport {
                     logW("Receiver was already unregistered", e);
                 }
 
-                // TODO: use proper message
-                handleTransportDisconnected("");
+                String disconnectMsg = (msg == null ? "" : msg);
+                if (ex != null) {
+                    disconnectMsg += ", " + ex.toString();
+                }
+
+                if (ex == null) {
+                    // This disconnect was not caused by an error, notify the
+                    // proxy that the transport has been disconnected.
+                    logI("Disconnect is correct. Handling it");
+                    handleTransportDisconnected(disconnectMsg);
+                } else {
+                    // This disconnect was caused by an error, notify the proxy
+                    // that there was a transport error.
+                    logI("Disconnect is incorrect. Handling it as error");
+                    handleTransportError(disconnectMsg, ex);
+                }
                 break;
 
             default:
