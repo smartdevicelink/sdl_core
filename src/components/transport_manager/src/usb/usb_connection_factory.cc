@@ -47,7 +47,7 @@ UsbConnectionFactory::UsbConnectionFactory(TransportAdapterController* controlle
     : controller_(controller) {
 }
 
-TransportAdapter::Error UsbConnectionFactory::init() {
+TransportAdapter::Error UsbConnectionFactory::Init() {
   return TransportAdapter::OK;
 }
 
@@ -75,7 +75,7 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   return TransportAdapter::OK;
 }
 
-void UsbConnectionFactory::terminate() {
+void UsbConnectionFactory::Terminate() {
 }
 
 bool UsbConnectionFactory::IsInitialised() const {

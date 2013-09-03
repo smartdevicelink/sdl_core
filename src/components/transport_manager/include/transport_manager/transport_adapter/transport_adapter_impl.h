@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_IMPL_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_IMPL_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
 
 #include <queue>
 #include <set>
@@ -92,7 +92,7 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
    *
    * @return Error information about possible reason of starting client listener failure.
    **/
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
 
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
@@ -125,7 +125,7 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
    *
    * @return Error information about possible reason of connecting to device failure.
    **/
-  virtual TransportAdapter::Error connect(const DeviceUID& device_handle,
+  virtual TransportAdapter::Error Connect(const DeviceUID& device_handle,
                                        const ApplicationHandle& app_handle);
 
   /**

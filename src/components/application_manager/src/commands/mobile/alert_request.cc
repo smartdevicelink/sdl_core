@@ -65,8 +65,9 @@ void AlertRequest::Run() {
   }
 
   //check if mandatory params(alertText1 and TTSChunk) specified
-  if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1)) ||
-      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) ||
+  if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1)) &&
+      (!(*message_)[strings::msg_params].keyExists(strings::alert_text2)) &&
+      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
       (1 > (*message_)[strings::msg_params][strings::tts_chunks].length()))) {
     LOG4CXX_ERROR_EXT(logger_, "Mandatoty parameters omitted");
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
@@ -74,15 +75,7 @@ void AlertRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
-                          verification_result);
-    SendResponse(false, verification_result);
-    return;
-  }
+  MessageHelper::VerifySoftButtons((*message_)[strings::msg_params], app);
 
   SendAlertRequest(app->app_id());
   SendPlayToneNotification(app->app_id());

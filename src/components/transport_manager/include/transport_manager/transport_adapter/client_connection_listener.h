@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CLIENT_CONNECTION_LISTENER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_CLIENT_CONNECTION_LISTENER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CLIENT_CONNECTION_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CLIENT_CONNECTION_LISTENER_H_
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
@@ -53,12 +53,12 @@ class ClientConnectionListener {
    *
    * @return Error information about possible reason of starting client listener failure.
    */
-  virtual TransportAdapter::Error init() = 0;
+  virtual TransportAdapter::Error Init() = 0;
 
   /**
    * @brief Stop client connection listener.
    */
-  virtual void terminate() = 0;
+  virtual void Terminate() = 0;
 
   /**
    * @brief Check initialization.

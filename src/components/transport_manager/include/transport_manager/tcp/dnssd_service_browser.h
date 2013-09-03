@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_DNSSD_SERVICE_BROWSER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_DNSSD_SERVICE_BROWSER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_DNSSD_SERVICE_BROWSER_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_DNSSD_SERVICE_BROWSER_H
 
 #include <string>
 #include <vector>
@@ -77,9 +77,9 @@ class DnssdServiceBrowser : public DeviceScanner {
   DnssdServiceBrowser(class TransportAdapterController* controller);
   virtual ~DnssdServiceBrowser();
  protected:
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
   virtual TransportAdapter::Error Scan();
-  virtual void terminate();
+  virtual void Terminate();
   virtual bool IsInitialised() const;
  private:
   TransportAdapter::Error CreateAvahiClientAndBrowser();

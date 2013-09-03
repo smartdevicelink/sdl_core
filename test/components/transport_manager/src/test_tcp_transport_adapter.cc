@@ -31,7 +31,7 @@ TEST(TcpAdapterBasicTest, NotInitialised) {
 
   EXPECT_EQ(TransportAdapter::BAD_STATE, transport_adapter->SearchDevices());
   EXPECT_EQ(TransportAdapter::OK,
-            transport_adapter->connect(DeviceUID("xxx"), 2));
+            transport_adapter->Connect(DeviceUID("xxx"), 2));
   EXPECT_EQ(TransportAdapter::BAD_STATE,
             transport_adapter->Disconnect(DeviceUID("xxx"), 2));
   EXPECT_EQ(TransportAdapter::BAD_STATE,
@@ -40,7 +40,7 @@ TEST(TcpAdapterBasicTest, NotInitialised) {
 
 class ClientTcpSocket {
  public:
-  bool connect(uint16_t server_port) {
+  bool Connect(uint16_t server_port) {
     socket_ = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_ < 0)
       return false;
@@ -100,7 +100,7 @@ class TcpAdapterTest : public ::testing::Test {
   }
 
   virtual void SetUp() {
-    const TransportAdapter::Error error = transport_adapter_->init();
+    const TransportAdapter::Error error = transport_adapter_->Init();
     ASSERT_EQ(TransportAdapter::OK, error);
     transport_adapter_->AddListener(&mock_dal_);
     while (!transport_adapter_->IsInitialised())
@@ -163,7 +163,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, Connect) {
     EXPECT_CALL(mock_dal_, OnConnectDone(transport_adapter_, _, _)).WillOnce(
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
 }
 
 TEST_F(TcpAdapterTestWithListenerAutoStart, Receive) {
@@ -175,7 +175,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, Receive) {
         OnDataReceiveDone(transport_adapter_, _, _, ContainsMessage("abcd"))).
         WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
   EXPECT_TRUE(client_.send("abcd"));
 }
 
@@ -213,7 +213,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, Send) {
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
 
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
   EXPECT_EQ("efgh", client_.receive(4));
 }
 
@@ -225,7 +225,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, DisconnectFromClient) {
     EXPECT_CALL(mock_dal_, OnDisconnectDone(transport_adapter_, _, _)).WillOnce(
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
   client_.Disconnect();
 }
 
@@ -237,7 +237,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, DisconnectFromServer) {
     EXPECT_CALL(mock_dal_, OnDisconnectDone(transport_adapter_, _, _)).WillOnce(
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
 }
 
 TEST_F(TcpAdapterTestWithListenerAutoStart, SendToDisconnected) {
@@ -250,7 +250,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, SendToDisconnected) {
         ::testing::DoAll(Invoke(helper, &SendHelper::sendMessage),
                          InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp)));
   }
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
 }
 
 TEST_F(TcpAdapterTestWithListenerAutoStart, SendFailed) {
@@ -266,22 +266,22 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, SendFailed) {
     EXPECT_CALL(mock_dal_, OnDisconnectDone(transport_adapter_, _, _)).WillOnce(
         InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
   client_.receive(2);
   client_.Disconnect();
 }
 
 TEST_F(TcpAdapterTest, StartStop) {
   EXPECT_EQ(TransportAdapter::BAD_STATE, transport_adapter_->StopClientListening());
-  EXPECT_FALSE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_FALSE(client_.Connect(TcpTransportAdapter::default_port));
   EXPECT_EQ(TransportAdapter::OK, transport_adapter_->StartClientListening());
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
   client_.Disconnect();
   EXPECT_EQ(TransportAdapter::BAD_STATE, transport_adapter_->StartClientListening());
-  EXPECT_TRUE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
   client_.Disconnect();
   EXPECT_EQ(TransportAdapter::OK, transport_adapter_->StopClientListening());
-  EXPECT_FALSE(client_.connect(TcpTransportAdapter::default_port));
+  EXPECT_FALSE(client_.Connect(TcpTransportAdapter::default_port));
   wakeUp();
 }
 

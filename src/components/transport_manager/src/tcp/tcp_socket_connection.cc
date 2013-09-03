@@ -101,7 +101,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
 
   if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
     LOG4CXX_ERROR(logger_,
-                  "Failed to connect for application" << application_handle());
+                  "Failed to Connect for application" << application_handle());
     *error = new ConnectError();
     return false;
   }

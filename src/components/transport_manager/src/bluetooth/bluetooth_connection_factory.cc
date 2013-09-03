@@ -45,7 +45,7 @@ BluetoothConnectionFactory::BluetoothConnectionFactory(
     : controller_(controller) {
 }
 
-TransportAdapter::Error BluetoothConnectionFactory::init() {
+TransportAdapter::Error BluetoothConnectionFactory::Init() {
   return TransportAdapter::OK;
 }
 
@@ -63,7 +63,7 @@ TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
   return error;
 }
 
-void BluetoothConnectionFactory::terminate() {
+void BluetoothConnectionFactory::Terminate() {
 }
 
 bool BluetoothConnectionFactory::IsInitialised() const {

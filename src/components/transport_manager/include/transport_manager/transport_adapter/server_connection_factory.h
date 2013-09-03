@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SERVER_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SERVER_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_SERVER_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_SERVER_CONNECTION_FACTORY_H_
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
@@ -50,7 +50,7 @@ class ServerConnectionFactory {
    *
    * @return Information about possible reason of error during initialization.
    */
-  virtual TransportAdapter::Error init() = 0;
+  virtual TransportAdapter::Error Init() = 0;
 
   /**
    * @brief
@@ -66,7 +66,7 @@ class ServerConnectionFactory {
   /**
    * @brief
    */
-  virtual void terminate() = 0;
+  virtual void Terminate() = 0;
 
   /**
    * @brief Check device scanner for initialization.

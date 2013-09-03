@@ -52,10 +52,10 @@ class MockTransportAdapter;
 class MockConnectionFactory : public ServerConnectionFactory {
  public:
   MockConnectionFactory(MockTransportAdapter *adapter);
-  TransportAdapter::Error init() { return TransportAdapter::OK; }
+  TransportAdapter::Error Init() { return TransportAdapter::OK; }
   TransportAdapter::Error CreateConnection(const ::transport_manager::DeviceUID& device_handle,
                                           const ApplicationHandle& app_handle);
-  void terminate() {}
+  void Terminate() {}
   bool IsInitialised() const { return true; }
 
  private:

@@ -1,6 +1,6 @@
 /**
  * \file common.h
- * \brief common definition.
+ * \brief Common definitions.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

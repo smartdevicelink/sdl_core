@@ -1,6 +1,6 @@
 /**
  * \file transport_manager.h
- * \brief Class transport_manager header.
+ * \brief Class transport_manager header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_DEVICE_SCANNER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_SCANNER_H_
 
 #include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
@@ -51,7 +51,7 @@ class DeviceScanner {
    *
    * @return Error information about reason of initialization failure.
    */
-  virtual TransportAdapter::Error init() = 0;
+  virtual TransportAdapter::Error Init() = 0;
 
   /**
    * @brief
@@ -63,7 +63,7 @@ class DeviceScanner {
   /**
    * @brief
    */
-  virtual void terminate() = 0;
+  virtual void Terminate() = 0;
 
   /**
    * @brief Check device scanner for initialization.

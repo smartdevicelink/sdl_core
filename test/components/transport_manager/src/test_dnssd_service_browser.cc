@@ -87,7 +87,7 @@ TEST(DnssdServiceBrowser, Basic) {
 
   DnssdServiceBrowser dnssd_service_browser(&controller);
   DeviceScanner& device_scanner = dnssd_service_browser;
-  device_scanner.init();
+  device_scanner.Init();
   while (!device_scanner.IsInitialised()) {
   }
   sleep(1);

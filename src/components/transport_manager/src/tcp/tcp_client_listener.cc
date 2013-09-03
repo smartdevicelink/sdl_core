@@ -72,11 +72,11 @@ void* tcpClientListenerThread(void* data) {
   return 0;
 }
 
-TransportAdapter::Error TcpClientListener::init() {
+TransportAdapter::Error TcpClientListener::Init() {
   return TransportAdapter::OK;
 }
 
-void TcpClientListener::terminate() {
+void TcpClientListener::Terminate() {
   shutdown_requested_ = true;
   StopListening();
 }

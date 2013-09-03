@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/usb/libusb_handler.h"
@@ -49,7 +49,7 @@ class UsbAoaAdapter : public TransportAdapterImpl {
  protected:
   virtual DeviceType GetDeviceType() const;
   virtual bool IsInitialised() const;
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
  private:
   bool is_initialised_;
   LibusbHandlerSptr libusb_handler_;

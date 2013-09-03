@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/alert_maneuver_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -66,6 +67,8 @@ void AlertManeuverRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+
+  MessageHelper::VerifySoftButtons((*message_)[strings::msg_params], app);
 
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);

@@ -44,7 +44,7 @@ TcpConnectionFactory::TcpConnectionFactory(TransportAdapterController* controlle
     : controller_(controller) {
 }
 
-TransportAdapter::Error TcpConnectionFactory::init() {
+TransportAdapter::Error TcpConnectionFactory::Init() {
   return TransportAdapter::OK;
 }
 
@@ -59,7 +59,7 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
   return error;
 }
 
-void TcpConnectionFactory::terminate() {
+void TcpConnectionFactory::Terminate() {
 }
 
 bool TcpConnectionFactory::IsInitialised() const {

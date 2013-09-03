@@ -60,12 +60,12 @@ bool UsbAoaAdapter::IsInitialised() const {
   return is_initialised_ && TransportAdapterImpl::IsInitialised();
 }
 
-TransportAdapter::Error UsbAoaAdapter::init() {
+TransportAdapter::Error UsbAoaAdapter::Init() {
   TransportAdapter::Error error = libusb_handler_->Init();
   if (error != TransportAdapter::OK) {
     return error;
   }
-  error = TransportAdapterImpl::init();
+  error = TransportAdapterImpl::Init();
   if (error != TransportAdapter::OK) {
     return error;
   }

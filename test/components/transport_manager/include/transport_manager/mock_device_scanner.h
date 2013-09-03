@@ -57,9 +57,9 @@ class MockDeviceScanner : public DeviceScanner {
   void fail_further_search() { is_search_failed_ = true; }
 
  protected:
-  TransportAdapter::Error init();
+  TransportAdapter::Error Init();
   TransportAdapter::Error Scan();
-  void terminate();
+  void Terminate();
   bool IsInitialised() const;
 
  private:

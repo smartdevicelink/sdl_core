@@ -271,7 +271,7 @@ void UsbDeviceScanner::GoogleAccessoryFound(
   libusb_close(device_handle);
 }
 
-TransportAdapter::Error UsbDeviceScanner::init() {
+TransportAdapter::Error UsbDeviceScanner::Init() {
   return TransportAdapter::OK;
 }
 
@@ -295,7 +295,7 @@ TransportAdapter::Error UsbDeviceScanner::Scan() {
   return TransportAdapter::OK;
 }
 
-void UsbDeviceScanner::terminate() {
+void UsbDeviceScanner::Terminate() {
 }
 
 bool UsbDeviceScanner::IsInitialised() const {

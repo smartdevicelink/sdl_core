@@ -155,8 +155,8 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
       LOG4CXX_ERROR(logger_, "Connect application failed E_CONNECTION_EXISTS")
       return E_CONNECTION_EXISTS;
     } else {
-      LOG4CXX_ERROR(logger_, "attempt to connect device")
-      if (transport_adapter::TransportAdapter::OK != da->connect(device_id, *it)) {
+      LOG4CXX_ERROR(logger_, "attempt to Connect device")
+      if (transport_adapter::TransportAdapter::OK != da->Connect(device_id, *it)) {
         LOG4CXX_ERROR(logger_, "Connect application failed E_INTERNAL_ERROR")
         return E_INTERNAL_ERROR;
       }
@@ -339,7 +339,7 @@ int TransportManagerImpl::AddTransportAdapter(
   transport_adapter->AddListener(transport_adapter_listeners_[transport_adapter]);
 
   if (transport_adapter->IsInitialised()
-      || transport_adapter->init() == TransportAdapter::OK) {
+      || transport_adapter->Init() == TransportAdapter::OK) {
     transport_adapters_.push_back(transport_adapter);
   }
 
@@ -407,7 +407,7 @@ int TransportManagerImpl::SearchDevices(void) {
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::init(void) {
+int TransportManagerImpl::Init(void) {
   LOG4CXX_INFO(logger_, "Init is called")
   all_thread_active_ = true;
 
@@ -841,6 +841,7 @@ void TransportManagerImpl::EventListenerThread(void) {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT:
           LOG4CXX_INFO(logger_, "Event ON_UNEXPECTED_DISCONNECT")
           // Remove device from list
+          device_handle = converter_.UidToHandle(device_id, is_new);
           for (auto it = device_list_.begin();
                it != device_list_.end();
                ++it) {

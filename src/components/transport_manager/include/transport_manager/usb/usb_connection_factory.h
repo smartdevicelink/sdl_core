@@ -1,6 +1,6 @@
 /**
  * \file usb_connection_factory.h
- * \brief
+ * \brief UsbConnectionFactory class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONNECTION_FACTORY_H_
 
 #include "transport_manager/transport_adapter/server_connection_factory.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -46,10 +46,10 @@ class UsbConnectionFactory : public ServerConnectionFactory {
  public:
   UsbConnectionFactory(TransportAdapterController* controller);
  protected:
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
   virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
                                                 const ApplicationHandle& app_handle);
-  virtual void terminate();
+  virtual void Terminate();
   virtual bool IsInitialised() const;
   virtual ~UsbConnectionFactory();
  private:

@@ -333,7 +333,7 @@ bool BluetoothDeviceScanner::WaitForDeviceScanRequest() {
   return deviceScanRequested;
 }
 
-TransportAdapter::Error BluetoothDeviceScanner::init() {
+TransportAdapter::Error BluetoothDeviceScanner::Init() {
   LOG4CXX_TRACE_ENTER(logger_)
   const int thread_start_error = pthread_create(&thread_, 0,
                                                 &bluetoothDeviceScannerThread,
@@ -353,7 +353,7 @@ TransportAdapter::Error BluetoothDeviceScanner::init() {
   return TransportAdapter::OK;
 }
 
-void BluetoothDeviceScanner::terminate() {
+void BluetoothDeviceScanner::Terminate() {
   LOG4CXX_TRACE_ENTER(logger_)
   shutdown_requested_ = true;
 

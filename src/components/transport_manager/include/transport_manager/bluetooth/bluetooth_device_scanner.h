@@ -77,12 +77,12 @@ class BluetoothDeviceScanner : public DeviceScanner {
    *
    * @return Error information about reason of initialization failure.
    */
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
 
   /**
    * @brief
    */
-  virtual void terminate();
+  virtual void Terminate();
 
   /**
    * @brief

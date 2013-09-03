@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER_H_
 
 #include <list>
 
@@ -66,9 +66,9 @@ class UsbDeviceScanner : public DeviceScanner, public LibusbListener {
   UsbDeviceScanner(class TransportAdapterController* controller);
   virtual ~UsbDeviceScanner();
  protected:
-  virtual TransportAdapter::Error init();
+  virtual TransportAdapter::Error Init();
   virtual TransportAdapter::Error Scan();
-  virtual void terminate();
+  virtual void Terminate();
   virtual bool IsInitialised() const;
   virtual void OnDeviceArrived(libusb_device* device);
   virtual void OnDeviceLeft(libusb_device* device);
