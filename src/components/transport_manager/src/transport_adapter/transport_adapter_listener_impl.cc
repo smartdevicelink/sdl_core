@@ -199,7 +199,7 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
 
   DataReceiveError *err = new DataReceiveError(error);
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
+      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
       *it, device, app_id, RawMessageSptr(),
       err);
 
