@@ -1,3 +1,5 @@
+LINK_DIRECTORIES(../thirdPartyLibs/libusbx)
+
 set(LIBRARIES
   ApplicationManager
   HMI_API
@@ -23,7 +25,7 @@ set(LIBRARIES
   MobileMessageHandler
   RequestWatchdog
   AudioManager
-#  usb-1.0
+  usb-1.0
 )
 
 # required to find 'glibconfig.h'
