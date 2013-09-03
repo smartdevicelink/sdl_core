@@ -24,11 +24,11 @@ set (SOURCES
 	./src/bluetooth/bluetooth_device.cc
 	./src/tcp/dnssd_service_browser.cc
 	./src/tcp/tcp_connection_factory.cc
-	./src/usb/libusb_handler.cc
-	./src/usb/usb_aoa_adapter.cc
-	./src/usb/usb_connection_factory.cc
-	./src/usb/usb_connection.cc
-	./src/usb/usb_device_scanner.cc
+	#	./src/usb/libusb_handler.cc
+	#./src/usb/usb_aoa_adapter.cc
+	#./src/usb/usb_connection_factory.cc
+	#./src/usb/usb_connection.cc
+	#./src/usb/usb_device_scanner.cc
 )
 
 add_library("TransportManager" ${SOURCES})
