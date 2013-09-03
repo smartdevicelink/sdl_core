@@ -48,7 +48,6 @@ enum MessageType {
   kResponse = 1,
   kNotification = 2,
   kErrorResponse = 3
-
 };
 
 enum ProtocolVersion {
@@ -63,7 +62,7 @@ class Message {
   Message();
   Message(const Message& message);
   Message& operator=(const Message& message);
-  bool operator== (const Message& message);
+  bool operator==(const Message& message);
   ~Message();
 
   //! --------------------------------------------------------------------------

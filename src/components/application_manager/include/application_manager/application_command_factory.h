@@ -38,8 +38,8 @@
 namespace application_manager {
 
 class ApplicationCommandFactory : public MobileCommandFactory {
-  public:
-    static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
+ public:
+  static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
 };
 
 }  //  namespace application_manager

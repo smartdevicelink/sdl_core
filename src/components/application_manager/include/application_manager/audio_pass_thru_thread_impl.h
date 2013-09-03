@@ -47,27 +47,24 @@ class SmartObject;
 
 namespace application_manager {
 
-typedef enum
-{
-  SR_INVALID  = -1,
-  SR_8KHZ     = 0,
-  SR_16KHZ    = 1,
-  SR_22KHZ    = 2,
-  SR_44KHZ    = 3
-}SamplingRate;
+typedef enum {
+  SR_INVALID = -1,
+  SR_8KHZ = 0,
+  SR_16KHZ = 1,
+  SR_22KHZ = 2,
+  SR_44KHZ = 3
+} SamplingRate;
 
-typedef enum
-{
+typedef enum {
   ACQ_INVALID = -1,
-  ACQ_8_BIT   = 0,
-  ACQ_16_BIT  = 1
-}AudioCaptureQuality;
+  ACQ_8_BIT = 0,
+  ACQ_16_BIT = 1
+} AudioCaptureQuality;
 
-typedef enum
-{
+typedef enum {
   AT_INVALID = -1,
-  AT_PCM     = 0
-}AudioType;
+  AT_PCM = 0
+} AudioType;
 
 /*
  * @brief AudioPassThruThreadImpl class used to read binary data written from microphone
@@ -85,11 +82,12 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
    * @param bits_per_sample The quality the audio is recorded.
    * @param audio_type      Type of audio data
    */
-  AudioPassThruThreadImpl(
-      const std::string fileName,
-      unsigned int session_key, unsigned int correlation_id,
-      unsigned int max_duration, const SamplingRate& sampling_rate,
-      const AudioCaptureQuality& bits_per_sample, const AudioType& audio_type);
+  AudioPassThruThreadImpl(const std::string fileName, unsigned int session_key,
+                          unsigned int correlation_id,
+                          unsigned int max_duration,
+                          const SamplingRate& sampling_rate,
+                          const AudioCaptureQuality& bits_per_sample,
+                          const AudioType& audio_type);
 
   /*
    * @brief AudioPassThruThreadImpl class destructor
@@ -156,7 +154,6 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
    */
   bool SendEndAudioPassThru();
 
-
   void sendAudioChunkToMobile();
 
   /*
@@ -168,21 +165,21 @@ class AudioPassThruThreadImpl : public threads::ThreadDelegate {
       NsSmartDeviceLink::NsSmartObjects::SmartObject* cmd);
 
   sync_primitives::SynchronisationPrimitives synchronisation_;
-  sync_primitives::Timer*     timer_;
+  sync_primitives::Timer* timer_;
 
-  unsigned int                session_key_;
-  unsigned int                correlation_id_;
-  unsigned int                max_duration_;
-  SamplingRate                sampling_rate_;
-  AudioCaptureQuality         bits_per_sample_;
-  AudioType                   audio_type_;
-  const std::string           fileName_;
-  int                         offset_;
-  bool                        shouldBeStoped_;
+  unsigned int session_key_;
+  unsigned int correlation_id_;
+  unsigned int max_duration_;
+  SamplingRate sampling_rate_;
+  AudioCaptureQuality bits_per_sample_;
+  AudioType audio_type_;
+  const std::string fileName_;
+  int offset_;
+  bool shouldBeStoped_;
   sync_primitives::SynchronisationPrimitives stopFlagMutex_;
 
-  static const int            kAudioPassThruTimeout;
-  static log4cxx::LoggerPtr   logger_;
+  static const int kAudioPassThruTimeout;
+  static log4cxx::LoggerPtr logger_;
 
   DISALLOW_COPY_AND_ASSIGN(AudioPassThruThreadImpl);
 };
