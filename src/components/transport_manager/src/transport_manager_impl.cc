@@ -841,6 +841,7 @@ void TransportManagerImpl::EventListenerThread(void) {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT:
           LOG4CXX_INFO(logger_, "Event ON_UNEXPECTED_DISCONNECT")
           // Remove device from list
+          device_handle = converter_.UidToHandle(device_id, is_new);
           for (auto it = device_list_.begin();
                it != device_list_.end();
                ++it) {
