@@ -62,8 +62,6 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  MessageHelper::VerifySoftButtons((*message_)[strings::msg_params], app);
-
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 

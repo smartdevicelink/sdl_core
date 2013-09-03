@@ -1024,55 +1024,15 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
       for (std::set<std::string>::const_iterator key = keys.begin();
            key != keys.end(); key++) {
-        if (strings::soft_buttons != (*key)) {
-          mobile_apis::Result::eType res = VerifyImageFiles(message[*key], app);
-          if (mobile_apis::Result::SUCCESS != res) {
-            return res;
-          }
+        mobile_apis::Result::eType res = VerifyImageFiles(message[*key], app);
+        if (mobile_apis::Result::SUCCESS != res) {
+          return res;
         }
       }
     }
   } // all other types shoudn't be processed
 
   return mobile_apis::Result::SUCCESS;
-}
-
-void MessageHelper::VerifySoftButtons(smart_objects::SmartObject& message,
-                                      const Application* app) {
-  if (message.keyExists(strings::soft_buttons)) {
-    smart_objects::SmartObject softButtons =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (int i = 0; i < message[strings::soft_buttons].length(); i++) {
-      if (message[strings::soft_buttons][i].keyExists(strings::image)) {
-        const std::string& file_name =
-            message[strings::soft_buttons][i][strings::image][strings::value];
-
-        std::string relative_file_path = app->name();
-        relative_file_path += "/";
-        relative_file_path += file_name;
-
-        std::string full_file_path = file_system::FullPath(relative_file_path);
-
-        if (file_system::FileExists(full_file_path) &&
-            ApplicationManagerImpl::instance()->VerifyImageType(
-              static_cast<mobile_apis::ImageType::eType>(
-                  message[strings::soft_buttons][i][strings::image]
-                         [strings::image_type].asInt()))) {
-          message[strings::soft_buttons][i][strings::image][strings::value] =
-                      full_file_path;
-          softButtons[-1] = message[strings::soft_buttons][i];
-        }
-      } else {
-        softButtons[-1] = message[strings::soft_buttons][i];
-      }
-    }
-
-    message[strings::soft_buttons] = softButtons;
-
-    if (0 == message[strings::soft_buttons].length()) {
-      message.erase(strings::soft_buttons);
-    }
-  }
 }
 
 // TODO(AK): change printf to logger
