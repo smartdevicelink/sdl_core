@@ -81,6 +81,8 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
         }
     }
 
+
+
     public void onMobileNaviCheckBoxAction(View v) {
         changeMobileNaviCheckBoxState();
     }
@@ -103,6 +105,11 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
         box.setChecked(false);
     }
 
+    public void setMobileNaviStateOn(){
+        mobileNavSessionCheckBoxState.setStateOn();
+        CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
+    }
+
     @Override
     public void onStreamingStart() {
         videoCheckBoxState.setStateOn();
@@ -113,6 +120,7 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
     @Override
     public void videoFrameReady(byte[] videoFrame) {
         Log.d(logTag, "video frame received" + videoFrame.toString());
+
     }
 
     @Override

@@ -2845,8 +2845,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-								/*
-								 * the number of items to send is determined as max of turn items
+                                /*
+                                 * the number of items to send is determined as max of turn items
 								 * and icon items. only when the both fields are empty, we
 								 * don't send anything.
 								 */
@@ -3720,10 +3720,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onMobileNaviStarted() {
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-        fr.onMobileNaviCheckBoxAction(findViewById(R.id.mobileNavCheckBox));
+        fr.setMobileNaviStateOn();
     }
 
-    public void onMobileNaviError(){
+    public void onMobileNaviError() {
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
 
@@ -3733,38 +3733,63 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         _msgAdapter.logMessage("Should start mobile nav session", true);
         if (ProxyService.getInstance().getProxyInstance() != null) {
             if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
-                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null){
+                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null) {
                     ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession();
-                }else{
+                } else {
                     _msgAdapter.logMessage("Can't start mobile nav session. sync connection is null", true);
                     onMobileNaviError();
                 }
-            }else {
+            } else {
                 _msgAdapter.logMessage("Can't start mobile nav session. Proxy is not connected", true);
                 onMobileNaviError();
             }
-        }else{
+        } else {
             _msgAdapter.logMessage("Can't start mobile nav session. Proxy is null", true);
             onMobileNaviError();
         }
     }
 
-    public void stopMobileNavSession(){
+    public void stopMobileNavSession() {
         _msgAdapter.logMessage("Should stop mobile nav session", true);
         if (ProxyService.getInstance().getProxyInstance() != null) {
             if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
-                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null){
+                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null) {
                     ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
-                }else{
+                } else {
                     _msgAdapter.logMessage("Can't stop mobile nav session. sync connection is null", true);
                 }
-            }else {
+            } else {
                 _msgAdapter.logMessage("Can't stop mobile nav session. Proxy is not connected", true);
             }
-        }else{
+        } else {
             _msgAdapter.logMessage("Can't stop mobile nav session. Proxy is null", true);
         }
 
+    }
+
+    public void onVideButtonAction(View v){
+        byte[] data = new byte[100];
+        sendMobileNaviData(data);
+    }
+
+    public void sendMobileNaviData(byte[] data) {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
+                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null) {
+                    try {
+                        ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
+                    } catch (SyncException e) {
+                        _msgAdapter.logMessage("Can't send mobile navi frame." + e.getMessage(), true);
+                    }
+                } else {
+                    _msgAdapter.logMessage("Can't send mobile nav data. sync connection is null", true);
+                }
+            } else {
+                _msgAdapter.logMessage("Can't send mobile nav data. Proxy is not connected", true);
+            }
+        } else {
+            _msgAdapter.logMessage("Can't send mobile nav data. Proxy is null", true);
+        }
     }
 
     public void onVideoStreamingCheckBoxAction(View checkBox) {
