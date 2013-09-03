@@ -1254,7 +1254,25 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-	@Override
+
+    @Override
+    public void onMobileNaviStart() {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        String response = "Mobile Navi Started";
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+        else Log.i(TAG, "" + response);
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.onMobileNaviStarted();
+            }
+        });
+    }
+
+    @Override
 	public void onOnTBTClientState(OnTBTClientState notification) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);

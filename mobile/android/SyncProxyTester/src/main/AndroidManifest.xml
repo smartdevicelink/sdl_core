@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ford.syncV4.android"
     android:versionCode="1"
-    android:versionName="1.1 (CW34)" >
+    android:versionName="1.1 (CW34)">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <!-- Required to pair Bluetooth devices -->
@@ -11,29 +11,30 @@
     <!-- Required to check if WiFi is enabled -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Required to make the device stay awake while doing XML tests -->
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:debuggable="true"
         android:icon="@drawable/fiesta"
-        android:label="@string/tester_app_name" >
+        android:label="@string/tester_app_name">
         <activity
-            android:name=".activity.SyncProxyTester"
+            android:name="com.ford.syncV4.android.activity.SyncProxyTester"
             android:label="@string/tester_app_name"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.ford.syncV4.android.policies.PoliciesTesterActivity"
+            android:label="Locked"
+            android:screenOrientation="portrait" />
 
-        <activity android:label="Locked" android:screenOrientation="portrait" android:name="com.ford.syncV4.android.policies.PoliciesTesterActivity"></activity>
-        
-        <service android:name=".service.ProxyService" >
-        </service>
+        <service android:name="com.ford.syncV4.android.service.ProxyService"></service>
 
-        <receiver android:name=".receivers.SyncReceiver" >
+        <receiver android:name="com.ford.syncV4.android.receivers.SyncReceiver">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
@@ -43,23 +44,23 @@
         </receiver>
 
         <activity
-            android:name=".activity.SoftButtonsListActivity"
-            android:label="@string/title_activity_soft_buttons_list" android:theme="@android:style/Theme.Dialog">
-        </activity>
-
+            android:name="com.ford.syncV4.android.activity.SoftButtonsListActivity"
+            android:label="@string/title_activity_soft_buttons_list"
+            android:theme="@android:style/Theme.Dialog"></activity>
         <activity
-            android:name=".activity.SoftButtonEditActivity"
+            android:name="com.ford.syncV4.android.activity.SoftButtonEditActivity"
             android:label="@string/title_activity_soft_button_edit"
-            android:theme="@android:style/Theme.Dialog" >
-        </activity>
-        
-        <activity android:label="@string/app_name" android:name="com.lamerman.FileDialog">
-        </activity>
+            android:theme="@android:style/Theme.Dialog"></activity>
+        <activity
+            android:name="com.lamerman.FileDialog"
+            android:label="@string/app_name"></activity>
+
     </application>
 
-    <uses-sdk android:minSdkVersion="5" />
+    <uses-sdk
+        android:minSdkVersion="5"
+        android:targetSdkVersion="8" />
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
-    </uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 
 </manifest>

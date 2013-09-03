@@ -8,3 +8,7 @@ buildscript {
 }
 ext.compileSdkVersion = 8
 ext.buildToolsVersion = "18.0.1"
+
+repositories {
+    mavenCentral()
+}

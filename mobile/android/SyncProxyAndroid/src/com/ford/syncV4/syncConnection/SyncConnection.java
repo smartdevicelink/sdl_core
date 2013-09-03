@@ -75,8 +75,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
             } // end-if
         }
 
-        closeMobileNavSession(rpcSessionID);
-
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
                 _transport.disconnect();
@@ -133,7 +131,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
                 _protocol.StartProtocolSession(SessionType.RPC);
             }
         }
-        startMobileNavSession();
     }
 
     public void startMobileNavSession() {

@@ -293,4 +293,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	public void onShowConstantTBTResponse(ShowConstantTBTResponse response);
 	
 	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
+
+    public void onMobileNaviStart();
 }

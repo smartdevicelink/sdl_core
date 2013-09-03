@@ -656,6 +656,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         DebugTool.disableDebugTool();
     }
 
+    public SyncConnection getSyncConnection() {
+        return _syncConnection;
+    }
+
     public ProxyMessageDispatcher<ProtocolMessage> getIncomingProxyMessageDispatcher() {
         return _incomingProxyMessageDispatcher;
     }
@@ -2386,7 +2390,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void startMobileNavSession(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
         _mobileNavSessionID = sessionID;
-        // TODO yet to implement startMobileNavSession
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onMobileNaviStart();
+                }
+            });
+        } else {
+            _proxyListener.onMobileNaviStart();
+        }
+    }
+
+    public void stopMobileNaviSession(){
+        Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
+        getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
     }
 
     // Queue internal callback message
