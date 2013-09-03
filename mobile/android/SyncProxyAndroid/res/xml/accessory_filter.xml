@@ -2,7 +2,7 @@
 
 <resources>
     <usb-accessory
-            model="osciprime"
-            manufacturer="Nexus-Computing GmbH"
-            version="antilope"/>
+            model="HMI"
+            manufacturer="Ford"
+            version="1.0"/>
 </resources>

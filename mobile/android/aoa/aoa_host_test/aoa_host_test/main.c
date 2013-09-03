@@ -100,12 +100,12 @@ int main (int argc, char *argv[]){
         case 0: {
             //doTransfer();
             if(setupAccessory(
-                              "Nexus-Computing GmbH",
-                              "osciprime",
-                              "Description",
-                              "antilope",
-                              "http://android.serverbox.ch/?p=262",
-                              "2254711SerialNo.") < 0){
+                              "Ford",
+                              "HMI",
+                              "Human machine interface",
+                              "1.0",
+                              "http://www.ford.com",
+                              "N000000") < 0){
                 fprintf(stdout, "Error setting up accessory\n");
                 deInit();
                 return -1;

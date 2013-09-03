@@ -65,7 +65,7 @@ public class USBTransport extends SyncTransport {
      * Manufacturer name of the accessory we want to connect to. Must be the
      * same as in accessory_filter.xml to work properly.
      */
-    private final static String ACCESSORY_MANUFACTURER = "Nexus-Computing GmbH";
+    private final static String ACCESSORY_MANUFACTURER = "Ford";
     /**
      * Prefix string to indicate debug output.
      */
