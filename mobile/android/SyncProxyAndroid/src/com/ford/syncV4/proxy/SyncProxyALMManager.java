@@ -2585,5 +2585,10 @@ public class SyncProxyALMManager {
 		public void onUpdateTurnListResponse(UpdateTurnListResponse response) {
 			_lifecycleListener.onUpdateTurnListResponse(response);
 		}
-	}
+
+        @Override
+        public void onMobileNaviStart() {
+
+        }
+    }
 }

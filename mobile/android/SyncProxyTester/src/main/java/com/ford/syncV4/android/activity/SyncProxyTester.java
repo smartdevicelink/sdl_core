@@ -953,7 +953,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
 /*	public void startSyncProxyService() {
-    	// Get the local Bluetooth adapter
+        // Get the local Bluetooth adapter
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //BT Adapter exists, is enabled, and there are paired devices with the name SYNC
@@ -3714,6 +3714,56 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onMobileNaviCheckBoxAction(View v) {
+        MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+        fr.onMobileNaviCheckBoxAction(v);
+    }
+
+    public void onMobileNaviStarted() {
+        MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+        fr.onMobileNaviCheckBoxAction(findViewById(R.id.mobileNavCheckBox));
+    }
+
+    public void onMobileNaviError(){
+        MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+        fr.setMobileNaviStateOff();
+
+    }
+
+    public void startMobileNaviSession() {
+        _msgAdapter.logMessage("Should start mobile nav session", true);
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
+                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null){
+                    ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession();
+                }else{
+                    _msgAdapter.logMessage("Can't start mobile nav session. sync connection is null", true);
+                    onMobileNaviError();
+                }
+            }else {
+                _msgAdapter.logMessage("Can't start mobile nav session. Proxy is not connected", true);
+                onMobileNaviError();
+            }
+        }else{
+            _msgAdapter.logMessage("Can't start mobile nav session. Proxy is null", true);
+            onMobileNaviError();
+        }
+    }
+
+    public void stopMobileNavSession(){
+        _msgAdapter.logMessage("Should stop mobile nav session", true);
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
+                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null){
+                    ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
+                }else{
+                    _msgAdapter.logMessage("Can't stop mobile nav session. sync connection is null", true);
+                }
+            }else {
+                _msgAdapter.logMessage("Can't stop mobile nav session. Proxy is not connected", true);
+            }
+        }else{
+            _msgAdapter.logMessage("Can't stop mobile nav session. Proxy is null", true);
+        }
 
     }
 

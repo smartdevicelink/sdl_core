@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.SyncProxyTester;
 
 public class MobileNavPreviewFragment extends Fragment implements VideoDataListener {
 
@@ -44,7 +45,7 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initiateVideoCheckBox(getActivity(), view);
+        initiateVideoCheckBox(view);
     }
 
     @Override
@@ -57,14 +58,13 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
         }
     }
 
-    private void initiateVideoCheckBox(Activity context, View view) {
+    private void initiateVideoCheckBox(View view) {
         CheckBox box = (CheckBox) view.findViewById(R.id.videoStreamingCheckBox);
-        videoCheckBoxState = new VideoCheckBoxState(box, context);
+        videoCheckBoxState = new VideoCheckBoxState(box, getActivity());
         videoCheckBoxState.setStateOff();
-        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState((CheckBox)view.findViewById(R.id.mobileNavCheckBox), context);
-        mobileNavSessionCheckBoxState.setStateDisabled();
+        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState((CheckBox) view.findViewById(R.id.mobileNavCheckBox), getActivity());
+        mobileNavSessionCheckBoxState.setStateOff();
     }
-
 
     public void onVideoStreamingCheckBoxAction(View checkBox) {
         changeVideoCheckBoxState((CheckBox) checkBox);
@@ -86,6 +86,21 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
     }
 
     private void changeMobileNaviCheckBoxState() {
+        if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
+            mobileNavSessionCheckBoxState.setStateDisabled();
+            SyncProxyTester tester = (SyncProxyTester) getActivity();
+            tester.startMobileNaviSession();
+        } else if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
+            SyncProxyTester tester = (SyncProxyTester) getActivity();
+            tester.stopMobileNavSession();
+            mobileNavSessionCheckBoxState.setStateOff();
+        }
+    }
+
+    public void setMobileNaviStateOff(){
+        mobileNavSessionCheckBoxState.setStateOff();
+        CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
+        box.setChecked(false);
     }
 
     @Override
