@@ -204,7 +204,7 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
 
-  message[strings::msg_params][strings::connection_key] = connection_key;
+  message[strings::params][strings::connection_key] = connection_key;
 
   message[strings::msg_params][strings::reason] = reason;
 
