@@ -195,7 +195,19 @@ var StateManager = Em.StateManager.extend( {
 
     /** Navigation state */
     navigation: Em.State.create( {
+        enter: function() {
 
+            this._super();
+
+            SDL.SDLModel.playVideo();
+        },
+
+        exit: function() {
+
+            this._super();
+
+            SDL.SDLModel.pauseVideo();
+        }
     }),
 
     /** Phone state */

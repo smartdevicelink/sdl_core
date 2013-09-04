@@ -34,12 +34,17 @@ SDL.NavigationView = Em.ContainerView.create( {
     /** View Id */
     elementId: 'navigationView',
 
+    afterRender: function(){
+        //SDL.SDLController.startVideo();
+    },
+
     classNameBindings: [
         'SDL.States.navigation.active:active_state:inactive_state'
     ],
 
     childViews: [
-        'windowText'
+        'windowText',
+        'videoView'
     ],
 
     windowText: SDL.Label.extend( {
@@ -47,6 +52,11 @@ SDL.NavigationView = Em.ContainerView.create( {
         classNames: 'windowText',
 
         content: 'Navigation'
+    }),
+
+    videoView: Ember.View.extend({
+        templateName: "video",
+        template: Ember.Handlebars.compile('<video id="html5Player"></video>')
     })
 
 });

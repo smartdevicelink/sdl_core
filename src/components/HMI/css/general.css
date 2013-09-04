@@ -296,8 +296,6 @@ div {
 	z-index: 1;
 	width: 800px;
 	height: 480px;
-	-webkit-transform: translateX(-810px);
-	-moz-transform: translateX(-810px);
 }
 
 #html5Player.visible {
