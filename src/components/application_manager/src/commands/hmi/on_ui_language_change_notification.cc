@@ -74,6 +74,10 @@ void OnUILanguageChangeNotification::Run() {
 
     if (app->ui_language() != (*message_)[strings::msg_params]
         [strings::hmi_display_language].asInt()) {
+      MessageHelper::SendDeleteCommandRequestToHMI(app);
+      MessageHelper::SendRemoveVrCommandsOnUnregisterApp(app);
+
+      MessageHelper::SendOnAppUnregNotificationToHMI(app);
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
         app->app_id(),
         mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
