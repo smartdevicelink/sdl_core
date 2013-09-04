@@ -18,3 +18,6 @@ install_manifest.txt
 # ctags-generated
 tags
 
+# Qt
+*.pro.user
+*.qmlproject.user
