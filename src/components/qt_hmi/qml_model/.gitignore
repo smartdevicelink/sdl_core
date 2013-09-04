@@ -1,0 +1,8 @@
+*.o
+*.pri
+*.so
+.DS_Store
+*.user
+
+Makefile
+moc_*.cpp
