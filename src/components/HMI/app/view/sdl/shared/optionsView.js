@@ -99,7 +99,7 @@ SDL.OptionsView = SDL.SDLAbstractView.create({
 
             this.list.refresh();
 
-        }.observes('SDL.SDLAppController.model.currentCommandsList')
+        }.observes('SDL.SDLAppController.model.currentSubMenuId', 'SDL.SDLAppController.model.currentCommandsList.@each')
     }),
 
     activate: function(text) {
@@ -113,8 +113,8 @@ SDL.OptionsView = SDL.SDLAbstractView.create({
 
         if (SDL.SDLAppController.model) {
 
-            if (SDL.SDLAppController.model.get('currentSubMenuId') >= 0) {
-                SDL.SDLAppController.onSubMenu(-1);
+            if (SDL.SDLAppController.model.get('currentSubMenuId') > 0) {
+                SDL.SDLAppController.onSubMenu(0);
             }else{
                 this._super();
                 SDL.SDLController.onSystemContextChange();

@@ -375,8 +375,7 @@ div {
 
 .right_text {
 	float: right;
-	margin-right: 10px;
-	font-style: italic;
+	margin-right: 5px;
 }
 
 .hidden_display {
@@ -674,7 +673,7 @@ div {
 	height: 49px;
 	cursor: pointer;
 	top: 60px;
-	left: 347px;
+	left: 347px;            ]
 	border: 1px solid #393939;
 	-webkit-border-radius: 3px;
 }
@@ -766,7 +765,7 @@ div {
     height: 49px;
 }
 .list-item span{
-    position: absolute
+    /*position: absolute*/
 }
 
 /* List item background */

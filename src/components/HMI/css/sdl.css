@@ -18,15 +18,16 @@
 	height: 49px;
 	border-bottom: 1px solid #393939;
 	line-height: 50px;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: flex;
 }
 
 .ffw_list_menu .ffw-button span {
-	margin-left: 20px;
-	height: 50px;
-	width: 120px;
-	position: absolute;
-	overflow: hidden;
-	text-overflow: ellipsis;
+    height: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
 }
 
 .ffw_list_menu .content {
@@ -52,13 +53,14 @@
 }
 
 .softButton .ico{
-	width: 50px;
-	height: auto;
-	float: left;
+    width: 50px;
+    height: 49px;
+    -webkit-flex: 0 0 50px;
+    float: left;
 }
 
-.softButton .rightTextButton{
-	left: 0;
+.softButton .right_text{
+    padding-left: 5px !important;
 }
 
 .sdl-window .back-button {
@@ -162,12 +164,6 @@
 /*#sdl_view_container .list-content,*/
 #sdl_options .list-content {
 	width: 590px;
-}
-
-.rightTextButton {
-	margin-left: 0px !important;
-	left: 50px;
-	position: absolute;
 }
 
 #VRPopUp.move{
@@ -820,14 +816,13 @@
 	font-size: 20px;
 }
 
-#TurnByTurnView .turnList .arrow-ico {
-	margin-top: -13px;
+
+#TurnByTurnView .ffw-button .text {
+    margin: auto;
 }
 
-#TurnByTurnView .ffw-button span {
-	margin: 0;
-	width: 0;
-	position: relative;
+#TurnByTurnView .turnList .arrow-ico {
+	margin-top: -13px;
 }
 
 #turnList img {
