@@ -73,32 +73,27 @@ void UnsubscribeVehicleDataRequest::Run() {
   namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
   NsSmart::SmartObject response_params;
 
-  bool is_param_with_false_value_exist = false;
-
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first)) {
-      if (true == (*message_)[str::msg_params][it->first].asBool()) {
-        ++items_to_unsubscribe;
-        response_params[it->first][strings::data_type] = it->second;
+    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
+        true == (*message_)[str::msg_params][it->first].asBool()) {
+      ++items_to_unsubscribe;
+      response_params[it->first][strings::data_type] = it->second;
 
-        if (app->UnsubscribeFromIVI(static_cast<unsigned int>(it->second))) {
-          ++unsubscribed_items;
-          response_params[it->first][strings::result_code] =
-            mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
-        } else {
-          response_params[it->first][strings::result_code] =
-            mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
-        }
+      if (app->UnsubscribeFromIVI(static_cast<unsigned int>(it->second))) {
+        ++unsubscribed_items;
+        response_params[it->first][strings::result_code] =
+          mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
       } else {
-        is_param_with_false_value_exist = true;
+        response_params[it->first][strings::result_code] =
+          mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
       }
     }
   }
 
-  if (0 == items_to_unsubscribe && !is_param_with_false_value_exist) {
+  if (0 == items_to_unsubscribe) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
                  "Provided VehicleData is empty", &response_params);
   } else if (unsubscribed_items == items_to_unsubscribe) {
