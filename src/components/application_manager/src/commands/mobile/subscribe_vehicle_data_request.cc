@@ -68,7 +68,6 @@ void SubscribeVehicleDataRequest::Run() {
   // counter for subscribed items by application
   int subscribed_items = 0;
 
-  //
   bool is_param_with_false_value_exist = false;
 
   // response params
