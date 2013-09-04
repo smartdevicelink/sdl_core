@@ -58,6 +58,13 @@ void AlertRequest::Run() {
     (*message_)[strings::params][strings::connection_key].asInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
+  if (ApplicationManagerImpl::instance()->vr_session_started())
+  {
+    LOG4CXX_ERROR_EXT(logger_, "VR session is in progress. Reject alert");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
+  }
+
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
