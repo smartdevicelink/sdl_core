@@ -221,8 +221,12 @@ SDL.SDLAppModel = Em.Object
          */
         deleteCommand: function(commandID) {
 
-            this.get('commandsList').removeObjects(this.get('commandsList')
-                .filterProperty('commandID', commandID));
+            for (var i in this.commandsList) {
+                if (this.commandsList[i].filterProperty('commandID', commandID)) {
+                    this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i)
+                        .filterProperty('commandID', commandID));
+                }
+            }
         },
 
         /**
@@ -246,7 +250,7 @@ SDL.SDLAppModel = Em.Object
                     menuID: request.params.menuID,
                     name: request.params.menuParams.menuName ? request.params.menuParams.menuName
                         : '',
-                    parent: -1,
+                    parent: 0,
                     position: request.params.menuParams.position
                         ? request.params.menuParams.position : 0
                 };
@@ -274,13 +278,11 @@ SDL.SDLAppModel = Em.Object
          */
         deleteSubMenu: function(menuID) {
 
-            // remove submenu
-            this.get('commandsList').removeObjects(this.get('commandsList')
-                .filterProperty('menuID', menuID));
-
-            // remove commands from deleted submenu
-            this.get('commandsList').removeObjects(this.get('commandsList')
-                .filterProperty('parent', menuID));
+            if (this.commandsList[0].filterProperty('commandID', menuID)) {
+                this.get('commandsList.0').removeObjects(this.get('commandsList.0')
+                    .filterProperty('menuID', menuID));
+                delete(this.commandsList[menuID]);
+            }
 
             return SDL.SDLModel.resultCode['SUCCESS'];
         },
