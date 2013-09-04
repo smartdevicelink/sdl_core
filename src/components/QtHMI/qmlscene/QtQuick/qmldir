@@ -1,3 +1,0 @@
-module QtQuick
-plugin qtquick2plugin
-typeinfo plugins.qmltypes
