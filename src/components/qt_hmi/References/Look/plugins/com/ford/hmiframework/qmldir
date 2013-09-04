@@ -1,5 +1,4 @@
 module com.ford.hmiframework
-plugin QtHMIFramework
 typeinfo plugin.qmltypes
 FActScriptCall 1.0 qml/Framework/FActScriptCall.qml
 FActSystemModelCall 1.0 qml/Framework/FActSystemModelCall.qml
@@ -7,6 +6,7 @@ FActTimer 1.0 qml/Framework/FActTimer.qml
 FActWidgetCall 1.0 qml/Framework/FActWidgetCall.qml
 FActWidgetProperty 1.0 qml/Framework/FActWidgetProperty.qml
 FConditionPool 1.0 qml/Framework/FConditionPool.qml
+FMetaInfoItem 1.0 qml/Framework/FMetaInfoItem.qml
 FDataPool 1.0 qml/Framework/FDataPool.qml
 FEventPool 1.0 qml/Framework/FEventPool.qml
 FGaugeValue 1.0 qml/Framework/FGaugeValue.qml
@@ -14,6 +14,8 @@ FStringFormat 1.0 qml/Framework/FStringFormat.qml
 FStyle 1.0 qml/Framework/FStyle.qml
 FStyler 1.0 qml/Framework/FStyler.qml
 FTimer 1.0 qml/Framework/FTimer.qml
+FEvent 1.0 qml/Framework/FEvent.qml
+FDisplay 1.0 qml/Framework/FDisplay.qml
 FTrgTimer 1.0 qml/Framework/FTrgTimer.qml
 FViewUseCase 1.0 qml/Framework/FViewUseCase.qml
 FViewUseCaseGroup 1.0 qml/Framework/FViewUseCaseGroup.qml
