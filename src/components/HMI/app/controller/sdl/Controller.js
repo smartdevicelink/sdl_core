@@ -64,6 +64,7 @@ SDL.SDLController = Em.Object
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
             'SDL.VRHelpListView.active'),
+
         /**
          * List of SDL application models
          * 
@@ -73,6 +74,7 @@ SDL.SDLController = Em.Object
             0: SDL.SDLMediaModel,
             1: SDL.SDLNonMediaModel
         },
+
         /**
          * Registered components handler
          * 
@@ -86,6 +88,18 @@ SDL.SDLController = Em.Object
                         true);
                     return;
                 }
+            }
+        },
+
+        /**
+         * Method starts on navigation init
+         * creates video object and set video stream to source
+         */
+        startVideo: function(){
+            if (SDL.SDLModel.naviVideo === null) {
+                console.log(document.getElementById("html5Player"));
+                SDL.SDLModel.naviVideo = document.getElementById("html5Player");
+                SDL.SDLModel.naviVideo.src = "http://content.bitsontherun.com/videos/nfSyO85Q-27m5HpIu.webm";
             }
         },
 
@@ -242,8 +256,7 @@ SDL.SDLController = Em.Object
          */
         tbtClientStateSelected: function(state) {
 
-            FFW.Navigation.onTBTClientState(state,
-                SDL.SDLAppController.model.appID);
+            FFW.Navigation.onTBTClientState(state);
         },
         /**
          * Method to sent notification with selected reason of Exit Application

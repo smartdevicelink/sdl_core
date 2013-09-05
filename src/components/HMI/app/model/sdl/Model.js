@@ -35,8 +35,15 @@ SDL.SDLModel = Em.Object
     .create( {
 
         /**
+         * Video player object for navigation
+         *
+         * @param {Object}
+         */
+        naviVideo: null,
+
+        /**
          * Flag to indicate AudioPassThruPopUp activity
-         * 
+         *
          * @param {Boolean}
          */
         AudioPassThruState: false,
@@ -322,6 +329,28 @@ SDL.SDLModel = Em.Object
             SDL.States.goToStates('phone.dialpad');
             SDL.PhoneModel.set('dialpadNumber', params.number);
             SDL.PhoneController.onDialCall();
+        },
+
+        /**
+         * Video player trigger to start playing video
+         */
+        playVideo: function(){
+            if (SDL.SDLModel.naviVideo === null) {
+                console.log(document.getElementById("html5Player"));
+                SDL.SDLModel.naviVideo = document.getElementById("html5Player");
+                SDL.SDLModel.naviVideo.src = "http://content.bitsontherun.com/videos/nfSyO85Q-27m5HpIu.webm";
+            }
+            SDL.SDLModel.naviVideo.play();
+        },
+
+        /**
+         * Video player trigger to stop playing video
+         */
+        pauseVideo: function(){
+            if (SDL.SDLModel.naviVideo != null) {
+
+                SDL.SDLModel.naviVideo.pause();
+            }
         },
 
         /**
