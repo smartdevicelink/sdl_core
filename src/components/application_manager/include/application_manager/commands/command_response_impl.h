@@ -47,15 +47,18 @@ namespace application_manager {
 namespace commands {
 
 class CommandResponseImpl : public CommandImpl {
-  public:
-    explicit CommandResponseImpl(const MessageSharedPtr& message);
-    virtual ~CommandResponseImpl();
-    virtual bool Init();
-    virtual bool CleanUp();
-    virtual void Run();
-    void SendResponse(bool successe, const mobile_apis::Result::eType& result_code =
-    				  mobile_apis::Result::INVALID_ENUM);
-    bool IsPendingResponseExist();
+ public:
+  explicit CommandResponseImpl(const MessageSharedPtr& message);
+  virtual ~CommandResponseImpl();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void SendResponse(bool successe,
+                    const mobile_apis::Result::eType& result_code =
+                        mobile_apis::Result::INVALID_ENUM);
+  bool IsPendingResponseExist();
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CommandResponseImpl);
 };
 
 }  // namespace commands

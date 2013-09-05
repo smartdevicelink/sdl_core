@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 VRDeleteCommandResponse::VRDeleteCommandResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VRDeleteCommandResponse::~VRDeleteCommandResponse() {
@@ -50,10 +51,10 @@ void VRDeleteCommandResponse::Run() {
   LOG4CXX_INFO(logger_, "VRDeleteCommandResponse::Run");
 
   const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -61,14 +62,14 @@ void VRDeleteCommandResponse::Run() {
   }
 
   const hmi_apis::Common_Result::eType code =
-    static_cast<hmi_apis::Common_Result::eType>(
-    (*message_)[strings::params][hmi_response::code].asInt());
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
   msg_chain->set_vr_response_result(code);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::DeleteCommandID;
+      mobile_apis::FunctionID::DeleteCommandID;
 
   SendResponseToMobile(message_);
 }

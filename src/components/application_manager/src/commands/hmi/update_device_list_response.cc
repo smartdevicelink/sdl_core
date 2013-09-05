@@ -36,7 +36,8 @@ namespace application_manager {
 namespace commands {
 
 UpdateDeviceListResponse::UpdateDeviceListResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UpdateDeviceListResponse::~UpdateDeviceListResponse() {

@@ -52,27 +52,27 @@ namespace commands {
  * @brief Base command class
  **/
 class Command {
-  public:
-    /**
-     * @brief Command initialization function
-     **/
-    virtual bool Init() = 0;
+ public:
+  /**
+   * @brief Command initialization function
+   **/
+  virtual bool Init() = 0;
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run() = 0;
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run() = 0;
 
-    /**
-     * @brief Free resources
-     **/
-    virtual bool CleanUp() = 0;
+  /**
+   * @brief Free resources
+   **/
+  virtual bool CleanUp() = 0;
 
-    /**
-     * \brief Command class destructor
-     **/
-    virtual ~Command() {
-    }
+  /**
+   * \brief Command class destructor
+   **/
+  virtual ~Command() {
+  }
 };
 
 }  // namespace commands

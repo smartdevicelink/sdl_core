@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-AllowAllAppsResponse::AllowAllAppsResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+AllowAllAppsResponse::AllowAllAppsResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 AllowAllAppsResponse::~AllowAllAppsResponse() {

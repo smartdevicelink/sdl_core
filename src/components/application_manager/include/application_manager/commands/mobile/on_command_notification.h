@@ -48,27 +48,25 @@ namespace commands {
  * to mobile device.
  **/
 class OnCommandNotification : public CommandNotificationImpl {
-  public:
-    /**
-     * @brief OnCommandNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnCommandNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnCommandNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnCommandNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnCommandNotification class destructor
-     **/
-    virtual ~OnCommandNotification();
+  /**
+   * @brief OnCommandNotification class destructor
+   **/
+  virtual ~OnCommandNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-
-    DISALLOW_COPY_AND_ASSIGN(OnCommandNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnCommandNotification);
 };
 
 }  // namespace commands

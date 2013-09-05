@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 OnUILanguageChangeNotification::OnUILanguageChangeNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {
@@ -50,24 +51,23 @@ void OnUILanguageChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnUILanguageChangeNotification::Run");
 
   ApplicationManagerImpl::instance()->set_active_ui_language(
-    static_cast<hmi_apis::Common_Language::eType>(
-      (*message_)[strings::msg_params][strings::language].asInt()));
+      static_cast<hmi_apis::Common_Language::eType>(
+          (*message_)[strings::msg_params][strings::language].asInt()));
 
   (*message_)[strings::msg_params][strings::hmi_display_language] =
-    (*message_)[strings::msg_params][strings::language];
+      (*message_)[strings::msg_params][strings::language];
 
   (*message_)[strings::msg_params][strings::language] =
-    ApplicationManagerImpl::instance()->active_vr_language();
+      ApplicationManagerImpl::instance()->active_vr_language();
 
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::OnLanguageChangeID;
+      mobile_apis::FunctionID::OnLanguageChangeID;
 
   const std::set<Application*>& applications =
-    ApplicationManagerImpl::instance()->applications();
+      ApplicationManagerImpl::instance()->applications();
 
   std::set<Application*>::iterator it = applications.begin();
   for (; applications.end() != it; ++it) {
-
     Application* app = *it;
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
@@ -79,8 +79,8 @@ void OnUILanguageChangeNotification::Run() {
 
       MessageHelper::SendOnAppUnregNotificationToHMI(app);
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-        app->app_id(),
-        mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
+          app->app_id(),
+          mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
     }
   }
 }

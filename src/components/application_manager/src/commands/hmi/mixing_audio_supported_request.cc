@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 MixingAudioSupportedRequest::MixingAudioSupportedRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message) : RequestToHMI(message) {
 }
 
 MixingAudioSupportedRequest::~MixingAudioSupportedRequest() {

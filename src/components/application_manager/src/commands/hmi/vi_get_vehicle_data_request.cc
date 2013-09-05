@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 VIGetVehicleDataRequest::VIGetVehicleDataRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 VIGetVehicleDataRequest::~VIGetVehicleDataRequest() {

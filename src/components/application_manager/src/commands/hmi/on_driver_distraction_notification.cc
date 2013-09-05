@@ -44,7 +44,8 @@ namespace commands {
 namespace hmi {
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnDriverDistractionNotification::~OnDriverDistractionNotification() {
@@ -53,16 +54,17 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
 
-  const std::set<Application*>& app_list =
-    ApplicationManagerImpl::instance()->applications();
+  const std::set<Application*>& app_list = ApplicationManagerImpl::instance()
+      ->applications();
 
   const hmi_apis::Common_DriverDistractionState::eType state =
-    static_cast<hmi_apis::Common_DriverDistractionState::eType>(
-      (*message_)[strings::msg_params][hmi_notification::state].asInt());
+      static_cast<hmi_apis::Common_DriverDistractionState::eType>(
+          (*message_)[strings::msg_params][hmi_notification::state]
+          .asInt());
   ApplicationManagerImpl::instance()->set_driver_distraction(state);
 
   smart_objects::SmartObject* on_driver_distraction =
-    new smart_objects::SmartObject();
+      new smart_objects::SmartObject();
 
   if (NULL == on_driver_distraction) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");

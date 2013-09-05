@@ -39,7 +39,8 @@ namespace application_manager {
 namespace commands {
 
 VRGetSupportedLanguagesResponse::VRGetSupportedLanguagesResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {
@@ -49,8 +50,8 @@ void VRGetSupportedLanguagesResponse::Run() {
   LOG4CXX_INFO(logger_, "VRGetSupportedLanguagesResponse::Run");
 
   const hmi_apis::Common_Result::eType code =
-    static_cast<hmi_apis::Common_Result::eType>(
-      (*message_)[strings::params][hmi_response::code].asInt());
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
   if (hmi_apis::Common_Result::SUCCESS == code) {
     ApplicationManagerImpl::instance()->set_vr_supported_languages(

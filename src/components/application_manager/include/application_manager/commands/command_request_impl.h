@@ -84,9 +84,9 @@ class CommandRequestImpl : public CommandImpl {
    *
    */
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                   const NsSmart::SmartObject& msg_params,
-                   bool require_chaining = false,
-                   unsigned int chaining_counter = 0);
+                        const NsSmart::SmartObject& msg_params,
+                        bool require_chaining = false,
+                        unsigned int chaining_counter = 0);
 
   /*
    * @brief Creates HMI request
@@ -95,10 +95,13 @@ class CommandRequestImpl : public CommandImpl {
    * @param msg_params HMI request msg params
    */
   void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
-                   const NsSmart::SmartObject& msg_params) const;
+                             const NsSmart::SmartObject& msg_params) const;
 
  protected:
-  MessageChaining*  msg_chaining_;
+  MessageChaining* msg_chaining_;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 };
 
 }  // namespace commands

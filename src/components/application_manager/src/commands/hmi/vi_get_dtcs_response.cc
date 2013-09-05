@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-VIGetDTCsResponse::VIGetDTCsResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+VIGetDTCsResponse::VIGetDTCsResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VIGetDTCsResponse::~VIGetDTCsResponse() {
@@ -48,7 +48,7 @@ void VIGetDTCsResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::GetDTCsID;
+      mobile_apis::FunctionID::GetDTCsID;
 
   SendResponseToMobile(message_);
 }

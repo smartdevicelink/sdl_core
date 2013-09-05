@@ -214,31 +214,29 @@ class MessageHelper {
       unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);
 
-    /*
-     * @brief Finds "Image" structure in request and verify image file presence
-     *                      in Core.
-     *
-     * @param message SmartObject with request
-     *
-     * @param app current application
-     *
-     * @return verification result
-     *
-     */
-    static  mobile_apis::Result::eType VerifyImageFiles(
-      smart_objects::SmartObject& message,
-      const Application* app);
+  /*
+   * @brief Finds "Image" structure in request and verify image file presence
+   *                      in Core.
+   *
+   * @param message SmartObject with request
+   *
+   * @param app current application
+   *
+   * @return verification result
+   *
+   */
+  static mobile_apis::Result::eType VerifyImageFiles(
+      smart_objects::SmartObject& message, const Application* app);
 
-    static bool PrintSmartObject(
-      smart_objects::SmartObject& object);
+  static bool PrintSmartObject(smart_objects::SmartObject& object);
 
-    template<typename From, typename To>
-    static To ConvertEnumAPINoCheck(const From& input) {
-      return static_cast<To>(input);
-    }
+  template<typename From, typename To>
+  static To ConvertEnumAPINoCheck(const From& input) {
+    return static_cast<To>(input);
+  }
 
-  private:
-    static smart_objects::SmartObject* CreateChangeRegistration(
+ private:
+  static smart_objects::SmartObject* CreateChangeRegistration(
       int function_id, int language, unsigned int app_id);
     static smart_objects::SmartObject* CreateGeneralVrCommand();
     static void SendRemoveCommandToHMI(int function_id,

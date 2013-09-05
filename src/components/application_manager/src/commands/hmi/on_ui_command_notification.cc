@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 OnUICommandNotification::OnUICommandNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnUICommandNotification::~OnUICommandNotification() {
@@ -48,10 +49,10 @@ void OnUICommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnUICommandNotification::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::OnCommandID;
+      mobile_apis::FunctionID::eType::OnCommandID;
 
   (*message_)[strings::msg_params][strings::trigger_source] =
-    mobile_apis::TriggerSource::TS_MENU;
+      mobile_apis::TriggerSource::TS_MENU;
   SendNotificationToMobile(message_);
 }
 
