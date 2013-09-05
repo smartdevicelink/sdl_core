@@ -3728,6 +3728,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         fr.setMobileNaviStateOff();
     }
 
+    public void onMobileNavAckReceived(int frameReceived){
+        
+    }
+
     public void startMobileNaviSession() {
         _msgAdapter.logMessage("Should start mobile nav session", true);
         if (ProxyService.getInstance().getProxyInstance() != null) {

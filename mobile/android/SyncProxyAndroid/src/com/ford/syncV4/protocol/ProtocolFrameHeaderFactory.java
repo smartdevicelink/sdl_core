@@ -138,4 +138,15 @@ public class ProtocolFrameHeaderFactory {
         return msg;
     }
 
+    public static ProtocolFrameHeader createMobileNaviAck(SessionType serviceType, byte sessionID,
+                                                          int consumedFramesNumber, byte version) {
+        ProtocolFrameHeader msg = new ProtocolFrameHeader();
+        msg.setVersion(version);
+        msg.setFrameType(FrameType.Control);
+        msg.setSessionType(serviceType);
+        msg.setSessionID(sessionID);
+        msg.setFrameData(FrameDataControlFrameType.MobileNaviACK.value());
+        msg.setMessageID(consumedFramesNumber);
+        return msg;
+    }
 }

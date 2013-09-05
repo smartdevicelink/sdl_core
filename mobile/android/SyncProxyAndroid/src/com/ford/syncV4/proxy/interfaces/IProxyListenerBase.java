@@ -295,4 +295,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
 
     public void onMobileNaviStart();
+
+    public void onMobileNavAckReceived(int frameReceivedNumber);
 }

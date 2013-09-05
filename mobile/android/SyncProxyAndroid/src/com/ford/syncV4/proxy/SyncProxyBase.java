@@ -2387,6 +2387,23 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    protected void handleMobileNavAck(int frameNumberReceived){
+        Log.i(TAG, "Mobile Nav Ack received = " + frameNumberReceived);
+        final int fNumber = frameNumberReceived;
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onMobileNavAckReceived(fNumber);
+                }
+            });
+        } else {
+            _proxyListener.onMobileNavAckReceived(fNumber);
+        }
+
+    }
+
     protected void startMobileNavSession(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
         _mobileNavSessionID = sessionID;
@@ -3249,6 +3266,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onProtocolError(String info, Exception e) {
             passErrorToProxyListener(info, e);
+        }
+
+        @Override
+        public void onMobileNavAckReceived(int frameReceivedNumber) {
+            handleMobileNavAck(frameReceivedNumber);
         }
     }
 

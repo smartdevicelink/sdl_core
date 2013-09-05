@@ -191,6 +191,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
         _connectionListener.onProtocolError(info, e);
     }
 
+    @Override
+    public void onMobileNavAckReceived(int frameReceivedNumber) {
+        _connectionListener.onMobileNavAckReceived(frameReceivedNumber);
+    }
+
     /**
      * Gets type of transport currently used by this connection.
      *

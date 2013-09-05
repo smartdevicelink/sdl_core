@@ -1273,6 +1273,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
+    public void onMobileNavAckReceived(int frameReceivedNumber) {
+        final int fNumber = frameReceivedNumber;
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        String response = "Mobile Ack Received = "+ frameReceivedNumber;
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+        else Log.i(TAG, "" + response);
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.onMobileNavAckReceived(fNumber);
+            }
+        });
+    }
+
+    @Override
 	public void onOnTBTClientState(OnTBTClientState notification) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);

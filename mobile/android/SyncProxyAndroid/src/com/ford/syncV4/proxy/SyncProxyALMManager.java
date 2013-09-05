@@ -2590,5 +2590,10 @@ public class SyncProxyALMManager {
         public void onMobileNaviStart() {
 
         }
+
+        @Override
+        public void onMobileNavAckReceived(int frameReceivedNumber) {
+
+        }
     }
 }

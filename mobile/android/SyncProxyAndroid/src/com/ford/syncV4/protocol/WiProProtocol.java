@@ -373,8 +373,14 @@ public class WiProProtocol extends AbstractProtocol {
                 } else {
                     handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
                 }
+            }else if (header.getSessionType().getValue() ==  SessionType.Mobile_Nav.getValue()  && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()){
+                handleMobileNavAckReceived(header);
             }
         } // end-method
+
+        private void handleMobileNavAckReceived(ProtocolFrameHeader header) {
+            _protocolListener.onMobileNavAckReceived(header.getMessageID());
+        }
 
         private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
             ProtocolMessage message = new ProtocolMessage();
