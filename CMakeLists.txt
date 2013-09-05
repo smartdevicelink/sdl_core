@@ -5,6 +5,9 @@ project (${PROJECT})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+# --- Check libavahi-common, libavahi-client availability
+find_package(Libavahi)
+
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
@@ -73,7 +76,6 @@ macro(create_test NAME SOURCES LIBS)
     target_link_libraries("${NAME}" ${LIBS})
     add_test(${NAME} ${NAME})
 endmacro(create_test)
-
 
 # Building application
 
