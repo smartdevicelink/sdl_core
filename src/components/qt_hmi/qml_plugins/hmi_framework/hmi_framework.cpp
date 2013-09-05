@@ -1,4 +1,4 @@
-#include "hmiframework.h"
+#include "hmi_framework.h"
 
 hmiframework::hmiframework(QQuickItem *parent):
     QQuickItem(parent)

@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import com.ford.hmiframework 1.0
 
 Rectangle {
     width: 1360
@@ -18,7 +19,7 @@ Rectangle {
 
     Item
     {
-        id: HardwareKeybezel1
+        id: FHardwareKeybezel1
         width: 800
         height: 375
         x:10

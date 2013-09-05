@@ -1,19 +1,19 @@
 TEMPLATE = lib
-TARGET = hmi_framework
+TARGET = hmiframework
 QT += qml quick
 CONFIG += qt plugin
 
 TARGET = $$qtLibraryTarget($$TARGET)
-uri = com.ford.hmi_framework
+uri = com.ford.hmiframework
 
 # Input
 SOURCES += \
     hmi_framework_plugin.cpp \
-    hmiframework.cpp
+    hmi_framework.cpp
 
 HEADERS += \
     hmi_framework_plugin.h \
-    hmiframework.h
+    hmi_framework.h
 
 OTHER_FILES = qmldir
 

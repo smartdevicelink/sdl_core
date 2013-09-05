@@ -1,5 +1,5 @@
 #include "hmi_framework_plugin.h"
-#include "hmiframework.h"
+#include "hmi_framework.h"
 
 #include <qqml.h>
 
