@@ -70,11 +70,9 @@ void AlertManeuverRequest::Run() {
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  msg_params[hmi_request::soft_buttons] =
-                smart_objects::SmartObject(smart_objects::SmartType_Array);
-  if ((*message_)[strings::params].keyExists(strings::soft_buttons)) {
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[hmi_request::soft_buttons] =
-      (*message_)[strings::params][strings::soft_buttons];
+      (*message_)[strings::msg_params][strings::soft_buttons];
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
