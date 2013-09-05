@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
@@ -81,8 +82,6 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
         }
     }
 
-
-
     public void onMobileNaviCheckBoxAction(View v) {
         changeMobileNaviCheckBoxState();
     }
@@ -96,6 +95,8 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopMobileNavSession();
             mobileNavSessionCheckBoxState.setStateOff();
+            Button button = (Button) getView().findViewById(R.id.videobutton);
+            button.setEnabled(false);
         }
     }
 
@@ -103,11 +104,14 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
         mobileNavSessionCheckBoxState.setStateOff();
         CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
         box.setChecked(false);
+        Button button = (Button) getView().findViewById(R.id.videobutton);
+        button.setEnabled(false);
     }
 
     public void setMobileNaviStateOn(){
         mobileNavSessionCheckBoxState.setStateOn();
-        CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
+        Button button = (Button) getView().findViewById(R.id.videobutton);
+        button.setEnabled(true);
     }
 
     @Override

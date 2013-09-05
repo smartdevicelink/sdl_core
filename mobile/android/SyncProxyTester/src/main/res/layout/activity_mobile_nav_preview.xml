@@ -30,6 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Send Data"
+        android:enabled="false"
         android:onClick="onVideButtonAction"
         android:id="@+id/videobutton"
         android:layout_below="@+id/videoStreamingCheckBox"
