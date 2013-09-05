@@ -90,7 +90,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
                 if (_transport != null && _transport.getIsConnected()) {
                     _protocol.EndProtocolSession(SessionType.Mobile_Nav, mobileNavSessionId);
                 }
-                _protocol = null;
             } // end-if
         }
     }

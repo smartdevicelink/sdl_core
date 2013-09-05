@@ -3726,7 +3726,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onMobileNaviError() {
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
-
     }
 
     public void startMobileNaviSession() {
