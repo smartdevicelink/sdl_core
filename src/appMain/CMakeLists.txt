@@ -1,4 +1,9 @@
-LINK_DIRECTORIES(../thirdPartyLibs/libusbx)
+cmake_policy(PUSH)
+# make link_directories() treat paths relative to the source dir
+# info: cmake --help-policy CMP0015
+cmake_policy(SET CMP0015 NEW)
+link_directories(../thirdPartyLibs/libusbx)
+cmake_policy(POP)
 
 set(LIBRARIES
   ApplicationManager
