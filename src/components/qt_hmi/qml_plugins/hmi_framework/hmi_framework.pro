@@ -1,24 +1,21 @@
 TEMPLATE = lib
-TARGET = jsondbus
-QT += qml quick dbus
+TARGET = hmi_framework
+QT += qml quick
 CONFIG += qt plugin
 
 TARGET = $$qtLibraryTarget($$TARGET)
-uri = sdl.core.interface
-
-DBUS_INTERFACES += api.xml
+uri = com.ford.hmi_framework
 
 # Input
 SOURCES += \
-    jsondbus_plugin.cpp \
-    api.cpp
+    hmi_framework_plugin.cpp \
+    hmiframework.cpp
 
 HEADERS += \
-    jsondbus_plugin.h \
-    api.h
+    hmi_framework_plugin.h \
+    hmiframework.h
 
-OTHER_FILES = qmldir \
-    api.xml
+OTHER_FILES = qmldir
 
 !equals(_PRO_FILE_PWD_, $$OUT_PWD) {
     copy_qmldir.target = $$OUT_PWD/qmldir
