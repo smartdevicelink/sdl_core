@@ -50,8 +50,8 @@ AlertManeuverRequest::~AlertManeuverRequest() {
 void AlertManeuverRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertManeuverRequest::Run");
 
-  if ((!(*message_)[strings::params].keyExists(strings::soft_buttons)) &&
-      (!(*message_)[strings::params].keyExists(strings::tts_chunks))) {
+  if ((!(*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
+      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks))) {
     LOG4CXX_ERROR(logger_, "AlertManeuverRequest::Request without parameters!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
