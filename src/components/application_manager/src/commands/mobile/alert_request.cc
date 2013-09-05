@@ -76,9 +76,9 @@ void AlertRequest::Run() {
       (!(*message_)[strings::msg_params].keyExists(strings::alert_text2)) &&
       (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
       (1 > (*message_)[strings::msg_params][strings::tts_chunks].length()))) {
-    LOG4CXX_ERROR_EXT(logger_, "Mandatoty parameters omitted");
+    LOG4CXX_ERROR_EXT(logger_, "Mandatory parameters are missing");
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "Mandatoty parameters omitted");
+                 "Mandatory parameters are missing");
     return;
   }
 
