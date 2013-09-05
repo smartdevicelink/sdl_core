@@ -78,7 +78,7 @@ def startMobileNaviSessionACK():
 
 
 def singleSendData():
-    return str(bytearray([33, 11, 0, 48, 0, 0, 0, 10, 0, 0, 0, 48]))
+    return str(bytearray([33, 11, 0, 48, 0, 0, 0, 100, 0, 0, 0, 48]))
 
 
 def mobileNavAck():
