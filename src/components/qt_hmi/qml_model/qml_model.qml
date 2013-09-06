@@ -6,6 +6,12 @@ Rectangle {
     height: 768
     color: "black"
 
+    Text {
+        id: caption
+        color: "lightblue"
+        text: "Hello"
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -24,10 +30,16 @@ Rectangle {
         cellHeight: 140
 
         model: Menu {}
-        highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
-        focus: true
+        // highlight: Rectangle { color: "lightsteelblue"; radius: 5; width: parent.width; height: parent.height + 20 }
+        focus: false
 
-        delegate: Item {
+        delegate: Column {
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    caption.text = name
+                }
+            }
             x: 20
             y: 20
             width: 100
@@ -38,9 +50,12 @@ Rectangle {
                 color: "white"
                 anchors.baseline: parent.bottom;
                 anchors.horizontalCenter: parent.horizontalCenter }
-        }
-    }
+            }
 
+    }
+//*/
+
+    /*
     Item
     {
         id: hardwareKeybezel1
@@ -48,7 +63,6 @@ Rectangle {
         height: 375
         x:10
         y:500
-/*
         // function keys
         TextHardkey {
             id: hk_OnOff
@@ -100,7 +114,7 @@ Rectangle {
                    keyboardKey: Qt.Key_Down
                    visible: false
                }
-//*/
     }
+    //*/
 }
 
