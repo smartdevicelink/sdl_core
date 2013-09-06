@@ -7,9 +7,9 @@ FIND_LIBRARY(
             )       
                 
 if (NOT LIBAVAHI_CLIENT)
-	message(ERROR " libavahi-client is not found")
-    message(ERROR " To install it type in the command line:")
-    message(ERROR " sudo apt-get install libavahi-client-dev")
+    message(STATUS " libavahi-client is not found")
+    message(STATUS " To install it type in the command line:")
+    message(STATUS " sudo apt-get install libavahi-client-dev")
 endif (NOT LIBAVAHI_CLIENT)
 
 FIND_LIBRARY(
@@ -19,7 +19,7 @@ FIND_LIBRARY(
             )       
      
 if (NOT LIBAVAHI_COMMON)
-	message(ERROR " libavahi-common is not found")
-    message(ERROR " To install it type in the command line:")
-    message(ERROR " sudo apt-get install libavahi-common-dev")
+    message(STATUS " libavahi-common is not found")
+    message(STATUS " To install it type in the command line:")
+    message(STATUS " sudo apt-get install libavahi-common-dev")
 endif (NOT LIBAVAHI_COMMON)

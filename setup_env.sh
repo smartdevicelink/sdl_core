@@ -11,6 +11,9 @@ PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 AVAHI_COMMON="libavahi-common-dev"
+DOXYGEN="doxygen"
+GRAPHVIZ="graphviz"
+MSCGEN="mscgen"
 
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
@@ -62,6 +65,18 @@ echo $OK
 
 echo "Installing Avahi-client-dev library"
 apt-install ${AVAHI_CLIENT_LIBRARY}
+echo $OK
+
+echo "Installing Doxygen"
+apt-install ${DOXYGEN}
+echo $OK
+
+echo "Installing Graphviz for doxygen"
+apt-install ${GRAPHVIZ}
+echo $OK
+
+echo "Installing Mscgen"
+apt-install ${MSCGEN}
 echo $OK
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
