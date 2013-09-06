@@ -53,8 +53,8 @@ void EndAudioPassThruRequest::Run() {
     ApplicationManagerImpl::instance()->StopAudioPassThruThread();
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                     smart_objects::SmartObject(smart_objects::SmartType_Map),
-                     true, 1);
+                         smart_objects::SmartObject(smart_objects::SmartType_Map),
+                         true, 1);
 
     ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
   } else {

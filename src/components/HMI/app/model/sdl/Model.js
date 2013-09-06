@@ -641,9 +641,10 @@ SDL.SDLModel = Em.Object
                 SDL.SDLController
                     .performAudioPassThruResponse(this.resultCode["SUCCESS"]);
             } else {
-                FFW.UI.sendUIResult(this.resultCode["GENERIC_ERROR"],
+                FFW.UI.sendError(this.resultCode["GENERIC_ERROR"],
                     FFW.UI.endAudioPassThruRequestID,
-                    "UI.EndAudioPassThru");
+                    "UI.EndAudioPassThru",
+                    "UI.PerformAudioPassThru are not processed at the moment!");
             }
         },
 

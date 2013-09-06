@@ -292,7 +292,7 @@ SDL.SDLController = Em.Object
                 FFW.UI.sendError(result,
                     messageRequestId,
                     'UI.ScrollableMessage',
-                    "ScrollableMessage request aborted!");
+                    "ScrollableMessage aborted!");
             }
         },
         /**
