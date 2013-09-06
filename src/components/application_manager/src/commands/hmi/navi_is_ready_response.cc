@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-NaviIsReadyResponse::NaviIsReadyResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+NaviIsReadyResponse::NaviIsReadyResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 NaviIsReadyResponse::~NaviIsReadyResponse() {
@@ -52,8 +52,7 @@ void NaviIsReadyResponse::Run() {
   bool is_available = false;
 
   if (object[strings::msg_params].keyExists(strings::available)) {
-    is_available =
-      object[strings::msg_params][strings::available].asBool();
+    is_available = object[strings::msg_params][strings::available].asBool();
   }
   ApplicationManagerImpl::instance()->set_is_navi_cooperating(is_available);
 }

@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-TTSStopSpeakingRequest::TTSStopSpeakingRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+TTSStopSpeakingRequest::TTSStopSpeakingRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 TTSStopSpeakingRequest::~TTSStopSpeakingRequest() {

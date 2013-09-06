@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-OnExitApplicationNotification::OnExitApplicationNotification(const MessageSharedPtr& message)
-  : NotificationFromHMI(message) {
+OnExitApplicationNotification::OnExitApplicationNotification(
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
 OnExitApplicationNotification::~OnExitApplicationNotification() {
@@ -48,7 +48,7 @@ void OnExitApplicationNotification::Run() {
   LOG4CXX_INFO(logger_, "OnExitApplicationNotification::Run");
 
   ApplicationManagerImpl::instance()->UnregisterApplication(
-    (*message_)[strings::msg_params][strings::app_id]);
+      (*message_)[strings::msg_params][strings::app_id]);
 }
 
 }  // namespace commands

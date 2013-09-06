@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UISetMediaClockTimerRequest::UISetMediaClockTimerRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UISetMediaClockTimerRequest::~UISetMediaClockTimerRequest() {

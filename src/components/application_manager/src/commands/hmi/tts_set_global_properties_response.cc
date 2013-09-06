@@ -41,7 +41,8 @@ namespace application_manager {
 namespace commands {
 
 TTSSetGlobalPropertiesResponse::TTSSetGlobalPropertiesResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {
@@ -50,46 +51,46 @@ TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {
 void TTSSetGlobalPropertiesResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSSetGlobalPropertiesResponse::Run");
 
-   const unsigned int correlation_id =
-       (*message_)[strings::params][strings::correlation_id].asUInt();
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
-   MessageChaining* msg_chain =
-     ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
-   if (NULL == msg_chain) {
-     LOG4CXX_ERROR(logger_, "NULL pointer");
-     return;
-   }
+  if (NULL == msg_chain) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
 
-   /* store received response code for to check it
-    * in corresponding Mobile response
-    */
-   const hmi_apis::Common_Result::eType code =
-     static_cast<hmi_apis::Common_Result::eType>(
-       (*message_)[strings::params][hmi_response::code].asInt());
+  /* store received response code for to check it
+   * in corresponding Mobile response
+   */
+  const hmi_apis::Common_Result::eType code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
-   msg_chain->set_tts_response_result(code);
+  msg_chain->set_tts_response_result(code);
 
-   const int connection_key = msg_chain->connection_key();
+  const int connection_key = msg_chain->connection_key();
 
-   Application* app = ApplicationManagerImpl::instance()->
-                      application(connection_key);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      connection_key);
 
-   if (NULL == app) {
-     LOG4CXX_ERROR(logger_, "NULL pointer");
-     return;
-   }
+  if (NULL == app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
 
-   // prepare SmartObject for mobile factory
-   if (app->is_reset_global_properties_active()) {
-     (*message_)[strings::params][strings::function_id] =
-       mobile_apis::FunctionID::ResetGlobalPropertiesID;
-   } else {
-     (*message_)[strings::params][strings::function_id] =
-       mobile_apis::FunctionID::SetGlobalPropertiesID;
-   }
+  // prepare SmartObject for mobile factory
+  if (app->is_reset_global_properties_active()) {
+    (*message_)[strings::params][strings::function_id] =
+        mobile_apis::FunctionID::ResetGlobalPropertiesID;
+  } else {
+    (*message_)[strings::params][strings::function_id] =
+        mobile_apis::FunctionID::SetGlobalPropertiesID;
+  }
 
-   SendResponseToMobile(message_);
+  SendResponseToMobile(message_);
 }
 
 }  // namespace commands

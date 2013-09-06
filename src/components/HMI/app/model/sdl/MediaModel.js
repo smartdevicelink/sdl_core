@@ -54,7 +54,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel
 
             this.set('isPlaying', true);
 
-            this.set('commandsList', []);
+            this.set('commandsList', {0: []});
             this.set('softButtons', []);
         },
 

@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-OnStartDeviceDiscovery::OnStartDeviceDiscovery(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+OnStartDeviceDiscovery::OnStartDeviceDiscovery(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnStartDeviceDiscovery::~OnStartDeviceDiscovery() {

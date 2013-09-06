@@ -103,7 +103,7 @@ void EncodedSyncPDataRequest::Run() {
       LOG4CXX_INFO(logger_, "Successfully write data to file");
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
-      LOG4CXX_ERROR(logger_, "Failed wrire to file");
+      LOG4CXX_ERROR(logger_, "Failed write to file");
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {

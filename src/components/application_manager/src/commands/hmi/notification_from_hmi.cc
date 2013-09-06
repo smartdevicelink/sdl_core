@@ -30,7 +30,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager_impl.h"
 #include "smart_objects/smart_object.h"
@@ -40,7 +39,7 @@ namespace application_manager {
 namespace commands {
 
 NotificationFromHMI::NotificationFromHMI(const MessageSharedPtr& message)
-: CommandImpl(message) {
+    : CommandImpl(message) {
 }
 
 NotificationFromHMI::~NotificationFromHMI() {
@@ -57,7 +56,8 @@ bool NotificationFromHMI::CleanUp() {
 void NotificationFromHMI::Run() {
 }
 
-void NotificationFromHMI::SendNotificationToMobile(const MessageSharedPtr& message) {
+void NotificationFromHMI::SendNotificationToMobile(
+    const MessageSharedPtr& message) {
   ApplicationManagerImpl::instance()->ManageMobileCommand(message);
 }
 
@@ -65,32 +65,32 @@ void NotificationFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const NsSmartObj::SmartObject& msg_params) const {
 
-    NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
-        new NsSmartDeviceLink::NsSmartObjects::SmartObject;
-    if (!result) {
-      LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-      return;
-    }
+  NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
+      new NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  if (!result) {
+    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    return;
+  }
 
-    // get hmi correlation id for chaining further request from this object
-    const unsigned int hmi_correlation_id_ =
-          ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  // get hmi correlation id for chaining further request from this object
+  const unsigned int hmi_correlation_id_ = ApplicationManagerImpl::instance()
+      ->GetNextHMICorrelationID();
 
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
-    request[strings::params][strings::message_type] = MessageType::kRequest;
-    request[strings::params][strings::function_id] = function_id;
-    request[strings::params][strings::correlation_id] = hmi_correlation_id_;
-    request[strings::params][strings::protocol_version] =
-        CommandImpl::protocol_version_;
-    request[strings::params][strings::protocol_type] =
-        CommandImpl::hmi_protocol_type_;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
+  request[strings::params][strings::message_type] = MessageType::kRequest;
+  request[strings::params][strings::function_id] = function_id;
+  request[strings::params][strings::correlation_id] = hmi_correlation_id_;
+  request[strings::params][strings::protocol_version] =
+      CommandImpl::protocol_version_;
+  request[strings::params][strings::protocol_type] =
+      CommandImpl::hmi_protocol_type_;
 
-    request[strings::msg_params] = msg_params;
+  request[strings::msg_params] = msg_params;
 
-    if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
-      LOG4CXX_ERROR(logger_, "Unable to send request");
-      return;
-    }
+  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+    LOG4CXX_ERROR(logger_, "Unable to send request");
+    return;
+  }
 }
 
 }  // namespace commands

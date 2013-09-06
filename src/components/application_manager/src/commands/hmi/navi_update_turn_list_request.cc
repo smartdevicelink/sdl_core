@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 NaviUpdateTurnListRequest::NaviUpdateTurnListRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message) : RequestToHMI(message) {
 }
 
 NaviUpdateTurnListRequest::~NaviUpdateTurnListRequest() {
