@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-OnReadyNotification::OnReadyNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+OnReadyNotification::OnReadyNotification(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnReadyNotification::~OnReadyNotification() {

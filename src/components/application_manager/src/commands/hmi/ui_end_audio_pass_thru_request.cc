@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UIEndAudioPassThruRequest::UIEndAudioPassThruRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIEndAudioPassThruRequest::~UIEndAudioPassThruRequest() {

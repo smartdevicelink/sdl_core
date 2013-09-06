@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UIPerformAudioPassThruResponse::UIPerformAudioPassThruResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UIPerformAudioPassThruResponse::~UIPerformAudioPassThruResponse() {
@@ -48,7 +49,7 @@ void UIPerformAudioPassThruResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::PerformAudioPassThruID;
+      mobile_apis::FunctionID::PerformAudioPassThruID;
 
   SendResponseToMobile(message_);
 }

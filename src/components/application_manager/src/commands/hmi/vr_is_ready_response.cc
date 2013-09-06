@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-VRIsReadyResponse::VRIsReadyResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+VRIsReadyResponse::VRIsReadyResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VRIsReadyResponse::~VRIsReadyResponse() {
@@ -52,8 +52,7 @@ void VRIsReadyResponse::Run() {
   bool is_available = false;
 
   if (object[strings::msg_params].keyExists(strings::available)) {
-    is_available =
-      object[strings::msg_params][strings::available].asBool();
+    is_available = object[strings::msg_params][strings::available].asBool();
   }
   ApplicationManagerImpl::instance()->set_is_vr_cooperating(is_available);
 }

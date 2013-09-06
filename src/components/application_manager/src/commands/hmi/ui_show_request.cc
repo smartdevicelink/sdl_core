@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIShowRequest::UIShowRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UIShowRequest::UIShowRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIShowRequest::~UIShowRequest() {

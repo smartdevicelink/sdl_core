@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UIPerformInteractionRequest::UIPerformInteractionRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIPerformInteractionRequest::~UIPerformInteractionRequest() {

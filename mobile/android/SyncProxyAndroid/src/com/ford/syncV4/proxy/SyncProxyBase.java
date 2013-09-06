@@ -278,12 +278,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			// proxyOnTransportDisconnect is called to alert the proxy that a requested
 			// disconnect has completed
 			
-			if (_advancedLifecycleManagementEnabled) {
-				// If ALM, nothing is required to be done here
-			} else {
+//			if (_advancedLifecycleManagementEnabled) {
+//				// If ALM, nothing is required to be done here
+//			} else {
 				// If original model, notify app the proxy is closed so it will delete and reinstanciate 
 				notifyProxyClosed(info, new SyncException("Transport disconnected.", SyncExceptionCause.SYNC_UNAVAILALBE));
-			}
+//			}
 		}
 
 		@Override

@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 NaviUpdateTurnListResponse::NaviUpdateTurnListResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message) : ResponseFromHMI(message) {
 }
 
 NaviUpdateTurnListResponse::~NaviUpdateTurnListResponse() {
@@ -48,7 +48,7 @@ void NaviUpdateTurnListResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::UpdateTurnListID;
+      mobile_apis::FunctionID::UpdateTurnListID;
 
   SendResponseToMobile(message_);
 }

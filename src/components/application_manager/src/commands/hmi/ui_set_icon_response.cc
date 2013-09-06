@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-UISetIconResponse::UISetIconResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+UISetIconResponse::UISetIconResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UISetIconResponse::~UISetIconResponse() {
@@ -53,8 +53,8 @@ void UISetIconResponse::Run() {
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "There is no pending response");
@@ -65,14 +65,13 @@ void UISetIconResponse::Run() {
    * in corresponding Mobile response
    */
   const hmi_apis::Common_Result::eType code =
-    static_cast<hmi_apis::Common_Result::eType>(
-      (*message_)[strings::params][hmi_response::code].asInt());
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
   msg_chain->set_ui_response_result(code);
 
   int app_id = msg_chain->connection_key();
-  Application* app = ApplicationManagerImpl::instance()->
-                     application(app_id);
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -81,7 +80,7 @@ void UISetIconResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::SetAppIconID;
+      mobile_apis::FunctionID::SetAppIconID;
 
   SendResponseToMobile(message_);
 }

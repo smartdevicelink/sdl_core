@@ -93,7 +93,7 @@ void SubscribeVehicleDataRequest::Run() {
   }
 
   if (0 == items_to_subscribe) {
-    SendResponse(false, mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE,
+    SendResponse(false, mobile_apis::Result::INVALID_DATA,
                  "Provided VehicleData is empty", &response_params);
   } else if (subscribed_items == items_to_subscribe) {
     SendResponse(true, mobile_apis::Result::SUCCESS,

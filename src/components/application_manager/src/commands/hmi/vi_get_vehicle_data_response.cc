@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 VIGetVehicleDataResponse::VIGetVehicleDataResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {
@@ -47,7 +48,7 @@ VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {
 void VIGetVehicleDataResponse::Run() {
   LOG4CXX_INFO(logger_, "VIGetVehicleDataResponse::Run");
   smart_objects::SmartObject* result_so = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
+      smart_objects::SmartType_Map);
   if (!result_so) {
     // TODO(PV): add response with out of memory.
     LOG4CXX_ERROR(logger_,
@@ -57,26 +58,26 @@ void VIGetVehicleDataResponse::Run() {
 
   smart_objects::SmartObject& result = *result_so;
 
-  if ((*message_)[strings::params][strings::message_type] ==
-      hmi_apis::messageType::error_response) {
+  if ((*message_)[strings::params][strings::message_type]
+      == hmi_apis::messageType::error_response) {
     if ((*message_)[strings::params].keyExists(strings::data)) {
       result[strings::msg_params] = (*message_)[strings::params][strings::data];
       result[strings::params][hmi_response::code] =
-        (*message_)[strings::params][hmi_response::code];
+          (*message_)[strings::params][hmi_response::code];
       result[strings::params][strings::correlation_id] =
-        (*message_)[strings::params][strings::correlation_id];
+          (*message_)[strings::params][strings::correlation_id];
       result[strings::params][strings::error_msg] =
-        (*message_)[strings::params][strings::error_msg];
+          (*message_)[strings::params][strings::error_msg];
       result[strings::params][strings::message_type] =
-        (*message_)[strings::params][strings::message_type];
+          (*message_)[strings::params][strings::message_type];
       result[strings::params][strings::protocol_type] =
-        (*message_)[strings::params][strings::protocol_type];
+          (*message_)[strings::params][strings::protocol_type];
       result[strings::params][strings::protocol_version] =
-        (*message_)[strings::params][strings::protocol_version];
+          (*message_)[strings::params][strings::protocol_version];
     }
 
     result[strings::params][strings::function_id] =
-       mobile_apis::FunctionID::GetVehicleDataID;
+        mobile_apis::FunctionID::GetVehicleDataID;
 
     SendResponseToMobile(result_so);
   } else {
@@ -84,9 +85,6 @@ void VIGetVehicleDataResponse::Run() {
         mobile_apis::FunctionID::GetVehicleDataID;
     SendResponseToMobile(message_);
   }
-
-
-
 }
 
 }  // namespace commands

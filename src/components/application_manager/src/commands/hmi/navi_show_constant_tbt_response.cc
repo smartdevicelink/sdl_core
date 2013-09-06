@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 NaviShowConstantTBTResponse::NaviShowConstantTBTResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message) : ResponseFromHMI(message) {
 }
 
 NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {
@@ -47,11 +47,10 @@ void NaviShowConstantTBTResponse::Run() {
   LOG4CXX_INFO(logger_, "NaviShowConstantTBTResponse::Run");
 
   // prepare SmartObject for mobile factory
-   (*message_)[strings::params][strings::function_id] =
-     mobile_apis::FunctionID::ShowConstantTBTID;
+  (*message_)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::ShowConstantTBTID;
 
   SendResponseToMobile(message_);
-
 }
 
 }  // namespace commands

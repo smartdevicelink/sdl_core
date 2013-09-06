@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 VIGetVehicleTypeResponse::VIGetVehicleTypeResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {

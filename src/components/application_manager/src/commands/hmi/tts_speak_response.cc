@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-TTSSpeakResponse::TTSSpeakResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+TTSSpeakResponse::TTSSpeakResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 TTSSpeakResponse::~TTSSpeakResponse() {
@@ -47,7 +47,7 @@ void TTSSpeakResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSSpeakResponse::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::SpeakID;
+      mobile_apis::FunctionID::SpeakID;
 
   SendResponseToMobile(message_);
 }
