@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 Rectangle {
+    id: rectangle1
     width: 1360
     height: 768
     color: "black"
@@ -10,96 +11,67 @@ Rectangle {
         onClicked: {
             Qt.quit();
         }
+
+        Grid {
+            id: upperMenuGrid
+            x: mainMenuGridview.x - 50
+            y: mainMenuGridview.y - 80
+            width: mainMenuGridview.width + 100
+            height: 80
+            Text{
+                text: "75°";
+                color: "#1d81d5"
+                font.pixelSize: 25;
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            Text{
+                text: "MENU";
+                color: "#1d81d5"
+                font.pixelSize: 25;
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            Text{
+                text: "12:50";
+                color: "#1d81d5"
+                font.pixelSize: 25;
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
     }
 
     GridView
     {
-        width: 600
-        height: 400
-        x : (parent.width - width) / 2
-        y : (parent.height - height) / 2
+        id: mainMenuGridview
+        x: 334
+        y: 259
+        width: 667
+        height: 303
+        cellWidth: 221
+        cellHeight: 149
+        highlightFollowsCurrentItem: false
+        snapMode: GridView.SnapToRow
+        flickableDirection: Flickable.AutoFlickDirection
+        interactive: true
 
-        cellWidth: 140
-        cellHeight: 140
 
         model: Menu {}
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
         focus: true
 
         delegate: Item {
-            x: 20
-            y: 20
-            width: 100
-            height: 100
-            Image { source: icon; anchors.horizontalCenter: parent.horizontalCenter }
-            Text  {
+            width: mainMenuGridview.cellWidth
+            height: mainMenuGridview.cellHeight
+            Image { source: icon; anchors.horizontalCenter: parent.horizontalCenter; anchors.verticalCenter: parent.verticalCenter;}
+            /*Text  {
                 text: name;
                 color: "white"
                 anchors.baseline: parent.bottom;
-                anchors.horizontalCenter: parent.horizontalCenter }
+                anchors.horizontalCenter: parent.horizontalCenter
+            }*/
         }
-    }
-
-    Item
-    {
-        id: hardwareKeybezel1
-        width: 800
-        height: 375
-        x:10
-        y:500
-/*
-        // function keys
-        TextHardkey {
-            id: hk_OnOff
-            width: 100
-            height: 50
-            anchors.left: parent.left
-            anchors.leftMargin: 0
-            anchors.top: parent.top
-            anchors.topMargin: 0
-            label: "On/Off"
-        }
-
-        BaseText {
-            id: info
-            text: dataPool.version
-            color: "black"
-            anchors.top: hk_OnOff.top
-            anchors.left: hk_OnOff.right
-            anchors.leftMargin: 20
-        }
-
-
-        FHardwareKey {
-                   id: buttonUp
-                   hardwareControlID: "buttonUp"
-                   //commName: "buttonBack"
-
-                   x:0
-                   y:0
-                   width: 60
-                   height:25
-
-
-                   keyboardKey: Qt.Key_Up
-                   visible: false
-               }
-
-        FHardwareKey {
-                   id: buttonDown
-                   hardwareControlID: "buttonDown"
-                   //commName: "buttonBack"
-
-                   x:0
-                   y:0
-                   width: 60
-                   height:25
-
-
-                   keyboardKey: Qt.Key_Down
-                   visible: false
-               }
-//*/
     }
 }
 
