@@ -6,10 +6,6 @@ Rectangle {
     height: 768
     color: "black"
 
-    Text {
-        anchors.centerIn: parent
-        text: "Hello World"
-    }
     MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -17,14 +13,42 @@ Rectangle {
         }
     }
 
+    GridView
+    {
+        width: 600
+        height: 400
+        x : (parent.width - width) / 2
+        y : (parent.height - height) / 2
+
+        cellWidth: 140
+        cellHeight: 140
+
+        model: Menu {}
+        highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+        focus: true
+
+        delegate: Item {
+            x: 20
+            y: 20
+            width: 100
+            height: 100
+            Image { source: icon; anchors.horizontalCenter: parent.horizontalCenter }
+            Text  {
+                text: name;
+                color: "white"
+                anchors.baseline: parent.bottom;
+                anchors.horizontalCenter: parent.horizontalCenter }
+        }
+    }
+
     Item
     {
-        id: FHardwareKeybezel1
+        id: hardwareKeybezel1
         width: 800
         height: 375
         x:10
         y:500
-
+/*
         // function keys
         TextHardkey {
             id: hk_OnOff
@@ -76,7 +100,7 @@ Rectangle {
                    keyboardKey: Qt.Key_Down
                    visible: false
                }
-
+//*/
     }
 }
 

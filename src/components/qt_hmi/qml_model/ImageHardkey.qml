@@ -2,7 +2,7 @@
 import QtQuick 2.0
 import com.ford.hmiframework 1.0
 
-FHardwareKey {
+Rectangle {
     width: 50
     height: 50
 
@@ -34,6 +34,10 @@ FHardwareKey {
         }
     }
 
+    StateGroup {
+    }
+
+/*
     FWdgtImage {
         id: theImage
         //anchors.fill: parent
@@ -41,7 +45,7 @@ FHardwareKey {
         //fillMode: Image.PreserveAspectFit
         smooth: true
     }
-
+//*/
 
     FViewUseCaseSimple {
         condition: pressed === true
