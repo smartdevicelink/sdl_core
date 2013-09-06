@@ -76,7 +76,7 @@ class ThreadedSocketConnection : public Connection {
    *
    * @return Information about possible reason of thread creation error.
    */
-  TransportAdapter::Error start();
+  TransportAdapter::Error Start();
 
   /**
    * @brief Set variable that hold socket No.
@@ -130,15 +130,15 @@ class ThreadedSocketConnection : public Connection {
 
   int read_fd_;
   int write_fd_;
-  void thread();
-  void transmit();
-  void finalize();
-  TransportAdapter::Error notify() const;
-  bool receive();
-  bool send();
-  void abort();
+  void Thread();
+  void Transmit();
+  void Finalize();
+  TransportAdapter::Error Notify() const;
+  bool Receive();
+  bool Send();
+  void Abort();
 
-  friend void* startThreadedSocketConnection(void*);
+  friend void* StartThreadedSocketConnection(void*);
 
   TransportAdapterController* controller_;
   /**

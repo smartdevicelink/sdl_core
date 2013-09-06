@@ -1,6 +1,6 @@
 /**
  * \file client_connection_listener.h
- * \brief Client connection listener header.
+ * \brief class ClientConnectionListener class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

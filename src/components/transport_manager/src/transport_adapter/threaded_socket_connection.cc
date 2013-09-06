@@ -1,6 +1,6 @@
 /**
  * \file transport_adapter_socket_communication.cc
- * \brief Implementation of classes responsible for communication over sockets
+ * \brief Implementation of classes responsible for communication over sockets.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -63,7 +63,7 @@ ThreadedSocketConnection::ThreadedSocketConnection(
 ThreadedSocketConnection::~ThreadedSocketConnection() {
   LOG4CXX_TRACE_ENTER(logger_);
   terminate_flag_ = true;
-  notify();
+  Notify();
   pthread_join(thread_, 0);
   pthread_mutex_destroy(&frames_to_send_mutex_);
 
@@ -75,23 +75,23 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
-void ThreadedSocketConnection::abort() {
+void ThreadedSocketConnection::Abort() {
   LOG4CXX_TRACE_ENTER(logger_)
   unexpected_disconnect_ = true;
   terminate_flag_ = true;
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-void* startThreadedSocketConnection(void* v) {
+void* StartThreadedSocketConnection(void* v) {
   LOG4CXX_TRACE_ENTER(logger_)
   ThreadedSocketConnection* connection =
       static_cast<ThreadedSocketConnection*>(v);
-  connection->thread();
+  connection->Thread();
   LOG4CXX_TRACE_EXIT(logger_)
   return 0;
 }
 
-TransportAdapter::Error ThreadedSocketConnection::start() {
+TransportAdapter::Error ThreadedSocketConnection::Start() {
   LOG4CXX_TRACE_ENTER(logger_)
   int fds[2];
   const int pipe_ret = pipe(fds);
@@ -112,7 +112,7 @@ TransportAdapter::Error ThreadedSocketConnection::start() {
     return TransportAdapter::FAIL;
   }
 
-  if (0 == pthread_create(&thread_, 0, &startThreadedSocketConnection, this)) {
+  if (0 == pthread_create(&thread_, 0, &StartThreadedSocketConnection, this)) {
     LOG4CXX_INFO(logger_, "thread created (#" << pthread_self() << ")")
     LOG4CXX_TRACE_EXIT(logger_)
     return TransportAdapter::OK;
@@ -123,7 +123,7 @@ TransportAdapter::Error ThreadedSocketConnection::start() {
   }
 }
 
-void ThreadedSocketConnection::finalize() {
+void ThreadedSocketConnection::Finalize() {
   LOG4CXX_TRACE_ENTER(logger_)
   if (unexpected_disconnect_) {
     LOG4CXX_INFO(logger_, "unexpected_disconnect (#" << pthread_self() << ")")
@@ -138,7 +138,7 @@ void ThreadedSocketConnection::finalize() {
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-TransportAdapter::Error ThreadedSocketConnection::notify() const {
+TransportAdapter::Error ThreadedSocketConnection::Notify() const {
   LOG4CXX_TRACE_ENTER(logger_)
   if (-1 == write_fd_) {
     LOG4CXX_ERROR_WITH_ERRNO(
@@ -165,17 +165,17 @@ TransportAdapter::Error ThreadedSocketConnection::SendData(
   frames_to_send_.push(message);
   pthread_mutex_unlock(&frames_to_send_mutex_);
   LOG4CXX_TRACE_EXIT(logger_)
-  return notify();
+  return Notify();
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
   LOG4CXX_TRACE_ENTER(logger_)
   terminate_flag_ = true;
   LOG4CXX_TRACE_EXIT(logger_)
-  return notify();
+  return Notify();
 }
 
-void ThreadedSocketConnection::thread() {
+void ThreadedSocketConnection::Thread() {
   LOG4CXX_TRACE_ENTER(logger_)
   controller_->ConnectionCreated(this, device_uid_, app_handle_);
   ConnectError* connect_error = nullptr;
@@ -183,10 +183,10 @@ void ThreadedSocketConnection::thread() {
     LOG4CXX_INFO(logger_, "Connection established (#" << pthread_self() << ")")
     controller_->ConnectDone(device_handle(), application_handle());
     while (!terminate_flag_) {
-      transmit();
+      Transmit();
     }
     LOG4CXX_INFO(logger_, "Connection is to finalize (#" << pthread_self() << ")")
-    finalize();
+    Finalize();
     while (!frames_to_send_.empty()) {
       LOG4CXX_INFO(logger_, "removing message (#" << pthread_self() << ")")
       RawMessageSptr message = frames_to_send_.front();
@@ -204,7 +204,7 @@ void ThreadedSocketConnection::thread() {
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-void ThreadedSocketConnection::transmit() {
+void ThreadedSocketConnection::Transmit() {
   LOG4CXX_TRACE_ENTER(logger_)
   bool pipe_notified = false;
   bool pipe_terminated = false;
@@ -219,7 +219,7 @@ void ThreadedSocketConnection::transmit() {
   LOG4CXX_INFO(logger_, "poll (#" << pthread_self() << ") " << this)
   if (-1 == poll(poll_fds, poll_fds_size, -1)) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
-    abort();
+    Abort();
     LOG4CXX_INFO(logger_, "exit");
     return;
   }
@@ -228,14 +228,14 @@ void ThreadedSocketConnection::transmit() {
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
     LOG4CXX_ERROR(logger_,
                   "Notification pipe for connection " << this << " terminated");
-    abort();
+    Abort();
     LOG4CXX_INFO(logger_, "exit");
     return;
   }
 
   if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
     LOG4CXX_INFO(logger_, "Connection " << this << " terminated");
-    abort();
+    Abort();
     LOG4CXX_INFO(logger_, "exit");
     return;
   }
@@ -253,16 +253,16 @@ void ThreadedSocketConnection::transmit() {
     if ((bytes_read < 0) && (EAGAIN != errno)) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
-      abort();
+      Abort();
       LOG4CXX_INFO(logger_, "exit");
       return;
     }
 
     // send data
-    const bool send_ok = send();
+    const bool send_ok = Send();
     if (!send_ok) {
-      LOG4CXX_INFO(logger_, "send() failed  (#" << pthread_self() << ")")
-      abort();
+      LOG4CXX_INFO(logger_, "Send() failed  (#" << pthread_self() << ")")
+      Abort();
       LOG4CXX_INFO(logger_, "exit");
       return;
     }
@@ -270,10 +270,10 @@ void ThreadedSocketConnection::transmit() {
 
   // receive data
   if (0 != poll_fds[0].revents & POLLIN) {
-    const bool receive_ok = receive();
+    const bool receive_ok = Receive();
     if (!receive_ok) {
-      LOG4CXX_INFO(logger_, "receive() failed  (#" << pthread_self() << ")")
-      abort();
+      LOG4CXX_INFO(logger_, "Receive() failed  (#" << pthread_self() << ")")
+      Abort();
       LOG4CXX_INFO(logger_, "exit");
       return;
     }
@@ -281,7 +281,7 @@ void ThreadedSocketConnection::transmit() {
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-bool ThreadedSocketConnection::receive() {
+bool ThreadedSocketConnection::Receive() {
   LOG4CXX_TRACE_ENTER(logger_)
   uint8_t buffer[4096];
   ssize_t bytes_read = -1;
@@ -315,7 +315,7 @@ bool ThreadedSocketConnection::receive() {
   return true;
 }
 
-bool ThreadedSocketConnection::send() {
+bool ThreadedSocketConnection::Send() {
   LOG4CXX_TRACE_ENTER(logger_)
   FrameQueue frames_to_send;
   pthread_mutex_lock(&frames_to_send_mutex_);

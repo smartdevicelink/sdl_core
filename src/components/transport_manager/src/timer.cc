@@ -85,7 +85,7 @@ Timer& Timer::operator = (const Timer &other)
     return *this;
 }
 
-void Timer::start() {
+void Timer::Start() {
   pthread_create(&thread_, nullptr, &ThreadRoutine, this);
 }
 

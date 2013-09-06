@@ -68,7 +68,7 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
 void* tcpClientListenerThread(void* data) {
   TcpClientListener* tcpClientListener = static_cast<TcpClientListener*>(data);
   assert(tcpClientListener != 0);
-  tcpClientListener->thread();
+  tcpClientListener->Thread();
   return 0;
 }
 
@@ -89,7 +89,7 @@ TcpClientListener::~TcpClientListener() {
   LOG4CXX_INFO(logger_, "destructor");
 }
 
-void TcpClientListener::thread() {
+void TcpClientListener::Thread() {
   LOG4CXX_INFO(logger_, "Tcp client listener thread started");
 
   while (false == thread_stop_requested_) {
@@ -133,7 +133,7 @@ void TcpClientListener::thread() {
         new TcpSocketConnection(device->unique_device_id(), app_handle,
                                 controller_));
     connection->set_socket(connection_fd);
-    const TransportAdapter::Error error = connection->start();
+    const TransportAdapter::Error error = connection->Start();
     if (error != TransportAdapter::OK) {
       delete connection;
     }

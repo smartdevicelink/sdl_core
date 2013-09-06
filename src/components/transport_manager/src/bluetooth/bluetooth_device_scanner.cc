@@ -82,7 +82,7 @@ void* bluetoothDeviceScannerThread(void* data) {
   BluetoothDeviceScanner* bluetoothDeviceScanner =
       static_cast<BluetoothDeviceScanner*>(data);
   assert(bluetoothDeviceScanner != 0);
-  bluetoothDeviceScanner->thread();
+  bluetoothDeviceScanner->Thread();
   LOG4CXX_TRACE_EXIT(logger_)
   return 0;
 }
@@ -91,7 +91,7 @@ bool BluetoothDeviceScanner::IsInitialised() const {
   return thread_started_;
 }
 
-SearchDeviceError* BluetoothDeviceScanner::doInquiry(
+SearchDeviceError* BluetoothDeviceScanner::DoInquiry(
     DeviceVector* discovered_devices) {
   LOG4CXX_TRACE_ENTER(logger_);
   assert(discovered_devices != 0);
@@ -279,7 +279,7 @@ BluetoothDeviceScanner::RfcommChannelVector BluetoothDeviceScanner::DiscoverSmar
   return channels;
 }
 
-void BluetoothDeviceScanner::thread() {
+void BluetoothDeviceScanner::Thread() {
   LOG4CXX_TRACE_ENTER(logger_)
   LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized")
   ready_ = true;
@@ -287,7 +287,7 @@ void BluetoothDeviceScanner::thread() {
     bool device_scan_requested = WaitForDeviceScanRequest();
     if (device_scan_requested) {
       DeviceVector discovered_devices;
-      SearchDeviceError* error = doInquiry(&discovered_devices);
+      SearchDeviceError* error = DoInquiry(&discovered_devices);
 
       if (error == 0) {
         LOG4CXX_INFO(

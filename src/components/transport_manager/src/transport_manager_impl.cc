@@ -228,7 +228,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
     param[1] = &connection;
     Timer timer(config_.disconnectTimeout, &DisconnectFailedRoutine, &param, true);
     connection->timer = timer;
-    timer.start();
+    timer.Start();
   } else {
     connection->transport_adapter->Disconnect(connection->device,
                                            connection->application);

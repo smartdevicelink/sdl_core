@@ -82,7 +82,7 @@ class Timer {
   /**
    * @brief Start timer.
    */
-  void start();
+  void Start();
 
   /**
    * @brief Stop timer.

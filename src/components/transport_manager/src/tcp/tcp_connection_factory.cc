@@ -53,7 +53,7 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
   TcpServerOiginatedSocketConnection* connection(
       new TcpServerOiginatedSocketConnection(device_uid, app_handle,
                                              controller_));
-  TransportAdapter::Error error = connection->start();
+  TransportAdapter::Error error = connection->Start();
   if (error != TransportAdapter::OK)
     delete connection;
   return error;

@@ -54,7 +54,7 @@ void *applicationWorker(void *p) {
   len = recv(data->sockfd, buf, 2 * 1024 * 1024, 0);
   if (len == 0)
     break;
-  send(data->sockfd, buf, len, 0);
+  Send(data->sockfd, buf, len, 0);
   }
   delete[] buf;
   delete data;
@@ -126,7 +126,7 @@ MockApplication::MockApplication(const MockDevice *device, ApplicationHandle id)
   socket_name_ = oss.str();
 }
 
-void MockApplication::start() {
+void MockApplication::Start() {
 
   pthread_cond_init(&ready_cond, nullptr);
   pthread_mutex_init(&ready_mutex, nullptr);
@@ -137,7 +137,7 @@ void MockApplication::start() {
   pthread_mutex_unlock(&ready_mutex);
 }
 
-void MockApplication::stop() {
+void MockApplication::Stop() {
   active = false;
   shutdown(sockfd, SHUT_RDWR);
   close(sockfd);
