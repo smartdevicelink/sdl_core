@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 OnVIVehicleDataNotification::OnVIVehicleDataNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnVIVehicleDataNotification::~OnVIVehicleDataNotification() {
@@ -49,7 +50,7 @@ void OnVIVehicleDataNotification::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::OnVehicleDataID;
+      mobile_apis::FunctionID::eType::OnVehicleDataID;
 
   SendNotificationToMobile(message_);
 }

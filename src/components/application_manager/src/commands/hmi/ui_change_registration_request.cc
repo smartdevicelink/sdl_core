@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UIChangeRegistrationRequest::UIChangeRegistrationRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIChangeRegistrationRequest::~UIChangeRegistrationRequest() {

@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 OnNaviTBTClientStateNotification::OnNaviTBTClientStateNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnNaviTBTClientStateNotification::~OnNaviTBTClientStateNotification() {
@@ -49,7 +50,7 @@ void OnNaviTBTClientStateNotification::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::OnTBTClientStateID;
+      mobile_apis::FunctionID::OnTBTClientStateID;
 
   SendNotificationToMobile(message_);
 }

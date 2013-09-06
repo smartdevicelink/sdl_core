@@ -46,13 +46,15 @@ namespace application_manager {
 namespace commands {
 
 class CommandNotificationImpl : public CommandImpl {
-  public:
-    explicit CommandNotificationImpl(const MessageSharedPtr& message);
-    virtual ~CommandNotificationImpl();
-    virtual bool Init();
-    virtual bool CleanUp();
-    virtual void Run();
-    void SendNotification();
+ public:
+  explicit CommandNotificationImpl(const MessageSharedPtr& message);
+  virtual ~CommandNotificationImpl();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void SendNotification();
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CommandNotificationImpl);
 };
 
 }  // namespace commands

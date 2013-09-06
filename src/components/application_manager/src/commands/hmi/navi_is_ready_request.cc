@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-NaviIsReadyRequest::NaviIsReadyRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+NaviIsReadyRequest::NaviIsReadyRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 NaviIsReadyRequest::~NaviIsReadyRequest() {

@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UISliderRequest::UISliderRequest(
-    const MessageSharedPtr& message): RequestToHMI(message) {
+UISliderRequest::UISliderRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UISliderRequest::~UISliderRequest() {

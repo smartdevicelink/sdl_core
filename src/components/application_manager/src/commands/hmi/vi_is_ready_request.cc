@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-VIIsReadyRequest::VIIsReadyRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+VIIsReadyRequest::VIIsReadyRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 VIIsReadyRequest::~VIIsReadyRequest() {

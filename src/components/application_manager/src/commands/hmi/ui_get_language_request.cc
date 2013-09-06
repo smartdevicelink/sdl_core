@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIGetLanguageRequest::UIGetLanguageRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UIGetLanguageRequest::UIGetLanguageRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIGetLanguageRequest::~UIGetLanguageRequest() {

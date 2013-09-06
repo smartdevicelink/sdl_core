@@ -36,7 +36,8 @@ namespace application_manager {
 namespace commands {
 
 TTSStopSpeakingResponse::TTSStopSpeakingResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {

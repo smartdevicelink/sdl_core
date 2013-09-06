@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIIsReadyRequest::UIIsReadyRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UIIsReadyRequest::UIIsReadyRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIIsReadyRequest::~UIIsReadyRequest() {

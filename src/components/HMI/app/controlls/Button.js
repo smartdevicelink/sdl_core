@@ -147,15 +147,14 @@ SDL.Button = Em.View
                     + '<span>{{view.text}}</span>'),
 
             templates: {
-                text: Em.Handlebars.compile('<span>{{view.text}}</span>'),
+                text: Em.Handlebars.compile('<span class="text">{{view.text}}</span>'),
 
                 icon: Em.Handlebars
                     .compile('<img class="ico" {{bindAttr src="view.icon"}} />'),
 
                 rightText: Em.Handlebars
                     .compile('<img class="ico" {{bindAttr src="view.icon"}} />'
-                        + '<span class="rightTextButton" >{{view.text}}</span>'
-                        + '<span class="right_text">{{view.rightText}}</span>'),
+                        + '<span class="right_text">{{view.text}}</span>'),
 
                 arrow: Em.Handlebars
                     .compile('<img class="ico" {{bindAttr src="view.icon"}} />'

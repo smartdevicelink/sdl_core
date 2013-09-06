@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNSUBSCRIBE_VEHICLE_DATA_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNSUBSCRIBE_VEHICLE_DATA_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
@@ -51,8 +51,7 @@ class UnsubscribeVehicleDataResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UnsubscribeVehicleDataResponse(
-      const MessageSharedPtr& message);
+  explicit UnsubscribeVehicleDataResponse(const MessageSharedPtr& message);
 
   /**
    * @brief UnsubscribeVehicleDataResponse class destructor
@@ -71,4 +70,4 @@ class UnsubscribeVehicleDataResponse : public CommandResponseImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNSUBSCRIBE_VEHICLE_DATA_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_RESPONSE_H_

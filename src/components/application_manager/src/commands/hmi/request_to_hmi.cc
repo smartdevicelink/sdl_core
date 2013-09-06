@@ -30,7 +30,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "application_manager/commands/hmi/request_to_hmi.h"
 #include "application_manager/application_manager_impl.h"
 
@@ -39,7 +38,7 @@ namespace application_manager {
 namespace commands {
 
 RequestToHMI::RequestToHMI(const MessageSharedPtr& message)
-: CommandImpl(message) {
+    : CommandImpl(message) {
 }
 
 RequestToHMI::~RequestToHMI() {

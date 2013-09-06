@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
@@ -47,11 +48,11 @@ void UIGetCapabilitiesResponse::Run() {
   LOG4CXX_INFO(logger_, "UIGetCapabilitiesResponse::Run");
 
   ApplicationManagerImpl::instance()->set_display_capabilities(
-    (*message_)[strings::msg_params][hmi_response::display_capabilities]);
+      (*message_)[strings::msg_params][hmi_response::display_capabilities]);
   ApplicationManagerImpl::instance()->set_hmi_zone_capabilities(
-    (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
+      (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
   ApplicationManagerImpl::instance()->set_soft_button_capabilities(
-    (*message_)[strings::msg_params][hmi_response::soft_button_capabilities]);
+      (*message_)[strings::msg_params][hmi_response::soft_button_capabilities]);
 }
 
 }  // namespace commands

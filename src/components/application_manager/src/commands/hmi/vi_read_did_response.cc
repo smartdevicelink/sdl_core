@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-VIReadDIDResponse::VIReadDIDResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+VIReadDIDResponse::VIReadDIDResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VIReadDIDResponse::~VIReadDIDResponse() {
@@ -49,7 +49,7 @@ void VIReadDIDResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::ReadDIDID;
+      mobile_apis::FunctionID::ReadDIDID;
 
   SendResponseToMobile(message_);
 }

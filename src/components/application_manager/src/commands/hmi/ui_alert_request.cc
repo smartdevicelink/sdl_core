@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIAlertRequest::UIAlertRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UIAlertRequest::UIAlertRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIAlertRequest::~UIAlertRequest() {
