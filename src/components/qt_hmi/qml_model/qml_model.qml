@@ -6,6 +6,12 @@ Rectangle {
     height: 768
     color: "black"
 
+    Text {
+        id: caption
+        color: "lightblue"
+        text: "Hello"
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {
