@@ -219,7 +219,7 @@ FFW.TTS = FFW.RPCObserver.create( {
         }
         case "TTS.ChangeRegistration": {
 
-            SDL.SDLModel.changeRegistrationTTSVR(request.params.language);
+            SDL.SDLModel.changeRegistrationTTSVR(request.params.language, request.params.appID);
 
             this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
                 request.id,

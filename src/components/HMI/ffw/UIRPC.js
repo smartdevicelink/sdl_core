@@ -267,7 +267,7 @@ FFW.UI = FFW.RPCObserver
                 }
                 case "UI.ChangeRegistration": {
 
-                    SDL.SDLModel.changeRegistrationUI(request.params.language);
+                    SDL.SDLModel.changeRegistrationUI(request.params.language, request.params.appID);
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);

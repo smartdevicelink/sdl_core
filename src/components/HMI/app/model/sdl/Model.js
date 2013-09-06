@@ -363,9 +363,11 @@ SDL.SDLModel = Em.Object
          * 
          * @type {String} lang
          */
-        changeRegistrationUI: function(lang) {
+        changeRegistrationUI: function(lang, appID) {
 
-            SDL.SDLAppController.model.set('UILanguage', lang);
+            if (SDL.SDLController.getApplicationModel(appID)) {
+                SDL.SDLController.getApplicationModel(appID).set('UILanguage', lang);
+            }
         },
 
         /**
@@ -374,9 +376,11 @@ SDL.SDLModel = Em.Object
          * 
          * @type {String} lang
          */
-        changeRegistrationTTSVR: function(lang) {
+        changeRegistrationTTSVR: function(lang, appID) {
 
-            SDL.SDLAppController.model.set('TTSVRLanguage', lang);
+            if (SDL.SDLController.getApplicationModel(appID)) {
+                SDL.SDLController.getApplicationModel(appID).set('TTSVRLanguage', lang);
+            }
         },
 
         /**
