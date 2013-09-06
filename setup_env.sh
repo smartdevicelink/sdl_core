@@ -56,12 +56,12 @@ echo "Installing pulseaudio development files"
 apt-install ${PULSEAUDIO_DEV}
 echo $OK
 
-echo "Installing Avahi-client-dev library"
-apt-install ${AVAHI_CLIENT_LIBRARY}
-echo $OK
-
 echo "Installing Avahi-common-dev library"
 apt-install ${AVAHI_COMMON}
+echo $OK
+
+echo "Installing Avahi-client-dev library"
+apt-install ${AVAHI_CLIENT_LIBRARY}
 echo $OK
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
