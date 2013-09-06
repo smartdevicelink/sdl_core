@@ -30,43 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_ACTIVATED_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_ACTIVATED_NOTIFICATION_H_
-
-#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/hmi/activate_app_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief OnAppActivatedNotification command class
- **/
-class OnAppActivatedNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnAppActivatedNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnAppActivatedNotification(const MessageSharedPtr& message);
+ActivateAppRequest::ActivateAppRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
+}
 
-    /**
-     * @brief OnAppActivatedNotification class destructor
-     **/
-    virtual ~OnAppActivatedNotification();
+ActivateAppRequest::~ActivateAppRequest() {
+}
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+void ActivateAppRequest::Run() {
+  LOG4CXX_INFO(logger_, "ActivateAppRequest::Run");
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnAppActivatedNotification);
-};
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_ACTIVATED_NOTIFICATION_H_

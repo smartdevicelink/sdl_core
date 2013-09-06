@@ -210,7 +210,9 @@ class MessageHelper {
   static void SendDeleteSubMenuRequestToHMI(Application* const app);
   static void ResetGlobalproperties(Application* const app);
 
-  static smart_objects::SmartObject* CreateNegativeResponse(
+    static void SendActivateAppToHMI(Application* const app);
+
+    static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);
 

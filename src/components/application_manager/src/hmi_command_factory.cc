@@ -47,6 +47,8 @@
 #include "application_manager/commands/hmi/allow_all_apps_response.h"
 #include "application_manager/commands/hmi/allow_app_request.h"
 #include "application_manager/commands/hmi/allow_app_response.h"
+#include "application_manager/commands/hmi/activate_app_request.h"
+#include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_request.h"
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
@@ -213,6 +215,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::AllowAppResponse(message));
       } else {
         command.reset(new commands::AllowAppRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_ActivateApp: {
+      if (is_response) {
+        command.reset(new commands::ActivateAppResponse(message));
+      } else {
+        command.reset(new commands::ActivateAppRequest(message));
       }
       break;
     }

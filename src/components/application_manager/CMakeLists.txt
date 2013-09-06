@@ -156,6 +156,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/allow_all_apps_response.cc
 ./src/commands/hmi/allow_app_request.cc
 ./src/commands/hmi/allow_app_response.cc
+./src/commands/hmi/activate_app_request.cc
+./src/commands/hmi/activate_app_response.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
 ./src/commands/hmi/update_app_list_request.cc

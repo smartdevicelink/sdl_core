@@ -908,6 +908,23 @@ void MessageHelper::SendDeleteSubMenuRequestToHMI(Application* const app) {
   }
 }
 
+void MessageHelper::SendActivateAppToHMI(Application* const app) {
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!message) {
+    return;
+  }
+
+  (*message)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::BasicCommunication_ActivateApp;
+  (*message)[strings::params][strings::message_type] = MessageType::kRequest;
+  (*message)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  (*message)[strings::msg_params][strings::app_id] = app->app_id();
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
+}
+
 smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
   unsigned int connection_key, int function_id, unsigned int correlation_id,
   int result_code) {
