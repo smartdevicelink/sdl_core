@@ -3,8 +3,8 @@ import QtQuick 2.0
 ListModel
 {
     ListElement {
-        name: "Car"
-        icon: "res/car.png"
+        name: "Climate"
+        icon: "res/snow.png"
     }
 
     ListElement {
@@ -13,13 +13,13 @@ ListModel
     }
 
     ListElement {
-        name: "Preferences"
-        icon: "res/gear.png"
+        name: "Media"
+        icon: "res/notes.png"
     }
 
     ListElement {
-        name: "Media"
-        icon: "res/notes.png"
+        name: "Apps"
+        icon: "res/apps.png"
     }
 
     ListElement {
@@ -28,7 +28,13 @@ ListModel
     }
 
     ListElement {
-        name: "Climate"
-        icon: "res/snow.png"
+        name: "Car"
+        icon: "res/car.png"
     }
+
+    ListElement {
+        name: "Preferences"
+        icon: "res/gear.png"
+    }
+
 }

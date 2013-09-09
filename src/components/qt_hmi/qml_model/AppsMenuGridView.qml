@@ -2,10 +2,6 @@ import QtQuick 2.0
 
 GridView
 {
-    id: mainMenuGridview
-    x: (parent.width - width) / 2
-    y: (parent.height - height) / 2
-
     populate: Transition {
         id: populateTransition;
         SequentialAnimation {
@@ -25,7 +21,10 @@ GridView
         }
     }
 
-    width: 4 * cellWidth
+    id: appsMenuGridview
+    x: (parent.width - width) / 2
+    y: (parent.height - height) / 2
+    width: 3 * cellWidth
     height: 2 * cellHeight
     cellWidth: 221
     cellHeight: 149
@@ -34,16 +33,15 @@ GridView
     flickableDirection: Flickable.AutoFlickDirection
     interactive: true
 
-    model: Menu {}
+    model: AppsMenu {}
     highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
     focus: true
-    visible: parent.state === "Main"
+    visible: parent.state === "Apps"
 
     delegate: Item {
-        width: mainMenuGridview.cellWidth
-        height: mainMenuGridview.cellHeight
+        width: appsMenuGridview.cellWidth
+        height: appsMenuGridview.cellHeight
         MouseArea {
-            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: {
                 caption.text = name
@@ -52,5 +50,11 @@ GridView
         }
 
         Image { source: icon; anchors.horizontalCenter: parent.horizontalCenter; anchors.verticalCenter: parent.verticalCenter;}
+        Text  {
+            text: name;
+            color: "white"
+            anchors.baseline: parent.bottom;
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
     }
 }

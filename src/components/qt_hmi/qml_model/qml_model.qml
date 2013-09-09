@@ -72,12 +72,19 @@ Rectangle {
         id: carMenuGridView
     }
 
+    AppsMenuGridView {
+        id: appsMenuGridView
+    }
+
     states: [
         State {
             name: "Main"
         },
         State {
             name: "Car"
+        },
+        State {
+            name: "Apps"
         }
     ]
 }
