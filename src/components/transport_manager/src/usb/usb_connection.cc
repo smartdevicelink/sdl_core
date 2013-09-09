@@ -133,6 +133,7 @@ void UsbConnection::PopOutMessage() {
     current_out_message_.reset();
   } else {
     current_out_message_ = out_messages_.front();
+    out_messages_.pop_front();
     PostOutTransfer();
   }
 }
@@ -164,6 +165,7 @@ void UsbConnection::OnOutTransfer(libusb_transfer *transfer) {
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     bytes_sent_ += transfer->actual_length;
     if (bytes_sent_ == current_out_message_->data_size()) {
+      LOG4CXX_INFO(logger_, "USB out transfer, data sent: " << current_out_message_.get());
       controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
       PopOutMessage();
     }
