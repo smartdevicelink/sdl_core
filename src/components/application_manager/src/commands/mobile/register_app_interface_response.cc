@@ -29,17 +29,16 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
-
+ */
 
 #include "application_manager/commands/mobile/register_app_interface_response.h"
 #include "interfaces/MOBILE_API.h"
 
-namespace application_manager  {
+namespace application_manager {
 
-namespace commands  {
+namespace commands {
 
-void RegisterAppInterfaceResponse::Run()  {
+void RegisterAppInterfaceResponse::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceResponse::Run");
 
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());

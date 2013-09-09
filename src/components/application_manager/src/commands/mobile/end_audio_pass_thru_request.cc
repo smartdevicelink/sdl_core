@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 EndAudioPassThruRequest::EndAudioPassThruRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 EndAudioPassThruRequest::~EndAudioPassThruRequest() {
@@ -61,7 +62,6 @@ void EndAudioPassThruRequest::Run() {
     SendResponse(false, mobile_apis::Result::REJECTED,
                  "No PerformAudioPassThru is now active");
   }
-
 }
 
 }  // namespace commands

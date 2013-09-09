@@ -98,7 +98,6 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
   threads::Thread* handle_messages_to_mobile_app_;
   friend class MessagesToMobileAppHandler;
 
-
   static MobileMessageHandlerImpl* self_;
   static log4cxx::LoggerPtr logger_;
 

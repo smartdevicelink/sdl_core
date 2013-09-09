@@ -42,7 +42,8 @@ typedef utils::SharedPtr<application_manager::Message> MobileMessage;
 class MobileMessageObserver {
  public:
   virtual void OnMobileMessageReceived(const MobileMessage& message) = 0;
-  virtual ~MobileMessageObserver() {}
+  virtual ~MobileMessageObserver() {
+  }
 };
 }  // namespace mobile_message_handler
 

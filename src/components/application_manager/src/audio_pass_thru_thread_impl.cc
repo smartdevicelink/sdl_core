@@ -153,12 +153,11 @@ void AudioPassThruThreadImpl::threadMain() {
   stopFlagMutex_.unlock();
 
   while (true) {
-
     sendAudioChunkToMobile();
 
     stopFlagMutex_.lock();
     if (shouldBeStoped_) {
-       break;
+      break;
     }
     stopFlagMutex_.unlock();
   }
@@ -203,7 +202,6 @@ void AudioPassThruThreadImpl::sendAudioChunkToMobile() {
   to = binaryData.end();
 
   if (from < binaryData.end() /*from != binaryData.end()*/) {
-
     LOG4CXX_INFO_EXT(logger_, "from != binaryData.end()");
 
     offset_ = offset_ + to - from;
@@ -248,7 +246,6 @@ void AudioPassThruThreadImpl::sendAudioChunkToMobile() {
 
     FactoryCreateCommand(on_audio_pass);
   }
-
 }
 
 void AudioPassThruThreadImpl::exitThreadMain() {

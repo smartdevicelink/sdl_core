@@ -44,66 +44,57 @@ namespace {
 const char kRpcsKey[] = "rpcs";
 const char kHmiLevelsKey[] = "hmi_levels";
 
-std::map<std::string, FunctionID::eType> kFunctionIDs {
-  { "RegisterAppInterface", FunctionID::RegisterAppInterfaceID },
-  { "UnregisterAppInterface", FunctionID::UnregisterAppInterfaceID },
-  { "SetGlobalProperties", FunctionID::SetGlobalPropertiesID },
-  { "ResetGlobalProperties", FunctionID::ResetGlobalPropertiesID },
-  { "AddCommand", FunctionID::AddCommandID },
-  { "DeleteCommand", FunctionID::DeleteCommandID },
-  { "AddSubMenu", FunctionID::AddSubMenuID },
-  { "DeleteSubMenu", FunctionID::DeleteSubMenuID },
-  { "CreateInteractionChoiceSet", FunctionID::CreateInteractionChoiceSetID },
-  { "PerformInteraction", FunctionID::PerformInteractionID },
-  { "DeleteInteractionChoiceSet", FunctionID::DeleteInteractionChoiceSetID },
-  { "Alert", FunctionID::AlertID },
-  { "Show", FunctionID::ShowID },
-  { "Speak", FunctionID::SpeakID },
-  { "SetMediaClockTimer", FunctionID::SetMediaClockTimerID },
-  { "EncodedSyncPData", FunctionID::EncodedSyncPDataID },
-  { "SyncPData", FunctionID::SyncPDataID },
-  { "PerformAudioPassThru", FunctionID::PerformAudioPassThruID },
-  { "EndAudioPassThru", FunctionID::EndAudioPassThruID },
-  { "SubscribeButton", FunctionID::SubscribeButtonID },
-  { "UnsubscribeButton", FunctionID::UnsubscribeButtonID },
-  { "SubscribeVehicleData", FunctionID::SubscribeVehicleDataID },
-  { "UnsubscribeVehicleData", FunctionID::UnsubscribeVehicleDataID },
-  { "GetVehicleData", FunctionID::GetVehicleDataID },
-  { "ReadDID", FunctionID::ReadDIDID },
-  { "GetDTCs", FunctionID::GetDTCsID },
-  { "ScrollableMessage", FunctionID::ScrollableMessageID },
-  { "Slider", FunctionID::SliderID },
-  { "ShowConstantTBT", FunctionID::ShowConstantTBTID },
-  { "AlertManeuver", FunctionID::AlertManeuverID },
-  { "UpdateTurnList", FunctionID::UpdateTurnListID },
-  { "ChangeRegistration", FunctionID::ChangeRegistrationID },
-  { "GenericResponse", FunctionID::GenericResponseID },
-  { "PutFile", FunctionID::PutFileID },
-  { "DeleteFile", FunctionID::DeleteFileID },
-  { "ListFiles", FunctionID::ListFilesID },
-  { "SetAppIcon", FunctionID::SetAppIconID },
-  { "SetDisplayLayout", FunctionID::SetDisplayLayoutID },
-  { "OnHMIStatus", FunctionID::OnHMIStatusID },
-  { "OnAppInterfaceUnregistered", FunctionID::OnAppInterfaceUnregisteredID },
-  { "OnButtonEvent", FunctionID::OnButtonEventID },
-  { "OnButtonPress", FunctionID::OnButtonPressID },
-  { "OnVehicleData", FunctionID::OnVehicleDataID },
-  { "OnCommand", FunctionID::OnCommandID },
-  { "OnEncodedSyncPData", FunctionID::OnEncodedSyncPDataID },
-  { "OnTBTClientState", FunctionID::OnTBTClientStateID },
-  { "OnPermissionsChange", FunctionID::OnPermissionsChangeID },
-  { "OnAudioPassThru", FunctionID::OnAudioPassThruID },
-  { "OnLanguageChange", FunctionID::OnLanguageChangeID },
-  { "OnDriverDistraction", FunctionID::OnDriverDistractionID },
-  { "OnSyncPData", FunctionID::EncodedSyncPDataID }
-};
+std::map<std::string, FunctionID::eType> kFunctionIDs { {
+    "RegisterAppInterface", FunctionID::RegisterAppInterfaceID }, {
+    "UnregisterAppInterface", FunctionID::UnregisterAppInterfaceID }, {
+    "SetGlobalProperties", FunctionID::SetGlobalPropertiesID }, {
+    "ResetGlobalProperties", FunctionID::ResetGlobalPropertiesID }, {
+    "AddCommand", FunctionID::AddCommandID }, { "DeleteCommand",
+    FunctionID::DeleteCommandID }, { "AddSubMenu", FunctionID::AddSubMenuID }, {
+    "DeleteSubMenu", FunctionID::DeleteSubMenuID }, {
+    "CreateInteractionChoiceSet", FunctionID::CreateInteractionChoiceSetID }, {
+    "PerformInteraction", FunctionID::PerformInteractionID }, {
+    "DeleteInteractionChoiceSet", FunctionID::DeleteInteractionChoiceSetID }, {
+    "Alert", FunctionID::AlertID }, { "Show", FunctionID::ShowID }, { "Speak",
+    FunctionID::SpeakID }, { "SetMediaClockTimer",
+    FunctionID::SetMediaClockTimerID }, { "EncodedSyncPData",
+    FunctionID::EncodedSyncPDataID }, { "SyncPData", FunctionID::SyncPDataID },
+    { "PerformAudioPassThru", FunctionID::PerformAudioPassThruID }, {
+        "EndAudioPassThru", FunctionID::EndAudioPassThruID }, {
+        "SubscribeButton", FunctionID::SubscribeButtonID }, {
+        "UnsubscribeButton", FunctionID::UnsubscribeButtonID }, {
+        "SubscribeVehicleData", FunctionID::SubscribeVehicleDataID }, {
+        "UnsubscribeVehicleData", FunctionID::UnsubscribeVehicleDataID }, {
+        "GetVehicleData", FunctionID::GetVehicleDataID }, { "ReadDID",
+        FunctionID::ReadDIDID }, { "GetDTCs", FunctionID::GetDTCsID }, {
+        "ScrollableMessage", FunctionID::ScrollableMessageID }, { "Slider",
+        FunctionID::SliderID }, { "ShowConstantTBT",
+        FunctionID::ShowConstantTBTID }, { "AlertManeuver",
+        FunctionID::AlertManeuverID }, { "UpdateTurnList",
+        FunctionID::UpdateTurnListID }, { "ChangeRegistration",
+        FunctionID::ChangeRegistrationID }, { "GenericResponse",
+        FunctionID::GenericResponseID }, { "PutFile", FunctionID::PutFileID }, {
+        "DeleteFile", FunctionID::DeleteFileID }, { "ListFiles",
+        FunctionID::ListFilesID }, { "SetAppIcon", FunctionID::SetAppIconID }, {
+        "SetDisplayLayout", FunctionID::SetDisplayLayoutID }, { "OnHMIStatus",
+        FunctionID::OnHMIStatusID }, { "OnAppInterfaceUnregistered",
+        FunctionID::OnAppInterfaceUnregisteredID }, { "OnButtonEvent",
+        FunctionID::OnButtonEventID }, { "OnButtonPress",
+        FunctionID::OnButtonPressID }, { "OnVehicleData",
+        FunctionID::OnVehicleDataID }, { "OnCommand", FunctionID::OnCommandID },
+    { "OnEncodedSyncPData", FunctionID::OnEncodedSyncPDataID }, {
+        "OnTBTClientState", FunctionID::OnTBTClientStateID }, {
+        "OnPermissionsChange", FunctionID::OnPermissionsChangeID }, {
+        "OnAudioPassThru", FunctionID::OnAudioPassThruID }, {
+        "OnLanguageChange", FunctionID::OnLanguageChangeID }, {
+        "OnDriverDistraction", FunctionID::OnDriverDistractionID }, {
+        "OnSyncPData", FunctionID::EncodedSyncPDataID } };
 
-std::map<std::string, mobile_apis::HMILevel::eType> kHmiLevels {
-  { "FULL", mobile_apis::HMILevel::HMI_FULL },
-  { "LIMITED", mobile_apis::HMILevel::HMI_LIMITED },
-  { "BACKGROUND", mobile_apis::HMILevel::HMI_BACKGROUND },
-  { "NONE", mobile_apis::HMILevel::HMI_NONE }
-};
+std::map<std::string, mobile_apis::HMILevel::eType> kHmiLevels { { "FULL",
+    mobile_apis::HMILevel::HMI_FULL }, { "LIMITED",
+    mobile_apis::HMILevel::HMI_LIMITED }, { "BACKGROUND",
+    mobile_apis::HMILevel::HMI_BACKGROUND }, { "NONE",
+    mobile_apis::HMILevel::HMI_NONE } };
 }  // namespace
 
 namespace application_manager {
@@ -112,7 +103,7 @@ namespace policies_manager {
 //! ---------------------------------------------------------------------------
 
 log4cxx::LoggerPtr PoliciesManager::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("PoliciesManager"));
+    log4cxx::Logger::getLogger("PoliciesManager"));
 
 //! ---------------------------------------------------------------------------
 
@@ -125,7 +116,7 @@ PoliciesManager::~PoliciesManager() {
 bool PoliciesManager::init() {
   std::string json_string;
   std::string policies_file_name = profile::Profile::instance()
-                                   ->policies_file_name();
+      ->policies_file_name();
   if (!file_system::FileExists(policies_file_name)) {
     return false;
   }
@@ -140,8 +131,8 @@ bool PoliciesManager::init() {
     bool parsedSuccess = reader_.parse(json_string, json_, false);
     if (!parsedSuccess) {
       LOG4CXX_ERROR(
-        logger_,
-        "Failed to parse JSON: " << reader_.getFormatedErrorMessages());
+          logger_,
+          "Failed to parse JSON: " << reader_.getFormatedErrorMessages());
       return false;
     }
 
@@ -173,9 +164,8 @@ bool PoliciesManager::init() {
   return true;
 }
 
-bool PoliciesManager::is_valid_hmi_status(
-  FunctionID::eType function,
-  mobile_apis::HMILevel::eType status) {
+bool PoliciesManager::is_valid_hmi_status(FunctionID::eType function,
+                                          mobile_apis::HMILevel::eType status) {
   if (items_.find(function) == items_.end()) {
     return false;
   }

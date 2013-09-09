@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 SliderResponse::SliderResponse(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
+    : CommandResponseImpl(message) {
 }
 
 SliderResponse::~SliderResponse() {
@@ -61,15 +61,14 @@ void SliderResponse::Run() {
 
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
-    if (mobile_apis::Result::SUCCESS == code ||
-        mobile_apis::Result::ABORTED == code) {
+    if (mobile_apis::Result::SUCCESS == code
+        || mobile_apis::Result::ABORTED == code) {
       SendResponse(true);
     } else {
       // TODO(VS): Some logic
       SendResponse(false);
     }
   }
-
 }
 
 }  // namespace commands

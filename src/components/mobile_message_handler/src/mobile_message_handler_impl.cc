@@ -50,8 +50,8 @@ const unsigned char kUnknown = 0xF;
 namespace mobile_message_handler {
 
 MobileMessageHandlerImpl* MobileMessageHandlerImpl::self_ = NULL;
-log4cxx::LoggerPtr MobileMessageHandlerImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("MobileMessageHandler"));
+log4cxx::LoggerPtr MobileMessageHandlerImpl::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("MobileMessageHandler"));
 //! ----------------------------------------------------------------------------
 
 MobileMessageHandlerImpl::MobileMessageHandlerImpl()
@@ -148,7 +148,7 @@ application_manager::Message*
 MobileMessageHandlerImpl::HandleIncomingMessageProtocolV2(
     const protocol_handler::RawMessage* message) {
   LOG4CXX_INFO(logger_,
-                 "MobileMessageHandlerImpl HandleIncomingMessageProtocolV2()");
+               "MobileMessageHandlerImpl HandleIncomingMessageProtocolV2()");
   application_manager::Message* outgoing_message =
       new application_manager::Message;
   if (!message) {
@@ -216,7 +216,9 @@ MobileMessageHandlerImpl::HandleIncomingMessageProtocolV2(
       static_cast<application_manager::MessageType>(rpcType));
   outgoing_message->set_correlation_id(correlationId);
   outgoing_message->set_connection_key(message->connection_key());
-  outgoing_message->set_protocol_version(static_cast<application_manager::ProtocolVersion>(message->protocol_version()));
+  outgoing_message->set_protocol_version(
+      static_cast<application_manager::ProtocolVersion>(message
+          ->protocol_version()));
 
   if (message->data_size() > (offset + jsonSize)) {
     application_manager::BinaryData* binaryData =
@@ -241,7 +243,7 @@ protocol_handler::RawMessage*
 MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV1(
     const MobileMessage& message) {
   LOG4CXX_INFO(logger_,
-                 "MobileMessageHandlerImpl HandleOutgoingMessageProtocolV1()");
+               "MobileMessageHandlerImpl HandleOutgoingMessageProtocolV1()");
   std::string messageString = message->json_message();
   if (messageString.length() == 0) {
     return NULL;
@@ -262,8 +264,8 @@ MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
   LOG4CXX_INFO(logger_,
                "MobileMessageHandlerImpl HandleOutgoingMessageProtocolV2()");
 //  if (json.isNull()) {
-//    if (NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID
-//        == message->getMethodId()) {
+//    if (NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal
+//        ::OnAudioPassThruID== message->getMethodId()) {
 //
 //      // Workaround to have no JSON string in OnAudioPassThru notification
 //      // This notification contains audio data only.
@@ -319,7 +321,7 @@ MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
 
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.")
-    //return NULL;
+    // return NULL;
   }
 
   const uint MAX_HEADER_SIZE = 12;
@@ -402,7 +404,8 @@ void MobileMessageHandlerImpl::AddMobileMessageListener(
 
 void MobileMessageHandlerImpl::RemoveMobileMessageListener(
     MobileMessageObserver* listener) {
-  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl RemoveMobileMessageListener()");
+  LOG4CXX_INFO(logger_,
+               "MobileMessageHandlerImpl RemoveMobileMessageListener()");
   if (NULL == listener) {
     NOTREACHED();
     return;

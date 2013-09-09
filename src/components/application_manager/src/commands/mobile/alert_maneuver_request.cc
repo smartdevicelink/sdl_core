@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-AlertManeuverRequest::AlertManeuverRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+AlertManeuverRequest::AlertManeuverRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 AlertManeuverRequest::~AlertManeuverRequest() {
@@ -57,9 +57,8 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -67,28 +66,28 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[hmi_request::soft_buttons] =
-      (*message_)[strings::msg_params][strings::soft_buttons];
+        (*message_)[strings::msg_params][strings::soft_buttons];
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
-                   msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver, msg_params,
+                   true);
 
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       // crate HMI basic communication playtone request
-      smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
 
+      msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
+          smart_objects::SmartType_Array);
       msg_params[hmi_request::tts_chunks] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-      msg_params[hmi_request::tts_chunks] =
-        (*message_)[strings::msg_params][strings::tts_chunks];
+          (*message_)[strings::msg_params][strings::tts_chunks];
 
       msg_params[strings::app_id] = app->app_id();
       CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);

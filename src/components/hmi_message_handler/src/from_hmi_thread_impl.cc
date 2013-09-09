@@ -28,20 +28,19 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "./from_hmi_thread_impl.h"
 
 namespace hmi_message_handler {
 
-log4cxx::LoggerPtr FromHMIThreadImpl::logger_   =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
+log4cxx::LoggerPtr FromHMIThreadImpl::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("HMIMessageHandler"));
 
 FromHMIThreadImpl::FromHMIThreadImpl(HMIMessageHandlerImpl* handler)
-  : handler_(handler) {
+    : handler_(handler) {
   DCHECK(handler_);
 }
-
 
 FromHMIThreadImpl::~FromHMIThreadImpl() {
   handler_ = NULL;
@@ -51,8 +50,7 @@ void FromHMIThreadImpl::threadMain() {
   while (1) {
     while (!handler_->messages_from_hmi_.empty()) {
       LOG4CXX_INFO(logger_, "Received message from hmi");
-      MessageSharedPointer message =
-        handler_->messages_from_hmi_.pop();
+      MessageSharedPointer message = handler_->messages_from_hmi_.pop();
 
       if (!handler_->observer_) {
         LOG4CXX_ERROR(logger_, "Observer is not set for HMIMessageHandler");

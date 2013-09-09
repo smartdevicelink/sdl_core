@@ -39,8 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
-GetVehicleDataResponse::GetVehicleDataResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+GetVehicleDataResponse::GetVehicleDataResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 GetVehicleDataResponse::~GetVehicleDataResponse() {

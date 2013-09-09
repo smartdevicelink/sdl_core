@@ -38,8 +38,8 @@ namespace application_manager {
 
 namespace commands {
 
-DeleteFileResponse::DeleteFileResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+DeleteFileResponse::DeleteFileResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 DeleteFileResponse::~DeleteFileResponse() {

@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-SetIconResponse::SetIconResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+SetIconResponse::SetIconResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 SetIconResponse::~SetIconResponse() {
@@ -62,28 +62,26 @@ void SetIconResponse::Run() {
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  const MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  const MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 
-  smart_objects::SmartObject data =
-    msg_chain->data();
-  const int connection_key =  msg_chain->connection_key();
+  smart_objects::SmartObject data = msg_chain->data();
+  const int connection_key = msg_chain->connection_key();
 
   if (!IsPendingResponseExist()) {
-
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
 
     if (hmi_apis::Common_Result::SUCCESS == code) {
-      Application* app = ApplicationManagerImpl::instance()->
-        application(connection_key);
+      Application* app = ApplicationManagerImpl::instance()->application(
+          connection_key);
 
-      app->set_app_icon_path(data[strings::msg_params]
-                             [strings::sync_file_name]);
+      app->set_app_icon_path(
+          data[strings::msg_params][strings::sync_file_name]);
 
       SendResponse(true);
     } else {

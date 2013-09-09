@@ -37,8 +37,8 @@
 
 namespace hmi_message_handler {
 
-log4cxx::LoggerPtr HMIMessageHandlerImpl::logger_   =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
+log4cxx::LoggerPtr HMIMessageHandlerImpl::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("HMIMessageHandler"));
 
 HMIMessageHandlerImpl* HMIMessageHandlerImpl::instance() {
   static HMIMessageHandlerImpl instance;
@@ -46,22 +46,20 @@ HMIMessageHandlerImpl* HMIMessageHandlerImpl::instance() {
 }
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()
-  : observer_(NULL)
-  , to_hmi_thread_(NULL)
-  , from_hmi_thread_(NULL) {
-  to_hmi_thread_ = new threads::Thread(
-    "hmi_message_handler::ToHMIThreadImpl",
-    new ToHMIThreadImpl(this));
+    : observer_(NULL),
+      to_hmi_thread_(NULL),
+      from_hmi_thread_(NULL) {
+  to_hmi_thread_ = new threads::Thread("hmi_message_handler::ToHMIThreadImpl",
+                                       new ToHMIThreadImpl(this));
   to_hmi_thread_->startWithOptions(
-    threads::ThreadOptions(
-      profile::Profile::instance()->thread_min_stach_size()));
+      threads::ThreadOptions(
+          profile::Profile::instance()->thread_min_stach_size()));
 
   from_hmi_thread_ = new threads::Thread(
-    "hmi_message_handler::FromHMIThreadImpl",
-    new FromHMIThreadImpl(this));
+      "hmi_message_handler::FromHMIThreadImpl", new FromHMIThreadImpl(this));
   from_hmi_thread_->startWithOptions(
-    threads::ThreadOptions(
-      profile::Profile::instance()->thread_min_stach_size()));
+      threads::ThreadOptions(
+          profile::Profile::instance()->thread_min_stach_size()));
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
@@ -82,8 +80,7 @@ HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
   }
 }
 
-void HMIMessageHandlerImpl::onMessageReceived(
-  MessageSharedPointer message) {
+void HMIMessageHandlerImpl::onMessageReceived(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~onMessageReceived()");
   if (!observer_) {
     // TODO(PV): WARNING
@@ -92,8 +89,7 @@ void HMIMessageHandlerImpl::onMessageReceived(
   messages_from_hmi_.push(message);
 }
 
-void HMIMessageHandlerImpl::sendMessageToHMI(
-  MessageSharedPointer message) {
+void HMIMessageHandlerImpl::sendMessageToHMI(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~sendMessageToHMI()");
   messages_to_hmi_.push(message);
 }
@@ -103,8 +99,7 @@ void HMIMessageHandlerImpl::setMessageObserver(HMIMessageObserver* observer) {
   observer_ = observer;
 }
 
-void HMIMessageHandlerImpl::onErrorSending(
-  MessageSharedPointer message) {
+void HMIMessageHandlerImpl::onErrorSending(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~onErrorSending()");
   if (!observer_) {
     // TODO(PV): WARNING
@@ -119,7 +114,7 @@ void HMIMessageHandlerImpl::addHMIMessageAdapter(HMIMessageAdapter* adapter) {
 }
 
 void HMIMessageHandlerImpl::removeHMIMessageAdapter(
-  HMIMessageAdapter* adapter) {
+    HMIMessageAdapter* adapter) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~removeHMIMessageAdapter()");
   message_adapters_.erase(adapter);
 }

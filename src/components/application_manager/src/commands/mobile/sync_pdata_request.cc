@@ -42,14 +42,13 @@ namespace application_manager {
 
 namespace commands {
 
-const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FILENAME
-  = "policy_sync_data.dat";
-const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME
-  = "policies/";
+const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FILENAME =
+    "policy_sync_data.dat";
+const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME =
+    "policies/";
 
-SyncPDataRequest::SyncPDataRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+SyncPDataRequest::SyncPDataRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 SyncPDataRequest::~SyncPDataRequest() {
@@ -58,7 +57,8 @@ SyncPDataRequest::~SyncPDataRequest() {
 void SyncPDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SyncPDataRequest::Run");
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+      .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -67,7 +67,7 @@ void SyncPDataRequest::Run() {
     return;
   }
 
-    unsigned int free_space = file_system::AvailableSpace();
+  unsigned int free_space = file_system::AvailableSpace();
 
   const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
 
@@ -75,8 +75,8 @@ void SyncPDataRequest::Run() {
       (*message_)[strings::params][strings::binary_data].asBinary();
 
   if (free_space > char_vector_pdata.size()) {
-    std::string relative_file_path =
-        file_system::CreateDirectory(TEMPORARY_HARDCODED_FOLDERNAME);
+    std::string relative_file_path = file_system::CreateDirectory(
+        TEMPORARY_HARDCODED_FOLDERNAME);
 
     relative_file_path += sync_file_name;
 

@@ -45,7 +45,8 @@ namespace application_manager {
 namespace commands {
 
 OnSyncPDataNotification::OnSyncPDataNotification(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 OnSyncPDataNotification::~OnSyncPDataNotification() {
@@ -55,12 +56,12 @@ void OnSyncPDataNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSyncPDataNotification::Run");
 
   const std::string fileName =
-    (*message_)[strings::params][hmi_notification::file_name].asString();
+      (*message_)[strings::params][hmi_notification::file_name].asString();
 
   if (!file_system::FileExists(fileName)) {
     (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::FILE_NOT_FOUND;
+        mobile_apis::Result::FILE_NOT_FOUND;
 
     SendResponse(false);
     LOG4CXX_ERROR(logger_, "File not found");
@@ -71,8 +72,7 @@ void OnSyncPDataNotification::Run() {
 
   file_system::ReadBinaryFile(fileName, pData);
 
-  const std::string string_pdata = std::string(pData.begin(),
-                                   pData.end());
+  const std::string string_pdata = std::string(pData.begin(), pData.end());
 
   (*message_)[strings::params][strings::data] = string_pdata;
 

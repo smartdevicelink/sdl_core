@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-ListFilesResponse::ListFilesResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+ListFilesResponse::ListFilesResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 ListFilesResponse::~ListFilesResponse() {
@@ -51,28 +51,27 @@ void ListFilesResponse::Run() {
   LOG4CXX_INFO(logger_, "ListFilesResponse::Run");
 
   (*message_)[strings::msg_params][strings::space_available] =
-          static_cast<int>(file_system::AvailableSpace());
-  Application* application =
-          ApplicationManagerImpl::instance()->
-          application((*message_)[strings::params][strings::connection_key]);
+      static_cast<int>(file_system::AvailableSpace());
+  Application* application = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
   if (file_system::DirectoryExists(application->name())) {
-      const std::string full_directory_path =
-              file_system::FullPath(application->name());
-      std::vector<std::string> list_files =
-              file_system::ListFiles(full_directory_path);
-      if (!list_files.empty()) {
-          int i = 0;
-          for (std::vector<std::string>::iterator it = list_files.begin();
-               list_files.end() != it; ++it) {
-              (*message_)[strings::msg_params][strings::filenames][i] = *it;
-              ++i;
-          }
+    const std::string full_directory_path = file_system::FullPath(
+        application->name());
+    std::vector < std::string > list_files = file_system::ListFiles(
+        full_directory_path);
+    if (!list_files.empty()) {
+      int i = 0;
+      for (std::vector<std::string>::iterator it = list_files.begin();
+          list_files.end() != it; ++it) {
+        (*message_)[strings::msg_params][strings::filenames][i] = *it;
+        ++i;
       }
+    }
   }
   SendResponse(true);
 }

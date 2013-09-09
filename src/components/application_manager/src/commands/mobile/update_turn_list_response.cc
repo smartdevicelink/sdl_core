@@ -39,8 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
-UpdateTurnListResponse::UpdateTurnListResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+UpdateTurnListResponse::UpdateTurnListResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 UpdateTurnListResponse::~UpdateTurnListResponse() {

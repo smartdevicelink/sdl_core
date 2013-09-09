@@ -106,7 +106,8 @@ void AddCommandRequest::Run() {
   }
 
   if (((*message_)[strings::msg_params].keyExists(strings::vr_commands))
-      && ((*message_)[strings::msg_params][strings::vr_commands].length() > 0)) {
+      && ((*message_)[strings::msg_params]
+                      [strings::vr_commands].length() > 0)) {
     if (!CheckCommandVRSynonym(app)) {
       SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
       return;
@@ -132,9 +133,8 @@ void AddCommandRequest::Run() {
 
     if (((*message_)[strings::msg_params][strings::cmd_icon].keyExists(
         strings::value))
-        && (0
-            < (*message_)[strings::msg_params][strings::cmd_icon][strings::value]
-                .length())) {
+        && (0 < (*message_)[strings::msg_params][strings::cmd_icon]
+                                                 [strings::value].length())) {
       msg_params[strings::cmd_icon] =
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
@@ -166,8 +166,8 @@ bool AddCommandRequest::CheckCommandName(const Application* app) {
 
   for (; commands.end() != i; ++i) {
     if ((*i->second)[strings::menu_params][strings::menu_name].asString()
-        == (*message_)[strings::msg_params][strings::menu_params][strings::menu_name]
-            .asString()) {
+        == (*message_)[strings::msg_params][strings::menu_params]
+                                            [strings::menu_name].asString()) {
       LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandName received"
                    " command name already exist");
       return false;
@@ -192,7 +192,8 @@ bool AddCommandRequest::CheckCommandVRSynonym(const Application* app) {
         std::string vr_cmd_i =
             (*it->second)[strings::vr_commands][i].asString();
         std::string vr_cmd_j =
-            (*message_)[strings::msg_params][strings::vr_commands][j].asString();
+            (*message_)[strings::msg_params]
+                        [strings::vr_commands][j].asString();
 
         if (0 == strcasecmp(vr_cmd_i.c_str(), vr_cmd_j.c_str())) {
           LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandVRSynonym"
@@ -211,8 +212,8 @@ bool AddCommandRequest::CheckCommandParentId(const Application* app) {
   }
 
   const int parent_id =
-      (*message_)[strings::msg_params][strings::menu_params][hmi_request::parent_id]
-          .asInt();
+      (*message_)[strings::msg_params][strings::menu_params]
+                                       [hmi_request::parent_id].asInt();
   smart_objects::SmartObject* parent = app->FindSubMenu(parent_id);
 
   if (!parent) {

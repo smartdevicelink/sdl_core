@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL
+#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL_H_
+#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL_H_
 
 #include <set>
 #include "hmi_message_handler/hmi_message_adapter.h"
@@ -48,35 +48,35 @@ class ToHMIThreadImpl;
 class FromHMIThreadImpl;
 
 class HMIMessageHandlerImpl : public HMIMessageHandler {
-  public:
-    static HMIMessageHandlerImpl* instance();
-    ~HMIMessageHandlerImpl();
-    void onMessageReceived(MessageSharedPointer message);
-    void sendMessageToHMI(MessageSharedPointer message);
-    void setMessageObserver(HMIMessageObserver* observer);
-    void onErrorSending(MessageSharedPointer message);
-    void addHMIMessageAdapter(HMIMessageAdapter* adapter);
-    void removeHMIMessageAdapter(HMIMessageAdapter* adapter);
+ public:
+  static HMIMessageHandlerImpl* instance();
+  ~HMIMessageHandlerImpl();
+  void onMessageReceived(MessageSharedPointer message);
+  void sendMessageToHMI(MessageSharedPointer message);
+  void setMessageObserver(HMIMessageObserver* observer);
+  void onErrorSending(MessageSharedPointer message);
+  void addHMIMessageAdapter(HMIMessageAdapter* adapter);
+  void removeHMIMessageAdapter(HMIMessageAdapter* adapter);
 
-  private:
-    HMIMessageHandlerImpl();
+ private:
+  HMIMessageHandlerImpl();
 
-    HMIMessageObserver* observer_;
-    std::set<HMIMessageAdapter* > message_adapters_;
+  HMIMessageObserver* observer_;
+  std::set<HMIMessageAdapter*> message_adapters_;
 
-    threads::Thread* to_hmi_thread_;
-    friend class ToHMIThreadImpl;
+  threads::Thread* to_hmi_thread_;
+  friend class ToHMIThreadImpl;
 
-    threads::Thread* from_hmi_thread_;
-    friend class FromHMIThreadImpl;
+  threads::Thread* from_hmi_thread_;
+  friend class FromHMIThreadImpl;
 
-    MessageQueue<MessageSharedPointer> messages_to_hmi_;
-    MessageQueue<MessageSharedPointer> messages_from_hmi_;
+  MessageQueue<MessageSharedPointer> messages_to_hmi_;
+  MessageQueue<MessageSharedPointer> messages_from_hmi_;
 
-    static log4cxx::LoggerPtr logger_;
+  static log4cxx::LoggerPtr logger_;
 
-    DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
+  DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
 };
 }  // namespace hmi_message_handler
 
-#endif  //  SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL
+#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_IMPL_H_

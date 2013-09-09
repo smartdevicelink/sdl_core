@@ -40,11 +40,11 @@ namespace application_manager {
 namespace commands {
 
 OnAppInterfaceUnregisteredNotification::OnAppInterfaceUnregisteredNotification(
-  const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
-OnAppInterfaceUnregisteredNotification::
-  ~OnAppInterfaceUnregisteredNotification() {
+OnAppInterfaceUnregisteredNotification::~OnAppInterfaceUnregisteredNotification() {
 }
 
 void OnAppInterfaceUnregisteredNotification::Run() {

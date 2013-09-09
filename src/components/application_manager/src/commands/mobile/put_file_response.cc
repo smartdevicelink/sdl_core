@@ -38,8 +38,8 @@ namespace application_manager {
 
 namespace commands {
 
-PutFileResponse::PutFileResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+PutFileResponse::PutFileResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 PutFileResponse::~PutFileResponse() {
