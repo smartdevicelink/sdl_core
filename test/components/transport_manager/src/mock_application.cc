@@ -54,7 +54,7 @@ void *applicationWorker(void *p) {
   len = recv(data->sockfd, buf, 2 * 1024 * 1024, 0);
   if (len == 0)
     break;
-  Send(data->sockfd, buf, len, 0);
+  send(data->sockfd, buf, len, 0);
   }
   delete[] buf;
   delete data;
