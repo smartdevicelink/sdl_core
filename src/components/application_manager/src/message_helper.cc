@@ -1023,6 +1023,29 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   return mobile_apis::Result::SUCCESS;
 }
 
+// TODO(VS): change printf to logger
+bool MessageHelper::VerifyApplicationName(
+    smart_objects::SmartObject& msg_params) {
+  for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
+    const std::string& tts_name = msg_params[strings::tts_name][i].asString();
+    if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
+       ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
+      printf("Invalid characters in tts name.\n");
+      return false;
+    }
+  }
+
+  const std::string& name = msg_params[strings::app_name].asString();
+
+  if ((name[0] == '\n') || (name[0] == ' ') ||
+     ((name[0] == '\\') && (name[1] == 'n'))) {
+    printf("Invalid characters in application name.\n");
+    return false;
+  }
+
+  return true;
+}
+
 // TODO(AK): change printf to logger
 bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
   static unsigned int tab = 0;
