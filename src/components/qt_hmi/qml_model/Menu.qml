@@ -5,6 +5,7 @@ ListModel
     ListElement {
         name: "Car"
         icon: "res/car.png"
+        qml: "CarMenuGridView.qml"
     }
 
     ListElement {

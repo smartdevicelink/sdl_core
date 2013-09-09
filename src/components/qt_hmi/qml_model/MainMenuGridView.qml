@@ -3,8 +3,6 @@ import QtQuick 2.0
 GridView
 {
     id: mainMenuGridview
-    x: (parent.width - width) / 2
-    y: (parent.height - height) / 2
 
     populate: Transition {
         id: populateTransition;
@@ -37,7 +35,6 @@ GridView
     model: Menu {}
     highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
     focus: true
-    visible: parent.state === "Main"
 
     delegate: Item {
         width: mainMenuGridview.cellWidth
@@ -48,6 +45,7 @@ GridView
             onClicked: {
                 caption.text = name
                 mainScreen.state = name
+                menuContainer.source = qml
             }
         }
 
