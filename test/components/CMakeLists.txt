@@ -24,3 +24,6 @@ add_subdirectory(./utils)
 
 # --- Audio Manager
 add_subdirectory(./audio_manager)
+
+# --- HMI Message Handler
+add_subdirectory(./hmi_message_handler)
