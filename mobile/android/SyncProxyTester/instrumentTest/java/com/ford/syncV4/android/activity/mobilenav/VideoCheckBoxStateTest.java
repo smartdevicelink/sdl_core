@@ -1,6 +1,7 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.UiThreadTest;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
@@ -24,6 +25,7 @@ public class VideoCheckBoxStateTest extends ActivityInstrumentationTestCase2<Syn
         sut = new VideoCheckBoxState(box,  getActivity());
     }
 
+    @UiThreadTest
     public void testInitialStateOff() throws Exception {
         assertEquals("should have empty text", "", sut.getItem().getText());
         assertEquals("should have video checkbox hint",  sut.getItem().getHint(), getActivity().getString(R.string.video_streaming_hint));

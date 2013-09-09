@@ -66,6 +66,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 @Override
                 public void onProtocolError(String info, Exception e) {
                 }
+
+                @Override
+                public void onMobileNavAckReceived(int frameReceivedNumber) {
+
+                }
             };
     private static final String TAG = WiProProtocolTest.class.getSimpleName();
     Method currentCheckMethod;
@@ -403,6 +408,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolError(String info, Exception e) {
+            }
+
+            @Override
+            public void onMobileNavAckReceived(int frameReceivedNumber) {
+
             }
         };
 

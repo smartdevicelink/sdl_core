@@ -54,11 +54,8 @@ public class MockVideoDataSourceTest extends InstrumentationTestCase {
         assertNotNull("thread should be not null", sut.getThread());
     }
 
-    public void testTreadShouldRunAfterStart() throws Exception {
-        sut.start();
-        Thread.State state = sut.getThread().getState();
-        assertEquals("thread should be waiting to run", Thread.State.WAITING, state);
-    }
+
+
 
     public void testThreadStartedOnlyOnce() throws Exception {
         try {
@@ -119,12 +116,6 @@ public class MockVideoDataSourceTest extends InstrumentationTestCase {
         });
         dataSource.dispatchDataToListener();
         assertEquals("callback should be called", true, callFlag[0]);
-    }
-
-    public synchronized void testSutThreadInterruptedOnStop() throws Exception {
-        sut.start();
-        sut.stop();
-        assertEquals("thread should  be TERMINATED", Thread.State.TERMINATED, sut.getThread().getState());
     }
 
     public void testStopCallBackIsCalledOnStop() throws Exception {

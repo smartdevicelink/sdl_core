@@ -32,6 +32,12 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertNotNull("data should not be null", data);
     }
 
+    public void testSessionStartNACKFrameCreation() throws Exception {
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionNACK(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
+        byte[] data =  header.assembleHeaderBytes();
+        assertNotNull("data should not be null", data);
+    }
+
     public void testMobileNavStartSessionACKFrameCreation() throws Exception {
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
         assertEquals(header.getSessionType(), SessionType.Mobile_Nav);
