@@ -36,7 +36,6 @@ GridView
     model: AppsMenu {}
     highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
     focus: true
-    visible: parent.state === "Apps"
 
     delegate: Item {
         width: appsMenuGridview.cellWidth

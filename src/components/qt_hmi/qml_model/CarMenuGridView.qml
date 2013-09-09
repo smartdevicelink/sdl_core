@@ -22,8 +22,6 @@ GridView
     }
 
     id: carMenuGridview
-    x: (parent.width - width) / 2
-    y: (parent.height - height) / 2
     width: 4 * cellWidth
     height: 2 * cellHeight
     cellWidth: 221
@@ -36,7 +34,6 @@ GridView
     model: CarMenu {}
     highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
     focus: true
-    visible: parent.state === "Car"
 
     delegate: Item {
         width: carMenuGridview.cellWidth
@@ -46,6 +43,7 @@ GridView
             onClicked: {
                 caption.text = name
                 mainScreen.state = name
+                menuContainer.source = qml
             }
         }
 
@@ -56,5 +54,9 @@ GridView
             anchors.baseline: parent.bottom;
             anchors.horizontalCenter: parent.horizontalCenter
         }
+    }
+
+    Component.onCompleted: {
+        console.log("abracadabra")
     }
 }

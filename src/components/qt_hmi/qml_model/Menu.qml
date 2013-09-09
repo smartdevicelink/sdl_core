@@ -20,6 +20,7 @@ ListModel
     ListElement {
         name: "Apps"
         icon: "res/apps.png"
+        qml: "AppsMenuGridView.qml"
     }
 
     ListElement {
@@ -30,6 +31,7 @@ ListModel
     ListElement {
         name: "Car"
         icon: "res/car.png"
+        qml: "CarMenuGridView.qml"
     }
 
     ListElement {

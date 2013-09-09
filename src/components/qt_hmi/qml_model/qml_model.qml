@@ -28,9 +28,16 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
         }
         Text{
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    menuContainer.source = "MainMenuGridView.qml"
+                }
+            }
+
             text: "MENU";
             color: "#1d81d5"
-            font.pixelSize: 25;
+            font.pixelSize: 25
             width: parent.width / parent.columns
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
@@ -46,16 +53,23 @@ Rectangle {
         visible: mainScreen.state !== ""
     }
 
-    Item {
+    property Item mmm;
+
+    Loader {
         id: menuContainer
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
     }
 
     PowerSwitcher {
         onSwitched: {
-            if (sw === "on")
+            if (sw === "on") {
                 mainScreen.state = "Main"
-            else
+                menuContainer.source = "MainMenuGridView.qml"
+            } else {
                 mainScreen.state = ""
+                menuContainer.source = ""
+            }
         }
     }
 
@@ -65,27 +79,5 @@ Rectangle {
         text: "Hello"
     }
 
-    MainMenuGridView {
-        id: mainMenuGridView
-    }
-    CarMenuGridView {
-        id: carMenuGridView
-    }
-
-    AppsMenuGridView {
-        id: appsMenuGridView
-    }
-
-    states: [
-        State {
-            name: "Main"
-        },
-        State {
-            name: "Car"
-        },
-        State {
-            name: "Apps"
-        }
-    ]
 }
 
