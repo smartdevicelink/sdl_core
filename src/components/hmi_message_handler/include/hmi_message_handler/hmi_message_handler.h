@@ -46,8 +46,7 @@ class HMIMessageAdapter;
  */
 class HMIMessageHandler : public HMIMessageObserver, public HMIMessageSender {
  public:
-  virtual ~HMIMessageHandler() {
-  }
+  virtual ~HMIMessageHandler() {}
   virtual void addHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
   virtual void removeHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
 };

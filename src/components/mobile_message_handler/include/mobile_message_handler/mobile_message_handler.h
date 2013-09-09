@@ -45,8 +45,7 @@ class MobileMessageHandler {
   virtual void SendMessageToMobileApp(const MobileMessage& message) = 0;
   virtual void AddMobileMessageListener(MobileMessageObserver* listener) = 0;
   virtual void RemoveMobileMessageListener(MobileMessageObserver* listener) = 0;
-  virtual ~MobileMessageHandler() {
-  }
+  virtual ~MobileMessageHandler() {}
 };
 }  // namespace mobile_message_handler
 
