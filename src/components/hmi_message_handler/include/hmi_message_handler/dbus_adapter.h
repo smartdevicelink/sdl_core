@@ -34,30 +34,171 @@
 
 #include <string>
 #include "utils/logger.h"
+#include "smart_objects/smart_object.h"
+#include "dbus_schema/schema.h"
 
 struct DBusConnection;
 struct DBusMessage;
+struct DBusMessageIter;
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace hmi_message_handler {
 
+/**
+ * \brief class for work with DBus
+ */
 class DBusAdapter {
  public:
-  DBusAdapter(const std::string& serviceName, const std::string& path);
+  /**
+   * \brief constructs DBus adapter
+   * \param sdlServiceName core service name
+   * \param sdlObjectPath core object path
+   * \param hmiServiceName hmi service name
+   */
+  DBusAdapter(const std::string& sdlServiceName,
+              const std::string& sdlObjectPath,
+              const std::string& hmiServiceName,
+              const std::string& hmiObjectPath);
+
+  /**
+   * \brief destructs DBus adapter
+   */
   virtual ~DBusAdapter();
+
+  /**
+   * \brief inits service
+   * \return true if success
+   */
   bool Init();
+
+  /**
+   * \brief return schema messages for DBus
+   * \return schema
+   */
+  const dbus_schema::DBusSchema& get_schema() const;
 
  protected:
   static log4cxx::LoggerPtr logger_;
 
-  bool Recv(std::string& message);
-  void Send(const std::string& message);
+  /**
+   * \brief calls method on HMI
+   * \param id id message
+   * \param path name of interface on HMI
+   * \param method name of method for call
+   * \param obj params for call
+   */
+  void MethodCall(uint id, const std::string& path, const std::string& method,
+                  smart_objects::SmartObject& obj);
 
- private:
-  std::string serviceName_;
-  std::string path_;
+  /**
+   * \brief sends signal
+   * \param id id message
+   * \param interface name of interface
+   * \param signal name of signal for send
+   * \param obj params for signal
+   */
+  void Signal(uint id, const std::string& interface, const std::string& signal,
+              smart_objects::SmartObject& obj);
+
+  /**
+   * \brief returns result of call method to HMI
+   * \param id id message
+   * \param obj params for return
+   */
+  void MethodReturn(uint id, smart_objects::SmartObject& obj);
+
+  /**
+   * \brief sends error on message from HMI
+   * \param id id message
+   * \param msg message from HMI
+   * \param name name of error
+   * \param description description of error
+   */
+  void Error(uint id, const std::string& name,
+             const std::string& description);
+
+  /**
+   * \brief adds a match rule
+   * \param rule string rule in the DBus specification
+   * \return false if error
+   */
+  bool AddMatch(const std::string& rule);
+
+  /**
+   * \brief processes message from DBus if queue isn't empty
+   * and fill obj
+   * \param obj object for send to core
+   * \return true if message processed
+   */
+  bool Process(smart_objects::SmartObject& obj);
+
+  std::string sdl_service_name_;
+  std::string sdl_object_path_;
+  std::string hmi_service_name_;
+  std::string hmi_object_path_;
   DBusConnection* conn_;
 
   void Reply(DBusMessage* msg, DBusConnection* conn, std::string& message);
+
+ private:
+  /**
+   * \brief schema messages and arguments for DBus
+   */
+  dbus_schema::DBusSchema schema_;
+
+  /**
+   * \brief processes call of method and fill obj
+   * \param msg message from DBus
+   * \param obj object for send to core
+   */
+  void ProcessMethodCall(DBusMessage* msg, smart_objects::SmartObject& obj);
+
+  /**
+   * \brief processes return of method and fill obj
+   * \param msg message from DBus
+   * \param obj object for send to core
+   */
+  void ProcessMethodReturn(DBusMessage* msg, smart_objects::SmartObject& obj);
+
+  /**
+   * \brief processes error and fill obj
+   * \param msg message from DBus
+   * \param obj object for send to core
+   */
+  void ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj);
+
+  /**
+   * \brief processes signal and fill obj
+   * \param msg message from DBus
+   * \param obj object for send to core
+   */
+  void ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& obj);
+
+  /**
+   * \brief sets arguments to message
+   * \param msg DBus message
+   * \param rules list of rules for arguments
+   * \param obj map of arguments
+   * \return true if success
+   */
+  bool SetArgs(DBusMessage* msg, const dbus_schema::ListArgs& rules,
+               smart_objects::SmartObject& obj);
+
+  /**
+   * \brief gets arguments from message
+   * @param msg DBus message
+   * @return true if success
+   */
+  bool GetArgs(DBusMessage* msg);
+
+//  bool SetBasicArg(DBusMessageIter* args,
+//                   dbus_schema::ParameterDescription* rule,
+//                   smart_objects::SmartObject& obj);
+//
+//  bool SetArrayArg(DBusMessageIter* args,
+//                   dbus_schema::ParameterDescription* rule,
+//                   smart_objects::SmartObject& obj);
 };
 
 }  // namespace hmi_message_handler

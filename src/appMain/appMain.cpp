@@ -60,6 +60,7 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
+#include "hmi_message_handler/dbus_message_adapter.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
 
@@ -155,6 +156,37 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
 
   mb_adapter->registerController();
   mb_adapter->subscribeTo();
+
+  return true;
+}
+
+/**
+ * Initialize DBus component
+ * @return true if success otherwise false.
+ */
+bool InitDBus() {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                log4cxx::Logger::getLogger("appMain"));
+
+  hmi_message_handler::DBusMessageAdapter* adapter =
+    new hmi_message_handler::DBusMessageAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
+
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->addHMIMessageAdapter(
+    adapter);
+  if (!adapter->Init()) {
+    LOG4CXX_INFO(logger, "Cannot init DBus service!");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
+  System::Thread* th1 = new System::Thread(
+    new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
+      *adapter, &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
+      NULL));
+  th1->Start(false);
+
+  adapter->subscribeTo();
 
   return true;
 }
@@ -308,6 +340,11 @@ int main(int argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
+
+  if (!InitDBus()) {
+    exit(EXIT_FAILURE);
+  }
+  LOG4CXX_INFO(logger, "Init DBus service successful");
 
   if (!InitMessageBroker()) {
     exit(EXIT_FAILURE);

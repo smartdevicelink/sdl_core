@@ -37,183 +37,58 @@ using NsMessageBroker::ErrorCode;
 
 namespace hmi_message_handler {
 
-DBusMessageController::DBusMessageController(const std::string& serviceName,
-                                             const std::string& path)
-    : DBusAdapter(serviceName, path),
-      mControllersIdStart(-1) {}
+DBusMessageController::DBusMessageController(const std::string& sdlServiceName,
+                                             const std::string& sdlObjectPath,
+                                             const std::string& hmiServiceName,
+                                             const std::string& hmiObjectPath)
+    : DBusAdapter(sdlServiceName, sdlObjectPath, hmiServiceName, hmiObjectPath),
+      mControllersIdStart(-1),
+      mControllersIdCurrent(0) {}
 
-void DBusMessageController::subscribeTo(std::string property) {
-}
-
-void DBusMessageController::SendJsonMessage(const Json::Value& message) {
-  std::string mes = m_writer.write(message);
-  Send(mes);
-  if (!isNotification(message) && !isResponse(message)) {
-    // not notification, not a response, store id and method name to recognize an answer
-    mWaitResponseQueue.insert(std::map<std::string, std::string>::value_type(
-        message["id"].asString(),
-        message["method"].asString()));
-  }
-}
-
-bool DBusMessageController::isNotification(const Json::Value& root) {
-  bool ret = false;
-  if (false == root.isMember("id")) {
-     ret = true;
-  }
-  return ret;
-}
-
-bool DBusMessageController::isResponse(const Json::Value& root) {
-  bool ret = false;
-  if ((true == root.isMember("result")) || (true == root.isMember("error"))) {
-     ret = true;
-  }
-  return ret;
-}
-
-void DBusMessageController::Send(const std::string& data) {
-  DBusAdapter::Send(data);
-}
-
-void DBusMessageController::Recv(std::string& data) {
-  if (DBusAdapter::Recv(data)) {
-    Json::Value root;
-    if (m_reader.parse(data, root)) {
-      onMessageReceived(root);
-    }
-  }
-}
-
-void DBusMessageController::onMessageReceived(Json::Value message) {
-  // Determine message type and process...
-  Json::Value error;
-  if (checkMessage(message, error))
-  {
-     if (isNotification(message))
-     {
-        processNotification(message);
-     } else if (isResponse(message))
-     {
-        std::string id = message["id"].asString();
-        std::string method = findMethodById(id);
-        if ("" != method)
-        {
-           if ("MB.registerComponent" == method)
-           { // initialize mControllersIdStart
-              if (message.isMember("result") && message["result"].isInt())
-              {
-                 mControllersIdStart = message["result"].asInt();
-              } else
-              {
-                 // TODO(KKolodiy): log it DBG_MSG_ERROR(("Not possible to initialize mControllersIdStart!\n"));
-              }
-           } else if ("MB.subscribeTo" == method || "MB.unregisterComponent" == method || "MB.unsubscribeFrom" == method)
-           {
-              //nothing to do for now
-           } else
-           {
-              processResponse(method, message);
-           }
-        } else
-        {
-          // TODO(KKolodiy): log it DBG_MSG_ERROR(("Request with id %s has not been found!\n", id.c_str()));
-        }
-     } else
-     {
-       // TODO(KKolodiy): log it DBG_MSG(("Message is request!\n"));
-        processRequest(message);
-     }
-  } else
-  {
-    // TODO(KKolodiy): log it DBG_MSG_ERROR(("Message contains wrong data!\n"));
-  }
+void DBusMessageController::subscribeTo(const std::string& interface,
+                                        const std::string& signal) {
+  std::string rule = "type='signal'";
+  rule.append(", sender='").append(hmi_service_name_).append("'")
+      .append(", path='").append(hmi_object_path_).append("'")
+      .append(", interface='").append(hmi_service_name_).append(".")
+      .append(interface).append("'")
+      .append(", member='").append(signal).append("'");
+  DBusAdapter::AddMatch(rule);
 }
 
 DBusMessageController::~DBusMessageController() {
 }
 
-std::string DBusMessageController::findMethodById(std::string id)
-{
-   std::string res = "";
-   std::map <std::string, std::string>::iterator it;
-   it = mWaitResponseQueue.find(id);
-   if (it != mWaitResponseQueue.end())
-   {
-      res = (*it).second;
-      mWaitResponseQueue.erase(it);
-   }
-   return res;
-}
-
-bool DBusMessageController::checkMessage(Json::Value& root, Json::Value& error) {
-  Json::Value err;
-
-  try
-  {
-     /* check the JSON-RPC version => 2.0 */
-     if (!root.isObject() || !root.isMember("jsonrpc") || root["jsonrpc"] != "2.0")
-     {
-        error["id"] = Json::Value::null;
-        error["jsonrpc"] = "2.0";
-        err["code"] = NsMessageBroker::INVALID_REQUEST;
-        err["message"] = "Invalid MessageBroker request.";
-        error["error"] = err;
-        return false;
-     }
-
-     if (root.isMember("id") && (root["id"].isArray() || root["id"].isObject()))
-     {
-        error["id"] = Json::Value::null;
-        error["jsonrpc"] = "2.0";
-        err["code"] = NsMessageBroker::INVALID_REQUEST;
-        err["message"] = "Invalid MessageBroker request.";
-        error["error"] = err;
-        return false;
-     }
-
-     if (root.isMember("method"))
-     {
-        if (!root["method"].isString())
-        {
-           error["id"] = Json::Value::null;
-           error["jsonrpc"] = "2.0";
-           err["code"] = NsMessageBroker::INVALID_REQUEST;
-           err["message"] = "Invalid MessageBroker request.";
-           error["error"] = err;
-           return false;
-        }
-        /* Check the params is  an object*/
-        if (root.isMember("params") && !root["params"].isObject())
-        {
-           error["id"] = Json::Value::null;
-           error["jsonrpc"] = "2.0";
-           err["code"] = NsMessageBroker::INVALID_REQUEST;
-           err["message"] = "Invalid JSONRPC params.";
-           error["error"] = err;
-           return false;
-        }
-     } else if (!root.isMember("result") && !root.isMember("error"))
-     {
-        return false;
-     }
-     return true;
-  } catch (...)
-  {
-    // TODO(KKolodiy): log it DBG_MSG_ERROR(("CMessageBrokerController::checkMessage() EXCEPTION has been caught!\n"));
-     return false;
+std::string DBusMessageController::findMethodById(std::string id) {
+  std::string res = "";
+  std::map <std::string, std::string>::iterator it;
+  it = mWaitResponseQueue.find(id);
+  if (it != mWaitResponseQueue.end()) {
+    res = (*it).second;
+    mWaitResponseQueue.erase(it);
   }
+  return res;
 }
 
-void* DBusMessageController::MethodForReceiverThread(void*)
+void* DBusMessageController::MethodForReceiverThread(void*) {
+  smart_objects::SmartObject obj;
+  while (true) {
+    if (DBusAdapter::Process(obj)) {
+      SendMessageToCore(obj);
+    }
+  }
+  return NULL;
+}
+
+int DBusMessageController::getNextMessageId()
 {
-   while(true)
+   if (mControllersIdCurrent < (mControllersIdStart+1000))
    {
-      std::string data = "";
-      Recv(data);
+      return mControllersIdCurrent++;
+   } else
+   {
+      return mControllersIdCurrent = mControllersIdStart;
    }
-   return NULL;
 }
 
 }  // namespace hmi_message_handler
-
