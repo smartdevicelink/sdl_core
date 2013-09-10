@@ -52,9 +52,7 @@ Item {
                 MouseArea {
                   anchors.fill: parent
                   onClicked: {
-                        caption.text = name
-                        mainScreen.state = name
-                        menuContainer.source = qml
+                      menuContainer.source = "ApplicationListView.qml"
                     }
                 }
                 text: name
@@ -94,9 +92,7 @@ Item {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-                caption.text = name
-                mainScreen.state = name
-                menuContainer.source = qml
+              menuContainer.source = "AppsMenuGridView.qml"
             }
         }
     }
